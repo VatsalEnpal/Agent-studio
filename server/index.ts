@@ -723,7 +723,7 @@ Choose the schedule and model based on the task:
   });
 
   // Enhanced project analysis (returns full ProjectProfile)
-  app.post("/api/agents/analyze", (req, res) => {
+  const handleAnalyze: express.RequestHandler = (req, res) => {
     try {
       const { projectPath } = req.body as { projectPath?: string };
       if (!projectPath) {
@@ -741,7 +741,9 @@ Choose the schedule and model based on the task:
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
     }
-  });
+  };
+  app.post("/api/agents/analyze", handleAnalyze);
+  app.post("/api/analyze-project", handleAnalyze);
 
   // Generate agents (with optional userDescription and teamSize)
   app.post("/api/agents/generate", async (req, res) => {
@@ -771,7 +773,7 @@ Choose the schedule and model based on the task:
   });
 
   // Preview agents (same as generate but no file writes)
-  app.post("/api/agents/preview", async (req, res) => {
+  const handlePreview: express.RequestHandler = async (req, res) => {
     try {
       const { projectPath, userDescription, teamSize } = req.body as {
         projectPath?: string;
@@ -794,7 +796,9 @@ Choose the schedule and model based on the task:
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
     }
-  });
+  };
+  app.post("/api/agents/preview", handlePreview);
+  app.post("/api/generate-agents/preview", handlePreview);
 
   // Generation status polling
   app.get("/api/agents/generate/status", (_req, res) => {
