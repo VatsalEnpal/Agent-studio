@@ -60,27 +60,150 @@ function ConnectionBanner() {
   return null;
 }
 
+// --- Preflight types ---
+interface PreflightCheck {
+  claudeCode: { installed: boolean; version?: string; path?: string; authenticated?: boolean };
+  node: { installed: boolean; version: string };
+  git: { installed: boolean; version?: string };
+}
+
+interface PreflightResult {
+  ready: boolean;
+  checks: PreflightCheck;
+  blockers: string[];
+}
+
+// --- Preflight blocker screen ---
+function PreflightBlocker({ result, onRecheck }: { result: PreflightResult; onRecheck: () => void }) {
+  const [checking, setChecking] = useState(false);
+
+  const handleRecheck = () => {
+    setChecking(true);
+    onRecheck();
+    // Reset after a moment in case onRecheck is fast
+    setTimeout(() => setChecking(false), 1500);
+  };
+
+  // Map blockers to actionable messages
+  const blockerDetails = result.blockers.map((msg) => {
+    if (msg.includes("not installed")) {
+      return { message: msg, fix: "Install it with: npm install -g @anthropic-ai/claude-code" };
+    }
+    if (msg.includes("not authenticated")) {
+      return { message: msg, fix: "Open your terminal and run: claude" };
+    }
+    if (msg.includes("Git")) {
+      return { message: msg, fix: "Install Git from https://git-scm.com" };
+    }
+    return { message: msg, fix: "" };
+  });
+
+  const passed: string[] = [];
+  if (result.checks.node.installed) passed.push(`Node.js ${result.checks.node.version}`);
+  if (result.checks.git.installed) passed.push(`Git ${result.checks.git.version ?? ""}`);
+  if (result.checks.claudeCode.installed) passed.push(`Claude Code ${result.checks.claudeCode.version ?? ""}`);
+  if (result.checks.claudeCode.authenticated) passed.push("Claude Code authenticated");
+
+  return (
+    <div className="h-screen flex items-center justify-center bg-zinc-950">
+      <div className="max-w-md text-center space-y-6 px-6">
+        <div className="text-5xl">&#9889;</div>
+        <h1 className="text-2xl font-bold text-white">Agent Studio needs Claude Code</h1>
+        <p className="text-zinc-400 text-sm">
+          Agent Studio manages Claude Code sessions. To get started,
+          you need the Claude Code CLI installed and authenticated.
+        </p>
+
+        <div className="space-y-2">
+          {blockerDetails.map((b, i) => (
+            <div key={i} className="bg-red-950/50 border border-red-800 rounded-lg p-3 text-left">
+              <div className="flex items-start gap-2">
+                <span className="text-red-400 shrink-0">&#10005;</span>
+                <div>
+                  <span className="text-red-300 text-sm">{b.message}</span>
+                  {b.fix && <p className="text-zinc-500 text-xs mt-1">{b.fix}</p>}
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {passed.map((p, i) => (
+            <div key={i} className="bg-zinc-900 rounded-lg p-3 text-left">
+              <div className="flex items-center gap-2">
+                <span className="text-green-400">&#10003;</span>
+                <span className="text-zinc-300 text-sm">{p}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {!result.checks.claudeCode.installed && (
+          <div className="space-y-2">
+            <p className="text-zinc-500 text-xs">Install Claude Code:</p>
+            <code className="bg-zinc-900 px-4 py-2 rounded text-amber-400 text-sm block font-mono">
+              npm install -g @anthropic-ai/claude-code
+            </code>
+            <p className="text-zinc-500 text-xs mt-3">Then authenticate:</p>
+            <code className="bg-zinc-900 px-4 py-2 rounded text-amber-400 text-sm block font-mono">
+              claude
+            </code>
+          </div>
+        )}
+
+        <button
+          onClick={handleRecheck}
+          disabled={checking}
+          className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors"
+        >
+          {checking ? "Checking..." : "Check Again"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [hydrated, setHydrated] = useState(false);
   const [showSetupWizard, setShowSetupWizard] = useState(false);
   const [defaultCwd, setDefaultCwd] = useState("~");
+  const [preflight, setPreflight] = useState<PreflightResult | null>(null);
+  const [preflightLoading, setPreflightLoading] = useState(true);
   useEffect(() => { setHydrated(true); }, []);
 
-  // Fetch config from server to get default cwd and setup status
+  // Preflight check — runs before anything else
+  const runPreflight = useCallback(async () => {
+    try {
+      const res = await fetch("/api/system/preflight");
+      if (res.ok) {
+        const data = await res.json() as PreflightResult;
+        setPreflight(data);
+        return data.ready;
+      }
+    } catch { /* server not ready */ }
+    setPreflightLoading(false);
+    return false;
+  }, []);
+
   useEffect(() => {
     void (async () => {
-      try {
-        const res = await fetch("/api/config");
-        if (!res.ok) return;
-        const data = await res.json() as { defaultCwd: string; config: { setupComplete: boolean; defaults: { workingDirectory: string } } };
-        const cwd = data.config?.defaults?.workingDirectory ?? data.defaultCwd ?? "~";
-        setDefaultCwd(cwd);
-        if (data.config && !data.config.setupComplete) {
-          setShowSetupWizard(true);
-        }
-      } catch { /* use defaults */ }
+      const ready = await runPreflight();
+      if (ready) {
+        // Only fetch config if preflight passes
+        try {
+          const res = await fetch("/api/config");
+          if (res.ok) {
+            const data = await res.json() as { defaultCwd: string; config: { setupComplete: boolean; defaults: { workingDirectory: string } } };
+            const cwd = data.config?.defaults?.workingDirectory ?? data.defaultCwd ?? "~";
+            setDefaultCwd(cwd);
+            if (data.config && !data.config.setupComplete) {
+              setShowSetupWizard(true);
+            }
+          }
+        } catch { /* use defaults */ }
+      }
+      setPreflightLoading(false);
     })();
-  }, []);
+  }, [runPreflight]);
 
   const setSessions = useSessionsStore((s) => s.setSessions);
   const setRepos = useGitStore((s) => s.setRepos);
@@ -284,11 +407,41 @@ export default function Home() {
     await fetch(`/api/sessions/${sessionId}`, { method: "DELETE" });
   }, []);
 
-  if (!hydrated) {
+  if (!hydrated || preflightLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-console-bg">
         <div className="text-console-dim text-sm animate-pulse">Loading Agent Studio...</div>
       </div>
+    );
+  }
+
+  // Preflight gate: block the entire app if Claude Code is missing
+  if (preflight && !preflight.ready) {
+    return (
+      <PreflightBlocker
+        result={preflight}
+        onRecheck={() => {
+          setPreflightLoading(true);
+          void (async () => {
+            const ready = await runPreflight();
+            if (ready) {
+              // Preflight now passes — fetch config
+              try {
+                const res = await fetch("/api/config");
+                if (res.ok) {
+                  const data = await res.json() as { defaultCwd: string; config: { setupComplete: boolean; defaults: { workingDirectory: string } } };
+                  const cwd = data.config?.defaults?.workingDirectory ?? data.defaultCwd ?? "~";
+                  setDefaultCwd(cwd);
+                  if (data.config && !data.config.setupComplete) {
+                    setShowSetupWizard(true);
+                  }
+                }
+              } catch { /* use defaults */ }
+            }
+            setPreflightLoading(false);
+          })();
+        }}
+      />
     );
   }
 

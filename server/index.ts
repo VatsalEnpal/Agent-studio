@@ -1995,7 +1995,8 @@ async function main() {
         } catch {
           // version check failed but CLI exists
         }
-        const claudeDir = join(os.homedir(), ".claude");
+        const { join: joinPre } = require("node:path") as typeof import("node:path");
+        const claudeDir = joinPre(os.homedir(), ".claude");
         const { existsSync: fsExistsPre } = require("node:fs") as typeof import("node:fs");
         checks.claudeCode.authenticated = fsExistsPre(claudeDir);
         if (!checks.claudeCode.authenticated) {
