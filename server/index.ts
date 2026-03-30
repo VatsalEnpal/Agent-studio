@@ -137,7 +137,7 @@ async function main() {
       homeDir: os.homedir(),
       cwd: process.cwd(),
       mainProjectDir: getMainProjectDir(),
-      defaultCwd: resolvePath(config.defaults.workingDirectory),
+      defaultCwd: resolvePath(config.defaults?.workingDirectory),
       config,
     });
   });

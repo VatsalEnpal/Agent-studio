@@ -100,8 +100,13 @@ export function loadConfig(): AgentStudioConfig | null {
   try {
     const raw = readFileSync(configPath, "utf-8");
     const parsed = JSON.parse(raw) as AgentStudioConfig;
-    // Basic validation
-    if (!parsed.version || !Array.isArray(parsed.projects)) return null;
+    // Basic validation — accept partial configs, fill in defaults
+    if (!Array.isArray(parsed.projects)) parsed.projects = [];
+    if (!parsed.version) parsed.version = CONFIG_VERSION;
+    if (!parsed.defaults) {
+      parsed.defaults = { model: "sonnet", permissions: "bypass", workingDirectory: "~" };
+    }
+    if (!Array.isArray(parsed.devServers)) parsed.devServers = [];
     return parsed;
   } catch {
     return null;
@@ -252,8 +257,9 @@ export function reloadConfig(): AgentStudioConfig {
   return getConfig();
 }
 
-/** Resolve ~ to the actual home directory. */
-export function resolvePath(p: string): string {
+/** Resolve ~ to the actual home directory. Returns "" for undefined/null input. */
+export function resolvePath(p: string | undefined | null): string {
+  if (!p) return "";
   if (p.startsWith("~")) {
     return p.replace("~", os.homedir());
   }
@@ -283,8 +289,9 @@ export function getAgentSystemPath(relativePath: string): string | null {
  */
 export function getMainProjectDir(): string {
   const config = getConfig();
-  const main = config.projects.find((p) => !p.isProd);
-  if (main) return main.path;
+  const projects = config.projects ?? [];
+  const main = projects.find((p) => !p.isProd);
+  if (main?.path) return main.path;
   // Fallback: parent of cwd
   return join(process.cwd(), "..");
 }
