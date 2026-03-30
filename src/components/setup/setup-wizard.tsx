@@ -132,11 +132,32 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
   const [useAiAgents, setUseAiAgents] = useState(false);
   const [editingAgentId, setEditingAgentId] = useState<string | null>(null);
 
+  // Smart detection state (Feature 2)
+  interface DetectedProject {
+    name: string;
+    path: string;
+    techStack: string[];
+    languages: string[];
+    packageManager: string;
+    devCommand?: string;
+    hasAgentSystem: boolean;
+    gitBranch: string;
+    lastCommit: string;
+    lastModified: number;
+  }
+  const [detectedProjects, setDetectedProjects] = useState<DetectedProject[]>([]);
+  const [detecting, setDetecting] = useState(false);
+  const [detectionDone, setDetectionDone] = useState(false);
+
+  // Preflight info for welcome step
+  const [claudeVersion, setClaudeVersion] = useState<string>("");
+
   const STEPS = getAllSteps(agentSystem);
 
-  // Auto-detect on mount
+  // Auto-detect on mount: fetch config + run detection + preflight info
   useEffect(() => {
     void (async () => {
+      // Fetch existing config
       try {
         const res = await fetch("/api/config");
         if (!res.ok) return;
@@ -172,6 +193,27 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
       } catch {
         // Server not ready yet
       }
+
+      // Run project detection
+      setDetecting(true);
+      try {
+        const detectRes = await fetch("/api/system/detect", { method: "POST" });
+        if (detectRes.ok) {
+          const data = await detectRes.json() as { projects: DetectedProject[] };
+          setDetectedProjects(data.projects ?? []);
+        }
+      } catch { /* detection failed */ }
+      setDetecting(false);
+      setDetectionDone(true);
+
+      // Get Claude Code version for welcome step
+      try {
+        const preRes = await fetch("/api/system/preflight");
+        if (preRes.ok) {
+          const preData = await preRes.json() as { checks: { claudeCode: { version?: string } } };
+          setClaudeVersion(preData.checks?.claudeCode?.version ?? "");
+        }
+      } catch { /* ignore */ }
     })();
   }, []);
 
@@ -406,15 +448,25 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
 
         {/* Step content */}
         <div className="px-8 py-6 min-h-[340px]">
-          {currentStep === "Welcome" && <WelcomeStep />}
+          {currentStep === "Welcome" && (
+            <WelcomeStep
+              claudeVersion={claudeVersion}
+              detectedCount={detectedProjects.length}
+              detecting={detecting}
+            />
+          )}
           {currentStep === "Projects" && (
             <ProjectsStep
               projects={projects}
+              setProjects={setProjects}
               newProjectPath={newProjectPath}
               setNewProjectPath={setNewProjectPath}
               addProject={addProject}
               removeProject={removeProject}
               toggleProd={toggleProd}
+              detectedProjects={detectedProjects}
+              detecting={detecting}
+              detectionDone={detectionDone}
             />
           )}
           {currentStep === "Agent System" && (
@@ -435,6 +487,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               editingAgentId={editingAgentId}
               setEditingAgentId={setEditingAgentId}
               setAiGen={setAiGen}
+              projectTechStack={detectedProjects.find((d) => projects.some((p) => p.path === d.path))?.techStack ?? []}
             />
           )}
           {currentStep === "Workflow" && (
@@ -460,6 +513,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               permissions={permissions}
               setPermissions={setPermissions}
               scaffoldResult={scaffoldResult}
+              showCostGuide
             />
           )}
         </div>
@@ -520,7 +574,15 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
 
 // ---------- Step Components ----------
 
-function WelcomeStep() {
+function WelcomeStep({
+  claudeVersion,
+  detectedCount,
+  detecting,
+}: {
+  claudeVersion: string;
+  detectedCount: number;
+  detecting: boolean;
+}) {
   return (
     <div className="flex flex-col items-center text-center pt-6 space-y-5">
       <div className="w-16 h-16 rounded-2xl bg-console-accent/10 border border-console-accent/20 flex items-center justify-center">
@@ -535,6 +597,28 @@ function WelcomeStep() {
           sprints, and track agent memory — all from one dashboard.
         </p>
       </div>
+
+      {/* System status badges */}
+      <div className="flex flex-wrap justify-center gap-2">
+        {claudeVersion && (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-[10px] text-green-400">
+            <Check className="w-3 h-3" />
+            Claude Code {claudeVersion}
+          </span>
+        )}
+        {detecting ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-console-accent/10 border border-console-accent/20 rounded-full text-[10px] text-console-accent">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            Scanning for projects...
+          </span>
+        ) : detectedCount > 0 ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-console-accent/10 border border-console-accent/20 rounded-full text-[10px] text-console-accent">
+            <FolderOpen className="w-3 h-3" />
+            Found {detectedCount} project{detectedCount !== 1 ? "s" : ""} on your machine
+          </span>
+        ) : null}
+      </div>
+
       <p className="text-xs text-console-dim">
         Let&apos;s set up your workspace in a few quick steps.
       </p>
@@ -542,92 +626,211 @@ function WelcomeStep() {
   );
 }
 
+interface DetectedProjectDisplay {
+  name: string;
+  path: string;
+  techStack: string[];
+  languages: string[];
+  packageManager: string;
+  devCommand?: string;
+  hasAgentSystem: boolean;
+  gitBranch: string;
+  lastCommit: string;
+  lastModified: number;
+}
+
 function ProjectsStep({
   projects,
+  setProjects,
   newProjectPath,
   setNewProjectPath,
   addProject,
   removeProject,
   toggleProd,
+  detectedProjects,
+  detecting,
+  detectionDone,
 }: {
   projects: ProjectEntry[];
+  setProjects: React.Dispatch<React.SetStateAction<ProjectEntry[]>>;
   newProjectPath: string;
   setNewProjectPath: (v: string) => void;
   addProject: () => void;
   removeProject: (i: number) => void;
   toggleProd: (i: number) => void;
+  detectedProjects: DetectedProjectDisplay[];
+  detecting: boolean;
+  detectionDone: boolean;
 }) {
+  const [showManualInput, setShowManualInput] = useState(false);
+
+  const isSelected = (path: string) => projects.some((p) => p.path === path);
+
+  const toggleDetected = (dp: DetectedProjectDisplay) => {
+    if (isSelected(dp.path)) {
+      setProjects((prev) => prev.filter((p) => p.path !== dp.path));
+    } else {
+      setProjects((prev) => [
+        ...prev,
+        { name: dp.name, path: dp.path, isProd: false },
+      ]);
+    }
+  };
+
+  // Auto-select recently modified projects (last 7 days) on first load
+  const [autoSelected, setAutoSelected] = useState(false);
+  useEffect(() => {
+    if (autoSelected || !detectionDone || detectedProjects.length === 0) return;
+    if (projects.length > 0) { setAutoSelected(true); return; }
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const recent = detectedProjects.filter((d) => d.lastModified > sevenDaysAgo);
+    if (recent.length > 0) {
+      setProjects(recent.map((d) => ({ name: d.name, path: d.path, isProd: false })));
+    }
+    setAutoSelected(true);
+  }, [detectionDone, detectedProjects, projects.length, autoSelected, setProjects]);
+
+  // Badge colors for tech stack
+  const stackColor = (tech: string) => {
+    if (tech.includes("React") || tech.includes("Next")) return "bg-blue-500/15 text-blue-400 border-blue-500/25";
+    if (tech.includes("Vue")) return "bg-green-500/15 text-green-400 border-green-500/25";
+    if (tech.includes("Python") || tech.includes("Django")) return "bg-yellow-500/15 text-yellow-400 border-yellow-500/25";
+    if (tech.includes("Go")) return "bg-cyan-500/15 text-cyan-400 border-cyan-500/25";
+    if (tech.includes("Rust")) return "bg-orange-500/15 text-orange-400 border-orange-500/25";
+    if (tech.includes("Tailwind")) return "bg-teal-500/15 text-teal-400 border-teal-500/25";
+    if (tech.includes("TypeScript")) return "bg-blue-400/15 text-blue-300 border-blue-400/25";
+    return "bg-console-faint text-console-muted border-console-border";
+  };
+
   return (
     <div className="space-y-4">
       <div>
         <h2 className="text-sm font-semibold text-console-text mb-1">
           <FolderOpen className="w-4 h-4 inline mr-1.5 -mt-0.5" />
-          Where are your projects?
+          {detectedProjects.length > 0
+            ? "We found these projects. Select the ones you want to manage:"
+            : "Where are your projects?"}
         </h2>
         <p className="text-xs text-console-dim">
-          Add the git repositories you work with. These show up in the sidebar
-          for status monitoring.
+          {detectedProjects.length > 0
+            ? "Click to select or deselect. Recently active projects are pre-selected."
+            : "Add the git repositories you work with."}
         </p>
       </div>
 
-      {/* Project list */}
-      <div className="space-y-2 max-h-36 overflow-y-auto">
-        {projects.map((p, i) => (
-          <div
-            key={`${p.path}-${i}`}
-            className="flex items-center gap-2 px-3 py-2 bg-console-bg border border-console-border rounded text-xs"
-          >
-            <FolderOpen className="w-3.5 h-3.5 text-console-dim shrink-0" />
-            <span className="flex-1 text-console-text font-mono truncate">
-              {p.path}
-            </span>
+      {/* Scanning indicator */}
+      {detecting && (
+        <div className="flex items-center gap-2 px-3 py-3 bg-console-accent/5 border border-console-accent/20 rounded text-xs text-console-accent">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Scanning your machine for projects...
+        </div>
+      )}
+
+      {/* Detected projects as selectable cards */}
+      {!detecting && detectedProjects.length > 0 && (
+        <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+          {detectedProjects.map((dp) => (
             <button
-              onClick={() => toggleProd(i)}
+              key={dp.path}
+              onClick={() => toggleDetected(dp)}
               className={cn(
-                "px-2 py-0.5 text-[9px] font-medium rounded border transition-colors",
-                p.isProd
-                  ? "bg-red-500/15 text-red-400 border-red-500/30"
-                  : "bg-console-faint text-console-dim border-transparent hover:border-console-border",
+                "flex items-start gap-3 w-full px-3 py-2.5 rounded border text-left transition-all",
+                isSelected(dp.path)
+                  ? "bg-console-accent/10 border-console-accent/30"
+                  : "bg-console-bg border-console-border hover:border-console-muted",
               )}
             >
-              {p.isProd ? "PROD" : "dev"}
+              <div className="mt-0.5">
+                {isSelected(dp.path) ? (
+                  <Check className="w-4 h-4 text-console-accent" />
+                ) : (
+                  <FolderOpen className="w-4 h-4 text-console-dim" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-console-text">{dp.name}</span>
+                  <span className="text-[9px] text-console-dim">{dp.lastCommit}</span>
+                  {dp.hasAgentSystem && (
+                    <span className="text-[9px] px-1.5 py-0.5 bg-purple-500/15 text-purple-400 border border-purple-500/25 rounded">
+                      agents
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {[...dp.techStack, ...dp.languages].slice(0, 5).map((t) => (
+                    <span key={t} className={cn("text-[9px] px-1.5 py-0.5 rounded border", stackColor(t))}>
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </button>
-            <button
-              onClick={() => removeProject(i)}
-              className="p-0.5 text-console-dim hover:text-console-error transition-colors"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {/* Add project */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={newProjectPath}
-          onChange={(e) => setNewProjectPath(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") addProject();
-          }}
-          placeholder="/path/to/project"
-          className="flex-1 px-3 py-2 text-xs font-mono bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:border-console-accent focus:outline-none"
-        />
-        <button
-          onClick={addProject}
-          disabled={!newProjectPath.trim()}
-          className={cn(
-            "flex items-center gap-1 px-3 py-2 text-xs font-medium rounded transition-all",
-            newProjectPath.trim()
-              ? "bg-console-accent/20 text-console-accent hover:bg-console-accent/30"
-              : "bg-console-faint text-console-dim cursor-not-allowed",
-          )}
+      {/* Selected projects (from manual add) that aren't in detected list */}
+      {projects.filter((p) => !detectedProjects.some((d) => d.path === p.path)).map((p, i) => (
+        <div
+          key={`manual-${p.path}-${i}`}
+          className="flex items-center gap-2 px-3 py-2 bg-console-accent/10 border border-console-accent/30 rounded text-xs"
         >
-          <Plus className="w-3 h-3" />
-          Add
+          <Check className="w-3.5 h-3.5 text-console-accent shrink-0" />
+          <span className="flex-1 text-console-text font-mono truncate text-[10px]">{p.path}</span>
+          <button
+            onClick={() => toggleProd(projects.indexOf(p))}
+            className={cn(
+              "px-2 py-0.5 text-[9px] font-medium rounded border transition-colors",
+              p.isProd
+                ? "bg-red-500/15 text-red-400 border-red-500/30"
+                : "bg-console-faint text-console-dim border-transparent hover:border-console-border",
+            )}
+          >
+            {p.isProd ? "PROD" : "dev"}
+          </button>
+          <button
+            onClick={() => removeProject(projects.indexOf(p))}
+            className="p-0.5 text-console-dim hover:text-console-error transition-colors"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      ))}
+
+      {/* Manual add */}
+      {(showManualInput || detectedProjects.length === 0) ? (
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newProjectPath}
+            onChange={(e) => setNewProjectPath(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") addProject(); }}
+            placeholder="/path/to/project"
+            className="flex-1 px-3 py-2 text-xs font-mono bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:border-console-accent focus:outline-none"
+          />
+          <button
+            onClick={addProject}
+            disabled={!newProjectPath.trim()}
+            className={cn(
+              "flex items-center gap-1 px-3 py-2 text-xs font-medium rounded transition-all",
+              newProjectPath.trim()
+                ? "bg-console-accent/20 text-console-accent hover:bg-console-accent/30"
+                : "bg-console-faint text-console-dim cursor-not-allowed",
+            )}
+          >
+            <Plus className="w-3 h-3" />
+            Add
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowManualInput(true)}
+          className="text-[10px] text-console-dim hover:text-console-muted transition-colors"
+        >
+          + Add a project not listed here
         </button>
-      </div>
+      )}
 
       {projects.length > 0 && projects.some((p) => p.isProd) && (
         <div className="flex items-start gap-2 px-3 py-2 bg-yellow-500/5 border border-yellow-500/20 rounded text-[10px] text-yellow-400">
@@ -790,6 +993,7 @@ function AgentTeamStep({
   editingAgentId,
   setEditingAgentId,
   setAiGen,
+  projectTechStack,
 }: {
   selectedAgents: string[];
   toggleAgent: (id: string) => void;
@@ -797,6 +1001,7 @@ function AgentTeamStep({
   aiGen: AiGenState;
   useAiAgents: boolean;
   setUseAiAgents: (v: boolean) => void;
+  projectTechStack?: string[];
   triggerAiGeneration: () => Promise<void>;
   editingAgentId: string | null;
   setEditingAgentId: (id: string | null) => void;
@@ -961,30 +1166,48 @@ function AgentTeamStep({
       )}
 
       <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
-        {AVAILABLE_AGENTS.map((agent) => (
-          <label
-            key={agent.id}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded border cursor-pointer transition-all",
-              selectedAgents.includes(agent.id)
-                ? "bg-console-accent/10 border-console-accent/30"
-                : "bg-console-bg border-console-border hover:border-console-muted",
-            )}
-          >
-            <input
-              type="checkbox"
-              checked={selectedAgents.includes(agent.id)}
-              onChange={() => toggleAgent(agent.id)}
-              className="accent-console-accent"
-            />
-            <span className="text-xs font-mono text-console-text w-28">
-              {agent.label}
-            </span>
-            <span className="text-[10px] text-console-dim flex-1">
-              {agent.desc}
-            </span>
-          </label>
-        ))}
+        {AVAILABLE_AGENTS.map((agent) => {
+          // Smart reason based on project tech stack
+          const stack = projectTechStack ?? [];
+          const hasReact = stack.some((t) => t.includes("React") || t.includes("Next") || t.includes("Vue") || t.includes("Svelte") || t.includes("Angular"));
+          const hasPython = stack.some((t) => t.includes("Python") || t.includes("Django") || t.includes("Go") || t.includes("Rust") || t.includes("Java"));
+          let reason = "";
+          if (agent.id === "frontend" && hasReact) reason = "Your project uses " + (stack.find((t) => t.includes("React") || t.includes("Next") || t.includes("Vue")) ?? "a frontend framework");
+          else if (agent.id === "backend" && hasPython) reason = "Your project has backend code";
+          else if (agent.id === "orchestrator") reason = "Coordinates the whole team";
+          else if (agent.id === "qa") reason = "Every project needs testing";
+          else if (agent.id === "security" && stack.length > 0) reason = "Reviews code for vulnerabilities";
+
+          return (
+            <label
+              key={agent.id}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded border cursor-pointer transition-all",
+                selectedAgents.includes(agent.id)
+                  ? "bg-console-accent/10 border-console-accent/30"
+                  : "bg-console-bg border-console-border hover:border-console-muted",
+              )}
+            >
+              <input
+                type="checkbox"
+                checked={selectedAgents.includes(agent.id)}
+                onChange={() => toggleAgent(agent.id)}
+                className="accent-console-accent"
+              />
+              <span className="text-xs font-mono text-console-text w-28">
+                {agent.label}
+              </span>
+              <div className="flex-1 min-w-0">
+                <span className="text-[10px] text-console-dim">{agent.desc}</span>
+                {reason && (
+                  <span className="text-[9px] text-console-accent ml-1.5">
+                    — {reason}
+                  </span>
+                )}
+              </div>
+            </label>
+          );
+        })}
       </div>
 
       <div className="flex items-center gap-2">
@@ -1220,13 +1443,21 @@ function PreferencesStep({
   permissions,
   setPermissions,
   scaffoldResult,
+  showCostGuide,
 }: {
   model: "opus" | "sonnet" | "haiku";
   setModel: (m: "opus" | "sonnet" | "haiku") => void;
   permissions: "bypass" | "default" | "plan";
   setPermissions: (p: "bypass" | "default" | "plan") => void;
   scaffoldResult: { created: string[] } | null;
+  showCostGuide?: boolean;
 }) {
+  const modelInfo: Record<string, { cost: string; best: string }> = {
+    opus: { cost: "~$15/hr active use", best: "Complex tasks, architecture" },
+    sonnet: { cost: "~$3/hr active use", best: "Good balance of speed and quality" },
+    haiku: { cost: "~$0.25/hr active use", best: "Simple tasks, fast iteration" },
+  };
+
   return (
     <div className="space-y-5">
       <div>
@@ -1274,6 +1505,13 @@ function PreferencesStep({
             </button>
           ))}
         </div>
+        {showCostGuide && (
+          <div className="mt-2 px-3 py-2 bg-console-bg border border-console-border rounded">
+            <p className="text-[10px] text-console-muted">
+              {modelInfo[model]?.cost} &mdash; {modelInfo[model]?.best}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Permissions */}
@@ -1282,7 +1520,7 @@ function PreferencesStep({
           Default Permissions
         </label>
         <div className="flex items-center gap-2">
-          {(["bypass", "default", "plan"] as const).map((p) => (
+          {(["default", "bypass", "plan"] as const).map((p) => (
             <button
               key={p}
               onClick={() => setPermissions(p)}
@@ -1299,10 +1537,10 @@ function PreferencesStep({
         </div>
         <p className="text-[10px] text-console-dim mt-1.5">
           {permissions === "bypass"
-            ? "Skip all permission prompts (fastest)"
+            ? "Skip all permission prompts (fastest, for experienced users)"
             : permissions === "plan"
-              ? "Plan mode: review before executing"
-              : "Standard Claude Code permissions"}
+              ? "Plan mode: Claude shows its plan before executing"
+              : "Recommended: Claude asks before running commands"}
         </p>
       </div>
     </div>
