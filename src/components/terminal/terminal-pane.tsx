@@ -207,9 +207,9 @@ export function TerminalPane({
   return (
     <div
       className={cn(
-        "flex flex-col h-full rounded-lg border overflow-hidden transition-[border-color,box-shadow] duration-200",
+        "terminal-pane-border flex flex-col h-full rounded-lg border overflow-hidden",
         focused
-          ? "border-console-success ring-1 ring-console-success/50"
+          ? "border-console-success/60 shadow-[0_0_12px_rgba(74,222,128,0.06)]"
           : "border-console-border",
       )}
       onClick={onFocus}
@@ -220,7 +220,7 @@ export function TerminalPane({
       }}
     >
       {/* Header bar */}
-      <div className="flex items-center gap-2 px-3 py-1 bg-console-panel border-b border-console-border shrink-0">
+      <div className="flex items-center gap-2 px-3 py-1.5 console-panel-bg border-b border-console-border shrink-0">
         <span
           className={cn(
             "w-2 h-2 rounded-full shrink-0",
@@ -236,50 +236,42 @@ export function TerminalPane({
           {effectiveModel && effectiveModel !== "unknown" && (
             <span
               className={cn(
-                "text-[9px] px-1.5 py-0.5 rounded font-medium",
+                "text-[9px] px-1.5 py-0.5 rounded-full font-medium",
                 effectiveModel === "opus"
-                  ? "bg-purple-500/20 text-purple-400"
+                  ? "bg-purple-500/15 text-purple-400"
                   : effectiveModel === "haiku"
-                    ? "bg-teal-500/20 text-teal-400"
-                    : "bg-console-border text-console-muted",
+                    ? "bg-emerald-500/15 text-emerald-400"
+                    : "bg-blue-500/10 text-blue-400/80",
               )}
             >
               {effectiveModel}
             </span>
           )}
           {contextDisplay && (
-            <span className={cn("text-[9px] px-1 py-0.5 rounded font-medium", contextColor)}>
+            <span className={cn("text-[9px] px-1 py-0.5 rounded-full font-medium", contextColor)}>
               {contextDisplay}
             </span>
           )}
-          <span className="text-[9px] px-1 py-0.5 rounded bg-console-border text-console-dim">
+          <span className="text-[9px] text-console-dim">
             {tokensDisplay}
           </span>
 
           {/* Zoom controls */}
-          <span className="flex items-center border border-console-border rounded overflow-hidden">
+          <span className="flex items-center gap-0 rounded-md border border-console-border/60 overflow-hidden">
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                zoomOut(sessionId);
-              }}
+              onClick={(e) => { e.stopPropagation(); zoomOut(sessionId); }}
               className="p-0.5 text-console-dim hover:text-console-muted hover:bg-console-faint/50 transition-colors"
               title="Zoom out"
             >
-              <ZoomOut className="w-3 h-3" />
+              <ZoomOut className="w-2.5 h-2.5" />
             </button>
-            <span className="text-[8px] text-console-dim px-1 font-mono min-w-[20px] text-center">
-              {zoomLevel}
-            </span>
+            <span className="text-[7px] text-console-dim px-0.5 font-mono min-w-[16px] text-center">{zoomLevel}</span>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                zoomIn(sessionId);
-              }}
+              onClick={(e) => { e.stopPropagation(); zoomIn(sessionId); }}
               className="p-0.5 text-console-dim hover:text-console-muted hover:bg-console-faint/50 transition-colors"
               title="Zoom in"
             >
-              <ZoomIn className="w-3 h-3" />
+              <ZoomIn className="w-2.5 h-2.5" />
             </button>
           </span>
 

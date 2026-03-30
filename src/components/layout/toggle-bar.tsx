@@ -39,7 +39,6 @@ const ALL_TABS: TabConfig[] = [
 function getBerlinPeakInfo(): { isPeak: boolean; berlinTime: string; peakStart: string; peakEnd: string } {
   const now = new Date();
 
-  // Get Berlin hour
   const berlinFormatter = new Intl.DateTimeFormat("de-DE", {
     timeZone: "Europe/Berlin",
     hour: "2-digit",
@@ -48,17 +47,9 @@ function getBerlinPeakInfo(): { isPeak: boolean; berlinTime: string; peakStart: 
   });
   const berlinTime = berlinFormatter.format(now);
 
-  // Determine UTC offset for Berlin to derive peak window
-  // Berlin is UTC+1 (CET) or UTC+2 (CEST)
-  // Peak in PT: 5:00-11:00 (PT is UTC-7 summer, UTC-8 winter)
-  // So peak in UTC: 12:00-18:00 (summer) or 13:00-19:00 (winter)
-  // In Berlin: 14:00-20:00 (CEST) or 14:00-20:00 (CET)
-  // Actually: PT+9h = Berlin in summer (PDT+9=CEST), PT+9h in winter (PST+9=CET)
-  // 5 PT + 9 = 14 Berlin, 11 PT + 9 = 20 Berlin (both seasons)
   const peakStart = "14:00";
   const peakEnd = "20:00";
 
-  // Parse Berlin hour for comparison
   const berlinParts = berlinTime.split(":");
   const berlinHour = parseInt(berlinParts[0], 10);
   const isPeak = berlinHour >= 14 && berlinHour < 20;
@@ -80,10 +71,10 @@ function PeakHoursIndicator() {
     <div className="relative group">
       <div
         className={cn(
-          "flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-medium transition-colors cursor-default",
+          "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-medium transition-colors cursor-default",
           info.isPeak
-            ? "bg-red-500/10 text-red-400 border border-red-500/20"
-            : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+            ? "bg-red-500/10 text-red-400/90"
+            : "bg-emerald-500/8 text-emerald-400/80",
         )}
       >
         <span
@@ -94,11 +85,11 @@ function PeakHoursIndicator() {
         />
         {info.isPeak
           ? `Peak until ${info.peakEnd}`
-          : `Off-Peak \u00b7 Peak starts at ${info.peakStart}`}
+          : `Off-Peak`}
       </div>
 
       {/* Tooltip */}
-      <div className="absolute right-0 top-full mt-1.5 w-56 p-2.5 rounded-lg border border-console-border bg-console-panel shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
+      <div className="absolute right-0 top-full mt-1.5 w-52 p-2.5 rounded-lg border border-console-border bg-console-panel shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
         <p className="text-[10px] text-console-text font-medium mb-1.5">
           {info.isPeak ? "Peak Hours Active" : "Off-Peak Hours"}
         </p>
@@ -139,19 +130,17 @@ function SystemWidget() {
   if (!stats) return null;
 
   return (
-    <div className="relative group">
-      <button
-        onClick={() => setActiveMode("settings")}
-        className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-mono text-console-dim hover:text-console-muted border border-console-border/50 hover:border-console-border transition-colors"
-        title="System monitor — click for details"
-      >
-        <Cpu className="w-3 h-3" />
-        <span>{stats.cpu.toFixed(0)}%</span>
-        <span className="text-console-border">|</span>
-        <MemoryStick className="w-3 h-3" />
-        <span>{stats.memUsed.toFixed(1)}/{stats.memTotal.toFixed(0)}GB</span>
-      </button>
-    </div>
+    <button
+      onClick={() => setActiveMode("settings")}
+      className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-mono text-console-dim hover:text-console-muted transition-colors"
+      title="System monitor"
+    >
+      <Cpu className="w-3 h-3" />
+      <span>{stats.cpu.toFixed(0)}%</span>
+      <span className="text-console-border">/</span>
+      <MemoryStick className="w-3 h-3" />
+      <span>{stats.memUsed.toFixed(1)}G</span>
+    </button>
   );
 }
 
@@ -162,7 +151,6 @@ function FullscreenButton() {
     const handler = () => setIsFs(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", handler);
 
-    // F11 key support
     const keyHandler = (e: KeyboardEvent) => {
       if (e.key === "F11") {
         e.preventDefault();
@@ -201,7 +189,7 @@ function FullscreenButton() {
 export function ToggleBar() {
   const activeMode = useUIStore((s) => s.activeMode);
   const setActiveMode = useUIStore((s) => s.setActiveMode);
-  const [hasAgentSystem, setHasAgentSystem] = useState(true); // default true so tabs don't flash
+  const [hasAgentSystem, setHasAgentSystem] = useState(true);
 
   useEffect(() => {
     void (async () => {
@@ -220,9 +208,9 @@ export function ToggleBar() {
     : ALL_TABS.filter((t) => t.id !== "teams" && t.id !== "memory");
 
   return (
-    <header className="flex items-center justify-between px-4 h-10 border-b border-console-border bg-console-panel shrink-0">
+    <header className="flex items-center justify-between px-3 h-10 border-b border-console-border console-panel-bg shrink-0">
       {/* Left: tabs */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeMode === tab.id;
@@ -233,16 +221,20 @@ export function ToggleBar() {
               disabled={tab.disabled}
               title={tab.disabled ? "Coming soon" : undefined}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-all",
+                "relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
                 isActive
-                  ? "bg-console-faint text-console-text"
+                  ? "text-console-text"
                   : tab.disabled
                     ? "text-console-dim cursor-not-allowed opacity-40"
-                    : "text-console-muted hover:text-console-text hover:bg-console-faint/50 active:bg-console-faint active:scale-95",
+                    : "text-console-muted hover:text-console-text hover:bg-console-faint/40 active:scale-95",
               )}
             >
-              <Icon className="w-3.5 h-3.5" />
+              <Icon className="w-4 h-4" />
               {tab.label}
+              {/* Active indicator line */}
+              {isActive && (
+                <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-console-accent rounded-full" />
+              )}
             </button>
           );
         })}
@@ -254,7 +246,7 @@ export function ToggleBar() {
         <FullscreenButton />
         <PeakHoursIndicator />
         <HelpPanel />
-        <span className="text-[10px] text-console-dim font-mono">
+        <span className="text-[9px] text-console-dim/70 font-mono tracking-wide">
           agent-studio
         </span>
       </div>

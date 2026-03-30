@@ -462,7 +462,7 @@ function RepoItem({
             PROD
           </span>
         )}
-        <span className="text-[9px] px-1 py-0.5 rounded bg-console-accent/10 text-console-accent font-mono shrink-0 max-w-[80px] truncate">
+        <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-console-accent/10 text-console-accent/80 font-mono shrink-0 max-w-[80px] truncate">
           {repo.branch}
         </span>
         <span
@@ -1176,19 +1176,19 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
   const managedSessions = sessions;
 
   return (
-    <aside className="w-56 border-r border-console-border bg-console-panel shrink-0 flex flex-col h-full">
+    <aside className="w-56 border-r border-console-border console-panel-bg shrink-0 flex flex-col h-full">
       {/* New Session button + collapse */}
-      <div className="flex items-center gap-2 px-2 py-2 border-b border-console-border">
+      <div className="flex items-center gap-2 px-2.5 py-2.5 border-b border-console-border">
         <button
           onClick={onNewSession}
-          className="flex items-center gap-1.5 flex-1 px-2 py-1.5 text-xs font-medium rounded bg-console-success/15 text-console-success hover:bg-console-success/25 active:bg-console-success/35 active:scale-95 transition-all"
+          className="flex items-center gap-1.5 flex-1 px-2.5 py-1.5 text-xs font-medium rounded-md bg-console-success/15 text-console-success hover:bg-console-success/25 active:bg-console-success/35 active:scale-95 transition-all"
         >
           <Plus className="w-3.5 h-3.5" />
           New Session
         </button>
         <button
           onClick={toggleSidebar}
-          className="p-1 text-console-dim hover:text-console-muted transition-colors"
+          className="p-1 text-console-dim hover:text-console-muted transition-colors rounded hover:bg-console-faint/40"
           title="Collapse sidebar"
         >
           <PanelLeftClose className="w-4 h-4" />
@@ -1196,7 +1196,7 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto py-2 px-1 space-y-3">
+      <div className="flex-1 overflow-y-auto scrollbar-thin py-2 px-1.5 space-y-4">
         {/* SESSIONS */}
         <SessionGroup
           title="Sessions"
@@ -1232,17 +1232,17 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
                 key={agent.id}
                 onClick={() => void launchAgent(agent)}
                 title={`Launch ${agent.name}: ${agent.description}`}
-                className="flex items-center gap-2 w-full px-2 py-1.5 text-xs text-console-muted hover:text-console-text hover:bg-console-faint/50 rounded transition-colors text-left"
+                className="sidebar-item flex items-center gap-2 w-full px-2 py-2 text-xs text-console-muted hover:text-console-text hover:bg-console-faint/40 rounded-md text-left"
               >
-                <Cpu className="w-3.5 h-3.5 shrink-0 text-console-accent" />
+                <span className={cn(
+                  "w-2 h-2 rounded-full shrink-0",
+                  agent.model === "opus" ? "bg-purple-400" :
+                  agent.model === "haiku" ? "bg-emerald-400" :
+                  "bg-blue-400",
+                )} />
                 <span className="truncate flex-1">{agent.name}</span>
                 {agent.model && (
-                  <span className={cn(
-                    "text-[8px] px-1 py-0.5 rounded font-medium shrink-0",
-                    agent.model === "opus" ? "bg-purple-500/20 text-purple-400" :
-                    agent.model === "haiku" ? "bg-green-500/20 text-green-400" :
-                    "bg-blue-500/20 text-blue-400",
-                  )}>
+                  <span className="text-[8px] text-console-dim/60 shrink-0">
                     {agent.model}
                   </span>
                 )}

@@ -69,10 +69,10 @@ export function SessionItem({
       onClick={onFocus}
       title={`${session.name}\nPath: ${session.cwd}\nID: ${session.id}\nModel: ${effectiveModel ?? "unknown"}\nStatus: ${session.status}${hasContext ? `\nContext: ${contextPercent}%` : ""}`}
       className={cn(
-        "flex flex-col gap-0.5 px-2 py-1.5 rounded cursor-pointer group transition-colors",
+        "sidebar-item flex flex-col gap-0.5 px-2 py-2 rounded-md cursor-pointer group",
         focused
-          ? "bg-console-faint text-console-text"
-          : "text-console-muted hover:bg-console-faint/50 hover:text-console-text",
+          ? "bg-console-faint text-console-text border-l-2 border-l-console-accent"
+          : "text-console-muted hover:bg-console-faint/40 hover:text-console-text border-l-2 border-l-transparent",
         !visible && "opacity-60",
       )}
     >
