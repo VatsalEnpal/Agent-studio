@@ -3,22 +3,7 @@ node_modules
 .git
 *.log
 logs/
-
-# Config (user-specific)
-.agent-studio.json
-.settings.json
-
-# Test artifacts
-test-*.mjs
-test-results/
 test-screenshots/
-tests/
-
-# User data
-ai-agents/
-
-# Internal docs
-DESIGN.md
-PLAN.md
-PM_REVIEW.md
-TEAMS-SPEC.md
+qa-screenshots/
+SECURITY_AUDIT.md
+.agent-studio.json

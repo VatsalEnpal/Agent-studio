@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  agent-studio:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount Claude credentials so CLI is authenticated
+      - ~/.claude:/root/.claude:ro
+      # Mount user's home for project access (read-write)
+      - ~/Code:/root/Code
+      # Persist config between restarts
+      - ./.agent-studio.json:/app/.agent-studio.json
+    environment:
+      - HOME=/root
+      - PORT=8080
+    stdin_open: true
+    tty: true

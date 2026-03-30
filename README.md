@@ -115,12 +115,38 @@ Key options: projects (paths, prod flags, tracked branches), default model, perm
 
 ## Docker
 
+Agent Studio's Docker image includes the Claude Code CLI. You just need to mount your existing credentials so the container can authenticate.
+
+**Prerequisites:** Claude Code must be authenticated on your host machine first. Run `claude` in your terminal and complete the auth flow if you haven't already.
+
+### Method 1: Docker Compose (recommended)
+
 ```bash
-docker build -t agent-studio .
-docker run -it -p 8080:8080 -v $HOME:$HOME agent-studio
+git clone https://github.com/VatsalEnpal/Agent-studio.git
+cd Agent-studio
+docker compose up
 ```
 
-Mount your home directory so Claude Code can access your projects and config. The CLI must be available inside the container.
+Open [http://localhost:8080](http://localhost:8080).
+
+### Method 2: Docker run (manual mounts)
+
+```bash
+docker build -t agent-studio .
+docker run -it \
+  -p 8080:8080 \
+  -v ~/.claude:/root/.claude:ro \
+  -v ~/Code:/root/Code \
+  agent-studio
+```
+
+### Volume mounts explained
+
+- `~/.claude` is mounted read-only (`:ro`) -- the container reads your auth credentials but cannot modify them.
+- `~/Code` is where your projects live -- change this path to match your setup. Inside the container, projects appear under `/root/Code/`.
+- `.agent-studio.json` is persisted so your configuration survives container restarts.
+
+On first run inside Docker, the setup wizard will ask you to point to projects under `/root/Code/...` (the mounted path).
 
 ## Requirements
 
