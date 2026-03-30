@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useCallback } from "react";
-import { Search, Tag, Calendar, User, FileText, Brain } from "lucide-react";
+import { Search, Calendar, Brain, Plus, Pin, Pencil, Trash2 } from "lucide-react";
 import { useMemoryStore, type MemoryEntry, type MemoryEntryDetail } from "@/stores/memory";
+import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
 import { MemoryDetail } from "./memory-detail";
+import { MemoryFormDialog } from "./memory-form-dialog";
+import { MemoryDeleteDialog } from "./memory-delete-dialog";
 
 const CATEGORIES = [
   "All",
@@ -48,15 +51,18 @@ export function MemoryView() {
   const entries = useMemoryStore((s) => s.entries);
   const search = useMemoryStore((s) => s.search);
   const selectedCategory = useMemoryStore((s) => s.selectedCategory);
+  const showPinnedOnly = useMemoryStore((s) => s.showPinnedOnly);
   const selectedEntry = useMemoryStore((s) => s.selectedEntry);
   const loading = useMemoryStore((s) => s.loading);
   const setEntries = useMemoryStore((s) => s.setEntries);
   const setSearch = useMemoryStore((s) => s.setSearch);
   const setCategory = useMemoryStore((s) => s.setCategory);
+  const setShowPinnedOnly = useMemoryStore((s) => s.setShowPinnedOnly);
   const selectEntry = useMemoryStore((s) => s.selectEntry);
   const setLoading = useMemoryStore((s) => s.setLoading);
   const setSelectedDetail = useMemoryStore((s) => s.setSelectedDetail);
   const setDetailLoading = useMemoryStore((s) => s.setDetailLoading);
+  const openCreateDialog = useMemoryStore((s) => s.openCreateDialog);
 
   // Load entries on mount
   useEffect(() => {
@@ -94,6 +100,10 @@ export function MemoryView() {
   const filtered = useMemo(() => {
     let result = entries.filter((e) => !e.superseded_by);
 
+    if (showPinnedOnly) {
+      result = result.filter((e) => e.pinned);
+    }
+
     if (selectedCategory && selectedCategory !== "All") {
       result = result.filter((e) => e.category === selectedCategory);
     }
@@ -108,11 +118,16 @@ export function MemoryView() {
       );
     }
 
-    // Sort by filename (contains date) — newest first
-    result.sort((a, b) => b.file.localeCompare(a.file));
+    // Sort: pinned first, then by filename (date) newest first
+    result.sort((a, b) => {
+      const aPinned = a.pinned ? 1 : 0;
+      const bPinned = b.pinned ? 1 : 0;
+      if (aPinned !== bPinned) return bPinned - aPinned;
+      return b.file.localeCompare(a.file);
+    });
 
     return result;
-  }, [entries, search, selectedCategory]);
+  }, [entries, search, selectedCategory, showPinnedOnly]);
 
   // Category counts (excluding superseded)
   const categoryCounts = useMemo(() => {
@@ -124,11 +139,16 @@ export function MemoryView() {
     return counts;
   }, [entries]);
 
+  const pinnedCount = useMemo(
+    () => entries.filter((e) => !e.superseded_by && e.pinned).length,
+    [entries],
+  );
+
   return (
     <div className="flex flex-col h-full">
-      {/* Search bar */}
-      <div className="px-4 py-3 border-b border-console-border">
-        <div className="relative">
+      {/* Search bar + create button */}
+      <div className="px-4 py-3 border-b border-console-border flex items-center gap-2">
+        <div className="relative flex-1">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-console-dim" />
           <input
             type="text"
@@ -138,9 +158,16 @@ export function MemoryView() {
             className="w-full pl-8 pr-3 py-2 text-xs bg-console-bg border border-console-border rounded-md text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent transition-colors"
           />
         </div>
+        <button
+          onClick={openCreateDialog}
+          className="flex items-center gap-1 px-2.5 py-2 text-[10px] font-medium bg-console-accent text-console-bg rounded-md hover:bg-console-accent/90 transition-colors shrink-0"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          New
+        </button>
       </div>
 
-      {/* Category pills */}
+      {/* Category pills + Pinned filter */}
       <div className="px-4 py-2 border-b border-console-border flex items-center gap-1.5 overflow-x-auto">
         {CATEGORIES.map((cat) => {
           const isActive = cat === "All" ? !selectedCategory || selectedCategory === "All" : selectedCategory === cat;
@@ -163,6 +190,22 @@ export function MemoryView() {
             </button>
           );
         })}
+        <div className="w-px h-4 bg-console-border mx-1" />
+        <button
+          onClick={() => setShowPinnedOnly(!showPinnedOnly)}
+          className={cn(
+            "flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-full whitespace-nowrap transition-all",
+            showPinnedOnly
+              ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+              : "bg-console-faint text-console-muted hover:text-console-text hover:bg-console-faint/80 border border-transparent",
+          )}
+        >
+          <Pin className="w-2.5 h-2.5" />
+          Pinned
+          <span className={cn("text-[9px]", showPinnedOnly ? "text-amber-400/70" : "text-console-dim")}>
+            {pinnedCount}
+          </span>
+        </button>
       </div>
 
       {/* Main content: list + detail */}
@@ -195,6 +238,11 @@ export function MemoryView() {
           <MemoryDetail />
         </div>
       </div>
+
+      {/* Dialogs */}
+      <MemoryFormDialog mode="create" />
+      <MemoryFormDialog mode="edit" />
+      <MemoryDeleteDialog />
     </div>
   );
 }
@@ -209,12 +257,50 @@ function MemoryListItem({
   onSelect: () => void;
 }) {
   const date = extractDate(entry.file);
+  const openEditDialog = useMemoryStore((s) => s.openEditDialog);
+  const openDeleteDialog = useMemoryStore((s) => s.openDeleteDialog);
+  const updateEntry = useMemoryStore((s) => s.updateEntry);
+  const addToast = useToastStore((s) => s.addToast);
+
+  const handlePin = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      try {
+        const res = await fetch(`/api/memory/entries/${encodeURIComponent(entry.file)}/pin`, {
+          method: "POST",
+        });
+        const data = await res.json() as { ok?: boolean; pinned?: boolean; error?: string };
+        if (!data.ok) throw new Error(data.error ?? "Failed to toggle pin");
+        updateEntry(entry.file, { pinned: data.pinned });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        addToast(`Pin failed: ${msg}`, "error");
+      }
+    },
+    [entry.file, updateEntry, addToast],
+  );
+
+  const handleEdit = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      openEditDialog(entry);
+    },
+    [entry, openEditDialog],
+  );
+
+  const handleDelete = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      openDeleteDialog(entry);
+    },
+    [entry, openDeleteDialog],
+  );
 
   return (
     <button
       onClick={onSelect}
       className={cn(
-        "w-full text-left px-3 py-2.5 border-b border-console-border/50 transition-colors",
+        "w-full text-left px-3 py-2.5 border-b border-console-border/50 transition-colors group",
         selected
           ? "bg-console-accent/10 border-l-2 border-l-console-accent"
           : "hover:bg-console-faint/50 border-l-2 border-l-transparent",
@@ -222,12 +308,44 @@ function MemoryListItem({
     >
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] text-console-text font-medium leading-snug truncate">
-            {entry.title}
-          </p>
+          <div className="flex items-center gap-1.5">
+            {entry.pinned && <Pin className="w-2.5 h-2.5 text-amber-400 shrink-0" />}
+            <p className="text-[11px] text-console-text font-medium leading-snug truncate">
+              {entry.title}
+            </p>
+          </div>
           <p className="text-[9px] text-console-muted mt-0.5 line-clamp-2 leading-relaxed">
             {entry.key_point}
           </p>
+        </div>
+        {/* Action buttons — visible on hover */}
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <button
+            onClick={handlePin}
+            className={cn(
+              "p-1 rounded transition-colors",
+              entry.pinned
+                ? "text-amber-400 hover:text-amber-300"
+                : "text-console-dim hover:text-console-muted",
+            )}
+            title={entry.pinned ? "Unpin" : "Pin"}
+          >
+            <Pin className="w-3 h-3" />
+          </button>
+          <button
+            onClick={handleEdit}
+            className="p-1 text-console-dim hover:text-console-muted rounded transition-colors"
+            title="Edit"
+          >
+            <Pencil className="w-3 h-3" />
+          </button>
+          <button
+            onClick={handleDelete}
+            className="p-1 text-console-dim hover:text-console-error rounded transition-colors"
+            title="Delete"
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
         </div>
       </div>
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">

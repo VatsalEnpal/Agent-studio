@@ -28,7 +28,7 @@ import { execSync, exec } from "node:child_process";
 import os from "node:os";
 import type { SessionMeta, WsMessage } from "./types.js";
 import { WorkflowManager } from "./workflows/index.js";
-import { getConfig, loadConfig, saveConfig, generateDefaultConfig, reloadConfig, getAgentSystemPath, getMainProjectDir, resolvePath, type AgentConfig } from "./config.js";
+import { getConfig, loadConfig, saveConfig, generateDefaultConfig, reloadConfig, getAgentSystemPath, getMainProjectDir, resolvePath, type AgentConfig, type WorkflowConfig } from "./config.js";
 import { scaffoldAgentSystem, previewScaffold } from "./scaffold.js";
 import type { ScaffoldOptions } from "./scaffold.js";
 import { AutomationEngine, AUTOMATION_TEMPLATES } from "./automations.js";
@@ -1073,6 +1073,194 @@ async function main() {
     }
   });
 
+  // --- Custom Workflow CRUD API ---
+
+  app.post("/api/workflows", async (req, res) => {
+    try {
+      const body = req.body as {
+        name?: string;
+        description?: string;
+        icon?: string;
+        steps?: Array<{ id: string; name: string; description?: string; agents: string[] }>;
+      };
+      if (!body.name || !Array.isArray(body.steps) || body.steps.length === 0) {
+        res.status(400).json({ error: "Missing name or steps" });
+        return;
+      }
+
+      const id = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const newWorkflow: WorkflowConfig = {
+        id,
+        name: body.name,
+        description: body.description,
+        icon: body.icon ?? "Workflow",
+        steps: body.steps.map((s) => ({
+          id: s.id,
+          name: s.name,
+          description: s.description,
+          agents: s.agents ?? [],
+        })),
+      };
+
+      const cfg = getConfig();
+      const workflows = cfg.workflows ?? [];
+      workflows.push(newWorkflow);
+      cfg.workflows = workflows;
+      saveConfig(cfg);
+      reloadConfig();
+      workflowManager.reload();
+
+      const flows = await workflowManager.getFlows();
+      // Broadcast update
+      const msg: WsMessage = { type: "workflow-update", payload: flows };
+      for (const client of wss.clients) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(msg));
+        }
+      }
+
+      res.json({ ok: true, id, workflow: newWorkflow });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.put("/api/workflows/:id", async (req, res) => {
+    try {
+      const workflowId = req.params["id"];
+      const body = req.body as {
+        name?: string;
+        description?: string;
+        icon?: string;
+        steps?: Array<{ id: string; name: string; description?: string; agents: string[] }>;
+      };
+
+      const cfg = getConfig();
+      const workflows = cfg.workflows ?? [];
+      const idx = workflows.findIndex((w) => w.id === workflowId);
+      if (idx < 0) {
+        res.status(404).json({ error: "Workflow not found" });
+        return;
+      }
+
+      if (body.name !== undefined) workflows[idx]!.name = body.name;
+      if (body.description !== undefined) workflows[idx]!.description = body.description;
+      if (body.icon !== undefined) workflows[idx]!.icon = body.icon;
+      if (body.steps !== undefined) {
+        workflows[idx]!.steps = body.steps.map((s) => ({
+          id: s.id,
+          name: s.name,
+          description: s.description,
+          agents: s.agents ?? [],
+        }));
+      }
+      cfg.workflows = workflows;
+      saveConfig(cfg);
+      reloadConfig();
+      workflowManager.reload();
+
+      const flows = await workflowManager.getFlows();
+      const msg: WsMessage = { type: "workflow-update", payload: flows };
+      for (const client of wss.clients) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(msg));
+        }
+      }
+
+      res.json({ ok: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.delete("/api/workflows/:id", async (req, res) => {
+    try {
+      const workflowId = req.params["id"];
+      const cfg = getConfig();
+      const workflows = cfg.workflows ?? [];
+      const idx = workflows.findIndex((w) => w.id === workflowId);
+      if (idx < 0) {
+        res.status(404).json({ error: "Workflow not found" });
+        return;
+      }
+
+      workflows.splice(idx, 1);
+      cfg.workflows = workflows;
+      saveConfig(cfg);
+      reloadConfig();
+      workflowManager.reload();
+
+      const flows = await workflowManager.getFlows();
+      const msg: WsMessage = { type: "workflow-update", payload: flows };
+      for (const client of wss.clients) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(msg));
+        }
+      }
+
+      res.json({ ok: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/workflows/:id/run", async (req, res) => {
+    try {
+      const workflowId = req.params["id"];
+      const flow = await workflowManager.getFlow(workflowId);
+      if (!flow) {
+        res.status(404).json({ error: "Workflow not found" });
+        return;
+      }
+
+      // Create a new run by adding to the flow's config
+      // For custom workflows, we create a run entry and broadcast
+      const runId = `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const run = {
+        id: runId,
+        flowId: workflowId,
+        name: `${flow.name} Run`,
+        status: "waiting" as const,
+        startedAt: new Date().toISOString(),
+        steps: flow.runs[0]?.steps.map((s) => ({
+          ...s,
+          status: "pending" as const,
+          startedAt: undefined,
+          completedAt: undefined,
+        })) ?? [],
+        stats: {
+          agentsUsed: flow.runs[0]?.stats.agentsUsed ?? [],
+        },
+      };
+
+      // We don't persist runs (they're ephemeral), just broadcast
+      // Add to the in-memory flow
+      flow.runs.unshift(run);
+
+      const flows = await workflowManager.getFlows();
+      // Inject the new run into the matching flow
+      const targetFlow = flows.find((f) => f.id === workflowId);
+      if (targetFlow && !targetFlow.runs.find((r) => r.id === runId)) {
+        targetFlow.runs.unshift(run);
+      }
+
+      const msg: WsMessage = { type: "workflow-update", payload: flows };
+      for (const client of wss.clients) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(msg));
+        }
+      }
+
+      res.json({ ok: true, runId, run });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
   // Broadcast workflow updates on sprint file changes
   fileWatcher.onUpdate(() => {
     void workflowManager.getFlows().then((flows) => {
@@ -1467,6 +1655,222 @@ async function main() {
     }
   });
 
+  // --- Memory Write API ---
+
+  app.post("/api/memory/entries", async (req, res) => {
+    try {
+      if (!MEMORY_INDEX_PATH || !MEMORY_BASE_PATH) {
+        res.status(400).json({ error: "No agent system configured" });
+        return;
+      }
+      const { readFile, writeFile, mkdir } = await import("node:fs/promises");
+      const { join } = await import("node:path");
+
+      const body = req.body as {
+        title?: string;
+        category?: string;
+        content?: { observation?: string; action?: string; outcome?: string; lesson?: string };
+        tags?: string[];
+        pinned?: boolean;
+      };
+      if (!body.title || !body.category) {
+        res.status(400).json({ error: "Missing title or category" });
+        return;
+      }
+
+      // Build filename
+      const now = new Date();
+      const pad = (n: number, len = 2) => String(n).padStart(len, "0");
+      const dateStr = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+      const categoryMap: Record<string, string> = {
+        learning: "learnings", learnings: "learnings",
+        correction: "corrections", corrections: "corrections",
+        decision: "decisions", decisions: "decisions",
+        knowledge: "knowledge",
+        "human-input": "human-inputs", "human-inputs": "human-inputs",
+      };
+      const folder = categoryMap[body.category] ?? "learnings";
+      const memoryDir = join(MEMORY_BASE_PATH, "ai-agents", "memory", folder);
+      await mkdir(memoryDir, { recursive: true });
+      const filename = `${dateStr}_dashboard_${body.category.replace(/-/g, "_")}.json`;
+      const filePath = join(memoryDir, filename);
+      const relPath = `ai-agents/memory/${folder}/${filename}`;
+
+      // Build entry JSON
+      const entry = {
+        agent_type: "dashboard",
+        memory_type: body.category,
+        title: body.title,
+        content: body.content ?? {},
+        tags: body.tags ?? [],
+        created_by: "dashboard",
+        created_at: now.toISOString(),
+        pinned: body.pinned ?? false,
+      };
+      await writeFile(filePath, JSON.stringify(entry, null, 2), "utf-8");
+
+      // Update index
+      try {
+        const rawIndex = await readFile(MEMORY_INDEX_PATH, "utf-8");
+        const index = JSON.parse(rawIndex) as { entries: Record<string, unknown>[]; total_entries: number; [k: string]: unknown };
+        const newIndexEntry = {
+          file: relPath,
+          title: body.title,
+          key_point: body.content?.lesson ?? body.content?.observation ?? body.title,
+          tags: body.tags ?? [],
+          category: folder,
+          agent_type: "dashboard",
+          pinned: body.pinned ?? false,
+        };
+        index.entries.push(newIndexEntry);
+        index.total_entries = index.entries.length;
+        await writeFile(MEMORY_INDEX_PATH, JSON.stringify(index, null, 2), "utf-8");
+      } catch {
+        // Index update failed — entry still saved
+      }
+
+      res.json({ ok: true, file: relPath });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.put("/api/memory/entries/:id", async (req, res) => {
+    try {
+      if (!MEMORY_INDEX_PATH || !MEMORY_BASE_PATH) {
+        res.status(400).json({ error: "No agent system configured" });
+        return;
+      }
+      const { readFile, writeFile } = await import("node:fs/promises");
+
+      const filePath = decodeURIComponent(req.params["id"] ?? "");
+      if (!filePath) {
+        res.status(400).json({ error: "Missing entry id (file path)" });
+        return;
+      }
+      const fullPath = `${MEMORY_BASE_PATH}/${filePath}`;
+      const raw = await readFile(fullPath, "utf-8");
+      const existing = JSON.parse(raw) as Record<string, unknown>;
+
+      const body = req.body as {
+        title?: string;
+        content?: { observation?: string; action?: string; outcome?: string; lesson?: string };
+        tags?: string[];
+        pinned?: boolean;
+      };
+
+      if (body.title !== undefined) existing["title"] = body.title;
+      if (body.content !== undefined) existing["content"] = body.content;
+      if (body.tags !== undefined) existing["tags"] = body.tags;
+      if (body.pinned !== undefined) existing["pinned"] = body.pinned;
+
+      await writeFile(fullPath, JSON.stringify(existing, null, 2), "utf-8");
+
+      // Update index entry
+      try {
+        const rawIndex = await readFile(MEMORY_INDEX_PATH, "utf-8");
+        const index = JSON.parse(rawIndex) as { entries: Record<string, unknown>[]; total_entries: number; [k: string]: unknown };
+        const idx = index.entries.findIndex((e) => e["file"] === filePath);
+        if (idx >= 0) {
+          if (body.title !== undefined) index.entries[idx]!["title"] = body.title;
+          if (body.tags !== undefined) index.entries[idx]!["tags"] = body.tags;
+          if (body.pinned !== undefined) index.entries[idx]!["pinned"] = body.pinned;
+          if (body.content?.lesson) index.entries[idx]!["key_point"] = body.content.lesson;
+          else if (body.content?.observation) index.entries[idx]!["key_point"] = body.content.observation;
+          await writeFile(MEMORY_INDEX_PATH, JSON.stringify(index, null, 2), "utf-8");
+        }
+      } catch {
+        // Index update failed
+      }
+
+      res.json({ ok: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.delete("/api/memory/entries/:id", async (req, res) => {
+    try {
+      if (!MEMORY_INDEX_PATH || !MEMORY_BASE_PATH) {
+        res.status(400).json({ error: "No agent system configured" });
+        return;
+      }
+      const { readFile, writeFile, unlink } = await import("node:fs/promises");
+
+      const filePath = decodeURIComponent(req.params["id"] ?? "");
+      if (!filePath) {
+        res.status(400).json({ error: "Missing entry id (file path)" });
+        return;
+      }
+      const fullPath = `${MEMORY_BASE_PATH}/${filePath}`;
+
+      // Delete file
+      try {
+        await unlink(fullPath);
+      } catch {
+        // File may already be gone
+      }
+
+      // Remove from index
+      try {
+        const rawIndex = await readFile(MEMORY_INDEX_PATH, "utf-8");
+        const index = JSON.parse(rawIndex) as { entries: Record<string, unknown>[]; total_entries: number; [k: string]: unknown };
+        index.entries = index.entries.filter((e) => e["file"] !== filePath);
+        index.total_entries = index.entries.length;
+        await writeFile(MEMORY_INDEX_PATH, JSON.stringify(index, null, 2), "utf-8");
+      } catch {
+        // Index update failed
+      }
+
+      res.json({ ok: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/memory/entries/:id/pin", async (req, res) => {
+    try {
+      if (!MEMORY_INDEX_PATH || !MEMORY_BASE_PATH) {
+        res.status(400).json({ error: "No agent system configured" });
+        return;
+      }
+      const { readFile, writeFile } = await import("node:fs/promises");
+
+      const filePath = decodeURIComponent(req.params["id"] ?? "");
+      if (!filePath) {
+        res.status(400).json({ error: "Missing entry id (file path)" });
+        return;
+      }
+      const fullPath = `${MEMORY_BASE_PATH}/${filePath}`;
+      const raw = await readFile(fullPath, "utf-8");
+      const existing = JSON.parse(raw) as Record<string, unknown>;
+      const wasPinned = existing["pinned"] === true;
+      existing["pinned"] = !wasPinned;
+      await writeFile(fullPath, JSON.stringify(existing, null, 2), "utf-8");
+
+      // Update index
+      try {
+        const rawIndex = await readFile(MEMORY_INDEX_PATH, "utf-8");
+        const index = JSON.parse(rawIndex) as { entries: Record<string, unknown>[]; total_entries: number; [k: string]: unknown };
+        const idx = index.entries.findIndex((e) => e["file"] === filePath);
+        if (idx >= 0) {
+          index.entries[idx]!["pinned"] = !wasPinned;
+          await writeFile(MEMORY_INDEX_PATH, JSON.stringify(index, null, 2), "utf-8");
+        }
+      } catch {
+        // Index update failed
+      }
+
+      res.json({ ok: true, pinned: !wasPinned });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
   // --- System Stats API ---
   app.get("/api/system/stats", (_req, res) => {
     try {
@@ -1564,6 +1968,170 @@ async function main() {
       const { writeFile } = await import("node:fs/promises");
       await writeFile(SETTINGS_PATH, JSON.stringify(req.body, null, 2), "utf-8");
       res.json({ ok: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- System Preflight API ---
+  app.get("/api/system/preflight", (_req, res) => {
+    try {
+      const checks = {
+        claudeCode: { installed: false } as { installed: boolean; version?: string; path?: string; authenticated?: boolean },
+        node: { installed: true, version: process.version },
+        git: { installed: false } as { installed: boolean; version?: string },
+      };
+      const blockers: string[] = [];
+
+      // Check Claude Code CLI
+      try {
+        const claudePath = execSync("which claude", { encoding: "utf-8", timeout: 5000 }).trim();
+        checks.claudeCode.installed = true;
+        checks.claudeCode.path = claudePath;
+        try {
+          const versionOutput = execSync("claude --version", { encoding: "utf-8", timeout: 5000 }).trim();
+          checks.claudeCode.version = versionOutput;
+        } catch {
+          // version check failed but CLI exists
+        }
+        const claudeDir = join(os.homedir(), ".claude");
+        const { existsSync: fsExistsPre } = require("node:fs") as typeof import("node:fs");
+        checks.claudeCode.authenticated = fsExistsPre(claudeDir);
+        if (!checks.claudeCode.authenticated) {
+          blockers.push("Claude Code is not authenticated. Run `claude` in your terminal and complete setup first.");
+        }
+      } catch {
+        checks.claudeCode.installed = false;
+        blockers.push("Claude Code CLI is not installed.");
+      }
+
+      // Check git
+      try {
+        const gitVersion = execSync("git --version", { encoding: "utf-8", timeout: 5000 }).trim();
+        checks.git.installed = true;
+        checks.git.version = gitVersion.replace("git version ", "");
+      } catch {
+        checks.git.installed = false;
+        blockers.push("Git is not installed.");
+      }
+
+      res.json({ ready: blockers.length === 0, checks, blockers });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- System Detect API ---
+  app.post("/api/system/detect", (_req, res) => {
+    try {
+      const { existsSync: fse, readdirSync: fsr, statSync: fss, readFileSync: fsrf, realpathSync: fsrp } = require("node:fs") as typeof import("node:fs");
+      const { join: pj } = require("node:path") as typeof import("node:path");
+      const home = os.homedir();
+
+      const searchDirs = [
+        pj(home, "Code"), pj(home, "code"), pj(home, "Projects"),
+        pj(home, "Documents"), pj(home, "Desktop"), pj(home, "repos"),
+        pj(home, "dev"), pj(home, "workspace"), pj(home, "src"), pj(home, "work"),
+      ];
+
+      interface DetectedProject {
+        name: string; path: string; techStack: string[]; languages: string[];
+        packageManager: string; devCommand?: string; hasAgentSystem: boolean;
+        gitBranch: string; lastCommit: string; lastModified: number;
+      }
+
+      const projects: DetectedProject[] = [];
+      const seenPaths = new Set<string>();
+
+      for (const dir of searchDirs) {
+        if (!fse(dir)) continue;
+        try {
+          const entries = fsr(dir);
+          for (const entry of entries) {
+            if (entry.startsWith(".")) continue;
+            const fullPath = pj(dir, entry);
+            try {
+              const stat = fss(fullPath);
+              if (!stat.isDirectory()) continue;
+              const resolved = fsrp(fullPath);
+              if (seenPaths.has(resolved)) continue;
+              if (!fse(pj(fullPath, ".git"))) continue;
+              seenPaths.add(resolved);
+
+              const techStack: string[] = [];
+              const languages: string[] = [];
+              let packageManager = "unknown";
+              let devCommand: string | undefined;
+
+              // package.json detection
+              if (fse(pj(fullPath, "package.json"))) {
+                try {
+                  const pkg = JSON.parse(fsrf(pj(fullPath, "package.json"), "utf-8")) as {
+                    dependencies?: Record<string, string>; devDependencies?: Record<string, string>;
+                    scripts?: Record<string, string>;
+                  };
+                  const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
+                  if (allDeps["next"]) techStack.push("Next.js");
+                  else if (allDeps["react"]) techStack.push("React");
+                  if (allDeps["vue"]) techStack.push("Vue");
+                  if (allDeps["svelte"] || allDeps["@sveltejs/kit"]) techStack.push("Svelte");
+                  if (allDeps["@angular/core"]) techStack.push("Angular");
+                  if (allDeps["express"]) techStack.push("Express");
+                  if (allDeps["fastify"]) techStack.push("Fastify");
+                  if (allDeps["tailwindcss"]) techStack.push("Tailwind");
+                  if (allDeps["electron"]) techStack.push("Electron");
+                  if (allDeps["react-native"]) techStack.push("React Native");
+                  if (allDeps["typescript"]) languages.push("TypeScript");
+                  else languages.push("JavaScript");
+
+                  if (fse(pj(fullPath, "pnpm-lock.yaml"))) packageManager = "pnpm";
+                  else if (fse(pj(fullPath, "yarn.lock"))) packageManager = "yarn";
+                  else if (fse(pj(fullPath, "bun.lockb"))) packageManager = "bun";
+                  else packageManager = "npm";
+
+                  if (pkg.scripts?.["dev"]) devCommand = `${packageManager} run dev`;
+                  else if (pkg.scripts?.["start"]) devCommand = `${packageManager} run start`;
+                } catch { /* bad package.json */ }
+              }
+
+              if (fse(pj(fullPath, "requirements.txt")) || fse(pj(fullPath, "pyproject.toml"))) {
+                languages.push("Python");
+                if (packageManager === "unknown") packageManager = fse(pj(fullPath, "pyproject.toml")) ? "poetry" : "pip";
+                if (fse(pj(fullPath, "manage.py"))) { techStack.push("Django"); devCommand = devCommand ?? "python manage.py runserver"; }
+              }
+              if (fse(pj(fullPath, "go.mod"))) { languages.push("Go"); if (packageManager === "unknown") packageManager = "go"; devCommand = devCommand ?? "go run ."; }
+              if (fse(pj(fullPath, "Cargo.toml"))) { languages.push("Rust"); if (packageManager === "unknown") packageManager = "cargo"; devCommand = devCommand ?? "cargo run"; }
+              if (fse(pj(fullPath, "pom.xml")) || fse(pj(fullPath, "build.gradle"))) {
+                languages.push("Java");
+                if (packageManager === "unknown") packageManager = fse(pj(fullPath, "build.gradle")) ? "gradle" : "maven";
+              }
+
+              const hasAgentSystem = fse(pj(fullPath, "ai-agents")) || fse(pj(fullPath, ".claude", "agents"));
+
+              let gitBranch = "main";
+              try { gitBranch = execSync("git rev-parse --abbrev-ref HEAD", { cwd: fullPath, encoding: "utf-8", timeout: 3000 }).trim(); } catch { /* default */ }
+
+              let lastCommit = "";
+              let lastModified = 0;
+              try {
+                const ct = execSync("git log -1 --format=%ci", { cwd: fullPath, encoding: "utf-8", timeout: 3000 }).trim();
+                lastModified = new Date(ct).getTime();
+                const dm = Math.floor((Date.now() - lastModified) / 60000);
+                if (dm < 60) lastCommit = `${dm}m ago`;
+                else if (dm < 1440) lastCommit = `${Math.floor(dm / 60)}h ago`;
+                else lastCommit = `${Math.floor(dm / 1440)}d ago`;
+              } catch { lastCommit = "unknown"; }
+
+              projects.push({ name: entry, path: fullPath, techStack, languages: languages.length > 0 ? languages : ["Unknown"], packageManager, devCommand, hasAgentSystem, gitBranch, lastCommit, lastModified });
+            } catch { /* skip */ }
+          }
+        } catch { /* skip */ }
+      }
+
+      projects.sort((a, b) => b.lastModified - a.lastModified);
+      res.json({ projects });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
