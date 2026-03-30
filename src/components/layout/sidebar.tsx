@@ -1088,6 +1088,66 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
     }
   }, [fetchDevServers]);
 
+  // Agents
+  interface SidebarAgent {
+    id: string;
+    name: string;
+    description: string;
+    model?: "opus" | "sonnet" | "haiku";
+  }
+  const [sidebarAgents, setSidebarAgents] = useState<SidebarAgent[]>([]);
+
+  const fetchAgents = useCallback(async () => {
+    try {
+      const res = await fetch("/api/agents");
+      if (res.ok) {
+        const agents = (await res.json()) as SidebarAgent[];
+        // Filter out "none" (No Agent) entry
+        setSidebarAgents(agents.filter((a) => a.id !== "none"));
+      }
+    } catch {
+      // Best effort
+    }
+  }, []);
+
+  const launchAgent = useCallback(async (agent: SidebarAgent) => {
+    try {
+      const configRes = await fetch("/api/config");
+      let cwd = "~";
+      if (configRes.ok) {
+        const data = await configRes.json() as { config?: { defaults?: { workingDirectory?: string } } };
+        cwd = data.config?.defaults?.workingDirectory ?? "~";
+      }
+
+      const res = await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: agent.name,
+          command: "claude",
+          args: [
+            "--model", agent.model ?? "sonnet",
+            "--agent", agent.id,
+            "--dangerously-skip-permissions",
+          ],
+          cwd,
+          meta: {
+            model: agent.model ?? "sonnet",
+            agent: agent.id,
+            permissions: "bypass",
+            channel: "none",
+            group: "standalone",
+          },
+        }),
+      });
+      if (!res.ok) {
+        // Silently fail
+      }
+    } catch {
+      // Best effort
+    }
+  }, []);
+
   const fetchRecentSessions = useCallback(async () => {
     try {
       const res = await fetch("/api/sessions/history");
@@ -1104,13 +1164,14 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
     void fetchProcesses();
     void fetchRecentSessions();
     void fetchDevServers();
+    void fetchAgents();
     const interval = setInterval(() => void fetchProcesses(), 15_000);
     const serverInterval = setInterval(() => void fetchDevServers(), 10_000);
     return () => {
       clearInterval(interval);
       clearInterval(serverInterval);
     };
-  }, [fetchProcesses, fetchRecentSessions, fetchDevServers]);
+  }, [fetchProcesses, fetchRecentSessions, fetchDevServers, fetchAgents]);
 
   const managedSessions = sessions;
 
@@ -1158,6 +1219,37 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
             ))
           )}
         </SessionGroup>
+
+        {/* AGENTS */}
+        {sidebarAgents.length > 0 && (
+          <SessionGroup
+            title="Agents"
+            count={sidebarAgents.length}
+            defaultOpen={false}
+          >
+            {sidebarAgents.map((agent) => (
+              <button
+                key={agent.id}
+                onClick={() => void launchAgent(agent)}
+                title={`Launch ${agent.name}: ${agent.description}`}
+                className="flex items-center gap-2 w-full px-2 py-1.5 text-xs text-console-muted hover:text-console-text hover:bg-console-faint/50 rounded transition-colors text-left"
+              >
+                <Cpu className="w-3.5 h-3.5 shrink-0 text-console-accent" />
+                <span className="truncate flex-1">{agent.name}</span>
+                {agent.model && (
+                  <span className={cn(
+                    "text-[8px] px-1 py-0.5 rounded font-medium shrink-0",
+                    agent.model === "opus" ? "bg-purple-500/20 text-purple-400" :
+                    agent.model === "haiku" ? "bg-green-500/20 text-green-400" :
+                    "bg-blue-500/20 text-blue-400",
+                  )}>
+                    {agent.model}
+                  </span>
+                )}
+              </button>
+            ))}
+          </SessionGroup>
+        )}
 
         {/* SERVERS */}
         <SessionGroup
