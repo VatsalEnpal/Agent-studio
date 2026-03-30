@@ -76,11 +76,46 @@ Full technical details in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Features
 
-**Session Dashboard** — Terminal grid (1-6 sessions), real-time token/cost/context tracking, session presets, one-click resume from history, keyboard-first navigation with Cmd+K command palette.
+### 🖥️ Session Management
 
-**Agent Operations** — AI-powered agent generation, scaffolding wizard, battle-tested templates with reasoning protocols and memory systems, approval-gated automations, custom workflow builder.
+- **Terminal Grid** — Run 1 to 6 Claude Code sessions side by side. Each is a real terminal with full color, scroll, and zoom.
+- **Live Metrics** — See token count, dollar cost, context window %, and model name on every session. Updated every 30 seconds.
+- **Session Presets** — One-click launchers: Quick Chat (Sonnet, no agent), Start Sprint (Opus + orchestrator), Security Audit, PMO Scan. Create your own.
+- **Resume Any Session** — Every past session is saved. Search by name, project, or agent. Click to resume exactly where you left off.
+- **Keyboard First** — Cmd+K opens a command palette. Cmd+N launches a session. Cmd+1-6 jumps between sessions. Tab cycles focus.
 
-**Developer Tools** — Multi-repo git dashboard with PR creation, dev server management, system monitor, Docker support.
+### 🤖 Agent System
+
+- **AI Agent Generation** — Tell Agent Studio about your project. It runs Claude to analyze your codebase — package.json, file structure, README — and generates custom agent definitions tailored to your stack. A React + FastAPI project gets a frontend agent that knows React patterns, a backend agent that knows FastAPI, and a QA agent that knows both.
+- **Scaffolding** — Creates the full agent directory structure: `.claude/agents/` for Claude Code entry points, `ai-agents/` for deep agent rules, memory system, sprint infrastructure. One click.
+- **Battle-Tested Templates** — Every generated agent includes reasoning protocols ("How You Think"), confidence signals, environment boundaries, memory read/write, handoff patterns, and self-verification. Patterns learned from running 200+ real agent sessions.
+- **Works Without AI Too** — No Claude CLI? The wizard falls back to a template picker where you select agents manually. The scaffolding still works.
+
+### 🔄 Automations & Reports
+
+- **Scheduled Scans** — Set up automations like "check for TypeScript errors every 2 hours" or "review security vulnerabilities daily." Agent Studio runs Claude in the background and produces a report.
+- **Approval Gates** — Nothing touches your code without your sign-off. Every automation produces a report with suggested actions. You approve, dismiss, or cherry-pick individual actions.
+- **Templates** — Start from built-in templates (Code Health, Security Scanner, PR Reviewer, Dependency Updater) or write your own prompt.
+- **Reports Dashboard** — A dedicated tab to view all reports, filter by status (pending / approved / dismissed), and take action.
+
+### 🧠 Memory & Knowledge
+
+- **Shared Memory** — Agents write learnings, corrections, and decisions to a shared knowledge base. When one agent discovers a pattern, every other agent knows it next session.
+- **Memory Browser** — Search and filter memories by title, content, tags, or category. Pin important memories so agents always load them first.
+- **Create & Edit** — Add memories from the dashboard. Tag them, categorize them, update them as your project evolves.
+
+### 🔀 Workflows
+
+- **Custom Workflows** — Build multi-step agent pipelines. Example: "Backend builds → Frontend wires → QA tests → Security reviews." Each step has an assigned agent and runs in sequence.
+- **Templates** — Start from built-in workflows (Sprint Planning, Code Review, Bug Fix, Feature Build) or create your own from scratch.
+- **Visual Timeline** — See each step's status, which agent is assigned, and what's completed — all in a timeline view.
+
+### 🛠️ Developer Tools
+
+- **Git Dashboard** — See status of all your repos at a glance. Branches, dirty state, ahead/behind counts. Stage, commit, push, and create PRs without leaving the app.
+- **Dev Server Management** — Start and stop your project's dev servers from the sidebar.
+- **System Monitor** — CPU, RAM, disk usage, active sessions, WebSocket connections — all in the Settings tab.
+- **Docker Support** — `docker compose up` mounts your Claude credentials and gets you running. Claude CLI pre-installed in the image.
 
 ## Why Not Just Terminal Tabs?
 
