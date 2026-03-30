@@ -33,6 +33,8 @@ import { scaffoldAgentSystem, previewScaffold } from "./scaffold.js";
 import type { ScaffoldOptions } from "./scaffold.js";
 import { AutomationEngine, AUTOMATION_TEMPLATES } from "./automations.js";
 import type { Automation } from "./automations.js";
+import { analyzeProject, generateAgents, writeAgentFiles, isClaudeCliAvailable } from "./agent-generator.js";
+import type { ProjectAnalysis } from "./agent-generator.js";
 
 const port = parseInt(process.env["PORT"] ?? "8080", 10);
 const dev = process.env["NODE_ENV"] !== "production";
@@ -487,6 +489,77 @@ async function main() {
         res.status(409).json({ error: "Agent system already exists at this path", result });
         return;
       }
+      res.status(201).json(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- Agent Generator API ---
+  app.get("/api/agents/cli-status", (_req, res) => {
+    try {
+      res.json({ available: isClaudeCliAvailable() });
+    } catch {
+      res.json({ available: false });
+    }
+  });
+
+  app.post("/api/agents/analyze", (req, res) => {
+    try {
+      const { projectPath } = req.body as { projectPath?: string };
+      if (!projectPath) {
+        res.status(400).json({ error: "Missing projectPath" });
+        return;
+      }
+      const { existsSync: fsExists } = require("node:fs") as typeof import("node:fs");
+      if (!fsExists(projectPath)) {
+        res.status(404).json({ error: "Project path does not exist" });
+        return;
+      }
+      const analysis = analyzeProject(projectPath);
+      res.json(analysis);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/agents/generate", async (req, res) => {
+    try {
+      const { analysis, projectPath } = req.body as {
+        analysis?: ProjectAnalysis;
+        projectPath?: string;
+      };
+      if (!analysis || !projectPath) {
+        res.status(400).json({ error: "Missing analysis or projectPath" });
+        return;
+      }
+      const agents = await generateAgents(analysis, projectPath);
+      res.json(agents);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/agents/apply", (req, res) => {
+    try {
+      const { agents, projectPath } = req.body as {
+        agents?: Array<{ id: string; name: string; description: string; model: string; mdContent: string }>;
+        projectPath?: string;
+      };
+      if (!agents || !projectPath || !Array.isArray(agents)) {
+        res.status(400).json({ error: "Missing agents array or projectPath" });
+        return;
+      }
+      const result = writeAgentFiles(
+        agents.map((a) => ({
+          ...a,
+          model: (a.model === "opus" || a.model === "sonnet" || a.model === "haiku") ? a.model : "sonnet" as const,
+        })),
+        projectPath,
+      );
       res.status(201).json(result);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
