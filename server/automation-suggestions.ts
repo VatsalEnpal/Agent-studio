@@ -1,6 +1,6 @@
 // ---------- Smart Automation Suggestions ----------
 //
-// Given a project analysis (from the agent generator's analyzer),
+// Given a project profile (from the project analyzer),
 // suggests which automations make sense for this specific project.
 
 import {
@@ -8,7 +8,7 @@ import {
   fillPromptTemplate,
   type AutomationTemplate,
 } from "./automation-templates.js";
-import type { ProjectAnalysis } from "./agent-generator.js";
+import type { ProjectProfile } from "./project-analyzer.js";
 
 // ---------- Types ----------
 
@@ -21,11 +21,11 @@ export interface AutomationSuggestion {
 
 // ---------- Language/framework normalization ----------
 
-/** Maps ProjectAnalysis values to template applicableTo tags */
-function normalizeStack(analysis: ProjectAnalysis): string[] {
+/** Maps project languages/frameworks to template applicableTo tags */
+function normalizeStack(profile: ProjectProfile): string[] {
   const tags = new Set<string>();
 
-  for (const lang of analysis.languages) {
+  for (const lang of profile.languages) {
     const lower = lang.toLowerCase();
     if (lower.includes("typescript") || lower.includes("javascript")) {
       tags.add("node");
@@ -37,7 +37,7 @@ function normalizeStack(analysis: ProjectAnalysis): string[] {
     if (lower.includes("ruby")) tags.add("ruby");
   }
 
-  for (const fw of analysis.frameworks) {
+  for (const fw of profile.frameworks) {
     const lower = fw.toLowerCase();
     if (lower.includes("next") || lower.includes("react") || lower.includes("express") || lower.includes("node")) {
       tags.add("node");
@@ -54,14 +54,14 @@ function normalizeStack(analysis: ProjectAnalysis): string[] {
 
 function getReasonForProject(
   template: AutomationTemplate,
-  analysis: ProjectAnalysis,
+  profile: ProjectProfile,
   stackTags: string[],
 ): string {
   switch (template.id) {
     case "code-health": {
       const checks: string[] = [];
       if (stackTags.includes("node")) checks.push("TypeScript type checking");
-      if (analysis.hasTests) checks.push("test runner detected");
+      if (profile.hasTests) checks.push("test runner detected");
       if (stackTags.includes("node")) checks.push("npm audit");
       if (stackTags.includes("python")) checks.push("pip-audit");
       return checks.length > 0
@@ -73,11 +73,11 @@ function getReasonForProject(
     case "security-scan":
       return "Recommended for all projects — finds vulnerabilities and leaked secrets";
     case "dependency-update": {
-      const mgr = analysis.packageManager || "detected package manager";
+      const mgr = profile.packageManager || "detected package manager";
       return `Uses ${mgr} — outdated dependencies are a common security risk`;
     }
     case "test-coverage":
-      return analysis.hasTests
+      return profile.hasTests
         ? "Tests detected — coverage analysis will find untested critical paths"
         : "No tests detected yet — coverage analyzer will identify where to start";
     case "documentation":
@@ -91,10 +91,10 @@ function getReasonForProject(
 
 function getFrameworkAdditions(
   templateId: string,
-  analysis: ProjectAnalysis,
+  profile: ProjectProfile,
 ): string {
   const additions: string[] = [];
-  const frameworks = analysis.frameworks.map((f) => f.toLowerCase());
+  const frameworks = profile.frameworks.map((f) => f.toLowerCase());
 
   if (templateId === "code-health") {
     if (frameworks.some((f) => f.includes("next"))) {
@@ -129,14 +129,14 @@ function getFrameworkAdditions(
 // ---------- Main suggestion function ----------
 
 /**
- * Suggest automations for a project based on its analysis.
+ * Suggest automations for a project based on its profile.
  * Returns suggestions sorted by priority (recommended first).
  */
 export function suggestAutomations(
-  analysis: ProjectAnalysis,
+  profile: ProjectProfile,
   projectPath: string,
 ): AutomationSuggestion[] {
-  const stackTags = normalizeStack(analysis);
+  const stackTags = normalizeStack(profile);
   const suggestions: AutomationSuggestion[] = [];
 
   for (const template of AUTOMATION_TEMPLATES) {
@@ -153,17 +153,17 @@ export function suggestAutomations(
     });
 
     // Add framework-specific instructions
-    prompt += getFrameworkAdditions(template.id, analysis);
+    prompt += getFrameworkAdditions(template.id, profile);
 
     // Determine priority
     const isRecommended =
       template.id === "code-health" ||
       template.id === "security-scan" ||
-      (template.id === "test-coverage" && analysis.hasTests);
+      (template.id === "test-coverage" && profile.hasTests);
 
     suggestions.push({
       template,
-      reason: getReasonForProject(template, analysis, stackTags),
+      reason: getReasonForProject(template, profile, stackTags),
       customizedPrompt: prompt,
       priority: isRecommended ? "recommended" : "optional",
     });

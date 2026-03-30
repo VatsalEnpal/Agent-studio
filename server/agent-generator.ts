@@ -2,27 +2,20 @@ import { spawn, execSync } from "node:child_process";
 import {
   readFileSync,
   readdirSync,
-  statSync,
   existsSync,
   mkdirSync,
   writeFileSync,
 } from "node:fs";
-import { join, basename, extname } from "node:path";
+import { join, basename } from "node:path";
+import type { ProjectProfile } from "./project-analyzer.js";
+
+// Re-export ProjectProfile so existing imports still work
+export type { ProjectProfile };
+
+// ---------- Legacy type alias for backward compatibility ----------
+export type ProjectAnalysis = ProjectProfile;
 
 // ---------- Types ----------
-
-export interface ProjectAnalysis {
-  name: string;
-  languages: string[];
-  frameworks: string[];
-  hasTests: boolean;
-  hasCi: boolean;
-  hasDocker: boolean;
-  packageManager: string;
-  structure: string;
-  readme: string;
-  description: string;
-}
 
 export interface GeneratedAgent {
   id: string;
@@ -30,279 +23,51 @@ export interface GeneratedAgent {
   description: string;
   model: "opus" | "sonnet" | "haiku";
   mdContent: string;
+  rulesFiles?: Array<{
+    filename: string;
+    content: string;
+  }>;
 }
 
-// ---------- File extension to language mapping ----------
+export interface GenerationResult {
+  agents: GeneratedAgent[];
+  claudeMd?: string;
+}
 
-const EXT_LANG_MAP: Record<string, string> = {
-  ".ts": "TypeScript",
-  ".tsx": "TypeScript",
-  ".js": "JavaScript",
-  ".jsx": "JavaScript",
-  ".py": "Python",
-  ".go": "Go",
-  ".rs": "Rust",
-  ".java": "Java",
-  ".kt": "Kotlin",
-  ".swift": "Swift",
-  ".rb": "Ruby",
-  ".php": "PHP",
-  ".cs": "C#",
-  ".cpp": "C++",
-  ".c": "C",
-  ".dart": "Dart",
-  ".ex": "Elixir",
-  ".exs": "Elixir",
-  ".scala": "Scala",
-  ".sql": "SQL",
-  ".sh": "Shell",
-};
-
-const SKIP_DIRS = new Set([
-  "node_modules",
-  ".git",
-  ".next",
-  "__pycache__",
-  ".venv",
-  "venv",
-  "env",
-  "dist",
-  "build",
-  "target",
-  ".turbo",
-  ".cache",
-  "coverage",
-  ".idea",
-  ".vscode",
-]);
-
-// ---------- Step 1: Analyze Project ----------
-
-export function analyzeProject(projectPath: string): ProjectAnalysis {
-  const name = basename(projectPath);
-  const languages = new Set<string>();
-  const frameworks: string[] = [];
-  let hasTests = false;
-  let hasCi = false;
-  let hasDocker = false;
-  let packageManager = "unknown";
-  let readme = "";
-  let description = "";
-
-  // Detect package manager and frameworks from config files
-  if (existsSync(join(projectPath, "package.json"))) {
-    packageManager = existsSync(join(projectPath, "yarn.lock"))
-      ? "yarn"
-      : existsSync(join(projectPath, "pnpm-lock.yaml"))
-        ? "pnpm"
-        : existsSync(join(projectPath, "bun.lockb"))
-          ? "bun"
-          : "npm";
-
-    try {
-      const pkg = JSON.parse(
-        readFileSync(join(projectPath, "package.json"), "utf-8"),
-      );
-      const allDeps = {
-        ...((pkg.dependencies as Record<string, string>) ?? {}),
-        ...((pkg.devDependencies as Record<string, string>) ?? {}),
-      };
-      if (allDeps["next"]) frameworks.push("Next.js");
-      if (allDeps["react"]) frameworks.push("React");
-      if (allDeps["vue"]) frameworks.push("Vue");
-      if (allDeps["svelte"] || allDeps["@sveltejs/kit"]) frameworks.push("Svelte");
-      if (allDeps["angular"] || allDeps["@angular/core"]) frameworks.push("Angular");
-      if (allDeps["express"]) frameworks.push("Express");
-      if (allDeps["fastify"]) frameworks.push("Fastify");
-      if (allDeps["nest"] || allDeps["@nestjs/core"]) frameworks.push("NestJS");
-      if (allDeps["tailwindcss"]) frameworks.push("Tailwind CSS");
-      if (allDeps["prisma"] || allDeps["@prisma/client"]) frameworks.push("Prisma");
-      if (allDeps["drizzle-orm"]) frameworks.push("Drizzle");
-      if (allDeps["supabase"] || allDeps["@supabase/supabase-js"]) frameworks.push("Supabase");
-      if (allDeps["react-native"]) frameworks.push("React Native");
-      if (allDeps["expo"]) frameworks.push("Expo");
-      if (allDeps["electron"]) frameworks.push("Electron");
-      if (allDeps["vitest"]) { frameworks.push("Vitest"); hasTests = true; }
-      if (allDeps["jest"]) { frameworks.push("Jest"); hasTests = true; }
-      if (allDeps["@playwright/test"]) { frameworks.push("Playwright"); hasTests = true; }
-      if (allDeps["cypress"]) { frameworks.push("Cypress"); hasTests = true; }
-      if (allDeps["mocha"]) { hasTests = true; }
-
-      if (pkg.description) description = String(pkg.description);
-    } catch {
-      // Ignore parse errors
-    }
-  }
-
-  if (existsSync(join(projectPath, "requirements.txt")) || existsSync(join(projectPath, "pyproject.toml"))) {
-    packageManager = packageManager === "unknown" ? "pip" : packageManager;
-    try {
-      const pyproject = existsSync(join(projectPath, "pyproject.toml"))
-        ? readFileSync(join(projectPath, "pyproject.toml"), "utf-8")
-        : "";
-      if (pyproject.includes("django")) frameworks.push("Django");
-      if (pyproject.includes("fastapi")) frameworks.push("FastAPI");
-      if (pyproject.includes("flask")) frameworks.push("Flask");
-      if (pyproject.includes("pytest")) hasTests = true;
-    } catch {
-      // Ignore
-    }
-  }
-
-  if (existsSync(join(projectPath, "go.mod"))) {
-    packageManager = packageManager === "unknown" ? "go modules" : packageManager;
-    try {
-      const gomod = readFileSync(join(projectPath, "go.mod"), "utf-8");
-      if (gomod.includes("gin-gonic")) frameworks.push("Gin");
-      if (gomod.includes("fiber")) frameworks.push("Fiber");
-      if (gomod.includes("echo")) frameworks.push("Echo");
-    } catch {
-      // Ignore
-    }
-  }
-
-  if (existsSync(join(projectPath, "Cargo.toml"))) {
-    packageManager = packageManager === "unknown" ? "cargo" : packageManager;
-    try {
-      const cargo = readFileSync(join(projectPath, "Cargo.toml"), "utf-8");
-      if (cargo.includes("actix")) frameworks.push("Actix");
-      if (cargo.includes("axum")) frameworks.push("Axum");
-      if (cargo.includes("rocket")) frameworks.push("Rocket");
-    } catch {
-      // Ignore
-    }
-  }
-
-  // Detect CI
-  hasCi =
-    existsSync(join(projectPath, ".github", "workflows")) ||
-    existsSync(join(projectPath, ".gitlab-ci.yml")) ||
-    existsSync(join(projectPath, "azure-pipelines.yml")) ||
-    existsSync(join(projectPath, ".circleci")) ||
-    existsSync(join(projectPath, "Jenkinsfile"));
-
-  // Detect Docker
-  hasDocker =
-    existsSync(join(projectPath, "Dockerfile")) ||
-    existsSync(join(projectPath, "docker-compose.yml")) ||
-    existsSync(join(projectPath, "docker-compose.yaml"));
-
-  // Detect test directories
-  if (!hasTests) {
-    hasTests =
-      existsSync(join(projectPath, "tests")) ||
-      existsSync(join(projectPath, "test")) ||
-      existsSync(join(projectPath, "__tests__")) ||
-      existsSync(join(projectPath, "spec"));
-  }
-
-  // Scan for languages and build tree (top 3 levels)
-  const structure = buildTree(projectPath, 3);
-  scanLanguages(projectPath, languages, 3);
-
-  // Read README
-  const readmeFiles = ["README.md", "readme.md", "README.rst", "README.txt", "README"];
-  for (const rf of readmeFiles) {
-    const rp = join(projectPath, rf);
-    if (existsSync(rp)) {
-      try {
-        readme = readFileSync(rp, "utf-8").slice(0, 1000);
-      } catch {
-        // Ignore
-      }
-      break;
-    }
-  }
-
-  return {
-    name,
-    languages: [...languages],
-    frameworks: [...new Set(frameworks)],
-    hasTests,
-    hasCi,
-    hasDocker,
-    packageManager,
-    structure,
-    readme,
-    description,
+export interface AgentGenerationRequest {
+  projectProfile: ProjectProfile;
+  userDescription: string;
+  teamSize?: number;
+  preferences?: {
+    workflowType?: string;
+    automations?: string[];
   };
 }
 
-function scanLanguages(dir: string, languages: Set<string>, maxDepth: number, depth = 0): void {
-  if (depth >= maxDepth) return;
-  try {
-    const entries = readdirSync(dir);
-    for (const entry of entries) {
-      if (SKIP_DIRS.has(entry) || entry.startsWith(".")) continue;
-      const fullPath = join(dir, entry);
-      try {
-        const stat = statSync(fullPath);
-        if (stat.isDirectory()) {
-          scanLanguages(fullPath, languages, maxDepth, depth + 1);
-        } else {
-          const ext = extname(entry).toLowerCase();
-          const lang = EXT_LANG_MAP[ext];
-          if (lang) languages.add(lang);
-        }
-      } catch {
-        // Skip inaccessible files
-      }
-    }
-  } catch {
-    // Skip inaccessible directories
-  }
+// ---------- Status tracking ----------
+
+type GenerationStatus = "idle" | "analyzing" | "generating" | "done" | "error";
+
+interface GenerationState {
+  status: GenerationStatus;
+  progress?: string;
+  result?: GenerationResult;
+  error?: string;
+  startedAt?: number;
 }
 
-function buildTree(dir: string, maxDepth: number, prefix = "", depth = 0): string {
-  if (depth >= maxDepth) return "";
-  const lines: string[] = [];
-  try {
-    const entries = readdirSync(dir)
-      .filter((e) => !SKIP_DIRS.has(e) && !e.startsWith("."))
-      .sort((a, b) => {
-        // Directories first
-        const aIsDir = statSync(join(dir, a)).isDirectory();
-        const bIsDir = statSync(join(dir, b)).isDirectory();
-        if (aIsDir && !bIsDir) return -1;
-        if (!aIsDir && bIsDir) return 1;
-        return a.localeCompare(b);
-      });
+const generationState: GenerationState = { status: "idle" };
 
-    // Cap at 15 entries per level to avoid huge output
-    const capped = entries.slice(0, 15);
-    const hasMore = entries.length > 15;
-
-    for (let i = 0; i < capped.length; i++) {
-      const entry = capped[i];
-      const fullPath = join(dir, entry);
-      const isLast = i === capped.length - 1 && !hasMore;
-      const connector = isLast ? "└── " : "├── ";
-      const childPrefix = isLast ? "    " : "│   ";
-
-      try {
-        const stat = statSync(fullPath);
-        if (stat.isDirectory()) {
-          lines.push(`${prefix}${connector}${entry}/`);
-          const sub = buildTree(fullPath, maxDepth, prefix + childPrefix, depth + 1);
-          if (sub) lines.push(sub);
-        } else {
-          lines.push(`${prefix}${connector}${entry}`);
-        }
-      } catch {
-        lines.push(`${prefix}${connector}${entry}`);
-      }
-    }
-
-    if (hasMore) {
-      lines.push(`${prefix}└── ... (${entries.length - 15} more)`);
-    }
-  } catch {
-    // Skip unreadable
-  }
-  return lines.join("\n");
+export function getGenerationStatus(): GenerationState {
+  return { ...generationState };
 }
 
-// ---------- Step 2: Check Claude CLI availability ----------
+function setStatus(status: GenerationStatus, extra?: Partial<GenerationState>) {
+  generationState.status = status;
+  if (extra) Object.assign(generationState, extra);
+}
+
+// ---------- Claude CLI check ----------
 
 export function isClaudeCliAvailable(): boolean {
   try {
@@ -313,72 +78,222 @@ export function isClaudeCliAvailable(): boolean {
   }
 }
 
-// ---------- Step 3: Generate agents using Claude CLI ----------
+// ---------- Prompt builder ----------
 
-const GENERATION_PROMPT = `You are generating agent definitions for a software project. Each agent is a .md file that tells Claude Code how to behave as a specialist.
+export function buildAgentGenerationPrompt(request: AgentGenerationRequest): string {
+  const { projectProfile, userDescription, teamSize } = request;
 
-PROJECT ANALYSIS:
-{ANALYSIS}
+  const profileSummary = [
+    `Project: ${projectProfile.name}`,
+    `Languages: ${projectProfile.languages.join(", ") || "unknown"}`,
+    `Frameworks: ${projectProfile.frameworks.join(", ") || "none detected"}`,
+    `Package Manager: ${projectProfile.packageManager}`,
+    projectProfile.database ? `Database: ${projectProfile.database}` : null,
+    projectProfile.stateManagement ? `State Management: ${projectProfile.stateManagement}` : null,
+    projectProfile.styling ? `Styling: ${projectProfile.styling}` : null,
+    projectProfile.apiPattern ? `API Pattern: ${projectProfile.apiPattern}` : null,
+    projectProfile.testFramework ? `Testing: ${projectProfile.testFramework}` : null,
+    projectProfile.ciPlatform ? `CI/CD: ${projectProfile.ciPlatform}` : null,
+    projectProfile.hasDocker ? "Has Docker: yes" : null,
+    projectProfile.repoInfo?.platform ? `Hosting: ${projectProfile.repoInfo.platform}` : null,
+    `Top-level dirs: ${projectProfile.projectStructure.join(", ") || "flat"}`,
+    `Key config files: ${projectProfile.keyFiles.join(", ") || "none"}`,
+    projectProfile.existingAgents.length > 0
+      ? `Existing agents: ${projectProfile.existingAgents.join(", ")}`
+      : null,
+  ].filter(Boolean).join("\n");
 
-AGENT .MD FILE FORMAT:
+  const readmeSection = projectProfile.readme
+    ? `\nREADME (first 2000 chars):\n${projectProfile.readme}`
+    : "";
 
-Every agent .md file MUST include:
-1. YAML frontmatter with: name, description, tools list
-2. A "How You Think" section with numbered reasoning steps specific to this agent's role
-3. Confidence Signals: "I am certain" / "I believe" / "I need to check"
-4. Environment Rules: what the agent CAN and CANNOT access
-5. "First — Read Context" section: which files to load before working
-6. Memory Protocol: read memory index before work, write memory after
-7. Handoff Protocol: write structured handoff files for next agent
-8. Self-Verification: verify own work before reporting done
-9. "NEVER run git push — commit locally, orchestrator handles pushing"
+  return `You are generating a custom AI agent system for a real software project. Each agent is a .md file that tells Claude Code how to behave as a specialist.
 
-Based on the project analysis, generate the appropriate agents. Common agents:
-- orchestrator (ALWAYS include — coordinates the team, never writes code itself)
-- frontend (if project has frontend code — builds UI)
-- backend (if project has backend/API code — builds APIs and data layer)
-- qa (ALWAYS include — tests the application)
-- security (ALWAYS include — reviews code for vulnerabilities)
-- devops (if project has CI/CD, Docker, Terraform — manages infrastructure)
-- data (if project has data pipelines, ML, analytics)
-- mobile (if React Native, Flutter, Swift, Kotlin)
-- documentation (if documentation is important for the project)
+CRITICAL: Generate agents that are SPECIFIC to THIS project. Do NOT use generic names like "frontend" or "backend" unless the project actually has those domains. The agent names, responsibilities, and domain knowledge must reflect what this project actually needs.
 
-IMPORTANT RULES:
-- Generate ONLY agents that make sense for this specific project
-- The mdContent must reference the actual tech stack detected (frameworks, languages, tools)
-- The orchestrator agent must list the other agents it coordinates
-- Each agent should have rules specific to the detected frameworks
-- Keep each agent's mdContent under 150 lines
-- Use the project name and detected tools in the rules
+Examples of project-specific agents:
+- Data engineering team: orchestrator, pipeline-builder, dbt-modeler, data-quality-checker
+- Mobile app: orchestrator, ios-dev, android-dev, api-builder, app-tester
+- Go microservices: orchestrator, service-builder, grpc-designer, k8s-deployer, load-tester
+- Solo dev: assistant, reviewer
+- ML project: orchestrator, model-trainer, data-engineer, evaluation-runner, api-deployer
+- Game dev: orchestrator, game-logic, rendering-engineer, level-designer, playtester
 
-Output ONLY a valid JSON array (no markdown fences, no explanation). Each element:
+## Project Profile
+${profileSummary}
+${readmeSection}
+
+## User's Description
+${userDescription || "(no description provided)"}
+
+## Team Size
+${teamSize ? `${teamSize} developer(s)` : "unknown"}
+
+## Agent .md File Format (MANDATORY)
+
+Every agent MUST have this structure:
+
+\`\`\`markdown
+---
+name: agent-id
+description: One paragraph describing when to use this agent and what it does
+tools:
+  - Bash
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - SendMessage
+---
+
+# Agent Name -- Domain Description
+
+You are the [role] for [project name]. You [core responsibility].
+
+## ABSOLUTE RULES
+1. NEVER run git push -- commit locally, the orchestrator handles pushing
+2. [Safety boundary specific to this agent's domain]
+3. [What to do when uncertain -- ask or stop]
+
+## ENVIRONMENT
+- Project path and relevant directories
+- Tools and services this agent can access
+- What it CANNOT access (explicit boundaries)
+
+## HOW YOU THINK -- Reasoning Protocol
+When you receive a task:
+1. Scope check -- is this my responsibility?
+2. Existing code check -- read before modifying
+3. Spec/pattern check -- follow established conventions
+4. Implement -- use the project's actual patterns
+5. Self-verify -- does it compile? does it match conventions?
+
+### Confidence Signals
+- "I am certain" = verified in codebase
+- "I believe" = reasonable but should verify
+- "I need to check" = will read files first
+
+## DOMAIN KNOWLEDGE
+[Specific knowledge about the tech stack, libraries, conventions for THIS project]
+[Reference the actual frameworks, versions, and patterns detected]
+
+## PATTERNS TO FOLLOW
+[Code style, file naming, architecture patterns from THIS project]
+
+## MEMORY PROTOCOL
+Read \`ai-agents/tools/memory_index.json\` before any task.
+After significant work, write a memory file to \`ai-agents/memory/\`.
+
+## HANDOFF PROTOCOL
+Write structured handoff files to \`ai-agents/sprints/handoffs/\` when your work is done and another agent needs the output.
+
+## WHAT TO DO WHEN STUCK
+1. Check memory index for similar past issues
+2. Message a teammate via SendMessage
+3. If blocked after 2 attempts, message the orchestrator
+\`\`\`
+
+## Generation Rules
+
+1. Generate ONLY agents that make sense for THIS specific project
+2. Every agent's mdContent MUST reference the actual tech stack (${projectProfile.frameworks.join(", ") || "the detected stack"})
+3. The orchestrator (or coordinator) agent MUST list the other agents it coordinates
+4. ${teamSize && teamSize <= 2 ? "For small teams, generate fewer agents (2-4 total). A solo dev might just need 'assistant' + 'reviewer'" : "Generate enough agents to cover the project's domains (typically 3-6)"}
+5. Keep each agent's mdContent between 80-150 lines
+6. Agent ids must be lowercase with hyphens (e.g., "api-builder", "data-modeler")
+7. Include domain-specific knowledge: if the project uses Next.js, the relevant agent should know App Router patterns. If it uses FastAPI, the agent should know Pydantic models.
+8. Each agent should have at least one rulesFile with deep domain knowledge
+
+## Output Format
+
+Return ONLY a valid JSON object (no markdown fences, no explanation before or after).
+
 {
-  "id": "agent-id",
-  "name": "Human Readable Name",
-  "description": "one line description",
-  "model": "sonnet",
-  "mdContent": "the full .md file content including YAML frontmatter"
-}`;
+  "agents": [
+    {
+      "id": "agent-id",
+      "name": "Human Readable Name",
+      "description": "One line -- when to use this agent",
+      "model": "sonnet",
+      "mdContent": "the full .md file content including YAML frontmatter",
+      "rulesFiles": [
+        {
+          "filename": "tech_stack.md",
+          "content": "# Tech Stack\\n\\nDetailed knowledge about..."
+        }
+      ]
+    }
+  ],
+  "claudeMd": "# Project Name -- Claude Code Instructions\\n\\n## Project Overview\\n...\\n## Code Style\\n...\\n## Agent System\\n..."
+}
+
+The claudeMd should be a CLAUDE.md file for the project root containing:
+- Project overview (from the analysis + user description)
+- Core architecture rules (inferred from the stack)
+- Code style conventions (language-appropriate)
+- Key directories
+- Agent system description (listing the generated agents)
+- Memory protocol (read/write to ai-agents/memory/)
+- Git commit format convention`;
+}
+
+// ---------- Generate agents ----------
 
 export async function generateAgents(
-  analysis: ProjectAnalysis,
+  analysis: ProjectProfile,
   _projectPath: string,
+  userDescription?: string,
+  teamSize?: number,
 ): Promise<GeneratedAgent[]> {
+  const result = await generateAgentsWithClaudeMd(analysis, _projectPath, userDescription, teamSize);
+  return result.agents;
+}
+
+export async function generateAgentsWithClaudeMd(
+  analysis: ProjectProfile,
+  _projectPath: string,
+  userDescription?: string,
+  teamSize?: number,
+): Promise<GenerationResult> {
   if (!isClaudeCliAvailable()) {
     throw new Error("Claude CLI not found. Install Claude Code to use AI agent generation.");
   }
 
-  const prompt = GENERATION_PROMPT.replace(
-    "{ANALYSIS}",
-    JSON.stringify(analysis, null, 2),
-  );
+  setStatus("generating", { startedAt: Date.now(), progress: "Building prompt..." });
 
+  const prompt = buildAgentGenerationPrompt({
+    projectProfile: analysis,
+    userDescription: userDescription ?? "",
+    teamSize,
+  });
+
+  setStatus("generating", { progress: "Calling Claude..." });
+
+  const output = await runClaudeHeadless(prompt);
+  const result = parseGenerationOutput(output);
+
+  setStatus("done", { result });
+  return result;
+}
+
+// ---------- Preview (no file writes) ----------
+
+export async function previewAgents(
+  analysis: ProjectProfile,
+  userDescription?: string,
+  teamSize?: number,
+): Promise<GenerationResult> {
+  return generateAgentsWithClaudeMd(analysis, "", userDescription, teamSize);
+}
+
+// ---------- Claude CLI runner ----------
+
+function runClaudeHeadless(prompt: string, model = "sonnet", timeoutMs = 120_000): Promise<string> {
   return new Promise((resolve, reject) => {
-    const args = ["--model", "sonnet", "--print", prompt];
+    const args = ["--model", model, "--print", prompt];
     const proc = spawn("claude", args, {
       stdio: ["ignore", "pipe", "pipe"],
-      timeout: 90_000,
       env: { ...process.env },
     });
 
@@ -395,81 +310,104 @@ export async function generateAgents(
 
     const timer = setTimeout(() => {
       proc.kill("SIGTERM");
-      reject(new Error("Claude CLI timed out after 90 seconds"));
-    }, 90_000);
+      setStatus("error", { error: "Claude CLI timed out" });
+      reject(new Error(`Claude CLI timed out after ${timeoutMs / 1000} seconds`));
+    }, timeoutMs);
 
     proc.on("close", (code) => {
       clearTimeout(timer);
       if (code !== 0 && !stdout.trim()) {
+        setStatus("error", { error: `Claude exited with code ${code}` });
         reject(new Error(`Claude CLI exited with code ${code}: ${stderr.slice(0, 500)}`));
         return;
       }
-
-      try {
-        const agents = parseAgentJson(stdout);
-        resolve(agents);
-      } catch (err) {
-        reject(
-          new Error(
-            `Failed to parse Claude output: ${err instanceof Error ? err.message : "unknown"}`,
-          ),
-        );
-      }
+      resolve(stdout);
     });
 
     proc.on("error", (err) => {
       clearTimeout(timer);
+      setStatus("error", { error: err.message });
       reject(new Error(`Failed to spawn Claude CLI: ${err.message}`));
     });
   });
 }
 
-function parseAgentJson(raw: string): GeneratedAgent[] {
-  // Claude might wrap JSON in markdown fences — strip them
+// ---------- Output parsing ----------
+
+function parseGenerationOutput(raw: string): GenerationResult {
   let cleaned = raw.trim();
-  if (cleaned.startsWith("```json")) {
-    cleaned = cleaned.slice(7);
-  } else if (cleaned.startsWith("```")) {
-    cleaned = cleaned.slice(3);
-  }
-  if (cleaned.endsWith("```")) {
-    cleaned = cleaned.slice(0, -3);
-  }
+
+  // Strip markdown fences
+  if (cleaned.startsWith("```json")) cleaned = cleaned.slice(7);
+  else if (cleaned.startsWith("```")) cleaned = cleaned.slice(3);
+  if (cleaned.endsWith("```")) cleaned = cleaned.slice(0, -3);
   cleaned = cleaned.trim();
 
-  // Try to find the JSON array in the output
-  const arrayStart = cleaned.indexOf("[");
+  // Try to find a JSON object (new format with claudeMd)
+  const objStart = cleaned.indexOf("{");
+  const objEnd = cleaned.lastIndexOf("}");
+  const arrStart = cleaned.indexOf("[");
+
+  // If the output is an object (new format), parse it
+  if (objStart !== -1 && objEnd > objStart && (arrStart === -1 || objStart < arrStart)) {
+    try {
+      const parsed = JSON.parse(cleaned.slice(objStart, objEnd + 1)) as Record<string, unknown>;
+      if (parsed.agents && Array.isArray(parsed.agents)) {
+        return {
+          agents: parseAgentArray(parsed.agents as unknown[]),
+          claudeMd: typeof parsed.claudeMd === "string" ? parsed.claudeMd : undefined,
+        };
+      }
+    } catch {
+      // Fall through to array parsing
+    }
+  }
+
+  // Fallback: try to find a JSON array (old format)
   const arrayEnd = cleaned.lastIndexOf("]");
-  if (arrayStart !== -1 && arrayEnd > arrayStart) {
-    cleaned = cleaned.slice(arrayStart, arrayEnd + 1);
+  if (arrStart !== -1 && arrayEnd > arrStart) {
+    cleaned = cleaned.slice(arrStart, arrayEnd + 1);
   }
 
   const parsed = JSON.parse(cleaned) as unknown[];
   if (!Array.isArray(parsed)) {
-    throw new Error("Expected JSON array");
+    throw new Error("Expected JSON array or object with agents array");
   }
 
-  return parsed.map((item) => {
+  return { agents: parseAgentArray(parsed) };
+}
+
+function parseAgentArray(arr: unknown[]): GeneratedAgent[] {
+  return arr.map((item) => {
     const obj = item as Record<string, unknown>;
     if (!obj.id || !obj.mdContent) {
       throw new Error("Agent missing required fields: id, mdContent");
     }
     const model = obj.model as string;
+    const rulesFiles = Array.isArray(obj.rulesFiles)
+      ? (obj.rulesFiles as Array<Record<string, unknown>>).map((rf) => ({
+          filename: String(rf.filename ?? "rules.md"),
+          content: String(rf.content ?? ""),
+        }))
+      : undefined;
+
     return {
       id: String(obj.id),
       name: String(obj.name ?? obj.id),
       description: String(obj.description ?? ""),
       model: (model === "opus" || model === "sonnet" || model === "haiku") ? model : "sonnet",
       mdContent: String(obj.mdContent),
+      rulesFiles,
     };
   });
 }
 
-// ---------- Step 4: Write agent files to disk ----------
+// ---------- Write agent files to disk ----------
 
 export function writeAgentFiles(
   agents: GeneratedAgent[],
   projectPath: string,
+  claudeMd?: string,
 ): { created: string[] } {
   const aiAgentsPath = join(projectPath, "ai-agents", "agents");
   const claudeAgentsPath = join(projectPath, ".claude", "agents");
@@ -493,11 +431,63 @@ export function writeAgentFiles(
     writeFileSync(agentMdPath, agent.mdContent, "utf-8");
     created.push(`ai-agents/agents/${agent.id}/agent.md`);
 
+    // Write rules files if present
+    if (agent.rulesFiles && agent.rulesFiles.length > 0) {
+      const rulesDir = join(agentDir, "rules");
+      if (!existsSync(rulesDir)) {
+        mkdirSync(rulesDir, { recursive: true });
+      }
+      for (const rf of agent.rulesFiles) {
+        const rfPath = join(rulesDir, rf.filename);
+        writeFileSync(rfPath, rf.content, "utf-8");
+        created.push(`ai-agents/agents/${agent.id}/rules/${rf.filename}`);
+      }
+    }
+
     // Write a short .claude/agents/<id>.md that references the full one
     const claudeMdContent = generateClaudeAgentStub(agent);
-    const claudeMdPath = join(claudeAgentsPath, `${agent.id}.md`);
-    writeFileSync(claudeMdPath, claudeMdContent, "utf-8");
+    const claudeMdFilePath = join(claudeAgentsPath, `${agent.id}.md`);
+    writeFileSync(claudeMdFilePath, claudeMdContent, "utf-8");
     created.push(`.claude/agents/${agent.id}.md`);
+  }
+
+  // Write CLAUDE.md if provided
+  if (claudeMd) {
+    const claudeMdPath = join(projectPath, "CLAUDE.md");
+    writeFileSync(claudeMdPath, claudeMd, "utf-8");
+    created.push("CLAUDE.md");
+  }
+
+  // Write memory index scaffold
+  const memoryIndexPath = join(projectPath, "ai-agents", "tools", "memory_index.json");
+  if (!existsSync(memoryIndexPath)) {
+    const toolsDir = join(projectPath, "ai-agents", "tools");
+    if (!existsSync(toolsDir)) {
+      mkdirSync(toolsDir, { recursive: true });
+    }
+    writeFileSync(memoryIndexPath, JSON.stringify({
+      rebuilt_at: new Date().toISOString(),
+      entries: [],
+    }, null, 2), "utf-8");
+    created.push("ai-agents/tools/memory_index.json");
+  }
+
+  // Ensure memory directories exist
+  const memoryDirs = ["learnings", "corrections", "decisions", "human-inputs", "knowledge"];
+  for (const dir of memoryDirs) {
+    const dirPath = join(projectPath, "ai-agents", "memory", dir);
+    if (!existsSync(dirPath)) {
+      mkdirSync(dirPath, { recursive: true });
+      // Write a .gitkeep to preserve empty dir
+      writeFileSync(join(dirPath, ".gitkeep"), "", "utf-8");
+    }
+  }
+
+  // Ensure handoffs directory exists
+  const handoffsDir = join(projectPath, "ai-agents", "sprints", "handoffs");
+  if (!existsSync(handoffsDir)) {
+    mkdirSync(handoffsDir, { recursive: true });
+    writeFileSync(join(handoffsDir, ".gitkeep"), "", "utf-8");
   }
 
   return { created };
@@ -505,7 +495,7 @@ export function writeAgentFiles(
 
 function generateClaudeAgentStub(agent: GeneratedAgent): string {
   // Extract tools from mdContent frontmatter if present
-  let tools = "  - Bash\n  - Read\n  - Write\n  - Edit\n  - Glob\n  - Grep";
+  let tools = "  - Bash\n  - Read\n  - Write\n  - Edit\n  - Glob\n  - Grep\n  - SendMessage";
   const fmMatch = agent.mdContent.match(/^---\n([\s\S]*?)\n---/);
   if (fmMatch) {
     const toolsMatch = fmMatch[1].match(/tools:\n((?:\s+-\s+.+\n?)+)/);
@@ -527,5 +517,9 @@ You are the ${agent.id} agent. Load your full context from \`ai-agents/agents/${
 
 ## Memory
 Read \`ai-agents/tools/memory_index.json\` before any task.
+After significant work, write a memory file to \`ai-agents/memory/\`.
+
+## Communication
+Use SendMessage to communicate with teammates. Check \`ai-agents/sprints/handoffs/\` for context from other agents.
 `;
 }
