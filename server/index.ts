@@ -31,6 +31,8 @@ import { WorkflowManager } from "./workflows/index.js";
 import { getConfig, loadConfig, saveConfig, generateDefaultConfig, reloadConfig, getAgentSystemPath, getMainProjectDir, resolvePath, type AgentConfig } from "./config.js";
 import { scaffoldAgentSystem, previewScaffold } from "./scaffold.js";
 import type { ScaffoldOptions } from "./scaffold.js";
+import { AutomationEngine, AUTOMATION_TEMPLATES } from "./automations.js";
+import type { Automation } from "./automations.js";
 
 const port = parseInt(process.env["PORT"] ?? "8080", 10);
 const dev = process.env["NODE_ENV"] !== "production";
@@ -236,6 +238,183 @@ async function main() {
       }
 
       res.json(agents);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- Automation Engine ---
+  const automationEngine = new AutomationEngine(getMainProjectDir());
+
+  // Load automations from config
+  const initialConfig = getConfig();
+  if (initialConfig.automations && Array.isArray(initialConfig.automations)) {
+    automationEngine.loadAutomations(initialConfig.automations as Automation[]);
+  }
+
+  // Forward automation events to WebSocket clients
+  automationEngine.onEvent((event) => {
+    const msg: WsMessage = {
+      type: event.type as WsMessage["type"],
+      payload: event.payload,
+    };
+    for (const client of wss.clients) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(msg));
+      }
+    }
+  });
+
+  // --- Automations API ---
+  app.get("/api/automations", (_req, res) => {
+    try {
+      const automations = automationEngine.getAutomations();
+      res.json(automations);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/automations", (req, res) => {
+    try {
+      const body = req.body as Omit<Automation, "id">;
+      if (!body.name || !body.prompt) {
+        res.status(400).json({ error: "Missing required fields: name, prompt" });
+        return;
+      }
+      const auto = automationEngine.addAutomation(body);
+      // Persist to config
+      const cfg = getConfig();
+      cfg.automations = automationEngine.toConfig();
+      saveConfig(cfg);
+      reloadConfig();
+      res.status(201).json(auto);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.put("/api/automations/:id", (req, res) => {
+    try {
+      const updated = automationEngine.updateAutomation(req.params["id"], req.body as Partial<Automation>);
+      if (!updated) {
+        res.status(404).json({ error: "Automation not found" });
+        return;
+      }
+      // Persist to config
+      const cfg = getConfig();
+      cfg.automations = automationEngine.toConfig();
+      saveConfig(cfg);
+      reloadConfig();
+      res.json(updated);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.delete("/api/automations/:id", (req, res) => {
+    try {
+      const removed = automationEngine.removeAutomation(req.params["id"]);
+      if (!removed) {
+        res.status(404).json({ error: "Automation not found" });
+        return;
+      }
+      // Persist to config
+      const cfg = getConfig();
+      cfg.automations = automationEngine.toConfig();
+      saveConfig(cfg);
+      reloadConfig();
+      res.status(204).end();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/automations/:id/run", async (req, res) => {
+    try {
+      const report = await automationEngine.runAutomation(req.params["id"]);
+      if (!report) {
+        res.status(404).json({ error: "Automation not found" });
+        return;
+      }
+      res.json(report);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- Automation Templates API ---
+  app.get("/api/automation-templates", (_req, res) => {
+    res.json(AUTOMATION_TEMPLATES);
+  });
+
+  // --- Reports API ---
+  app.get("/api/reports", (_req, res) => {
+    try {
+      const reports = automationEngine.getReports();
+      res.json(reports);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.get("/api/reports/:id", (req, res) => {
+    try {
+      const report = automationEngine.getReport(req.params["id"]);
+      if (!report) {
+        res.status(404).json({ error: "Report not found" });
+        return;
+      }
+      res.json(report);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/reports/:id/approve", (req, res) => {
+    try {
+      const report = automationEngine.approveReport(req.params["id"]);
+      if (!report) {
+        res.status(404).json({ error: "Report not found" });
+        return;
+      }
+      res.json(report);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/reports/:id/dismiss", (req, res) => {
+    try {
+      const report = automationEngine.dismissReport(req.params["id"]);
+      if (!report) {
+        res.status(404).json({ error: "Report not found" });
+        return;
+      }
+      res.json(report);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/reports/:id/actions/:actionId/approve", (req, res) => {
+    try {
+      const report = automationEngine.approveAction(req.params["id"], req.params["actionId"]);
+      if (!report) {
+        res.status(404).json({ error: "Report or action not found" });
+        return;
+      }
+      res.json(report);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });

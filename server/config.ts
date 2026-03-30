@@ -55,6 +55,19 @@ export interface AgentConfig {
   icon?: string;
 }
 
+export interface AutomationConfig {
+  id: string;
+  name: string;
+  description: string;
+  schedule: string;
+  agent: string;
+  model: "opus" | "sonnet" | "haiku";
+  prompt: string;
+  enabled: boolean;
+  lastRun?: string;
+  nextRun?: string;
+}
+
 export interface AgentStudioConfig {
   projects: ProjectConfig[];
   agentSystem?: AgentSystemConfig;
@@ -62,6 +75,7 @@ export interface AgentStudioConfig {
   defaults: DefaultsConfig;
   workflows?: WorkflowConfig[];
   agents?: AgentConfig[];
+  automations?: AutomationConfig[];
   setupComplete: boolean;
   version: string;
 }

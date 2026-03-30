@@ -51,7 +51,8 @@ export interface WsMessage {
     | "file-update"
     | "git-update"
     | "workflow-update"
-    | "usage-update";
+    | "usage-update"
+    | "automation-report";
   sessionId?: string;
   data?: string;
   cols?: number;
@@ -76,7 +77,7 @@ export interface RepoStatus {
   branches?: BranchInfo[];
 }
 
-export type ActiveMode = "sessions" | "teams" | "memory" | "settings";
+export type ActiveMode = "sessions" | "teams" | "memory" | "reports" | "settings";
 
 export interface LauncherPreset {
   name: string;
