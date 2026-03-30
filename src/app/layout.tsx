@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Agent Studio",
@@ -13,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-console-bg text-console-text min-h-screen">
+    <html lang="en" className={inter.variable}>
+      <body className="bg-console-bg text-console-text min-h-screen font-sans">
         <ErrorBoundary fallbackLabel="Agent Studio encountered an error">
           {children}
         </ErrorBoundary>
