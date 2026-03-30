@@ -5,6 +5,7 @@ import { useSettingsStore, type AppSettings } from "@/stores/settings";
 import { SettingsWorkspace } from "./settings-workspace";
 import { SettingsGeneral } from "./settings-general";
 import { SettingsPmo } from "./settings-pmo";
+import { SettingsAutomations } from "./settings-automations";
 import { SettingsMonitor } from "./settings-monitor";
 import { SettingsShortcuts } from "./settings-shortcuts";
 import { SettingsAbout } from "./settings-about";
@@ -52,6 +53,7 @@ export function SettingsView() {
         <SettingsWorkspace />
         <SettingsGeneral />
         <SettingsPmo />
+        <SettingsAutomations />
         <SettingsMonitor />
         <SettingsShortcuts />
         <SettingsAbout />
