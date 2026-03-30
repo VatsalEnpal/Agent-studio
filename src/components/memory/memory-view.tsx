@@ -213,12 +213,19 @@ export function MemoryView() {
         {/* Entry list */}
         <div className="w-80 border-r border-console-border overflow-y-auto">
           {loading ? (
-            <div className="flex items-center justify-center h-32 text-console-dim text-xs animate-pulse">
-              Loading memories...
+            <div className="px-3 py-4 space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="space-y-1.5">
+                  <div className="skeleton h-3 w-3/4" />
+                  <div className="skeleton h-2 w-1/2" />
+                </div>
+              ))}
             </div>
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 gap-3 px-6 text-center">
-              <Brain className="w-6 h-6 text-console-dim" />
+              <div className="w-10 h-10 rounded-xl bg-console-faint/50 flex items-center justify-center">
+                <Brain className="w-5 h-5 text-console-dim" />
+              </div>
               <span className="text-console-muted text-xs font-medium">
                 {selectedCategory || showPinnedOnly ? "No memories match this filter" : "Your agents haven\u0027t learned anything yet."}
               </span>

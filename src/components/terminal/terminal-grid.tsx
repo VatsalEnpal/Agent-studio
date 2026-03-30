@@ -52,12 +52,15 @@ export function TerminalGrid({
 
   if (sessions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-8">
-        <div className="text-center space-y-2">
-          <p className="text-console-text text-base font-semibold">
+      <div className="flex flex-col items-center justify-center h-full gap-8 animate-tab-enter">
+        <div className="text-center space-y-3">
+          <div className="w-14 h-14 rounded-2xl bg-console-faint/50 flex items-center justify-center mx-auto mb-2">
+            <span className="text-2xl">&#9889;</span>
+          </div>
+          <p className="text-console-text text-base font-semibold tracking-tight">
             Ready to go.
           </p>
-          <p className="text-console-dim text-xs max-w-sm">
+          <p className="text-console-dim text-xs max-w-sm leading-relaxed">
             Launch a session to start working with Claude. Press{" "}
             <kbd className="px-1 py-0.5 rounded bg-console-border text-console-muted text-[10px]">
               Cmd+N
@@ -70,21 +73,21 @@ export function TerminalGrid({
         <div className="flex flex-col items-center gap-3 w-full max-w-xs">
           <button
             onClick={onQuickChat ?? onCreateSession}
-            className="w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded-lg border border-console-accent/30 bg-console-accent/5 hover:border-console-accent/60 hover:bg-console-accent/10 active:bg-console-accent/20 active:scale-[0.98] transition-all"
+            className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded-xl border border-console-accent/30 bg-console-accent/5 hover:border-console-accent/50 hover:bg-console-accent/8 hover:shadow-glow-sm active:scale-[0.98] transition-all"
           >
             <span className="text-sm font-medium text-console-text">Start a Quick Chat</span>
             <span className="text-[10px] text-console-dim">Ask Claude anything — uses Sonnet, no agent needed.</span>
           </button>
           <button
             onClick={onStartSprint ?? onCreateSession}
-            className="w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded-lg border border-console-border hover:border-console-accent/50 hover:bg-console-faint/50 active:bg-console-faint active:scale-[0.98] transition-all"
+            className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded-xl border border-console-border hover:border-console-accent/40 hover:bg-console-faint/40 hover:shadow-card active:scale-[0.98] transition-all"
           >
             <span className="text-sm font-medium text-console-text">Start a Sprint</span>
             <span className="text-[10px] text-console-dim">Launch a full agent team to work on your project.</span>
           </button>
           <button
             onClick={onContinueLast ?? onCreateSession}
-            className="w-full flex flex-col items-center gap-1 px-5 py-3 rounded-lg border border-console-border hover:border-console-accent/50 hover:bg-console-faint/50 active:bg-console-faint active:scale-[0.98] transition-all"
+            className="w-full flex flex-col items-center gap-1 px-5 py-3 rounded-xl border border-console-border hover:border-console-accent/40 hover:bg-console-faint/40 active:scale-[0.98] transition-all"
           >
             <span className="text-[11px] font-medium text-console-text">Continue Last Session</span>
             <span className="text-[9px] text-console-dim">Pick up where you left off.</span>

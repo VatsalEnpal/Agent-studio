@@ -74,9 +74,11 @@ export function TeamsView() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full gap-2 text-console-dim">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        <span className="text-sm">Loading workflows...</span>
+      <div className="flex items-center justify-center h-full">
+        <div className="space-y-3 w-56">
+          <div className="skeleton h-4 w-3/4 mx-auto" />
+          <div className="skeleton h-3 w-1/2 mx-auto" />
+        </div>
       </div>
     );
   }
@@ -84,7 +86,10 @@ export function TeamsView() {
   if (flows.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-center max-w-md px-6 space-y-3">
+        <div className="text-center max-w-md px-6 space-y-4">
+          <div className="w-12 h-12 rounded-xl bg-console-faint/50 flex items-center justify-center mx-auto">
+            <span className="text-xl">&#x1F91D;</span>
+          </div>
           <p className="text-console-muted text-sm font-medium">No workflows running.</p>
           <p className="text-console-dim text-xs leading-relaxed">
             Workflows coordinate multiple agents on a task &mdash;
@@ -96,7 +101,7 @@ export function TeamsView() {
           </p>
           <button
             onClick={() => openBuilder()}
-            className="px-3 py-1.5 text-[10px] font-medium text-console-bg bg-console-accent rounded hover:bg-console-accent/90 transition-colors"
+            className="btn-lift px-4 py-2 text-[10px] font-medium text-console-bg bg-console-accent rounded-lg hover:bg-amber-400 hover:shadow-glow-sm transition-all"
           >
             Create Workflow
           </button>

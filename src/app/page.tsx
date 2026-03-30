@@ -514,7 +514,10 @@ export default function Home() {
   if (!hydrated || preflightLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-console-bg">
-        <div className="text-console-dim text-sm animate-pulse">Loading Agent Studio...</div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-console-dim/30 border-t-console-accent rounded-full animate-spin" />
+          <span className="text-console-dim text-xs">Loading Agent Studio...</span>
+        </div>
       </div>
     );
   }
