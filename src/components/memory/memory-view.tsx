@@ -217,9 +217,18 @@ export function MemoryView() {
               Loading memories...
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-32 gap-2">
-              <Brain className="w-5 h-5 text-console-dim" />
-              <span className="text-console-dim text-xs">No memories found</span>
+            <div className="flex flex-col items-center justify-center h-48 gap-3 px-6 text-center">
+              <Brain className="w-6 h-6 text-console-dim" />
+              <span className="text-console-muted text-xs font-medium">
+                {selectedCategory || showPinnedOnly ? "No memories match this filter" : "Your agents haven\u0027t learned anything yet."}
+              </span>
+              {!selectedCategory && !showPinnedOnly && (
+                <p className="text-console-dim text-[10px] leading-relaxed max-w-[220px]">
+                  Memories are created automatically as your agents work &mdash;
+                  they record patterns, corrections, and decisions so they
+                  don&apos;t repeat mistakes. Launch a session to get started.
+                </p>
+              )}
             </div>
           ) : (
             filtered.map((entry) => (

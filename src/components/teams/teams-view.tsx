@@ -84,11 +84,15 @@ export function TeamsView() {
   if (flows.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-center max-w-md px-6">
-          <p className="text-console-dim text-sm mb-2">No workflows configured.</p>
-          <p className="text-console-dim/60 text-xs leading-relaxed mb-4">
-            Add an agent system in Settings to enable the built-in Sprint Planning workflow,
-            or create a custom workflow to get started.
+        <div className="text-center max-w-md px-6 space-y-3">
+          <p className="text-console-muted text-sm font-medium">No workflows running.</p>
+          <p className="text-console-dim text-xs leading-relaxed">
+            Workflows coordinate multiple agents on a task &mdash;
+            like a sprint where backend, frontend, and QA agents
+            work together in sequence.
+          </p>
+          <p className="text-console-dim text-xs">
+            Start a Sprint from the Sessions tab, or create a custom workflow.
           </p>
           <button
             onClick={() => openBuilder()}
