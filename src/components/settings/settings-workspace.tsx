@@ -189,12 +189,13 @@ export function SettingsWorkspace() {
 
   if (loading) {
     return (
-      <section className="border border-console-border rounded-lg bg-console-panel">
-        <div className="px-4 py-3 border-b border-console-border">
+      <section className="border border-console-border/60 rounded-xl console-panel-bg shadow-card">
+        <div className="px-5 py-3.5 border-b border-console-border/60">
           <h3 className="text-xs font-medium text-console-text">Workspace</h3>
         </div>
-        <div className="px-4 py-6 text-center text-xs text-console-dim animate-pulse">
-          Loading config...
+        <div className="px-5 py-8 flex flex-col items-center gap-2">
+          <div className="skeleton h-4 w-48" />
+          <div className="skeleton h-3 w-32" />
         </div>
       </section>
     );
@@ -206,14 +207,14 @@ export function SettingsWorkspace() {
 
   return (
     <>
-      <section className="border border-console-border rounded-lg bg-console-panel">
-        <div className="px-4 py-3 border-b border-console-border flex items-center justify-between">
+      <section className="border border-console-border/60 rounded-xl console-panel-bg shadow-card">
+        <div className="px-5 py-3.5 border-b border-console-border/60 flex items-center justify-between">
           <h3 className="text-xs font-medium text-console-text">Workspace</h3>
           <span className="text-[9px] text-console-dim font-mono">
             .agent-studio.json v{config.version}
           </span>
         </div>
-        <div className="px-4 py-3 space-y-4">
+        <div className="px-5 py-4 space-y-5">
           {/* Projects */}
           <div>
             <label className="text-[10px] text-console-muted block mb-1.5">

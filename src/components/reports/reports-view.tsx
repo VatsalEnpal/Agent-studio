@@ -50,7 +50,11 @@ export function ReportsView() {
   if (loading && reports.length === 0) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="text-xs text-console-dim animate-pulse">Loading reports...</div>
+        <div className="space-y-3 w-64">
+          <div className="skeleton h-4 w-3/4 mx-auto" />
+          <div className="skeleton h-3 w-1/2 mx-auto" />
+          <div className="skeleton h-3 w-2/3 mx-auto" />
+        </div>
       </div>
     );
   }
@@ -58,11 +62,13 @@ export function ReportsView() {
   if (reports.length === 0) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="text-center space-y-3">
-          <FileText className="w-10 h-10 text-console-dim mx-auto" />
+        <div className="text-center space-y-4 max-w-sm">
+          <div className="w-12 h-12 rounded-xl bg-console-faint/60 flex items-center justify-center mx-auto">
+            <FileText className="w-6 h-6 text-console-dim" />
+          </div>
           <div>
-            <p className="text-sm text-console-muted mb-1">No reports yet</p>
-            <p className="text-xs text-console-dim max-w-sm">
+            <p className="text-sm font-medium text-console-muted mb-1.5">No reports yet</p>
+            <p className="text-xs text-console-dim leading-relaxed">
               Set up automations in Settings to get started. Automations run on a
               schedule and produce reports for your review.
             </p>
@@ -76,8 +82,8 @@ export function ReportsView() {
     <div className="h-full flex">
       {/* Left panel: report list */}
       <div className="w-80 shrink-0 border-r border-console-border flex flex-col">
-        <div className="px-3 py-2 border-b border-console-border flex items-center justify-between">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-console-dim">
+        <div className="px-3 py-2.5 border-b border-console-border flex items-center justify-between">
+          <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-console-dim">
             Reports ({reports.length})
           </span>
           <button

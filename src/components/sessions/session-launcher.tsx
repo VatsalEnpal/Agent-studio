@@ -300,7 +300,7 @@ export function SessionLauncher({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[520px] max-h-[85vh] overflow-y-auto bg-console-panel border border-console-border rounded-lg shadow-2xl">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[520px] max-h-[85vh] overflow-y-auto console-panel-bg border border-console-border rounded-xl shadow-2xl">
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-console-border">
             <Dialog.Description className="sr-only">Launch a new Claude Code session</Dialog.Description>
@@ -440,10 +440,10 @@ export function SessionLauncher({
                       onClick={() => applyPreset(preset)}
                       disabled={launching}
                       className={cn(
-                        "flex flex-col items-center gap-1.5 p-2.5 rounded border transition-colors",
+                        "flex flex-col items-center gap-1.5 p-2.5 rounded-lg border transition-all",
                         launching
                           ? "border-console-border opacity-50 cursor-not-allowed"
-                          : "border-console-border hover:border-console-accent/50 hover:bg-console-faint/50 active:bg-console-faint",
+                          : "border-console-border hover:border-console-accent/40 hover:bg-console-faint/40 hover:shadow-card active:bg-console-faint active:scale-[0.98]",
                       )}
                     >
                       <Icon className="w-4 h-4 text-console-accent" />
@@ -565,7 +565,7 @@ export function SessionLauncher({
                   type="text"
                   value={cwd}
                   onChange={(e) => setCwd(e.target.value)}
-                  className="flex-1 px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
+                  className="flex-1 px-2 py-1.5 text-xs font-mono bg-console-bg border border-console-border rounded-md text-console-text focus:border-console-accent/60 focus:ring-1 focus:ring-console-accent/15 focus:outline-none transition-colors"
                 />
               </div>
             </div>
@@ -592,13 +592,13 @@ export function SessionLauncher({
               onClick={handleLaunch}
               disabled={launching}
               className={cn(
-                "px-4 py-1.5 text-xs font-medium rounded transition-all",
-                "bg-console-accent text-black hover:bg-console-accent/90 active:scale-95",
-                "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
+                "btn-lift px-5 py-2 text-xs font-medium rounded-lg transition-all",
+                "bg-console-accent text-black hover:bg-amber-400 hover:shadow-glow-sm active:scale-[0.98]",
+                "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:shadow-none",
               )}
             >
               {launching ? "Launching..." : resume ? "Resume" : "Launch"}
-              {!launching && <span className="ml-2 text-[10px] opacity-70">Enter</span>}
+              {!launching && <span className="ml-2 text-[10px] opacity-60">Enter</span>}
             </button>
           </div>
         </Dialog.Content>

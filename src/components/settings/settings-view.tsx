@@ -48,8 +48,8 @@ export function SettingsView() {
   }, [setSettings]);
 
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="max-w-3xl mx-auto px-6 py-6 space-y-6">
+    <div className="h-full overflow-y-auto scrollbar-thin">
+      <div className="max-w-3xl mx-auto px-6 py-8 space-y-8">
         <SettingsWorkspace />
         <SettingsGeneral />
         <SettingsPmo />

@@ -25,16 +25,16 @@ function StatusBadge({ status }: { status: Report["status"] }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium",
-        status === "pending" && "bg-yellow-500/15 text-yellow-400",
-        status === "approved" && "bg-emerald-500/15 text-emerald-400",
-        status === "dismissed" && "bg-console-faint text-console-dim",
+        "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium",
+        status === "pending" && "bg-amber-500/12 text-amber-400",
+        status === "approved" && "bg-emerald-500/12 text-emerald-400",
+        status === "dismissed" && "bg-console-faint/60 text-console-dim",
       )}
     >
       <span
         className={cn(
           "w-1.5 h-1.5 rounded-full",
-          status === "pending" && "bg-yellow-400",
+          status === "pending" && "bg-amber-400",
           status === "approved" && "bg-emerald-400",
           status === "dismissed" && "bg-console-dim",
         )}
@@ -57,10 +57,10 @@ export function ReportCard({ report, isSelected, onClick }: ReportCardProps) {
     <button
       onClick={onClick}
       className={cn(
-        "w-full text-left px-3 py-2.5 border-b border-console-border transition-colors",
+        "sidebar-item w-full text-left px-3 py-2.5 border-b border-console-border/60",
         isSelected
-          ? "bg-console-accent/10 border-l-2 border-l-console-accent"
-          : "hover:bg-console-faint/50 border-l-2 border-l-transparent",
+          ? "bg-console-accent/8 border-l-2 border-l-console-accent"
+          : "hover:bg-console-faint/30 border-l-2 border-l-transparent",
       )}
     >
       <div className="flex items-center justify-between mb-1">
