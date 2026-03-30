@@ -10,6 +10,7 @@ import {
 import type { WsMessage } from "@/lib/types";
 import { FlowSidebar } from "./flow-sidebar";
 import { StepTimeline } from "./step-timeline";
+import { WorkflowBuilderDialog } from "./workflow-builder-dialog";
 
 async function fetchJson<T>(url: string): Promise<T | null> {
   try {
@@ -31,6 +32,8 @@ export function TeamsView() {
     selectRun,
     setLoading,
   } = useWorkflowStore();
+
+  const openBuilder = useWorkflowStore((s) => s.openBuilder);
 
   const loadWorkflows = useCallback(async () => {
     setLoading(true);
@@ -83,10 +86,17 @@ export function TeamsView() {
       <div className="flex items-center justify-center h-full">
         <div className="text-center max-w-md px-6">
           <p className="text-console-dim text-sm mb-2">No workflows configured.</p>
-          <p className="text-console-dim/60 text-xs leading-relaxed">
+          <p className="text-console-dim/60 text-xs leading-relaxed mb-4">
             Add an agent system in Settings to enable the built-in Sprint Planning workflow,
-            or define custom workflows in your <code className="text-console-text/70">.agent-studio.json</code> config.
+            or create a custom workflow to get started.
           </p>
+          <button
+            onClick={() => openBuilder()}
+            className="px-3 py-1.5 text-[10px] font-medium text-console-bg bg-console-accent rounded hover:bg-console-accent/90 transition-colors"
+          >
+            Create Workflow
+          </button>
+          <WorkflowBuilderDialog />
         </div>
       </div>
     );
@@ -112,6 +122,9 @@ export function TeamsView() {
           </div>
         )}
       </div>
+
+      {/* Builder dialog */}
+      <WorkflowBuilderDialog />
     </div>
   );
 }
