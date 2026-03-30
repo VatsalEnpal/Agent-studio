@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { FolderOpen, Plus, X, RefreshCw, AlertTriangle, Check, Brain, Loader2 } from "lucide-react";
+import { FolderOpen, Plus, X, RefreshCw, AlertTriangle, Check, Brain, Loader2, Sparkles } from "lucide-react";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
 import { ScaffoldDialog } from "./scaffold-dialog";
@@ -37,6 +37,7 @@ export function SettingsWorkspace() {
   const [loading, setLoading] = useState(true);
   const [newPath, setNewPath] = useState("");
   const [showScaffold, setShowScaffold] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -138,6 +139,50 @@ export function SettingsWorkspace() {
     [config, saveConfig, addToast],
   );
 
+  const regenerateAgents = useCallback(async () => {
+    if (!config || !config.projects.length) return;
+    const projectPath = config.projects[0].path;
+    setRegenerating(true);
+    try {
+      // Step 1: Analyze
+      const analyzeRes = await fetch("/api/agents/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectPath }),
+      });
+      if (!analyzeRes.ok) throw new Error("Analysis failed");
+      const analysis = await analyzeRes.json();
+
+      // Step 2: Generate
+      const genRes = await fetch("/api/agents/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ analysis, projectPath }),
+      });
+      if (!genRes.ok) {
+        const err = await genRes.json() as { error?: string };
+        throw new Error(err.error ?? "Generation failed");
+      }
+      const agents = await genRes.json() as Array<{ id: string; name: string; description: string; model: string; mdContent: string }>;
+
+      // Step 3: Apply
+      const applyRes = await fetch("/api/agents/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agents, projectPath }),
+      });
+      if (!applyRes.ok) throw new Error("Failed to write agent files");
+      const result = await applyRes.json() as { created: string[] };
+
+      addToast(`Regenerated ${agents.length} agents (${result.created.length} files)`, "success");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      addToast(`Agent generation failed: ${msg}`, "error");
+    } finally {
+      setRegenerating(false);
+    }
+  }, [config, addToast]);
+
   if (loading) {
     return (
       <section className="border border-console-border rounded-lg bg-console-panel">
@@ -231,11 +276,27 @@ export function SettingsWorkspace() {
               Agent System
             </label>
             {config.agentSystem ? (
-              <div className="flex items-center gap-2 px-2 py-1.5 bg-console-bg border border-console-border rounded text-[10px]">
-                <Check className="w-3 h-3 text-console-success shrink-0" />
-                <span className="flex-1 font-mono text-console-text truncate">
-                  {config.agentSystem.path}
-                </span>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 px-2 py-1.5 bg-console-bg border border-console-border rounded text-[10px]">
+                  <Check className="w-3 h-3 text-console-success shrink-0" />
+                  <span className="flex-1 font-mono text-console-text truncate">
+                    {config.agentSystem.path}
+                  </span>
+                </div>
+                {config.projects.length > 0 && (
+                  <button
+                    onClick={() => void regenerateAgents()}
+                    disabled={regenerating}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded border border-console-accent/20 transition-colors disabled:opacity-50"
+                  >
+                    {regenerating ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-3 h-3" />
+                    )}
+                    {regenerating ? "Generating..." : "Regenerate Agents with AI"}
+                  </button>
+                )}
               </div>
             ) : (
               <div className="space-y-2">

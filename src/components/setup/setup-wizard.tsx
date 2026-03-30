@@ -17,6 +17,9 @@ import {
   Users,
   GitBranch,
   Bell,
+  Sparkles,
+  Pencil,
+  RotateCcw,
 } from "lucide-react";
 
 interface ProjectEntry {
@@ -37,6 +40,22 @@ interface AgentSystemState {
     scanLog: boolean;
     memoryCount: number;
   };
+}
+
+interface GeneratedAgentDef {
+  id: string;
+  name: string;
+  description: string;
+  model: "opus" | "sonnet" | "haiku";
+  mdContent: string;
+}
+
+interface AiGenState {
+  status: "idle" | "analyzing" | "generating" | "done" | "error";
+  cliAvailable: boolean | null;
+  analysis: Record<string, unknown> | null;
+  agents: GeneratedAgentDef[];
+  error: string | null;
 }
 
 interface SetupWizardProps {
@@ -102,6 +121,17 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
   const [scaffolding, setScaffolding] = useState(false);
   const [scaffoldResult, setScaffoldResult] = useState<{ created: string[] } | null>(null);
 
+  // AI agent generation state
+  const [aiGen, setAiGen] = useState<AiGenState>({
+    status: "idle",
+    cliAvailable: null,
+    analysis: null,
+    agents: [],
+    error: null,
+  });
+  const [useAiAgents, setUseAiAgents] = useState(false);
+  const [editingAgentId, setEditingAgentId] = useState<string | null>(null);
+
   const STEPS = getAllSteps(agentSystem);
 
   // Auto-detect on mount
@@ -144,6 +174,63 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
       }
     })();
   }, []);
+
+  // Check Claude CLI availability on mount
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await fetch("/api/agents/cli-status");
+        if (res.ok) {
+          const data = await res.json() as { available: boolean };
+          setAiGen((prev) => ({ ...prev, cliAvailable: data.available }));
+        }
+      } catch {
+        setAiGen((prev) => ({ ...prev, cliAvailable: false }));
+      }
+    })();
+  }, []);
+
+  // Trigger AI generation when entering Agent Team step with "create new" and CLI available
+  const triggerAiGeneration = useCallback(async () => {
+    if (!projects.length) return;
+    const projectPath = projects[0].path;
+
+    setAiGen((prev) => ({ ...prev, status: "analyzing", error: null }));
+    try {
+      // Step 1: Analyze project
+      const analyzeRes = await fetch("/api/agents/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectPath }),
+      });
+      if (!analyzeRes.ok) throw new Error("Failed to analyze project");
+      const analysis = await analyzeRes.json() as Record<string, unknown>;
+
+      setAiGen((prev) => ({ ...prev, status: "generating", analysis }));
+
+      // Step 2: Generate agents
+      const genRes = await fetch("/api/agents/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ analysis, projectPath }),
+      });
+      if (!genRes.ok) {
+        const errData = await genRes.json() as { error?: string };
+        throw new Error(errData.error ?? "Generation failed");
+      }
+      const agents = await genRes.json() as GeneratedAgentDef[];
+
+      setAiGen((prev) => ({ ...prev, status: "done", agents }));
+      setUseAiAgents(true);
+      // Also update selectedAgents to match generated agents
+      setSelectedAgents(agents.map((a) => a.id));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Generation failed";
+      setAiGen((prev) => ({ ...prev, status: "error", error: message }));
+      // Fall back to manual selection
+      setUseAiAgents(false);
+    }
+  }, [projects]);
 
   // Validate agent system path
   useEffect(() => {
@@ -213,7 +300,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             projectPath,
-            agents: selectedAgents,
+            agents: useAiAgents ? aiGen.agents.map((a) => a.id) : selectedAgents,
             workflow,
             notifications: { telegram: telegramEnabled },
             scheduler: { enabled: schedulerEnabled, intervalHours: schedulerInterval },
@@ -224,8 +311,19 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
         if (scaffoldRes.ok) {
           const result = await scaffoldRes.json() as { created: string[] };
           setScaffoldResult(result);
-          // Update agent system path to the newly created one
           agentSystem.path = `${projectPath}/ai-agents`;
+        }
+
+        // If AI-generated agents, overwrite the generic templates with AI-generated .md files
+        if (useAiAgents && aiGen.agents.length > 0) {
+          await fetch("/api/agents/apply", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              agents: aiGen.agents.filter((a) => selectedAgents.includes(a.id)),
+              projectPath,
+            }),
+          });
         }
         setScaffolding(false);
       }
@@ -274,7 +372,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
     } finally {
       setSaving(false);
     }
-  }, [projects, agentSystem, model, permissions, selectedAgents, workflow, telegramEnabled, schedulerEnabled, schedulerInterval, onComplete]);
+  }, [projects, agentSystem, model, permissions, selectedAgents, workflow, telegramEnabled, schedulerEnabled, schedulerInterval, onComplete, useAiAgents, aiGen.agents]);
 
   const canAdvance = (): boolean => {
     const currentStep = STEPS[step];
@@ -330,6 +428,13 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               selectedAgents={selectedAgents}
               toggleAgent={toggleAgent}
               setSelectedAgents={setSelectedAgents}
+              aiGen={aiGen}
+              useAiAgents={useAiAgents}
+              setUseAiAgents={setUseAiAgents}
+              triggerAiGeneration={triggerAiGeneration}
+              editingAgentId={editingAgentId}
+              setEditingAgentId={setEditingAgentId}
+              setAiGen={setAiGen}
             />
           )}
           {currentStep === "Workflow" && (
@@ -678,22 +783,182 @@ function AgentTeamStep({
   selectedAgents,
   toggleAgent,
   setSelectedAgents,
+  aiGen,
+  useAiAgents,
+  setUseAiAgents,
+  triggerAiGeneration,
+  editingAgentId,
+  setEditingAgentId,
+  setAiGen,
 }: {
   selectedAgents: string[];
   toggleAgent: (id: string) => void;
   setSelectedAgents: (agents: string[]) => void;
+  aiGen: AiGenState;
+  useAiAgents: boolean;
+  setUseAiAgents: (v: boolean) => void;
+  triggerAiGeneration: () => Promise<void>;
+  editingAgentId: string | null;
+  setEditingAgentId: (id: string | null) => void;
+  setAiGen: React.Dispatch<React.SetStateAction<AiGenState>>;
 }) {
+  // AI generation in progress
+  if (aiGen.status === "analyzing" || aiGen.status === "generating") {
+    return (
+      <div className="flex flex-col items-center text-center pt-10 space-y-4">
+        <div className="w-12 h-12 rounded-xl bg-console-accent/10 border border-console-accent/20 flex items-center justify-center">
+          <Loader2 className="w-6 h-6 text-console-accent animate-spin" />
+        </div>
+        <div>
+          <p className="text-sm font-medium text-console-text">
+            {aiGen.status === "analyzing" ? "Analyzing your project..." : "Generating tailored agents..."}
+          </p>
+          <p className="text-[10px] text-console-dim mt-1">
+            {aiGen.status === "analyzing"
+              ? "Reading package.json, file structure, README..."
+              : "Claude is creating agent definitions for your tech stack"}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // AI generation done — show generated agents
+  if (useAiAgents && aiGen.status === "done" && aiGen.agents.length > 0) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-console-text mb-0.5">
+              <Sparkles className="w-4 h-4 inline mr-1.5 -mt-0.5 text-console-accent" />
+              AI-Generated Agents
+            </h2>
+            <p className="text-[10px] text-console-dim">
+              Tailored to your project. Deselect, edit, or switch to templates.
+            </p>
+          </div>
+          <button
+            onClick={() => { setUseAiAgents(false); setEditingAgentId(null); }}
+            className="px-2 py-1 text-[10px] text-console-dim hover:text-console-muted border border-console-border rounded transition-colors"
+          >
+            Use templates
+          </button>
+        </div>
+
+        <div className="space-y-1.5 max-h-[180px] overflow-y-auto">
+          {aiGen.agents.map((agent) => (
+            <div key={agent.id}>
+              <label
+                className={cn(
+                  "flex items-center gap-2 px-3 py-2 rounded border cursor-pointer transition-all",
+                  selectedAgents.includes(agent.id)
+                    ? "bg-console-accent/10 border-console-accent/30"
+                    : "bg-console-bg border-console-border hover:border-console-muted",
+                )}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedAgents.includes(agent.id)}
+                  onChange={() => toggleAgent(agent.id)}
+                  className="accent-console-accent"
+                />
+                <span className="text-xs font-mono text-console-accent w-24 truncate">
+                  {agent.id}
+                </span>
+                <span className="text-[10px] text-console-muted flex-1 truncate">
+                  {agent.description}
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setEditingAgentId(editingAgentId === agent.id ? null : agent.id);
+                  }}
+                  className="p-1 text-console-dim hover:text-console-accent transition-colors"
+                  title="Edit agent definition"
+                >
+                  <Pencil className="w-3 h-3" />
+                </button>
+              </label>
+              {editingAgentId === agent.id && (
+                <div className="mt-1 ml-6">
+                  <textarea
+                    value={agent.mdContent}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setAiGen((prev) => ({
+                        ...prev,
+                        agents: prev.agents.map((a) =>
+                          a.id === agent.id ? { ...a, mdContent: val } : a,
+                        ),
+                      }));
+                    }}
+                    rows={8}
+                    className="w-full px-2 py-1.5 text-[10px] font-mono bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none resize-y"
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSelectedAgents(aiGen.agents.map((a) => a.id))}
+            className="px-2.5 py-1 text-[10px] text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
+          >
+            Select All
+          </button>
+          <button
+            onClick={() => void triggerAiGeneration()}
+            className="flex items-center gap-1 px-2.5 py-1 text-[10px] text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
+          >
+            <RotateCcw className="w-2.5 h-2.5" />
+            Regenerate
+          </button>
+          <span className="text-[10px] text-console-dim ml-auto">
+            {selectedAgents.length} selected
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // Default: manual template selection (also shown on AI error/fallback)
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="text-sm font-semibold text-console-text mb-1">
-          <Users className="w-4 h-4 inline mr-1.5 -mt-0.5" />
-          Which agents do you want in your team?
-        </h2>
-        <p className="text-xs text-console-dim">
-          Each agent gets its own definition file with rules and capabilities.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-console-text mb-1">
+            <Users className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+            Which agents do you want in your team?
+          </h2>
+          <p className="text-xs text-console-dim">
+            Each agent gets its own definition file with rules and capabilities.
+          </p>
+        </div>
       </div>
+
+      {/* AI generation prompt — show if CLI available and not yet tried */}
+      {aiGen.cliAvailable && aiGen.status !== "error" && (
+        <button
+          onClick={() => void triggerAiGeneration()}
+          className="flex items-center gap-2 w-full px-3 py-2.5 text-xs font-medium text-console-accent bg-console-accent/5 hover:bg-console-accent/10 border border-console-accent/20 hover:border-console-accent/40 rounded transition-all"
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>Generate agents tailored to your project with AI</span>
+          <ChevronRight className="w-3 h-3 ml-auto" />
+        </button>
+      )}
+
+      {/* AI error message */}
+      {aiGen.status === "error" && (
+        <div className="flex items-start gap-2 px-3 py-2 bg-yellow-500/5 border border-yellow-500/20 rounded text-[10px] text-yellow-400">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <span>
+            AI generation failed: {aiGen.error}. Using generic templates instead.
+          </span>
+        </div>
+      )}
 
       <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
         {AVAILABLE_AGENTS.map((agent) => (
