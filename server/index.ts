@@ -2024,6 +2024,52 @@ async function main() {
     }
   });
 
+  // --- Install Claude Code CLI ---
+  app.post("/api/system/install-claude", async (_req, res) => {
+    try {
+      // Check if npm is available
+      let npmPath: string;
+      try {
+        npmPath = execSync("which npm", { encoding: "utf-8", timeout: 5000 }).trim();
+      } catch {
+        res.status(400).json({ error: "npm is not installed. Install Node.js first." });
+        return;
+      }
+      if (!npmPath) {
+        res.status(400).json({ error: "npm is not installed. Install Node.js first." });
+        return;
+      }
+
+      // Run the install
+      const result = execSync("npm install -g @anthropic-ai/claude-code 2>&1", {
+        encoding: "utf-8",
+        timeout: 120000,
+      });
+
+      // Verify it installed
+      try {
+        const version = execSync("claude --version 2>&1", { encoding: "utf-8", timeout: 5000 }).trim();
+        res.json({ success: true, version, output: result });
+      } catch {
+        res.json({
+          success: false,
+          error: "Installed but claude command not found. You may need to restart your terminal.",
+          output: result,
+        });
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Installation failed";
+      if (message.includes("EACCES") || message.includes("permission")) {
+        res.status(403).json({
+          error: "Permission denied. Try running Agent Studio with sudo, or install Claude Code manually:\n\nsudo npm install -g @anthropic-ai/claude-code",
+          output: message,
+        });
+      } else {
+        res.status(500).json({ error: message, output: message });
+      }
+    }
+  });
+
   // --- System Detect API ---
   app.post("/api/system/detect", (_req, res) => {
     try {

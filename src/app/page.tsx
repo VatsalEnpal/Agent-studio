@@ -76,27 +76,46 @@ interface PreflightResult {
 // --- Preflight blocker screen ---
 function PreflightBlocker({ result, onRecheck }: { result: PreflightResult; onRecheck: () => void }) {
   const [checking, setChecking] = useState(false);
+  const [installing, setInstalling] = useState(false);
+  const [installResult, setInstallResult] = useState<{
+    success?: boolean;
+    version?: string;
+    error?: string;
+  } | null>(null);
 
   const handleRecheck = () => {
     setChecking(true);
     onRecheck();
-    // Reset after a moment in case onRecheck is fast
     setTimeout(() => setChecking(false), 1500);
   };
 
-  // Map blockers to actionable messages
-  const blockerDetails = result.blockers.map((msg) => {
-    if (msg.includes("not installed")) {
-      return { message: msg, fix: "Install it with: npm install -g @anthropic-ai/claude-code" };
+  const handleInstall = async () => {
+    setInstalling(true);
+    setInstallResult(null);
+    try {
+      const res = await fetch("/api/system/install-claude", { method: "POST" });
+      const data = await res.json() as { success?: boolean; version?: string; error?: string };
+      if (res.ok && data.success) {
+        setInstallResult({ success: true, version: data.version });
+        // Auto-recheck after successful install
+        setTimeout(() => onRecheck(), 2000);
+      } else {
+        setInstallResult({ success: false, error: data.error ?? "Installation failed" });
+      }
+    } catch {
+      setInstallResult({ success: false, error: "Network error. Is the server running?" });
+    } finally {
+      setInstalling(false);
     }
-    if (msg.includes("not authenticated")) {
-      return { message: msg, fix: "Open your terminal and run: claude" };
-    }
-    if (msg.includes("Git")) {
-      return { message: msg, fix: "Install Git from https://git-scm.com" };
-    }
-    return { message: msg, fix: "" };
-  });
+  };
+
+  const claudeNotInstalled = !result.checks.claudeCode.installed;
+  const claudeNotAuthenticated = result.checks.claudeCode.installed && !result.checks.claudeCode.authenticated;
+
+  // Non-Claude blockers (e.g. Git missing)
+  const otherBlockers = result.blockers.filter(
+    (msg) => !msg.includes("Claude Code") && !msg.includes("claude")
+  );
 
   const passed: string[] = [];
   if (result.checks.node.installed) passed.push(`Node.js ${result.checks.node.version}`);
@@ -104,6 +123,46 @@ function PreflightBlocker({ result, onRecheck }: { result: PreflightResult; onRe
   if (result.checks.claudeCode.installed) passed.push(`Claude Code ${result.checks.claudeCode.version ?? ""}`);
   if (result.checks.claudeCode.authenticated) passed.push("Claude Code authenticated");
 
+  // --- Auth-only blocker ---
+  if (claudeNotAuthenticated && otherBlockers.length === 0) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-zinc-950">
+        <div className="max-w-md text-center space-y-6 px-6">
+          <div className="text-5xl">&#128273;</div>
+          <h1 className="text-2xl font-bold text-white">Almost there — authenticate Claude Code</h1>
+          <p className="text-zinc-400 text-sm">
+            Claude Code is installed but not authenticated yet.
+            Open a terminal and run the command below to complete setup.
+          </p>
+
+          <code className="bg-zinc-900 px-4 py-3 rounded-lg text-amber-400 text-sm block font-mono">
+            claude
+          </code>
+
+          <div className="space-y-2">
+            {passed.map((p, i) => (
+              <div key={i} className="bg-zinc-900 rounded-lg p-3 text-left">
+                <div className="flex items-center gap-2">
+                  <span className="text-green-400">&#10003;</span>
+                  <span className="text-zinc-300 text-sm">{p}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={handleRecheck}
+            disabled={checking}
+            className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            {checking ? "Checking..." : "Check Again"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Install blocker (Claude not installed, or other blockers) ---
   return (
     <div className="h-screen flex items-center justify-center bg-zinc-950">
       <div className="max-w-md text-center space-y-6 px-6">
@@ -114,18 +173,25 @@ function PreflightBlocker({ result, onRecheck }: { result: PreflightResult; onRe
           you need the Claude Code CLI installed and authenticated.
         </p>
 
+        {/* Status list */}
         <div className="space-y-2">
-          {blockerDetails.map((b, i) => (
+          {otherBlockers.map((msg, i) => (
             <div key={i} className="bg-red-950/50 border border-red-800 rounded-lg p-3 text-left">
               <div className="flex items-start gap-2">
                 <span className="text-red-400 shrink-0">&#10005;</span>
-                <div>
-                  <span className="text-red-300 text-sm">{b.message}</span>
-                  {b.fix && <p className="text-zinc-500 text-xs mt-1">{b.fix}</p>}
-                </div>
+                <span className="text-red-300 text-sm">{msg}</span>
               </div>
             </div>
           ))}
+
+          {claudeNotInstalled && (
+            <div className="bg-red-950/50 border border-red-800 rounded-lg p-3 text-left">
+              <div className="flex items-start gap-2">
+                <span className="text-red-400 shrink-0">&#10005;</span>
+                <span className="text-red-300 text-sm">Claude Code CLI is not installed.</span>
+              </div>
+            </div>
+          )}
 
           {passed.map((p, i) => (
             <div key={i} className="bg-zinc-900 rounded-lg p-3 text-left">
@@ -137,16 +203,54 @@ function PreflightBlocker({ result, onRecheck }: { result: PreflightResult; onRe
           ))}
         </div>
 
-        {!result.checks.claudeCode.installed && (
-          <div className="space-y-2">
-            <p className="text-zinc-500 text-xs">Install Claude Code:</p>
-            <code className="bg-zinc-900 px-4 py-2 rounded text-amber-400 text-sm block font-mono">
-              npm install -g @anthropic-ai/claude-code
-            </code>
-            <p className="text-zinc-500 text-xs mt-3">Then authenticate:</p>
-            <code className="bg-zinc-900 px-4 py-2 rounded text-amber-400 text-sm block font-mono">
-              claude
-            </code>
+        {/* Install button + result */}
+        {claudeNotInstalled && (
+          <div className="space-y-4">
+            {installResult?.success ? (
+              <div className="bg-green-950/50 border border-green-800 rounded-lg p-4 space-y-1">
+                <div className="flex items-center justify-center gap-2 text-green-400 font-medium text-sm">
+                  <span>&#10003;</span> Installed successfully
+                </div>
+                {installResult.version && (
+                  <p className="text-green-300/70 text-xs">Version: {installResult.version}</p>
+                )}
+                <p className="text-zinc-500 text-xs">Rechecking automatically...</p>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={handleInstall}
+                  disabled={installing}
+                  className="w-full bg-green-600 hover:bg-green-500 disabled:opacity-60 text-white px-6 py-3 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  {installing ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Installing...
+                    </>
+                  ) : (
+                    "Install Claude Code"
+                  )}
+                </button>
+                <p className="text-zinc-600 text-xs">
+                  Runs <code className="text-zinc-500">npm install -g @anthropic-ai/claude-code</code> on your machine
+                </p>
+              </>
+            )}
+
+            {installResult && !installResult.success && installResult.error && (
+              <div className="bg-red-950/50 border border-red-800 rounded-lg p-3 text-left space-y-2">
+                <p className="text-red-300 text-sm whitespace-pre-wrap">{installResult.error}</p>
+              </div>
+            )}
+
+            {/* Manual fallback */}
+            <div className="border-t border-zinc-800 pt-4 space-y-2">
+              <p className="text-zinc-600 text-xs">Or install manually:</p>
+              <code className="bg-zinc-900 px-4 py-2 rounded text-amber-400 text-xs block font-mono">
+                npm install -g @anthropic-ai/claude-code
+              </code>
+            </div>
           </div>
         )}
 
