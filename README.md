@@ -16,6 +16,8 @@ Stop juggling terminal tabs. See every AI session, its cost, and its context win
 
 ---
 
+![Agent Studio Dashboard](public/screenshot-dashboard.png)
+
 > **New to AI agents?** Agent Studio scans your projects, generates custom agents for your codebase using Claude, and runs them on a schedule — no configuration needed. [Set up in 2 minutes.](#first-run)
 
 ---
@@ -78,6 +80,8 @@ Full technical details in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ### 🖥️ Session Management
 
+![Session Launcher](public/screenshot-launcher.png)
+
 - **Terminal Grid** — Run 1 to 6 Claude Code sessions side by side. Each is a real terminal with full color, scroll, and zoom.
 - **Live Metrics** — See token count, dollar cost, context window %, and model name on every session. Updated every 30 seconds.
 - **Session Presets** — One-click launchers: Quick Chat (Sonnet, no agent), Start Sprint (Opus + orchestrator), Security Audit, PMO Scan. Create your own.
@@ -92,6 +96,8 @@ Full technical details in [ARCHITECTURE.md](ARCHITECTURE.md).
 - **Works Without AI Too** — No Claude CLI? The wizard falls back to a template picker where you select agents manually. The scaffolding still works.
 
 ### 🔄 Automations & Reports
+
+![Automation Reports](public/screenshot-reports.png)
 
 - **Scheduled Scans** — Set up automations like "check for TypeScript errors every 2 hours" or "review security vulnerabilities daily." Agent Studio runs Claude in the background and produces a report.
 - **Approval Gates** — Nothing touches your code without your sign-off. Every automation produces a report with suggested actions. You approve, dismiss, or cherry-pick individual actions.
@@ -111,6 +117,8 @@ Full technical details in [ARCHITECTURE.md](ARCHITECTURE.md).
 - **Visual Timeline** — See each step's status, which agent is assigned, and what's completed — all in a timeline view.
 
 ### 🛠️ Developer Tools
+
+![Settings & Automations](public/screenshot-settings.png)
 
 - **Git Dashboard** — See status of all your repos at a glance. Branches, dirty state, ahead/behind counts. Stage, commit, push, and create PRs without leaving the app.
 - **Dev Server Management** — Start and stop your project's dev servers from the sidebar.
