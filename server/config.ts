@@ -47,12 +47,21 @@ export interface WorkflowConfig {
   steps: WorkflowStepConfig[];
 }
 
+export interface AgentConfig {
+  id: string;
+  name: string;
+  description: string;
+  model?: "opus" | "sonnet" | "haiku";
+  icon?: string;
+}
+
 export interface AgentStudioConfig {
   projects: ProjectConfig[];
   agentSystem?: AgentSystemConfig;
   devServers: DevServerConfig[];
   defaults: DefaultsConfig;
   workflows?: WorkflowConfig[];
+  agents?: AgentConfig[];
   setupComplete: boolean;
   version: string;
 }

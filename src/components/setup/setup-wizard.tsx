@@ -30,6 +30,7 @@ interface AgentSystemState {
   enabled: boolean;
   createNew: boolean;
   path: string;
+  projectDescription?: string;
   found: {
     memoryIndex: boolean;
     currentSprint: boolean;
@@ -216,6 +217,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
             workflow,
             notifications: { telegram: telegramEnabled },
             scheduler: { enabled: schedulerEnabled, intervalHours: schedulerInterval },
+            projectDescription: agentSystem.projectDescription ?? "",
           }),
         });
 
@@ -641,9 +643,9 @@ function AgentSystemStep({
         </div>
       )}
 
-      {/* Create new — info */}
+      {/* Create new — info + project description */}
       {agentSystem.enabled && agentSystem.createNew && (
-        <div className="pl-6">
+        <div className="pl-6 space-y-3">
           <div className="flex items-start gap-2 px-3 py-2 bg-console-accent/5 border border-console-accent/20 rounded text-[10px] text-console-muted">
             <Brain className="w-3.5 h-3.5 shrink-0 mt-0.5 text-console-accent" />
             <span>
@@ -651,6 +653,20 @@ function AgentSystemStep({
               <code className="text-console-accent">.claude/agents/</code> in your first
               project directory. Choose your agents on the next page.
             </span>
+          </div>
+          <div>
+            <label className="block text-[10px] text-console-muted mb-1">
+              What kind of project are you building? <span className="text-console-dim">(optional)</span>
+            </label>
+            <input
+              type="text"
+              value={agentSystem.projectDescription ?? ""}
+              onChange={(e) =>
+                setAgentSystem((prev) => ({ ...prev, projectDescription: e.target.value }))
+              }
+              placeholder="e.g., React app with Python backend, Go microservices, mobile app..."
+              className="w-full px-3 py-2 text-xs bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:border-console-accent focus:outline-none"
+            />
           </div>
         </div>
       )}

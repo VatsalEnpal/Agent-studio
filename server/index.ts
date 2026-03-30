@@ -28,7 +28,7 @@ import { execSync, exec } from "node:child_process";
 import os from "node:os";
 import type { SessionMeta, WsMessage } from "./types.js";
 import { WorkflowManager } from "./workflows/index.js";
-import { getConfig, loadConfig, saveConfig, generateDefaultConfig, reloadConfig, getAgentSystemPath, getMainProjectDir, resolvePath } from "./config.js";
+import { getConfig, loadConfig, saveConfig, generateDefaultConfig, reloadConfig, getAgentSystemPath, getMainProjectDir, resolvePath, type AgentConfig } from "./config.js";
 import { scaffoldAgentSystem, previewScaffold } from "./scaffold.js";
 import type { ScaffoldOptions } from "./scaffold.js";
 
@@ -151,6 +151,91 @@ async function main() {
       reloadConfig();
       workflowManager.reload();
       res.json({ ok: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- Agents API ---
+  app.get("/api/agents", async (_req, res) => {
+    try {
+      const config = getConfig();
+      const agents: AgentConfig[] = [];
+      const seenIds = new Set<string>();
+
+      // Always include "No Agent" as the first option
+      agents.push({ id: "none", name: "No Agent", description: "Plain Claude session" });
+      seenIds.add("none");
+
+      // Add agents from config
+      if (config.agents && Array.isArray(config.agents)) {
+        for (const a of config.agents) {
+          if (!seenIds.has(a.id)) {
+            agents.push(a);
+            seenIds.add(a.id);
+          }
+        }
+      }
+
+      // Auto-discover agents from .claude/agents/ in each project
+      const { existsSync, readdirSync } = await import("node:fs");
+      const { readFile } = await import("node:fs/promises");
+      const { join, basename } = await import("node:path");
+
+      for (const project of config.projects) {
+        const agentsDir = join(project.path, ".claude", "agents");
+        if (!existsSync(agentsDir)) continue;
+
+        try {
+          const files = readdirSync(agentsDir).filter((f: string) => f.endsWith(".md"));
+          for (const file of files) {
+            const id = basename(file, ".md");
+            if (seenIds.has(id)) continue;
+
+            // Try to extract description from frontmatter
+            let description = `Agent from ${project.name}`;
+            let model: "opus" | "sonnet" | "haiku" | undefined;
+            try {
+              const content = await readFile(join(agentsDir, file), "utf-8");
+              // Parse YAML frontmatter for description
+              const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+              if (fmMatch) {
+                const descMatch = fmMatch[1].match(/description:\s*(.+)/);
+                if (descMatch) description = descMatch[1].trim();
+              }
+            } catch {
+              // Use default description
+            }
+
+            agents.push({ id, name: id, description, model });
+            seenIds.add(id);
+          }
+        } catch {
+          // Can't read directory, skip
+        }
+      }
+
+      // If no agents beyond "none", add sensible defaults
+      if (agents.length <= 1) {
+        const defaults: AgentConfig[] = [
+          { id: "orchestrator", name: "orchestrator", description: "Coordinates agent teams and delegates work" },
+          { id: "frontend", name: "frontend", description: "Builds UI and frontend code" },
+          { id: "backend", name: "backend", description: "Builds APIs, database, server logic" },
+          { id: "qa", name: "qa", description: "Tests the application" },
+          { id: "security", name: "security", description: "Reviews code for vulnerabilities" },
+          { id: "pmo", name: "pmo", description: "Scans for tasks, manages sprints" },
+          { id: "documentation", name: "documentation", description: "Maintains docs and READMEs" },
+        ];
+        for (const d of defaults) {
+          if (!seenIds.has(d.id)) {
+            agents.push(d);
+            seenIds.add(d.id);
+          }
+        }
+      }
+
+      res.json(agents);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });

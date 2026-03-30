@@ -66,16 +66,23 @@ const PRESETS: (LauncherPreset & { icon: React.ComponentType<{ className?: strin
   },
 ];
 
-// Default agents — overridden by config if agent system is set up
-const DEFAULT_AGENTS = [
-  "none",
-  "orchestrator",
-  "frontend",
-  "backend",
-  "qa",
-  "security",
-  "pmo",
-  "documentation",
+interface AgentOption {
+  id: string;
+  name: string;
+  description: string;
+  model?: "opus" | "sonnet" | "haiku";
+}
+
+// Fallback agents used until API responds
+const DEFAULT_AGENTS: AgentOption[] = [
+  { id: "none", name: "No Agent", description: "Plain Claude session" },
+  { id: "orchestrator", name: "orchestrator", description: "Coordinates agent teams" },
+  { id: "frontend", name: "frontend", description: "Builds UI code" },
+  { id: "backend", name: "backend", description: "Builds APIs and server logic" },
+  { id: "qa", name: "qa", description: "Tests the application" },
+  { id: "security", name: "security", description: "Reviews code for vulnerabilities" },
+  { id: "pmo", name: "pmo", description: "Scans for tasks" },
+  { id: "documentation", name: "documentation", description: "Maintains docs" },
 ];
 
 const MODELS: ("opus" | "sonnet" | "haiku")[] = ["opus", "sonnet", "haiku"];
@@ -138,6 +145,9 @@ export function SessionLauncher({
   const [launching, setLaunching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Dynamic agents from API
+  const [agents, setAgents] = useState<AgentOption[]>(DEFAULT_AGENTS);
+
   // Recent sessions for dropdown
   const [recentSessions, setRecentSessions] = useState<PastSession[]>([]);
   const [resumeDropdownOpen, setResumeDropdownOpen] = useState(false);
@@ -164,6 +174,23 @@ export function SessionLauncher({
       } catch { /* use default */ }
     })();
   }, [defaultCwdLoaded]);
+
+  // Fetch agents from API
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await fetch("/api/agents");
+        if (res.ok) {
+          const data = (await res.json()) as AgentOption[];
+          if (Array.isArray(data) && data.length > 0) {
+            setAgents(data);
+          }
+        }
+      } catch {
+        // Use defaults
+      }
+    })();
+  }, []);
 
   // Fetch recent sessions when dialog opens
   useEffect(() => {
@@ -461,12 +488,20 @@ export function SessionLauncher({
                 </label>
                 <select
                   value={agent}
-                  onChange={(e) => setAgent(e.target.value)}
+                  onChange={(e) => {
+                    const selectedId = e.target.value;
+                    setAgent(selectedId);
+                    // Auto-select model if agent has a preferred one
+                    const selectedAgent = agents.find((a) => a.id === selectedId);
+                    if (selectedAgent?.model) {
+                      setModel(selectedAgent.model);
+                    }
+                  }}
                   className="w-full px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
                 >
-                  {DEFAULT_AGENTS.map((a) => (
-                    <option key={a} value={a}>
-                      {a}
+                  {agents.map((a) => (
+                    <option key={a.id} value={a.id} title={a.description}>
+                      {a.name}{a.description ? ` — ${a.description}` : ""}
                     </option>
                   ))}
                 </select>
