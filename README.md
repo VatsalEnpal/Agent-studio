@@ -1,52 +1,66 @@
 # Agent Studio
 
-A command center for developers who run AI coding agents.
+A command center for developers who run AI coding agents. Two things in one app: a dashboard that shows all your Claude Code sessions at a glance, and an operations layer that turns Claude Code into a team of specialized agents working on your project.
 
 ## The Problem
 
-If you use Claude Code, you already know the pattern: open a terminal, start a session, open another terminal, start another session. Before long you have six tabs, no idea which agent is doing what, no visibility into token spend, and no way to manage it all without juggling windows.
+If you use Claude Code, you know the pattern: open a terminal, start a session, open another, start another. Before long you have six tabs, no idea which agent is doing what, no visibility into token spend, and no way to manage it all without juggling windows.
 
-Terminal tabs were not designed for this.
+And if you want agents that actually collaborate -- a frontend specialist, a QA tester, a security reviewer -- you are left building that structure from scratch every time.
 
-## The Solution
+## What Agent Studio Does
 
-Agent Studio gives you a single dashboard to run, monitor, and manage multiple Claude Code sessions. It spawns real CLI processes -- not API wrappers -- so you get the exact same behavior as your terminal, with a management layer on top: a visual grid, real-time cost tracking, git operations, session history, and an agent scaffolding system.
+### 1. Session Dashboard
 
-<!-- Screenshots coming soon -->
+This is what you see when you open Agent Studio: all your Claude Code sessions, side by side, with everything you need to manage them.
 
-## What You Can Do
+The terminal grid displays up to six sessions in a tiled layout. Each tile is a real Claude Code process with full tool access and MCP support. Focus on one, fullscreen it, or watch them all work in parallel. Every session shows live metrics -- tokens used, dollar cost, and context window percentage -- so you always know what a session is costing and how much room it has left.
 
-**Run multiple AI sessions at once.**
-Launch up to six Claude Code sessions in a tiled grid. Focus, fullscreen, zoom, or cycle between them. Each session is a real PTY process with full tool access and MCP support.
+Session history lets you browse and resume previous Claude Code conversations from a searchable list. No more hunting through terminal scrollback or remembering session IDs.
 
-**See what your agents are costing you.**
-Every session displays token usage, dollar cost, and context window percentage in real time. No more guessing whether that Opus session has burned through your budget.
+The git dashboard polls your projects and shows branch status, uncommitted changes, and ahead/behind counts across multiple repos. Stage, commit, push, and create pull requests without leaving the app. If you manage several repositories, this replaces the constant context-switching between terminal windows.
 
-**Never lose a session again.**
-Browse and resume previous Claude Code sessions from a searchable dropdown. One click to pick up where you left off.
+Keyboard shortcuts keep everything fast. `Cmd+N` launches a new session. `Cmd+1` through `Cmd+6` jump between grid positions. `Cmd+K` opens the command palette for any action. `Cmd+Enter` toggles fullscreen.
 
-**Set up agents for your project in minutes.**
-The scaffolding wizard generates a complete agent system -- agent definitions, memory index, sprint infrastructure, and Claude Code entry points -- tailored to your project. Choose which agents you need, pick a workflow template, and go.
+### 2. Agent Operations
 
-**Automate the boring stuff.**
-Define multi-step workflows with step-by-step execution. Schedule periodic scans. Set up automation templates that run headless agent loops on a cadence you control.
+This is how you set up a team of AI agents for your project and keep them running -- even when you are not watching.
 
-**Keep your git in check.**
-A multi-repo dashboard polls your projects and shows branch status, dirty state, and ahead/behind counts. Stage, commit, push, and create pull requests without leaving the app.
+**Scaffolding.** Agent Studio generates a set of instruction files that tell Claude Code how to behave as different specialists. A frontend agent that knows your React patterns. A QA agent that tests your app. A backend agent that writes your database migrations. An orchestrator that delegates work across the team. The scaffolding wizard creates these definitions (`.claude/agents/*.md` files), a shared memory index, and sprint infrastructure, all tailored to the agents you choose and the workflow template you pick.
 
-**Remember what your agents learn.**
-Browse your agent memory index with search and filters. See what patterns your agents have discovered, what corrections they have made, and what decisions they have recorded.
+**Automations.** Set up a scan that runs every few hours. It launches Claude Code in the background, checks your code for problems, and writes a report. You review the report in the dashboard and approve or dismiss the suggested fixes. Nothing happens to your codebase without your sign-off. This is headless Claude Code on a schedule, with you as the gatekeeper.
 
-## Who Is This For
+**Shared memory.** Agents write what they learn -- patterns, corrections, decisions -- to a shared memory system. When one agent discovers that a particular API returns dates in an unexpected format, that knowledge is available to every other agent in the next session. The memory browser in the dashboard lets you search, filter, and review everything your agents have recorded.
 
-Developers and teams using Claude Code who run multiple agents as part of their daily workflow and want visibility and control over what those agents are doing.
+**Workflow templates.** Pre-built configurations for common patterns: sprint planning, CI/CD pipelines, security audits. Pick a template during setup or create your own. Each template defines which agents participate, what automations run, and how work flows between them.
 
-## Requirements
+### Built and Working
 
-- **Node.js 22+**
-- **[Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)** installed and authenticated
-- **Git**
-- macOS or Linux (Windows is untested)
+**Session Dashboard**
+- Terminal grid with up to 6 concurrent sessions
+- Real-time token usage, cost, and context window tracking per session
+- Session history with search and one-click resume
+- Session presets (Quick Chat, Sprint, Security Audit, and custom)
+- Multi-repo git dashboard with branch status, staging, commit, push, and PR creation
+- Dev server management (start, stop, monitor)
+- Command palette and full keyboard shortcut system
+
+**Agent Operations**
+- Setup wizard with project detection, agent selection, and workflow templates
+- Agent scaffolding (generates `.claude/agents/`, `ai-agents/` directory structure, memory index)
+- Agent team configuration (orchestrator, frontend, backend, QA, security, PMO, documentation, clearing)
+- Automation engine with scheduled headless Claude Code runs
+- Reports dashboard for reviewing and approving automated actions
+- Shared memory browser with search and filtering
+- Workflow template library
+
+### In Development
+
+- AI-powered agent generation: describe your project, get tailored agent definitions
+- GitHub and GitLab webhook triggers for automatic agent responses
+- Team multiplayer with shared dashboards
+- Cost budgets and alerts
+- Session recordings and replay
 
 ## Quick Start
 
@@ -61,9 +75,11 @@ Open [http://localhost:8080](http://localhost:8080).
 
 ## First Run
 
-On first launch, Agent Studio runs a **setup wizard** that auto-detects your projects and git repos, configures default models and permissions, and optionally scaffolds an agent system. You can skip steps and change everything later in Settings.
+On first launch, Agent Studio runs a setup wizard that detects your projects and git repos, configures default models and permissions, and offers to scaffold an agent system.
 
-After setup, press `Cmd+N` to launch your first session. The grid handles layout automatically.
+You can use Agent Studio in two ways. If you just want the session dashboard -- the terminal grid, cost tracking, git management -- skip the agent setup and start launching sessions immediately. If you want the full agent operations layer, the wizard walks you through choosing agents, picking a workflow template, and generating the scaffolding files for your project.
+
+Everything is configurable after setup through the Settings UI.
 
 ## Why Not Just Terminal Tabs?
 
@@ -76,12 +92,12 @@ After setup, press `Cmd+N` to launch your first session. The grid handles layout
 | Git status across repos | Switch between terminals | Single dashboard |
 | Create PRs | CLI commands | Built-in modal |
 | Scaffold agent systems | Manual file creation | Guided wizard with templates |
-| Session presets | Aliases/scripts | Built-in (Quick Chat, Sprint, Security Audit, etc.) |
+| Scheduled automations | Cron + scripts | Built-in with approval gates |
 | Kill runaway agents | Find PID, kill manually | One click |
 
 ## How It Works
 
-Agent Studio does not call the Anthropic API. It spawns real Claude Code CLI processes using `node-pty` (the same library VS Code uses for its terminal) and pipes I/O through a WebSocket to the browser. You get the exact same behavior as your local terminal -- permissions, tools, MCP servers -- with a visual layer on top.
+Agent Studio does not call the Anthropic API directly. It spawns real Claude Code CLI processes and pipes I/O through a WebSocket to the browser. You get the exact same behavior as your local terminal -- permissions, tools, MCP servers -- with a management layer on top.
 
 ```
 Browser (xterm.js)  <-->  WebSocket  <-->  Express Server  <-->  node-pty  <-->  Claude Code CLI
@@ -93,11 +109,7 @@ Everything runs on a single port. One command to start, one URL to open. See [AR
 
 Agent Studio stores config in `.agent-studio.json` in your working directory. It generates automatically on first run. Edit it directly or use the Settings UI.
 
-Key options: projects (paths, prod flags, tracked branches), default model (opus/sonnet/haiku), permissions mode, dev server commands, and workflow definitions. See [HOWTO.md](HOWTO.md) for the full configuration guide.
-
-## Keyboard Shortcuts
-
-`Cmd+K` opens the command palette -- from there you can find any action. `Cmd+N` launches a new session, `Cmd+1` through `Cmd+6` jump to sessions by grid position, and `Cmd+Enter` toggles fullscreen. Full shortcut reference is in [HOWTO.md](HOWTO.md).
+Key options: projects (paths, prod flags, tracked branches), default model, permissions mode, dev server commands, automation schedules, and workflow definitions. See [HOWTO.md](HOWTO.md) for the full configuration guide.
 
 ## Docker
 
@@ -108,14 +120,12 @@ docker run -it -p 8080:8080 -v $HOME:$HOME agent-studio
 
 Mount your home directory so Claude Code can access your projects and config. The CLI must be available inside the container.
 
-## Roadmap
+## Requirements
 
-- AI-powered agent generation: describe your project, get tailored agents
-- Headless automation with approval gates
-- GitHub/GitLab webhook triggers for automatic agent responses
-- Team multiplayer with shared dashboards
-- Cost budgets and alerts
-- Session recordings and replay
+- **Node.js 22+**
+- **[Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)** installed and authenticated
+- **Git**
+- macOS or Linux (Windows is untested)
 
 ## Contributing
 
