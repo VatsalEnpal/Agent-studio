@@ -21,7 +21,7 @@ import { PRModal } from "@/components/git/pr-modal";
 import { ToastContainer } from "@/components/ui/toast";
 
 import { ErrorBoundary } from "@/components/ui/error-boundary";
-import { SetupWizard } from "@/components/setup/setup-wizard";
+import { Onboarding } from "@/components/setup/onboarding";
 import type { Session, WsMessage, RepoStatus } from "@/lib/types";
 import { PanelLeftOpen } from "lucide-react";
 
@@ -551,7 +551,7 @@ export default function Home() {
 
   if (showSetupWizard) {
     return (
-      <SetupWizard
+      <Onboarding
         onComplete={() => {
           setShowSetupWizard(false);
           // Re-fetch config to pick up new defaults
