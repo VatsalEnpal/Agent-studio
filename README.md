@@ -50,14 +50,14 @@ This is how you set up a team of AI agents for your project and keep them runnin
 - Agent scaffolding (generates `.claude/agents/`, `ai-agents/` directory structure, memory index)
 - Agent team configuration (orchestrator, frontend, backend, QA, security, PMO, documentation, clearing)
 - AI agent generation -- describe your project, Claude analyzes your codebase and generates tailored agent definitions (uses Haiku for analysis, Sonnet for generation, costs ~$0.02 per setup)
-- Automation engine with scheduled headless Claude Code runs
-- Reports dashboard for reviewing and approving automated actions
+- Automation engine with scheduled headless Claude Code runs (create, trigger, schedule)
+- Approval-gated reports -- automations produce reports with status "pending"; approve or dismiss the full report, or approve individual actions one by one. Nothing touches your codebase without sign-off
+- Reports dashboard with Approve/Dismiss per report and per action
 - Shared memory browser with search and filtering
 - Workflow template library
 
 ### In Development
 
-- **Approval-gated automations** -- scheduled headless scans produce reports; nothing happens until you approve. The engine exists, the approval flow is next. *Why: automated agents should never change your code without your say-so.*
 - **Cost budgets and alerts** -- set a dollar limit per session or per day, get warned before you burn through it. *Why: a single runaway session can cost real money, and there is no built-in kill switch.*
 - **Session recordings** -- replay what an agent did step by step, see the full conversation after it finishes. *Why: when something goes wrong, you need to trace what the agent actually did, not guess from the diff.*
 - **Webhook triggers** -- connect to GitHub push events to auto-trigger agent scans when code lands on main. *Why: the best time to catch a problem is right after the code that caused it was merged.*
