@@ -361,6 +361,218 @@ async function main() {
     res.json(AUTOMATION_TEMPLATES);
   });
 
+  // --- Rich Automation Templates API (with prompt templates + applicability) ---
+  app.get("/api/automation-templates/rich", (_req, res) => {
+    res.json(RICH_TEMPLATES);
+  });
+
+  // --- Automation Suggestions API ---
+  app.get("/api/automation-suggestions", (req, res) => {
+    try {
+      const projectPath = req.query["project"] as string | undefined;
+      if (!projectPath) {
+        res.status(400).json({ error: "Missing 'project' query parameter" });
+        return;
+      }
+      const { existsSync: fsExists } = require("node:fs") as typeof import("node:fs");
+      if (!fsExists(projectPath)) {
+        res.status(404).json({ error: "Project path does not exist" });
+        return;
+      }
+      const profile = analyzeProjectEnhanced(projectPath);
+      const suggestions = suggestAutomations(profile, projectPath);
+      res.json({ profile: { name: profile.name, languages: profile.languages, frameworks: profile.frameworks }, suggestions });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- Create Automation from Template ---
+  app.post("/api/automations/from-template", (req, res) => {
+    try {
+      const { templateId, projectPath, schedule, model } = req.body as {
+        templateId?: string;
+        projectPath?: string;
+        schedule?: string;
+        model?: "opus" | "sonnet" | "haiku";
+      };
+      if (!templateId || !projectPath) {
+        res.status(400).json({ error: "Missing templateId or projectPath" });
+        return;
+      }
+      const template = getTemplate(templateId);
+      if (!template) {
+        res.status(404).json({ error: `Template '${templateId}' not found` });
+        return;
+      }
+      const prompt = fillPromptTemplate(template.promptTemplate, { projectPath });
+      const auto = automationEngine.addAutomation({
+        name: template.name,
+        description: template.description,
+        schedule: schedule ?? template.defaultSchedule,
+        agent: "none",
+        model: model ?? template.defaultModel,
+        prompt,
+        enabled: true,
+      });
+      // Persist to config
+      const cfg = getConfig();
+      cfg.automations = automationEngine.toConfig();
+      saveConfig(cfg);
+      reloadConfig();
+      res.status(201).json(auto);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- Generate Automation from Natural Language Description ---
+  app.post("/api/automations/from-description", async (req, res) => {
+    try {
+      const { description, projectPath } = req.body as {
+        description?: string;
+        projectPath?: string;
+      };
+      if (!description || !projectPath) {
+        res.status(400).json({ error: "Missing description or projectPath" });
+        return;
+      }
+
+      // Use Claude --print to generate an automation config from the description
+      const generationPrompt = `You are an automation configuration generator for a developer tool called Agent Studio.
+
+The user wants to create an automation for their project at: ${projectPath}
+Their description: "${description}"
+
+Generate a JSON automation configuration. The automation will run Claude headlessly with the prompt you write.
+
+Output ONLY valid JSON (no markdown fences, no explanation):
+{
+  "name": "Short name for this automation (2-4 words)",
+  "description": "One sentence description",
+  "schedule": "every 2h|every 6h|daily|weekly",
+  "model": "haiku|sonnet|opus",
+  "prompt": "The detailed prompt that Claude will execute. Include specific commands to run, what to check, and the expected output format. Reference the project path: ${projectPath}"
+}
+
+Choose the schedule and model based on the task:
+- Lightweight checks (lint, type check): haiku, every 2h
+- Code review, security: sonnet, every 6h or daily
+- Complex analysis, refactoring suggestions: opus, daily or weekly`;
+
+      const { spawn: spawnProc } = await import("node:child_process");
+
+      const output = await new Promise<string>((resolve) => {
+        try {
+          const proc = spawnProc("claude", ["--print", "--model", "haiku", generationPrompt], {
+            cwd: projectPath,
+            env: { ...process.env },
+            timeout: 60_000,
+          });
+          let stdout = "";
+          proc.stdout.on("data", (data: Buffer) => {
+            stdout += data.toString("utf-8");
+          });
+          proc.on("close", () => resolve(stdout));
+          proc.on("error", () => resolve(""));
+        } catch {
+          resolve("");
+        }
+      });
+
+      if (!output.trim()) {
+        res.status(500).json({ error: "Failed to generate automation — Claude CLI may not be available" });
+        return;
+      }
+
+      // Try to parse the JSON from the output
+      let config: { name: string; description: string; schedule: string; model: string; prompt: string };
+      try {
+        // Strip any markdown fences if present
+        const cleaned = output.replace(/```json?\n?/g, "").replace(/```\n?/g, "").trim();
+        config = JSON.parse(cleaned) as typeof config;
+      } catch {
+        res.status(500).json({ error: "Failed to parse generated automation config", raw: output });
+        return;
+      }
+
+      // Return the generated config for user approval (don't auto-create)
+      res.json({
+        generated: true,
+        automation: {
+          name: config.name || "Custom Automation",
+          description: config.description || description,
+          schedule: config.schedule || "daily",
+          agent: "none",
+          model: (config.model === "opus" || config.model === "sonnet" || config.model === "haiku") ? config.model : "sonnet",
+          prompt: config.prompt || description,
+          enabled: true,
+        },
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- CLAUDE.md Generator API ---
+  app.post("/api/generate-claudemd", (req, res) => {
+    try {
+      const { projectPath, preserveExisting } = req.body as {
+        projectPath?: string;
+        preserveExisting?: boolean;
+      };
+      if (!projectPath) {
+        res.status(400).json({ error: "Missing projectPath" });
+        return;
+      }
+      const { existsSync: fsExists } = require("node:fs") as typeof import("node:fs");
+      if (!fsExists(projectPath)) {
+        res.status(404).json({ error: "Project path does not exist" });
+        return;
+      }
+
+      // Analyze the project
+      const profile = analyzeProjectEnhanced(projectPath);
+
+      // Check for generated agents
+      const { readdirSync } = require("node:fs") as typeof import("node:fs");
+      const { join: joinPath, basename: baseName } = require("node:path") as typeof import("node:path");
+      const agentsDir = joinPath(projectPath, ".claude", "agents");
+      const agents: Array<{ id: string; name: string; description: string; model: "opus" | "sonnet" | "haiku"; mdContent: string }> = [];
+      if (fsExists(agentsDir)) {
+        try {
+          const files = readdirSync(agentsDir).filter((f: string) => f.endsWith(".md"));
+          for (const file of files) {
+            agents.push({
+              id: baseName(file, ".md"),
+              name: baseName(file, ".md"),
+              description: `Agent from ${profile.name}`,
+              model: "sonnet",
+              mdContent: "",
+            });
+          }
+        } catch {
+          // Skip if can't read
+        }
+      }
+
+      const result = writeClaudeMd({
+        analysis: profile,
+        agents,
+        projectPath,
+        preserveExisting,
+      });
+
+      res.json(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
   // --- Reports API ---
   app.get("/api/reports", (_req, res) => {
     try {
