@@ -1,0 +1,50 @@
+{
+  "name": "agent-studio",
+  "version": "0.1.0",
+  "description": "Web-based command center for AI coding agents. Manage Claude Code sessions, custom agents, and automated workflows from one dashboard.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VatsalEnpal/Agent-studio.git"
+  },
+  "keywords": ["claude", "ai-agents", "claude-code", "terminal", "automation"],
+  "scripts": {
+    "dev": "tsx server/index.ts",
+    "build": "next build",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.0",
+    "@radix-ui/react-dropdown-menu": "^2.1.0",
+    "@radix-ui/react-tooltip": "^1.1.0",
+    "@xterm/addon-fit": "^0.12.0-beta.195",
+    "@xterm/addon-webgl": "^0.20.0-beta.194",
+    "@xterm/xterm": "^6.1.0-beta.195",
+    "chokidar": "^4.0.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "express": "^5.1.0",
+    "lucide-react": "^0.577.0",
+    "next": "^16.2.1",
+    "node-pty": "^1.0.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-resizable-panels": "^3.0.0",
+    "tailwind-merge": "^3.0.0",
+    "tailwindcss": "^3.4.0",
+    "ws": "^8.18.0",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/express": "^5",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/ws": "^8",
+    "autoprefixer": "^10",
+    "postcss": "^8",
+    "tsx": "^4.19.0",
+    "typescript": "^5",
+    "vitest": "^4.1.0"
+  }
+}

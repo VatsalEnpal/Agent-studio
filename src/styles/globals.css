@@ -1,0 +1,170 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #0a0a0a;
+  color: #cccccc;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* xterm.js terminal container */
+.xterm {
+  padding: 2px 4px;
+}
+
+/* Scrollbar styling for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+/* Keyboard shortcut kbd styling */
+kbd {
+  font-family: Menlo, Consolas, "Courier New", monospace;
+}
+
+/* ============================================
+   Radix Dialog animations
+   ============================================ */
+[data-state="open"][data-radix-dialog-overlay] {
+  animation: fadeIn 150ms ease-out;
+}
+
+[data-state="closed"][data-radix-dialog-overlay] {
+  animation: fadeOut 100ms ease-in;
+}
+
+[data-state="open"][data-radix-dialog-content] {
+  animation: slideIn 150ms ease-out;
+}
+
+[data-state="closed"][data-radix-dialog-content] {
+  animation: slideOut 100ms ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+
+/* ============================================
+   Toast notifications
+   ============================================ */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+.animate-toast-in {
+  animation: toastIn 250ms ease-out;
+}
+
+/* ============================================
+   Fullscreen overlay fade
+   ============================================ */
+@keyframes fullscreenFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fullscreenFadeIn 200ms ease-out;
+}
+
+/* ============================================
+   Activity feed entry animation
+   ============================================ */
+@keyframes feedEntryIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-feed-in {
+  animation: feedEntryIn 300ms ease-out;
+}
+
+/* ============================================
+   Status dot pulse (for building state)
+   ============================================ */
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-status-pulse {
+  animation: statusPulse 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   Smooth transitions for interactive elements
+   ============================================ */
+
+/* Gate badge color transitions */
+.gate-badge {
+  transition: background-color 400ms ease, color 400ms ease, border-color 400ms ease;
+}
+
+/* Terminal focus border transition */
+.terminal-pane-border {
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+/* Sidebar collapse transition */
+.sidebar-transition {
+  transition: width 200ms ease, opacity 150ms ease;
+}

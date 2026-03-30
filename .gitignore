@@ -1,0 +1,22 @@
+node_modules/
+.next/
+.env*
+
+# Config (user-specific, generated on first run)
+.agent-studio.json
+.settings.json
+
+# Logs
+*.log
+logs/
+
+# Test artifacts
+test-results/
+test-screenshots/
+qa-screenshots/
+
+# User data (not app code)
+ai-agents/
+
+# Build artifacts
+tsconfig.tsbuildinfo
