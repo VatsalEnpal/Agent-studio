@@ -16,6 +16,7 @@ import { CommandPalette } from "@/components/layout/command-palette";
 import { TeamsView } from "@/components/teams/teams-view";
 import { MemoryView } from "@/components/memory/memory-view";
 import { SettingsView } from "@/components/settings/settings-view";
+import { ReportsView } from "@/components/reports/reports-view";
 import { PRModal } from "@/components/git/pr-modal";
 import { ToastContainer } from "@/components/ui/toast";
 
@@ -361,6 +362,11 @@ export default function Home() {
           <div className={activeMode === "memory" ? "h-full" : "hidden"}>
             <ErrorBoundary fallbackLabel="Memory view error">
               <MemoryView />
+            </ErrorBoundary>
+          </div>
+          <div className={activeMode === "reports" ? "h-full" : "hidden"}>
+            <ErrorBoundary fallbackLabel="Reports view error">
+              <ReportsView />
             </ErrorBoundary>
           </div>
           <div className={activeMode === "settings" ? "h-full" : "hidden"}>

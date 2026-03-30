@@ -5,6 +5,7 @@ import {
   Monitor,
   Users,
   Brain,
+  FileText,
   Settings,
   Maximize,
   Minimize,
@@ -27,6 +28,7 @@ const ALL_TABS: TabConfig[] = [
   { id: "sessions", label: "Sessions", icon: Monitor },
   { id: "teams", label: "Teams", icon: Users },
   { id: "memory", label: "Memory", icon: Brain },
+  { id: "reports", label: "Reports", icon: FileText },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
