@@ -68,6 +68,19 @@ export function SettingsAutomations() {
   const [loading, setLoading] = useState(true);
   const [showCreator, setShowCreator] = useState(false);
   const [runningId, setRunningId] = useState<string | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<Array<{
+    templateId: string;
+    name: string;
+    description: string;
+    schedule: string;
+    model: "opus" | "sonnet" | "haiku";
+    reason: string;
+    priority: "recommended" | "optional";
+  }>>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [descriptionInput, setDescriptionInput] = useState("");
+  const [generatingFromDesc, setGeneratingFromDesc] = useState(false);
 
   // Fetch automations and templates
   useEffect(() => {
@@ -175,6 +188,108 @@ export function SettingsAutomations() {
     [addToast],
   );
 
+  const loadSuggestions = useCallback(async () => {
+    setSuggestionsLoading(true);
+    setShowSuggestions(true);
+    try {
+      // Get the first project path from config
+      const cfgRes = await fetch("/api/config");
+      if (!cfgRes.ok) return;
+      const cfgData = await cfgRes.json() as { config: { projects?: Array<{ path: string }> } };
+      const projectPath = cfgData.config?.projects?.[0]?.path;
+      if (!projectPath) {
+        addToast("No project configured — add one in Settings first", "error");
+        return;
+      }
+      const res = await fetch(`/api/automation-suggestions?project=${encodeURIComponent(projectPath)}`);
+      if (res.ok) {
+        const data = await res.json() as {
+          suggestions: Array<{
+            template: { id: string; name: string; description: string; defaultSchedule: string; defaultModel: "opus" | "sonnet" | "haiku" };
+            reason: string;
+            priority: "recommended" | "optional";
+          }>;
+        };
+        setSuggestions(
+          data.suggestions.map((s) => ({
+            templateId: s.template.id,
+            name: s.template.name,
+            description: s.template.description,
+            schedule: s.template.defaultSchedule,
+            model: s.template.defaultModel,
+            reason: s.reason,
+            priority: s.priority,
+          })),
+        );
+      }
+    } catch {
+      addToast("Failed to load suggestions", "error");
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }, [addToast]);
+
+  const addFromSuggestion = useCallback(
+    async (templateId: string) => {
+      try {
+        const cfgRes = await fetch("/api/config");
+        if (!cfgRes.ok) return;
+        const cfgData = await cfgRes.json() as { config: { projects?: Array<{ path: string }> } };
+        const projectPath = cfgData.config?.projects?.[0]?.path;
+        if (!projectPath) return;
+
+        const res = await fetch("/api/automations/from-template", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ templateId, projectPath }),
+        });
+        if (res.ok) {
+          const created = (await res.json()) as Automation;
+          setAutomations((prev) => [...prev, created]);
+          setSuggestions((prev) => prev.filter((s) => s.templateId !== templateId));
+          addToast(`Added "${created.name}" automation`, "success");
+        }
+      } catch {
+        addToast("Failed to add automation", "error");
+      }
+    },
+    [addToast],
+  );
+
+  const generateFromDescription = useCallback(async () => {
+    if (!descriptionInput.trim()) return;
+    setGeneratingFromDesc(true);
+    try {
+      const cfgRes = await fetch("/api/config");
+      if (!cfgRes.ok) return;
+      const cfgData = await cfgRes.json() as { config: { projects?: Array<{ path: string }> } };
+      const projectPath = cfgData.config?.projects?.[0]?.path;
+      if (!projectPath) {
+        addToast("No project configured", "error");
+        return;
+      }
+
+      const res = await fetch("/api/automations/from-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: descriptionInput.trim(), projectPath }),
+      });
+      if (res.ok) {
+        const data = await res.json() as { generated: boolean; automation: Omit<Automation, "id"> };
+        if (data.generated) {
+          await handleCreate(data.automation);
+          setDescriptionInput("");
+        }
+      } else {
+        addToast("Failed to generate automation from description", "error");
+      }
+    } catch {
+      addToast("Failed to generate automation", "error");
+    } finally {
+      setGeneratingFromDesc(false);
+    }
+  }, [descriptionInput, addToast, handleCreate]);
+
   if (loading) {
     return (
       <section className="border border-console-border rounded-lg bg-console-panel">
@@ -198,13 +313,27 @@ export function SettingsAutomations() {
             ({automations.length})
           </span>
         </div>
-        <button
-          onClick={() => setShowCreator(true)}
-          className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors"
-        >
-          <Plus className="w-3 h-3" />
-          Add
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => void loadSuggestions()}
+            disabled={suggestionsLoading}
+            className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-console-dim hover:text-console-text bg-console-faint/50 hover:bg-console-faint rounded transition-colors disabled:opacity-50"
+          >
+            {suggestionsLoading ? (
+              <Loader2 className="w-3 h-3 animate-spin" />
+            ) : (
+              <Zap className="w-3 h-3" />
+            )}
+            Suggestions
+          </button>
+          <button
+            onClick={() => setShowCreator(true)}
+            className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors"
+          >
+            <Plus className="w-3 h-3" />
+            Add
+          </button>
+        </div>
       </div>
 
       <div className="px-4 py-3 space-y-2">
@@ -278,6 +407,79 @@ export function SettingsAutomations() {
             </div>
           </div>
         ))}
+
+        {/* Suggestions */}
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="border border-console-accent/20 rounded-lg bg-console-accent/5 overflow-hidden">
+            <div className="px-3 py-2 border-b border-console-accent/20 flex items-center justify-between">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-console-accent">
+                Suggested for your project
+              </span>
+              <button
+                onClick={() => setShowSuggestions(false)}
+                className="p-0.5 text-console-dim hover:text-console-muted"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="px-3 py-2 space-y-1.5">
+              {suggestions.map((s) => (
+                <div
+                  key={s.templateId}
+                  className="flex items-center gap-3 px-2 py-2 bg-console-bg border border-console-border rounded"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-console-text">{s.name}</span>
+                      <span className="text-[9px] text-console-dim">{s.schedule}</span>
+                      <span className="text-[9px] text-console-dim">{s.model}</span>
+                      {s.priority === "recommended" && (
+                        <span className="text-[8px] px-1.5 py-0.5 bg-console-accent/20 text-console-accent rounded-full">
+                          recommended
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-console-dim mt-0.5 italic">{s.reason}</p>
+                  </div>
+                  <button
+                    onClick={() => void addFromSuggestion(s.templateId)}
+                    className="px-2 py-1 text-[10px] font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors shrink-0"
+                  >
+                    <Plus className="w-3 h-3 inline -mt-0.5 mr-0.5" />
+                    Add
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Create from description */}
+        <div className="flex items-center gap-2 pt-1">
+          <input
+            type="text"
+            value={descriptionInput}
+            onChange={(e) => setDescriptionInput(e.target.value)}
+            placeholder="Describe an automation... (e.g., 'Review code for security issues daily')"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && descriptionInput.trim()) {
+                void generateFromDescription();
+              }
+            }}
+            className="flex-1 px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim/50 focus:border-console-accent focus:outline-none"
+          />
+          <button
+            onClick={() => void generateFromDescription()}
+            disabled={!descriptionInput.trim() || generatingFromDesc}
+            className="px-2 py-1.5 text-[10px] font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+          >
+            {generatingFromDesc ? (
+              <Loader2 className="w-3 h-3 animate-spin" />
+            ) : (
+              "Generate"
+            )}
+          </button>
+        </div>
 
         {/* Creator */}
         {showCreator && (

@@ -153,7 +153,7 @@ export function SettingsWorkspace() {
       if (!analyzeRes.ok) throw new Error("Analysis failed");
       const analysis = await analyzeRes.json();
 
-      // Step 2: Generate
+      // Step 2: Generate (with CLAUDE.md)
       const genRes = await fetch("/api/agents/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -163,13 +163,17 @@ export function SettingsWorkspace() {
         const err = await genRes.json() as { error?: string };
         throw new Error(err.error ?? "Generation failed");
       }
-      const agents = await genRes.json() as Array<{ id: string; name: string; description: string; model: string; mdContent: string }>;
+      const genData = await genRes.json() as {
+        agents: Array<{ id: string; name: string; description: string; model: string; mdContent: string }>;
+        claudeMd?: string;
+      };
+      const agents = genData.agents ?? [];
 
-      // Step 3: Apply
+      // Step 3: Apply (including CLAUDE.md if generated)
       const applyRes = await fetch("/api/agents/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agents, projectPath }),
+        body: JSON.stringify({ agents, projectPath, claudeMd: genData.claudeMd }),
       });
       if (!applyRes.ok) throw new Error("Failed to write agent files");
       const result = await applyRes.json() as { created: string[] };

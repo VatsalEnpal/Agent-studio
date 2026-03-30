@@ -55,6 +55,7 @@ interface AiGenState {
   cliAvailable: boolean | null;
   analysis: Record<string, unknown> | null;
   agents: GeneratedAgentDef[];
+  claudeMd: string | null;
   error: string | null;
 }
 
@@ -79,7 +80,7 @@ type WorkflowType = "sprint" | "simple" | "custom";
 function getAllSteps(agentSystem: AgentSystemState) {
   const base = ["Welcome", "Projects", "Agent System", "Preferences"] as const;
   if (agentSystem.enabled && agentSystem.createNew) {
-    return [...base.slice(0, 3), "Agent Team", "Workflow", "Automation", ...base.slice(3)] as const;
+    return [...base.slice(0, 3), "Describe Project", "Agent Team", "Workflow", "Automation", ...base.slice(3)] as const;
   }
   return base;
 }
@@ -105,6 +106,12 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
     AVAILABLE_AGENTS.filter((a) => a.defaultOn).map((a) => a.id),
   );
 
+  // Step 4b (conditional): Describe Project
+  const [projectDescription, setProjectDescription] = useState("");
+  const [teamSize, setTeamSize] = useState<number | undefined>(undefined);
+  const [scanResult, setScanResult] = useState<Record<string, unknown> | null>(null);
+  const [scanning, setScanning] = useState(false);
+
   // Step 5 (conditional): Workflow
   const [workflow, setWorkflow] = useState<WorkflowType>("sprint");
 
@@ -112,6 +119,21 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
   const [telegramEnabled, setTelegramEnabled] = useState(false);
   const [schedulerEnabled, setSchedulerEnabled] = useState(false);
   const [schedulerInterval, setSchedulerInterval] = useState(2);
+
+  // Automation suggestions state
+  interface AutomationSuggestionUI {
+    templateId: string;
+    name: string;
+    description: string;
+    icon: string;
+    schedule: string;
+    model: "opus" | "sonnet" | "haiku";
+    reason: string;
+    priority: "recommended" | "optional";
+    enabled: boolean;
+  }
+  const [autoSuggestions, setAutoSuggestions] = useState<AutomationSuggestionUI[]>([]);
+  const [autoSuggestionsLoading, setAutoSuggestionsLoading] = useState(false);
 
   // Final: Preferences
   const [model, setModel] = useState<"opus" | "sonnet" | "haiku">("sonnet");
@@ -127,6 +149,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
     cliAvailable: null,
     analysis: null,
     agents: [],
+    claudeMd: null,
     error: null,
   });
   const [useAiAgents, setUseAiAgents] = useState(false);
@@ -232,6 +255,26 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
     })();
   }, []);
 
+  // Scan project for tech stack detection
+  const scanProject = useCallback(async () => {
+    if (!projects.length) return;
+    setScanning(true);
+    try {
+      const res = await fetch("/api/agents/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectPath: projects[0].path }),
+      });
+      if (res.ok) {
+        const data = await res.json() as Record<string, unknown>;
+        setScanResult(data);
+      }
+    } catch {
+      // Scan failed silently
+    }
+    setScanning(false);
+  }, [projects]);
+
   // Trigger AI generation when entering Agent Team step with "create new" and CLI available
   const triggerAiGeneration = useCallback(async () => {
     if (!projects.length) return;
@@ -239,30 +282,41 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
 
     setAiGen((prev) => ({ ...prev, status: "analyzing", error: null }));
     try {
-      // Step 1: Analyze project
-      const analyzeRes = await fetch("/api/agents/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectPath }),
-      });
-      if (!analyzeRes.ok) throw new Error("Failed to analyze project");
-      const analysis = await analyzeRes.json() as Record<string, unknown>;
+      // Step 1: Analyze project (use cached scan result if available)
+      let analysis: Record<string, unknown>;
+      if (scanResult) {
+        analysis = scanResult;
+      } else {
+        const analyzeRes = await fetch("/api/agents/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ projectPath }),
+        });
+        if (!analyzeRes.ok) throw new Error("Failed to analyze project");
+        analysis = await analyzeRes.json() as Record<string, unknown>;
+      }
 
       setAiGen((prev) => ({ ...prev, status: "generating", analysis }));
 
-      // Step 2: Generate agents
+      // Step 2: Generate agents (with user description and team size)
       const genRes = await fetch("/api/agents/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ analysis, projectPath }),
+        body: JSON.stringify({
+          analysis,
+          projectPath,
+          userDescription: projectDescription,
+          teamSize,
+        }),
       });
       if (!genRes.ok) {
         const errData = await genRes.json() as { error?: string };
         throw new Error(errData.error ?? "Generation failed");
       }
-      const agents = await genRes.json() as GeneratedAgentDef[];
+      const genData = await genRes.json() as { agents: GeneratedAgentDef[]; claudeMd?: string };
+      const agents = genData.agents ?? [];
 
-      setAiGen((prev) => ({ ...prev, status: "done", agents }));
+      setAiGen((prev) => ({ ...prev, status: "done", agents, claudeMd: genData.claudeMd ?? null }));
       setUseAiAgents(true);
       // Also update selectedAgents to match generated agents
       setSelectedAgents(agents.map((a) => a.id));
@@ -272,7 +326,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
       // Fall back to manual selection
       setUseAiAgents(false);
     }
-  }, [projects]);
+  }, [projects, scanResult, projectDescription, teamSize]);
 
   // Validate agent system path
   useEffect(() => {
@@ -364,6 +418,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
             body: JSON.stringify({
               agents: aiGen.agents.filter((a) => selectedAgents.includes(a.id)),
               projectPath,
+              claudeMd: aiGen.claudeMd,
             }),
           });
         }
@@ -475,6 +530,17 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               setAgentSystem={setAgentSystem}
             />
           )}
+          {currentStep === "Describe Project" && (
+            <DescribeProjectStep
+              projectDescription={projectDescription}
+              setProjectDescription={setProjectDescription}
+              teamSize={teamSize}
+              setTeamSize={setTeamSize}
+              scanResult={scanResult}
+              scanning={scanning}
+              onScan={scanProject}
+            />
+          )}
           {currentStep === "Agent Team" && (
             <AgentTeamStep
               selectedAgents={selectedAgents}
@@ -504,6 +570,51 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               setSchedulerEnabled={setSchedulerEnabled}
               schedulerInterval={schedulerInterval}
               setSchedulerInterval={setSchedulerInterval}
+              suggestions={autoSuggestions}
+              suggestionsLoading={autoSuggestionsLoading}
+              onToggleSuggestion={(templateId) => {
+                setAutoSuggestions((prev) =>
+                  prev.map((s) =>
+                    s.templateId === templateId ? { ...s, enabled: !s.enabled } : s,
+                  ),
+                );
+              }}
+              projectPath={projects[0]?.path}
+              onLoadSuggestions={async () => {
+                if (!projects[0]?.path || autoSuggestions.length > 0) return;
+                setAutoSuggestionsLoading(true);
+                try {
+                  const res = await fetch(
+                    `/api/automation-suggestions?project=${encodeURIComponent(projects[0].path)}`,
+                  );
+                  if (res.ok) {
+                    const data = await res.json() as {
+                      suggestions: Array<{
+                        template: { id: string; name: string; description: string; icon: string; defaultSchedule: string; defaultModel: "opus" | "sonnet" | "haiku" };
+                        reason: string;
+                        priority: "recommended" | "optional";
+                      }>;
+                    };
+                    setAutoSuggestions(
+                      data.suggestions.map((s) => ({
+                        templateId: s.template.id,
+                        name: s.template.name,
+                        description: s.template.description,
+                        icon: s.template.icon,
+                        schedule: s.template.defaultSchedule,
+                        model: s.template.defaultModel,
+                        reason: s.reason,
+                        priority: s.priority,
+                        enabled: s.priority === "recommended",
+                      })),
+                    );
+                  }
+                } catch {
+                  // Best effort
+                } finally {
+                  setAutoSuggestionsLoading(false);
+                }
+              }}
             />
           )}
           {currentStep === "Preferences" && (
@@ -982,6 +1093,137 @@ function AgentSystemStep({
   );
 }
 
+function DescribeProjectStep({
+  projectDescription,
+  setProjectDescription,
+  teamSize,
+  setTeamSize,
+  scanResult,
+  scanning,
+  onScan,
+}: {
+  projectDescription: string;
+  setProjectDescription: (v: string) => void;
+  teamSize: number | undefined;
+  setTeamSize: (v: number | undefined) => void;
+  scanResult: Record<string, unknown> | null;
+  scanning: boolean;
+  onScan: () => Promise<void>;
+}) {
+  const teamSizeOptions = [
+    { value: 1, label: "Solo" },
+    { value: 2, label: "2-3" },
+    { value: 4, label: "4-6" },
+    { value: 7, label: "7+" },
+  ];
+
+  const scanData = scanResult as {
+    frameworks?: string[];
+    languages?: string[];
+    database?: string;
+    testFramework?: string;
+    ciPlatform?: string;
+  } | null;
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-sm font-semibold text-console-text mb-1">
+          <Sparkles className="w-4 h-4 inline mr-1.5 -mt-0.5 text-console-accent" />
+          Tell us about your project
+        </h2>
+        <p className="text-xs text-console-dim">
+          This helps us generate agents tailored to YOUR project, not generic templates.
+        </p>
+      </div>
+
+      <textarea
+        value={projectDescription}
+        onChange={(e) => setProjectDescription(e.target.value)}
+        placeholder={"Describe your project in a few sentences. For example:\n\"React Native fitness app with FastAPI backend on AWS...\"\n\nThe more detail, the better the agents."}
+        rows={4}
+        className="w-full px-3 py-2 text-xs bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:border-console-accent focus:outline-none resize-y"
+      />
+
+      <button
+        onClick={() => void onScan()}
+        disabled={scanning}
+        className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-console-accent bg-console-accent/5 hover:bg-console-accent/10 border border-console-accent/20 hover:border-console-accent/40 rounded transition-all disabled:opacity-50"
+      >
+        {scanning ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        ) : (
+          <Settings className="w-3.5 h-3.5" />
+        )}
+        {scanning ? "Scanning..." : "Scan project for tech stack"}
+      </button>
+
+      {scanData && (
+        <div className="px-3 py-2.5 bg-console-bg border border-console-border rounded space-y-2">
+          <span className="text-[10px] text-console-muted font-medium">Detected:</span>
+          <div className="flex flex-wrap gap-1.5">
+            {scanData.frameworks?.map((fw) => (
+              <span key={fw} className="px-2 py-0.5 text-[10px] font-medium bg-console-accent/10 text-console-accent border border-console-accent/20 rounded-full">
+                {fw}
+              </span>
+            ))}
+            {scanData.languages?.map((lang) => (
+              <span key={lang} className="px-2 py-0.5 text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">
+                {lang}
+              </span>
+            ))}
+            {scanData.database && (
+              <span className="px-2 py-0.5 text-[10px] font-medium bg-green-500/10 text-green-400 border border-green-500/20 rounded-full">
+                {scanData.database}
+              </span>
+            )}
+            {scanData.testFramework && (
+              <span className="px-2 py-0.5 text-[10px] font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded-full">
+                {scanData.testFramework}
+              </span>
+            )}
+            {scanData.ciPlatform && (
+              <span className="px-2 py-0.5 text-[10px] font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-full">
+                {scanData.ciPlatform}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <label className="text-[10px] text-console-muted block mb-1.5">
+          <Users className="w-3 h-3 inline mr-1 -mt-0.5" />
+          Team size
+        </label>
+        <div className="flex gap-2">
+          {teamSizeOptions.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setTeamSize(teamSize === opt.value ? undefined : opt.value)}
+              className={cn(
+                "px-3 py-1.5 text-xs rounded border transition-all",
+                teamSize === opt.value
+                  ? "bg-console-accent/15 text-console-accent border-console-accent/30 font-medium"
+                  : "bg-console-bg text-console-muted border-console-border hover:border-console-muted",
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        <p className="text-[9px] text-console-dim mt-1">
+          {teamSize === 1
+            ? "Solo dev: fewer, broader agents"
+            : teamSize && teamSize >= 7
+              ? "Large team: specialized agents for each domain"
+              : "Affects agent count and specialization"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function AgentTeamStep({
   selectedAgents,
   toggleAgent,
@@ -1306,6 +1548,18 @@ function WorkflowStep({
   );
 }
 
+interface AutomationSuggestionItem {
+  templateId: string;
+  name: string;
+  description: string;
+  icon: string;
+  schedule: string;
+  model: "opus" | "sonnet" | "haiku";
+  reason: string;
+  priority: "recommended" | "optional";
+  enabled: boolean;
+}
+
 function AutomationStep({
   telegramEnabled,
   setTelegramEnabled,
@@ -1313,6 +1567,11 @@ function AutomationStep({
   setSchedulerEnabled,
   schedulerInterval,
   setSchedulerInterval,
+  suggestions,
+  suggestionsLoading,
+  onToggleSuggestion,
+  projectPath,
+  onLoadSuggestions,
 }: {
   telegramEnabled: boolean;
   setTelegramEnabled: (v: boolean) => void;
@@ -1320,7 +1579,19 @@ function AutomationStep({
   setSchedulerEnabled: (v: boolean) => void;
   schedulerInterval: number;
   setSchedulerInterval: (v: number) => void;
+  suggestions: AutomationSuggestionItem[];
+  suggestionsLoading: boolean;
+  onToggleSuggestion: (templateId: string) => void;
+  projectPath?: string;
+  onLoadSuggestions: () => void;
 }) {
+  useEffect(() => {
+    if (projectPath) {
+      onLoadSuggestions();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectPath]);
+
   return (
     <div className="space-y-4">
       <div>
@@ -1332,6 +1603,53 @@ function AutomationStep({
           These are optional. You can enable them later in Settings.
         </p>
       </div>
+
+      {/* Suggested Automations */}
+      {(suggestions.length > 0 || suggestionsLoading) && (
+        <div className="space-y-2">
+          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-console-accent">
+            Recommended automations for your project
+          </h3>
+          {suggestionsLoading ? (
+            <div className="flex items-center gap-2 px-3 py-4 text-xs text-console-dim">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              Analyzing project...
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              {suggestions.map((s) => (
+                <label
+                  key={s.templateId}
+                  className={cn(
+                    "flex items-start gap-3 px-3 py-2.5 rounded border cursor-pointer transition-all",
+                    s.enabled
+                      ? "bg-console-accent/10 border-console-accent/30"
+                      : "bg-console-bg border-console-border hover:border-console-muted",
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={s.enabled}
+                    onChange={() => onToggleSuggestion(s.templateId)}
+                    className="accent-console-accent mt-0.5"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-console-text">
+                        {s.name}
+                      </span>
+                      <span className="text-[9px] text-console-dim">{s.schedule}</span>
+                      <span className="text-[9px] text-console-dim">{s.model}</span>
+                    </div>
+                    <p className="text-[10px] text-console-muted mt-0.5">{s.description}</p>
+                    <p className="text-[10px] text-console-dim mt-0.5 italic">{s.reason}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="space-y-3">
         {/* Telegram */}
