@@ -74,11 +74,11 @@ interface SidebarProps {
   onKillSession: (id: string) => void;
 }
 
-function openFolder(path: string, app?: string) {
+function openFolder(repoPath: string, app?: string) {
   fetch("/api/git/open", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ path, app }),
+    body: JSON.stringify({ repo: repoPath, app }),
   }).catch(() => {
     // Best effort
   });

@@ -24,7 +24,9 @@ import {
 import { GitWatcher } from "./git-status.js";
 import { createPR, getRepoBranches } from "./pr-creator.js";
 import { getDevServers, startDevServer, stopDevServer, addCustomServer, removeCustomServer } from "./dev-servers.js";
-import { execSync, exec } from "node:child_process";
+import { execSync, exec, execFile } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 import os from "node:os";
 import type { SessionMeta, WsMessage } from "./types.js";
 import { WorkflowManager } from "./workflows/index.js";
@@ -46,6 +48,27 @@ const dev = process.env["NODE_ENV"] !== "production";
 
 const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
+
+/**
+ * Security: Validate that a project path is within allowed directories.
+ * Returns the resolved path if valid, or null if invalid.
+ */
+function validateProjectPath(inputPath: string): string | null {
+  const resolved = path.resolve(inputPath);
+  const home = os.homedir();
+  const tmp = os.tmpdir();
+  // Allow paths under home directory or /tmp
+  if (
+    resolved.startsWith(home) ||
+    resolved.startsWith(tmp) ||
+    resolved.startsWith("/tmp")
+  ) {
+    if (fs.existsSync(resolved)) {
+      return resolved;
+    }
+  }
+  return null;
+}
 
 async function main() {
   // Auto-generate config on first run if missing
@@ -374,13 +397,13 @@ async function main() {
         res.status(400).json({ error: "Missing 'project' query parameter" });
         return;
       }
-      const { existsSync: fsExists } = require("node:fs") as typeof import("node:fs");
-      if (!fsExists(projectPath)) {
-        res.status(404).json({ error: "Project path does not exist" });
+      const validPath = validateProjectPath(projectPath);
+      if (!validPath) {
+        res.status(400).json({ error: "Invalid project path" });
         return;
       }
-      const profile = analyzeProjectEnhanced(projectPath);
-      const suggestions = suggestAutomations(profile, projectPath);
+      const profile = analyzeProjectEnhanced(validPath);
+      const suggestions = suggestAutomations(profile, validPath);
       res.json({ profile: { name: profile.name, languages: profile.languages, frameworks: profile.frameworks }, suggestions });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -401,12 +424,17 @@ async function main() {
         res.status(400).json({ error: "Missing templateId or projectPath" });
         return;
       }
+      const validPath = validateProjectPath(projectPath);
+      if (!validPath) {
+        res.status(400).json({ error: "Invalid project path" });
+        return;
+      }
       const template = getTemplate(templateId);
       if (!template) {
         res.status(404).json({ error: `Template '${templateId}' not found` });
         return;
       }
-      const prompt = fillPromptTemplate(template.promptTemplate, { projectPath });
+      const prompt = fillPromptTemplate(template.promptTemplate, { projectPath: validPath });
       const auto = automationEngine.addAutomation({
         name: template.name,
         description: template.description,
@@ -528,27 +556,25 @@ Choose the schedule and model based on the task:
         res.status(400).json({ error: "Missing projectPath" });
         return;
       }
-      const { existsSync: fsExists } = require("node:fs") as typeof import("node:fs");
-      if (!fsExists(projectPath)) {
-        res.status(404).json({ error: "Project path does not exist" });
+      const validPath = validateProjectPath(projectPath);
+      if (!validPath) {
+        res.status(400).json({ error: "Invalid project path" });
         return;
       }
 
       // Analyze the project
-      const profile = analyzeProjectEnhanced(projectPath);
+      const profile = analyzeProjectEnhanced(validPath);
 
       // Check for generated agents
-      const { readdirSync } = require("node:fs") as typeof import("node:fs");
-      const { join: joinPath, basename: baseName } = require("node:path") as typeof import("node:path");
-      const agentsDir = joinPath(projectPath, ".claude", "agents");
+      const agentsDir = path.join(validPath, ".claude", "agents");
       const agents: Array<{ id: string; name: string; description: string; model: "opus" | "sonnet" | "haiku"; mdContent: string }> = [];
-      if (fsExists(agentsDir)) {
+      if (fs.existsSync(agentsDir)) {
         try {
-          const files = readdirSync(agentsDir).filter((f: string) => f.endsWith(".md"));
+          const files = fs.readdirSync(agentsDir).filter((f: string) => f.endsWith(".md"));
           for (const file of files) {
             agents.push({
-              id: baseName(file, ".md"),
-              name: baseName(file, ".md"),
+              id: path.basename(file, ".md"),
+              name: path.basename(file, ".md"),
               description: `Agent from ${profile.name}`,
               model: "sonnet",
               mdContent: "",
@@ -562,7 +588,7 @@ Choose the schedule and model based on the task:
       const result = writeClaudeMd({
         analysis: profile,
         agents,
-        projectPath,
+        projectPath: validPath,
         preserveExisting,
       });
 
@@ -730,12 +756,12 @@ Choose the schedule and model based on the task:
         res.status(400).json({ error: "Missing projectPath" });
         return;
       }
-      const { existsSync: fsExists } = require("node:fs") as typeof import("node:fs");
-      if (!fsExists(projectPath)) {
-        res.status(404).json({ error: "Project path does not exist" });
+      const validPath = validateProjectPath(projectPath);
+      if (!validPath) {
+        res.status(400).json({ error: "Invalid project path" });
         return;
       }
-      const profile = analyzeProjectEnhanced(projectPath);
+      const profile = analyzeProjectEnhanced(validPath);
       res.json(profile);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -784,12 +810,12 @@ Choose the schedule and model based on the task:
         res.status(400).json({ error: "Missing projectPath" });
         return;
       }
-      const { existsSync: fsExists } = require("node:fs") as typeof import("node:fs");
-      if (!fsExists(projectPath)) {
-        res.status(404).json({ error: "Project path does not exist" });
+      const validPath = validateProjectPath(projectPath);
+      if (!validPath) {
+        res.status(400).json({ error: "Invalid project path" });
         return;
       }
-      const profile = analyzeProjectEnhanced(projectPath);
+      const profile = analyzeProjectEnhanced(validPath);
       const result = await previewAgents(profile, userDescription, teamSize);
       res.json({ agents: result.agents, claudeMd: result.claudeMd, profile });
     } catch (err) {
@@ -860,8 +886,13 @@ Choose the schedule and model based on the task:
         meta?: SessionMeta;
       };
 
+      if (!name || typeof name !== "string") {
+        res.status(400).json({ error: "Missing required field: name" });
+        return;
+      }
+
       const session = terminalManager.createSession({
-        name: name ?? "Agent",
+        name,
         command: command ?? "claude",
         args: args ?? ["--dangerously-skip-permissions"],
         cwd,
@@ -1238,7 +1269,7 @@ Choose the schedule and model based on the task:
         return;
       }
 
-      execSync("git add -A", {
+      execSync("git add -u", {
         cwd: repo,
         encoding: "utf-8",
         timeout: 10000,
@@ -1296,23 +1327,43 @@ Choose the schedule and model based on the task:
 
   app.post("/api/git/open", (req, res) => {
     try {
-      const { path: dirPath, app: appName } = req.body as {
-        path?: string;
+      const { repo, app: appChoice } = req.body as {
+        repo?: string;
         app?: string;
       };
-      if (!dirPath) {
-        res.status(400).json({ error: "Missing 'path' in request body" });
+      if (!repo || typeof repo !== "string") {
+        res.status(400).json({ error: "Missing repo path" });
         return;
       }
-      if (appName) {
-        execSync(`open -a "${appName}" "${dirPath}"`, { timeout: 5000 });
-      } else {
-        execSync(`open "${dirPath}"`, { timeout: 5000 });
+      // Validate path exists and is a directory
+      if (!fs.existsSync(repo) || !fs.statSync(repo).isDirectory()) {
+        res.status(400).json({ error: "Invalid directory path" });
+        return;
       }
-      res.status(200).json({ ok: true });
+      // Use execFile (not execSync with string interpolation) to prevent injection
+      if (appChoice === "terminal") {
+        execFile("open", ["-a", "Terminal", repo], (err) => {
+          if (err) res.status(500).json({ error: "Failed to open terminal" });
+          else res.json({ ok: true });
+        });
+      } else if (appChoice === "finder") {
+        execFile("open", [repo], (err) => {
+          if (err) res.status(500).json({ error: "Failed to open finder" });
+          else res.json({ ok: true });
+        });
+      } else if (appChoice === "code") {
+        execFile("code", [repo], (err) => {
+          if (err) res.status(500).json({ error: "Failed to open VS Code" });
+          else res.json({ ok: true });
+        });
+      } else {
+        execFile("open", [repo], (err) => {
+          if (err) res.status(500).json({ error: "Failed to open" });
+          else res.json({ ok: true });
+        });
+      }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      res.status(500).json({ error: message });
+      res.status(500).json({ error: "Failed to open" });
     }
   });
 
@@ -2457,15 +2508,28 @@ Choose the schedule and model based on the task:
     }
   });
 
+  // Custom error handler — no stack traces in responses
+  app.use(
+    (
+      err: Error,
+      _req: express.Request,
+      res: express.Response,
+      _next: express.NextFunction,
+    ) => {
+      // eslint-disable-next-line no-console
+      console.error("Server error:", err.message);
+      res.status(500).json({ error: "Internal server error" });
+    },
+  );
+
   // --- Next.js catch-all ---
   app.all("/{*path}", (req, res) => {
     return handle(req, res);
   });
 
-  // Listen on :: to accept both IPv4 and IPv6 connections.
-  // macOS resolves "localhost" to ::1 (IPv6). Binding only to
-  // 127.0.0.1 causes browser WebSocket connections to fail.
-  server.listen(port, "::", () => {
+  // Security: bind to localhost only — prevent network access
+  // Use "::1" for IPv6 localhost (macOS resolves localhost to ::1)
+  server.listen(port, "127.0.0.1", () => {
     // eslint-disable-next-line no-console
     console.log(`Agent Studio running on http://localhost:${port}`);
   });

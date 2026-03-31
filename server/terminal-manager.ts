@@ -2,10 +2,24 @@ import * as pty from "node-pty";
 import { randomUUID } from "node:crypto";
 import { execSync } from "node:child_process";
 
+const ALLOWED_COMMANDS = new Set([
+  "claude",
+  "bash",
+  "sh",
+  "zsh",
+  "node",
+  "python",
+  "python3",
+]);
+
 function resolveCommand(cmd: string): string {
   if (cmd.startsWith("/")) return cmd;
+  // Security: only allow alphanumeric, dash, underscore, dot
+  if (!/^[a-zA-Z0-9._-]+$/.test(cmd)) {
+    return cmd; // Don't try to resolve suspicious commands
+  }
   try {
-    return execSync(`which ${cmd}`, { encoding: "utf-8" }).trim();
+    return execSync(`which ${cmd}`, { encoding: "utf-8", timeout: 3000 }).trim();
   } catch {
     return cmd;
   }
@@ -31,6 +45,15 @@ export class TerminalManager {
   createSession(opts: CreateSessionOptions): Session {
     const id = randomUUID();
     const command = opts.command ?? "claude";
+
+    // Security: only allow known commands
+    const baseCommand = command.split("/").pop() ?? command;
+    if (!ALLOWED_COMMANDS.has(baseCommand)) {
+      throw new Error(
+        `Command "${baseCommand}" is not allowed. Allowed: ${[...ALLOWED_COMMANDS].join(", ")}`,
+      );
+    }
+
     const args = opts.args ?? ["--dangerously-skip-permissions"];
     const cwd = opts.cwd ?? process.cwd();
     const cols = opts.cols ?? 120;
