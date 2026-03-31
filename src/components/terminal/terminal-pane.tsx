@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
+import { WebglAddon } from "@xterm/addon-webgl";
 import "@xterm/xterm/css/xterm.css";
 import { X, Maximize2, Minimize2, Loader2, ZoomIn, ZoomOut } from "lucide-react";
 import { wsClient } from "@/lib/ws-client";
@@ -65,8 +66,8 @@ export function TerminalPane({
     const term = termRef.current;
     const fitAddon = fitAddonRef.current;
     if (!term || !fitAddon) return;
-    // Small delay to let the DOM update display from hidden to block
-    const timer = setTimeout(() => {
+    // Use rAF to wait for CSS layout to complete after display changes from hidden to block
+    requestAnimationFrame(() => {
       try {
         fitAddon.fit();
         wsClient.send({
@@ -78,8 +79,7 @@ export function TerminalPane({
       } catch {
         // Ignore fit errors
       }
-    }, 50);
-    return () => clearTimeout(timer);
+    });
   }, [visible, sessionId]);
 
   // Apply zoom changes to running terminal
@@ -149,6 +149,8 @@ export function TerminalPane({
       },
       scrollback: 10000,
       convertEol: true,
+      smoothScrollDuration: 0,
+      rescaleOverlappingGlyphs: false,
     });
 
     const fitAddon = new FitAddon();
@@ -156,23 +158,47 @@ export function TerminalPane({
 
     term.open(container);
 
-    requestAnimationFrame(() => {
-      try {
-        fitAddon.fit();
-      } catch {
-        // Ignore
-      }
-    });
+    // Use WebGL renderer for much faster rendering; fall back to canvas.
+    // MUST happen after open(). If WebGL fails, xterm falls back to canvas automatically.
+    try {
+      const webgl = new WebglAddon();
+      webgl.onContextLoss(() => {
+        webgl.dispose();
+        // Canvas fallback is automatic after dispose — just refit
+        requestAnimationFrame(() => {
+          try { fitAddon.fit(); } catch { /* ignore */ }
+        });
+      });
+      term.loadAddon(webgl);
+    } catch {
+      // WebGL not available — canvas renderer is the default
+    }
 
     fitAddonRef.current = fitAddon;
     termRef.current = term;
 
-    wsClient.send({
-      type: "terminal-resize",
-      sessionId,
-      cols: term.cols,
-      rows: term.rows,
-    });
+    // Fit after a short delay to ensure the container has non-zero dimensions.
+    // New sessions or tab switches can cause the container to be laid out with
+    // zero height initially; rAF alone isn't enough because CSS may still be
+    // transitioning from hidden to visible.
+    const fitAndResize = () => {
+      try {
+        fitAddon.fit();
+        wsClient.send({
+          type: "terminal-resize",
+          sessionId,
+          cols: term.cols,
+          rows: term.rows,
+        });
+      } catch {
+        // Ignore fit errors during initial layout
+      }
+    };
+
+    // First attempt: immediate rAF
+    requestAnimationFrame(fitAndResize);
+    // Second attempt: after layout settles (handles CSS transitions / display:none->block)
+    const fallbackTimer = setTimeout(fitAndResize, 100);
 
     const inputDisposable = term.onData((data: string) => {
       wsClient.send({
@@ -209,6 +235,7 @@ export function TerminalPane({
     resizeObserver.observe(container);
 
     return () => {
+      clearTimeout(fallbackTimer);
       inputDisposable.dispose();
       unsubscribe();
       resizeObserver.disconnect();
