@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 import os from "node:os";
 
 // ---------- Schema ----------
@@ -134,7 +134,7 @@ export function generateDefaultConfig(): AgentStudioConfig {
 
   // Parent directory as main project (if it's a git repo)
   if (existsSync(join(parentDir, ".git"))) {
-    const parentName = parentDir.split("/").pop() ?? "main-project";
+    const parentName = parentDir.split(sep).pop() ?? "main-project";
     projects.push({
       name: parentName,
       path: parentDir,
@@ -145,7 +145,7 @@ export function generateDefaultConfig(): AgentStudioConfig {
 
   // Current directory as project (if it's a git repo and different from parent)
   if (existsSync(join(cwd, ".git")) && cwd !== parentDir) {
-    const cwdName = cwd.split("/").pop() ?? "project";
+    const cwdName = cwd.split(sep).pop() ?? "project";
     if (!projects.some((p) => p.path === cwd)) {
       projects.push({
         name: cwdName,

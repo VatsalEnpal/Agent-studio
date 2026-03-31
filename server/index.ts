@@ -24,7 +24,8 @@ import {
 import { GitWatcher } from "./git-status.js";
 import { createPR, getRepoBranches } from "./pr-creator.js";
 import { getDevServers, startDevServer, stopDevServer, addCustomServer, removeCustomServer } from "./dev-servers.js";
-import { execSync, exec, execFile } from "node:child_process";
+import { execSync, exec } from "node:child_process";
+import { whichCommand, isAllowedPath, killProcess as platformKill, openInOS, openTerminal, openVSCode, getDiskUsage, isSchedulerLoaded, loadScheduler, unloadScheduler, IS_MAC } from "./platform.js";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
@@ -55,14 +56,7 @@ const handle = nextApp.getRequestHandler();
  */
 function validateProjectPath(inputPath: string): string | null {
   const resolved = path.resolve(inputPath);
-  const home = os.homedir();
-  const tmp = os.tmpdir();
-  // Allow paths under home directory or /tmp
-  if (
-    resolved.startsWith(home) ||
-    resolved.startsWith(tmp) ||
-    resolved.startsWith("/tmp")
-  ) {
+  if (isAllowedPath(resolved)) {
     if (fs.existsSync(resolved)) {
       return resolved;
     }
@@ -1340,29 +1334,29 @@ Choose the schedule and model based on the task:
         res.status(400).json({ error: "Invalid directory path" });
         return;
       }
-      // Use execFile (not execSync with string interpolation) to prevent injection
+      // Use cross-platform helpers to open directories
       if (appChoice === "terminal") {
-        execFile("open", ["-a", "Terminal", repo], (err) => {
+        openTerminal(repo, (err) => {
           if (err) res.status(500).json({ error: "Failed to open terminal" });
           else res.json({ ok: true });
         });
       } else if (appChoice === "finder") {
-        execFile("open", [repo], (err) => {
-          if (err) res.status(500).json({ error: "Failed to open finder" });
+        openInOS(repo, undefined, (err) => {
+          if (err) res.status(500).json({ error: "Failed to open file manager" });
           else res.json({ ok: true });
         });
       } else if (appChoice === "code") {
-        execFile("code", [repo], (err) => {
+        openVSCode(repo, (err) => {
           if (err) res.status(500).json({ error: "Failed to open VS Code" });
           else res.json({ ok: true });
         });
       } else {
-        execFile("open", [repo], (err) => {
+        openInOS(repo, undefined, (err) => {
           if (err) res.status(500).json({ error: "Failed to open" });
           else res.json({ ok: true });
         });
       }
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: "Failed to open" });
     }
   });
@@ -1605,13 +1599,7 @@ Choose the schedule and model based on the task:
 
   app.get("/api/pmo/status", (_req, res) => {
     try {
-      let isLoaded = false;
-      try {
-        const result = execSync("launchctl list 2>/dev/null", { timeout: 5000 }).toString();
-        isLoaded = result.includes("agent-studio");
-      } catch {
-        isLoaded = false;
-      }
+      const isLoaded = isSchedulerLoaded("agent-studio");
 
       // Read last scan from scan_log.md
       let lastScan: string | null = null;
@@ -1635,13 +1623,7 @@ Choose the schedule and model based on the task:
   // Async version that properly reads scan log
   app.get("/api/pmo/status-full", async (_req, res) => {
     try {
-      let isLoaded = false;
-      try {
-        const result = execSync("launchctl list 2>/dev/null", { timeout: 5000 }).toString();
-        isLoaded = result.includes("agent-studio");
-      } catch {
-        isLoaded = false;
-      }
+      const isLoaded = isSchedulerLoaded("agent-studio");
 
       const scanEntries = await readScanLog();
       const lastEntry = scanEntries.length > 0 ? scanEntries[scanEntries.length - 1] : null;
@@ -1675,7 +1657,11 @@ Choose the schedule and model based on the task:
 
   app.post("/api/pmo/start", (_req, res) => {
     try {
-      execSync(`launchctl load "${PMO_PLIST}" 2>/dev/null || true`, { timeout: 5000 });
+      if (!IS_MAC) {
+        res.status(501).json({ error: "PMO scheduler is only supported on macOS (launchd)" });
+        return;
+      }
+      loadScheduler(PMO_PLIST);
       res.json({ ok: true, status: "started" });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -1685,7 +1671,11 @@ Choose the schedule and model based on the task:
 
   app.post("/api/pmo/stop", (_req, res) => {
     try {
-      execSync(`launchctl unload "${PMO_PLIST}" 2>/dev/null || true`, { timeout: 5000 });
+      if (!IS_MAC) {
+        res.status(501).json({ error: "PMO scheduler is only supported on macOS (launchd)" });
+        return;
+      }
+      unloadScheduler(PMO_PLIST);
       res.json({ ok: true, status: "stopped" });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -1719,7 +1709,11 @@ Choose the schedule and model based on the task:
         res.status(403).json({ error: "Cannot kill this process" });
         return;
       }
-      process.kill(pid, "SIGTERM");
+      const killed = platformKill(pid);
+      if (!killed) {
+        res.status(500).json({ error: "Failed to kill process" });
+        return;
+      }
       res.json({ ok: true, pid });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -2216,20 +2210,11 @@ Choose the schedule and model based on the task:
       let diskUsed = 0;
       let diskTotal = 0;
       let diskPercentage = 0;
-      try {
-        const dfOutput = execSync("df -k /", { encoding: "utf-8", timeout: 3000 });
-        const lines = dfOutput.trim().split("\n");
-        if (lines.length >= 2) {
-          const parts = lines[1].split(/\s+/);
-          // df -k outputs: Filesystem 1K-blocks Used Available Use% Mounted
-          const totalBlocks = parseInt(parts[1], 10) || 0;
-          const usedBlocks = parseInt(parts[2], 10) || 0;
-          diskTotal = totalBlocks / (1024 * 1024); // Convert to GB
-          diskUsed = usedBlocks / (1024 * 1024);
-          diskPercentage = diskTotal > 0 ? (diskUsed / diskTotal) * 100 : 0;
-        }
-      } catch {
-        // Disk stats unavailable
+      const diskInfo = getDiskUsage();
+      if (diskInfo) {
+        diskUsed = diskInfo.used;
+        diskTotal = diskInfo.total;
+        diskPercentage = diskInfo.percentage;
       }
 
       // Active server count
@@ -2309,7 +2294,8 @@ Choose the schedule and model based on the task:
 
       // Check Claude Code CLI
       try {
-        const claudePath = execSync("which claude", { encoding: "utf-8", timeout: 5000 }).trim();
+        const claudePath = whichCommand("claude");
+        if (!claudePath) throw new Error("not found");
         checks.claudeCode.installed = true;
         checks.claudeCode.path = claudePath;
         try {
@@ -2351,13 +2337,7 @@ Choose the schedule and model based on the task:
   app.post("/api/system/install-claude", async (_req, res) => {
     try {
       // Check if npm is available
-      let npmPath: string;
-      try {
-        npmPath = execSync("which npm", { encoding: "utf-8", timeout: 5000 }).trim();
-      } catch {
-        res.status(400).json({ error: "npm is not installed. Install Node.js first." });
-        return;
-      }
+      const npmPath = whichCommand("npm");
       if (!npmPath) {
         res.status(400).json({ error: "npm is not installed. Install Node.js first." });
         return;

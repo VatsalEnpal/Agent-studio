@@ -1,4 +1,5 @@
-import { spawn, execSync } from "node:child_process";
+import { spawn } from "node:child_process";
+import { whichCommand } from "./platform.js";
 import {
   readFileSync,
   readdirSync,
@@ -70,12 +71,7 @@ function setStatus(status: GenerationStatus, extra?: Partial<GenerationState>) {
 // ---------- Claude CLI check ----------
 
 export function isClaudeCliAvailable(): boolean {
-  try {
-    execSync("which claude", { encoding: "utf-8", timeout: 5000 });
-    return true;
-  } catch {
-    return false;
-  }
+  return whichCommand("claude") !== null;
 }
 
 // ---------- Prompt builder ----------

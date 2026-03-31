@@ -1,6 +1,6 @@
 import * as pty from "node-pty";
 import { randomUUID } from "node:crypto";
-import { execSync } from "node:child_process";
+import { whichCommand, IS_WINDOWS } from "./platform.js";
 
 const ALLOWED_COMMANDS = new Set([
   "claude",
@@ -10,19 +10,12 @@ const ALLOWED_COMMANDS = new Set([
   "node",
   "python",
   "python3",
+  ...(IS_WINDOWS ? ["powershell.exe", "cmd.exe", "pwsh.exe"] : []),
 ]);
 
 function resolveCommand(cmd: string): string {
-  if (cmd.startsWith("/")) return cmd;
-  // Security: only allow alphanumeric, dash, underscore, dot
-  if (!/^[a-zA-Z0-9._-]+$/.test(cmd)) {
-    return cmd; // Don't try to resolve suspicious commands
-  }
-  try {
-    return execSync(`which ${cmd}`, { encoding: "utf-8", timeout: 3000 }).trim();
-  } catch {
-    return cmd;
-  }
+  if (cmd.startsWith("/") || (IS_WINDOWS && /^[a-zA-Z]:\\/.test(cmd))) return cmd;
+  return whichCommand(cmd) ?? cmd;
 }
 import type { Session, SessionMeta, WsMessage } from "./types.js";
 

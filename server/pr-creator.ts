@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import { IS_WINDOWS } from "./platform.js";
 
 export interface CreatePROptions {
   repo: string; // path to the git repo
@@ -71,12 +72,15 @@ function getAzureToken(): string | null {
 
   // 2. Try git credential helper
   try {
+    const credentialInput = IS_WINDOWS
+      ? 'echo protocol=https& echo host=dev.azure.com& echo.'
+      : 'printf "protocol=https\\nhost=dev.azure.com\\n\\n"';
     const result = execSync(
-      'printf "protocol=https\\nhost=dev.azure.com\\n\\n" | git credential fill',
+      `${credentialInput} | git credential fill`,
       {
         encoding: "utf-8",
         timeout: 5000,
-        shell: "/bin/bash",
+        shell: IS_WINDOWS ? "cmd.exe" : "/bin/bash",
       },
     ).trim();
 

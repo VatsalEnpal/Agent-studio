@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
-import { execSync } from "node:child_process";
+import { findChildPids } from "./platform.js";
 
 export interface SessionUsage {
   pid: number;
@@ -318,44 +318,19 @@ export function findSessionIdForPtyPid(ptyPid: number): string | null {
   }
 
   // Try to find a session file whose PID is a child of ptyPid
-  // by checking process tree via ps
-  try {
-    const raw = execSync(`pgrep -P ${ptyPid} 2>/dev/null || true`, {
-      encoding: "utf-8",
-      timeout: 2000,
-    });
-    const childPids = raw
-      .trim()
-      .split("\n")
-      .map((s) => parseInt(s.trim(), 10))
-      .filter((n) => !isNaN(n));
-
-    for (const childPid of childPids) {
-      if (sessionFiles.has(childPid)) {
-        return sessionFiles.get(childPid)!.sessionId;
-      }
-      // Go one more level deep
-      try {
-        const grandRaw = execSync(`pgrep -P ${childPid} 2>/dev/null || true`, {
-          encoding: "utf-8",
-          timeout: 2000,
-        });
-        const grandPids = grandRaw
-          .trim()
-          .split("\n")
-          .map((s) => parseInt(s.trim(), 10))
-          .filter((n) => !isNaN(n));
-        for (const gp of grandPids) {
-          if (sessionFiles.has(gp)) {
-            return sessionFiles.get(gp)!.sessionId;
-          }
-        }
-      } catch {
-        // Skip
+  // by checking process tree
+  const childPids = findChildPids(ptyPid);
+  for (const childPid of childPids) {
+    if (sessionFiles.has(childPid)) {
+      return sessionFiles.get(childPid)!.sessionId;
+    }
+    // Go one more level deep
+    const grandPids = findChildPids(childPid);
+    for (const gp of grandPids) {
+      if (sessionFiles.has(gp)) {
+        return sessionFiles.get(gp)!.sessionId;
       }
     }
-  } catch {
-    // Skip
   }
 
   return null;

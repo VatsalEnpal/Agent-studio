@@ -1,8 +1,9 @@
-import { execSync, spawn, type ChildProcess } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { getConfig } from "./config.js";
+import { findNodeListeningPorts, findPortsForPid, getProcessCwd, killProcessGroup } from "./platform.js";
 
 export interface DevServer {
   pid: number;
@@ -86,69 +87,37 @@ function detectRunningServers(): DevServer[] {
   const selfPort = parseInt(process.env["PORT"] ?? "8080", 10);
 
   try {
-    const raw = execSync(
-      "lsof -iTCP -sTCP:LISTEN -P -n 2>/dev/null | grep -i node || true",
-      { encoding: "utf-8", timeout: 5000 },
-    ).trim();
-
-    if (!raw) return servers;
+    const listening = findNodeListeningPorts();
+    if (listening.length === 0) return servers;
 
     const seen = new Set<number>();
-    for (const line of raw.split("\n")) {
-      if (!line.trim()) continue;
-      const parts = line.split(/\s+/);
-      // lsof output: COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME
-      const pid = parseInt(parts[1], 10);
-      if (isNaN(pid) || seen.has(pid)) continue;
-
-      // Extract port from the NAME column.
-      // lsof output: COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME (STATE)
-      // The name field contains the address:port (e.g., "*:3000" or "127.0.0.1:8080").
-      // It may be followed by "(LISTEN)" as a separate field.
-      const fullLine = line;
-      const portMatch = fullLine.match(/:(\d+)\s+\(LISTEN\)/) ?? fullLine.match(/:(\d+)$/);
-      if (!portMatch) continue;
-      const port = parseInt(portMatch[1], 10);
-      if (isNaN(port)) continue;
-
-      seen.add(pid);
+    for (const entry of listening) {
+      if (seen.has(entry.pid)) continue;
+      seen.add(entry.pid);
 
       // Get the cwd of the process
-      let cwd = "unknown";
-      try {
-        cwd = execSync(`lsof -p ${pid} -Fn 2>/dev/null | grep "^ncwd" || true`, {
-          encoding: "utf-8",
-          timeout: 3000,
-        }).trim();
-        if (cwd.startsWith("ncwd")) {
-          cwd = cwd.slice(4);
-        } else {
-          // Try alternative: read /proc on Linux or use pwdx
-          cwd = execSync(`lsof -p ${pid} 2>/dev/null | grep cwd | awk '{print $NF}' || true`, {
-            encoding: "utf-8",
-            timeout: 3000,
-          }).trim();
-        }
-      } catch {
-        cwd = "unknown";
-      }
+      const cwd = getProcessCwd(entry.pid) ?? "unknown";
 
       // Derive a name from the cwd
-      const dirName = cwd !== "unknown" ? cwd.split("/").pop() ?? "dev-server" : "dev-server";
-      const isSelf = pid === selfPid || port === selfPort;
+      const sep = path.sep;
+      const dirName =
+        cwd !== "unknown"
+          ? cwd.split(sep).pop() ?? "dev-server"
+          : "dev-server";
+      const isSelf = entry.pid === selfPid || entry.port === selfPort;
 
       servers.push({
-        pid,
-        port,
-        command: parts[0] ?? "node",
+        pid: entry.pid,
+        port: entry.port,
+        command: entry.command ?? "node",
         cwd,
-        name: `${dirName}:${port}`,
+        name: `${dirName}:${entry.port}`,
         running: true,
         isSelf,
       });
     }
   } catch {
-    // lsof not available or failed
+    // Detection failed
   }
 
   return servers;
@@ -212,44 +181,13 @@ export function getDevServers(): DevServer[] {
  * Scans common dev server ports and checks if a process with the given PID owns any.
  */
 function detectPortForPid(pid: number): number {
-  try {
-    const raw = execSync(
-      `lsof -p ${pid} -iTCP -sTCP:LISTEN -P -n 2>/dev/null || true`,
-      { encoding: "utf-8", timeout: 5000 },
-    ).trim();
+  const ports = findPortsForPid(pid);
+  if (ports.length > 0) return ports[0]!;
 
-    for (const line of raw.split("\n")) {
-      if (!line.trim()) continue;
-      const portMatch = line.match(/:(\d+)\s+\(LISTEN\)/) ?? line.match(/:(\d+)\s*$/);
-      if (portMatch) {
-        return parseInt(portMatch[1], 10);
-      }
-    }
-  } catch {
-    // lsof failed
-  }
-
-  // Fallback: scan common ports for any new listeners
-  try {
-    const raw = execSync(
-      "lsof -iTCP -sTCP:LISTEN -P -n 2>/dev/null | grep -i node || true",
-      { encoding: "utf-8", timeout: 5000 },
-    ).trim();
-    for (const line of raw.split("\n")) {
-      if (!line.trim()) continue;
-      const parts = line.split(/\s+/);
-      const linePid = parseInt(parts[1], 10);
-      if (linePid !== pid) continue;
-      const portMatch = line.match(/:(\d+)\s+\(LISTEN\)/) ?? line.match(/:(\d+)\s*$/);
-      if (portMatch) {
-        return parseInt(portMatch[1], 10);
-      }
-    }
-  } catch {
-    // ignore
-  }
-
-  return 0;
+  // Fallback: scan all node listeners and find a match
+  const allListeners = findNodeListeningPorts();
+  const match = allListeners.find((l) => l.pid === pid);
+  return match?.port ?? 0;
 }
 
 /**
@@ -288,7 +226,7 @@ export async function startDevServer(
   child.unref();
 
   const pid = child.pid ?? 0;
-  const projectName = cwd.split("/").pop() ?? "unknown";
+  const projectName = cwd.split(path.sep).pop() ?? "unknown";
   if (pid) {
     managedProcesses.set(projectName, child);
   }
@@ -324,17 +262,5 @@ export async function startDevServer(
  * Stop a dev server by PID.
  */
 export function stopDevServer(pid: number): boolean {
-  try {
-    // Kill the process group (negative PID kills the group)
-    process.kill(-pid, "SIGTERM");
-    return true;
-  } catch {
-    try {
-      // Fallback: kill just the process
-      process.kill(pid, "SIGTERM");
-      return true;
-    } catch {
-      return false;
-    }
-  }
+  return killProcessGroup(pid);
 }
