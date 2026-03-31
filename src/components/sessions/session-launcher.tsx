@@ -155,6 +155,21 @@ export function SessionLauncher({
   const [resumeSearch, setResumeSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Reset form state when dialog opens — ensures no stale preset lingers
+  useEffect(() => {
+    if (open) {
+      setCustomName("");
+      setModel("sonnet");
+      setAgent("none");
+      setPermissions("default");
+      setChannel("none");
+      setResume("");
+      setError(null);
+      setLaunching(false);
+      // Don't reset cwd — keep the user's configured default
+    }
+  }, [open]);
+
   // Fetch default cwd from config on first open
   const [defaultCwdLoaded, setDefaultCwdLoaded] = useState(false);
   useEffect(() => {
