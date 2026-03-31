@@ -7,6 +7,7 @@ import { useUIStore } from "@/stores/ui";
 import { useGitStore } from "@/stores/git";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useThemeSync } from "@/hooks/use-theme-sync";
 import { ToggleBar } from "@/components/layout/toggle-bar";
 import { Sidebar } from "@/components/layout/sidebar";
 import { BottomBar } from "@/components/layout/bottom-bar";
@@ -321,6 +322,9 @@ export default function Home() {
 
   // Keyboard shortcuts
   useKeyboardShortcuts();
+
+  // Theme sync
+  useThemeSync();
 
   // Dynamic favicon + tab title + exit toasts
   useNotifications();

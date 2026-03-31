@@ -13,6 +13,8 @@ import {
   MemoryStick,
   Gauge,
   ExternalLink,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useUIStore } from "@/stores/ui";
 import { cn } from "@/lib/utils";
@@ -153,21 +155,8 @@ function FullscreenButton() {
     const handler = () => setIsFs(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", handler);
 
-    const keyHandler = (e: KeyboardEvent) => {
-      if (e.key === "F11") {
-        e.preventDefault();
-        if (document.fullscreenElement) {
-          void document.exitFullscreen();
-        } else {
-          void document.documentElement.requestFullscreen();
-        }
-      }
-    };
-    document.addEventListener("keydown", keyHandler);
-
     return () => {
       document.removeEventListener("fullscreenchange", handler);
-      document.removeEventListener("keydown", keyHandler);
     };
   }, []);
 
@@ -181,9 +170,28 @@ function FullscreenButton() {
         }
       }}
       className="p-1 text-console-dim hover:text-console-muted transition-colors rounded hover:bg-console-faint/50"
-      title={isFs ? "Exit fullscreen (F11)" : "Fullscreen (F11)"}
+      title={isFs ? "Exit fullscreen" : "Fullscreen"}
     >
       {isFs ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
+    </button>
+  );
+}
+
+function ThemeToggle() {
+  const theme = useUIStore((s) => s.theme);
+  const toggleTheme = useUIStore((s) => s.toggleTheme);
+
+  return (
+    <button
+      onClick={toggleTheme}
+      className="p-1 text-console-dim hover:text-console-muted transition-colors rounded hover:bg-console-faint/50"
+      title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+    >
+      {theme === "dark" ? (
+        <Sun className="w-3.5 h-3.5" />
+      ) : (
+        <Moon className="w-3.5 h-3.5" />
+      )}
     </button>
   );
 }
@@ -242,7 +250,7 @@ export function ToggleBar() {
         })}
       </div>
 
-      {/* Right: system + fullscreen + peak indicator + help + branding */}
+      {/* Right: system + fullscreen + theme + peak indicator + help + branding */}
       <div className="flex items-center gap-2">
         <SystemWidget />
         <a
@@ -257,6 +265,7 @@ export function ToggleBar() {
           <ExternalLink className="w-2.5 h-2.5" />
         </a>
         <FullscreenButton />
+        <ThemeToggle />
         <PeakHoursIndicator />
         <HelpPanel />
         <span className="text-[9px] text-console-dim/70 font-mono tracking-wide">

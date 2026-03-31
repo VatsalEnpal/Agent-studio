@@ -6,12 +6,15 @@ import { useSessionsStore } from "@/stores/sessions";
 
 /**
  * Global keyboard shortcuts.
- * - Cmd/Ctrl+N: open launcher
- * - Cmd/Ctrl+K: open command palette
- * - Cmd/Ctrl+1-6: focus session by position
- * - Cmd/Ctrl+Enter: fullscreen focused pane
+ * Uses Cmd+Shift (Mac) / Ctrl+Shift (Windows) to avoid Chrome conflicts.
+ *
+ * - Cmd+Shift+N: open launcher
+ * - Cmd+Shift+K: open command palette
+ * - Cmd+Shift+1-6: focus session by position
+ * - Cmd+Shift+F: toggle fullscreen
+ * - Cmd+Shift+\: toggle sidebar
+ * - Cmd+Enter: fullscreen focused pane
  * - Escape: exit fullscreen / close launcher / close command palette
- * - Cmd/Ctrl+\: toggle sidebar
  * - Tab (when not in terminal): cycle focus
  */
 export function useKeyboardShortcuts() {
@@ -29,31 +32,43 @@ export function useKeyboardShortcuts() {
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      const meta = e.metaKey || e.ctrlKey;
+      const mod = e.metaKey || e.ctrlKey;
+      const shift = e.shiftKey;
 
-      // Cmd+K: open command palette
-      if (meta && e.key === "k") {
+      // Cmd+Shift+K: open command palette
+      if (mod && shift && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setCommandPaletteOpen(!commandPaletteOpen);
         return;
       }
 
-      // Cmd+N: open launcher
-      if (meta && e.key === "n") {
+      // Cmd+Shift+N: open launcher
+      if (mod && shift && e.key.toLowerCase() === "n") {
         e.preventDefault();
         setLauncherOpen(true);
         return;
       }
 
-      // Cmd+\: toggle sidebar
-      if (meta && e.key === "\\") {
+      // Cmd+Shift+\: toggle sidebar
+      if (mod && shift && e.key === "\\") {
         e.preventDefault();
         toggleSidebar();
         return;
       }
 
+      // Cmd+Shift+F: toggle browser fullscreen
+      if (mod && shift && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        if (document.fullscreenElement) {
+          void document.exitFullscreen();
+        } else {
+          void document.documentElement.requestFullscreen();
+        }
+        return;
+      }
+
       // Cmd+Enter: fullscreen focused pane
-      if (meta && e.key === "Enter") {
+      if (mod && e.key === "Enter") {
         e.preventDefault();
         if (fullscreenId) {
           setFullscreen(null);
@@ -79,8 +94,8 @@ export function useKeyboardShortcuts() {
         return;
       }
 
-      // Cmd+1 through Cmd+6: focus session by position
-      if (meta && e.key >= "1" && e.key <= "6") {
+      // Cmd+Shift+1 through Cmd+Shift+6: focus session by position
+      if (mod && shift && e.key >= "1" && e.key <= "6") {
         e.preventDefault();
         const index = parseInt(e.key) - 1;
         if (index < visibleIds.length) {
@@ -94,7 +109,7 @@ export function useKeyboardShortcuts() {
         e.key === "Tab" &&
         !launcherOpen &&
         !commandPaletteOpen &&
-        !meta &&
+        !mod &&
         !(e.target instanceof HTMLInputElement) &&
         !(e.target instanceof HTMLSelectElement) &&
         !(e.target instanceof HTMLTextAreaElement)

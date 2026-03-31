@@ -23,8 +23,8 @@ export function BottomBar() {
 
       {/* Right: keyboard hints */}
       <div className="flex items-center gap-3">
-        <ShortcutHint mod keys="K" label="commands" />
-        <ShortcutHint mod keys="N" label="new session" />
+        <ShortcutHint keys="K" label="commands" />
+        <ShortcutHint keys="N" label="new session" />
       </div>
     </footer>
   );
@@ -33,19 +33,18 @@ export function BottomBar() {
 function ShortcutHint({
   keys,
   label,
-  mod,
 }: {
   keys: string;
   label: string;
-  mod?: boolean;
 }) {
   return (
     <span className="flex items-center gap-0.5">
-      {mod && (
-        <kbd className="px-0.5 py-0 rounded bg-console-border text-console-dim text-[8px] font-mono">
-          Cmd
-        </kbd>
-      )}
+      <kbd className="px-0.5 py-0 rounded bg-console-border text-console-dim text-[8px] font-mono">
+        {"Cmd"}
+      </kbd>
+      <kbd className="px-0.5 py-0 rounded bg-console-border text-console-dim text-[8px] font-mono">
+        {"Shift"}
+      </kbd>
       <kbd className="px-1 py-0 rounded bg-console-border text-console-dim text-[9px] font-mono">
         {keys}
       </kbd>

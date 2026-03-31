@@ -1,14 +1,14 @@
 "use client";
 
 const SHORTCUTS = [
-  { keys: "Cmd + N", description: "Open session launcher" },
-  { keys: "Cmd + K", description: "Open command palette" },
-  { keys: "Cmd + \\", description: "Toggle sidebar" },
+  { keys: "Cmd + Shift + N", description: "Open session launcher" },
+  { keys: "Cmd + Shift + K", description: "Open command palette" },
+  { keys: "Cmd + Shift + \\", description: "Toggle sidebar" },
+  { keys: "Cmd + Shift + F", description: "Toggle fullscreen mode" },
   { keys: "Cmd + Enter", description: "Fullscreen focused pane" },
-  { keys: "Cmd + 1-6", description: "Focus session by position" },
+  { keys: "Cmd + Shift + 1-6", description: "Focus session by position" },
   { keys: "Tab", description: "Cycle focus between sessions" },
   { keys: "Escape", description: "Exit fullscreen / close modals" },
-  { keys: "F11", description: "Toggle fullscreen mode" },
 ];
 
 export function SettingsShortcuts() {

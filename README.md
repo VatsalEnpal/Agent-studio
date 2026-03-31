@@ -87,7 +87,7 @@ Full technical details in [ARCHITECTURE.md](ARCHITECTURE.md).
 - **Live Metrics** — See token count, dollar cost, context window %, and model name on every session. Updated every 30 seconds.
 - **Session Presets** — One-click launchers: Quick Chat (Sonnet, no agent), Start Sprint (Opus + orchestrator), Security Audit, PMO Scan. Create your own.
 - **Resume Any Session** — Every past session is saved. Search by name, project, or agent. Click to resume exactly where you left off.
-- **Keyboard First** — Cmd+K opens a command palette. Cmd+N launches a session. Cmd+1-6 jumps between sessions. Tab cycles focus.
+- **Keyboard First** — Cmd+Shift+K opens a command palette. Cmd+Shift+N launches a session. Cmd+Shift+1-6 jumps between sessions. Tab cycles focus. (Use Ctrl+Shift on Windows/Linux.)
 
 ### 🤖 Agent System
 

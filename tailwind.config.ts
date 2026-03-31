@@ -2,6 +2,7 @@ import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: ['./src/**/*.{ts,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
@@ -9,17 +10,17 @@ const config: Config = {
         mono: ['Menlo', 'Consolas', 'Courier New', 'monospace'],
       },
       colors: {
-        'console-bg': '#0a0b0e',
-        'console-panel': '#111218',
-        'console-border': '#1e2028',
-        'console-accent': '#f59e0b',
+        'console-bg': 'var(--bg-base)',
+        'console-panel': 'var(--bg-panel)',
+        'console-border': 'var(--border-color)',
+        'console-accent': 'var(--accent-color)',
         'console-accent-glow': 'rgba(245, 158, 11, 0.15)',
-        'console-success': '#4ade80',
-        'console-error': '#ef4444',
-        'console-text': '#d4d4dc',
-        'console-muted': '#8b8b9e',
-        'console-dim': '#555568',
-        'console-faint': '#2a2b35',
+        'console-success': 'var(--success-color)',
+        'console-error': 'var(--error-color)',
+        'console-text': 'var(--text-normal)',
+        'console-muted': 'var(--text-muted)',
+        'console-dim': 'var(--text-dim)',
+        'console-faint': 'var(--bg-faint)',
       },
       boxShadow: {
         'glow-amber': '0 0 16px rgba(245, 158, 11, 0.12)',

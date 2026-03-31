@@ -15,7 +15,7 @@
   --text-normal: #2c2d33;
   --text-muted: #6b6c7a;
   --text-dim: #999aab;
-  --border-color: rgba(0,0,0,0.10);
+  --border-color: #d0d1d8;
   --accent-color: #d97706;
   --success-color: #16a34a;
   --error-color: #dc2626;
@@ -37,7 +37,7 @@
   --text-normal: #d4d4dc;
   --text-muted: #8b8b9e;
   --text-dim: #555568;
-  --border-color: rgba(255,255,255,0.08);
+  --border-color: #1e2028;
   --accent-color: #f59e0b;
   --success-color: #22c55e;
   --error-color: #ef4444;
