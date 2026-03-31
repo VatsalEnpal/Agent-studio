@@ -135,6 +135,7 @@ export function SessionLauncher({
   onOpenChange,
   onLaunch,
 }: SessionLauncherProps) {
+  const [customName, setCustomName] = useState("");
   const [model, setModel] = useState<"opus" | "sonnet" | "haiku">("sonnet");
   const [agent, setAgent] = useState("none");
   const [permissions, setPermissions] =
@@ -245,7 +246,7 @@ export function SessionLauncher({
     setError(null);
     try {
       const sessionName =
-        agent !== "none" ? agent : `claude-${model}`;
+        customName.trim() || (agent !== "none" ? agent : `claude-${model}`);
       await onLaunch({
         name: sessionName,
         model,
@@ -257,6 +258,7 @@ export function SessionLauncher({
       });
       onOpenChange(false);
       setResume("");
+      setCustomName("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Launch failed");
     } finally {
@@ -264,6 +266,7 @@ export function SessionLauncher({
     }
   }, [
     launching,
+    customName,
     model,
     agent,
     permissions,
@@ -457,6 +460,27 @@ export function SessionLauncher({
                   );
                 })}
               </div>
+            </div>
+
+            {/* Divider between presets and manual config */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-console-border" />
+              <span className="text-[9px] text-console-dim">or customize below</span>
+              <div className="flex-1 h-px bg-console-border" />
+            </div>
+
+            {/* Session Name */}
+            <div>
+              <label className="block text-[10px] font-semibold uppercase tracking-wider text-console-dim mb-1.5">
+                Session Name
+              </label>
+              <input
+                type="text"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                placeholder="Name this session (optional)"
+                className="w-full px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:border-console-accent focus:outline-none"
+              />
             </div>
 
             {/* Options grid */}

@@ -1,10 +1,29 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { X, Clock, Loader2 } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { X, Clock, Loader2, Pencil } from "lucide-react";
 import { cn, statusDotColor } from "@/lib/utils";
 import { useSessionUsage } from "@/hooks/use-usage";
 import type { Session } from "@/lib/types";
+
+// Local storage map for user-renamed sessions
+const RENAME_KEY = "agent-studio-session-names";
+
+function getCustomNames(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem(RENAME_KEY);
+    if (raw) return JSON.parse(raw) as Record<string, string>;
+  } catch { /* ignore */ }
+  return {};
+}
+
+function setCustomName(sessionId: string, name: string): void {
+  const names = getCustomNames();
+  names[sessionId] = name;
+  try {
+    localStorage.setItem(RENAME_KEY, JSON.stringify(names));
+  } catch { /* ignore */ }
+}
 
 interface SessionItemProps {
   session: Session;
@@ -64,10 +83,41 @@ export function SessionItem({
   const contextPercent = usage.contextPercent ?? 0;
   const hasContext = contextPercent > 0 && !usage.loading;
 
+  // Display name: custom rename > auto-detected from first message > session.name
+  const [customNameState, setCustomNameState] = useState<string | null>(() => {
+    return getCustomNames()[session.id] ?? null;
+  });
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const displayName = customNameState || session.name;
+
+  const startEditing = useCallback(() => {
+    setEditValue(displayName);
+    setEditing(true);
+    requestAnimationFrame(() => inputRef.current?.select());
+  }, [displayName]);
+
+  const commitRename = useCallback(() => {
+    const trimmed = editValue.trim();
+    if (trimmed && trimmed !== session.name) {
+      setCustomName(session.id, trimmed);
+      setCustomNameState(trimmed);
+    } else if (!trimmed) {
+      // Clear custom name — revert to auto-detected or default
+      const names = getCustomNames();
+      delete names[session.id];
+      try { localStorage.setItem(RENAME_KEY, JSON.stringify(names)); } catch { /* ignore */ }
+      setCustomNameState(null);
+    }
+    setEditing(false);
+  }, [editValue, session.id, session.name]);
+
   return (
     <div
       onClick={onFocus}
-      title={`${session.name}\nPath: ${session.cwd}\nID: ${session.id}\nModel: ${effectiveModel ?? "unknown"}\nStatus: ${session.status}${hasContext ? `\nContext: ${contextPercent}%` : ""}`}
+      title={`${displayName}\nPath: ${session.cwd}\nID: ${session.id}\nModel: ${effectiveModel ?? "unknown"}\nStatus: ${session.status}${hasContext ? `\nContext: ${contextPercent}%` : ""}`}
       className={cn(
         "sidebar-item flex flex-col gap-0.5 px-2 py-2 rounded-md cursor-pointer group",
         focused
@@ -81,7 +131,37 @@ export function SessionItem({
         <span
           className={cn("w-2 h-2 rounded-full shrink-0", statusDotColor(session.status))}
         />
-        <span className="text-xs font-medium truncate flex-1">{session.name}</span>
+        {editing ? (
+          <input
+            ref={inputRef}
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={commitRename}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") commitRename();
+              if (e.key === "Escape") setEditing(false);
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="text-xs font-medium truncate flex-1 bg-console-bg border border-console-accent/50 rounded px-1 py-0 text-console-text focus:outline-none focus:border-console-accent"
+            autoFocus
+          />
+        ) : (
+          <>
+            <span className="text-xs font-medium truncate flex-1">
+              {displayName}
+            </span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                startEditing();
+              }}
+              className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-white/10 shrink-0"
+              title="Rename session"
+            >
+              <Pencil className="w-3 h-3 text-console-dim" />
+            </button>
+          </>
+        )}
         {effectiveModel && effectiveModel !== "unknown" && (
           <span
             className={cn(

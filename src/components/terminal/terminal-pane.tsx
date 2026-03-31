@@ -11,6 +11,18 @@ import { useSessionsStore } from "@/stores/sessions";
 import { useSessionUsage } from "@/hooks/use-usage";
 import type { WsMessage, SessionMeta } from "@/lib/types";
 
+/** Read custom session names from localStorage */
+function getCustomName(sessionId: string): string | null {
+  try {
+    const raw = localStorage.getItem("agent-studio-session-names");
+    if (raw) {
+      const names = JSON.parse(raw) as Record<string, string>;
+      return names[sessionId] ?? null;
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
 interface TerminalPaneProps {
   sessionId: string;
   name: string;
@@ -92,6 +104,8 @@ export function TerminalPane({
   // Real usage data from Claude session files
   const usage = useSessionUsage(sessionId);
   const effectiveModel = usage.modelShort ?? meta?.model ?? null;
+  const customName = getCustomName(sessionId);
+  const displayName = customName || name;
   const contextPercent = usage.contextPercent ?? 0;
   const contextDisplay = usage.loading ? "..." : contextPercent > 0 ? `${contextPercent}% ctx` : null;
   const contextColor = contextPercent >= 90 ? "text-red-400 bg-red-500/15" : contextPercent >= 70 ? "text-yellow-400 bg-yellow-500/15" : "bg-console-border text-console-dim";
@@ -228,7 +242,7 @@ export function TerminalPane({
           )}
         />
         <span className="text-xs font-medium text-console-text truncate">
-          {name}
+          {displayName}
         </span>
 
         {/* Badges — real data from Claude session files */}

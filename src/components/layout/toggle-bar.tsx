@@ -11,6 +11,8 @@ import {
   Minimize,
   Cpu,
   MemoryStick,
+  Gauge,
+  ExternalLink,
 } from "lucide-react";
 import { useUIStore } from "@/stores/ui";
 import { cn } from "@/lib/utils";
@@ -243,6 +245,17 @@ export function ToggleBar() {
       {/* Right: system + fullscreen + peak indicator + help + branding */}
       <div className="flex items-center gap-2">
         <SystemWidget />
+        <a
+          href="https://claude.ai/settings"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-console-dim hover:text-console-muted transition-colors flex items-center gap-1"
+          title="Check your usage limits on claude.ai"
+        >
+          <Gauge className="w-3 h-3" />
+          <span>Limits</span>
+          <ExternalLink className="w-2.5 h-2.5" />
+        </a>
         <FullscreenButton />
         <PeakHoursIndicator />
         <HelpPanel />
