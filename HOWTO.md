@@ -140,7 +140,74 @@ docker run -it -p 8080:8080 -v $HOME:$HOME -w /path/to/project agent-studio
 
 Make sure Claude Code CLI is available inside the container. The easiest way is to mount your `~/.claude` directory.
 
-## 11. Troubleshoot Common Issues
+## 11. Set Up the Agent System
+
+Agent Studio's Teams, Memory, and Workflows features all rely on an `ai-agents/` folder in your project. This folder is a shared knowledge base where your AI agents store memories, track sprints, and coordinate work.
+
+### What it contains
+
+```
+ai-agents/
+├── memory/           # Agent learnings, corrections, decisions
+│   ├── learnings/
+│   ├── corrections/
+│   ├── decisions/
+│   ├── human-inputs/
+│   └── knowledge/
+├── sprints/          # Sprint plans, handoffs, scan logs
+│   └── handoffs/
+├── tools/            # memory_index.json and utility scripts
+└── context/          # Project-specific context files
+.claude/
+└── agents/           # Claude Code agent entry points (.md files)
+```
+
+### Three ways to create it
+
+**1. Onboarding flow (recommended)**
+
+When you first run Agent Studio, the setup wizard offers to scaffold an agent system for your project. Click "Set me up" and follow the prompts. The wizard analyzes your codebase and generates agents tailored to your stack.
+
+**2. Settings button**
+
+Go to **Settings** > **Workspace**. If no agent system is detected, you will see a "Create Agent System" button. Click it to open the scaffold wizard, choose which agents you want, and create the folder structure.
+
+**3. Manually**
+
+Create the directories yourself:
+
+```bash
+mkdir -p ai-agents/memory/{learnings,corrections,decisions,human-inputs,knowledge}
+mkdir -p ai-agents/sprints/handoffs
+mkdir -p ai-agents/tools
+mkdir -p ai-agents/context
+mkdir -p .claude/agents
+```
+
+Then create a `ai-agents/tools/memory_index.json` file:
+
+```json
+{
+  "version": "1.0",
+  "rebuilt_at": "2024-01-01T00:00:00Z",
+  "entries": []
+}
+```
+
+And add agent definition files (`.md`) in `.claude/agents/` for each agent you want to use.
+
+### What unlocks
+
+Once the `ai-agents/` folder exists and is detected by Agent Studio:
+
+- **Teams tab** shows workflow runs and lets you create multi-agent pipelines
+- **Memory tab** displays all agent memories with search, filter, pin, and edit
+- **Agents can share knowledge** across sessions via the memory index
+- **Automations** can read and write to the sprint and memory system
+
+Sessions, Reports, Git, and Automations all work without it -- the agent system is only required for the collaborative features.
+
+## 12. Troubleshoot Common Issues
 
 **Server won't start:**
 - Check that port 8080 is free: `lsof -i :8080`. Kill any process using it.

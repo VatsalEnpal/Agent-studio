@@ -304,10 +304,15 @@ export function SettingsWorkspace() {
                 )}
               </div>
             ) : (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 px-2 py-1.5 bg-console-bg border border-console-border rounded text-[10px] text-console-dim">
-                  <AlertTriangle className="w-3 h-3 shrink-0" />
-                  Not configured — Teams and Memory tabs are hidden
+              <div className="space-y-2.5">
+                <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-500/5 border border-amber-500/20 rounded text-[10px]">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="space-y-1.5">
+                    <p className="text-console-text font-medium">No agent system detected</p>
+                    <p className="text-console-muted leading-relaxed">
+                      Teams, Memory, and Workflows need an <code className="text-console-accent bg-console-faint px-1 py-0.5 rounded text-[9px]">ai-agents/</code> folder in your project.
+                    </p>
+                  </div>
                 </div>
                 {config.projects.length > 0 && (
                   <button
@@ -318,6 +323,9 @@ export function SettingsWorkspace() {
                     Create Agent System
                   </button>
                 )}
+                <p className="text-[9px] text-console-dim leading-relaxed pl-0.5">
+                  This creates: <code className="text-console-muted">ai-agents/memory/</code>, <code className="text-console-muted">ai-agents/sprints/</code>, <code className="text-console-muted">ai-agents/tools/</code>, and <code className="text-console-muted">.claude/agents/</code> with your custom agent definitions.
+                </p>
               </div>
             )}
           </div>

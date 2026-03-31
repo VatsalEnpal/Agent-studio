@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Settings } from "lucide-react";
 import { wsClient } from "@/lib/ws-client";
 import {
   useWorkflowStore,
   type WorkflowFlow,
 } from "@/stores/workflows";
+import { useUIStore } from "@/stores/ui";
 import type { WsMessage } from "@/lib/types";
 import { FlowSidebar } from "./flow-sidebar";
 import { StepTimeline } from "./step-timeline";
@@ -90,21 +91,33 @@ export function TeamsView() {
           <div className="w-12 h-12 rounded-xl bg-console-faint/50 flex items-center justify-center mx-auto">
             <span className="text-xl">&#x1F91D;</span>
           </div>
-          <p className="text-console-muted text-sm font-medium">No workflows running.</p>
+          <p className="text-console-muted text-sm font-medium">No workflows yet</p>
           <p className="text-console-dim text-xs leading-relaxed">
-            Workflows coordinate multiple agents on a task &mdash;
-            like a sprint where backend, frontend, and QA agents
-            work together in sequence.
+            Workflows track your agent team&apos;s progress through sprints and tasks.
           </p>
-          <p className="text-console-dim text-xs">
-            Start a Sprint from the Sessions tab, or create a custom workflow.
-          </p>
-          <button
-            onClick={() => openBuilder()}
-            className="btn-lift px-4 py-2 text-[10px] font-medium text-console-bg bg-console-accent rounded-lg hover:bg-amber-400 hover:shadow-glow-sm transition-all"
-          >
-            Create Workflow
-          </button>
+          <div className="text-console-dim text-xs leading-relaxed text-left inline-block">
+            <p className="mb-1.5 text-console-muted font-medium">To get started:</p>
+            <ol className="list-decimal list-inside space-y-1">
+              <li>Create an agent system in Settings &rarr; Workspace</li>
+              <li>Launch a sprint with the orchestrator agent</li>
+              <li>Workflow steps will appear here automatically</li>
+            </ol>
+          </div>
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => useUIStore.getState().setActiveMode("settings")}
+              className="flex items-center gap-1.5 px-4 py-2 text-[10px] font-medium text-console-muted bg-console-faint hover:bg-console-faint/80 rounded-lg border border-console-border hover:border-console-muted transition-all"
+            >
+              <Settings className="w-3 h-3" />
+              Go to Settings
+            </button>
+            <button
+              onClick={() => openBuilder()}
+              className="btn-lift px-4 py-2 text-[10px] font-medium text-console-bg bg-console-accent rounded-lg hover:bg-amber-400 hover:shadow-glow-sm transition-all"
+            >
+              Create Workflow
+            </button>
+          </div>
           <WorkflowBuilderDialog />
         </div>
       </div>

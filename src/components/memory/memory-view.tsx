@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useCallback } from "react";
-import { Search, Calendar, Brain, Plus, Pin, Pencil, Trash2 } from "lucide-react";
+import { Search, Calendar, Brain, Plus, Pin, Pencil, Trash2, Settings } from "lucide-react";
 import { useMemoryStore, type MemoryEntry, type MemoryEntryDetail } from "@/stores/memory";
 import { useToastStore } from "@/stores/toast";
+import { useUIStore } from "@/stores/ui";
 import { cn } from "@/lib/utils";
 import { MemoryDetail } from "./memory-detail";
 import { MemoryFormDialog } from "./memory-form-dialog";
@@ -227,14 +228,26 @@ export function MemoryView() {
                 <Brain className="w-5 h-5 text-console-dim" />
               </div>
               <span className="text-console-muted text-xs font-medium">
-                {selectedCategory || showPinnedOnly ? "No memories match this filter" : "Your agents haven\u0027t learned anything yet."}
+                {selectedCategory || showPinnedOnly ? "No memories match this filter" : "No memories yet"}
               </span>
               {!selectedCategory && !showPinnedOnly && (
-                <p className="text-console-dim text-[10px] leading-relaxed max-w-[220px]">
-                  Memories are created automatically as your agents work &mdash;
-                  they record patterns, corrections, and decisions so they
-                  don&apos;t repeat mistakes. Launch a session to get started.
-                </p>
+                <>
+                  <p className="text-console-dim text-[10px] leading-relaxed max-w-[240px]">
+                    Agent memories are stored in <code className="text-console-muted bg-console-faint px-1 py-0.5 rounded text-[9px]">ai-agents/memory/</code> and help your agents learn from past work.
+                  </p>
+                  <p className="text-console-dim text-[10px] leading-relaxed max-w-[240px]">
+                    Memories are created automatically when agents complete tasks, or you can create them manually.
+                  </p>
+                  {entries.length === 0 && (
+                    <button
+                      onClick={() => useUIStore.getState().setActiveMode("settings")}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-console-muted bg-console-faint hover:bg-console-faint/80 rounded border border-console-border hover:border-console-muted transition-colors mt-1"
+                    >
+                      <Settings className="w-3 h-3" />
+                      Create Agent System
+                    </button>
+                  )}
+                </>
               )}
             </div>
           ) : (

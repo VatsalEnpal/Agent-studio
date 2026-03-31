@@ -118,6 +118,13 @@ Full technical details in [ARCHITECTURE.md](ARCHITECTURE.md).
 - **Templates** — Start from built-in workflows (Sprint Planning, Code Review, Bug Fix, Feature Build) or create your own from scratch.
 - **Visual Timeline** — See each step's status, which agent is assigned, and what's completed — all in a timeline view.
 
+> **Note:** Teams, Memory, and Workflows features require an `ai-agents/` folder in your project. This is created automatically when you:
+> - Go through the onboarding flow ("Set me up")
+> - Click "Create Agent System" in Settings
+> - Or create it manually ([see guide](HOWTO.md#set-up-the-agent-system))
+>
+> Without it, these tabs show helpful empty states. Everything else (sessions, reports, git, automations) works without it.
+
 ### 🛠️ Developer Tools
 
 ![Agent Studio — Settings](public/screenshot-settings.png)
