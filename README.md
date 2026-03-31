@@ -53,6 +53,8 @@ cd Agent-studio && npm install && npm run dev
 Open **http://localhost:8080**. That's it.
 
 > **Requires:** [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated. Node.js 22+. Agent Studio checks on startup and tells you exactly what's missing.
+>
+> **Platforms:** macOS, Linux, and Windows (requires Claude Code CLI installed on all platforms).
 
 ## First Run
 
