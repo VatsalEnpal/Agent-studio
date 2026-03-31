@@ -916,6 +916,15 @@ Choose the schedule and model based on the task:
     res.json(terminalManager.listSessions());
   });
 
+  app.get("/api/sessions/:id/buffer", (req, res) => {
+    const buffer = terminalManager.getSessionBuffer(req.params["id"]);
+    if (buffer === null) {
+      res.status(404).json({ error: "Session not found" });
+      return;
+    }
+    res.json({ buffer });
+  });
+
   // --- Process discovery API ---
   app.get("/api/processes", (_req, res) => {
     try {

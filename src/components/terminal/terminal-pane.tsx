@@ -184,6 +184,18 @@ export function TerminalPane({
     // Second attempt: after layout settles (handles CSS transitions / display:none->block)
     const fallbackTimer = setTimeout(fitAndResize, 100);
 
+    // Replay buffer from server (restores previous output on tab switch / reconnect)
+    fetch(`/api/sessions/${sessionId}/buffer`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { buffer: string } | null) => {
+        if (data?.buffer) {
+          term.write(data.buffer);
+        }
+      })
+      .catch(() => {
+        // Best effort — if buffer fetch fails, just show live output
+      });
+
     const inputDisposable = term.onData((data: string) => {
       wsClient.send({
         type: "terminal-input",

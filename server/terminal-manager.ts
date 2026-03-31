@@ -31,8 +31,13 @@ interface CreateSessionOptions {
 
 type EventListener = (message: WsMessage) => void;
 
+const MAX_BUFFER_SIZE = 100 * 1024; // 100KB per session
+
 export class TerminalManager {
-  private sessions = new Map<string, { session: Session; pty: pty.IPty }>();
+  private sessions = new Map<
+    string,
+    { session: Session; pty: pty.IPty; outputBuffer: string }
+  >();
   private listeners = new Set<EventListener>();
 
   createSession(opts: CreateSessionOptions): Session {
@@ -82,10 +87,17 @@ export class TerminalManager {
       meta: opts.meta,
     };
 
-    this.sessions.set(id, { session, pty: ptyProcess });
+    const entry = { session, pty: ptyProcess, outputBuffer: "" };
+    this.sessions.set(id, entry);
 
     ptyProcess.onData((data: string) => {
       try {
+        // Append to circular buffer for replay on reconnect
+        entry.outputBuffer += data;
+        if (entry.outputBuffer.length > MAX_BUFFER_SIZE) {
+          entry.outputBuffer = entry.outputBuffer.slice(-MAX_BUFFER_SIZE);
+        }
+
         this.emit({
           type: "terminal-data",
           sessionId: id,
@@ -164,6 +176,11 @@ export class TerminalManager {
     return () => {
       this.listeners.delete(listener);
     };
+  }
+
+  getSessionBuffer(id: string): string | null {
+    const entry = this.sessions.get(id);
+    return entry?.outputBuffer ?? null;
   }
 
   private emit(message: WsMessage): void {
