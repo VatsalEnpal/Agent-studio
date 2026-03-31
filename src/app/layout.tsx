@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { GeistMono } from "geist/font/mono";
 import "@/styles/globals.css";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { ThemeScript } from "@/components/ui/theme-script";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
+const geistMono = GeistMono;
 
 export const metadata: Metadata = {
   title: "Agent Studio",
@@ -21,11 +17,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} dark`} suppressHydrationWarning>
+    <html lang="en" className={`${geistMono.variable} dark`} suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>
-      <body className="bg-console-bg text-console-text min-h-screen font-sans">
+      <body className="bg-console-bg text-console-text min-h-screen font-mono">
         <ErrorBoundary fallbackLabel="Agent Studio encountered an error">
           {children}
         </ErrorBoundary>
