@@ -1,244 +1,366 @@
-# How To Use Agent Studio
+# Agent Studio — How To Guide
 
-Practical step-by-step guide for common tasks. Each section assumes you have the app running at [http://localhost:8080](http://localhost:8080).
+Quick reference for everything you can do. App runs at [http://localhost:8080](http://localhost:8080).
 
 ---
 
-## 1. Launch Your First Session
+## Getting Started
 
-1. Open Agent Studio in your browser.
-2. If this is your first run, the setup wizard appears. Follow the prompts to add your project and configure defaults.
-3. Once on the main screen, click **+ New Session** in the sidebar (or press `Cmd+N`).
-4. The session launcher modal opens with **Quick Start** presets at the top.
-5. Click **Quick Chat** to launch a Sonnet session with no agent, or **Start Sprint** for Opus with the orchestrator agent.
-6. The terminal appears in the grid. You can start typing immediately -- it is a real Claude Code session.
+### First Launch
 
-## 2. Run Multiple Sessions Side by Side
+On first run, Agent Studio checks for Claude Code CLI (`claude`), Node.js, and git. If all pass, the **onboarding wizard** appears. Describe what you're working on, optionally point to a project folder, and Agent Studio generates a tailored agent setup. Click **"Set me up"** to proceed, or **"Skip setup"** to go straight to the dashboard.
 
-1. Launch your first session (see above).
-2. Press `Cmd+N` again to open the launcher and start a second session.
-3. The grid automatically arranges sessions: 1 session = full width, 2 = side by side, 3+ = grid layout.
-4. Up to 6 sessions are visible at once. Additional sessions appear in the sidebar and can be swapped in.
-5. Click any terminal to focus it. Use `Cmd+1` through `Cmd+6` to jump to a session by grid position.
-6. Press `Cmd+Enter` to fullscreen the focused session. Press `Escape` to return to the grid.
+### The Dashboard
 
-## 3. Set Up Custom Agents
+You land on the **Sessions** view. Three areas:
 
-**Using the scaffold wizard (recommended):**
+- **Sidebar** (left) — active sessions, git repos, discovered processes, past sessions
+- **Terminal grid** (center) — your Claude Code sessions, auto-arranged
+- **Toggle bar** (top) — tabs for Sessions, Teams, Memory, Reports, Settings. Plus theme toggle, system stats, peak hours indicator, Limits link, and help
 
-1. Go to **Settings** (gear icon in the toggle bar).
-2. Open the **Workspace** tab and click **Scaffold Agent System**.
-3. Choose which agents you want (orchestrator, frontend, backend, QA, security, PMO, docs, domain).
-4. Select a workflow template (sprint, simple, or custom).
-5. Click **Create**. Agent Studio generates `ai-agents/` and `.claude/agents/` in your project.
+---
 
-**Manual setup:**
+## Sessions
 
-1. Create `ai-agents/agents/my-agent/agent.md` in your project with the agent's rules and identity.
-2. Create `.claude/agents/my-agent.md` as the Claude Code entry point that references the full agent file.
-3. When launching a session, select your agent name from the **Agent** dropdown in the launcher.
+### Launch a Session
 
-## 4. Monitor Token Usage and Costs
+Press **`Cmd+Shift+N`** or click **+ New Session** in the sidebar. The launcher modal opens with:
 
-1. Each active session shows a bottom bar with cost (`$0.42`), token count (`12.3k`), and context window usage (`34%`).
-2. This data updates every 30 seconds automatically via WebSocket.
-3. For detailed usage, use the **Usage** API: `GET /api/sessions/:id/usage` returns input tokens, output tokens, cache tokens, message count, and context breakdown.
-4. The bottom bar of the main window shows aggregate stats across all sessions.
+1. **Resume Previous Session** — dropdown of recent sessions (searchable)
+2. **Quick Start presets** — Continue (last session), Quick Chat (Sonnet, no agent), Start Sprint (Opus + orchestrator), Security Audit (Opus + security), PMO Scan (Sonnet + PMO)
+3. **Custom configuration** — model, agent, permissions, channel, working directory, session name
 
-## 5. Resume a Previous Session
+Click a preset to fill the form, then click **Launch**. Or customize everything below the divider.
 
-1. Open the session launcher (`Cmd+N`).
-2. At the top, you will see **Resume Previous Session** with a dropdown of your recent Claude Code sessions (read from `~/.claude/projects/`).
-3. Click the dropdown, search by project name or session ID, and select one.
-4. Click **Resume**. The session picks up where it left off.
-5. Alternatively, click the **Continue** button (leftmost Quick Start button) to resume your most recent session without choosing.
+### Name Your Sessions
 
-## 6. Track Git Across Repos
+Type a name in the **Session Name** field of the launcher before launching. After launch, hover over a session in the sidebar to reveal the **pencil icon** — click it to rename.
 
-1. Agent Studio auto-detects git repos from your configured projects and polls status every 10 seconds.
-2. The sidebar shows each repo with its current branch, dirty/clean status, and ahead/behind counts.
-3. Click a repo in the sidebar to see more detail.
-4. Use the API for programmatic access: `GET /api/git/status` returns all repos, `GET /api/git/changes?repo=PATH` returns porcelain output, `GET /api/git/diff?repo=PATH` returns staged and unstaged diffs.
+### Switch Between Sessions
 
-## 7. Create a PR from the Dashboard
+- **Click** a session in the sidebar to focus it
+- **`Cmd+Shift+1`** through **`Cmd+Shift+6`** to jump by grid position
+- **`Tab`** to cycle focus between visible sessions (when not typing)
 
-1. In the sidebar, find the repo you want to create a PR for.
-2. Click the PR icon (or use the command palette: `Cmd+K`, type "PR").
-3. The PR modal opens. Select:
-   - **Source branch** (your feature branch)
-   - **Target branch** (e.g., main)
-   - **Title** and **Description**
-4. Click **Create PR**. Agent Studio uses `gh` CLI under the hood.
-5. Requires the [GitHub CLI](https://cli.github.com/) installed and authenticated.
+### Resume a Previous Session
 
-## 8. Use Keyboard Shortcuts
+Open the launcher (`Cmd+Shift+N`). At the top, click **Resume Previous Session** dropdown. Search by project name or session ID, then select and click **Resume**. Or click the **Continue** preset to resume your most recent session instantly.
 
-The most useful shortcuts for daily use:
+### Multiple Sessions Side by Side
 
-| What you want to do | Press |
-|---------------------|-------|
-| Launch a new session | `Cmd+N` |
-| Find any action quickly | `Cmd+K` (command palette) |
-| Jump to session 1, 2, 3... | `Cmd+1`, `Cmd+2`, `Cmd+3` |
-| Fullscreen the current session | `Cmd+Enter` |
-| Toggle the sidebar | `Cmd+\` |
-| Cycle between sessions | `Tab` |
-| Close any modal or exit fullscreen | `Escape` |
+The grid auto-arranges: 1 session = full width, 2 = side by side, 3+ = grid layout. Up to **6 sessions visible** at once. Additional sessions live in the sidebar and can be focused to swap in. Double-click a terminal header to fullscreen it, or press `Cmd+Enter`.
 
-All shortcuts use `Ctrl` instead of `Cmd` on Windows/Linux.
+### Kill a Session
 
-## 9. Configure for Your Workflow
+Click the **X** on the terminal header or the session's sidebar entry. Exited sessions auto-remove after 10 seconds.
 
-Edit `.agent-studio.json` in the directory where you run the server:
+### Zoom In/Out
 
-**Add a project:**
-```json
-{
-  "projects": [
-    { "name": "api", "path": "/Users/you/Code/api", "isProd": false },
-    { "name": "prod-api", "path": "/Users/you/Code/prod-api", "isProd": true }
-  ]
-}
-```
-Setting `isProd: true` blocks direct commits and requires confirmation for pushes.
+Each terminal pane has **zoom controls** (+ / -) in its header bar. Zoom level is per-session and persists.
 
-**Change default model:**
-```json
-{
-  "defaults": {
-    "model": "opus",
-    "permissions": "default",
-    "workingDirectory": "~/Code/my-project"
-  }
-}
+---
+
+## Agents
+
+### AI-Generated Agents (Recommended)
+
+During onboarding, describe your project and workflow in natural language. Agent Studio analyzes your codebase and generates agents tailored to your stack — each with a name, description, model preference, and full `.md` rules file. You can refine the results ("remove the inventory one, add a social media agent") before confirming.
+
+### Scaffold Agent System
+
+Go to **Settings > Workspace > Create Agent System**. Choose agents from the list (orchestrator, frontend, backend, QA, security, PMO, documentation, domain). Pick a workflow template (sprint, simple, or custom). Click **Create** — this generates `ai-agents/` and `.claude/agents/` in your project.
+
+### Manual Agent Setup
+
+Create `.claude/agents/my-agent.md` in your project. It appears automatically in the launcher's **Agent** dropdown. Reference a full identity file if needed:
+
+```markdown
+---
+name: my-agent
+description: Does specific things
+model: sonnet
+---
+
+# My Agent
+
+You are... [identity and rules here]
 ```
 
-**Add a dev server:**
-```json
-{
-  "devServers": [
-    { "name": "frontend", "path": "~/Code/frontend", "command": "npm run dev" },
-    { "name": "backend", "path": "~/Code/backend", "command": "cargo watch -x run" }
-  ]
-}
-```
+### What Agents Are Available
 
-After editing, restart Agent Studio or save via the Settings UI to reload.
+The launcher dropdown shows all agents detected from `.claude/agents/` in your project. Defaults: No Agent, orchestrator, frontend, backend, qa, security, pmo, documentation. Custom agents appear automatically when you add `.md` files.
 
-## 10. Run in Docker
+---
 
-```bash
-# Build the image
-docker build -t agent-studio .
+## Automations
 
-# Run with access to your home directory (needed for Claude Code config and projects)
-docker run -it -p 8080:8080 -v $HOME:$HOME agent-studio
+### What Are Automations?
 
-# Run with a custom working directory
-docker run -it -p 8080:8080 -v $HOME:$HOME -w /path/to/project agent-studio
-```
+Scheduled headless Claude Code runs that produce reports. They run on a timer, execute a prompt, and save the output as a report you can review before taking action.
 
-Make sure Claude Code CLI is available inside the container. The easiest way is to mount your `~/.claude` directory.
+### Set Up an Automation
 
-## 11. Set Up the Agent System
+Go to **Settings > Automations**. Three ways to add:
 
-Agent Studio's Teams, Memory, and Workflows features all rely on an `ai-agents/` folder in your project. This folder is a shared knowledge base where your AI agents store memories, track sprints, and coordinate work.
+1. **Click "Add"** — pick a template, configure name/schedule/model/prompt, click Create
+2. **Click "Suggestions"** — Agent Studio scans your project and recommends relevant automations. Click **+ Add** on any suggestion
+3. **Type a description** — describe what you want in natural language (e.g., "Review code for security issues daily") and click **Generate**
 
-### What it contains
+### Available Templates
+
+| Template | What it does | Default schedule |
+|----------|-------------|-----------------|
+| Code Health | tsc, tests, npm audit | Every 2h |
+| PR Reviewer | Reviews open PRs | Every 6h |
+| Security Scanner | Deps + code secrets scan | Daily |
+| Dependency Updater | Checks outdated packages | Weekly |
+| Test Coverage | Finds untested code | Daily |
+| Documentation | Checks README + inline docs | Weekly |
+
+### Manage Automations
+
+Each automation shows a **toggle** (on/off), **Run Now** button (play icon), and **Delete** button (trash icon). Last run time and schedule are visible inline.
+
+### Review Reports
+
+Switch to the **Reports** tab in the toggle bar. Click a report to see its summary and suggested actions. Reports arrive in real-time via WebSocket when automations complete.
+
+---
+
+## Theme
+
+### Switch Between Dark and Light Mode
+
+Click the **sun/moon icon** in the top-right of the toggle bar. Terminal panes stay dark in both modes. Your preference is saved automatically.
+
+---
+
+## Memory
+
+### Browse Agent Memories
+
+Switch to the **Memory** tab. Use the **search bar** to find memories by title, content, or tags. Filter by category pills: All, Learnings, Corrections, Decisions, Human Inputs, Knowledge. Toggle **Pinned** to see only pinned memories.
+
+Click any memory to see its full detail in the right panel.
+
+### Create, Edit, Pin, Delete
+
+- **Create** — click the **+ New** button in the Memory tab header
+- **Pin** — hover over a memory in the list, click the pin icon. Pinned memories sort to the top
+- **Edit** — hover, click the pencil icon. Modify title, content, tags
+- **Delete** — hover, click the trash icon. Confirm in the dialog
+
+### What Creates Memories?
+
+Agents create memories automatically after significant work (patterns learned, bugs fixed, decisions made). You can also create them manually via the **+ New** button.
+
+### Requires ai-agents/ Folder
+
+Teams, Memory, and Workflows need the `ai-agents/` folder in your project. Create it via onboarding, the Settings > Workspace button, or manually (see [Set Up the Agent System](#set-up-the-agent-system) below).
+
+---
+
+## Teams & Workflows
+
+### View Sprint Progress
+
+Switch to the **Teams** tab. The left sidebar shows all workflow flows and their runs. Select a run to see its **step timeline** — each step shows status, assigned agent, and handoff details.
+
+### Create a Custom Workflow
+
+In the Teams tab, click **Create Workflow**. Name your workflow, define steps (with agent assignments and dependencies), then save. Runs track progress automatically and update in real-time via WebSocket.
+
+---
+
+## Git
+
+### Track Repos
+
+The sidebar's **REPOS** section auto-detects git repos from your configured projects. Each repo shows:
+
+- Current **branch** name
+- **Dirty/clean** status indicator
+- **Ahead/behind** counts
+
+Click a repo to open it in Finder. Middle-click to open in Cursor. Status polls every 10 seconds.
+
+### Create a PR
+
+Open the command palette (`Cmd+Shift+K`), type **"PR"**, and select a repo. Or click the PR icon next to a repo in the sidebar. Fill in source branch, target branch, title, and description. Production repos require a **two-step confirmation** before creating.
+
+Requires [GitHub CLI](https://cli.github.com/) installed and authenticated.
+
+---
+
+## Settings
+
+### Workspace
+
+Manage tracked **projects** (add/remove paths, mark as prod). View or create the **agent system**. Configure **dev servers**. The "Create Agent System" and "Regenerate Agents" buttons are here.
+
+### General
+
+Set defaults for new sessions: **model** (opus/sonnet/haiku), **permissions** (bypass/default/plan/auto), **working directory**.
+
+### Automations
+
+List of configured automations. Toggle on/off, run now, add new, view suggestions. See [Automations](#automations) section above.
+
+### Shortcuts
+
+Reference table of all keyboard shortcuts with their key combinations.
+
+### System Monitor
+
+Live **CPU** and **RAM** usage displayed in the toggle bar's system widget. Click it to jump to Settings for more detail.
+
+### About
+
+Version info and links.
+
+---
+
+## Keyboard Shortcuts
+
+| Action | Mac | Windows/Linux |
+|--------|-----|---------------|
+| New session | `Cmd+Shift+N` | `Ctrl+Shift+N` |
+| Command palette | `Cmd+Shift+K` | `Ctrl+Shift+K` |
+| Toggle sidebar | `Cmd+Shift+\` | `Ctrl+Shift+\` |
+| Focus session 1-6 | `Cmd+Shift+1` - `6` | `Ctrl+Shift+1` - `6` |
+| Browser fullscreen | `Cmd+Shift+F` | `Ctrl+Shift+F` |
+| Fullscreen focused pane | `Cmd+Enter` | `Ctrl+Enter` |
+| Cycle session focus | `Tab` | `Tab` |
+| Close modal / exit fullscreen | `Esc` | `Esc` |
+
+---
+
+## Usage & Limits
+
+### Token Tracking
+
+Each session shows **cost** ($), **token count**, and **context window %** in its terminal header and sidebar entry. Data updates via WebSocket.
+
+### Check Your Claude Limits
+
+Click **"Limits"** in the top-right of the toggle bar. Opens [claude.ai/settings/usage](https://claude.ai/settings/usage) in a new tab.
+
+### Peak Hours Indicator
+
+The toggle bar shows a **peak/off-peak** badge. Peak hours are **14:00-20:00 Berlin time** (5am-11am PT). Expect slower responses during peak. Hover for details.
+
+---
+
+## Set Up the Agent System
+
+Agent Studio's Teams, Memory, and Workflows features all require an `ai-agents/` folder in your project.
+
+### What it creates
 
 ```
 ai-agents/
-├── memory/           # Agent learnings, corrections, decisions
-│   ├── learnings/
-│   ├── corrections/
-│   ├── decisions/
-│   ├── human-inputs/
-│   └── knowledge/
-├── sprints/          # Sprint plans, handoffs, scan logs
-│   └── handoffs/
-├── tools/            # memory_index.json and utility scripts
-└── context/          # Project-specific context files
+  memory/          # learnings, corrections, decisions, human-inputs, knowledge
+  sprints/         # sprint plans, handoffs
+  tools/           # memory_index.json
+  context/         # project-specific context
 .claude/
-└── agents/           # Claude Code agent entry points (.md files)
+  agents/          # agent entry points (.md files)
 ```
 
 ### Three ways to create it
 
-**1. Onboarding flow (recommended)**
-
-When you first run Agent Studio, the setup wizard offers to scaffold an agent system for your project. Click "Set me up" and follow the prompts. The wizard analyzes your codebase and generates agents tailored to your stack.
-
-**2. Settings button**
-
-Go to **Settings** > **Workspace**. If no agent system is detected, you will see a "Create Agent System" button. Click it to open the scaffold wizard, choose which agents you want, and create the folder structure.
-
-**3. Manually**
-
-Create the directories yourself:
+1. **Onboarding** — first-run wizard offers to scaffold it. Click "Set me up"
+2. **Settings** — Settings > Workspace > "Create Agent System" button
+3. **Manual** — create the directories and a `memory_index.json` yourself:
 
 ```bash
 mkdir -p ai-agents/memory/{learnings,corrections,decisions,human-inputs,knowledge}
-mkdir -p ai-agents/sprints/handoffs
-mkdir -p ai-agents/tools
-mkdir -p ai-agents/context
+mkdir -p ai-agents/{sprints/handoffs,tools,context}
 mkdir -p .claude/agents
+echo '{"version":"1.0","rebuilt_at":"2024-01-01T00:00:00Z","entries":[]}' > ai-agents/tools/memory_index.json
 ```
 
-Then create a `ai-agents/tools/memory_index.json` file:
+### What it unlocks
+
+- **Teams tab** — workflow runs, multi-agent pipelines
+- **Memory tab** — search, filter, pin, edit agent memories
+- **Cross-session knowledge sharing** via the memory index
+- **Automations** can read/write to the sprint and memory system
+
+Sessions, Reports, Git, and Automations work without it.
+
+---
+
+## Configuration File
+
+Agent Studio reads `.agent-studio.json` from its working directory:
 
 ```json
 {
-  "version": "1.0",
-  "rebuilt_at": "2024-01-01T00:00:00Z",
-  "entries": []
+  "projects": [
+    { "name": "my-app", "path": "/Users/you/Code/my-app", "isProd": false },
+    { "name": "prod", "path": "/Users/you/Code/prod", "isProd": true }
+  ],
+  "defaults": {
+    "model": "sonnet",
+    "permissions": "default",
+    "workingDirectory": "~/Code/my-app"
+  },
+  "devServers": [
+    { "name": "frontend", "path": "~/Code/frontend", "command": "npm run dev" }
+  ]
 }
 ```
 
-And add agent definition files (`.md`) in `.claude/agents/` for each agent you want to use.
+Setting `isProd: true` blocks direct commits and requires confirmation for pushes. Edit via Settings UI or directly in the file (restart to reload).
 
-### What unlocks
+---
 
-Once the `ai-agents/` folder exists and is detected by Agent Studio:
+## Docker
 
-- **Teams tab** shows workflow runs and lets you create multi-agent pipelines
-- **Memory tab** displays all agent memories with search, filter, pin, and edit
-- **Agents can share knowledge** across sessions via the memory index
-- **Automations** can read and write to the sprint and memory system
-
-Sessions, Reports, Git, and Automations all work without it -- the agent system is only required for the collaborative features.
-
-## 12. Troubleshoot Common Issues
-
-**Server won't start:**
-- Check that port 8080 is free: `lsof -i :8080`. Kill any process using it.
-- If `node-pty` fails to install, you need build tools: `xcode-select --install` (macOS) or `apt install python3 make g++` (Linux).
-- Try deleting `node_modules` and running `npm install` again.
-
-**Blank terminal (session launches but nothing appears):**
-- Verify Claude Code CLI is installed: run `which claude` in your terminal.
-- Check the browser console for WebSocket connection errors.
-- Try refreshing the page -- the WebSocket reconnects automatically.
-
-**Session stuck in "starting" status:**
-- The Claude Code process may have exited immediately. Check if `claude --dangerously-skip-permissions` works in your regular terminal.
-- Look at the session's exit code in the sidebar (hover over the status badge).
-
-**Port already in use:**
 ```bash
-# Find what's using port 8080
-lsof -i :8080
+# Build
+docker build -t agent-studio .
 
-# Kill it
-kill -9 <PID>
+# Run (mount home directory for Claude Code config + project access)
+docker run -it -p 8080:8080 -v $HOME:$HOME agent-studio
 
-# Or use a different port
-PORT=3000 npm run dev
+# Custom working directory
+docker run -it -p 8080:8080 -v $HOME:$HOME -w /path/to/project agent-studio
 ```
 
-**Usage data not showing:**
-- Usage polling runs every 30 seconds. Wait a moment after launching a session.
-- Usage is read from Claude Code's status files. If Claude Code was installed in a non-standard location, the data may not be found.
+Ensure Claude Code CLI is available inside the container. Mount `~/.claude` for config access.
 
-**Git status not updating:**
-- Git status polls every 10 seconds. Changes may take a moment to appear.
-- Verify the project paths in `.agent-studio.json` point to valid git repositories.
+---
+
+## Troubleshooting
+
+### Server won't start
+
+- **Port in use** — `lsof -i :8080` to find the process, `kill -9 <PID>` to free it. Or run on another port: `PORT=9090 npm run dev`
+- **node-pty build failure** — install build tools: `xcode-select --install` (macOS) or `apt install python3 make g++` (Linux)
+- **Stale cache** — delete `node_modules` and `.next`, then `npm install && npm run dev`
+
+### Terminal goes blank
+
+Refresh the page. WebSocket reconnects automatically and replays the terminal buffer. If persistent, restart: kill the server, `rm -rf .next`, then `npm run dev`.
+
+### Session stuck in "starting"
+
+Check if Claude Code CLI works in a regular terminal: `claude --version`. Look at the session's exit code by hovering over the status badge in the sidebar.
+
+### Usage data not showing
+
+Usage polling runs every 30 seconds after session launch. If Claude Code is installed in a non-standard location, usage files may not be found.
+
+### Git status not updating
+
+Git polls every 10 seconds. Verify project paths in `.agent-studio.json` point to valid git repos.
+
+### Port already in use
+
+```bash
+lsof -i :8080          # Find the process
+kill -9 <PID>          # Kill it
+PORT=3000 npm run dev  # Or use a different port
+```
