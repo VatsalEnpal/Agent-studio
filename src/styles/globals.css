@@ -2,9 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   Theme variables
+   ============================================ */
+:root {
+  /* Light theme */
+  --bg-base: #f5f6f8;
+  --bg-panel: #ffffff;
+  --bg-elevated: #ecedf0;
+  --bg-faint: #e5e6ea;
+  --text-bright: #111218;
+  --text-normal: #2c2d33;
+  --text-muted: #6b6c7a;
+  --text-dim: #999aab;
+  --border-color: rgba(0,0,0,0.10);
+  --accent-color: #d97706;
+  --success-color: #16a34a;
+  --error-color: #dc2626;
+  --skeleton-from: #e5e6ea;
+  --skeleton-mid: #d1d2d8;
+  --skeleton-to: #e5e6ea;
+  --scrollbar-thumb: #c5c6ce;
+  --scrollbar-hover: #aaaab5;
+  --panel-gradient-start: #ffffff;
+  --panel-gradient-end: #f9fafb;
+}
+
+.dark {
+  --bg-base: #0a0b0e;
+  --bg-panel: #111218;
+  --bg-elevated: #1e2028;
+  --bg-faint: #191a22;
+  --text-bright: #ededf0;
+  --text-normal: #d4d4dc;
+  --text-muted: #8b8b9e;
+  --text-dim: #555568;
+  --border-color: rgba(255,255,255,0.08);
+  --accent-color: #f59e0b;
+  --success-color: #22c55e;
+  --error-color: #ef4444;
+  --skeleton-from: #1e2028;
+  --skeleton-mid: #2a2b35;
+  --skeleton-to: #1e2028;
+  --scrollbar-thumb: #2a2b35;
+  --scrollbar-hover: #3a3b48;
+  --panel-gradient-start: #111218;
+  --panel-gradient-end: #0e0f14;
+}
+
 body {
-  background-color: #0a0b0e;
-  color: #d4d4dc;
+  background-color: var(--bg-base);
+  color: var(--text-normal);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -13,16 +61,16 @@ body {
 /* ============================================
    Text hierarchy
    ============================================ */
-.text-bright { color: #ededf0; font-weight: 500; }
-.text-normal { color: #d4d4dc; }
-.text-secondary { color: #8b8b9e; }
-.text-tertiary { color: #555568; }
+.text-bright { color: var(--text-bright); font-weight: 500; }
+.text-normal { color: var(--text-normal); }
+.text-secondary { color: var(--text-muted); }
+.text-tertiary { color: var(--text-dim); }
 
 /* ============================================
    Panel backgrounds with subtle gradient
    ============================================ */
 .console-panel-bg {
-  background: linear-gradient(180deg, #111218 0%, #0e0f14 100%);
+  background: linear-gradient(180deg, var(--panel-gradient-start) 0%, var(--panel-gradient-end) 100%);
 }
 
 /* ============================================
@@ -45,12 +93,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2a2b35;
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a3b48;
+  background: var(--scrollbar-hover);
 }
 
 /* Thin scrollbar — only visible on hover */
@@ -59,7 +107,7 @@ body {
   scrollbar-color: transparent transparent;
 }
 .scrollbar-thin:hover {
-  scrollbar-color: #2a2b35 transparent;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
 /* ============================================
@@ -250,9 +298,9 @@ kbd {
 .skeleton {
   background: linear-gradient(
     90deg,
-    #1e2028 25%,
-    #2a2b35 50%,
-    #1e2028 75%
+    var(--skeleton-from) 25%,
+    var(--skeleton-mid) 50%,
+    var(--skeleton-to) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;

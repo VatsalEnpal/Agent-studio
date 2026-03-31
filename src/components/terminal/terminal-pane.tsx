@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
-import { WebglAddon } from "@xterm/addon-webgl";
+
 import "@xterm/xterm/css/xterm.css";
 import { X, Maximize2, Minimize2, Loader2, ZoomIn, ZoomOut } from "lucide-react";
 import { wsClient } from "@/lib/ws-client";
@@ -157,22 +157,6 @@ export function TerminalPane({
     term.loadAddon(fitAddon);
 
     term.open(container);
-
-    // Use WebGL renderer for much faster rendering; fall back to canvas.
-    // MUST happen after open(). If WebGL fails, xterm falls back to canvas automatically.
-    try {
-      const webgl = new WebglAddon();
-      webgl.onContextLoss(() => {
-        webgl.dispose();
-        // Canvas fallback is automatic after dispose — just refit
-        requestAnimationFrame(() => {
-          try { fitAddon.fit(); } catch { /* ignore */ }
-        });
-      });
-      term.loadAddon(webgl);
-    } catch {
-      // WebGL not available — canvas renderer is the default
-    }
 
     fitAddonRef.current = fitAddon;
     termRef.current = term;

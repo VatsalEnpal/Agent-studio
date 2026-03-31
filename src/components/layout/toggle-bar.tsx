@@ -246,7 +246,7 @@ export function ToggleBar() {
       <div className="flex items-center gap-2">
         <SystemWidget />
         <a
-          href="https://claude.ai/settings"
+          href="https://claude.ai/settings/usage"
           target="_blank"
           rel="noopener noreferrer"
           className="text-xs text-console-dim hover:text-console-muted transition-colors flex items-center gap-1"
