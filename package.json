@@ -68,7 +68,8 @@
     "productName": "Agent Studio",
     "mac": {
       "category": "public.app-category.developer-tools",
-      "target": ["dmg"]
+      "target": ["dmg"],
+      "icon": "public/icon.png"
     },
     "files": [
       "server/**/*",

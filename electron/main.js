@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Notification, Tray, Menu, nativeImage, ipcMain } = require("electron");
+const { app, BrowserWindow, Notification, Tray, Menu, nativeImage, ipcMain, dialog } = require("electron");
 const { spawn } = require("child_process");
 const path = require("path");
 const net = require("net");
@@ -45,6 +45,10 @@ async function startServer() {
     }, 500);
     setTimeout(() => {
       clearInterval(check);
+      dialog.showErrorBox(
+        "Agent Studio — Server Failed",
+        "The backend server did not start within 30 seconds.\n\nTry restarting the app or running 'npm run dev' manually to diagnose.",
+      );
       resolve(port);
     }, 30000);
   });
@@ -58,6 +62,8 @@ function createWindow() {
     minHeight: 600,
     titleBarStyle: "hiddenInset",
     backgroundColor: "#0a0b0e",
+    icon: path.join(__dirname, "..", "public", "icon.png"),
+    show: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -66,6 +72,21 @@ function createWindow() {
   });
 
   mainWindow.loadURL(`http://127.0.0.1:${serverPort}`);
+
+  // Show window once content is ready — avoids blank flash
+  mainWindow.once("ready-to-show", () => {
+    mainWindow?.show();
+  });
+
+  // If page fails to load (server still booting), retry after 2s
+  mainWindow.webContents.on("did-fail-load", (_event, _code, _desc, url) => {
+    if (url.includes("127.0.0.1")) {
+      setTimeout(() => {
+        mainWindow?.loadURL(`http://127.0.0.1:${serverPort}`);
+      }, 2000);
+    }
+  });
+
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
@@ -73,7 +94,7 @@ function createWindow() {
 
 function createTray() {
   try {
-    const iconPath = path.join(__dirname, "..", "public", "favicon-green.svg");
+    const iconPath = path.join(__dirname, "..", "public", "icon-tray.svg");
     const icon = nativeImage.createFromPath(iconPath);
     tray = new Tray(icon.resize({ width: 16, height: 16 }));
     tray.setToolTip("Agent Studio");

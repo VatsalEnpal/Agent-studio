@@ -21,3 +21,6 @@ ai-agents/
 # Build artifacts
 tsconfig.tsbuildinfo
 SECURITY_AUDIT.md
+dist/
+out/
+*.dmg
