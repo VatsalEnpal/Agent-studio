@@ -14,10 +14,16 @@
     "terminal",
     "automation"
   ],
+  "main": "electron/main.js",
   "scripts": {
     "dev": "tsx server/index.ts",
     "build": "next build",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "electron": "electron electron/main.js",
+    "electron:dev": "concurrently \"npm run dev\" \"sleep 8 && electron electron/main.js\"",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.0",
@@ -49,9 +55,35 @@
     "@types/react": "^19",
     "@types/ws": "^8",
     "autoprefixer": "^10",
+    "concurrently": "^9.2.1",
+    "electron": "^41.1.1",
+    "electron-builder": "^26.8.1",
     "postcss": "^8",
     "tsx": "^4.19.0",
     "typescript": "^5",
     "vitest": "^4.1.0"
+  },
+  "build": {
+    "appId": "dev.agent-studio",
+    "productName": "Agent Studio",
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": ["dmg"]
+    },
+    "files": [
+      "server/**/*",
+      "src/**/*",
+      "public/**/*",
+      "electron/**/*",
+      "package.json",
+      "next.config.mjs",
+      "tailwind.config.ts",
+      "tsconfig.json",
+      "postcss.config.mjs",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      "node_modules/**/*"
+    ]
   }
 }
