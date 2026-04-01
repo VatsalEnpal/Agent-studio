@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useSessionsStore } from "@/stores/sessions";
 import { useToastStore } from "@/stores/toast";
+import { notifySessionExit, getNotificationPrefs } from "@/lib/notifications";
 
 type FaviconColor = "green" | "yellow" | "red";
 
@@ -62,6 +63,11 @@ export function useNotifications() {
           `Session "${session.name}" ended (code ${code})`,
           session.exitCode === 0 ? "success" : "error",
         );
+        // Fire native OS notification if enabled in prefs
+        const prefs = getNotificationPrefs();
+        if (prefs.sessionExit) {
+          notifySessionExit(session.name, typeof code === "number" ? code : -1);
+        }
       }
     }
 

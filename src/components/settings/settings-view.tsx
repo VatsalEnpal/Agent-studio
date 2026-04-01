@@ -9,6 +9,7 @@ import { SettingsAutomations } from "./settings-automations";
 import { SettingsMonitor } from "./settings-monitor";
 import { SettingsShortcuts } from "./settings-shortcuts";
 import { SettingsAbout } from "./settings-about";
+import { SettingsNotifications } from "./settings-notifications";
 
 export function SettingsView() {
   const setSystemStats = useSettingsStore((s) => s.setSystemStats);
@@ -54,6 +55,7 @@ export function SettingsView() {
         <SettingsGeneral />
         <SettingsPmo />
         <SettingsAutomations />
+        <SettingsNotifications />
         <SettingsMonitor />
         <SettingsShortcuts />
         <SettingsAbout />
