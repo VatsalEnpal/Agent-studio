@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useSessionsStore } from "@/stores/sessions";
 import { useUIStore } from "@/stores/ui";
 import { TerminalPane } from "./terminal-pane";
@@ -49,6 +50,14 @@ export function TerminalGrid({
   const { gridClass, spanClasses } = computeGridLayout(
     isAgentTeam ? sessionsToRender.length : 1,
   );
+
+  // When session count or fullscreen state changes, refit all terminals after layout settles
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event("terminal-refit"));
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [sessionsToRender.length, fullscreenId]);
 
   if (sessions.length === 0) {
     return (

@@ -213,8 +213,11 @@ export function TerminalPane({
       },
     );
 
+    // Debounced resize observer — prevents rapid-fire fits that cause overlapping lines
+    let fitTimeout: ReturnType<typeof setTimeout> | null = null;
     const resizeObserver = new ResizeObserver(() => {
-      requestAnimationFrame(() => {
+      if (fitTimeout) clearTimeout(fitTimeout);
+      fitTimeout = setTimeout(() => {
         try {
           fitAddon.fit();
           wsClient.send({
@@ -224,17 +227,35 @@ export function TerminalPane({
             rows: term.rows,
           });
         } catch {
-          // Ignore
+          // Ignore fit errors during layout transitions
         }
-      });
+      }, 100);
     });
     resizeObserver.observe(container);
 
+    // Listen for grid-wide refit events (triggered when session count changes)
+    const refitHandler = () => {
+      try {
+        fitAddon.fit();
+        wsClient.send({
+          type: "terminal-resize",
+          sessionId,
+          cols: term.cols,
+          rows: term.rows,
+        });
+      } catch {
+        // Ignore fit errors
+      }
+    };
+    window.addEventListener("terminal-refit", refitHandler);
+
     return () => {
       clearTimeout(fallbackTimer);
+      if (fitTimeout) clearTimeout(fitTimeout);
       inputDisposable.dispose();
       unsubscribe();
       resizeObserver.disconnect();
+      window.removeEventListener("terminal-refit", refitHandler);
       term.dispose();
       termRef.current = null;
       fitAddonRef.current = null;
@@ -257,7 +278,7 @@ export function TerminalPane({
       }}
     >
       {/* Header bar */}
-      <div className="flex items-center gap-2 px-3 py-1.5 console-panel-bg border-b border-console-border shrink-0">
+      <div className="flex items-center gap-2 px-3 py-1.5 console-panel-bg border-b border-console-border shrink-0 font-mono">
         <span
           className={cn(
             "w-2 h-2 rounded-full shrink-0",
@@ -365,7 +386,7 @@ export function TerminalPane({
       </div>
 
       {/* Terminal */}
-      <div ref={terminalRef} className="flex-1 min-h-0" />
+      <div ref={terminalRef} className="flex-1 min-h-0 overflow-hidden" />
     </div>
   );
 }
