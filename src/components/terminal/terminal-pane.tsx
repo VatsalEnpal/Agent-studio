@@ -105,7 +105,7 @@ export function TerminalPane({
   const usage = useSessionUsage(sessionId);
   const effectiveModel = usage.modelShort ?? meta?.model ?? null;
   const customName = getCustomName(sessionId);
-  const displayName = customName || name;
+  const displayName = customName || usage.displayName || name;
   const contextPercent = usage.contextPercent ?? 0;
   const contextDisplay = usage.loading ? "..." : contextPercent > 0 ? `${contextPercent}% ctx` : null;
   const contextColor = contextPercent >= 90 ? "text-red-400 bg-red-500/15" : contextPercent >= 70 ? "text-yellow-400 bg-yellow-500/15" : "bg-console-border text-console-dim";

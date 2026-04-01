@@ -31,6 +31,9 @@ import path from "node:path";
 import os from "node:os";
 import type { SessionMeta, WsMessage } from "./types.js";
 import { WorkflowManager } from "./workflows/index.js";
+import { RoomManager } from "./rooms.js";
+import type { RoomMessage } from "./rooms.js";
+import { roomsRoutes } from "./routes/rooms.js";
 import { getConfig, loadConfig, saveConfig, generateDefaultConfig, reloadConfig, getAgentSystemPath, getMainProjectDir, resolvePath, type AgentConfig, type WorkflowConfig } from "./config.js";
 import { scaffoldAgentSystem, previewScaffold } from "./scaffold.js";
 import type { ScaffoldOptions } from "./scaffold.js";
@@ -84,6 +87,129 @@ async function main() {
   const wss = new WebSocketServer({ noServer: true });
   const terminalManager = new TerminalManager();
   const gitWatcher = new GitWatcher();
+
+  // --- Room management ---
+  const roomManager = new RoomManager();
+  const sessionToRoom = new Map<string, string>(); // sessionId -> roomId
+  const sessionToAgent = new Map<string, string>(); // sessionId -> agentId
+  const lastBufferPos = new Map<string, number>();  // sessionId -> last read position
+
+  function stripAnsi(str: string): string {
+    return str.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "").replace(/\x1B\][^\x07]*\x07/g, "");
+  }
+
+  // Broadcast room events via WebSocket
+  roomManager.on("message", (msg: RoomMessage) => {
+    const wsMsg: WsMessage = { type: "room-message", payload: msg };
+    for (const client of wss.clients) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(wsMsg));
+      }
+    }
+  });
+
+  roomManager.on("agent-status", (payload: { roomId: string; agentId: string; status: string }) => {
+    const wsMsg: WsMessage = { type: "room-agent-status", payload };
+    for (const client of wss.clients) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(wsMsg));
+      }
+    }
+  });
+
+  roomManager.on("approval", (payload: { roomId: string; messageId: string; approved: boolean }) => {
+    const wsMsg: WsMessage = { type: "room-approval", payload };
+    for (const client of wss.clients) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(wsMsg));
+      }
+    }
+  });
+
+  // Poll terminal output for room-linked sessions every 3 seconds
+  setInterval(() => {
+    for (const [sessionId, roomId] of sessionToRoom) {
+      const buffer = terminalManager.getSessionBuffer(sessionId);
+      if (!buffer) continue;
+
+      const lastPos = lastBufferPos.get(sessionId) ?? 0;
+      if (buffer.length <= lastPos) continue;
+
+      const newOutput = buffer.slice(lastPos);
+      lastBufferPos.set(sessionId, buffer.length);
+
+      const agentId = sessionToAgent.get(sessionId);
+      if (!agentId) continue;
+
+      // Check for dangerous commands in raw output
+      const dangerous = roomManager.checkDangerous(newOutput);
+      if (dangerous) {
+        roomManager.addMessage(roomId, {
+          from: agentId,
+          text: `Wants to execute: ${dangerous}`,
+          type: "approval-request",
+          actionCommand: dangerous,
+          approvalStatus: "pending",
+        });
+      }
+
+      const cleaned = stripAnsi(newOutput);
+      const hasPrompt = /(\n|^)\s*[>$]\s*$/m.test(cleaned);
+      const hasSubstantialOutput = cleaned.replace(/\s+/g, " ").trim().length > 30;
+      if (!hasSubstantialOutput) continue;
+
+      const lines = cleaned.split("\n").filter(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return false;
+        if (/^[>$]\s*$/.test(trimmed)) return false;
+        if (trimmed.includes("shift+tab to cycle")) return false;
+        if (trimmed.includes("MCP server")) return false;
+        if (/^[─━═]+$/.test(trimmed)) return false;
+        if (/^Tokens:/.test(trimmed)) return false;
+        if (/^Model:/.test(trimmed)) return false;
+        return true;
+      });
+
+      if (lines.length === 0) continue;
+      const responseText = lines.join("\n").trim();
+      if (responseText.length < 10) continue;
+      if (!hasPrompt && responseText.length < 200) continue;
+
+      const truncated = responseText.length > 2000
+        ? responseText.slice(0, 2000) + "\n...(truncated)"
+        : responseText;
+
+      roomManager.addMessage(roomId, {
+        from: agentId,
+        text: truncated,
+        type: "message",
+      });
+      roomManager.updateContextFile(roomId);
+
+      if (hasPrompt) {
+        roomManager.setAgentStatus(roomId, agentId, "idle");
+      }
+    }
+  }, 3000);
+
+  // Listen for session exits to clean up room maps
+  terminalManager.onEvent((message: WsMessage) => {
+    if (message.type === "sessions-update") {
+      const sessions = message.payload as import("./types.js").Session[];
+      for (const session of sessions) {
+        if (session.status === "exited" && sessionToRoom.has(session.id)) {
+          const roomId = sessionToRoom.get(session.id)!;
+          const agentId = sessionToAgent.get(session.id);
+          if (agentId) {
+            roomManager.setAgentStatus(roomId, agentId, "offline");
+          }
+          sessionToRoom.delete(session.id);
+          sessionToAgent.delete(session.id);
+          lastBufferPos.delete(session.id);
+        }
+      }
+    }
+  });
 
   // Route WebSocket upgrades: only /ws goes to our server,
   // everything else (e.g. /_next/webpack-hmr) passes through to Next.js
@@ -2510,6 +2636,9 @@ Choose the schedule and model based on the task:
       res.status(500).json({ error: "Internal server error" });
     },
   );
+
+  // --- Room routes (mounted via route module) ---
+  app.use("/api/rooms", roomsRoutes(roomManager, terminalManager, sessionToRoom, sessionToAgent, lastBufferPos));
 
   // --- Next.js catch-all ---
   app.all("/{*path}", (req, res) => {

@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync, openSync, readSync, closeSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { findChildPids } from "./platform.js";
@@ -334,6 +334,75 @@ export function findSessionIdForPtyPid(ptyPid: number): string | null {
   }
 
   return null;
+}
+
+// Display name cache — avoids re-reading JSONL files on every poll
+const displayNameCache = new Map<string, string>();
+
+/**
+ * Extract the first user message from a JSONL file for display name.
+ */
+function extractFirstUserMessage(jsonlPath: string): string | null {
+  try {
+    const fd = openSync(jsonlPath, "r");
+    const buf = Buffer.alloc(32768);
+    const bytesRead = readSync(fd, buf, 0, 32768, 0);
+    closeSync(fd);
+    const chunk = buf.toString("utf8", 0, bytesRead);
+    const lines = chunk.split("\n").filter(Boolean);
+    for (const line of lines.slice(0, 30)) {
+      try {
+        const entry = JSON.parse(line);
+        if (entry.type === "user") {
+          const msg = entry.message;
+          let text = "";
+          if (typeof msg === "string") {
+            text = msg;
+          } else if (msg && typeof msg.content === "string") {
+            text = msg.content;
+          } else if (msg && Array.isArray(msg.content)) {
+            text = msg.content
+              .filter((b: { type: string }) => b.type === "text")
+              .map((b: { text: string }) => b.text)
+              .join(" ");
+          }
+          if (text && !text.startsWith("<") && text.length > 5) {
+            return text.slice(0, 60).replace(/\n/g, " ").trim();
+          }
+        }
+      } catch {
+        // Skip unparseable lines
+      }
+    }
+  } catch {
+    // Can't read file
+  }
+  return null;
+}
+
+/**
+ * Get the display name for a session by extracting the first user message.
+ */
+export function getSessionDisplayName(sessionId: string): string | null {
+  if (displayNameCache.has(sessionId)) {
+    return displayNameCache.get(sessionId) ?? null;
+  }
+  const jsonlPath = findJsonlFile(sessionId);
+  if (!jsonlPath) return null;
+  const name = extractFirstUserMessage(jsonlPath);
+  if (name) {
+    displayNameCache.set(sessionId, name);
+  }
+  return name;
+}
+
+/**
+ * Get display name for a session by looking up the Claude session ID from a PTY PID.
+ */
+export function getDisplayNameForPtyPid(ptyPid: number): string | null {
+  const claudeSessionId = findSessionIdForPtyPid(ptyPid);
+  if (!claudeSessionId) return null;
+  return getSessionDisplayName(claudeSessionId);
 }
 
 /**

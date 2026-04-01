@@ -5,7 +5,9 @@ export interface SessionMeta {
   agent?: string;
   permissions?: "bypass" | "default" | "plan" | "auto";
   channel?: "none" | "telegram";
-  group?: "sprint" | "standalone";
+  group?: "sprint" | "standalone" | "room";
+  roomId?: string;
+  roomName?: string;
   cost?: string;
   contextPercent?: number;
 }
@@ -52,7 +54,10 @@ export interface WsMessage {
     | "git-update"
     | "workflow-update"
     | "usage-update"
-    | "automation-report";
+    | "automation-report"
+    | "room-message"
+    | "room-agent-status"
+    | "room-approval";
   sessionId?: string;
   data?: string;
   cols?: number;
@@ -86,4 +91,5 @@ export interface LauncherPreset {
   permissions: "bypass" | "default" | "plan" | "auto";
   channel: "none" | "telegram";
   cwd: string;
+  customName?: string;
 }

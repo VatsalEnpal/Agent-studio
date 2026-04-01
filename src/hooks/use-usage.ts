@@ -83,6 +83,7 @@ export function useSessionUsage(sessionId: string | null): {
   contextUsed: number;
   contextTotal: number;
   contextPercent: number;
+  displayName: string | null;
   loading: boolean;
 } {
   const [data, setData] = useState<{
@@ -94,6 +95,7 @@ export function useSessionUsage(sessionId: string | null): {
     contextUsed: number;
     contextTotal: number;
     contextPercent: number;
+    displayName: string | null;
     loading: boolean;
   }>({
     cost: null,
@@ -104,6 +106,7 @@ export function useSessionUsage(sessionId: string | null): {
     contextUsed: 0,
     contextTotal: 0,
     contextPercent: 0,
+    displayName: null,
     loading: true,
   });
 
@@ -126,6 +129,7 @@ export function useSessionUsage(sessionId: string | null): {
             contextUsed?: number;
             contextTotal?: number;
             contextPercent?: number;
+            displayName?: string;
           };
           setData({
             cost: json.cost,
@@ -136,6 +140,7 @@ export function useSessionUsage(sessionId: string | null): {
             contextUsed: json.contextUsed ?? 0,
             contextTotal: json.contextTotal ?? 0,
             contextPercent: json.contextPercent ?? 0,
+            displayName: json.displayName ?? null,
             loading: false,
           });
         }

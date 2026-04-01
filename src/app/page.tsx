@@ -5,6 +5,8 @@ import { wsClient, type ConnectionState } from "@/lib/ws-client";
 import { useSessionsStore } from "@/stores/sessions";
 import { useUIStore } from "@/stores/ui";
 import { useGitStore } from "@/stores/git";
+import { useRoomsStore } from "@/stores/rooms";
+import type { RoomMessage, RoomAgent } from "@/stores/rooms";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useThemeSync } from "@/hooks/use-theme-sync";
@@ -349,11 +351,36 @@ export default function Home() {
       },
     );
 
+    // Room events
+    const unsubRoomMsg = wsClient.on("room-message", (msg: WsMessage) => {
+      const roomMsg = msg.payload as RoomMessage;
+      if (roomMsg?.roomId) {
+        useRoomsStore.getState().addMessage(roomMsg.roomId, roomMsg);
+      }
+    });
+
+    const unsubRoomStatus = wsClient.on("room-agent-status", (msg: WsMessage) => {
+      const payload = msg.payload as { roomId: string; agentId: string; status: RoomAgent["status"] };
+      if (payload?.roomId) {
+        useRoomsStore.getState().updateAgentStatus(payload.roomId, payload.agentId, payload.status);
+      }
+    });
+
+    const unsubRoomApproval = wsClient.on("room-approval", (msg: WsMessage) => {
+      const payload = msg.payload as { roomId: string; messageId: string; approved: boolean };
+      if (payload?.roomId) {
+        useRoomsStore.getState().updateApproval(payload.roomId, payload.messageId, payload.approved);
+      }
+    });
+
     wsClient.connect(`ws://${window.location.host}/ws`);
 
     return () => {
       unsubSessions();
       unsubGit();
+      unsubRoomMsg();
+      unsubRoomStatus();
+      unsubRoomApproval();
     };
   }, [setSessions, setRepos]);
 

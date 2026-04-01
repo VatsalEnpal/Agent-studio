@@ -1,0 +1,145 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { History, Play } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { SessionGroup } from "@/components/sessions/session-group";
+import type { PastSession } from "./types";
+import { formatHistoryDate } from "./utils";
+
+export function RecentSection() {
+  const [sessions, setSessions] = useState<PastSession[]>([]);
+  const [resumingId, setResumingId] = useState<string | null>(null);
+
+  const fetchRecentSessions = useCallback(async () => {
+    try {
+      const res = await fetch("/api/sessions/history");
+      if (res.ok) {
+        setSessions((await res.json()) as PastSession[]);
+      }
+    } catch {
+      // Best effort
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchRecentSessions();
+  }, [fetchRecentSessions]);
+
+  const handleResume = useCallback(
+    (s: PastSession) => {
+      if (resumingId) return;
+      setResumingId(s.id);
+
+      void (async () => {
+        try {
+          const cwd = "/" + s.project;
+          const name = s.preview
+            ? s.preview.length > 30
+              ? s.preview.slice(0, 30) + "..."
+              : s.preview
+            : `resume-${s.id.slice(0, 8)}`;
+
+          await fetch("/api/sessions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name,
+              command: "claude",
+              args: ["--resume", s.id, "--dangerously-skip-permissions"],
+              cwd,
+              meta: {
+                model: "sonnet",
+                agent: "resumed",
+                permissions: "bypass",
+                channel: "none",
+                group: "standalone",
+              },
+            }),
+          });
+        } finally {
+          setTimeout(() => setResumingId(null), 5000);
+        }
+      })();
+    },
+    [resumingId],
+  );
+
+  if (sessions.length === 0) return null;
+
+  return (
+    <SessionGroup
+      title="Recent Sessions"
+      count={sessions.length}
+      defaultOpen={false}
+    >
+      {sessions.slice(0, 10).map((session) => (
+        <RecentSessionItem
+          key={session.id}
+          session={session}
+          resumingId={resumingId}
+          onResume={handleResume}
+        />
+      ))}
+    </SessionGroup>
+  );
+}
+
+/* ---------- Recent Session Item ---------- */
+
+function RecentSessionItem({
+  session,
+  onResume,
+  resumingId,
+}: {
+  session: PastSession;
+  onResume: (session: PastSession) => void;
+  resumingId: string | null;
+}) {
+  const projectShort =
+    session.projectShort ??
+    session.project.split("/").pop() ??
+    session.project;
+  const dateStr = formatHistoryDate(session.date);
+
+  const displayName = session.preview
+    ? session.preview.length > 50
+      ? session.preview.slice(0, 50) + "..."
+      : session.preview
+    : projectShort;
+
+  const subtitle = [session.agent, projectShort, dateStr]
+    .filter(Boolean)
+    .join(" \u00b7 ");
+
+  return (
+    <div
+      className="flex items-center gap-2 px-2 py-1.5 group"
+      title={`${session.preview ?? ""}\n${session.agent ? `Agent: ${session.agent}\n` : ""}${session.project}\nSession: ${session.id}`}
+    >
+      <History className="w-3 h-3 text-console-dim shrink-0" />
+      <div className="flex-1 min-w-0">
+        <span className="text-[10px] text-console-muted truncate block">
+          {displayName}
+        </span>
+        <span className="text-[9px] text-console-dim truncate block">
+          {subtitle}
+        </span>
+      </div>
+      <button
+        onClick={() => onResume(session)}
+        disabled={resumingId === session.id}
+        className={cn(
+          "flex items-center gap-0.5 px-1.5 py-0.5 text-[8px] font-medium rounded transition-all shrink-0",
+          resumingId === session.id
+            ? "text-console-dim bg-console-border cursor-not-allowed opacity-100"
+            : "opacity-0 group-hover:opacity-100 text-console-accent bg-console-accent/10 hover:bg-console-accent/20 active:bg-console-accent/30",
+        )}
+        title={`Resume session ${session.id.slice(0, 8)}`}
+      >
+        <Play className="w-2 h-2" />
+        {resumingId === session.id ? "Resuming..." : "Resume"}
+      </button>
+    </div>
+  );
+}

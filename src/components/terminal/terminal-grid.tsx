@@ -32,19 +32,22 @@ export function TerminalGrid({
   const fullscreenId = useUIStore((s) => s.fullscreenId);
   const setFullscreen = useUIStore((s) => s.setFullscreen);
 
+  // Filter out room-managed sessions — those only appear in Team Chat
+  const nonRoomSessions = sessions.filter((s) => s.meta?.group !== "room");
+
   // Determine if this is an agent team (sprint) — multiple sessions with group: "sprint"
-  const sprintSessions = sessions.filter((s) => s.meta?.group === "sprint");
+  const sprintSessions = nonRoomSessions.filter((s) => s.meta?.group === "sprint");
   const isAgentTeam = sprintSessions.length > 1;
 
   // In agent-team mode, show all sprint sessions in grid
   // In single mode, show only the focused session full-width
   const sessionsToRender: Session[] = isAgentTeam
     ? visibleIds
-        .map((id) => sessions.find((s) => s.id === id))
+        .map((id) => nonRoomSessions.find((s) => s.id === id))
         .filter((s): s is Session => s !== undefined)
     : (() => {
-        const focused = sessions.find((s) => s.id === focusedId);
-        return focused ? [focused] : sessions.length > 0 ? [sessions[0]] : [];
+        const focused = nonRoomSessions.find((s) => s.id === focusedId);
+        return focused ? [focused] : nonRoomSessions.length > 0 ? [nonRoomSessions[0]] : [];
       })();
 
   const { gridClass, spanClasses } = computeGridLayout(
@@ -59,7 +62,7 @@ export function TerminalGrid({
     return () => clearTimeout(timer);
   }, [sessionsToRender.length, fullscreenId]);
 
-  if (sessions.length === 0) {
+  if (nonRoomSessions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-8 animate-tab-enter">
         <div className="text-center space-y-3">
