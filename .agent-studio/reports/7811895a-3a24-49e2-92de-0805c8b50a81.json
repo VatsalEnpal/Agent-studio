@@ -1,0 +1,18 @@
+{
+  "id": "7811895a-3a24-49e2-92de-0805c8b50a81",
+  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
+  "automationName": "Code Health Scan",
+  "timestamp": "2026-04-01T08:36:19.611Z",
+  "status": "pending",
+  "summary": "I need permission to access and analyze the project at `/Users/vatsalbhatt230813/Code/agent-studio`. This will involve:\n\n- Reading project files (package.json, pyproject.toml, etc.)\n- Running type checkers\n- Running tests\n- Running security audits\n- Scanning source files for TODO/FIXME comments\n\nMay I proceed with these checks?\n",
+  "suggestedActions": [
+    {
+      "id": "c0712b66-3214-4f96-a60d-a5a450b84df2",
+      "title": "/FIXME comments",
+      "description": "/FIXME comments",
+      "agent": "none",
+      "prompt": "Fix: /FIXME comments",
+      "approved": false
+    }
+  ]
+}

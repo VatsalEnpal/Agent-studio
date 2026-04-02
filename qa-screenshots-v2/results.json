@@ -1,0 +1,238 @@
+{
+  "results": [
+    {
+      "id": "R1",
+      "title": "Homepage loads with toggle bar",
+      "pass": true,
+      "detail": "Sessions: true, Reports: true, Settings: true",
+      "severity": null
+    },
+    {
+      "id": "R2",
+      "title": "Tab: Sessions",
+      "pass": true,
+      "detail": "Switched and rendered",
+      "severity": null
+    },
+    {
+      "id": "R2",
+      "title": "Tab: Reports",
+      "pass": true,
+      "detail": "Switched and rendered",
+      "severity": null
+    },
+    {
+      "id": "R2",
+      "title": "Tab: Settings",
+      "pass": true,
+      "detail": "Switched and rendered",
+      "severity": null
+    },
+    {
+      "id": "R2",
+      "title": "Teams/Memory tabs",
+      "pass": true,
+      "detail": "Hidden (agentSystem not configured) — expected. Teams: true, Memory: true",
+      "severity": null
+    },
+    {
+      "id": "R7",
+      "title": "Zero console errors after navigation",
+      "pass": true,
+      "detail": "Clean",
+      "severity": null
+    },
+    {
+      "id": "R3",
+      "title": "Session launcher opens",
+      "pass": true,
+      "detail": "Dialog visible",
+      "severity": null
+    },
+    {
+      "id": "A2",
+      "title": "Launcher shows dynamic agents from API",
+      "pass": true,
+      "detail": "Found 7/7: orchestrator, frontend, backend, qa, security, pmo, documentation",
+      "severity": null
+    },
+    {
+      "id": "A1",
+      "title": "GET /api/agents returns 9 agents",
+      "pass": true,
+      "detail": "Verified via curl: none + 8 named agents with id/name/description",
+      "severity": null
+    },
+    {
+      "id": "A3",
+      "title": "Agent list includes domain agent",
+      "pass": true,
+      "detail": "New 'domain' agent for core business logic",
+      "severity": null
+    },
+    {
+      "id": "RP1",
+      "title": "Reports tab in toggle bar",
+      "pass": true,
+      "detail": "Visible",
+      "severity": null
+    },
+    {
+      "id": "RP2",
+      "title": "Reports view renders",
+      "pass": true,
+      "detail": "Reports content visible",
+      "severity": null
+    },
+    {
+      "id": "RP3",
+      "title": "Reports shows automation results",
+      "pass": true,
+      "detail": "Shows 'Test Health Check' report (pending)",
+      "severity": null
+    },
+    {
+      "id": "AU1",
+      "title": "Settings has Automations section",
+      "pass": true,
+      "detail": "Found automations section",
+      "severity": null
+    },
+    {
+      "id": "AU2",
+      "title": "Automations has Suggestions button",
+      "pass": true,
+      "detail": "Suggestions feature found",
+      "severity": null
+    },
+    {
+      "id": "AU3",
+      "title": "Automation templates visible",
+      "pass": true,
+      "detail": "Template content found",
+      "severity": null
+    },
+    {
+      "id": "AP1",
+      "title": "GET /api/agents — 200",
+      "pass": true,
+      "detail": "9 agents returned",
+      "severity": null
+    },
+    {
+      "id": "AP2",
+      "title": "GET /api/automations — 200",
+      "pass": true,
+      "detail": "Returns array with existing automations",
+      "severity": null
+    },
+    {
+      "id": "AP3",
+      "title": "GET /api/reports — 200",
+      "pass": true,
+      "detail": "Returns array with report entries",
+      "severity": null
+    },
+    {
+      "id": "AP4",
+      "title": "GET /api/automation-templates/rich — 200",
+      "pass": true,
+      "detail": "6 templates: code-health, pr-reviewer, security-scan, dependency-update, test-coverage, documentation",
+      "severity": null
+    },
+    {
+      "id": "AP5",
+      "title": "GET /api/automation-suggestions — 200",
+      "pass": true,
+      "detail": "Returns project profile + 6 ranked suggestions with customized prompts",
+      "severity": null
+    },
+    {
+      "id": "AP6",
+      "title": "POST /api/automations/from-template — 201",
+      "pass": true,
+      "detail": "Creates automation from template with filled prompt",
+      "severity": null
+    },
+    {
+      "id": "AP7",
+      "title": "POST /api/generate-claudemd — 200",
+      "pass": true,
+      "detail": "Generates CLAUDE.md at project root",
+      "severity": null
+    },
+    {
+      "id": "AP8",
+      "title": "POST /api/automations/from-template — validation",
+      "pass": true,
+      "detail": "Missing fields returns 400 with clear error",
+      "severity": null
+    },
+    {
+      "id": "AP9",
+      "title": "POST /api/generate-claudemd — validation",
+      "pass": true,
+      "detail": "Missing projectPath returns 400 with clear error",
+      "severity": null
+    },
+    {
+      "id": "AP10",
+      "title": "POST /api/analyze-project — 404",
+      "pass": false,
+      "detail": "Endpoint NOT registered in Express routes",
+      "severity": "P1"
+    },
+    {
+      "id": "AP11",
+      "title": "POST /api/generate-agents/preview — 404",
+      "pass": false,
+      "detail": "Endpoint NOT registered in Express routes",
+      "severity": "P1"
+    },
+    {
+      "id": "S1",
+      "title": "No Enpal references in UI",
+      "pass": true,
+      "detail": "Clean",
+      "severity": null
+    },
+    {
+      "id": "S2",
+      "title": "No API keys in responses",
+      "pass": true,
+      "detail": "Verified: /api/config, /api/agents, /api/automations — no tokens/secrets",
+      "severity": null
+    },
+    {
+      "id": "S3",
+      "title": "Zero JS console errors (final)",
+      "pass": true,
+      "detail": "Clean",
+      "severity": null
+    },
+    {
+      "id": "V1",
+      "title": "Layout at 1920px viewport",
+      "pass": true,
+      "detail": "No overflow or layout issues (visual only)",
+      "severity": null
+    },
+    {
+      "id": "SW1",
+      "title": "Setup wizard accessible",
+      "pass": true,
+      "detail": "Found setup button in settings",
+      "severity": null
+    }
+  ],
+  "score": 70,
+  "summary": {
+    "total": 32,
+    "passed": 30,
+    "failed": 2,
+    "p0": 0,
+    "p1": 2,
+    "p2": 0,
+    "p3": 0
+  }
+}

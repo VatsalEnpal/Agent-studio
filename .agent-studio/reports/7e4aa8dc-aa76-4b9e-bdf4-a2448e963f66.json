@@ -1,0 +1,9 @@
+{
+  "id": "7e4aa8dc-aa76-4b9e-bdf4-a2448e963f66",
+  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
+  "automationName": "Code Health Scan",
+  "timestamp": "2026-03-31T16:36:22.340Z",
+  "status": "pending",
+  "summary": "I can't access that path — the session is restricted to `/private/tmp/fittrack-app`. \n\nTo analyze `/Users/vatsalbhatt230813/Code/agent-studio`, you would need to either:\n1. Change the working directory to that project when starting Claude Code\n2. Or copy the project into the allowed workspace\n\nWould you like me to analyze the current project at `/private/tmp/fittrack-app` instead?\n",
+  "suggestedActions": []
+}

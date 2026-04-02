@@ -1,0 +1,9 @@
+{
+  "id": "b6f91b7c-a418-4026-8db2-a12f42eac0cb",
+  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
+  "automationName": "Code Health Scan",
+  "timestamp": "2026-03-30T20:44:47.310Z",
+  "status": "pending",
+  "summary": "I need permission to access `/Users/vatsalbhatt230813/Code/agent-studio`. Let me request access to analyze this project directory.\n\nThe system requires explicit permission to read from that location. Could you confirm you'd like me to proceed with analyzing `/Users/vatsalbhatt230813/Code/agent-studio`? This will allow me to:\n- Check for type errors\n- Run tests\n- Audit dependencies\n- Scan for code issues\n\nOnce you approve, I'll run all the health checks and provide the full JSON report.\n",
+  "suggestedActions": []
+}

@@ -1,0 +1,9 @@
+{
+  "id": "5d3c4542-04a8-40b6-9452-85ff9bf3e616",
+  "automationId": "b9c50802-7eb4-48ff-8533-96a5503870c6",
+  "automationName": "Code Health Scan",
+  "timestamp": "2026-04-01T06:36:32.036Z",
+  "status": "pending",
+  "summary": "I can only access files in the current working directory `/private/tmp/fittrack-app`. The path `/tmp/phantom-engine` is outside the allowed scope for security reasons.\n\nWould you like me to:\n1. Analyze the current project at `/private/tmp/fittrack-app` instead?\n2. Or, if the phantom-engine project should be accessible, clarify the correct path relative to the current working directory?\n",
+  "suggestedActions": []
+}

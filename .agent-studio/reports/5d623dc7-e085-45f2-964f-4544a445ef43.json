@@ -1,0 +1,9 @@
+{
+  "id": "5d623dc7-e085-45f2-964f-4544a445ef43",
+  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
+  "automationName": "Code Health Scan",
+  "timestamp": "2026-03-31T20:36:39.938Z",
+  "status": "pending",
+  "summary": "I don't have permission to access `/Users/vatsalbhatt230813/Code/agent-studio` from this session. The Claude Code environment restricts me to working within `/private/tmp/fittrack-app`.\n\nTo analyze the agent-studio project, you have a few options:\n\n1. **Change working directory**: If you have a Claude Code session open in that project directory, run the analysis there\n2. **Copy the project**: Copy agent-studio into the fittrack-app working directory so I can analyze it\n3. **Use the web app**: Open the agent-studio project directly in claude.ai/code, which will run in the correct directory context\n\nWould you like me to analyze the current fittrack-app project instead, or can you switch to the agent-studio directory?\n",
+  "suggestedActions": []
+}

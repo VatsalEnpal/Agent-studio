@@ -1,0 +1,9 @@
+{
+  "id": "46ee53a1-f486-4380-b7da-a2471811ab34",
+  "automationId": "b9c50802-7eb4-48ff-8533-96a5503870c6",
+  "automationName": "Code Health Scan",
+  "timestamp": "2026-04-01T10:36:22.832Z",
+  "status": "pending",
+  "summary": "I don't have access to `/tmp/phantom-engine`. Claude Code restricts file access to the current working directory: `/private/tmp/fittrack-app`.\n\nCould you either:\n1. Change to the phantom-engine project directory so I can analyze it there, or\n2. Provide the path as it relates to the current working directory\n\nOnce you clarify the accessible path, I can run the full health check.\n",
+  "suggestedActions": []
+}

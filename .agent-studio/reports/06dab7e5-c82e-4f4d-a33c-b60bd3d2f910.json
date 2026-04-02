@@ -1,0 +1,9 @@
+{
+  "id": "06dab7e5-c82e-4f4d-a33c-b60bd3d2f910",
+  "automationId": "b9c50802-7eb4-48ff-8533-96a5503870c6",
+  "automationName": "Code Health Scan",
+  "timestamp": "2026-04-01T12:36:18.795Z",
+  "status": "pending",
+  "summary": "I can't access `/tmp/phantom-engine` — my session is restricted to the working directory `/private/tmp/fittrack-app`. \n\nTo analyze a different project, either:\n1. Change the working directory to `/private/tmp/fittrack-app` and place the phantom-engine project there, or\n2. Start a new Claude Code session with `/tmp/phantom-engine` as the working directory\n\nWould you like me to analyze the current project (`/private/tmp/fittrack-app`) instead, or can you provide the phantom-engine project in the allowed directory?\n",
+  "suggestedActions": []
+}

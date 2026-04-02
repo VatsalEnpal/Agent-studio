@@ -1,0 +1,26 @@
+{
+  "id": "9c5965d8-815d-4d47-b21d-c5bbff6a34c6",
+  "automationId": "32876ac7-2339-4322-a99b-35651eacd82d",
+  "automationName": "Code Health Scan",
+  "timestamp": "2026-04-01T10:36:59.138Z",
+  "status": "pending",
+  "summary": "```json\n{\n  \"typeCheck\": {\n    \"pass\": null,\n    \"errors\": 0,\n    \"details\": \"Skipped: No tsconfig.json or TypeScript configuration found. Project uses JSX/TSX but no type checking is configured.\"\n  },\n  \"tests\": {\n    \"pass\": null,\n    \"total\": 0,\n    \"failed\": 0,\n    \"skipped\": true,\n    \"details\": \"Skipped: No test scripts found in package.json. No test runner detected.\"\n  },\n  \"security\": {\n    \"vulnerabilities\": 0,\n    \"critical\": 0,\n    \"details\": \"Cannot run npm audit: node_modules not installed. Dependencies declared: react@^19.0.0, react-native@^0.76.0 (both stable versions). No npm advisory data available locally.\"\n  },\n  \"todos\": [],\n  \"summary\": \"Project is in early prototype stage with minimal code (single React component). No type checking, tests, or build tooling configured. Zero TODO/FIXME/HACK comments found. Main concerns: missing TypeScript configuration despite .tsx files, no test infrastructure, and dependencies not installed. Recommended: Install dependencies, add tsconfig.json with strict settings, configure a test runner (Jest or Vitest), and add basic linting (ESLint).\",\n  \"score\": 25\n}\n```\n\n**Key Issues:**\n- No TypeScript configuration despite using `.tsx` files\n- Zero test infrastructure\n- Dependencies not installed\n- Minimal documentation/setup\n- No build or development scripts\n\nThe project appears to be a fresh scaffold that needs foundational tooling setup.\n",
+  "suggestedActions": [
+    {
+      "id": "55f32bf6-ba57-4725-87d3-e558bc91eb2f",
+      "title": "s\": [],",
+      "description": "s\": [],",
+      "agent": "none",
+      "prompt": "Fix: s\": [],",
+      "approved": false
+    },
+    {
+      "id": "9fb10d3a-5b71-405d-b93d-7fab02bb76d8",
+      "title": "/FIXME/HACK comments found. Main concerns: missing TypeScript configuration despite .tsx files, no t",
+      "description": "/FIXME/HACK comments found. Main concerns: missing TypeScript configuration despite .tsx files, no test infrastructure, and dependencies not installed. Recommended: Install dependencies, add tsconfig.json with strict settings, configure a test runner (Jest or Vitest), and add basic linting (ESLint).\",",
+      "agent": "none",
+      "prompt": "Fix: /FIXME/HACK comments found. Main concerns: missing TypeScript configuration despite .tsx files, no test infrastructure, and dependencies not installed. Recommended: Install dependencies, add tsconfig.json with strict settings, configure a test runner (Jest or Vitest), and add basic linting (ESLint).\",",
+      "approved": false
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "id": "113a8b80-0672-461b-af7c-8ebd1e88c96e",
+  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
+  "automationName": "Code Health Scan",
+  "timestamp": "2026-03-31T08:44:19.334Z",
+  "status": "pending",
+  "summary": "I can't access that directory — Claude Code is restricted to the current working directory `/private/tmp/fittrack-app`. \n\nTo analyze `/Users/vatsalbhatt230813/Code/agent-studio`, you'd need to either:\n1. Change the working directory to that project path\n2. Copy the project into the current workspace\n3. Run the analysis from your terminal directly using the commands I can provide\n\nWould you like me to analyze the FitTrack app in the current directory instead, or would you prefer commands to run the analysis yourself?\n",
+  "suggestedActions": []
+}

@@ -1,0 +1,9 @@
+{
+  "id": "3596a6ed-1ebf-41aa-be32-fee588672a2d",
+  "automationId": "b9c50802-7eb4-48ff-8533-96a5503870c6",
+  "automationName": "Code Health Scan",
+  "timestamp": "2026-03-30T20:44:56.200Z",
+  "status": "pending",
+  "summary": "I'm unable to analyze the project at `/tmp/phantom-engine` because my session is restricted to the working directory `/private/tmp/fittrack-app` for security reasons. \n\nTo analyze `/tmp/phantom-engine`, I would need either:\n1. The project files to be in the current working directory (`/private/tmp/fittrack-app`)\n2. A separate session configured with `/tmp/phantom-engine` as the working directory\n\nCould you either:\n- Copy/move the `phantom-engine` project to the current working directory, or\n- Start a new Claude Code session with `/tmp/phantom-engine` as the working directory?\n\nOnce that's set up, I can run the full health check analysis.\n",
+  "suggestedActions": []
+}

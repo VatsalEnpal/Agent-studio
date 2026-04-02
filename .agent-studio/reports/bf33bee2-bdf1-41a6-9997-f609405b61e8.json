@@ -1,0 +1,9 @@
+{
+  "id": "bf33bee2-bdf1-41a6-9997-f609405b61e8",
+  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
+  "automationName": "Code Health Scan",
+  "timestamp": "2026-03-30T22:44:35.839Z",
+  "status": "pending",
+  "summary": "I'm unable to access `/Users/vatsalbhatt230813/Code/agent-studio` — my current session is restricted to `/private/tmp/fittrack-app` as the working directory.\n\nTo analyze the agent-studio project, I'd need either:\n1. The project path to be within `/private/tmp/fittrack-app`, or\n2. Permission to access that location\n\nWould you like me to:\n- Analyze the fittrack-app project instead (the one I have access to)?\n- Copy the agent-studio project into the current working directory?\n- Or provide instructions on how to run these health checks yourself?\n",
+  "suggestedActions": []
+}

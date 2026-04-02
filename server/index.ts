@@ -167,6 +167,7 @@ async function main() {
         if (trimmed.includes("shift+tab to cycle")) return false;
         if (trimmed.includes("MCP server")) return false;
         if (/^[─━═╭╮╰╯│┌┐└┘]+$/.test(trimmed)) return false;    // box drawing only lines
+        if (trimmed.replace(/[─━═╭╮╰╯│┌┐└┘ ]/g, "").length < trimmed.length * 0.2) return false; // mostly box drawing
         if (/^[▗▖▝▘▀▄█░▒▓]+/.test(trimmed)) return false;        // block drawing characters
         if (/^Tokens:/.test(trimmed)) return false;
         if (/^Model:/.test(trimmed)) return false;
@@ -179,6 +180,11 @@ async function main() {
         if (trimmed.includes("/mcp")) return false;                  // MCP command
         if (/^@\w+\s*·/.test(trimmed)) return false;               // @agent · path
         if (trimmed.includes("[Room #")) return false;               // Our own injected messages
+        if (trimmed.includes("Remote Control")) return false;            // Remote control status
+        if (trimmed.includes("MCP server failed")) return false;         // MCP failure
+        if (trimmed.includes("MCP server needs auth")) return false;     // MCP auth
+        if (trimmed.includes("/buddy")) return false;                    // Claude buddy command
+        if (/^❯\s*$/.test(trimmed)) return false;                        // prompt only
         return true;
       });
 

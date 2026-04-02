@@ -1,0 +1,9 @@
+{
+  "id": "79ffbd2a-3beb-41d9-a267-f8ac9cc53612",
+  "automationId": "b9c50802-7eb4-48ff-8533-96a5503870c6",
+  "automationName": "Code Health Scan",
+  "timestamp": "2026-03-31T10:44:42.460Z",
+  "status": "pending",
+  "summary": "I don't have permission to access `/tmp/phantom-engine`. The session is configured to only access `/private/tmp/fittrack-app`.\n\nCould you either:\n1. **Copy the project to the working directory**: Move the project files to `/private/tmp/fittrack-app` or a subdirectory within it\n2. **Change the working directory**: Let me know if you'd like to analyze a different project in the allowed directory\n3. **Adjust permissions**: If this is your project setup, you may need to configure access permissions\n\nWhich would you prefer?\n",
+  "suggestedActions": []
+}

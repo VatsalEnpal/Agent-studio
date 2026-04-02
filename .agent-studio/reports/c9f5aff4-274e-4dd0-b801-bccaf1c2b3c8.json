@@ -1,0 +1,9 @@
+{
+  "id": "c9f5aff4-274e-4dd0-b801-bccaf1c2b3c8",
+  "automationId": "b9c50802-7eb4-48ff-8533-96a5503870c6",
+  "automationName": "Code Health Scan",
+  "timestamp": "2026-03-31T16:36:37.149Z",
+  "status": "pending",
+  "summary": "I need permission to access `/tmp/phantom-engine`. Please grant access so I can analyze the project for code health.\n",
+  "suggestedActions": []
+}
