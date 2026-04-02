@@ -34,6 +34,7 @@ import { WorkflowManager } from "./workflows/index.js";
 import { RoomManager } from "./rooms.js";
 import type { RoomMessage } from "./rooms.js";
 import { roomsRoutes } from "./routes/rooms.js";
+import { SdkSessionManager } from "./sdk-session.js";
 import { getConfig, loadConfig, saveConfig, generateDefaultConfig, reloadConfig, getAgentSystemPath, getMainProjectDir, resolvePath, type AgentConfig, type WorkflowConfig } from "./config.js";
 import { scaffoldAgentSystem, previewScaffold } from "./scaffold.js";
 import type { ScaffoldOptions } from "./scaffold.js";
@@ -85,19 +86,8 @@ async function main() {
 
   // --- Room management ---
   const roomManager = new RoomManager();
-  const sessionToRoom = new Map<string, string>(); // sessionId -> roomId
-  const sessionToAgent = new Map<string, string>(); // sessionId -> agentId
-  const lastBufferPos = new Map<string, number>();  // sessionId -> last read position
+  const sdkManager = new SdkSessionManager();
 
-  function stripAnsi(str: string): string {
-    return str
-      .replace(/\x1B\[\??[0-9;]*[a-zA-Z]/g, "")   // CSI sequences (including ?-prefixed)
-      .replace(/\x1B\][^\x07]*\x07/g, "")           // OSC sequences
-      .replace(/\x1B[()][A-Z0-9]/g, "")             // Character set selection
-      .replace(/\x1B[#=>/<?]/g, "")                  // Other escape sequences
-      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "") // Control characters (keep \n \r \t)
-      .replace(/\r\n?/g, "\n");                       // Normalize line endings
-  }
 
   // Broadcast room events via WebSocket
   roomManager.on("message", (msg: RoomMessage) => {
@@ -127,110 +117,10 @@ async function main() {
     }
   });
 
-  // Poll terminal output for room-linked sessions every 3 seconds
-  setInterval(() => {
-    for (const [sessionId, roomId] of sessionToRoom) {
-      const buffer = terminalManager.getSessionBuffer(sessionId);
-      if (!buffer) continue;
+  // Route WebSocket upgrades: /ws goes to our server,
+  // everything else (e.g. /_next/webpack-hmr) is forwarded to Next.js
+  let nextUpgradeHandler: ((req: any, socket: any, head: any) => void) | null = null;
 
-      const lastPos = lastBufferPos.get(sessionId) ?? 0;
-      if (buffer.length <= lastPos) continue;
-
-      const newOutput = buffer.slice(lastPos);
-      // Don't advance position yet — only advance after we process the output
-
-      const agentId = sessionToAgent.get(sessionId);
-      if (!agentId) continue;
-
-      // Check for dangerous commands in raw output
-      const dangerous = roomManager.checkDangerous(newOutput);
-      if (dangerous) {
-        roomManager.addMessage(roomId, {
-          from: agentId,
-          text: `Wants to execute: ${dangerous}`,
-          type: "approval-request",
-          actionCommand: dangerous,
-          approvalStatus: "pending",
-        });
-      }
-
-      const cleaned = stripAnsi(newOutput);
-      const hasPrompt = /(\n|^)\s*[>$]\s*$/m.test(cleaned);
-      const hasSubstantialOutput = cleaned.replace(/\s+/g, " ").trim().length > 30;
-      if (!hasSubstantialOutput) continue;
-
-      const lines = cleaned.split("\n").filter(line => {
-        const trimmed = line.trim();
-        if (!trimmed) return false;
-        if (/^[>❯$]\s*$/.test(trimmed)) return false;
-        if (trimmed.startsWith("\u23F5")) return false;            // ⏵ bypass permissions
-        if (trimmed.includes("shift+tab to cycle")) return false;
-        if (trimmed.includes("MCP server")) return false;
-        if (/^[─━═╭╮╰╯│┌┐└┘]+$/.test(trimmed)) return false;    // box drawing only lines
-        if (trimmed.replace(/[─━═╭╮╰╯│┌┐└┘ ]/g, "").length < trimmed.length * 0.2) return false; // mostly box drawing
-        if (/^[▗▖▝▘▀▄█░▒▓]+/.test(trimmed)) return false;        // block drawing characters
-        if (/^Tokens:/.test(trimmed)) return false;
-        if (/^Model:/.test(trimmed)) return false;
-        if (/Claude Code v[\d.]+/.test(trimmed)) return false;     // Claude version banner
-        if (/Opus|Sonnet|Haiku/.test(trimmed) && trimmed.length < 60) return false; // model info line
-        if (/with (low|medium|high) effort/.test(trimmed)) return false; // effort setting
-        if (trimmed.includes("bypass permissions on")) return false; // permissions status
-        if (trimmed.includes("ctrl+g to edit")) return false;       // UI hints
-        if (trimmed.includes("/effort")) return false;               // command hints
-        if (trimmed.includes("/mcp")) return false;                  // MCP command
-        if (/^@\w+\s*·/.test(trimmed)) return false;               // @agent · path
-        if (trimmed.includes("[Room #")) return false;               // Our own injected messages
-        if (trimmed.includes("Remote Control")) return false;            // Remote control status
-        if (trimmed.includes("MCP server failed")) return false;         // MCP failure
-        if (trimmed.includes("MCP server needs auth")) return false;     // MCP auth
-        if (trimmed.includes("/buddy")) return false;                    // Claude buddy command
-        if (/^❯\s*$/.test(trimmed)) return false;                        // prompt only
-        return true;
-      });
-
-      if (lines.length === 0) continue;
-      const responseText = lines.join("\n").trim();
-      if (responseText.length < 10) continue;
-      if (!hasPrompt && responseText.length < 200) continue;
-
-      const truncated = responseText.length > 2000
-        ? responseText.slice(0, 2000) + "\n...(truncated)"
-        : responseText;
-
-      roomManager.addMessage(roomId, {
-        from: agentId,
-        text: truncated,
-        type: "message",
-      });
-      roomManager.updateContextFile(roomId);
-
-      if (hasPrompt) {
-        roomManager.setAgentStatus(roomId, agentId, "idle");
-      }
-    }
-  }, 3000);
-
-  // Listen for session exits to clean up room maps
-  terminalManager.onEvent((message: WsMessage) => {
-    if (message.type === "sessions-update") {
-      const sessions = message.payload as import("./types.js").Session[];
-      for (const session of sessions) {
-        if (session.status === "exited" && sessionToRoom.has(session.id)) {
-          const roomId = sessionToRoom.get(session.id)!;
-          const agentId = sessionToAgent.get(session.id);
-          if (agentId) {
-            roomManager.setAgentStatus(roomId, agentId, "offline");
-          }
-          sessionToRoom.delete(session.id);
-          sessionToAgent.delete(session.id);
-          lastBufferPos.delete(session.id);
-        }
-      }
-    }
-  });
-
-  // Route WebSocket upgrades: only /ws goes to our server,
-  // everything else (e.g. /_next/webpack-hmr) passes through to Next.js
   server.on("upgrade", (request, socket, head) => {
     const { pathname } = new URL(
       request.url!,
@@ -240,8 +130,10 @@ async function main() {
       wss.handleUpgrade(request, socket, head, (ws) => {
         wss.emit("connection", ws, request);
       });
+    } else if (nextUpgradeHandler) {
+      // Forward to Next.js (Turbopack HMR, etc.)
+      nextUpgradeHandler(request, socket, head);
     }
-    // All other upgrade requests fall through to Next.js (Turbopack HMR)
   });
 
   // --- WebSocket handling ---
@@ -2656,7 +2548,7 @@ Choose the schedule and model based on the task:
   );
 
   // --- Room routes (mounted via route module) ---
-  app.use("/api/rooms", roomsRoutes(roomManager, terminalManager, sessionToRoom, sessionToAgent, lastBufferPos));
+  app.use("/api/rooms", roomsRoutes(roomManager, sdkManager, wss));
 
   // --- Next.js catch-all (with loading page while compiling) ---
   let nextReady = false;
@@ -2693,13 +2585,19 @@ Choose the schedule and model based on the task:
   });
 
   // Prepare Next.js in the background — doesn't block API routes
-  const nextApp = next({ dev });
+  const nextApp = next({ dev, hostname: "127.0.0.1", port });
   handle = nextApp.getRequestHandler();
+  nextUpgradeHandler = nextApp.getUpgradeHandler();
 
   nextApp.prepare().then(() => {
     nextReady = true;
     // eslint-disable-next-line no-console
     console.log("Next.js ready — UI is now serving");
+  }).catch((err) => {
+    // eslint-disable-next-line no-console
+    console.error("Next.js failed to compile:", err);
+    // Still mark as ready so the error page is visible instead of infinite loading
+    nextReady = true;
   });
 }
 
