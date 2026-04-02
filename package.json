@@ -20,12 +20,13 @@
     "build": "next build",
     "type-check": "tsc --noEmit",
     "electron": "electron electron/main.js",
-    "electron:dev": "concurrently \"npm run dev\" \"sleep 8 && electron electron/main.js\"",
+    "electron:dev": "concurrently \"npm run dev\" \"sleep 8 && EXTERNAL_SERVER_PORT=8080 electron electron/main.js\"",
     "build:mac": "electron-builder --mac",
     "build:win": "electron-builder --win",
     "build:linux": "electron-builder --linux"
   },
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.90",
     "@radix-ui/react-dialog": "^1.1.0",
     "@radix-ui/react-dropdown-menu": "^2.1.0",
     "@radix-ui/react-tooltip": "^1.1.0",
@@ -42,9 +43,12 @@
     "node-pty": "^1.0.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-markdown": "^9.1.0",
     "react-resizable-panels": "^3.0.0",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.0.0",
     "tailwindcss": "^3.4.0",
+    "tree-kill": "^1.2.2",
     "ws": "^8.18.0",
     "zustand": "^5.0.0"
   },
@@ -68,7 +72,9 @@
     "productName": "Agent Studio",
     "mac": {
       "category": "public.app-category.developer-tools",
-      "target": ["dmg"],
+      "target": [
+        "dmg"
+      ],
       "icon": "public/icon.png"
     },
     "files": [
