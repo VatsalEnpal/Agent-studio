@@ -1,5 +1,6 @@
 import * as pty from "node-pty";
 import { randomUUID } from "node:crypto";
+import { existsSync } from "node:fs";
 import { whichCommand, IS_WINDOWS } from "./platform.js";
 
 const ALLOWED_COMMANDS = new Set([
@@ -54,6 +55,11 @@ export class TerminalManager {
 
     const args = opts.args ?? ["--dangerously-skip-permissions"];
     const cwd = opts.cwd ?? process.cwd();
+
+    // Validate CWD exists before spawning — prevents silent crashes
+    if (!existsSync(cwd)) {
+      throw new Error(`Working directory does not exist: ${cwd}`);
+    }
     const cols = opts.cols ?? 120;
     const rows = opts.rows ?? 30;
 
@@ -90,6 +96,12 @@ export class TerminalManager {
     const entry = { session, pty: ptyProcess, outputBuffer: "" };
     this.sessions.set(id, entry);
 
+    // Batch PTY output: collect data and flush every 50ms instead of
+    // emitting on every byte. This reduces WebSocket message volume by ~20x
+    // during heavy output (e.g. Claude streaming a response).
+    let pending = "";
+    let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
     ptyProcess.onData((data: string) => {
       try {
         // Append to circular buffer for replay on reconnect
@@ -98,11 +110,21 @@ export class TerminalManager {
           entry.outputBuffer = entry.outputBuffer.slice(-MAX_BUFFER_SIZE);
         }
 
-        this.emit({
-          type: "terminal-data",
-          sessionId: id,
-          data,
-        });
+        pending += data;
+
+        if (!flushTimer) {
+          flushTimer = setTimeout(() => {
+            if (pending) {
+              this.emit({
+                type: "terminal-data",
+                sessionId: id,
+                data: pending,
+              });
+              pending = "";
+            }
+            flushTimer = null;
+          }, 50);
+        }
       } catch {
         // Don't let a single data event crash the server
       }
@@ -110,6 +132,20 @@ export class TerminalManager {
 
     ptyProcess.onExit(({ exitCode }) => {
       try {
+        // Flush any remaining buffered output before marking as exited
+        if (pending) {
+          this.emit({
+            type: "terminal-data",
+            sessionId: id,
+            data: pending,
+          });
+          pending = "";
+        }
+        if (flushTimer) {
+          clearTimeout(flushTimer);
+          flushTimer = null;
+        }
+
         const entry = this.sessions.get(id);
         if (entry) {
           entry.session.status = "exited";
