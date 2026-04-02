@@ -1,4 +1,5 @@
 import * as pty from "node-pty";
+import treeKill from "tree-kill";
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { whichCommand, IS_WINDOWS } from "./platform.js";
@@ -189,18 +190,39 @@ export class TerminalManager {
     if (!entry) {
       throw new Error(`Session ${id} not found`);
     }
-    entry.pty.kill();
-    // Don't delete immediately — let onExit set status to 'exited' first
-    // so the frontend can show a toast notification.
+
+    const pid = entry.session.pid;
+
+    // Escalation: SIGTERM -> 2s -> SIGKILL tree -> 1s -> force cleanup
+    // Step 1: Graceful SIGTERM
+    try {
+      entry.pty.kill("SIGTERM");
+    } catch {
+      // PTY may already be dead
+    }
+
+    // Step 2: After 2s, kill entire process tree with SIGKILL
+    setTimeout(() => {
+      if (entry.session.status !== "exited" && pid) {
+        treeKill(pid, "SIGKILL", (err) => {
+          if (err) {
+            // tree-kill failed — force cleanup anyway
+          }
+        });
+      }
+    }, 2000);
+
+    // Step 3: After 3s total, force cleanup regardless
     setTimeout(() => {
       if (this.sessions.has(id)) {
+        entry.session.status = "exited";
         this.sessions.delete(id);
         this.emit({
           type: "sessions-update",
           payload: this.listSessions(),
         });
       }
-    }, 3000);
+    }, 3500);
   }
 
   listSessions(): Session[] {
