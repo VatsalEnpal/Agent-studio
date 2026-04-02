@@ -1,12 +1,27 @@
 import { Router } from "express";
 import { exec, execFile } from "node:child_process";
 import { promisify } from "node:util";
+import path from "node:path";
 import { stat, access } from "node:fs/promises";
 import { constants } from "node:fs";
 import type { GitWatcher } from "../git-status.js";
+import { getConfig } from "../config.js";
 import { createPR, getRepoBranches } from "../pr-creator.js";
 
 const execAsync = promisify(exec);
+
+/**
+ * Validate that a repo path is within one of the configured project directories.
+ * Prevents arbitrary command execution in attacker-controlled directories.
+ */
+function isValidRepoPath(repoPath: string): boolean {
+  const config = getConfig();
+  const resolved = path.resolve(repoPath);
+  return config.projects.some((p) => {
+    const projectRoot = path.resolve(p.path);
+    return resolved === projectRoot || resolved.startsWith(projectRoot + path.sep);
+  });
+}
 
 export function gitRoutes(gitWatcher: GitWatcher): Router {
   const router = Router();
@@ -26,6 +41,10 @@ export function gitRoutes(gitWatcher: GitWatcher): Router {
       const repoPath = req.query["repo"] as string | undefined;
       if (!repoPath) {
         res.status(400).json({ error: "Missing 'repo' query parameter" });
+        return;
+      }
+      if (!isValidRepoPath(repoPath)) {
+        res.status(400).json({ error: "Repository path not in configured projects" });
         return;
       }
       const branches = getRepoBranches(repoPath);
@@ -53,6 +72,10 @@ export function gitRoutes(gitWatcher: GitWatcher): Router {
         });
         return;
       }
+      if (!isValidRepoPath(repo)) {
+        res.status(400).json({ error: "Repository path not in configured projects" });
+        return;
+      }
 
       const result = await createPR({
         repo,
@@ -76,6 +99,10 @@ export function gitRoutes(gitWatcher: GitWatcher): Router {
         res.status(400).json({ error: "Missing 'repo' query parameter" });
         return;
       }
+      if (!isValidRepoPath(repoPath)) {
+        res.status(400).json({ error: "Repository path not in configured projects" });
+        return;
+      }
       const { stdout } = await execAsync("git status --porcelain", {
         cwd: repoPath,
         encoding: "utf-8",
@@ -92,6 +119,10 @@ export function gitRoutes(gitWatcher: GitWatcher): Router {
       const repoPath = req.query["repo"] as string | undefined;
       if (!repoPath) {
         res.status(400).json({ error: "Missing 'repo' query parameter" });
+        return;
+      }
+      if (!isValidRepoPath(repoPath)) {
+        res.status(400).json({ error: "Repository path not in configured projects" });
         return;
       }
       const [stagedResult, unstagedResult] = await Promise.all([
@@ -115,6 +146,10 @@ export function gitRoutes(gitWatcher: GitWatcher): Router {
       };
       if (!repo || !commitMsg) {
         res.status(400).json({ error: "Missing 'repo' or 'message'" });
+        return;
+      }
+      if (!isValidRepoPath(repo)) {
+        res.status(400).json({ error: "Repository path not in configured projects" });
         return;
       }
 
@@ -148,6 +183,10 @@ export function gitRoutes(gitWatcher: GitWatcher): Router {
       };
       if (!repo) {
         res.status(400).json({ error: "Missing 'repo'" });
+        return;
+      }
+      if (!isValidRepoPath(repo)) {
+        res.status(400).json({ error: "Repository path not in configured projects" });
         return;
       }
 

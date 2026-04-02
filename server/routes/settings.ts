@@ -130,8 +130,16 @@ export function settingsRoutes(workflowManager: WorkflowManager): Router {
 
   router.post("/settings", async (req, res) => {
     try {
+      const { defaultModel, defaultPermissions, defaultCwd, customServers } = req.body as Record<string, unknown>;
+      // Only persist known fields — reject arbitrary keys
+      const validated: Record<string, unknown> = {};
+      if (defaultModel && typeof defaultModel === "string") validated.defaultModel = defaultModel;
+      if (defaultPermissions && typeof defaultPermissions === "string") validated.defaultPermissions = defaultPermissions;
+      if (defaultCwd && typeof defaultCwd === "string") validated.defaultCwd = defaultCwd;
+      if (Array.isArray(customServers)) validated.customServers = customServers;
+
       const { writeFile } = await import("node:fs/promises");
-      await writeFile(SETTINGS_PATH, JSON.stringify(req.body, null, 2), "utf-8");
+      await writeFile(SETTINGS_PATH, JSON.stringify(validated, null, 2), "utf-8");
       res.json({ ok: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";

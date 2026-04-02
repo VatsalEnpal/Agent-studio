@@ -1,4 +1,5 @@
 import { Router } from "express";
+import path from "node:path";
 import { readMemoryStats } from "../file-watcher.js";
 import { getAgentSystemPath, getMainProjectDir } from "../config.js";
 
@@ -42,8 +43,14 @@ export function memoryRoutes(): Router {
         res.status(404).json({ error: "No agent system configured" });
         return;
       }
+      // Prevent path traversal — resolved path must stay within base directory
+      const resolvedBase = path.resolve(MEMORY_BASE_PATH);
+      const fullPath = path.resolve(MEMORY_BASE_PATH, filePath);
+      if (!fullPath.startsWith(resolvedBase + path.sep) && fullPath !== resolvedBase) {
+        res.status(400).json({ error: "Invalid file path" });
+        return;
+      }
       const { readFile } = await import("node:fs/promises");
-      const fullPath = `${MEMORY_BASE_PATH}/${filePath}`;
       const raw = await readFile(fullPath, "utf-8");
       const data = JSON.parse(raw);
       res.json(data);
