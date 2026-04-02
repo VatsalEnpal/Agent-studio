@@ -5,13 +5,17 @@ import { Send, Hash, Loader2, Power, PowerOff, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRoomsStore } from "@/stores/rooms";
 import type { Room, RoomMessage } from "@/stores/rooms";
-import { ChatMessage } from "./chat-message";
+import { ChatMessage, StreamingMessage } from "./chat-message";
 
 export function RoomChat() {
   const selectedRoomId = useRoomsStore((s) => s.selectedRoomId);
   const room = useRoomsStore((s) =>
     s.rooms.find((r) => r.id === s.selectedRoomId),
   );
+
+  const typingAgents = useRoomsStore((s) => s.typingAgents);
+  const streamingText = useRoomsStore((s) => s.streamingText);
+  const typingAgentIds = room ? (typingAgents[room.id] ?? []) : [];
 
   const [input, setInput] = useState("");
   const [spawning, setSpawning] = useState(false);
@@ -278,6 +282,14 @@ export function RoomChat() {
                     msg={msg}
                     onApprove={handleApprove}
                     onReject={handleReject}
+                  />
+                ))}
+                {/* Streaming ghost messages — shown while agents are typing */}
+                {typingAgentIds.map((agentId) => (
+                  <StreamingMessage
+                    key={`streaming-${agentId}`}
+                    agentId={agentId}
+                    text={streamingText[agentId] ?? ""}
                   />
                 ))}
                 <div ref={messagesEndRef} />
