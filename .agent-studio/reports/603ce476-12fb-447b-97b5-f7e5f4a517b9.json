@@ -1,9 +1,0 @@
-{
-  "id": "603ce476-12fb-447b-97b5-f7e5f4a517b9",
-  "automationId": "b9c50802-7eb4-48ff-8533-96a5503870c6",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-03-31T04:44:57.078Z",
-  "status": "pending",
-  "summary": "I can only work in the allowed working directory `/private/tmp/fittrack-app`. The system restricts me from accessing `/tmp/phantom-engine`. \n\nCould you either:\n1. Move the phantom-engine project into the fittrack-app directory, or\n2. Confirm if you meant to analyze the fittrack-app project instead?\n\nIf you'd like me to analyze `/private/tmp/fittrack-app`, I can do that now.\n",
-  "suggestedActions": []
-}

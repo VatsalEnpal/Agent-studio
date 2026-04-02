@@ -1,9 +1,0 @@
-{
-  "id": "54062e30-c285-471e-956b-3fa950928c84",
-  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-03-31T10:44:54.869Z",
-  "status": "pending",
-  "summary": "I need permission to access `/Users/vatsalbhatt230813/Code/agent-studio`. Please grant me access to that directory so I can run the code health checks.\n\nAlternatively, if you'd like to proceed, you can:\n1. Change the working directory to that project in your terminal and let me know\n2. Copy the project to `/private/tmp/agent-studio` \n3. Grant me explicit permission to access that location\n\nWould you like me to proceed with any of these options?\n",
-  "suggestedActions": []
-}

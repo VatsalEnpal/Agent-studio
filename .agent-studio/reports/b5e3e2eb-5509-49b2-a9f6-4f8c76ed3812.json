@@ -1,9 +1,0 @@
-{
-  "id": "b5e3e2eb-5509-49b2-a9f6-4f8c76ed3812",
-  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-03-31T02:45:03.238Z",
-  "status": "pending",
-  "summary": "I can only access files in my current working directory (`/private/tmp/fittrack-app`). The project at `/Users/vatsalbhatt230813/Code/agent-studio` is outside this scope and I don't have permission to analyze it.\n\n**Options:**\n1. **Change working directory**: Run Claude Code with `/Users/vatsalbhatt230813/Code/agent-studio` as the working directory\n2. **Analyze current project**: I can analyze the fittrack-app project in `/private/tmp/fittrack-app` instead\n\nWhich would you prefer?\n",
-  "suggestedActions": []
-}

@@ -1,9 +1,0 @@
-{
-  "id": "b3cee138-8de3-428e-aa8e-4d64e157efed",
-  "automationId": "b9c50802-7eb4-48ff-8533-96a5503870c6",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-04-01T08:36:21.327Z",
-  "status": "pending",
-  "summary": "I cannot access `/tmp/phantom-engine` due to security restrictions. Claude Code limits file access to the allowed working directories for this session, which is currently `/private/tmp/fittrack-app`.\n\nTo analyze a project, either:\n\n1. **Change to the correct directory**: If you want me to analyze `/tmp/phantom-engine`, you'd need to run Claude Code from that directory as the working directory.\n\n2. **Analyze the current project**: I can analyze `/private/tmp/fittrack-app` (the current fittrack app) instead.\n\nWhich would you prefer?\n",
-  "suggestedActions": []
-}

@@ -1,9 +1,0 @@
-{
-  "id": "ed63dfac-b9e4-4857-b7d5-34e4cbd578f5",
-  "automationId": "b9c50802-7eb4-48ff-8533-96a5503870c6",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-04-01T04:36:21.957Z",
-  "status": "pending",
-  "summary": "I cannot access `/tmp/phantom-engine` — the session is restricted to the working directory `/private/tmp/fittrack-app`. \n\nThe project you want analyzed is outside this scope. To proceed, I would need either:\n1. The project to be located at `/private/tmp/fittrack-app`, or\n2. You to change the session's working directory\n\nWould you like me to analyze the current project (`/private/tmp/fittrack-app`) instead, or do you need to adjust the path?\n",
-  "suggestedActions": []
-}

@@ -15,8 +15,11 @@ test-results/
 test-screenshots/
 qa-screenshots/
 
-# User data (not app code)
+# User data (generated per user, not app code)
 ai-agents/
+.agent-studio/rooms/
+.agent-studio/reports/
+qa-screenshots-v2/
 
 # Build artifacts
 tsconfig.tsbuildinfo

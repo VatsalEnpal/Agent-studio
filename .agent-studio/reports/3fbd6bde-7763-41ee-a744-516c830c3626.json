@@ -1,9 +1,0 @@
-{
-  "id": "3fbd6bde-7763-41ee-a744-516c830c3626",
-  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-04-01T00:36:27.601Z",
-  "status": "pending",
-  "summary": "I need permission to access the directory `/Users/vatsalbhatt230813/Code/agent-studio`. Can you confirm I should proceed with analyzing this project? This will involve reading configuration files and running diagnostics.\n",
-  "suggestedActions": []
-}

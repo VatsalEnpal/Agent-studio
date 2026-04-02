@@ -1,9 +1,0 @@
-{
-  "id": "d9eea35b-c5c8-4a09-9d12-a1cc25b30a25",
-  "automationId": "b9c50802-7eb4-48ff-8533-96a5503870c6",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-03-31T20:36:35.250Z",
-  "status": "pending",
-  "summary": "I cannot access `/tmp/phantom-engine` — the Claude Code environment restricts me to the current working directory `/private/tmp/fittrack-app` for security reasons.\n\nTo analyze the phantom-engine project, please:\n\n1. **Confirm the path**: Is the project at a different location (e.g., relative to `/private/tmp/fittrack-app`)?\n2. **Move or copy the project**: If you have access, you can copy it into the current working directory\n3. **Change scope**: Let me know if you'd like me to analyze the fittrack-app instead (the current allowed directory)\n\nWhich would you prefer?\n",
-  "suggestedActions": []
-}

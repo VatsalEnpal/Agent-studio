@@ -1,9 +1,0 @@
-{
-  "id": "a45f472c-2962-4cc7-a3a8-8c50cf2b3441",
-  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-03-31T22:36:31.736Z",
-  "status": "pending",
-  "summary": "I don't have access to `/Users/vatsalbhatt230813/Code/agent-studio` — my working directory is restricted to `/private/tmp/fittrack-app`. \n\nWould you like me to analyze the **fittrack-app** project instead (the one in the current working directory)? Or do you need to change the working directory first?\n",
-  "suggestedActions": []
-}

@@ -1,9 +1,0 @@
-{
-  "id": "f8ffb353-5179-4caa-b312-dbcdd380f85e",
-  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-04-01T10:36:22.632Z",
-  "status": "pending",
-  "summary": "I need permission to access `/Users/vatsalbhatt230813/Code/agent-studio`. Could you grant access to that directory so I can run the analysis?\n\nAlternatively, if you'd like me to analyze a project in the current working directory (`/private/tmp/fittrack-app`), I can do that instead.\n",
-  "suggestedActions": []
-}

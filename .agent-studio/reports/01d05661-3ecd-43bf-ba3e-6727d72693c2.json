@@ -1,9 +1,0 @@
-{
-  "id": "01d05661-3ecd-43bf-ba3e-6727d72693c2",
-  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-04-01T04:36:24.893Z",
-  "status": "pending",
-  "summary": "I don't have access to `/Users/vatsalbhatt230813/Code/agent-studio`. Claude Code is restricted to the working directory `/private/tmp/fittrack-app` for security reasons.\n\nTo analyze the agent-studio project, you can:\n1. **Copy the project** to the working directory and I'll analyze it there\n2. **Work on the fittrack-app** in `/private/tmp/fittrack-app` instead\n3. **Provide specific files** from agent-studio for analysis\n\nWhich would you prefer?\n",
-  "suggestedActions": []
-}

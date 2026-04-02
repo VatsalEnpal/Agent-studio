@@ -1,9 +1,0 @@
-{
-  "id": "ed4e9559-4c95-4bee-af41-d08f79c40373",
-  "automationId": "b9c50802-7eb4-48ff-8533-96a5503870c6",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-04-01T14:36:13.124Z",
-  "status": "pending",
-  "summary": "I'm restricted to working within `/private/tmp/fittrack-app`. The path `/tmp/phantom-engine` is outside my allowed working directory. \n\nDid you mean:\n1. A subdirectory at `/private/tmp/fittrack-app/phantom-engine`?\n2. Or would you like me to analyze the current project at `/private/tmp/fittrack-app` instead?\n\nPlease clarify the correct path.\n",
-  "suggestedActions": []
-}

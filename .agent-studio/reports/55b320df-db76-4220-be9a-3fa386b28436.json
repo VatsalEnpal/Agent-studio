@@ -1,9 +1,0 @@
-{
-  "id": "55b320df-db76-4220-be9a-3fa386b28436",
-  "automationId": "b9c50802-7eb4-48ff-8533-96a5503870c6",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-04-01T02:36:24.193Z",
-  "status": "pending",
-  "summary": "I need permission to access `/tmp/phantom-engine`. It appears to be outside the current project directory. \n\nWould you like me to:\n1. Analyze `/tmp/phantom-engine` (requires you to grant access permissions)\n2. Analyze the current project at `/private/tmp/fittrack-app` instead\n\nWhich would you prefer?\n",
-  "suggestedActions": []
-}

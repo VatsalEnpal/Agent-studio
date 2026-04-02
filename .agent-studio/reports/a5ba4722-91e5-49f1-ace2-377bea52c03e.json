@@ -1,9 +1,0 @@
-{
-  "id": "a5ba4722-91e5-49f1-ace2-377bea52c03e",
-  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-03-31T04:44:46.212Z",
-  "status": "pending",
-  "summary": "I can't access `/Users/vatsalbhatt230813/Code/agent-studio` — Claude Code restricts directory access to the current session's working directory, which is `/private/tmp/fittrack-app`.\n\nTo analyze a project outside the current session, you'd need to:\n1. **Create a new Claude Code session** in that directory, or\n2. **Clone/copy the project** into the current working directory\n\nWould you like me to analyze the fittrack-app project instead, or would you prefer to start a new session pointed at `/Users/vatsalbhatt230813/Code/agent-studio`?\n",
-  "suggestedActions": []
-}

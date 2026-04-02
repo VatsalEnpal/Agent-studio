@@ -1,9 +1,0 @@
-{
-  "id": "b4e7a7a5-b3df-49f9-b889-40be8f8ad082",
-  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-04-01T06:36:33.344Z",
-  "status": "pending",
-  "summary": "I need permission to access `/Users/vatsalbhatt230813/Code/agent-studio`. Could you grant permission to read from that directory? Once approved, I'll run the code health checks.\n\nAlternatively, if this is a sensitive directory, you can copy the path or let me know the project type (Node/Python/Go/Rust) and I can tailor the checks accordingly.\n",
-  "suggestedActions": []
-}

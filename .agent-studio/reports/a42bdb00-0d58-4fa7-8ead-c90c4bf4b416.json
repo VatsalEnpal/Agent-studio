@@ -1,9 +1,0 @@
-{
-  "id": "a42bdb00-0d58-4fa7-8ead-c90c4bf4b416",
-  "automationId": "536096c8-5265-407b-9575-e07a5ecd9a35",
-  "automationName": "Code Health Scan",
-  "timestamp": "2026-04-01T12:36:33.469Z",
-  "status": "pending",
-  "summary": "I don't have access to `/Users/vatsalbhatt230813/Code/agent-studio` in this session. My working directory is restricted to `/private/tmp/fittrack-app`.\n\nTo analyze the project at `/Users/vatsalbhatt230813/Code/agent-studio`, I would need either:\n\n1. **Change the working directory** - Start a new session with that project as the working directory\n2. **Copy the project** - Have you copy the project to `/private/tmp/fittrack-app` or a subdirectory\n3. **Analyze the fittrack-app instead** - If you meant to analyze the current project at `/private/tmp/fittrack-app`\n\nWhich would you prefer?\n",
-  "suggestedActions": []
-}
