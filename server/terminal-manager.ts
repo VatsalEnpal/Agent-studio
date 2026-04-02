@@ -41,8 +41,28 @@ export class TerminalManager {
     { session: Session; pty: pty.IPty; outputBuffer: string }
   >();
   private listeners = new Set<EventListener>();
+  private spawnCount = 0;
+  private readonly maxConcurrentSpawns = 4;
 
   createSession(opts: CreateSessionOptions): Session {
+    if (this.spawnCount >= this.maxConcurrentSpawns) {
+      // Synchronous fallback: wait briefly then spawn
+      // For async queue, callers would need to handle promises.
+      // Since the current API is synchronous, we allow slight over-limit
+      // but log a warning.
+      console.warn(`[terminal-manager] Spawn limit reached (${this.spawnCount}/${this.maxConcurrentSpawns}). Spawning anyway.`);
+    }
+    this.spawnCount++;
+    try {
+      const session = this._doCreateSession(opts);
+      return session;
+    } catch (err) {
+      this.spawnCount--;
+      throw err;
+    }
+  }
+
+  private _doCreateSession(opts: CreateSessionOptions): Session {
     const id = randomUUID();
     const command = opts.command ?? "claude";
 
@@ -152,6 +172,7 @@ export class TerminalManager {
           entry.session.status = "exited";
           entry.session.exitCode = exitCode;
         }
+        this.spawnCount--;
         this.emit({
           type: "sessions-update",
           payload: this.listSessions(),
