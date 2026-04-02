@@ -69,8 +69,11 @@ The desktop app includes:
 - Menu bar tray icon for quick access
 - No browser tab needed — Cmd+Tab to Agent Studio
 - All keyboard shortcuts work natively (no browser conflicts)
+- IPv4/IPv6 compatibility, `allowedDevOrigins` for secure dev mode, configurable `EXTERNAL_SERVER_PORT`
 
 > **Requires:** [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated. Node.js 22+. Agent Studio checks on startup and tells you exactly what's missing.
+>
+> **Key dependency:** `@anthropic-ai/claude-agent-sdk` — used for room agent communication. Installed automatically via `npm install`.
 >
 > **Platforms:** macOS, Linux, and Windows (requires Claude Code CLI installed on all platforms).
 
@@ -91,9 +94,12 @@ No config files. No YAML. No manual setup. Everything is reconfigurable later th
 Your browser  <-->  Agent Studio  <-->  Claude Code CLI (on your machine)
 ```
 
-Agent Studio spawns real Claude Code processes — the same ones you'd run in your terminal. It doesn't call the Anthropic API directly. Your permissions, tools, MCP servers, and file access all work exactly as they do today.
+Agent Studio has two communication modes:
 
-The difference: you can see everything at once, track what it costs, and manage it from one place.
+- **Individual sessions** — Spawn real Claude Code processes in PTY terminals. Full color, scroll, and interactive control — the same experience as running Claude in your own terminal.
+- **Room agents** — Use `@anthropic-ai/claude-agent-sdk` for structured, streaming communication. Room agents return clean text replies (no terminal escape codes), support TalkTo-style messaging between agents, and stream responses with typing indicators.
+
+Your permissions, tools, MCP servers, and file access all work exactly as they do in the CLI. Agent Studio doesn't call the Anthropic API directly.
 
 Full technical details in [ARCHITECTURE.md](ARCHITECTURE.md).
 
@@ -105,6 +111,7 @@ Full technical details in [ARCHITECTURE.md](ARCHITECTURE.md).
 - **Live Metrics** — See token count, dollar cost, context window %, and model name on every session. Updated every 30 seconds.
 - **Session Presets** — One-click launchers: Quick Chat (Sonnet, no agent), Start Sprint (Opus + orchestrator), Security Audit, PMO Scan. Create your own.
 - **Resume Any Session** — Every past session is saved. Search by name, project, or agent. Click to resume exactly where you left off.
+- **Terminal Reliability** — Tree-kill escalation ensures zombie processes are cleaned up. Spawn semaphore prevents overloading. Shell readiness detection before sending input.
 - **Keyboard First** — Cmd+Shift+K opens a command palette. Cmd+Shift+N launches a session. Cmd+Shift+1-6 jumps between sessions. Tab cycles focus. (Use Ctrl+Shift on Windows/Linux.)
 
 ### 🤖 Agent System
@@ -113,6 +120,12 @@ Full technical details in [ARCHITECTURE.md](ARCHITECTURE.md).
 - **Scaffolding** — Creates the full agent directory structure: `.claude/agents/` for Claude Code entry points, `ai-agents/` for deep agent rules, memory system, sprint infrastructure. One click.
 - **Battle-Tested Templates** — Every generated agent includes reasoning protocols ("How You Think"), confidence signals, environment boundaries, memory read/write, handoff patterns, and self-verification. Patterns learned from running 200+ real agent sessions.
 - **Works Without AI Too** — No Claude CLI? The wizard falls back to a template picker where you select agents manually. The scaffolding still works.
+
+### 💬 Room Chat
+
+- **Streaming Replies** — Room agents respond with real-time streaming, showing typing indicators while generating. TalkTo-style messaging between agents and humans.
+- **Markdown Rendering** — Agent replies render full Markdown (code blocks, lists, links) directly in the chat interface.
+- **Claude Agent SDK** — Room communication uses `@anthropic-ai/claude-agent-sdk` instead of PTY parsing, producing clean structured text with no terminal artifacts.
 
 ### 🔄 Automations & Reports
 

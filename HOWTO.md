@@ -170,6 +170,16 @@ Switch to the **Teams** tab. The left sidebar shows all workflow flows and their
 
 In the Teams tab, click **Create Workflow**. Name your workflow, define steps (with agent assignments and dependencies), then save. Runs track progress automatically and update in real-time via WebSocket.
 
+### Rooms
+
+Rooms are persistent chat spaces where you interact with agents. Each room runs a **Claude Agent SDK session** (not a PTY terminal), which means:
+
+- **Clean text replies** — no ANSI escape codes, no raw tool call output. You see plain conversational text.
+- **Real-time streaming** — replies stream in with a typing indicator while the agent is thinking.
+- **@mention routing** — tag an agent (e.g., `@frontend`) to route a message to that agent's context. Works the same as before.
+
+Under the hood, each room spawns a dedicated SDK session that persists for the room's lifetime. Messages you send are passed to the SDK, and the streamed response is relayed back to the UI over WebSocket.
+
 ---
 
 ## Git
@@ -333,6 +343,28 @@ Ensure Claude Code CLI is available inside the container. Mount `~/.claude` for 
 
 ---
 
+## Electron (Desktop App)
+
+### All-in-One Launch
+
+```bash
+npm run electron:dev
+```
+
+This starts the dev server and opens the Electron window together.
+
+### Reuse an Existing Server
+
+If you already have the dev server running (e.g., on port 8080), point Electron at it instead of spawning a second one:
+
+```bash
+EXTERNAL_SERVER_PORT=8080 npx electron electron/main.js
+```
+
+Electron binds to `127.0.0.1` (IPv4 explicitly) to avoid localhost resolution issues on macOS where `localhost` can resolve to `::1` (IPv6).
+
+---
+
 ## Troubleshooting
 
 ### Server won't start
@@ -356,6 +388,30 @@ Usage polling runs every 30 seconds after session launch. If Claude Code is inst
 ### Git status not updating
 
 Git polls every 10 seconds. Verify project paths in `.agent-studio.json` point to valid git repos.
+
+### Room agent not responding
+
+The room's SDK session requires the Claude Code CLI. Verify it is installed and on your PATH: `claude --version`. If the CLI works but the agent still fails, check the server logs for SDK session errors — a common cause is an expired or missing API key.
+
+### Electron shows blank screen
+
+When running Electron in dev mode alongside an already-running dev server, pass the server port explicitly:
+
+```bash
+EXTERNAL_SERVER_PORT=8080 npx electron electron/main.js
+```
+
+This tells Electron to connect to your existing server on `localhost` (IPv4) instead of spawning its own. Without it, Electron may try to load a page before the server is ready, or hit an IPv4/IPv6 mismatch.
+
+### Zombie claude processes
+
+Agent Studio uses `tree-kill` to clean up process trees when sessions and rooms are closed. If you suspect orphaned processes after a crash, check manually:
+
+```bash
+ps aux | grep claude
+```
+
+Kill any leftover processes with `kill <PID>`. This should be rare under normal operation.
 
 ### Port already in use
 
