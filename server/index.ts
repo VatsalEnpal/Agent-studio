@@ -50,9 +50,6 @@ import { writeClaudeMd } from "./claudemd-generator.js";
 const port = parseInt(process.env["PORT"] ?? "8080", 10);
 const dev = process.env["NODE_ENV"] !== "production";
 
-const nextApp = next({ dev });
-const handle = nextApp.getRequestHandler();
-
 /**
  * Security: Validate that a project path is within allowed directories.
  * Returns the resolved path if valid, or null if invalid.
@@ -76,8 +73,6 @@ async function main() {
     // eslint-disable-next-line no-console
     console.log("Generated default config at .agent-studio.json");
   }
-
-  await nextApp.prepare();
 
   const app = express();
   app.use(express.json());
@@ -2640,16 +2635,48 @@ Choose the schedule and model based on the task:
   // --- Room routes (mounted via route module) ---
   app.use("/api/rooms", roomsRoutes(roomManager, terminalManager, sessionToRoom, sessionToAgent, lastBufferPos));
 
-  // --- Next.js catch-all ---
+  // --- Next.js catch-all (with loading page while compiling) ---
+  let nextReady = false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let handle: (req: any, res: any, parsedUrl?: any) => Promise<void>;
+
   app.all("/{*path}", (req, res) => {
-    return handle(req, res);
+    if (nextReady) {
+      return handle(req, res);
+    }
+    // Next.js still compiling — serve loading page for HTML requests
+    if (req.headers.accept?.includes("text/html")) {
+      res.send(`<!DOCTYPE html>
+<html>
+<head><title>Agent Studio</title><meta http-equiv="refresh" content="3"></head>
+<body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0b0e;color:#f59e0b;font-family:'Geist Mono',monospace">
+  <div style="text-align:center">
+    <div style="font-size:32px;margin-bottom:16px">\u26A1</div>
+    <div style="font-size:16px;font-weight:600">Agent Studio</div>
+    <div style="font-size:12px;color:#888;margin-top:12px">Compiling UI... this only takes long the first time.</div>
+    <div style="font-size:11px;color:#555;margin-top:8px">API is already running. The page will refresh automatically.</div>
+  </div>
+</body>
+</html>`);
+    } else {
+      res.status(503).json({ error: "UI is still compiling" });
+    }
   });
 
-  // Security: bind to localhost only — prevent network access
-  // Use "::1" for IPv6 localhost (macOS resolves localhost to ::1)
+  // Start HTTP server IMMEDIATELY — API routes are ready now
   server.listen(port, "127.0.0.1", () => {
     // eslint-disable-next-line no-console
     console.log(`Agent Studio running on http://localhost:${port}`);
+  });
+
+  // Prepare Next.js in the background — doesn't block API routes
+  const nextApp = next({ dev });
+  handle = nextApp.getRequestHandler();
+
+  nextApp.prepare().then(() => {
+    nextReady = true;
+    // eslint-disable-next-line no-console
+    console.log("Next.js ready — UI is now serving");
   });
 }
 

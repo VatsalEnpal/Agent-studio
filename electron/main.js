@@ -98,7 +98,7 @@ async function startServer() {
       }
     });
 
-    // Extended timeout — 120 seconds (first compile can be slow)
+    // Server boots in <2s now (API-first, Next.js compiles in background)
     setTimeout(() => {
       if (!resolved) {
         clearInterval(check);
@@ -106,7 +106,7 @@ async function startServer() {
         // Don't show error — just try to load anyway, server might be partially ready
         resolve(port);
       }
-    }, 120000);
+    }, 30000);
   });
 }
 
