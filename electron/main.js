@@ -136,7 +136,7 @@ function createWindow() {
 
   // If page fails to load (server still booting), retry after 2s
   mainWindow.webContents.on("did-fail-load", (_event, _code, _desc, url) => {
-    if (url.includes("127.0.0.1")) {
+    if (url.includes("127.0.0.1") || url.includes("localhost")) {
       setTimeout(() => {
         mainWindow?.loadURL(`http://127.0.0.1:${serverPort}`);
       }, 2000);
@@ -186,7 +186,25 @@ ipcMain.on("send-notification", (_event, { title, body }) => {
 
 app.whenReady().then(async () => {
   createSplash();
-  await startServer();
+
+  // If an external server is already running (e.g. from `npm run dev`), reuse it
+  if (process.env.EXTERNAL_SERVER_PORT) {
+    serverPort = Number(process.env.EXTERNAL_SERVER_PORT);
+    // Wait until the external server is actually reachable
+    await new Promise((resolve) => {
+      const check = setInterval(async () => {
+        try {
+          const res = await fetch(`http://127.0.0.1:${serverPort}/api/config`);
+          if (res.ok) { clearInterval(check); resolve(); }
+        } catch { /* not ready yet */ }
+      }, 1000);
+      // Give up after 30s and try anyway
+      setTimeout(() => { clearInterval(check); resolve(); }, 30000);
+    });
+  } else {
+    await startServer();
+  }
+
   if (splashWindow) { splashWindow.close(); splashWindow = null; }
   createWindow();
   createTray();
