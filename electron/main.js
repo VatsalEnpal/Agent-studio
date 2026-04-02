@@ -4,6 +4,7 @@ const path = require("path");
 const net = require("net");
 
 let mainWindow = null;
+let splashWindow = null;
 let tray = null;
 let serverProcess = null;
 let serverPort = 8080;
@@ -18,6 +19,31 @@ function findFreePort() {
   });
 }
 
+function createSplash() {
+  splashWindow = new BrowserWindow({
+    width: 300,
+    height: 200,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    center: true,
+    resizable: false,
+    webPreferences: { nodeIntegration: false, contextIsolation: true },
+  });
+
+  splashWindow.loadURL(`data:text/html;charset=utf-8,
+    <html>
+    <body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0b0e;color:#f59e0b;font-family:monospace;border-radius:12px;border:1px solid #1e2028;">
+      <div style="text-align:center">
+        <div style="font-size:24px;margin-bottom:12px">⚡</div>
+        <div style="font-size:14px;font-weight:600">Agent Studio</div>
+        <div style="font-size:11px;color:#888;margin-top:8px">Starting server...</div>
+      </div>
+    </body>
+    </html>
+  `);
+}
+
 async function startServer() {
   const port = await findFreePort();
   serverPort = port;
@@ -30,27 +56,57 @@ async function startServer() {
 
   serverProcess.stderr.on("data", (d) => process.stderr.write(d));
 
-  // Wait for server ready
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    let resolved = false;
+
+    // Listen for the "running on" message from stdout
+    serverProcess.stdout.on("data", (data) => {
+      const text = data.toString();
+      process.stdout.write(text); // pass through for debugging
+
+      if (!resolved && text.includes("Agent Studio running on")) {
+        resolved = true;
+        resolve(port);
+      }
+    });
+
+    // Also poll as fallback (in case the message format changes)
     const check = setInterval(async () => {
+      if (resolved) { clearInterval(check); return; }
       try {
         const res = await fetch(`http://127.0.0.1:${port}/api/config`);
-        if (res.ok) {
+        if (res.ok && !resolved) {
+          resolved = true;
           clearInterval(check);
           resolve(port);
         }
       } catch {
         // Server not ready yet
       }
-    }, 500);
+    }, 2000);
+
+    // Handle server crash
+    serverProcess.on("exit", (code) => {
+      if (!resolved) {
+        clearInterval(check);
+        resolved = true;
+        dialog.showErrorBox(
+          "Agent Studio — Server Failed",
+          `The server exited with code ${code}.\n\nTry running 'npm run dev' in the agent-studio directory to diagnose.`,
+        );
+        reject(new Error(`Server exited with code ${code}`));
+      }
+    });
+
+    // Extended timeout — 120 seconds (first compile can be slow)
     setTimeout(() => {
-      clearInterval(check);
-      dialog.showErrorBox(
-        "Agent Studio — Server Failed",
-        "The backend server did not start within 30 seconds.\n\nTry restarting the app or running 'npm run dev' manually to diagnose.",
-      );
-      resolve(port);
-    }, 30000);
+      if (!resolved) {
+        clearInterval(check);
+        resolved = true;
+        // Don't show error — just try to load anyway, server might be partially ready
+        resolve(port);
+      }
+    }, 120000);
   });
 }
 
@@ -129,7 +185,9 @@ ipcMain.on("send-notification", (_event, { title, body }) => {
 });
 
 app.whenReady().then(async () => {
+  createSplash();
   await startServer();
+  if (splashWindow) { splashWindow.close(); splashWindow = null; }
   createWindow();
   createTray();
   app.on("activate", () => {
