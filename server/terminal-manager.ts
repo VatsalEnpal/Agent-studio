@@ -38,7 +38,7 @@ const MAX_BUFFER_SIZE = 100 * 1024; // 100KB per session
 export class TerminalManager {
   private sessions = new Map<
     string,
-    { session: Session; pty: pty.IPty; outputBuffer: string }
+    { session: Session; pty: pty.IPty; outputBuffer: string; ready: boolean; pendingWrites: string[] }
   >();
   private listeners = new Set<EventListener>();
   private spawnCount = 0;
@@ -114,7 +114,7 @@ export class TerminalManager {
       meta: opts.meta,
     };
 
-    const entry = { session, pty: ptyProcess, outputBuffer: "" };
+    const entry = { session, pty: ptyProcess, outputBuffer: "", ready: false, pendingWrites: [] as string[] };
     this.sessions.set(id, entry);
 
     // Batch PTY output: collect data and flush every 50ms instead of
@@ -129,6 +129,20 @@ export class TerminalManager {
         entry.outputBuffer += data;
         if (entry.outputBuffer.length > MAX_BUFFER_SIZE) {
           entry.outputBuffer = entry.outputBuffer.slice(-MAX_BUFFER_SIZE);
+        }
+
+        // Shell readiness detection: look for prompt indicators
+        if (!entry.ready) {
+          const bufferTail = entry.outputBuffer.slice(-500);
+          // Match common prompt patterns: $, >, ❯, %, or Claude's ">" prompt
+          if (/[>$❯%]\s*$/.test(bufferTail) || bufferTail.includes("Claude Code")) {
+            entry.ready = true;
+            // Flush any pending writes
+            for (const pendingWrite of entry.pendingWrites) {
+              ptyProcess.write(pendingWrite);
+            }
+            entry.pendingWrites = [];
+          }
         }
 
         pending += data;
@@ -187,6 +201,17 @@ export class TerminalManager {
       payload: this.listSessions(),
     });
 
+    // Readiness timeout: if shell doesn't show a prompt within 15s, mark as ready anyway
+    setTimeout(() => {
+      if (!entry.ready) {
+        entry.ready = true;
+        for (const pendingWrite of entry.pendingWrites) {
+          ptyProcess.write(pendingWrite);
+        }
+        entry.pendingWrites = [];
+      }
+    }, 15000);
+
     return session;
   }
 
@@ -194,6 +219,10 @@ export class TerminalManager {
     const entry = this.sessions.get(id);
     if (!entry) {
       throw new Error(`Session ${id} not found`);
+    }
+    if (!entry.ready) {
+      entry.pendingWrites.push(data);
+      return;
     }
     entry.pty.write(data);
   }
