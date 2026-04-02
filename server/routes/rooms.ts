@@ -97,7 +97,7 @@ export function roomsRoutes(
             for (const agent of room.agents) {
               if (agent.sessionId) {
                 try {
-                  terminalManager.writeToSession(agent.sessionId, cleanText + "\n");
+                  terminalManager.writeToSession(agent.sessionId, cleanText + "\r");
                   roomManager.setAgentStatus(roomId, agent.id, "working");
                 } catch {
                   // Session may have exited
@@ -121,7 +121,7 @@ export function roomsRoutes(
         if (targetAgent?.sessionId) {
           try {
             // Send clean text only — no brackets or metadata that fight with readline
-            terminalManager.writeToSession(targetAgent.sessionId, messageText + "\n");
+            terminalManager.writeToSession(targetAgent.sessionId, messageText + "\r");
             roomManager.setAgentStatus(roomId, targetAgentId, "working");
             // Sender/room context is in the context.md file the agent already reads
             roomManager.updateContextFile(roomId);
@@ -198,7 +198,7 @@ export function roomsRoutes(
 
         setTimeout(() => {
           try {
-            terminalManager.writeToSession(session.id, initMessage + "\n");
+            terminalManager.writeToSession(session.id, initMessage + "\r");
           } catch {
             // Session may have failed to start
           }
