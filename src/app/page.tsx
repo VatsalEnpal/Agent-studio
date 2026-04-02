@@ -373,6 +373,20 @@ export default function Home() {
       }
     });
 
+    const unsubRoomTyping = wsClient.on("room-agent-typing", (msg: WsMessage) => {
+      const payload = msg.payload as { roomId: string; agentId: string };
+      if (payload?.roomId) {
+        useRoomsStore.getState().setAgentTyping(payload.roomId, payload.agentId);
+      }
+    });
+
+    const unsubRoomStreaming = wsClient.on("room-agent-streaming", (msg: WsMessage) => {
+      const payload = msg.payload as { roomId: string; agentId: string; delta: string };
+      if (payload?.roomId) {
+        useRoomsStore.getState().appendStreamingDelta(payload.roomId, payload.agentId, payload.delta);
+      }
+    });
+
     wsClient.connect(`ws://${window.location.host}/ws`);
 
     return () => {
@@ -381,6 +395,8 @@ export default function Home() {
       unsubRoomMsg();
       unsubRoomStatus();
       unsubRoomApproval();
+      unsubRoomTyping();
+      unsubRoomStreaming();
     };
   }, [setSessions, setRepos]);
 
