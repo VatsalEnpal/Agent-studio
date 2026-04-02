@@ -90,7 +90,13 @@ async function main() {
   const lastBufferPos = new Map<string, number>();  // sessionId -> last read position
 
   function stripAnsi(str: string): string {
-    return str.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "").replace(/\x1B\][^\x07]*\x07/g, "");
+    return str
+      .replace(/\x1B\[\??[0-9;]*[a-zA-Z]/g, "")   // CSI sequences (including ?-prefixed)
+      .replace(/\x1B\][^\x07]*\x07/g, "")           // OSC sequences
+      .replace(/\x1B[()][A-Z0-9]/g, "")             // Character set selection
+      .replace(/\x1B[#=>/<?]/g, "")                  // Other escape sequences
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "") // Control characters (keep \n \r \t)
+      .replace(/\r\n?/g, "\n");                       // Normalize line endings
   }
 
   // Broadcast room events via WebSocket
@@ -156,12 +162,23 @@ async function main() {
       const lines = cleaned.split("\n").filter(line => {
         const trimmed = line.trim();
         if (!trimmed) return false;
-        if (/^[>$]\s*$/.test(trimmed)) return false;
+        if (/^[>❯$]\s*$/.test(trimmed)) return false;
+        if (trimmed.startsWith("\u23F5")) return false;            // ⏵ bypass permissions
         if (trimmed.includes("shift+tab to cycle")) return false;
         if (trimmed.includes("MCP server")) return false;
-        if (/^[─━═]+$/.test(trimmed)) return false;
+        if (/^[─━═╭╮╰╯│┌┐└┘]+$/.test(trimmed)) return false;    // box drawing only lines
+        if (/^[▗▖▝▘▀▄█░▒▓]+/.test(trimmed)) return false;        // block drawing characters
         if (/^Tokens:/.test(trimmed)) return false;
         if (/^Model:/.test(trimmed)) return false;
+        if (/Claude Code v[\d.]+/.test(trimmed)) return false;     // Claude version banner
+        if (/Opus|Sonnet|Haiku/.test(trimmed) && trimmed.length < 60) return false; // model info line
+        if (/with (low|medium|high) effort/.test(trimmed)) return false; // effort setting
+        if (trimmed.includes("bypass permissions on")) return false; // permissions status
+        if (trimmed.includes("ctrl+g to edit")) return false;       // UI hints
+        if (trimmed.includes("/effort")) return false;               // command hints
+        if (trimmed.includes("/mcp")) return false;                  // MCP command
+        if (/^@\w+\s*·/.test(trimmed)) return false;               // @agent · path
+        if (trimmed.includes("[Room #")) return false;               // Our own injected messages
         return true;
       });
 
