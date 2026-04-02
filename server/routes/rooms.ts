@@ -1,16 +1,64 @@
+// server/routes/rooms.ts
 import { Router } from "express";
-import type { TerminalManager } from "../terminal-manager.js";
 import type { RoomManager } from "../rooms.js";
+import type { SdkSessionManager, SdkSessionCallbacks } from "../sdk-session.js";
 import { getMainProjectDir } from "../config.js";
+import type { WebSocket } from "ws";
+import type { WebSocketServer } from "ws";
 
 export function roomsRoutes(
   roomManager: RoomManager,
-  terminalManager: TerminalManager,
-  sessionToRoom: Map<string, string>,
-  sessionToAgent: Map<string, string>,
-  lastBufferPos: Map<string, number>,
+  sdkManager: SdkSessionManager,
+  wss: WebSocketServer,
 ): Router {
   const router = Router();
+
+  // Helper: broadcast a WebSocket message to all clients
+  function broadcast(type: string, payload: unknown): void {
+    const msg = JSON.stringify({ type, payload });
+    for (const client of wss.clients) {
+      if ((client as WebSocket).readyState === 1) { // WebSocket.OPEN
+        (client as WebSocket).send(msg);
+      }
+    }
+  }
+
+  // Shared callbacks for SDK session events — broadcasts to all WS clients
+  function makeSdkCallbacks(roomId: string): SdkSessionCallbacks {
+    return {
+      onTypingStart(agentId: string) {
+        roomManager.setAgentStatus(roomId, agentId, "working");
+        broadcast("room-agent-typing", { roomId, agentId });
+      },
+      onTextDelta(agentId: string, delta: string) {
+        broadcast("room-agent-streaming", { roomId, agentId, delta });
+      },
+      onResult(agentId: string, text: string, usage) {
+        const truncated = text.length > 5000 ? text.slice(0, 5000) + "\n...(truncated)" : text;
+        roomManager.addMessage(roomId, {
+          from: agentId,
+          text: truncated,
+          type: "message",
+        });
+        roomManager.updateContextFile(roomId);
+
+        if (usage) {
+          broadcast("room-agent-usage", { roomId, agentId, ...usage });
+        }
+      },
+      onError(agentId: string, err: Error) {
+        roomManager.addMessage(roomId, {
+          from: "system",
+          text: `Agent ${agentId} error: ${err.message}`,
+          type: "system",
+        });
+        roomManager.setAgentStatus(roomId, agentId, "idle");
+      },
+      onIdle(agentId: string) {
+        roomManager.setAgentStatus(roomId, agentId, "idle");
+      },
+    };
+  }
 
   router.get("/", (_req, res) => {
     res.json(roomManager.getRooms());
@@ -27,7 +75,6 @@ export function roomsRoutes(
         res.status(400).json({ error: "Missing 'name' or 'topic'" });
         return;
       }
-      // Validate agents array format
       if (agents !== undefined && !Array.isArray(agents)) {
         res.status(400).json({ error: "agents must be an array" });
         return;
@@ -61,10 +108,13 @@ export function roomsRoutes(
     res.json(room);
   });
 
+  // --- Message routing: user -> SDK agent ---
   router.post("/:id/messages", (req, res) => {
     try {
       const roomId = req.params["id"]!;
-      const { from, text, to, id: clientId } = req.body as { from?: string; text?: string; to?: string; id?: string };
+      const { from, text, to, id: clientId } = req.body as {
+        from?: string; text?: string; to?: string; id?: string;
+      };
       if (!text) {
         res.status(400).json({ error: "Missing 'text'" });
         return;
@@ -82,7 +132,6 @@ export function roomsRoutes(
         return;
       }
 
-      // Route to agent PTY if @mention or to orchestrator by default
       const room = roomManager.getRoom(roomId);
       if (room && (from === "user" || from === undefined)) {
         const mentionMatch = text.match(/@(\w+)/);
@@ -94,45 +143,34 @@ export function roomsRoutes(
           if (mentioned === "all") {
             // Broadcast to all agents
             const cleanText = text.replace(/@all\s*/g, "").trim();
+            const callbacks = makeSdkCallbacks(roomId);
             for (const agent of room.agents) {
-              if (agent.sessionId) {
-                try {
-                  terminalManager.writeToSession(agent.sessionId, cleanText + "\r");
-                  roomManager.setAgentStatus(roomId, agent.id, "working");
-                } catch {
-                  // Session may have exited
-                }
+              const session = sdkManager.getSession(agent.id);
+              if (session) {
+                sdkManager.sendMessage(agent.id, cleanText, callbacks).catch(() => {});
               }
             }
-            // Update context file with sender metadata (keeps PTY input clean)
             roomManager.updateContextFile(roomId);
             res.status(201).json(msg);
             return;
           }
 
           const mentionedAgent = room.agents.find(a => a.id === mentioned);
-          if (mentionedAgent?.sessionId) {
+          if (mentionedAgent && sdkManager.getSession(mentioned)) {
             targetAgentId = mentioned;
           }
           messageText = text.replace(/@\w+\s*/, "").trim();
         }
 
-        const targetAgent = room.agents.find(a => a.id === targetAgentId);
-        if (targetAgent?.sessionId) {
-          try {
-            // Send clean text only — no brackets or metadata that fight with readline
-            terminalManager.writeToSession(targetAgent.sessionId, messageText + "\r");
-            roomManager.setAgentStatus(roomId, targetAgentId, "working");
-            // Sender/room context is in the context.md file the agent already reads
-            roomManager.updateContextFile(roomId);
-          } catch {
-            // Session may have exited
-          }
+        const session = sdkManager.getSession(targetAgentId);
+        if (session) {
+          const callbacks = makeSdkCallbacks(roomId);
+          sdkManager.sendMessage(targetAgentId, messageText, callbacks).catch(() => {});
+          roomManager.updateContextFile(roomId);
         } else {
-          // Agent not spawned — add a system warning
           roomManager.addMessage(roomId, {
             from: "system",
-            text: `Cannot deliver to ${targetAgentId} — agent is offline. Agents are spawned when the room is created; if they exited, close and recreate the room.`,
+            text: `Cannot deliver to ${targetAgentId} — agent is offline. Start the room first.`,
             type: "system",
           });
         }
@@ -145,6 +183,7 @@ export function roomsRoutes(
     }
   });
 
+  // --- Spawn: create SDK sessions for all agents ---
   router.post("/:id/spawn", async (req, res) => {
     try {
       const roomId = req.params["id"]!;
@@ -155,57 +194,45 @@ export function roomsRoutes(
       }
 
       const mainDir = getMainProjectDir();
-      const spawned: Array<{ agentId: string; sessionId: string }> = [];
+      const spawned: Array<{ agentId: string }> = [];
 
       for (const agent of room.agents) {
-        if (agent.sessionId) continue; // already spawned
+        // Skip if already has an SDK session
+        if (sdkManager.getSession(agent.id)) continue;
 
-        const args: string[] = ["--dangerously-skip-permissions", "--model", agent.model];
-
-        if (agent.id !== "none") {
-          args.push("--agent", agent.id);
-        }
-
-        const session = terminalManager.createSession({
-          name: `room:${room.id}:${agent.id}`,
-          command: "claude",
-          args,
+        sdkManager.createSession({
+          agentId: agent.id,
+          roomId,
           cwd: mainDir,
-          meta: {
-            model: agent.model,
-            agent: agent.id,
-            permissions: "bypass",
-            group: "room",
-            roomId,
-            roomName: room.name,
-          },
+          model: agent.model,
+          agentProfile: agent.id !== "none" ? agent.id : undefined,
         });
 
-        roomManager.linkSession(roomId, agent.id, session.id);
-        sessionToRoom.set(session.id, roomId);
-        sessionToAgent.set(session.id, agent.id);
-        lastBufferPos.set(session.id, 0);
+        roomManager.setAgentStatus(roomId, agent.id, "idle");
+        spawned.push({ agentId: agent.id });
+      }
 
-        const otherAgents = room.agents.filter(a => a.id !== agent.id).map(a => a.name).join(", ");
+      // Send init message to orchestrator to establish the session
+      const orchestratorSession = sdkManager.getSession("orchestrator");
+      if (orchestratorSession && spawned.length > 0) {
+        const otherAgents = room.agents.filter(a => a.id !== "orchestrator").map(a => a.name).join(", ");
         const initMessage = [
-          `You are agent "${agent.name}" in team room "#${room.name}".`,
-          `Topic: ${room.topic}`,
-          `Team members: ${otherAgents}`,
+          `You are the orchestrator in team room "#${room.name}".`,
+          `Topic: ${room.topic}.`,
+          `Team: ${otherAgents}.`,
           `Read ${room.contextFile} for team status.`,
-          `When you finish a task, write a summary to that file.`,
-          `You can message other agents by including @agentname in your response.`,
+          `Acknowledge briefly that you're ready.`,
         ].join(" ");
 
-        setTimeout(() => {
-          try {
-            terminalManager.writeToSession(session.id, initMessage + "\r");
-          } catch {
-            // Session may have failed to start
-          }
-        }, 3000);
-
-        spawned.push({ agentId: agent.id, sessionId: session.id });
+        const callbacks = makeSdkCallbacks(roomId);
+        sdkManager.sendMessage("orchestrator", initMessage, callbacks).catch(() => {});
       }
+
+      roomManager.addMessage(roomId, {
+        from: "system",
+        text: `Agents started: ${spawned.map(s => s.agentId).join(", ")}`,
+        type: "system",
+      });
 
       res.json({ spawned });
     } catch (err) {
@@ -232,23 +259,18 @@ export function roomsRoutes(
     res.json({ ok: true });
   });
 
+  // --- Close room: destroy SDK sessions ---
   router.delete("/:id", (req, res) => {
     try {
       const roomId = req.params["id"]!;
-      const sessionIds = roomManager.closeRoom(roomId);
-
-      for (const sid of sessionIds) {
-        try {
-          terminalManager.killSession(sid);
-        } catch {
-          // Already exited
+      const room = roomManager.getRoom(roomId);
+      if (room) {
+        for (const agent of room.agents) {
+          sdkManager.destroySession(agent.id);
         }
-        sessionToRoom.delete(sid);
-        sessionToAgent.delete(sid);
-        lastBufferPos.delete(sid);
       }
-
-      res.json({ ok: true, killedSessions: sessionIds.length });
+      roomManager.closeRoom(roomId);
+      res.json({ ok: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
