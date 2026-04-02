@@ -137,7 +137,7 @@ async function main() {
       if (buffer.length <= lastPos) continue;
 
       const newOutput = buffer.slice(lastPos);
-      lastBufferPos.set(sessionId, buffer.length);
+      // Don't advance position yet — only advance after we process the output
 
       const agentId = sessionToAgent.get(sessionId);
       if (!agentId) continue;
