@@ -34,7 +34,13 @@ Agent Studio is a three-layer application:
 ┌─────────────────────────┼───────────────────────────────┐
 │  Process Layer          │                               │
 │                         │                               │
-│  node-pty ──> claude CLI sessions (real PTY processes)   │
+│  Two execution modes:                                   │
+│  ┌─ Individual sessions (terminal view):                │
+│  │  node-pty ──> claude CLI (real PTY) ──> xterm.js     │
+│  ├─ Room agents (chat view):                            │
+│  │  Claude Agent SDK query() ──> structured events      │
+│  │                           ──> chat messages via WS   │
+│  │                                                      │
 │  child_process ──> git commands, dev servers             │
 │  chokidar ──> file system watchers                      │
 │  launchd ──> PMO scheduler (macOS)                      │
@@ -71,12 +77,36 @@ This pattern gives us one port for everything -- the UI, the API, and the WebSoc
 5. Register `onExit` handler to update session status and emit `sessions-update`
 6. Return the session object
 
-**Killing a session:**
-1. Call `pty.kill()` on the underlying process
-2. Wait 3 seconds before removing from the map (so the frontend can show an exit toast)
-3. Emit `sessions-update`
+**Killing a session (tree-kill escalation):**
+1. Send `SIGTERM` to the PTY process for graceful shutdown
+2. After 2 seconds, if still alive, use `tree-kill` to `SIGKILL` the entire process tree (kills orphaned child processes that `pty.kill()` alone would miss)
+3. After 3.5 seconds, force cleanup regardless -- remove from the map and emit `sessions-update`
 
-**Key design:** Sessions are stored in a `Map<string, { session, pty }>`. The session object is the serializable metadata; the pty object is the live process handle. Only the session object is sent to clients.
+**Spawn semaphore:** A `maxConcurrentSpawns` limit (default 4) prevents PTY fork-bombs if multiple sessions are created simultaneously. If the limit is reached, spawning still proceeds but logs a warning.
+
+**Shell readiness detection:** After spawning, the PTY monitors output for prompt indicators (`$`, `>`, `❯`, `%`, or `Claude Code`). Writes sent before the shell is ready are queued in `pendingWrites` and flushed once a prompt is detected. A 15-second timeout marks the session as ready regardless, preventing indefinite write stalling.
+
+**Key design:** Sessions are stored in a `Map<string, { session, pty, outputBuffer, ready, pendingWrites }>`. The session object is the serializable metadata; the pty object is the live process handle. Only the session object is sent to clients.
+
+### SDK Session Manager
+
+`server/sdk-session.ts` manages room agents via the `@anthropic-ai/claude-agent-sdk` instead of PTY. This replaced the earlier approach of injecting messages into a PTY and parsing raw terminal output with regex -- which was fragile and lost formatting.
+
+**How it works:**
+1. `SdkSessionManager` maintains a `Map<string, SdkSession>` keyed by agent ID
+2. When a message is sent to a room agent, `sendMessage()` calls `query()` from the Agent SDK with the prompt, model, cwd, and optional `--agent` profile
+3. The SDK returns structured events: the manager fires callbacks for `onTypingStart`, `onTextDelta` (streaming), `onResult` (final text + usage), and `onError`
+4. Room routes (`server/routes/rooms.ts`) wire these callbacks to WebSocket broadcasts, so the frontend receives typed events instead of raw ANSI bytes
+5. If a message arrives while the agent is busy, it is queued in `messageQueues` and processed after the current query completes
+6. Session IDs from the SDK are stored so agents can `--resume` conversations across messages
+
+**Room architecture** (`server/rooms.ts`):
+- `RoomManager` handles room lifecycle: create, list, add/remove agents, persist to disk
+- Each room has agents, messages, a topic, and a context file path
+- Messages are typed: `message`, `action`, `approval-request`, `system`
+- Dangerous commands (force push, DROP TABLE, etc.) are pattern-matched and surfaced as approval requests before execution
+
+**Why two execution modes:** Interactive terminal sessions need a real PTY for full terminal emulation (scrollback, ANSI rendering, cursor control). Room agents only need structured text -- the SDK gives clean markdown responses, streaming deltas, and usage data without any terminal parsing.
 
 ### WebSocket Message Types
 
@@ -92,6 +122,10 @@ All WebSocket communication uses JSON messages with a `type` field:
 | `usage-update` | Server | `{ all, managed }` | Token/cost data (every 30s) |
 | `file-update` | Server | `{ file, content }` | Sprint/memory file changed on disk |
 | `workflow-update` | Server | `WorkflowFlow[]` | Workflow state changed |
+| `room-agent-typing` | Server | `{ roomId, agentId }` | Room agent started processing |
+| `room-agent-streaming` | Server | `{ roomId, agentId, delta }` | Room agent text delta (streaming) |
+| `room-message` | Server | `{ roomId, message }` | Final room agent reply or user message |
+| `room-agent-status` | Server | `{ roomId, agentId, status }` | Room agent status change (idle/working) |
 
 On connect, the server immediately sends `sessions-update` and `git-update` so the client has current state without waiting for the next poll.
 
@@ -110,6 +144,7 @@ Routes are grouped by domain in `server/index.ts`:
 - **Workflows** (`/api/workflows`) -- workflow definitions and runs
 - **PMO** (`/api/pmo/*`) -- scheduler status and control
 - **Dev Servers** (`/api/servers`) -- start, stop, and manage dev servers
+- **Rooms** (`/api/rooms/*`) -- create rooms, spawn/remove agents, send messages, close rooms
 
 ### Supporting Server Modules
 
@@ -124,6 +159,9 @@ Routes are grouped by domain in `server/index.ts`:
 | Process Discovery | `process-discovery.ts` | Find running Claude processes via `ps` |
 | File Watcher | `file-watcher.ts` | Watch sprint/memory files with chokidar |
 | Dev Servers | `dev-servers.ts` | Start/stop dev server child processes |
+| SDK Session Manager | `sdk-session.ts` | Claude Agent SDK lifecycle for room agents |
+| Room Manager | `rooms.ts` | Room state, persistence, context files, message history |
+| Room Routes | `routes/rooms.ts` | Room API endpoints wired to SDK callbacks |
 | Workflows | `workflows/` | Workflow engine with registry and step execution |
 
 ## 3. Frontend Layer
@@ -194,8 +232,9 @@ src/components/
 ├── memory/          # Memory browser
 │   ├── memory-view.tsx         # Main memory page
 │   └── memory-detail.tsx       # Single memory entry
-├── teams/           # Workflows
+├── teams/           # Workflows and rooms
 │   ├── teams-view.tsx          # Workflow list and runner
+│   ├── room-chat.tsx           # Room chat (streaming ghost messages, typing indicators, markdown)
 │   ├── step-card.tsx           # Individual step card
 │   ├── step-timeline.tsx       # Step progress timeline
 │   ├── flow-sidebar.tsx        # Flow navigation
@@ -218,15 +257,15 @@ src/components/
 
 ## 4. Key Design Decisions
 
-### Why node-pty instead of the Anthropic API?
+### Why the PTY + SDK hybrid?
 
-Agent Studio is a terminal multiplexer, not an API wrapper. By spawning real Claude Code CLI processes:
-- You get the exact same behavior as running `claude` in your terminal
-- All Claude Code features work: tools, MCP servers, permissions, `--agent`, `--resume`
-- No API key management in Agent Studio itself
-- No need to reimplement Claude Code's tool use, file editing, or conversation state
+Agent Studio uses two execution modes depending on the interaction model:
 
-The trade-off is that you need Claude Code CLI installed locally.
+**Individual sessions (PTY via node-pty):** For interactive terminal views, we spawn real Claude Code CLI processes. You get the exact same behavior as running `claude` in your terminal -- tools, MCP servers, permissions, `--agent`, `--resume` all work. The trade-off is that you need Claude Code CLI installed locally.
+
+**Room agents (Claude Agent SDK):** For the room chat experience, we use `@anthropic-ai/claude-agent-sdk` `query()` to get structured responses. The earlier approach spawned PTY processes for room agents too, then tried to parse raw terminal output with regex on a 3-second polling loop -- this was brittle, lost markdown formatting, and couldn't distinguish agent output from ANSI noise. The SDK gives clean text, streaming deltas, usage data, and session resumption without any terminal parsing.
+
+Both modes run Claude Code under the hood. The SDK path is not an API wrapper -- it invokes the CLI programmatically and returns structured events.
 
 ### Why a single WebSocket?
 
@@ -255,7 +294,9 @@ Next.js App Router does not natively support WebSocket or long-running server pr
 agent-studio/
 ├── server/                     # Server-side code (runs in Node.js)
 │   ├── index.ts                # Entry point: Express + WS + Next.js + all routes
-│   ├── terminal-manager.ts     # PTY session lifecycle
+│   ├── terminal-manager.ts     # PTY session lifecycle (tree-kill, semaphore, readiness)
+│   ├── sdk-session.ts          # Claude Agent SDK session lifecycle (room agents)
+│   ├── rooms.ts                # Room + agent state, persistence, context files
 │   ├── config.ts               # Config file management
 │   ├── scaffold.ts             # Agent system generator (templates + directory creation)
 │   ├── git-status.ts           # Git polling (runs every 10s)
@@ -265,6 +306,8 @@ agent-studio/
 │   ├── file-watcher.ts         # Watches sprint/memory files via chokidar
 │   ├── dev-servers.ts          # Dev server child process management
 │   ├── types.ts                # Shared types: Session, WsMessage, SessionMeta
+│   ├── routes/
+│   │   └── rooms.ts            # Room API endpoints (create, spawn, message, close)
 │   └── workflows/              # Workflow engine
 │       ├── index.ts            # WorkflowManager class
 │       ├── types.ts            # Workflow types
@@ -301,13 +344,26 @@ agent-studio/
 └── postcss.config.mjs          # PostCSS config
 ```
 
-## 6. Adding a New Feature
+## 6. Key Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `node-pty` | PTY spawning for interactive terminal sessions |
+| `@anthropic-ai/claude-agent-sdk` | Programmatic Claude Code queries for room agents |
+| `tree-kill` | Kill entire process trees (SIGKILL escalation) |
+| `xterm.js` + `@xterm/addon-webgl` | GPU-accelerated terminal rendering in browser |
+| `react-markdown` + `remark-gfm` | Markdown rendering in room chat messages |
+| `express` + `ws` | HTTP server and WebSocket transport |
+| `chokidar` | File system watching for sprint/memory files |
+| `zustand` | Lightweight frontend state management |
+
+## 7. Adding a New Feature
 
 ### Adding an API Route
 
 1. Open `server/index.ts`.
 2. Add your route in the appropriate section (or create a new section with a comment header).
-3. If the route needs shared state, access it through the existing instances (`terminalManager`, `gitWatcher`, `workflowManager`) or create a new module in `server/`.
+3. If the route needs shared state, access it through the existing instances (`terminalManager`, `sdkManager`, `roomManager`, `gitWatcher`, `workflowManager`) or create a new module in `server/`.
 4. Follow the existing error handling pattern: `try/catch` with `res.status(N).json({ error: message })`.
 
 ### Adding a Component
