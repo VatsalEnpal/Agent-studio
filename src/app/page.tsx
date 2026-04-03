@@ -113,7 +113,7 @@ const modeToNav: Record<ActiveMode, NavPage> = {
   sessions: "sessions",
   teams: "teams",
   sprints: "sprints",
-  reports: "sprints",
+  reports: "sessions",
   memory: "knowledge",
   settings: "settings",
 };
@@ -121,7 +121,7 @@ const modeToNav: Record<ActiveMode, NavPage> = {
 const navToMode: Record<NavPage, ActiveMode> = {
   sessions: "sessions",
   teams: "teams",
-  sprints: "reports",
+  sprints: "sprints",
   knowledge: "memory",
   settings: "settings",
 };
@@ -516,7 +516,7 @@ export default function Home() {
         icon: Play,
         keywords: [sprint.status],
         onSelect: () => {
-          setActiveMode("reports");
+          setActiveMode("sprints");
           selectSprint(sprint.id);
           useUIStore.getState().setCommandPaletteOpen(false);
         },
@@ -627,7 +627,7 @@ export default function Home() {
           {activeMode === "teams" && (
             <RoomList onCreateRoom={() => setCreateRoomOpen(true)} />
           )}
-          {activeMode === "reports" && (
+          {activeMode === "sprints" && (
             <SprintList
               sprints={sprints}
               selectedSprintId={selectedSprintId}
@@ -713,7 +713,7 @@ export default function Home() {
             </div>
 
             {/* Sprints */}
-            <div className={activeMode === "reports" ? "h-full" : "hidden"}>
+            <div className={activeMode === "sprints" ? "h-full" : "hidden"}>
               <ErrorBoundary fallbackLabel="Sprints view error">
                 <SprintsView />
               </ErrorBoundary>
