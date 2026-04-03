@@ -1,7 +1,9 @@
 "use client";
 
-import { Tag, Calendar, User, FileText, ArrowRight, Brain } from "lucide-react";
+import { useCallback } from "react";
+import { Tag, Calendar, User, FileText, ArrowRight, Brain, Pin, Pencil, Trash2 } from "lucide-react";
 import { useMemoryStore } from "@/stores/memory";
+import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
 
 function categoryColor(cat: string): string {
@@ -19,6 +21,27 @@ export function MemoryDetail() {
   const selectedEntry = useMemoryStore((s) => s.selectedEntry);
   const selectedDetail = useMemoryStore((s) => s.selectedDetail);
   const detailLoading = useMemoryStore((s) => s.detailLoading);
+  const openEditDialog = useMemoryStore((s) => s.openEditDialog);
+  const openDeleteDialog = useMemoryStore((s) => s.openDeleteDialog);
+  const updateEntry = useMemoryStore((s) => s.updateEntry);
+  const addToast = useToastStore((s) => s.addToast);
+
+  const handlePin = useCallback(async () => {
+    if (!selectedEntry) return;
+    try {
+      const res = await fetch(
+        `/api/memory/entries/${encodeURIComponent(selectedEntry.file)}/pin`,
+        { method: "POST" },
+      );
+      const data = (await res.json()) as { ok?: boolean; pinned?: boolean; error?: string };
+      if (!data.ok) throw new Error(data.error ?? "Failed to toggle pin");
+      updateEntry(selectedEntry.file, { pinned: data.pinned });
+      addToast(data.pinned ? "Memory pinned" : "Memory unpinned", "success");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      addToast(`Pin failed: ${msg}`, "error");
+    }
+  }, [selectedEntry, updateEntry, addToast]);
 
   if (!selectedEntry) {
     return (
@@ -42,13 +65,44 @@ export function MemoryDetail() {
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
-      <div>
-        <h2 className="text-sm font-medium text-console-text leading-snug">
-          {selectedEntry.title}
-        </h2>
-        <p className="text-[11px] text-console-muted mt-1 leading-relaxed">
-          {selectedEntry.key_point}
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-sm font-medium text-console-text leading-snug">
+            {selectedEntry.title}
+          </h2>
+          <p className="text-[11px] text-console-muted mt-1 leading-relaxed">
+            {selectedEntry.key_point}
+          </p>
+        </div>
+        {/* Action buttons */}
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={() => openEditDialog(selectedEntry)}
+            className="flex items-center gap-1 px-2 py-1 text-[9px] font-medium text-console-muted bg-console-faint hover:bg-console-faint/80 rounded transition-colors"
+          >
+            <Pencil className="w-3 h-3" />
+            Edit
+          </button>
+          <button
+            onClick={() => void handlePin()}
+            className={cn(
+              "flex items-center gap-1 px-2 py-1 text-[9px] font-medium rounded transition-colors",
+              selectedEntry.pinned
+                ? "text-amber-400 bg-amber-500/10 hover:bg-amber-500/20"
+                : "text-console-muted bg-console-faint hover:bg-console-faint/80",
+            )}
+          >
+            <Pin className="w-3 h-3" />
+            {selectedEntry.pinned ? "Unpin" : "Pin"}
+          </button>
+          <button
+            onClick={() => openDeleteDialog(selectedEntry)}
+            className="flex items-center gap-1 px-2 py-1 text-[9px] font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 rounded transition-colors"
+          >
+            <Trash2 className="w-3 h-3" />
+            Delete
+          </button>
+        </div>
       </div>
 
       {/* Meta info */}
@@ -63,7 +117,7 @@ export function MemoryDetail() {
         {detail?.created_at && (
           <span className="text-[9px] text-console-dim flex items-center gap-1">
             <Calendar className="w-3 h-3" />
-            {new Date(detail.created_at).toLocaleDateString("de-DE", {
+            {new Date(detail.created_at).toLocaleDateString("en-GB", {
               day: "2-digit",
               month: "2-digit",
               year: "numeric",
@@ -117,11 +171,19 @@ export function MemoryDetail() {
         </div>
       )}
 
+      {/* Superseded by info */}
+      {detail?.superseded_by && (
+        <div className="flex items-center gap-2 text-[9px] text-console-accent bg-console-accent/5 border border-console-accent/20 px-3 py-2 rounded">
+          <ArrowRight className="w-3 h-3" />
+          <span>Superseded by: <span className="font-mono">{detail.superseded_by}</span></span>
+        </div>
+      )}
+
       {/* Supersedes info */}
       {detail?.supersedes && (
         <div className="flex items-center gap-2 text-[9px] text-console-dim bg-console-faint px-3 py-2 rounded">
           <ArrowRight className="w-3 h-3" />
-          <span>Supersedes: {detail.supersedes}</span>
+          <span>Supersedes: <span className="font-mono">{detail.supersedes}</span></span>
         </div>
       )}
 
