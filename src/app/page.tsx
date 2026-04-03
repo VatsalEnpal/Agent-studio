@@ -101,7 +101,7 @@ const pageTitles: Record<ActiveMode, string> = {
   teams: "Teams",
   sprints: "Sprints",
   memory: "Knowledge",
-  reports: "Sprints",
+  reports: "Reports",
   settings: "Settings",
 };
 
