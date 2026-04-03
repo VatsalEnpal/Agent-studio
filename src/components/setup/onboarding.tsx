@@ -114,7 +114,7 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-[#0a0b0e]">
+    <div className="h-screen flex items-center justify-center bg-canvas">
       <div className="w-full max-w-xl px-6 space-y-8">
         {/* Brand */}
         <div className="text-center space-y-3">
@@ -248,7 +248,7 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-[#0a0b0e]">
+    <div className="h-screen flex items-center justify-center bg-canvas">
       <div className="w-full max-w-2xl px-6 py-8 max-h-screen overflow-y-auto">
         <h2 className="text-lg font-semibold text-white mb-6">Here&apos;s your setup:</h2>
 
@@ -376,7 +376,7 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
 
 function LoadingScreen() {
   return (
-    <div className="h-screen flex items-center justify-center bg-[#0a0b0e]">
+    <div className="h-screen flex items-center justify-center bg-canvas">
       <div className="text-center space-y-4">
         <Loader2 className="w-8 h-8 text-amber-400 animate-spin mx-auto" />
         <div>

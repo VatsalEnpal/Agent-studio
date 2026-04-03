@@ -3,7 +3,7 @@
 import type React from "react";
 import { lazy, Suspense, useState } from "react";
 import { cn } from "@/lib/utils";
-import { agentColor } from "@/lib/design-tokens";
+import { agentColor, colors } from "@/lib/design-tokens";
 import { Check, X, ChevronDown, ChevronRight, Clock, FileCode, Wrench } from "lucide-react";
 import type { RoomMessage } from "@/stores/rooms";
 
@@ -53,7 +53,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject }: ChatMessagePr
   const isSystem = msg.type === "system";
   const isApproval = msg.type === "approval-request";
 
-  const color = isUser ? "#4F8FF7" : agentColor(msg.from);
+  const color = isUser ? colors.accent : agentColor(msg.from);
 
   // System messages: centered, smaller, gray
   if (isSystem) {

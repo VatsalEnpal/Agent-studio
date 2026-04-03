@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { useToastStore as useNotificationStore } from "@/components/ui/notification-toast";
 
 export interface Toast {
   id: string;
@@ -15,6 +16,10 @@ interface ToastState {
 
 let toastCounter = 0;
 
+/**
+ * Legacy toast store — forwards all addToast calls to the v2
+ * notification-toast store so a single ToastContainer renders them.
+ */
 export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
 
@@ -23,10 +28,16 @@ export const useToastStore = create<ToastState>((set) => ({
     const toast: Toast = { id, message, type, createdAt: Date.now() };
 
     set((state) => ({
-      toasts: [...state.toasts, toast].slice(-5), // Keep max 5 toasts
+      toasts: [...state.toasts, toast].slice(-5),
     }));
 
-    // Auto-dismiss after 4 seconds
+    // Forward to v2 notification-toast store (rendered in page.tsx)
+    useNotificationStore.getState().addToast({
+      type,
+      title: message,
+    });
+
+    // Auto-dismiss from legacy store after 4 seconds
     setTimeout(() => {
       set((state) => ({
         toasts: state.toasts.filter((t) => t.id !== id),
