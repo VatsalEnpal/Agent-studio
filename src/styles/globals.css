@@ -2,90 +2,143 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================
-   Theme variables
-   ============================================ */
+/* =============================================================================
+   Agent Studio v2 — CSS Custom Properties
+   "Notion x Whispr Flow" — dark-mode primary
+   ============================================================================= */
+
 :root {
-  /* Light theme */
-  --bg-base: #f5f6f8;
-  --bg-panel: #ffffff;
-  --bg-elevated: #ecedf0;
-  --bg-faint: #e5e6ea;
-  --text-bright: #111218;
-  --text-normal: #2c2d33;
-  --text-muted: #6b6c7a;
-  --text-dim: #999aab;
-  --border-color: #d0d1d8;
-  --accent-color: #d97706;
-  --success-color: #16a34a;
-  --error-color: #dc2626;
-  --skeleton-from: #e5e6ea;
-  --skeleton-mid: #d1d2d8;
-  --skeleton-to: #e5e6ea;
-  --scrollbar-thumb: #c5c6ce;
-  --scrollbar-hover: #aaaab5;
-  --panel-gradient-start: #ffffff;
-  --panel-gradient-end: #f9fafb;
+  /* --- Elevation --- */
+  --elevation-0: #0a0a0a;
+  --elevation-1: #111214;
+  --elevation-2: #161616;
+  --elevation-3: #1a1a1a;
+  --elevation-4: #1f1f1f;
+
+  /* --- Surfaces --- */
+  --surface-active: #1c1c1c;
+  --surface-overlay: rgba(17, 18, 20, 0.80);
+
+  /* --- Borders --- */
+  --border: #232323;
+  --border-subtle: #1a1a1a;
+
+  /* --- Text --- */
+  --text-primary: #d4d4d4;
+  --text-emphasis: #f5f5f5;
+  --text-secondary: #737373;
+  --text-tertiary: #525252;
+
+  /* --- Accent --- */
+  --accent: #4F8FF7;
+  --accent-hover: #6BA3FA;
+  --accent-pressed: #3A7DE5;
+  --accent-subtle: rgba(79, 143, 247, 0.08);
+  --accent-glow: 0 0 20px rgba(79, 143, 247, 0.25);
+
+  /* --- Semantic --- */
+  --success: #34D399;
+  --success-subtle: rgba(52, 211, 153, 0.08);
+  --warning: #FBBF24;
+  --warning-subtle: rgba(251, 191, 36, 0.08);
+  --error: #F87171;
+  --error-subtle: rgba(248, 113, 113, 0.08);
+
+  /* --- Shadows --- */
+  --shadow-elevated: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --shadow-modal: 0 25px 50px rgba(0, 0, 0, 0.5);
+  --shadow-toast: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+  /* --- Scrollbar --- */
+  --scrollbar-thumb: #2a2a2a;
+  --scrollbar-hover: #3a3a3a;
+
+  /* --- Animation durations --- */
+  --duration-instant: 100ms;
+  --duration-quick: 150ms;
+  --duration-smooth: 250ms;
+  --duration-bounce: 300ms;
+  --duration-pulse: 1.5s;
+
+  /* --- Easing --- */
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* --- Legacy v1 aliases (backward compat) --- */
+  --bg-base: var(--elevation-0);
+  --bg-panel: var(--elevation-1);
+  --bg-elevated: var(--elevation-2);
+  --bg-faint: var(--elevation-2);
+  --text-bright: var(--text-emphasis);
+  --text-normal: var(--text-primary);
+  --text-muted: var(--text-secondary);
+  --text-dim: var(--text-tertiary);
+  --border-color: var(--border);
+  --accent-color: var(--accent);
+  --success-color: var(--success);
+  --error-color: var(--error);
+  --skeleton-from: var(--elevation-1);
+  --skeleton-mid: var(--elevation-2);
+  --skeleton-to: var(--elevation-1);
+  --panel-gradient-start: var(--elevation-1);
+  --panel-gradient-end: var(--elevation-0);
 }
 
-.dark {
-  --bg-base: #0a0b0e;
-  --bg-panel: #111218;
-  --bg-elevated: #1e2028;
-  --bg-faint: #191a22;
-  --text-bright: #ededf0;
-  --text-normal: #d4d4dc;
-  --text-muted: #8b8b9e;
-  --text-dim: #555568;
-  --border-color: #1e2028;
-  --accent-color: #f59e0b;
-  --success-color: #22c55e;
-  --error-color: #ef4444;
-  --skeleton-from: #1e2028;
-  --skeleton-mid: #2a2b35;
-  --skeleton-to: #1e2028;
-  --scrollbar-thumb: #2a2b35;
-  --scrollbar-hover: #3a3b48;
-  --panel-gradient-start: #111218;
-  --panel-gradient-end: #0e0f14;
-}
+/* =============================================================================
+   Base styles
+   ============================================================================= */
 
 body {
-  background-color: var(--bg-base);
-  color: var(--text-normal);
+  background-color: var(--elevation-0);
+  color: var(--text-primary);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ============================================
-   Text hierarchy
-   ============================================ */
-.text-bright { color: var(--text-bright); font-weight: 500; }
-.text-normal { color: var(--text-normal); }
-.text-secondary { color: var(--text-muted); }
-.text-tertiary { color: var(--text-dim); }
+/* =============================================================================
+   Noise texture overlay — subtle grain at 0.4% opacity
+   Uses an inline SVG fractal noise pattern
+   ============================================================================= */
 
-/* ============================================
-   Panel backgrounds with subtle gradient
-   ============================================ */
-.console-panel-bg {
-  background: linear-gradient(180deg, var(--panel-gradient-start) 0%, var(--panel-gradient-end) 100%);
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.004;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
 }
 
-/* ============================================
-   xterm.js terminal container
-   ============================================ */
-.xterm {
-  padding: 2px 4px;
+/* =============================================================================
+   Selection color
+   ============================================================================= */
+
+::selection {
+  background-color: var(--accent-subtle);
+  color: var(--text-emphasis);
 }
 
-/* ============================================
-   Scrollbar styling for dark theme
-   ============================================ */
+/* =============================================================================
+   Focus ring — 2px accent, 2px offset
+   ============================================================================= */
+
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+/* =============================================================================
+   Scrollbar — thin, dark, matching theme
+   ============================================================================= */
+
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -110,16 +163,80 @@ body {
   scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
-/* ============================================
+/* =============================================================================
+   Glassmorphism utility
+   ============================================================================= */
+
+@layer utilities {
+  .glass {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: var(--surface-overlay);
+  }
+}
+
+/* =============================================================================
+   Skeleton shimmer
+   ============================================================================= */
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--elevation-1) 25%,
+    var(--elevation-2) 50%,
+    var(--elevation-1) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+/* =============================================================================
+   Text hierarchy utilities
+   ============================================================================= */
+
+.text-bright { color: var(--text-emphasis); font-weight: 500; }
+.text-normal { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+
+/* =============================================================================
+   Panel backgrounds with subtle gradient (legacy)
+   ============================================================================= */
+
+.console-panel-bg {
+  background: linear-gradient(180deg, var(--panel-gradient-start) 0%, var(--panel-gradient-end) 100%);
+}
+
+/* =============================================================================
+   xterm.js terminal container
+   ============================================================================= */
+
+.xterm {
+  padding: 2px 4px;
+}
+
+/* =============================================================================
    Keyboard shortcut kbd styling
-   ============================================ */
+   ============================================================================= */
+
 kbd {
   font-family: var(--font-geist-mono), Menlo, Consolas, "Courier New", monospace;
 }
 
-/* ============================================
+/* =============================================================================
    Radix Dialog animations
-   ============================================ */
+   ============================================================================= */
+
 [data-state="open"][data-radix-dialog-overlay] {
   animation: fadeIn 150ms ease-out;
 }
@@ -168,9 +285,10 @@ kbd {
   }
 }
 
-/* ============================================
-   Toast notifications
-   ============================================ */
+/* =============================================================================
+   Toast slide-in
+   ============================================================================= */
+
 @keyframes toastIn {
   from {
     opacity: 0;
@@ -183,12 +301,13 @@ kbd {
 }
 
 .animate-toast-in {
-  animation: toastIn 250ms ease-out;
+  animation: toastIn 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ============================================
+/* =============================================================================
    Fullscreen overlay fade
-   ============================================ */
+   ============================================================================= */
+
 @keyframes fullscreenFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -198,9 +317,10 @@ kbd {
   animation: fullscreenFadeIn 200ms ease-out;
 }
 
-/* ============================================
+/* =============================================================================
    Activity feed entry animation
-   ============================================ */
+   ============================================================================= */
+
 @keyframes feedEntryIn {
   from {
     opacity: 0;
@@ -216,9 +336,10 @@ kbd {
   animation: feedEntryIn 300ms ease-out;
 }
 
-/* ============================================
+/* =============================================================================
    Status dot pulse (for building state)
-   ============================================ */
+   ============================================================================= */
+
 @keyframes statusPulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
@@ -228,9 +349,9 @@ kbd {
   animation: statusPulse 1.5s ease-in-out infinite;
 }
 
-/* ============================================
+/* =============================================================================
    Smooth transitions for interactive elements
-   ============================================ */
+   ============================================================================= */
 
 /* Gate badge color transitions */
 .gate-badge {
@@ -247,9 +368,9 @@ kbd {
   transition: width 200ms ease, opacity 150ms ease;
 }
 
-/* ============================================
+/* =============================================================================
    Micro-interactions
-   ============================================ */
+   ============================================================================= */
 
 /* Button hover lift */
 .btn-lift {
@@ -281,28 +402,4 @@ kbd {
 
 .animate-tab-enter {
   animation: tabEnter 150ms ease-out;
-}
-
-/* ============================================
-   Shimmer loading skeleton
-   ============================================ */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--skeleton-from) 25%,
-    var(--skeleton-mid) 50%,
-    var(--skeleton-to) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-  border-radius: 4px;
 }
