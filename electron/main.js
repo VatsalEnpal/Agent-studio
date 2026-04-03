@@ -1,145 +1,561 @@
-const { app, BrowserWindow, Notification, Tray, Menu, nativeImage, ipcMain, dialog } = require("electron");
+/**
+ * Agent Studio — Electron Main Process
+ *
+ * Responsibilities:
+ *   1. Spawn the Express/Next.js server on a free port
+ *   2. Health-check watchdog with crash recovery & exponential backoff
+ *   3. Splash screen → main window lifecycle
+ *   4. Tray icon with session list
+ *   5. Graceful shutdown (SIGTERM → SIGKILL escalation)
+ *   6. IPC handlers for notifications, badge, file dialog, platform info
+ */
+
+const {
+  app,
+  BrowserWindow,
+  Notification,
+  Tray,
+  Menu,
+  nativeImage,
+  ipcMain,
+  dialog,
+} = require("electron");
 const { spawn } = require("child_process");
 const path = require("path");
 const net = require("net");
+const fs = require("fs");
+const http = require("http");
+const os = require("os");
 
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const APP_DIR = path.join(os.homedir(), ".agent-studio");
+const LOG_PATH = path.join(APP_DIR, "server.log");
+const WINDOW_STATE_PATH = path.join(APP_DIR, "window-state.json");
+
+const HEALTH_POLL_INTERVAL_MS = 10_000;
+const HEALTH_STARTUP_POLL_MS = 500;
+const HEALTH_STARTUP_TIMEOUT_MS = 15_000;
+const MAX_RESTART_ATTEMPTS = 5;
+const MAX_BACKOFF_MS = 30_000;
+const CONSECUTIVE_FAILURES_THRESHOLD = 3;
+const SERVER_KILL_GRACE_MS = 3_000;
+const DEFAULT_PORT_START = 8080;
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+
+/** @type {BrowserWindow | null} */
 let mainWindow = null;
+/** @type {BrowserWindow | null} */
 let splashWindow = null;
+/** @type {Tray | null} */
 let tray = null;
+/** @type {import("child_process").ChildProcess | null} */
 let serverProcess = null;
-let serverPort = 8080;
+let serverPort = DEFAULT_PORT_START;
 
-function findFreePort() {
+// Crash recovery
+let restartAttempts = 0;
+let currentBackoffMs = 1_000;
+let restartTimer = null;
+
+// Watchdog
+let watchdogInterval = null;
+let consecutiveHealthFailures = 0;
+
+// macOS quit vs hide
+let isQuitting = false;
+
+// Server status pushed to renderer
+let currentServerStatus = "starting"; // starting | running | reconnecting | error
+
+// Log file stream
+/** @type {fs.WriteStream | null} */
+let logStream = null;
+
+// Singleton lock
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+  app.quit();
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Ensure ~/.agent-studio directory exists and open log stream. */
+function initLogStream() {
+  fs.mkdirSync(APP_DIR, { recursive: true });
+  logStream = fs.createWriteStream(LOG_PATH, { flags: "a" });
+  logStream.write(
+    `\n--- Agent Studio starting at ${new Date().toISOString()} ---\n`,
+  );
+}
+
+/** Write a line to the log file. */
+function log(msg) {
+  const line = `[${new Date().toISOString()}] ${msg}\n`;
+  if (logStream) logStream.write(line);
+  process.stdout.write(line);
+}
+
+/**
+ * Check whether a port is available by trying to bind to it.
+ * Returns true if the port is free.
+ */
+function isPortFree(port) {
   return new Promise((resolve) => {
     const srv = net.createServer();
-    srv.listen(0, () => {
-      const port = srv.address().port;
-      srv.close(() => resolve(port));
+    srv.once("error", () => resolve(false));
+    srv.listen(port, "127.0.0.1", () => {
+      srv.close(() => resolve(true));
     });
   });
 }
 
+/**
+ * Find a free port starting from `start`, incrementing until one is found.
+ */
+async function findFreePort(start = DEFAULT_PORT_START) {
+  let port = start;
+  while (port < start + 100) {
+    if (await isPortFree(port)) return port;
+    port++;
+  }
+  // Fallback: let OS pick
+  return new Promise((resolve) => {
+    const srv = net.createServer();
+    srv.listen(0, "127.0.0.1", () => {
+      const p = srv.address().port;
+      srv.close(() => resolve(p));
+    });
+  });
+}
+
+/**
+ * GET /api/health on the server.  Resolves to the parsed JSON body or
+ * rejects on any error (network, non-200, timeout).
+ */
+function fetchHealth() {
+  return new Promise((resolve, reject) => {
+    const req = http.get(
+      `http://127.0.0.1:${serverPort}/api/health`,
+      { timeout: 3000 },
+      (res) => {
+        if (res.statusCode !== 200) {
+          res.resume();
+          return reject(new Error(`HTTP ${res.statusCode}`));
+        }
+        let data = "";
+        res.on("data", (c) => (data += c));
+        res.on("end", () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(e);
+          }
+        });
+      },
+    );
+    req.on("error", reject);
+    req.on("timeout", () => {
+      req.destroy();
+      reject(new Error("timeout"));
+    });
+  });
+}
+
+/**
+ * Read saved window position/size from disk.
+ * Falls back to sensible defaults.
+ */
+function loadWindowState() {
+  try {
+    const raw = fs.readFileSync(WINDOW_STATE_PATH, "utf8");
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+/** Persist current window bounds. */
+function saveWindowState() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  try {
+    const bounds = mainWindow.getBounds();
+    const isMaximized = mainWindow.isMaximized();
+    fs.writeFileSync(
+      WINDOW_STATE_PATH,
+      JSON.stringify({ ...bounds, isMaximized }, null, 2),
+    );
+  } catch {
+    // Non-critical
+  }
+}
+
+/** Push server status to the renderer process. */
+function setServerStatus(status) {
+  currentServerStatus = status;
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("server-status", status);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Server Lifecycle
+// ---------------------------------------------------------------------------
+
+async function startServer() {
+  const port = await findFreePort(DEFAULT_PORT_START);
+  serverPort = port;
+
+  log(`Starting server on port ${port}`);
+  setServerStatus("starting");
+
+  const serverEntry = path.join(__dirname, "..", "server", "index.ts");
+  const cwd = path.join(__dirname, "..");
+
+  // Use `node --import tsx` to run the TypeScript server entry.
+  // In Electron, process.execPath is the Electron binary, so we must
+  // resolve the system `node` explicitly.  In a packaged build the
+  // compiled JS can be pointed to directly (just change serverEntry).
+  const nodeBin = resolveNodeBin();
+  log(`Using node binary: ${nodeBin}`);
+
+  serverProcess = spawn(
+    nodeBin,
+    ["--import", "tsx", serverEntry],
+    {
+      env: { ...process.env, PORT: String(port) },
+      cwd,
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+
+  // Pipe stdout/stderr to log file
+  if (serverProcess.stdout) {
+    serverProcess.stdout.on("data", (d) => {
+      if (logStream) logStream.write(d);
+    });
+  }
+  if (serverProcess.stderr) {
+    serverProcess.stderr.on("data", (d) => {
+      if (logStream) logStream.write(d);
+    });
+  }
+
+  // Handle unexpected exit → crash recovery
+  serverProcess.on("exit", (code, signal) => {
+    log(`Server exited: code=${code} signal=${signal}`);
+    serverProcess = null;
+
+    // If we are quitting, do not restart
+    if (isQuitting) return;
+
+    setServerStatus("reconnecting");
+    scheduleRestart();
+  });
+
+  // Poll /api/health until the server is ready (timeout: 15s)
+  await waitForServerReady();
+
+  // Server is up
+  restartAttempts = 0;
+  currentBackoffMs = 1_000;
+  consecutiveHealthFailures = 0;
+  setServerStatus("running");
+  log(`Server is healthy on port ${port}`);
+}
+
+/**
+ * Poll /api/health until a successful response or timeout.
+ * Throws if the timeout is reached.
+ */
+function waitForServerReady() {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+
+    const poll = async () => {
+      // If the server process died while we are waiting, bail
+      if (!serverProcess) {
+        return reject(new Error("Server process exited during startup"));
+      }
+
+      try {
+        await fetchHealth();
+        return resolve();
+      } catch {
+        if (Date.now() - start > HEALTH_STARTUP_TIMEOUT_MS) {
+          return reject(
+            new Error(
+              `Server did not become healthy within ${HEALTH_STARTUP_TIMEOUT_MS / 1000}s`,
+            ),
+          );
+        }
+        setTimeout(poll, HEALTH_STARTUP_POLL_MS);
+      }
+    };
+
+    poll();
+  });
+}
+
+/** Schedule a server restart with exponential backoff. */
+function scheduleRestart() {
+  if (restartAttempts >= MAX_RESTART_ATTEMPTS) {
+    log(`Max restart attempts (${MAX_RESTART_ATTEMPTS}) reached — giving up`);
+    setServerStatus("error");
+    dialog.showErrorBox(
+      "Agent Studio — Server Failed",
+      `The server has crashed ${MAX_RESTART_ATTEMPTS} times and will not be restarted.\n\n` +
+        `Check the log at:\n${LOG_PATH}\n\n` +
+        `Try running "npm run dev" in the project directory to diagnose.`,
+    );
+    return;
+  }
+
+  const delay = Math.min(currentBackoffMs, MAX_BACKOFF_MS);
+  restartAttempts++;
+  log(`Scheduling restart attempt ${restartAttempts}/${MAX_RESTART_ATTEMPTS} in ${delay}ms`);
+
+  restartTimer = setTimeout(async () => {
+    try {
+      await startServer();
+      // Reload main window to reconnect
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.loadURL(`http://127.0.0.1:${serverPort}`);
+      }
+    } catch (err) {
+      log(`Restart attempt ${restartAttempts} failed: ${err.message}`);
+      currentBackoffMs = Math.min(currentBackoffMs * 2, MAX_BACKOFF_MS);
+      scheduleRestart();
+    }
+  }, delay);
+}
+
+// ---------------------------------------------------------------------------
+// Health Check Watchdog
+// ---------------------------------------------------------------------------
+
+function startWatchdog() {
+  watchdogInterval = setInterval(async () => {
+    if (!serverProcess || isQuitting) return;
+
+    try {
+      const health = await fetchHealth();
+      consecutiveHealthFailures = 0;
+
+      // Reset backoff on successful health check
+      restartAttempts = 0;
+      currentBackoffMs = 1_000;
+
+      if (currentServerStatus !== "running") {
+        setServerStatus("running");
+      }
+
+      // Update tray tooltip with session count
+      if (tray && health.activeSessions != null) {
+        const label =
+          health.activeSessions === 0
+            ? "Agent Studio — no active sessions"
+            : `Agent Studio — ${health.activeSessions} active session${health.activeSessions > 1 ? "s" : ""}`;
+        tray.setToolTip(label);
+      }
+    } catch {
+      consecutiveHealthFailures++;
+      log(
+        `Health check failed (${consecutiveHealthFailures}/${CONSECUTIVE_FAILURES_THRESHOLD})`,
+      );
+
+      if (consecutiveHealthFailures >= CONSECUTIVE_FAILURES_THRESHOLD) {
+        log("Consecutive health failures threshold reached — killing server");
+        setServerStatus("reconnecting");
+        forceKillServer();
+        // The 'exit' handler on serverProcess will trigger scheduleRestart
+      }
+    }
+  }, HEALTH_POLL_INTERVAL_MS);
+}
+
+function stopWatchdog() {
+  if (watchdogInterval) {
+    clearInterval(watchdogInterval);
+    watchdogInterval = null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Server Kill Helpers
+// ---------------------------------------------------------------------------
+
+function forceKillServer() {
+  if (!serverProcess) return;
+  try {
+    serverProcess.kill("SIGKILL");
+  } catch {
+    // Already dead
+  }
+}
+
+/**
+ * Gracefully stop the server: SIGTERM, wait grace period, SIGKILL.
+ * Returns a promise that resolves once the process is confirmed dead.
+ */
+function gracefulShutdownServer() {
+  return new Promise((resolve) => {
+    if (!serverProcess) return resolve();
+
+    const proc = serverProcess;
+
+    // If the process exits on its own, resolve immediately
+    proc.on("exit", () => resolve());
+
+    try {
+      proc.kill("SIGTERM");
+    } catch {
+      return resolve();
+    }
+
+    // Force kill after grace period
+    setTimeout(() => {
+      try {
+        proc.kill("SIGKILL");
+      } catch {
+        // Already dead
+      }
+      // Give a tiny moment for the exit event to fire
+      setTimeout(resolve, 200);
+    }, SERVER_KILL_GRACE_MS);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Splash Screen
+// ---------------------------------------------------------------------------
+
 function createSplash() {
   splashWindow = new BrowserWindow({
-    width: 300,
-    height: 200,
+    width: 340,
+    height: 220,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
     center: true,
     resizable: false,
+    skipTaskbar: true,
     webPreferences: { nodeIntegration: false, contextIsolation: true },
   });
 
-  splashWindow.loadURL(`data:text/html;charset=utf-8,
-    <html>
-    <body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0b0e;color:#f59e0b;font-family:monospace;border-radius:12px;border:1px solid #1e2028;">
-      <div style="text-align:center">
-        <div style="font-size:24px;margin-bottom:12px">⚡</div>
-        <div style="font-size:14px;font-weight:600">Agent Studio</div>
-        <div style="font-size:11px;color:#888;margin-top:8px">Starting server...</div>
-      </div>
-    </body>
-    </html>
-  `);
+  splashWindow.loadURL(
+    `data:text/html;charset=utf-8,${encodeURIComponent(`<!DOCTYPE html>
+<html>
+<body style="margin:0;display:flex;align-items:center;justify-content:center;
+  height:100vh;background:#0a0b0e;color:#f59e0b;font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  border-radius:12px;border:1px solid #1e2028;-webkit-app-region:drag;user-select:none;">
+  <div style="text-align:center">
+    <div style="font-size:28px;margin-bottom:12px">&#9889;</div>
+    <div style="font-size:15px;font-weight:600;letter-spacing:0.5px">Agent Studio</div>
+    <div style="font-size:11px;color:#888;margin-top:10px" id="status">Starting server...</div>
+  </div>
+</body>
+</html>`)}`,
+  );
 }
 
-async function startServer() {
-  const port = await findFreePort();
-  serverPort = port;
-
-  serverProcess = spawn("npx", ["tsx", path.join(__dirname, "..", "server", "index.ts")], {
-    env: { ...process.env, PORT: String(port) },
-    cwd: path.join(__dirname, ".."),
-    stdio: "pipe",
-  });
-
-  serverProcess.stderr.on("data", (d) => process.stderr.write(d));
-
-  return new Promise((resolve, reject) => {
-    let resolved = false;
-
-    // Listen for the "running on" message from stdout
-    serverProcess.stdout.on("data", (data) => {
-      const text = data.toString();
-      process.stdout.write(text); // pass through for debugging
-
-      if (!resolved && text.includes("Agent Studio running on")) {
-        resolved = true;
-        resolve(port);
-      }
-    });
-
-    // Also poll as fallback (in case the message format changes)
-    const check = setInterval(async () => {
-      if (resolved) { clearInterval(check); return; }
-      try {
-        const res = await fetch(`http://127.0.0.1:${port}/api/config`);
-        if (res.ok && !resolved) {
-          resolved = true;
-          clearInterval(check);
-          resolve(port);
-        }
-      } catch {
-        // Server not ready yet
-      }
-    }, 2000);
-
-    // Handle server crash
-    serverProcess.on("exit", (code) => {
-      if (!resolved) {
-        clearInterval(check);
-        resolved = true;
-        dialog.showErrorBox(
-          "Agent Studio — Server Failed",
-          `The server exited with code ${code}.\n\nTry running 'npm run dev' in the agent-studio directory to diagnose.`,
-        );
-        reject(new Error(`Server exited with code ${code}`));
-      }
-    });
-
-    // Server boots in <2s now (API-first, Next.js compiles in background)
-    setTimeout(() => {
-      if (!resolved) {
-        clearInterval(check);
-        resolved = true;
-        // Don't show error — just try to load anyway, server might be partially ready
-        resolve(port);
-      }
-    }, 30000);
-  });
-}
+// ---------------------------------------------------------------------------
+// Main Window
+// ---------------------------------------------------------------------------
 
 function createWindow() {
-  mainWindow = new BrowserWindow({
-    width: 1440,
-    height: 900,
-    minWidth: 800,
+  const saved = loadWindowState();
+
+  const opts = {
+    width: saved?.width || 1200,
+    height: saved?.height || 800,
+    minWidth: 900,
     minHeight: 600,
     titleBarStyle: "hiddenInset",
     backgroundColor: "#0a0b0e",
-    icon: path.join(__dirname, "..", "public", "icon.png"),
     show: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, "preload.js"),
     },
-  });
+  };
+
+  // Restore position if we have it and the display still contains those coords
+  if (saved?.x != null && saved?.y != null) {
+    const { screen } = require("electron");
+    const displays = screen.getAllDisplays();
+    const visible = displays.some((d) => {
+      const { x, y, width, height } = d.bounds;
+      return (
+        saved.x >= x &&
+        saved.x < x + width &&
+        saved.y >= y &&
+        saved.y < y + height
+      );
+    });
+    if (visible) {
+      opts.x = saved.x;
+      opts.y = saved.y;
+    }
+  }
+
+  // Try to set icon (non-critical if missing)
+  const iconPath = path.join(__dirname, "..", "public", "icon.png");
+  if (fs.existsSync(iconPath)) {
+    opts.icon = iconPath;
+  }
+
+  mainWindow = new BrowserWindow(opts);
+
+  if (saved?.isMaximized) {
+    mainWindow.maximize();
+  }
 
   mainWindow.loadURL(`http://127.0.0.1:${serverPort}`);
 
-  // Show window once content is ready — avoids blank flash
   mainWindow.once("ready-to-show", () => {
-    mainWindow?.show();
+    if (mainWindow) mainWindow.show();
+    if (splashWindow && !splashWindow.isDestroyed()) {
+      splashWindow.close();
+      splashWindow = null;
+    }
   });
 
-  // If page fails to load (server still booting), retry after 2s
+  // Retry on load failure (server might still be starting after restart)
   mainWindow.webContents.on("did-fail-load", (_event, _code, _desc, url) => {
     if (url.includes("127.0.0.1") || url.includes("localhost")) {
       setTimeout(() => {
-        mainWindow?.loadURL(`http://127.0.0.1:${serverPort}`);
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.loadURL(`http://127.0.0.1:${serverPort}`);
+        }
       }, 2000);
+    }
+  });
+
+  // Notify renderer when window gains focus
+  mainWindow.on("focus", () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("window-focus");
+    }
+  });
+
+  // Save window state on move/resize
+  mainWindow.on("resize", saveWindowState);
+  mainWindow.on("move", saveWindowState);
+
+  // macOS: close window hides, Cmd+Q fully quits
+  mainWindow.on("close", (e) => {
+    if (process.platform === "darwin" && !isQuitting) {
+      e.preventDefault();
+      mainWindow.hide();
     }
   });
 
@@ -148,78 +564,217 @@ function createWindow() {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Tray Icon
+// ---------------------------------------------------------------------------
+
 function createTray() {
   try {
     const iconPath = path.join(__dirname, "..", "public", "icon-tray.svg");
+    if (!fs.existsSync(iconPath)) {
+      log("Tray icon not found, skipping tray creation");
+      return;
+    }
+
     const icon = nativeImage.createFromPath(iconPath);
     tray = new Tray(icon.resize({ width: 16, height: 16 }));
     tray.setToolTip("Agent Studio");
-    tray.setContextMenu(
-      Menu.buildFromTemplate([
-        {
-          label: "Open Agent Studio",
-          click: () => {
-            mainWindow?.show();
-            mainWindow?.focus();
-          },
-        },
-        { type: "separator" },
-        { label: "Quit", click: () => app.quit() },
-      ]),
-    );
-  } catch {
-    // Tray icon failed — not critical
+    updateTrayMenu([]);
+  } catch (err) {
+    log(`Tray creation failed: ${err.message}`);
   }
 }
 
-// Notification IPC
-ipcMain.on("send-notification", (_event, { title, body }) => {
-  if (Notification.isSupported()) {
-    const notif = new Notification({ title, body });
-    notif.on("click", () => {
-      mainWindow?.show();
-      mainWindow?.focus();
-    });
-    notif.show();
+/**
+ * Rebuild the tray context menu.
+ * @param {Array<{name: string, id: string}>} sessions - Active session list
+ */
+function updateTrayMenu(sessions = []) {
+  if (!tray) return;
+
+  const template = [
+    {
+      label: "Show Window",
+      click: () => {
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.focus();
+        } else {
+          createWindow();
+        }
+      },
+    },
+    { type: "separator" },
+  ];
+
+  if (sessions.length > 0) {
+    for (const s of sessions) {
+      template.push({
+        label: s.name || s.id || "Session",
+        enabled: false, // informational
+      });
+    }
+    template.push({ type: "separator" });
+  } else {
+    template.push({ label: "No active sessions", enabled: false });
+    template.push({ type: "separator" });
+  }
+
+  template.push({
+    label: "Quit",
+    click: () => {
+      isQuitting = true;
+      app.quit();
+    },
+  });
+
+  tray.setContextMenu(Menu.buildFromTemplate(template));
+}
+
+// ---------------------------------------------------------------------------
+// IPC Handlers (Task 5.2 & 5.3)
+// ---------------------------------------------------------------------------
+
+// renderer→main: Show native notification
+ipcMain.on("send-notification", (_event, { title, body, action }) => {
+  if (!Notification.isSupported()) return;
+
+  const notif = new Notification({ title, body });
+  notif.on("click", () => {
+    // Focus the main window
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    }
+    // Send deep-link action back to renderer so it can navigate
+    if (action && mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("notification-action", action);
+    }
+  });
+  notif.show();
+});
+
+// renderer→main: Set dock badge count
+ipcMain.on("set-badge-count", (_event, count) => {
+  if (typeof app.setBadgeCount === "function") {
+    app.setBadgeCount(Number(count) || 0);
   }
 });
+
+// renderer→main→renderer: Open native file picker
+ipcMain.handle("show-file-dialog", async (_event, options) => {
+  const result = await dialog.showOpenDialog(mainWindow || undefined, {
+    properties: ["openFile"],
+    ...(options || {}),
+  });
+  return result.canceled ? null : result.filePaths[0] || null;
+});
+
+// renderer→main→renderer: Return process.platform
+ipcMain.handle("get-platform", () => {
+  return process.platform;
+});
+
+// ---------------------------------------------------------------------------
+// App Lifecycle
+// ---------------------------------------------------------------------------
+
+// Enforce single instance
+app.on("second-instance", () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  }
+});
+
+// macOS: re-show window when dock icon is clicked
+app.on("activate", () => {
+  if (mainWindow) {
+    mainWindow.show();
+    mainWindow.focus();
+  } else {
+    createWindow();
+  }
+});
+
+// macOS: set isQuitting so the close handler allows the window to close
+app.on("before-quit", () => {
+  isQuitting = true;
+});
+
+// Non-macOS: quit when all windows closed
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    isQuitting = true;
+    app.quit();
+  }
+});
+
+// Graceful shutdown: stop watchdog, kill server
+app.on("will-quit", (e) => {
+  e.preventDefault();
+  stopWatchdog();
+
+  if (restartTimer) {
+    clearTimeout(restartTimer);
+    restartTimer = null;
+  }
+
+  const cleanup = async () => {
+    await gracefulShutdownServer();
+    if (logStream) {
+      logStream.write(
+        `--- Agent Studio shutting down at ${new Date().toISOString()} ---\n`,
+      );
+      logStream.end();
+      logStream = null;
+    }
+    // Now actually quit (won't re-trigger will-quit because we call exit)
+    app.exit(0);
+  };
+
+  cleanup().catch(() => app.exit(1));
+});
+
+// ---------------------------------------------------------------------------
+// Bootstrap
+// ---------------------------------------------------------------------------
 
 app.whenReady().then(async () => {
+  initLogStream();
   createSplash();
 
-  // If an external server is already running (e.g. from `npm run dev`), reuse it
-  if (process.env.EXTERNAL_SERVER_PORT) {
-    serverPort = Number(process.env.EXTERNAL_SERVER_PORT);
-    // Wait until the external server is actually reachable
-    await new Promise((resolve) => {
-      const check = setInterval(async () => {
+  try {
+    if (process.env.EXTERNAL_SERVER_PORT) {
+      // Developer mode: reuse externally started server
+      serverPort = Number(process.env.EXTERNAL_SERVER_PORT);
+      log(`Using external server on port ${serverPort}`);
+
+      // Wait until the external server is reachable
+      const start = Date.now();
+      while (Date.now() - start < HEALTH_STARTUP_TIMEOUT_MS) {
         try {
-          const res = await fetch(`http://127.0.0.1:${serverPort}/api/config`);
-          if (res.ok) { clearInterval(check); resolve(); }
-        } catch { /* not ready yet */ }
-      }, 1000);
-      // Give up after 30s and try anyway
-      setTimeout(() => { clearInterval(check); resolve(); }, 30000);
-    });
-  } else {
-    await startServer();
+          await fetchHealth();
+          break;
+        } catch {
+          await new Promise((r) => setTimeout(r, 500));
+        }
+      }
+      setServerStatus("running");
+    } else {
+      await startServer();
+    }
+  } catch (err) {
+    log(`Initial server start failed: ${err.message}`);
+    setServerStatus("error");
+    dialog.showErrorBox(
+      "Agent Studio — Server Failed",
+      `Could not start the server.\n\n${err.message}\n\nCheck ${LOG_PATH} for details.`,
+    );
   }
 
-  if (splashWindow) { splashWindow.close(); splashWindow = null; }
   createWindow();
   createTray();
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
-});
-
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") app.quit();
-});
-
-app.on("before-quit", () => {
-  if (serverProcess) {
-    serverProcess.kill();
-    serverProcess = null;
-  }
+  startWatchdog();
 });
