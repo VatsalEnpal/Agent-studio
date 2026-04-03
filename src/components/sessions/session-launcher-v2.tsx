@@ -362,9 +362,7 @@ export function SessionLauncherV2({
   // Native file picker via electronAPI
   const handlePickDirectory = useCallback(async () => {
     try {
-      const electronAPI = (window as unknown as Record<string, unknown>).electronAPI as
-        | { selectDirectory?: () => Promise<string | null> }
-        | undefined;
+      const electronAPI = (window as unknown as { electronAPI?: { selectDirectory?: () => Promise<string | null> } }).electronAPI;
       if (electronAPI?.selectDirectory) {
         const dir = await electronAPI.selectDirectory();
         if (dir) setCwd(dir);
