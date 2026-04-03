@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { X, Plus, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { agentColor } from "@/lib/design-tokens";
 import { useRoomsStore } from "@/stores/rooms";
 import type { Room } from "@/stores/rooms";
 
@@ -16,7 +17,7 @@ interface AgentConfig {
   name: string;
   model: "opus" | "sonnet" | "haiku";
   enabled: boolean;
-  locked?: boolean; // orchestrator is always enabled
+  locked?: boolean;
 }
 
 const DEFAULT_AGENTS: AgentConfig[] = [
@@ -36,7 +37,6 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
   const addRoom = useRoomsStore((s) => s.addRoom);
   const selectRoom = useRoomsStore((s) => s.selectRoom);
 
-  // Reset form when dialog opens
   useEffect(() => {
     if (open) {
       setName("");
@@ -83,11 +83,10 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
         selectRoom(room.id);
         onOpenChange(false);
 
-        // Auto-spawn agents so they're ready immediately
         try {
           await fetch(`/api/rooms/${room.id}/spawn`, { method: "POST" });
         } catch {
-          // Spawn failure is non-fatal — user can retry via Start Room button
+          // Spawn failure is non-fatal
         }
       }
     } catch {
@@ -101,33 +100,33 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
   const enabledCount = agents.filter((a) => a.enabled).length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-modal flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
         onClick={() => onOpenChange(false)}
       />
 
       {/* Dialog */}
-      <div className="relative z-10 w-full max-w-lg bg-console-panel border border-console-border rounded-lg shadow-2xl">
+      <div className="relative z-10 w-full max-w-lg bg-elevation-3 border border-border rounded-xl shadow-modal animate-slide-up">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-console-border">
-          <h2 className="text-[13px] font-medium text-console-text">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
+          <h2 className="text-title-sm text-text-emphasis">
             Create Team Room
           </h2>
           <button
             onClick={() => onOpenChange(false)}
-            className="p-1 rounded text-console-dim hover:text-console-text transition-colors"
+            className="p-1 rounded-md text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors duration-[100ms]"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-5 py-4 space-y-4">
+        <div className="px-5 py-4 space-y-5">
           {/* Room name */}
           <div>
-            <label className="block text-[10px] font-medium text-console-muted uppercase tracking-wider mb-1.5">
+            <label className="block text-label-xs text-text-secondary uppercase tracking-[0.04em] mb-1.5">
               Room Name
             </label>
             <input
@@ -135,14 +134,14 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="auth-refactor"
-              className="w-full bg-console-faint border border-console-border rounded px-3 py-2 text-[12px] font-mono text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent/50"
+              className="w-full bg-elevation-2 border border-border rounded-md px-3 py-2 text-body font-mono text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors duration-[100ms]"
               autoFocus
             />
           </div>
 
           {/* Topic */}
           <div>
-            <label className="block text-[10px] font-medium text-console-muted uppercase tracking-wider mb-1.5">
+            <label className="block text-label-xs text-text-secondary uppercase tracking-[0.04em] mb-1.5">
               Topic / Goal
             </label>
             <input
@@ -150,100 +149,113 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Refactor auth flow to use server-side sessions"
-              className="w-full bg-console-faint border border-console-border rounded px-3 py-2 text-[12px] font-mono text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent/50"
+              className="w-full bg-elevation-2 border border-border rounded-md px-3 py-2 text-body font-mono text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors duration-[100ms]"
             />
           </div>
 
           {/* Agent picker */}
           <div>
-            <label className="block text-[10px] font-medium text-console-muted uppercase tracking-wider mb-2">
+            <label className="block text-label-xs text-text-secondary uppercase tracking-[0.04em] mb-2">
               Agents ({enabledCount} selected)
             </label>
-            <div className="space-y-2">
-              {agents.map((agent) => (
-                <div
-                  key={agent.id}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded border transition-colors",
-                    agent.enabled
-                      ? "border-console-accent/30 bg-console-faint"
-                      : "border-console-border bg-transparent",
-                  )}
-                >
-                  {/* Checkbox */}
-                  <button
-                    onClick={() => toggleAgent(agent.id)}
-                    disabled={agent.locked}
+            <div className="space-y-1.5">
+              {agents.map((agent) => {
+                const color = agentColor(agent.name);
+                return (
+                  <div
+                    key={agent.id}
                     className={cn(
-                      "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors",
+                      "flex items-center gap-3 px-3 py-2.5 rounded-md border transition-colors duration-[100ms]",
                       agent.enabled
-                        ? "bg-console-accent border-console-accent"
-                        : "border-console-border",
-                      agent.locked && "opacity-60 cursor-not-allowed",
+                        ? "border-accent/30 bg-accent-subtle"
+                        : "border-border bg-transparent hover:bg-surface-hover/30",
                     )}
                   >
-                    {agent.enabled && (
-                      <svg className="w-3 h-3 text-black" viewBox="0 0 12 12">
-                        <path
-                          d="M2 6l3 3 5-6"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    )}
-                  </button>
+                    {/* Checkbox */}
+                    <button
+                      onClick={() => toggleAgent(agent.id)}
+                      disabled={agent.locked}
+                      className={cn(
+                        "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors duration-[100ms]",
+                        agent.enabled
+                          ? "bg-accent border-accent"
+                          : "border-text-tertiary",
+                        agent.locked && "opacity-60 cursor-not-allowed",
+                      )}
+                    >
+                      {agent.enabled && (
+                        <svg className="w-3 h-3 text-canvas" viewBox="0 0 12 12">
+                          <path
+                            d="M2 6l3 3 5-6"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            fill="none"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
+                    </button>
 
-                  {/* Name */}
-                  <span
-                    className={cn(
-                      "text-[11px] font-mono flex-1",
-                      agent.enabled ? "text-console-text" : "text-console-dim",
-                    )}
-                  >
-                    {agent.name}
-                    {agent.locked && (
-                      <span className="text-[8px] text-console-dim ml-1">(required)</span>
-                    )}
-                  </span>
+                    {/* Avatar + Name */}
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: color + "25" }}
+                      >
+                        <span className="text-[8px] font-bold" style={{ color }}>
+                          {agent.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <span
+                        className={cn(
+                          "text-body-sm font-medium truncate",
+                          agent.enabled ? "text-text-primary" : "text-text-secondary",
+                        )}
+                      >
+                        {agent.name}
+                        {agent.locked && (
+                          <span className="text-label-xs text-text-tertiary ml-1">(required)</span>
+                        )}
+                      </span>
+                    </div>
 
-                  {/* Model selector */}
-                  <select
-                    value={agent.model}
-                    onChange={(e) =>
-                      setAgentModel(agent.id, e.target.value as "opus" | "sonnet" | "haiku")
-                    }
-                    className="bg-console-bg border border-console-border rounded px-2 py-0.5 text-[10px] font-mono text-console-muted focus:outline-none"
-                  >
-                    <option value="opus">opus</option>
-                    <option value="sonnet">sonnet</option>
-                    <option value="haiku">haiku</option>
-                  </select>
-                </div>
-              ))}
+                    {/* Model selector */}
+                    <select
+                      value={agent.model}
+                      onChange={(e) =>
+                        setAgentModel(agent.id, e.target.value as "opus" | "sonnet" | "haiku")
+                      }
+                      className="bg-canvas border border-border rounded-md px-2 py-0.5 text-label-xs font-mono text-text-secondary focus:outline-none focus:border-accent/50 transition-colors duration-[100ms]"
+                    >
+                      <option value="opus">opus</option>
+                      <option value="sonnet">sonnet</option>
+                      <option value="haiku">haiku</option>
+                    </select>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-console-border">
+        <div className="flex items-center justify-end gap-2 px-5 py-3.5 border-t border-border">
           <button
             onClick={() => onOpenChange(false)}
-            className="px-4 py-1.5 text-[11px] font-medium text-console-muted hover:text-console-text rounded transition-colors"
+            className="px-4 py-1.5 text-body-sm font-medium text-text-secondary hover:text-text-primary rounded-md transition-colors duration-[100ms]"
           >
             Cancel
           </button>
           <button
             onClick={() => void handleCreate()}
             disabled={!name.trim() || !topic.trim() || creating}
-            className="flex items-center gap-1.5 px-4 py-1.5 text-[11px] font-medium rounded bg-console-accent text-black hover:bg-console-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-4 py-1.5 text-body-sm font-medium rounded-md bg-accent text-canvas hover:bg-accent-hover transition-colors duration-[100ms] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {creating ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
-              <Plus className="w-3 h-3" />
+              <Plus className="w-3.5 h-3.5" />
             )}
             Create Room
           </button>

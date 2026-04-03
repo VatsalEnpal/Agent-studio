@@ -30,6 +30,12 @@ export interface Room {
   createdAt: string;
 }
 
+export interface TypingAgent {
+  agentId: string;
+  activity: string;
+  startedAt: string;
+}
+
 interface RoomsState {
   rooms: Room[];
   selectedRoomId: string | null;
@@ -37,7 +43,7 @@ interface RoomsState {
   lastSeenByRoom: Record<string, string>;
 
   // Streaming state (TalkTo-style)
-  typingAgents: Record<string, string[]>;         // roomId -> agentId[]
+  typingAgents: Record<string, TypingAgent[]>;    // roomId -> agent activity info
   streamingText: Record<string, string>;           // agentId -> accumulated text so far
 
   setRooms: (rooms: Room[]) => void;
@@ -51,6 +57,7 @@ interface RoomsState {
 
   // Streaming actions
   setAgentTyping: (roomId: string, agentId: string) => void;
+  updateAgentActivity: (roomId: string, agentId: string, activity: string) => void;
   appendStreamingDelta: (roomId: string, agentId: string, delta: string) => void;
   clearStreaming: (roomId: string, agentId: string) => void;
 }
@@ -84,7 +91,7 @@ export const useRoomsStore = create<RoomsState>((set) => ({
       delete newStreamingText[msg.from];
       const newTyping = { ...state.typingAgents };
       if (newTyping[roomId]) {
-        newTyping[roomId] = newTyping[roomId].filter((id) => id !== msg.from);
+        newTyping[roomId] = newTyping[roomId].filter((ta) => ta.agentId !== msg.from);
       }
       return {
         rooms: state.rooms.map((r) =>
@@ -134,10 +141,25 @@ export const useRoomsStore = create<RoomsState>((set) => ({
   setAgentTyping: (roomId, agentId) =>
     set((state) => {
       const current = state.typingAgents[roomId] ?? [];
-      if (current.includes(agentId)) return state;
+      if (current.some((ta) => ta.agentId === agentId)) return state;
+      const entry: TypingAgent = { agentId, activity: "", startedAt: new Date().toISOString() };
       return {
-        typingAgents: { ...state.typingAgents, [roomId]: [...current, agentId] },
+        typingAgents: { ...state.typingAgents, [roomId]: [...current, entry] },
         streamingText: { ...state.streamingText, [agentId]: "" },
+      };
+    }),
+
+  updateAgentActivity: (roomId, agentId, activity) =>
+    set((state) => {
+      const current = state.typingAgents[roomId];
+      if (!current) return state;
+      return {
+        typingAgents: {
+          ...state.typingAgents,
+          [roomId]: current.map((ta) =>
+            ta.agentId === agentId ? { ...ta, activity } : ta,
+          ),
+        },
       };
     }),
 
@@ -155,7 +177,7 @@ export const useRoomsStore = create<RoomsState>((set) => ({
       delete newStreamingText[agentId];
       const newTyping = { ...state.typingAgents };
       if (newTyping[roomId]) {
-        newTyping[roomId] = newTyping[roomId].filter((id) => id !== agentId);
+        newTyping[roomId] = newTyping[roomId].filter((ta) => ta.agentId !== agentId);
       }
       return { streamingText: newStreamingText, typingAgents: newTyping };
     }),

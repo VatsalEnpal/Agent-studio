@@ -1,50 +1,44 @@
 "use client";
 
 import type React from "react";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Bot, User, AlertTriangle, Info, Check, X } from "lucide-react";
+import { agentColor } from "@/lib/design-tokens";
+import { Check, X, ChevronDown, ChevronRight, Clock, FileCode, Wrench } from "lucide-react";
 import type { RoomMessage } from "@/stores/rooms";
 
 const Markdown = lazy(() => import("react-markdown"));
 const remarkGfm = lazy(() => import("remark-gfm").then((m) => ({ default: m.default })));
 
-interface ChatMessageProps {
+export interface ChatMessageProps {
   msg: RoomMessage;
+  grouped?: boolean; // consecutive message from same agent within 2min
   onApprove: (msg: RoomMessage) => void;
   onReject: (msg: RoomMessage) => void;
 }
 
-const AGENT_COLORS: Record<string, string> = {
-  orchestrator: "text-purple-400",
-  "frontend-worker": "text-blue-400",
-  frontend: "text-blue-400",
-  "backend-worker": "text-green-400",
-  backend: "text-green-400",
-  "qa-tester": "text-yellow-400",
-  qa: "text-yellow-400",
-  "security-reviewer": "text-red-400",
-  security: "text-red-400",
-  pmo: "text-orange-400",
-};
-
 function MessageContent({ text, isSystem }: { text: string; isSystem: boolean }) {
   if (isSystem) {
-    return <span className="text-console-dim italic">{text}</span>;
+    return <span className="text-text-tertiary italic text-body-sm">{text}</span>;
   }
 
   // For short messages without markdown syntax, render as plain text
   const hasMarkdown = /[*_`#\[\]|>-]/.test(text) && text.length > 40;
   if (!hasMarkdown) {
-    return <span className="text-console-text">{highlightMentions(text)}</span>;
+    return <span className="text-text-primary text-body">{highlightMentions(text)}</span>;
   }
 
   return (
-    <Suspense fallback={<span className="text-console-text">{text}</span>}>
-      <div className="text-console-text prose prose-invert prose-sm max-w-none
-        prose-p:my-1 prose-pre:my-2 prose-code:text-console-accent prose-code:bg-console-faint
-        prose-code:px-1 prose-code:rounded prose-headings:text-console-text prose-headings:mt-3 prose-headings:mb-1
-        prose-a:text-console-accent prose-strong:text-console-text">
+    <Suspense fallback={<span className="text-text-primary text-body">{text}</span>}>
+      <div className="text-text-primary text-body prose prose-invert prose-sm max-w-none
+        prose-p:my-1 prose-pre:my-2
+        prose-code:text-accent prose-code:bg-elevation-2 prose-code:px-1 prose-code:py-0.5 prose-code:rounded-sm prose-code:text-body-sm prose-code:font-mono
+        prose-pre:bg-elevation-2 prose-pre:border prose-pre:border-border-subtle prose-pre:rounded-md
+        prose-headings:text-text-emphasis prose-headings:mt-3 prose-headings:mb-1
+        prose-a:text-accent prose-a:no-underline hover:prose-a:underline
+        prose-strong:text-text-emphasis
+        prose-li:my-0.5
+        prose-blockquote:border-accent/30 prose-blockquote:text-text-secondary">
         <Markdown remarkPlugins={[remarkGfm as any]}>
           {text}
         </Markdown>
@@ -53,105 +47,181 @@ function MessageContent({ text, isSystem }: { text: string; isSystem: boolean })
   );
 }
 
-export function ChatMessage({ msg, onApprove, onReject }: ChatMessageProps) {
+export function ChatMessage({ msg, grouped, onApprove, onReject }: ChatMessageProps) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const isUser = msg.from === "user";
-  const isSystem = msg.from === "system";
+  const isSystem = msg.type === "system";
   const isApproval = msg.type === "approval-request";
 
-  const agentColor = AGENT_COLORS[msg.from] ?? "text-console-muted";
+  const color = isUser ? "#4F8FF7" : agentColor(msg.from);
+
+  // System messages: centered, smaller, gray
+  if (isSystem) {
+    return (
+      <div className="flex justify-center py-2 px-4">
+        <div className="text-label-xs text-text-tertiary text-center max-w-md">
+          {msg.text}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
       className={cn(
-        "px-4 py-2.5 transition-colors",
-        isUser && "bg-console-elevated/20",
-        isApproval && msg.approvalStatus === "pending" && "bg-amber-400/5 border-l-2 border-amber-400/50",
-        isApproval && msg.approvalStatus === "approved" && "bg-green-400/5 border-l-2 border-green-400/30",
-        isApproval && msg.approvalStatus === "rejected" && "bg-red-400/5 border-l-2 border-red-400/30",
+        "px-4 transition-colors duration-[100ms]",
+        grouped ? "pt-0.5 pb-1.5" : "pt-3 pb-1.5",
+        isUser && "bg-accent-subtle/50",
+        isApproval && msg.approvalStatus === "pending" && "bg-warning-subtle shadow-accent-glow",
+        isApproval && msg.approvalStatus === "approved" && "bg-success-subtle/50",
+        isApproval && msg.approvalStatus === "rejected" && "bg-error-subtle/50",
       )}
     >
-      <div className="flex items-center gap-2 mb-1">
-        {isUser ? (
-          <User className="w-3 h-3 text-console-accent shrink-0" />
-        ) : isSystem ? (
-          <Info className="w-3 h-3 text-console-dim shrink-0" />
-        ) : isApproval ? (
-          <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" />
-        ) : (
-          <Bot className="w-3 h-3 text-console-muted shrink-0" />
-        )}
-
-        <span
-          className={cn(
-            "text-[11px] font-semibold font-mono",
-            isUser ? "text-console-accent" : isSystem ? "text-console-dim" : agentColor,
+      <div className="flex gap-3">
+        {/* Avatar — only show for non-grouped messages */}
+        <div className="w-8 shrink-0">
+          {!grouped && (
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: color + "20", border: `1.5px solid ${color}40` }}
+            >
+              <span
+                className="text-xs font-semibold leading-none"
+                style={{ color }}
+              >
+                {isUser ? "Y" : msg.from.charAt(0).toUpperCase()}
+              </span>
+            </div>
           )}
-        >
-          {isUser ? "You" : msg.from}
-        </span>
-
-        {msg.to && (
-          <span className="text-[9px] text-console-dim font-mono">
-            &rarr; {msg.to}
-          </span>
-        )}
-
-        <span className="text-[9px] text-console-dim ml-auto font-mono shrink-0">
-          {formatRelativeTime(msg.timestamp)}
-        </span>
-      </div>
-
-      <div className="pl-5">
-        <MessageContent text={msg.text ?? ""} isSystem={isSystem} />
-      </div>
-
-      {isApproval && msg.approvalStatus === "pending" && (
-        <div className="flex gap-2 mt-2 pl-5">
-          <button
-            onClick={() => onApprove(msg)}
-            className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-medium bg-green-600/20 text-green-400 rounded hover:bg-green-600/30 transition-colors"
-          >
-            <Check className="w-3 h-3" />
-            Approve
-          </button>
-          <button
-            onClick={() => onReject(msg)}
-            className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-medium bg-red-600/20 text-red-400 rounded hover:bg-red-600/30 transition-colors"
-          >
-            <X className="w-3 h-3" />
-            Reject
-          </button>
         </div>
-      )}
-      {isApproval && msg.approvalStatus === "approved" && (
-        <span className="text-[9px] text-green-400 mt-1 block pl-5 font-mono">Approved</span>
-      )}
-      {isApproval && msg.approvalStatus === "rejected" && (
-        <span className="text-[9px] text-red-400 mt-1 block pl-5 font-mono">Rejected</span>
-      )}
+
+        <div className="flex-1 min-w-0">
+          {/* Name + timestamp — only for non-grouped */}
+          {!grouped && (
+            <div className="flex items-center gap-2 mb-1">
+              <span
+                className="text-body-sm font-semibold"
+                style={{ color }}
+              >
+                {isUser ? "You" : msg.from}
+              </span>
+              {msg.to && (
+                <span className="text-label-xs text-text-tertiary">
+                  &rarr; {msg.to}
+                </span>
+              )}
+              <span className="text-label-xs text-text-tertiary ml-auto shrink-0">
+                {formatTimestamp(msg.timestamp)}
+              </span>
+            </div>
+          )}
+
+          {/* Message body */}
+          <MessageContent text={msg.text ?? ""} isSystem={false} />
+
+          {/* Approval buttons */}
+          {isApproval && msg.approvalStatus === "pending" && (
+            <div className="flex gap-2 mt-2.5">
+              <button
+                onClick={() => onApprove(msg)}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 text-label font-medium bg-success/15 text-success rounded-md hover:bg-success/25 transition-colors duration-[100ms] shadow-[0_0_12px_rgba(52,211,153,0.15)]"
+              >
+                <Check className="w-3.5 h-3.5" />
+                Approve
+              </button>
+              <button
+                onClick={() => onReject(msg)}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 text-label font-medium bg-error/15 text-error rounded-md hover:bg-error/25 transition-colors duration-[100ms]"
+              >
+                <X className="w-3.5 h-3.5" />
+                Reject
+              </button>
+            </div>
+          )}
+          {isApproval && msg.approvalStatus === "approved" && (
+            <div className="flex items-center gap-1 mt-1.5 text-label-xs text-success">
+              <Check className="w-3 h-3" />
+              Approved
+            </div>
+          )}
+          {isApproval && msg.approvalStatus === "rejected" && (
+            <div className="flex items-center gap-1 mt-1.5 text-label-xs text-error">
+              <X className="w-3 h-3" />
+              Rejected
+            </div>
+          )}
+
+          {/* Expandable detail panel (for agent messages) */}
+          {!isUser && msg.type === "message" && (
+            <button
+              onClick={() => setDetailsOpen(!detailsOpen)}
+              className="flex items-center gap-1 mt-1.5 text-label-xs text-text-tertiary hover:text-text-secondary transition-colors duration-[100ms]"
+            >
+              {detailsOpen ? (
+                <ChevronDown className="w-3 h-3" />
+              ) : (
+                <ChevronRight className="w-3 h-3" />
+              )}
+              Details
+            </button>
+          )}
+
+          {detailsOpen && (
+            <div className="mt-2 p-2.5 rounded-md bg-elevation-2 border border-border-subtle text-label-xs text-text-secondary space-y-1.5 animate-slide-up">
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-3 h-3 text-text-tertiary" />
+                <span>{formatTimestamp(msg.timestamp)}</span>
+              </div>
+              {msg.actionCommand && (
+                <div className="flex items-center gap-1.5">
+                  <Wrench className="w-3 h-3 text-text-tertiary" />
+                  <span className="font-mono">{msg.actionCommand}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1.5">
+                <FileCode className="w-3 h-3 text-text-tertiary" />
+                <span>Message ID: {msg.id.slice(0, 12)}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
 // --- Streaming ghost message (shown while agent is typing) ---
 export function StreamingMessage({ agentId, text }: { agentId: string; text: string }) {
-  const agentColor = AGENT_COLORS[agentId] ?? "text-console-muted";
+  const color = agentColor(agentId);
 
   if (!text) {
     // Typing indicator — no text yet
     return (
-      <div className="px-4 py-2.5">
-        <div className="flex items-center gap-2 mb-1">
-          <Bot className="w-3 h-3 text-console-muted shrink-0" />
-          <span className={cn("text-[11px] font-semibold font-mono", agentColor)}>
-            {agentId}
-          </span>
-          <span className="text-[9px] text-console-dim italic">is thinking...</span>
-        </div>
-        <div className="pl-5 flex gap-1">
-          <span className="w-1.5 h-1.5 bg-console-dim rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-          <span className="w-1.5 h-1.5 bg-console-dim rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-          <span className="w-1.5 h-1.5 bg-console-dim rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+      <div className="px-4 pt-3 pb-1.5">
+        <div className="flex gap-3">
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 animate-pulse-dot"
+            style={{ backgroundColor: color + "20", border: `1.5px solid ${color}40` }}
+          >
+            <span className="text-xs font-semibold leading-none" style={{ color }}>
+              {agentId.charAt(0).toUpperCase()}
+            </span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-body-sm font-semibold" style={{ color }}>
+                {agentId}
+              </span>
+              <span className="text-label-xs text-text-tertiary italic">
+                is thinking...
+              </span>
+            </div>
+            <div className="flex gap-1.5 py-1">
+              <span className="w-1.5 h-1.5 bg-text-tertiary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-1.5 h-1.5 bg-text-tertiary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-1.5 h-1.5 bg-text-tertiary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -159,17 +229,26 @@ export function StreamingMessage({ agentId, text }: { agentId: string; text: str
 
   // Streaming text — show accumulated markdown with pulsing cursor
   return (
-    <div className="px-4 py-2.5 bg-console-elevated/10">
-      <div className="flex items-center gap-2 mb-1">
-        <Bot className="w-3 h-3 text-console-muted shrink-0 animate-pulse" />
-        <span className={cn("text-[11px] font-semibold font-mono", agentColor)}>
-          {agentId}
-        </span>
-        <span className="text-[9px] text-console-dim italic">typing...</span>
-      </div>
-      <div className="pl-5">
-        <MessageContent text={text} isSystem={false} />
-        <span className="inline-block w-1.5 h-4 bg-console-accent/70 animate-pulse ml-0.5 align-text-bottom" />
+    <div className="px-4 pt-3 pb-1.5 bg-accent-subtle/30">
+      <div className="flex gap-3">
+        <div
+          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+          style={{ backgroundColor: color + "20", border: `1.5px solid ${color}40` }}
+        >
+          <span className="text-xs font-semibold leading-none animate-pulse-dot" style={{ color }}>
+            {agentId.charAt(0).toUpperCase()}
+          </span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-body-sm font-semibold" style={{ color }}>
+              {agentId}
+            </span>
+            <span className="text-label-xs text-text-tertiary italic">typing...</span>
+          </div>
+          <MessageContent text={text} isSystem={false} />
+          <span className="inline-block w-1.5 h-4 bg-accent/70 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+        </div>
       </div>
     </div>
   );
@@ -179,14 +258,14 @@ function highlightMentions(text: string): React.ReactNode {
   const parts = text.split(/(@\w+)/g);
   return parts.map((part, i) =>
     part.startsWith("@") ? (
-      <span key={i} className="text-console-accent font-semibold">{part}</span>
+      <span key={i} className="text-accent font-semibold">{part}</span>
     ) : (
       part
     ),
   );
 }
 
-function formatRelativeTime(iso: string): string {
+function formatTimestamp(iso: string): string {
   try {
     const now = Date.now();
     const then = new Date(iso).getTime();

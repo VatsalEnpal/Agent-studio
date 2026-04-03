@@ -57,6 +57,9 @@ export interface WsMessage {
     | "automation-report"
     | "room-message"
     | "room-agent-status"
+    | "room-agent-typing"
+    | "room-agent-streaming"
+    | "room-agent-activity"
     | "room-approval";
   sessionId?: string;
   data?: string;

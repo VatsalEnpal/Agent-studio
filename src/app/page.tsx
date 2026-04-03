@@ -387,6 +387,13 @@ export default function Home() {
       }
     });
 
+    const unsubRoomActivity = wsClient.on("room-agent-activity", (msg: WsMessage) => {
+      const payload = msg.payload as { roomId: string; agentId: string; activity: string };
+      if (payload?.roomId) {
+        useRoomsStore.getState().updateAgentActivity(payload.roomId, payload.agentId, payload.activity);
+      }
+    });
+
     wsClient.connect(`ws://${window.location.host}/ws`);
 
     return () => {
@@ -397,6 +404,7 @@ export default function Home() {
       unsubRoomApproval();
       unsubRoomTyping();
       unsubRoomStreaming();
+      unsubRoomActivity();
     };
   }, [setSessions, setRepos]);
 
