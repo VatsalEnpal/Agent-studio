@@ -205,6 +205,31 @@ const config: Config = {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.4" },
         },
+        pageCrossfade: {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        messageSlideUp: {
+          from: { opacity: "0", transform: "translateY(8px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        gateBounce: {
+          "0%": { opacity: "0", transform: "scale(0.3)" },
+          "50%": { opacity: "1", transform: "scale(1.15)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        panelSlideIn: {
+          from: { opacity: "0", transform: "translateX(24px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+        cmdPaletteIn: {
+          from: { opacity: "0", transform: "scale(0.95) translateY(-8px)" },
+          to: { opacity: "1", transform: "scale(1) translateY(0)" },
+        },
+        sessionCrossfade: {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
       },
       animation: {
         "fade-in": "fadeIn 250ms cubic-bezier(0.16, 1, 0.3, 1)",
@@ -212,6 +237,12 @@ const config: Config = {
         "slide-in-right": "slideInRight 250ms cubic-bezier(0.16, 1, 0.3, 1)",
         shimmer: "shimmer 1.5s ease-in-out infinite",
         "pulse-dot": "pulse-dot 1.5s ease-in-out infinite",
+        "page-crossfade": "pageCrossfade 200ms ease-out",
+        "message-in": "messageSlideUp 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "gate-bounce": "gateBounce 300ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "panel-in": "panelSlideIn 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "cmd-palette-in": "cmdPaletteIn 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "session-crossfade": "sessionCrossfade 200ms ease-out",
       },
 
       // -----------------------------------------------------------------

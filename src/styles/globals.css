@@ -403,3 +403,152 @@ kbd {
 .animate-tab-enter {
   animation: tabEnter 150ms ease-out;
 }
+
+/* =============================================================================
+   Page crossfade — 200ms when switching between modes
+   ============================================================================= */
+
+@keyframes pageCrossfade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-page-crossfade {
+  animation: pageCrossfade 200ms ease-out;
+}
+
+/* =============================================================================
+   Message slide up — room chat message arrival
+   ============================================================================= */
+
+@keyframes messageSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-message-in {
+  animation: messageSlideUp 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =============================================================================
+   Gate completion — checkmark bounce scale
+   ============================================================================= */
+
+@keyframes gateBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-gate-bounce {
+  animation: gateBounce 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* =============================================================================
+   Slide-in panel — from right (launcher, dialogs)
+   ============================================================================= */
+
+@keyframes panelSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes panelSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+.animate-panel-in {
+  animation: panelSlideIn 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-panel-out {
+  animation: panelSlideOut 200ms ease-in forwards;
+}
+
+/* =============================================================================
+   Command palette drop-in — scale 95%→100% + opacity
+   ============================================================================= */
+
+@keyframes cmdPaletteIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes cmdPaletteOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+}
+
+.animate-cmd-palette-in {
+  animation: cmdPaletteIn 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-cmd-palette-out {
+  animation: cmdPaletteOut 150ms ease-in forwards;
+}
+
+/* =============================================================================
+   Nav rail active indicator — smooth vertical slide
+   ============================================================================= */
+
+.nav-indicator-slide {
+  transition: top var(--duration-smooth) cubic-bezier(0.16, 1, 0.3, 1),
+              height var(--duration-smooth) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =============================================================================
+   Session crossfade — terminal pane opacity transition
+   ============================================================================= */
+
+@keyframes sessionCrossfade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-session-crossfade {
+  animation: sessionCrossfade 200ms ease-out;
+}
