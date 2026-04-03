@@ -87,6 +87,52 @@ if (!gotSingleInstanceLock) {
 // Helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Resolve the system `node` binary.  Inside Electron, process.execPath
+ * points to the Electron binary, so we need to find the real Node.js
+ * executable via PATH or well-known install locations.
+ */
+function resolveNodeBin() {
+  const { execSync } = require("child_process");
+
+  // 1. Check if an explicit NODE_PATH env was set (useful for packaged apps)
+  if (process.env.AGENT_STUDIO_NODE_BIN && fs.existsSync(process.env.AGENT_STUDIO_NODE_BIN)) {
+    return process.env.AGENT_STUDIO_NODE_BIN;
+  }
+
+  // 2. Try `which node` (works on macOS/Linux)
+  try {
+    const nodePath = execSync("which node", { encoding: "utf8", timeout: 3000 }).trim();
+    if (nodePath && fs.existsSync(nodePath)) return nodePath;
+  } catch {
+    // which not available or node not in PATH
+  }
+
+  // 3. Try `where node` (Windows)
+  try {
+    const nodePath = execSync("where node", { encoding: "utf8", timeout: 3000 })
+      .split("\n")[0]
+      .trim();
+    if (nodePath && fs.existsSync(nodePath)) return nodePath;
+  } catch {
+    // Not on Windows or node not in PATH
+  }
+
+  // 4. Well-known locations
+  const candidates = [
+    "/opt/homebrew/bin/node",       // macOS ARM (Homebrew)
+    "/usr/local/bin/node",          // macOS Intel / Linux
+    "/usr/bin/node",                // Linux system
+    "C:\\Program Files\\nodejs\\node.exe",
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+
+  // 5. Last resort: hope "node" is on the PATH at spawn time
+  return "node";
+}
+
 /** Ensure ~/.agent-studio directory exists and open log stream. */
 function initLogStream() {
   fs.mkdirSync(APP_DIR, { recursive: true });
@@ -127,8 +173,9 @@ async function findFreePort(start = DEFAULT_PORT_START) {
     port++;
   }
   // Fallback: let OS pick
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const srv = net.createServer();
+    srv.once("error", (err) => reject(new Error(`Port fallback failed: ${err.message}`)));
     srv.listen(0, "127.0.0.1", () => {
       const p = srv.address().port;
       srv.close(() => resolve(p));
@@ -137,13 +184,13 @@ async function findFreePort(start = DEFAULT_PORT_START) {
 }
 
 /**
- * GET /api/health on the server.  Resolves to the parsed JSON body or
- * rejects on any error (network, non-200, timeout).
+ * HTTP GET helper that resolves to the parsed JSON body or rejects on
+ * any error (network, non-200, timeout).
  */
-function fetchHealth() {
+function httpGetJson(urlPath) {
   return new Promise((resolve, reject) => {
     const req = http.get(
-      `http://127.0.0.1:${serverPort}/api/health`,
+      `http://127.0.0.1:${serverPort}${urlPath}`,
       { timeout: 3000 },
       (res) => {
         if (res.statusCode !== 200) {
@@ -170,13 +217,42 @@ function fetchHealth() {
 }
 
 /**
+ * Check server health.  Tries /api/health first (returns session counts,
+ * memory usage, etc.) and falls back to /api/config if the health route
+ * is not yet registered.
+ */
+async function fetchHealth() {
+  try {
+    return await httpGetJson("/api/health");
+  } catch (err) {
+    // If the health endpoint returns 404, the route may not be mounted yet.
+    // Fall back to /api/config which has always existed.
+    if (err.message === "HTTP 404") {
+      const cfg = await httpGetJson("/api/config");
+      return { status: "ok", fallback: true, ...cfg };
+    }
+    throw err;
+  }
+}
+
+/**
  * Read saved window position/size from disk.
  * Falls back to sensible defaults.
  */
 function loadWindowState() {
   try {
     const raw = fs.readFileSync(WINDOW_STATE_PATH, "utf8");
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    // Validate: must be an object with numeric width/height
+    if (
+      parsed == null ||
+      typeof parsed !== "object" ||
+      typeof parsed.width !== "number" ||
+      typeof parsed.height !== "number"
+    ) {
+      return null;
+    }
+    return parsed;
   } catch {
     return null;
   }
@@ -357,13 +433,18 @@ function startWatchdog() {
         setServerStatus("running");
       }
 
-      // Update tray tooltip with session count
-      if (tray && health.activeSessions != null) {
+      // Update tray tooltip and menu with session data
+      if (tray) {
+        const count = health.activeSessions ?? 0;
         const label =
-          health.activeSessions === 0
+          count === 0
             ? "Agent Studio — no active sessions"
-            : `Agent Studio — ${health.activeSessions} active session${health.activeSessions > 1 ? "s" : ""}`;
+            : `Agent Studio — ${count} active session${count > 1 ? "s" : ""}`;
         tray.setToolTip(label);
+
+        // Rebuild tray menu with session list if the server provides it
+        const sessions = Array.isArray(health.sessions) ? health.sessions : [];
+        updateTrayMenu(sessions);
       }
     } catch {
       consecutiveHealthFailures++;
@@ -410,25 +491,36 @@ function gracefulShutdownServer() {
     if (!serverProcess) return resolve();
 
     const proc = serverProcess;
+    let resolved = false;
+    let killTimer = null;
+    let finalTimer = null;
+
+    const done = () => {
+      if (resolved) return;
+      resolved = true;
+      if (killTimer) clearTimeout(killTimer);
+      if (finalTimer) clearTimeout(finalTimer);
+      resolve();
+    };
 
     // If the process exits on its own, resolve immediately
-    proc.on("exit", () => resolve());
+    proc.on("exit", done);
 
     try {
       proc.kill("SIGTERM");
     } catch {
-      return resolve();
+      return done();
     }
 
     // Force kill after grace period
-    setTimeout(() => {
+    killTimer = setTimeout(() => {
       try {
         proc.kill("SIGKILL");
       } catch {
         // Already dead
       }
       // Give a tiny moment for the exit event to fire
-      setTimeout(resolve, 200);
+      finalTimer = setTimeout(done, 200);
     }, SERVER_KILL_GRACE_MS);
   });
 }
@@ -768,10 +860,21 @@ app.whenReady().then(async () => {
   } catch (err) {
     log(`Initial server start failed: ${err.message}`);
     setServerStatus("error");
+    // Close splash before showing error dialog so it doesn't sit behind it
+    if (splashWindow && !splashWindow.isDestroyed()) {
+      splashWindow.close();
+      splashWindow = null;
+    }
     dialog.showErrorBox(
       "Agent Studio — Server Failed",
       `Could not start the server.\n\n${err.message}\n\nCheck ${LOG_PATH} for details.`,
     );
+  }
+
+  // Ensure splash is closed even if createWindow's ready-to-show never fires
+  if (splashWindow && !splashWindow.isDestroyed()) {
+    splashWindow.close();
+    splashWindow = null;
   }
 
   createWindow();
