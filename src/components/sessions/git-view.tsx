@@ -1,18 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  ArrowLeft,
-  GitBranch,
-  GitCommit,
-  ChevronDown,
-  Plus,
-  Upload,
-  GitMerge,
-  FileText,
-  FilePlus,
-  FileMinus,
-} from "lucide-react";
+import { ArrowLeft, GitBranch, GitCommit, CaretDown, Plus, UploadSimple, GitMerge, FileText, FilePlus, FileMinus } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useGitStore } from "@/stores/git";
 import type { RepoStatus, BranchInfo } from "@/lib/types";
@@ -180,7 +169,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
           >
             <GitBranch className="size-3" />
             {currentBranch}
-            <ChevronDown className="size-3" />
+            <CaretDown className="size-3" />
           </button>
           {branchDropdownOpen && branches.length > 0 && (
             <div className="absolute right-0 top-full mt-1 w-56 bg-surface border border-border rounded-md shadow-modal z-dropdown max-h-48 overflow-y-auto">
@@ -221,7 +210,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
               "transition-colors disabled:opacity-50",
             )}
           >
-            <Upload className="size-3.5" />
+            <UploadSimple className="size-3.5" />
             {pushing ? "Pushing..." : "Push"}
           </button>
           <button

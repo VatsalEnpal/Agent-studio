@@ -1,7 +1,6 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
-import { Terminal, MessageCircle, Play, Brain } from "lucide-react";
+import { Terminal, ChatCircle, Play, Brain, type Icon as PhosphorIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -9,7 +8,7 @@ import { cn } from "@/lib/utils";
 // ---------------------------------------------------------------------------
 
 interface EmptyStateProps {
-  icon: LucideIcon;
+  icon: PhosphorIcon;
   title: string;
   description: string;
   actionLabel?: string;
@@ -34,7 +33,6 @@ export function EmptyState({
     >
       <Icon
         className="size-12 text-text-tertiary"
-        strokeWidth={1.25}
       />
       <h3 className="text-title-md text-text-emphasis">{title}</h3>
       <p className="text-body-sm text-text-secondary max-w-[320px]">
@@ -77,7 +75,7 @@ export function EmptySessionsState({ onAction }: { onAction?: () => void }) {
 export function EmptyRoomsState({ onAction }: { onAction?: () => void }) {
   return (
     <EmptyState
-      icon={MessageCircle}
+      icon={ChatCircle}
       title="No rooms yet"
       description="Create a team room to collaborate with multiple AI agents in a shared chat."
       actionLabel="New Room"

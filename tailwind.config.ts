@@ -148,20 +148,20 @@ const config: Config = {
       // -----------------------------------------------------------------
       fontSize: {
         display: [
-          "28px",
-          { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "600" },
+          "24px",
+          { lineHeight: "1.2", letterSpacing: "-0.025em", fontWeight: "600" },
         ],
         "title-lg": [
           "20px",
-          { lineHeight: "1.3", letterSpacing: "-0.01em", fontWeight: "600" },
+          { lineHeight: "1.3", letterSpacing: "-0.01em", fontWeight: "500" },
         ],
         "title-md": [
           "16px",
-          { lineHeight: "1.4", letterSpacing: "-0.01em", fontWeight: "600" },
+          { lineHeight: "1.4", letterSpacing: "-0.01em", fontWeight: "500" },
         ],
         "title-sm": [
           "14px",
-          { lineHeight: "1.4", letterSpacing: "0", fontWeight: "600" },
+          { lineHeight: "1.4", letterSpacing: "0", fontWeight: "500" },
         ],
         body: [
           "14px",
@@ -177,7 +177,7 @@ const config: Config = {
         ],
         "label-xs": [
           "11px",
-          { lineHeight: "1.4", letterSpacing: "0.04em", fontWeight: "500" },
+          { lineHeight: "1.4", letterSpacing: "0.02em", fontWeight: "500" },
         ],
       },
 

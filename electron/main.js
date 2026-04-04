@@ -292,19 +292,58 @@ async function startServer() {
   log(`Starting server on port ${port}`);
   setServerStatus("starting");
 
-  const serverEntry = path.join(__dirname, "..", "server", "index.ts");
-  const cwd = path.join(__dirname, "..");
+  // Resolve paths differently for development vs packaged app
+  let serverEntry, cwd, spawnArgs;
 
-  // Use `node --import tsx` to run the TypeScript server entry.
-  // In Electron, process.execPath is the Electron binary, so we must
-  // resolve the system `node` explicitly.  In a packaged build the
-  // compiled JS can be pointed to directly (just change serverEntry).
+  // Check if EXTERNAL_SERVER_PORT is set — skip spawning if so
+  if (process.env.EXTERNAL_SERVER_PORT) {
+    log(`Using external server on port ${process.env.EXTERNAL_SERVER_PORT}`);
+    serverPort = parseInt(process.env.EXTERNAL_SERVER_PORT, 10);
+    setServerStatus("running");
+    return;
+  }
+
+  if (app.isPackaged) {
+    // Packaged: use pre-compiled JS from dist-server/ (copied via extraResources)
+    const appDir = path.join(process.resourcesPath, "app");
+    const compiledEntry = path.join(appDir, "dist-server", "index.js");
+    const tsEntry = path.join(appDir, "server", "index.ts");
+
+    if (fs.existsSync(compiledEntry)) {
+      // Pre-compiled server (preferred)
+      serverEntry = compiledEntry;
+      cwd = appDir;
+      spawnArgs = [serverEntry];
+      log("Using pre-compiled server: " + compiledEntry);
+    } else if (fs.existsSync(tsEntry)) {
+      // Fallback to tsx if compiled version missing
+      serverEntry = tsEntry;
+      cwd = appDir;
+      spawnArgs = ["--import", "tsx", serverEntry];
+      log("Using TypeScript server (tsx): " + tsEntry);
+    } else {
+      throw new Error(`No server found. Checked:\n  ${compiledEntry}\n  ${tsEntry}`);
+    }
+  } else {
+    // Development: run from source via tsx
+    serverEntry = path.join(__dirname, "..", "server", "index.ts");
+    cwd = path.join(__dirname, "..");
+    spawnArgs = ["--import", "tsx", serverEntry];
+  }
+
   const nodeBin = resolveNodeBin();
-  log(`Using node binary: ${nodeBin}`);
+  log(`Using node: ${nodeBin}, cwd: ${cwd}, entry: ${serverEntry}`);
+
+  // Verify cwd exists before spawning
+  if (!fs.existsSync(cwd)) {
+    const err = `Server directory does not exist: ${cwd}`;
+    log(err);
+    throw new Error(err);
+  }
 
   serverProcess = spawn(
     nodeBin,
-    ["--import", "tsx", serverEntry],
+    spawnArgs,
     {
       env: { ...process.env, PORT: String(port) },
       cwd,

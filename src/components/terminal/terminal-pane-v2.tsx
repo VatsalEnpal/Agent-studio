@@ -143,21 +143,10 @@ export function TerminalPaneV2({
     [sessionId],
   );
 
-  // Attach/detach terminal when sessionId or visibility changes
+  // Attach terminal when sessionId changes (stays attached across visibility toggles)
   useEffect(() => {
     const container = containerRef.current;
-    if (!container || !visible) {
-      // Detach if hidden
-      if (attachedRef.current) {
-        const prev = terminalPool.get(attachedRef.current);
-        if (prev) {
-          // Detach by clearing the container — Terminal stays alive in the pool
-          container && (container.innerHTML = "");
-        }
-        attachedRef.current = null;
-      }
-      return;
-    }
+    if (!container) return;
 
     const entry = getOrCreateTerminal(sessionId);
 
@@ -196,7 +185,21 @@ export function TerminalPaneV2({
       resizeObserver.disconnect();
       window.removeEventListener("terminal-refit", refitHandler);
     };
-  }, [sessionId, visible, fitAndResize]);
+  }, [sessionId, fitAndResize]);
+
+  // Re-fit when becoming visible again (e.g. switching back to Sessions tab)
+  useEffect(() => {
+    if (!visible) return;
+    const entry = terminalPool.get(sessionId);
+    if (!entry) return;
+    // Use rAF + fallback to ensure layout has settled after visibility change
+    const raf = requestAnimationFrame(() => fitAndResize(entry));
+    const fallback = setTimeout(() => fitAndResize(entry), 150);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(fallback);
+    };
+  }, [visible, sessionId, fitAndResize]);
 
   // Apply font size changes
   useEffect(() => {

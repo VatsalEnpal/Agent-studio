@@ -1,16 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import {
-  Brain,
-  Monitor,
-  Activity,
-  Timer,
-  Hash,
-  Play,
-  Pause,
-  RefreshCw,
-} from "lucide-react";
+import { Brain, Monitor, Pulse, Timer, Hash, Play, Pause, ArrowClockwise } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useUsage, formatTokensDisplay } from "@/hooks/use-usage";
 import { useToastStore } from "@/stores/toast";
@@ -178,7 +169,7 @@ export function SystemPanel() {
 
       {/* Avg Context Usage */}
       <StatRow
-        icon={<Activity className="w-3 h-3" />}
+        icon={<Pulse className="w-3 h-3" />}
         label="Avg Context"
         value={usageData.all.length > 0
           ? `${Math.round(usageData.all.reduce((sum, s) => sum + (s.contextPercent ?? 0), 0) / usageData.all.length)}%`
@@ -243,7 +234,7 @@ export function SystemPanel() {
         {/* Status */}
         <div className="flex items-center gap-2 px-1 py-0.5">
           <span className="text-console-dim shrink-0">
-            <Activity className="w-3 h-3" />
+            <Pulse className="w-3 h-3" />
           </span>
           <span className="text-[9px] text-console-dim flex-1">Status</span>
           <span className={cn(
@@ -301,7 +292,7 @@ export function SystemPanel() {
             )}
           >
             {pmoAction ? (
-              <RefreshCw className="w-2.5 h-2.5 animate-spin" />
+              <ArrowClockwise className="w-2.5 h-2.5 animate-spin" />
             ) : pmoFull?.loaded ? (
               <Pause className="w-2.5 h-2.5" />
             ) : (
@@ -320,7 +311,7 @@ export function SystemPanel() {
                 : "bg-console-accent/15 text-console-accent hover:bg-console-accent/25 active:bg-console-accent/35",
             )}
           >
-            <RefreshCw className={cn("w-2.5 h-2.5", scanning && "animate-spin")} />
+            <ArrowClockwise className={cn("w-2.5 h-2.5", scanning && "animate-spin")} />
             {scanning ? "Scanning..." : "Scan Now"}
           </button>
         </div>

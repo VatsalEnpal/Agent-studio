@@ -47,6 +47,7 @@ import type { ProjectProfile } from "./project-analyzer.js";
 import { suggestAutomations } from "./automation-suggestions.js";
 import { AUTOMATION_TEMPLATES as RICH_TEMPLATES, getTemplate, fillPromptTemplate } from "./automation-templates.js";
 import { writeClaudeMd } from "./claudemd-generator.js";
+import { broadcast } from "./ws/broadcast.js";
 
 const port = parseInt(process.env["PORT"] ?? "8080", 10);
 const dev = process.env["NODE_ENV"] !== "production";
@@ -82,6 +83,21 @@ async function main() {
 
   const wss = new WebSocketServer({ noServer: true });
   const terminalManager = new TerminalManager();
+
+  // --- Health endpoint (works even before Next.js is ready) ---
+  const serverStartTime = Date.now();
+  app.get("/api/health", (_req, res) => {
+    const sessions = terminalManager.listSessions();
+    res.json({
+      status: "ok",
+      uptime: Math.floor((Date.now() - serverStartTime) / 1000),
+      activeSessions: sessions.filter((s: { status: string }) => s.status === "active").length,
+      totalSessions: sessions.length,
+      wsClients: wss.clients.size,
+      memoryUsage: process.memoryUsage().heapUsed,
+      timestamp: new Date().toISOString(),
+    });
+  });
   const gitWatcher = new GitWatcher();
 
   // --- Room management ---
@@ -91,30 +107,15 @@ async function main() {
 
   // Broadcast room events via WebSocket
   roomManager.on("message", (msg: RoomMessage) => {
-    const wsMsg: WsMessage = { type: "room-message", payload: msg };
-    for (const client of wss.clients) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(wsMsg));
-      }
-    }
+    broadcast(wss, { type: "room-message", payload: msg } satisfies WsMessage);
   });
 
   roomManager.on("agent-status", (payload: { roomId: string; agentId: string; status: string }) => {
-    const wsMsg: WsMessage = { type: "room-agent-status", payload };
-    for (const client of wss.clients) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(wsMsg));
-      }
-    }
+    broadcast(wss, { type: "room-agent-status", payload } satisfies WsMessage);
   });
 
   roomManager.on("approval", (payload: { roomId: string; messageId: string; approved: boolean }) => {
-    const wsMsg: WsMessage = { type: "room-approval", payload };
-    for (const client of wss.clients) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(wsMsg));
-      }
-    }
+    broadcast(wss, { type: "room-approval", payload } satisfies WsMessage);
   });
 
   // Route WebSocket upgrades: /ws goes to our server,
@@ -315,15 +316,10 @@ async function main() {
 
   // Forward automation events to WebSocket clients
   automationEngine.onEvent((event) => {
-    const msg: WsMessage = {
+    broadcast(wss, {
       type: event.type as WsMessage["type"],
       payload: event.payload,
-    };
-    for (const client of wss.clients) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(msg));
-      }
-    }
+    } satisfies WsMessage);
   });
 
   // --- Automations API ---
@@ -1085,15 +1081,10 @@ Choose the schedule and model based on the task:
         }
       }
 
-      const msg: WsMessage = {
+      broadcast(wss, {
         type: "usage-update",
         payload: { all: usage, managed: managedUsage },
-      };
-      for (const client of wss.clients) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(msg));
-        }
-      }
+      } satisfies WsMessage);
     } catch {
       // Ignore polling errors
     }
@@ -1102,15 +1093,10 @@ Choose the schedule and model based on the task:
   // --- File watcher for sprint/memory files ---
   const fileWatcher = new FileWatcher();
   fileWatcher.onUpdate((update) => {
-    const msg: WsMessage = {
+    broadcast(wss, {
       type: "file-update",
       data: JSON.stringify({ file: update.file, content: update.content }),
-    };
-    for (const client of wss.clients) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(msg));
-      }
-    }
+    } satisfies WsMessage);
   });
   fileWatcher.start();
 
@@ -1171,15 +1157,10 @@ Choose the schedule and model based on the task:
 
   // --- Git watcher ---
   gitWatcher.onUpdate((repos) => {
-    const msg: WsMessage = {
+    broadcast(wss, {
       type: "git-update",
       payload: repos,
-    };
-    for (const client of wss.clients) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(msg));
-      }
-    }
+    } satisfies WsMessage);
   });
   gitWatcher.start(10_000);
 
@@ -1409,6 +1390,199 @@ Choose the schedule and model based on the task:
   // --- Workflow API ---
   const workflowManager = new WorkflowManager();
 
+  // --- /api/sprints — maps workflow runs to Sprint objects for the Sprints page ---
+  app.get("/api/sprints", async (_req, res) => {
+    try {
+      const flows = await workflowManager.getFlows();
+      const sprints: Array<Record<string, unknown>> = [];
+
+      for (const flow of flows) {
+        for (const run of (flow as any).runs ?? []) {
+          const gates = ((run as any).steps ?? []).map((step: any, i: number) => ({
+            id: step.id ?? `gate-${i}`,
+            name: step.name ?? `Step ${i + 1}`,
+            status: step.status === "completed" ? "passed"
+              : step.status === "running" || step.status === "active" ? "in_progress"
+              : step.status === "failed" ? "failed"
+              : step.status === "waiting" ? "in_progress"
+              : "not_started",
+            requirements: ((step as any).agents ?? []).map((a: string) => ({
+              label: `${a} complete`,
+              met: step.status === "completed",
+            })),
+            action: (step as any).action ?? null,
+            details: (step as any).details ?? null,
+            richContent: (step as any).richContent ?? null,
+          }));
+
+          // Build activity entries from step details and richContent
+          const activity: Array<Record<string, unknown>> = [];
+          let actIdx = 0;
+          for (const step of ((run as any).steps ?? []) as any[]) {
+            if (step.details) {
+              activity.push({
+                id: `activity-${actIdx++}`,
+                timestamp: step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
+                agent: (step.agents?.[0]) ?? "system",
+                action: step.details,
+                type: step.id?.includes("qa") ? "qa" : step.id?.includes("gate") || step.id?.includes("build") ? "gate" : "info",
+              });
+            }
+            // Add scan entries from richContent
+            const rc = step.richContent;
+            if (rc?.scanEntries) {
+              for (const entry of rc.scanEntries) {
+                activity.push({
+                  id: `activity-${actIdx++}`,
+                  timestamp: entry.timestamp,
+                  agent: "pmo",
+                  action: `[${entry.status}] ${entry.detail}`,
+                  type: "info",
+                });
+              }
+            }
+            // Add handoff entries
+            if (rc?.handoffs) {
+              for (const h of rc.handoffs) {
+                activity.push({
+                  id: `activity-${actIdx++}`,
+                  timestamp: step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
+                  agent: h.from ?? "system",
+                  action: `Handoff to ${h.to}: ${h.detail ?? h.file}`,
+                  type: "handoff",
+                  handoffData: h.content ?? { from: h.from, to: h.to, file: h.file },
+                });
+              }
+            }
+            // Add gate check results
+            if (rc?.gateResults) {
+              for (const r of rc.gateResults) {
+                activity.push({
+                  id: `activity-${actIdx++}`,
+                  timestamp: step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
+                  agent: step.agents?.[0] ?? "system",
+                  action: r,
+                  type: step.id?.includes("qa") ? "qa" : "gate",
+                  ...(rc.qaHealth != null ? { qaScore: rc.qaHealth } : {}),
+                });
+              }
+            }
+          }
+
+          const statusMap: Record<string, string> = {
+            running: "in_progress",
+            waiting: "paused",
+            completed: "completed",
+            failed: "failed",
+            cancelled: "cancelled",
+          };
+
+          sprints.push({
+            id: `${(flow as any).id}-${run.id}`,
+            flowId: (flow as any).id,
+            runId: run.id,
+            name: run.name ?? (flow as any).name,
+            status: statusMap[run.status] ?? "planned",
+            startedAt: run.startedAt,
+            completedAt: run.completedAt,
+            gates,
+            agents: (run.stats?.agentsUsed ?? []).map((a: string) => ({
+              name: a,
+              color: "",
+              status: "idle",
+            })),
+            activity,
+          });
+        }
+      }
+
+      res.json(sprints);
+    } catch {
+      res.json([]);
+    }
+  });
+
+  // --- Gate approval endpoint ---
+  app.post("/api/sprints/:sprintId/gates/:gateId/approve", async (req, res) => {
+    try {
+      const { sprintId, gateId } = req.params as { sprintId: string; gateId: string };
+      // Approve works via the sprint-planning workflow's state file
+      const { getAgentSystemPath } = await import("./config.js");
+      const { readFile, writeFile } = await import("node:fs/promises");
+      const statePath = getAgentSystemPath("sprints/state.json");
+      const currentPath = getAgentSystemPath("sprints/current.md");
+
+      // Update state.json gate status
+      if (statePath) {
+        try {
+          const raw = await readFile(statePath, "utf-8");
+          const state = JSON.parse(raw);
+          if (state.gates && state.gates[gateId] !== undefined) {
+            const cur = state.gates[gateId];
+            state.gates[gateId] = cur === "not_started" ? "in_progress" : cur === "in_progress" ? "passed" : "in_progress";
+            await writeFile(statePath, JSON.stringify(state, null, 2) + "\n", "utf-8");
+          }
+        } catch { /* state.json may not exist yet */ }
+      }
+
+      // For user-approval gate, also update sprint status in current.md
+      if (gateId === "user-approval" && currentPath) {
+        try {
+          let md = await readFile(currentPath, "utf-8");
+          md = md.replace(/Status:\s*\*\*[^*]+\*\*/, "Status: **RUNNING**");
+          await writeFile(currentPath, md, "utf-8");
+        } catch { /* current.md may not exist */ }
+      }
+
+      // Broadcast workflow update
+      const flows = await workflowManager.getFlows();
+      broadcast(wss, { type: "workflow-update", payload: flows } satisfies WsMessage);
+
+      res.json({ ok: true, gateId });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- Sprint spec endpoint ---
+  app.get("/api/sprints/:sprintId/spec", async (req, res) => {
+    try {
+      const { sprintId } = req.params as { sprintId: string };
+      const { getAgentSystemPath } = await import("./config.js");
+      const { readFile, readdir } = await import("node:fs/promises");
+      const { join } = await import("node:path");
+
+      // Try current.md first
+      const currentPath = getAgentSystemPath("sprints/current.md");
+      if (currentPath) {
+        try {
+          const content = await readFile(currentPath, "utf-8");
+          res.json({ content, source: "current.md" });
+          return;
+        } catch { /* not found, try archive */ }
+      }
+
+      // Try archive
+      const archiveDir = getAgentSystemPath("sprints/archive");
+      if (archiveDir) {
+        try {
+          const files = await readdir(archiveDir);
+          const mdFiles = files.filter((f: string) => f.endsWith(".md")).sort().reverse();
+          if (mdFiles.length > 0) {
+            const content = await readFile(join(archiveDir, mdFiles[0]!), "utf-8");
+            res.json({ content, source: mdFiles[0] });
+            return;
+          }
+        } catch { /* no archive */ }
+      }
+
+      res.json({ content: null, source: null });
+    } catch {
+      res.json({ content: null, source: null });
+    }
+  });
+
   app.get("/api/workflows", async (_req, res) => {
     try {
       const flows = await workflowManager.getFlows();
@@ -1473,13 +1647,7 @@ Choose the schedule and model based on the task:
       workflowManager.reload();
 
       const flows = await workflowManager.getFlows();
-      // Broadcast update
-      const msg: WsMessage = { type: "workflow-update", payload: flows };
-      for (const client of wss.clients) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(msg));
-        }
-      }
+      broadcast(wss, { type: "workflow-update", payload: flows } satisfies WsMessage);
 
       res.json({ ok: true, id, workflow: newWorkflow });
     } catch (err) {
@@ -1523,12 +1691,7 @@ Choose the schedule and model based on the task:
       workflowManager.reload();
 
       const flows = await workflowManager.getFlows();
-      const msg: WsMessage = { type: "workflow-update", payload: flows };
-      for (const client of wss.clients) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(msg));
-        }
-      }
+      broadcast(wss, { type: "workflow-update", payload: flows } satisfies WsMessage);
 
       res.json({ ok: true });
     } catch (err) {
@@ -1555,12 +1718,7 @@ Choose the schedule and model based on the task:
       workflowManager.reload();
 
       const flows = await workflowManager.getFlows();
-      const msg: WsMessage = { type: "workflow-update", payload: flows };
-      for (const client of wss.clients) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(msg));
-        }
-      }
+      broadcast(wss, { type: "workflow-update", payload: flows } satisfies WsMessage);
 
       res.json({ ok: true });
     } catch (err) {
@@ -1609,12 +1767,7 @@ Choose the schedule and model based on the task:
         targetFlow.runs.unshift(run);
       }
 
-      const msg: WsMessage = { type: "workflow-update", payload: flows };
-      for (const client of wss.clients) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(msg));
-        }
-      }
+      broadcast(wss, { type: "workflow-update", payload: flows } satisfies WsMessage);
 
       res.json({ ok: true, runId, run });
     } catch (err) {
@@ -1626,15 +1779,7 @@ Choose the schedule and model based on the task:
   // Broadcast workflow updates on sprint file changes
   fileWatcher.onUpdate(() => {
     void workflowManager.getFlows().then((flows) => {
-      const msg: WsMessage = {
-        type: "workflow-update",
-        payload: flows,
-      };
-      for (const client of wss.clients) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(msg));
-        }
-      }
+      broadcast(wss, { type: "workflow-update", payload: flows } satisfies WsMessage);
     });
   });
 
@@ -2586,10 +2731,10 @@ Choose the schedule and model based on the task:
 
   // Prepare Next.js in the background — doesn't block API routes
   const nextApp = next({ dev, hostname: "127.0.0.1", port });
-  handle = nextApp.getRequestHandler();
-  nextUpgradeHandler = nextApp.getUpgradeHandler();
 
   nextApp.prepare().then(() => {
+    handle = nextApp.getRequestHandler();
+    nextUpgradeHandler = nextApp.getUpgradeHandler();
     nextReady = true;
     // eslint-disable-next-line no-console
     console.log("Next.js ready — UI is now serving");

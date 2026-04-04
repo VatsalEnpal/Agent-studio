@@ -72,16 +72,16 @@ export function SettingsView() {
   return (
     <div className="flex h-full">
       {/* Tab sidebar */}
-      <div className="w-[180px] shrink-0 border-r border-console-border bg-console-panel py-3 px-2 space-y-0.5">
+      <div className="w-[180px] shrink-0 border-r border-border bg-surface py-3 px-2 space-y-0.5">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              "w-full text-left px-3 py-1.5 text-[11px] font-medium rounded transition-colors",
+              "w-full text-left px-3 py-2 text-body-sm font-medium rounded transition-colors",
               activeTab === tab.id
-                ? "bg-console-accent/10 text-console-accent"
-                : "text-console-muted hover:text-console-text hover:bg-console-faint/50",
+                ? "bg-accent/10 text-accent"
+                : "text-text-secondary hover:text-text-primary hover:bg-elevation-2/50",
             )}
           >
             {tab.label}
@@ -144,11 +144,11 @@ function SettingsAgentsDiscovery() {
   }, []);
 
   return (
-    <section className="border border-console-border rounded-lg bg-console-panel">
-      <div className="px-4 py-3 border-b border-console-border">
-        <h3 className="text-xs font-medium text-console-text">Agents</h3>
-        <p className="text-[9px] text-console-dim mt-0.5">
-          Auto-discovered from <code className="text-console-muted bg-console-faint px-1 py-0.5 rounded">.claude/agents/</code>
+    <section className="border border-border rounded-lg bg-surface">
+      <div className="px-4 py-3 border-b border-border">
+        <h3 className="text-body-sm font-medium text-text-primary">Agents</h3>
+        <p className="text-label-xs text-text-tertiary mt-0.5">
+          Auto-discovered from <code className="text-text-secondary bg-elevation-2 px-1 py-0.5 rounded text-label-xs">.claude/agents/</code>
         </p>
       </div>
       <div className="px-4 py-3">
@@ -162,26 +162,26 @@ function SettingsAgentsDiscovery() {
             ))}
           </div>
         ) : agents.length === 0 ? (
-          <p className="text-[10px] text-console-dim text-center py-4">
-            No agents discovered. Create agent definitions in <code className="text-console-muted">.claude/agents/</code>.
+          <p className="text-body-sm text-text-tertiary text-center py-4">
+            No agents discovered. Create agent definitions in <code className="text-text-secondary">.claude/agents/</code>.
           </p>
         ) : (
           <div className="space-y-2">
             {agents.map((agent) => (
               <div
                 key={agent.id}
-                className="flex items-center gap-3 px-3 py-2 bg-console-bg border border-console-border rounded"
+                className="flex items-center gap-3 px-3 py-2 bg-canvas border border-border rounded"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-medium text-console-text">
+                    <span className="text-body-sm font-medium text-text-primary">
                       {agent.name}
                     </span>
-                    <span className="text-[8px] px-1.5 py-0.5 rounded bg-console-faint text-console-dim font-mono">
+                    <span className="text-label-xs px-1.5 py-0.5 rounded bg-elevation-2 text-text-tertiary font-mono">
                       {agent.model}
                     </span>
                   </div>
-                  <p className="text-[9px] text-console-muted mt-0.5 truncate">
+                  <p className="text-label-xs text-text-secondary mt-0.5 truncate">
                     {agent.description}
                   </p>
                 </div>

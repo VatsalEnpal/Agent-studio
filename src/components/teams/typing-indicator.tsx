@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Terminal } from "lucide-react";
+import { Terminal } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import type { TypingAgent, RoomAgent } from "@/stores/rooms";
@@ -78,7 +78,7 @@ function TypingAgentLine({
       </span>
 
       {/* Activity text */}
-      <span className="text-text-tertiary truncate flex-1 min-w-0 font-mono">
+      <span className="text-text-tertiary truncate flex-1 min-w-0">
         {displayActivity}
       </span>
 

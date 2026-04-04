@@ -15,6 +15,9 @@ export interface Gate {
   name: string;
   status: GateStatus;
   requirements: Array<{ label: string; met: boolean }>;
+  action?: { label: string; type: "go" | "approve" | "input" } | null;
+  details?: string | null;
+  richContent?: Record<string, unknown> | null;
 }
 
 export interface SprintAgent {
@@ -53,6 +56,9 @@ interface SprintsState {
   activeTab: "overview" | "activity";
   expandedGateId: string | null;
   handoffPanelData: Record<string, unknown> | null;
+  specPanelOpen: boolean;
+  specContent: string | null;
+  specLoading: boolean;
 
   setSprints: (sprints: Sprint[]) => void;
   selectSprint: (id: string | null) => void;
@@ -61,6 +67,9 @@ interface SprintsState {
   setExpandedGate: (id: string | null) => void;
   setHandoffPanelData: (data: Record<string, unknown> | null) => void;
   updateSprint: (id: string, updates: Partial<Sprint>) => void;
+  setSpecPanel: (open: boolean) => void;
+  setSpecContent: (content: string | null) => void;
+  setSpecLoading: (loading: boolean) => void;
 }
 
 export const useSprintsStore = create<SprintsState>((set) => ({
@@ -70,6 +79,9 @@ export const useSprintsStore = create<SprintsState>((set) => ({
   activeTab: "overview",
   expandedGateId: null,
   handoffPanelData: null,
+  specPanelOpen: false,
+  specContent: null,
+  specLoading: false,
 
   setSprints: (sprints) => set({ sprints }),
   selectSprint: (selectedSprintId) =>
@@ -84,4 +96,7 @@ export const useSprintsStore = create<SprintsState>((set) => ({
         s.id === id ? { ...s, ...updates } : s,
       ),
     })),
+  setSpecPanel: (specPanelOpen) => set({ specPanelOpen }),
+  setSpecContent: (specContent) => set({ specContent }),
+  setSpecLoading: (specLoading) => set({ specLoading }),
 }));

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell } from "lucide-react";
+import { Bell } from "@phosphor-icons/react";
 import {
   notify,
   getNotificationPrefs,
@@ -37,7 +37,7 @@ const NOTIFICATION_OPTIONS: {
   {
     key: "contextWarning",
     label: "Context window warnings",
-    desc: "When a session hits 90% context",
+    desc: "When a session hits 80%+ context usage",
   },
 ];
 
@@ -62,12 +62,12 @@ export function SettingsNotifications() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-console-text flex items-center gap-2">
+        <h3 className="text-title-sm text-console-text flex items-center gap-2">
           <Bell className="w-4 h-4" /> Notifications
         </h3>
         <button
           onClick={handleTest}
-          className="text-[10px] text-console-dim hover:text-console-muted transition-colors"
+          className="text-label-xs text-console-dim hover:text-console-muted transition-colors"
         >
           Test
         </button>
@@ -82,10 +82,10 @@ export function SettingsNotifications() {
             className="mt-0.5 accent-amber-500"
           />
           <div>
-            <span className="text-xs text-console-text group-hover:text-console-accent transition-colors">
+            <span className="text-body-sm text-console-text group-hover:text-console-accent transition-colors">
               {label}
             </span>
-            <p className="text-[10px] text-console-dim">{desc}</p>
+            <p className="text-label-xs text-console-dim">{desc}</p>
           </div>
         </label>
       ))}

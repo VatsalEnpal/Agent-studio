@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { Hash, Plus, Users, X } from "lucide-react";
+import { Hash, Plus, Users, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import { useRoomsStore } from "@/stores/rooms";
@@ -78,7 +78,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           className="flex items-center gap-1 px-2 py-1 rounded-md text-label-xs font-medium bg-accent text-canvas hover:bg-accent-hover transition-colors duration-[100ms]"
           title="New room"
         >
-          <Plus className="w-3 h-3" />
+          <Plus size={12} weight="light" />
           New Room
         </button>
       </div>
@@ -153,26 +153,29 @@ function RoomItem({
   const onlineCount = agents.filter((a) => a.status !== "offline").length;
   const workingCount = agents.filter((a) => a.status === "working").length;
 
-  // Count unread messages since last seen
+  // Count unread messages since last seen (skip archived rooms — their counts are stale)
   const messages = room.messages ?? [];
-  const unreadCount = lastSeen
+  const unreadCount = !room.active ? 0 : lastSeen
     ? messages.filter(
         (m) => new Date(m.timestamp) > new Date(lastSeen) && m.from !== "user",
       ).length
     : messages.filter((m) => m.from !== "user").length;
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(); }}
       className={cn(
-        "group flex items-center gap-2.5 w-full px-2.5 py-2 rounded-md text-left transition-colors duration-[100ms]",
+        "group flex items-center gap-2.5 w-full px-2.5 py-2 rounded-md text-left transition-colors duration-[100ms] cursor-pointer",
         selected
           ? "bg-surface-hover"
           : "hover:bg-surface-hover/50",
         !room.active && "opacity-50",
       )}
     >
-      <Hash className="w-3.5 h-3.5 text-text-tertiary shrink-0" />
+      <Hash size={14} weight="light" className="text-text-tertiary shrink-0" />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
@@ -190,27 +193,33 @@ function RoomItem({
         </div>
 
         <div className="flex items-center gap-1.5 mt-0.5">
-          {/* Agent avatar dots */}
-          <div className="flex -space-x-1">
-            {agents.slice(0, 4).map((a) => (
-              <div
-                key={a.id}
-                className="w-3 h-3 rounded-full border border-surface flex items-center justify-center"
-                style={{ backgroundColor: agentColor(a.name) }}
-                title={`${a.name}: ${a.status}`}
-              >
-                <span className="text-[5px] font-bold text-white/90 leading-none">
-                  {a.name.charAt(0).toUpperCase()}
-                </span>
+          {room.active ? (
+            <>
+              {/* Agent avatar dots */}
+              <div className="flex -space-x-1">
+                {agents.slice(0, 4).map((a) => (
+                  <div
+                    key={a.id}
+                    className="w-3 h-3 rounded-full border border-surface flex items-center justify-center"
+                    style={{ backgroundColor: agentColor(a.name) }}
+                    title={`${a.name}: ${a.status}`}
+                  >
+                    <span className="text-[6px] font-bold text-white/90 leading-none">
+                      {a.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <span className="text-label-xs text-text-tertiary">
-            {agents.length} agent{agents.length !== 1 ? "s" : ""}
-            {onlineCount > 0 && (
-              <span className="text-success"> &middot; {onlineCount} online</span>
-            )}
-          </span>
+              <span className="text-label-xs text-text-tertiary">
+                {agents.length} agent{agents.length !== 1 ? "s" : ""}
+                {onlineCount > 0 && (
+                  <span className="text-success"> &middot; {onlineCount} online</span>
+                )}
+              </span>
+            </>
+          ) : (
+            <span className="text-label-xs text-text-tertiary italic">Legacy</span>
+          )}
         </div>
       </div>
 
@@ -241,9 +250,9 @@ function RoomItem({
           className="opacity-0 group-hover:opacity-100 p-0.5 text-text-tertiary hover:text-error transition-all duration-[100ms] shrink-0"
           title="Close room"
         >
-          <X className="w-3 h-3" />
+          <X size={12} weight="light" />
         </button>
       )}
-    </button>
+    </div>
   );
 }

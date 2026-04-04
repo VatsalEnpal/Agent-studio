@@ -5,7 +5,7 @@ import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 
 import "@xterm/xterm/css/xterm.css";
-import { X, Maximize2, Minimize2, Loader2, ZoomIn, ZoomOut } from "lucide-react";
+import { X, ArrowsOut, ArrowsIn, SpinnerGap, MagnifyingGlassPlus, MagnifyingGlassMinus } from "@phosphor-icons/react";
 import { wsClient } from "@/lib/ws-client";
 import { cn, statusDotColor } from "@/lib/utils";
 import { useSessionsStore } from "@/stores/sessions";
@@ -321,7 +321,7 @@ export function TerminalPane({
               className="p-0.5 text-console-dim hover:text-console-muted hover:bg-console-faint/50 transition-colors"
               title="Zoom out"
             >
-              <ZoomOut className="w-2.5 h-2.5" />
+              <MagnifyingGlassMinus className="w-2.5 h-2.5" />
             </button>
             <span className="text-[7px] text-console-dim px-0.5 font-mono min-w-[16px] text-center">{zoomLevel}</span>
             <button
@@ -329,7 +329,7 @@ export function TerminalPane({
               className="p-0.5 text-console-dim hover:text-console-muted hover:bg-console-faint/50 transition-colors"
               title="Zoom in"
             >
-              <ZoomIn className="w-2.5 h-2.5" />
+              <MagnifyingGlassPlus className="w-2.5 h-2.5" />
             </button>
           </span>
 
@@ -342,9 +342,9 @@ export function TerminalPane({
             title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
           >
             {isFullscreen ? (
-              <Minimize2 className="w-3 h-3" />
+              <ArrowsIn className="w-3 h-3" />
             ) : (
-              <Maximize2 className="w-3 h-3" />
+              <ArrowsOut className="w-3 h-3" />
             )}
           </button>
           {confirmKill ? (
@@ -379,7 +379,7 @@ export function TerminalPane({
               )}
               title={killing ? "Killing..." : "Kill session"}
             >
-              {killing ? <Loader2 className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />}
+              {killing ? <SpinnerGap className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />}
             </button>
           )}
         </div>

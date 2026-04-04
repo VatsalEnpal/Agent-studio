@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { Zap, FolderOpen, ChevronRight, Loader2, Check, Pencil, RefreshCw } from "lucide-react";
+import { Lightning, FolderOpen, CaretRight, SpinnerGap, Check, PencilSimple, ArrowClockwise } from "@phosphor-icons/react";
 
 // ---------- Types ----------
 
@@ -119,7 +119,7 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
         {/* Brand */}
         <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
-            <Zap className="w-6 h-6 text-amber-400" />
+            <Lightning className="w-6 h-6 text-amber-400" />
             <h1 className="text-2xl font-semibold text-white tracking-tight">Agent Studio</h1>
           </div>
           <p className="text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
@@ -197,7 +197,7 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
             )}
           >
             Set me up
-            <ChevronRight className="w-4 h-4" />
+            <CaretRight className="w-4 h-4" />
           </button>
           <button
             onClick={onSkip}
@@ -324,13 +324,13 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
           >
             {applying ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <SpinnerGap className="w-4 h-4 animate-spin" />
                 Applying...
               </>
             ) : (
               <>
                 Looks good &mdash; let&apos;s go
-                <ChevronRight className="w-4 h-4" />
+                <CaretRight className="w-4 h-4" />
               </>
             )}
           </button>
@@ -362,7 +362,7 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
                     : "bg-zinc-800 text-zinc-600 cursor-not-allowed",
                 )}
               >
-                {refining ? <Loader2 className="w-3 h-3 animate-spin" /> : "Update"}
+                {refining ? <SpinnerGap className="w-3 h-3 animate-spin" /> : "Update"}
               </button>
             </div>
           </div>
@@ -378,7 +378,7 @@ function LoadingScreen() {
   return (
     <div className="h-screen flex items-center justify-center bg-canvas">
       <div className="text-center space-y-4">
-        <Loader2 className="w-8 h-8 text-amber-400 animate-spin mx-auto" />
+        <SpinnerGap className="w-8 h-8 text-amber-400 animate-spin mx-auto" />
         <div>
           <p className="text-sm text-zinc-300 font-medium">Building your setup...</p>
           <p className="text-xs text-zinc-600 mt-1">Analyzing your needs and generating agents</p>

@@ -2,17 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import {
-  Plus,
-  XCircle,
-  Users,
-  Monitor,
-  Brain,
-  Search as SearchIcon,
-  Zap,
-  Terminal,
-  Command,
-} from "lucide-react";
+import { Plus, XCircle, Users, Monitor, Brain, MagnifyingGlass as SearchIcon, Lightning, Terminal, Command } from "@phosphor-icons/react";
 import { useUIStore } from "@/stores/ui";
 import { useSessionsStore } from "@/stores/sessions";
 import { cn } from "@/lib/utils";
@@ -55,7 +45,7 @@ export function CommandPalette({
       void fetch("/api/memory/stats")
         .then((r) => r.json())
         .then((d: { total?: number }) => setMemoryTotal(d.total ?? 0))
-        .catch(() => {});
+        .catch(() => { /* optional — memory stats are cosmetic */ });
     }
   }, [open]);
 
@@ -131,7 +121,7 @@ export function CommandPalette({
         id: "pmo-scan",
         label: "Trigger PMO Scan",
         description: "Start a PMO scan to check for ready tickets",
-        icon: Zap,
+        icon: Lightning,
         keywords: ["scan", "pmo", "tickets", "notion", "ready"],
         onSelect: () => {
           close();
@@ -235,7 +225,7 @@ export function CommandPalette({
         >
           <Dialog.Title className="sr-only">Command Palette</Dialog.Title>
           <Dialog.Description className="sr-only">
-            Search for actions, sessions, and commands
+            MagnifyingGlass for actions, sessions, and commands
           </Dialog.Description>
 
           {/* Search input */}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Check, X, Play, Clock } from "lucide-react";
+import { Check, X, Play, Clock } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useReportsStore, type Report } from "@/stores/reports";
 

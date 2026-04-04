@@ -3,16 +3,17 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import {
   X,
-  Zap,
+  Lightning,
   Shield,
-  Search,
-  MessageSquare,
+  MagnifyingGlass,
+  ChatCircle,
   Folder,
-  RotateCcw,
-  History,
-  ChevronDown,
+  ArrowCounterClockwise,
+  ClockCounterClockwise,
+  CaretDown,
   Rocket,
-} from "lucide-react";
+  type IconProps,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { LauncherPreset } from "@/lib/types";
 
@@ -54,12 +55,12 @@ interface SessionLauncherV2Props {
 // ---------------------------------------------------------------------------
 
 const PRESETS: (LauncherPreset & {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<IconProps>;
   description: string;
 })[] = [
   {
     name: "Continue",
-    icon: RotateCcw,
+    icon: ArrowCounterClockwise,
     description: "Resume last session",
     model: "sonnet",
     agent: "none",
@@ -69,7 +70,7 @@ const PRESETS: (LauncherPreset & {
   },
   {
     name: "Quick Chat",
-    icon: MessageSquare,
+    icon: ChatCircle,
     description: "Sonnet, no agent",
     model: "sonnet",
     agent: "none",
@@ -79,7 +80,7 @@ const PRESETS: (LauncherPreset & {
   },
   {
     name: "Start Sprint",
-    icon: Zap,
+    icon: Lightning,
     description: "Opus + orchestrator",
     model: "opus",
     agent: "orchestrator",
@@ -99,7 +100,7 @@ const PRESETS: (LauncherPreset & {
   },
   {
     name: "PMO Scan",
-    icon: Search,
+    icon: MagnifyingGlass,
     description: "Sonnet + PMO",
     model: "sonnet",
     agent: "pmo",
@@ -401,7 +402,7 @@ export function SessionLauncherV2({
             onClick={() => onOpenChange(false)}
             className="p-1 text-text-tertiary hover:text-text-secondary transition-colors"
           >
-            <X className="size-4" />
+            <X size={16} weight="light" />
           </button>
         </div>
 
@@ -411,7 +412,7 @@ export function SessionLauncherV2({
           {recentSessions.length > 0 && (
             <div>
               <label className="block text-label-xs uppercase text-text-tertiary mb-1.5">
-                <History className="size-3 inline mr-1 -mt-0.5" />
+                <ClockCounterClockwise size={12} weight="light" className="inline mr-1 -mt-0.5" />
                 Resume Previous
               </label>
               <div className="relative" ref={dropdownRef}>
@@ -429,7 +430,7 @@ export function SessionLauncherV2({
                 >
                   {resume ? (
                     <>
-                      <History className="size-3 text-accent shrink-0" />
+                      <ClockCounterClockwise size={12} weight="light" className="text-accent shrink-0" />
                       <span className="truncate flex-1">
                         {shortProject(
                           recentSessions.find((s) => s.id === resume)?.project ??
@@ -446,7 +447,7 @@ export function SessionLauncherV2({
                         }}
                         className="p-0.5 text-text-tertiary hover:text-text-secondary"
                       >
-                        <X className="size-3" />
+                        <X size={12} weight="light" />
                       </button>
                     </>
                   ) : (
@@ -454,7 +455,7 @@ export function SessionLauncherV2({
                       <span className="flex-1 text-left">
                         Select a previous session...
                       </span>
-                      <ChevronDown className="size-3 text-text-tertiary" />
+                      <CaretDown size={12} weight="light" className="text-text-tertiary" />
                     </>
                   )}
                 </button>
@@ -491,7 +492,7 @@ export function SessionLauncherV2({
                               resume === session.id && "bg-accent-subtle",
                             )}
                           >
-                            <History className="size-3 text-text-tertiary shrink-0" />
+                            <ClockCounterClockwise size={12} weight="light" className="text-text-tertiary shrink-0" />
                             <span className="text-label text-text-primary truncate flex-1">
                               {shortProject(session.project)}
                             </span>
@@ -532,7 +533,7 @@ export function SessionLauncherV2({
                         : "border-border-subtle hover:border-accent/30 hover:bg-surface-hover active:scale-[0.97]",
                     )}
                   >
-                    <Icon className="size-4 text-accent" />
+                    <Icon size={16} weight="light" className="text-accent" />
                     <span className="text-label-xs text-text-primary leading-tight text-center">
                       {preset.name}
                     </span>
@@ -598,9 +599,8 @@ export function SessionLauncherV2({
                 )}
               >
                 {agents.map((a) => (
-                  <option key={a.id} value={a.id}>
+                  <option key={a.id} value={a.id} title={a.description}>
                     {a.name}
-                    {a.description ? ` -- ${a.description}` : ""}
                   </option>
                 ))}
               </select>
@@ -652,7 +652,7 @@ export function SessionLauncherV2({
                   className="p-1.5 rounded-md border border-border-subtle text-text-tertiary hover:text-text-secondary hover:bg-surface-hover transition-colors"
                   title="Browse"
                 >
-                  <Folder className="size-4" />
+                  <Folder size={16} weight="light" />
                 </button>
               </div>
             </div>
@@ -703,7 +703,7 @@ export function SessionLauncherV2({
               "disabled:opacity-50 disabled:cursor-not-allowed",
             )}
           >
-            <Rocket className="size-3.5" />
+            <Rocket size={14} weight="light" />
             {launching ? "Launching..." : resume ? "Resume" : "Launch"}
             {!launching && (
               <kbd className="ml-1 text-label-xs opacity-60">

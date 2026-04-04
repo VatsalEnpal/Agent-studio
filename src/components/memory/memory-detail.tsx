@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { Tag, Calendar, User, FileText, ArrowRight, Brain, Pin, Pencil, Trash2 } from "lucide-react";
+import { Tag, Calendar, User, FileText, ArrowRight, Brain, PushPin, PencilSimple, Trash } from "@phosphor-icons/react";
 import { useMemoryStore } from "@/stores/memory";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
@@ -47,7 +47,7 @@ export function MemoryDetail() {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3 text-console-dim">
         <Brain className="w-8 h-8" />
-        <p className="text-xs">Select a memory to view details</p>
+        <p className="text-body-sm">Select a memory to view details</p>
       </div>
     );
   }
@@ -67,10 +67,10 @@ export function MemoryDetail() {
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <h2 className="text-sm font-medium text-console-text leading-snug">
+          <h2 className="text-title-sm text-console-text leading-snug">
             {selectedEntry.title}
           </h2>
-          <p className="text-[11px] text-console-muted mt-1 leading-relaxed">
+          <p className="text-body-sm text-console-muted mt-1 leading-relaxed">
             {selectedEntry.key_point}
           </p>
         </div>
@@ -78,28 +78,28 @@ export function MemoryDetail() {
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={() => openEditDialog(selectedEntry)}
-            className="flex items-center gap-1 px-2 py-1 text-[9px] font-medium text-console-muted bg-console-faint hover:bg-console-faint/80 rounded transition-colors"
+            className="flex items-center gap-1 px-2 py-1 text-label-xs font-medium text-console-muted bg-console-faint hover:bg-console-faint/80 rounded transition-colors"
           >
-            <Pencil className="w-3 h-3" />
+            <PencilSimple className="w-3 h-3" />
             Edit
           </button>
           <button
             onClick={() => void handlePin()}
             className={cn(
-              "flex items-center gap-1 px-2 py-1 text-[9px] font-medium rounded transition-colors",
+              "flex items-center gap-1 px-2 py-1 text-label-xs font-medium rounded transition-colors",
               selectedEntry.pinned
                 ? "text-amber-400 bg-amber-500/10 hover:bg-amber-500/20"
                 : "text-console-muted bg-console-faint hover:bg-console-faint/80",
             )}
           >
-            <Pin className="w-3 h-3" />
+            <PushPin className="w-3 h-3" />
             {selectedEntry.pinned ? "Unpin" : "Pin"}
           </button>
           <button
             onClick={() => openDeleteDialog(selectedEntry)}
-            className="flex items-center gap-1 px-2 py-1 text-[9px] font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 rounded transition-colors"
+            className="flex items-center gap-1 px-2 py-1 text-label-xs font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 rounded transition-colors"
           >
-            <Trash2 className="w-3 h-3" />
+            <Trash className="w-3 h-3" />
             Delete
           </button>
         </div>
@@ -107,15 +107,15 @@ export function MemoryDetail() {
 
       {/* Meta info */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className={cn("text-[9px] px-2 py-0.5 rounded-full font-medium", categoryColor(selectedEntry.category))}>
+        <span className={cn("text-label-xs px-2 py-0.5 rounded-full font-medium", categoryColor(selectedEntry.category))}>
           {selectedEntry.category}
         </span>
-        <span className="text-[9px] text-console-dim flex items-center gap-1">
+        <span className="text-label-xs text-console-dim flex items-center gap-1">
           <User className="w-3 h-3" />
           {selectedEntry.agent_type}
         </span>
         {detail?.created_at && (
-          <span className="text-[9px] text-console-dim flex items-center gap-1">
+          <span className="text-label-xs text-console-dim flex items-center gap-1">
             <Calendar className="w-3 h-3" />
             {new Date(detail.created_at).toLocaleDateString("en-GB", {
               day: "2-digit",
@@ -127,7 +127,7 @@ export function MemoryDetail() {
           </span>
         )}
         {detail?.created_by && (
-          <span className="text-[9px] text-console-dim">
+          <span className="text-label-xs text-console-dim">
             by {detail.created_by}
           </span>
         )}
@@ -137,7 +137,7 @@ export function MemoryDetail() {
       <div className="flex items-center gap-1.5 flex-wrap">
         <Tag className="w-3 h-3 text-console-dim shrink-0" />
         {selectedEntry.tags.map((tag) => (
-          <span key={tag} className="text-[9px] px-1.5 py-0.5 bg-console-faint text-console-muted rounded">
+          <span key={tag} className="text-label-xs px-1.5 py-0.5 bg-console-faint text-console-muted rounded">
             {tag}
           </span>
         ))}
@@ -173,7 +173,7 @@ export function MemoryDetail() {
 
       {/* Superseded by info */}
       {detail?.superseded_by && (
-        <div className="flex items-center gap-2 text-[9px] text-console-accent bg-console-accent/5 border border-console-accent/20 px-3 py-2 rounded">
+        <div className="flex items-center gap-2 text-label-xs text-console-accent bg-console-accent/5 border border-console-accent/20 px-3 py-2 rounded">
           <ArrowRight className="w-3 h-3" />
           <span>Superseded by: <span className="font-mono">{detail.superseded_by}</span></span>
         </div>
@@ -181,14 +181,14 @@ export function MemoryDetail() {
 
       {/* Supersedes info */}
       {detail?.supersedes && (
-        <div className="flex items-center gap-2 text-[9px] text-console-dim bg-console-faint px-3 py-2 rounded">
+        <div className="flex items-center gap-2 text-label-xs text-console-dim bg-console-faint px-3 py-2 rounded">
           <ArrowRight className="w-3 h-3" />
           <span>Supersedes: <span className="font-mono">{detail.supersedes}</span></span>
         </div>
       )}
 
       {/* File path */}
-      <div className="flex items-center gap-2 text-[9px] text-console-dim pt-2 border-t border-console-border">
+      <div className="flex items-center gap-2 text-label-xs text-console-dim pt-2 border-t border-console-border">
         <FileText className="w-3 h-3" />
         <span className="font-mono truncate">{selectedEntry.file}</span>
       </div>
@@ -214,10 +214,10 @@ function ContentSection({
           : "border-console-border bg-console-bg",
       )}
     >
-      <p className={cn("text-[9px] font-medium mb-1", accent ? "text-console-accent" : "text-console-dim")}>
+      <p className={cn("text-label-xs font-medium mb-1", accent ? "text-console-accent" : "text-console-dim")}>
         {title}
       </p>
-      <p className="text-[11px] text-console-text leading-relaxed whitespace-pre-wrap">
+      <p className="text-body-sm text-console-text leading-relaxed whitespace-pre-wrap">
         {value}
       </p>
     </div>

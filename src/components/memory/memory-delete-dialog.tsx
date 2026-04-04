@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { X, Loader2, Trash2 } from "lucide-react";
+import { X, SpinnerGap, Trash } from "@phosphor-icons/react";
 import { useMemoryStore } from "@/stores/memory";
 import { useToastStore } from "@/stores/toast";
 
@@ -42,7 +42,7 @@ export function MemoryDeleteDialog() {
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[400px] bg-console-panel border border-console-border rounded-lg shadow-xl">
           <div className="flex items-center justify-between px-4 py-3 border-b border-console-border">
             <Dialog.Title className="text-xs font-medium text-console-error flex items-center gap-1.5">
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash className="w-3.5 h-3.5" />
               Delete Memory
             </Dialog.Title>
             <Dialog.Close asChild>
@@ -57,11 +57,11 @@ export function MemoryDeleteDialog() {
               Are you sure you want to delete this memory?
             </p>
             {entry && (
-              <p className="text-[10px] text-console-muted mt-2 font-medium truncate">
+              <p className="text-label-xs text-console-muted mt-2 font-medium truncate">
                 &ldquo;{entry.title}&rdquo;
               </p>
             )}
-            <p className="text-[9px] text-console-dim mt-2">
+            <p className="text-label-xs text-console-dim mt-2">
               This action cannot be undone. The memory file and its index entry will be permanently removed.
             </p>
           </div>
@@ -69,16 +69,16 @@ export function MemoryDeleteDialog() {
           <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-console-border">
             <button
               onClick={close}
-              className="px-3 py-1.5 text-[10px] text-console-muted hover:text-console-text bg-console-faint rounded transition-colors"
+              className="px-3 py-1.5 text-label-xs text-console-muted hover:text-console-text bg-console-faint rounded transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleDelete}
               disabled={saving}
-              className="px-3 py-1.5 text-[10px] font-medium text-white bg-console-error/80 rounded hover:bg-console-error transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              className="px-3 py-1.5 text-label-xs font-medium text-white bg-console-error/80 rounded hover:bg-console-error transition-colors disabled:opacity-50 flex items-center gap-1.5"
             >
-              {saving && <Loader2 className="w-3 h-3 animate-spin" />}
+              {saving && <SpinnerGap className="w-3 h-3 animate-spin" />}
               Delete
             </button>
           </div>

@@ -2,17 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import {
-  X,
-  Zap,
-  Shield,
-  Search,
-  MessageSquare,
-  Folder,
-  RotateCcw,
-  History,
-  ChevronDown,
-} from "lucide-react";
+import { X, Lightning, Shield, MagnifyingGlass, ChatCircle, Folder, ArrowCounterClockwise, ClockCounterClockwise, CaretDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { LauncherPreset } from "@/lib/types";
 
@@ -26,7 +16,7 @@ interface PastSession {
 const PRESETS: (LauncherPreset & { icon: React.ComponentType<{ className?: string }>; description: string })[] = [
   {
     name: "Quick Chat",
-    icon: MessageSquare,
+    icon: ChatCircle,
     description: "Sonnet, no agent",
     model: "sonnet",
     agent: "none",
@@ -36,7 +26,7 @@ const PRESETS: (LauncherPreset & { icon: React.ComponentType<{ className?: strin
   },
   {
     name: "Start Sprint",
-    icon: Zap,
+    icon: Lightning,
     description: "Opus + orchestrator",
     model: "opus",
     agent: "orchestrator",
@@ -56,7 +46,7 @@ const PRESETS: (LauncherPreset & { icon: React.ComponentType<{ className?: strin
   },
   {
     name: "PMO Scan",
-    icon: Search,
+    icon: MagnifyingGlass,
     description: "Sonnet + PMO",
     model: "sonnet",
     agent: "pmo",
@@ -335,7 +325,7 @@ export function SessionLauncher({
             {recentSessions.length > 0 && (
               <div>
                 <label className="block text-[10px] font-semibold uppercase tracking-wider text-console-dim mb-1.5">
-                  <History className="w-3 h-3 inline mr-1 -mt-0.5" />
+                  <ClockCounterClockwise className="w-3 h-3 inline mr-1 -mt-0.5" />
                   Resume Previous Session
                 </label>
                 <div className="relative" ref={dropdownRef}>
@@ -352,7 +342,7 @@ export function SessionLauncher({
                   >
                     {resume ? (
                       <>
-                        <History className="w-3 h-3 text-console-accent shrink-0" />
+                        <ClockCounterClockwise className="w-3 h-3 text-console-accent shrink-0" />
                         <span className="truncate flex-1">{shortProject(recentSessions.find(s => s.id === resume)?.project ?? resume)}</span>
                         <span className="text-[9px] text-console-dim font-mono">{resume.slice(0, 8)}</span>
                         <button
@@ -368,7 +358,7 @@ export function SessionLauncher({
                     ) : (
                       <>
                         <span className="flex-1">Select a previous session...</span>
-                        <ChevronDown className="w-3 h-3 text-console-dim" />
+                        <CaretDown className="w-3 h-3 text-console-dim" />
                       </>
                     )}
                   </button>
@@ -405,7 +395,7 @@ export function SessionLauncher({
                                 resume === session.id && "bg-console-accent/10",
                               )}
                             >
-                              <History className="w-3 h-3 text-console-dim shrink-0" />
+                              <ClockCounterClockwise className="w-3 h-3 text-console-dim shrink-0" />
                               <span className="text-[10px] text-console-text truncate flex-1">
                                 {shortProject(session.project)}
                               </span>
@@ -442,7 +432,7 @@ export function SessionLauncher({
                       : "border-console-accent/30 bg-console-accent/5 hover:border-console-accent/60 hover:bg-console-accent/10 active:bg-console-accent/20",
                   )}
                 >
-                  <RotateCcw className={cn("w-4 h-4 text-console-accent", launching && "animate-spin")} />
+                  <ArrowCounterClockwise className={cn("w-4 h-4 text-console-accent", launching && "animate-spin")} />
                   <span className="text-[10px] font-medium text-console-text">
                     {launching ? "Starting..." : "Continue"}
                   </span>

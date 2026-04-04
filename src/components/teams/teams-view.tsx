@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Loader2 } from "lucide-react";
+import { SpinnerGap } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { wsClient } from "@/lib/ws-client";
 import {
@@ -74,67 +74,11 @@ export function TeamsView() {
   const selectedFlow = flows.find((f) => f.id === selectedFlowId);
   const selectedRun = selectedFlow?.runs.find((r) => r.id === selectedRunId);
 
+  // Sidebar is already provided by page.tsx SidebarShell — only render main content
   return (
     <div className="flex h-full">
-      {/* Left sidebar */}
-      <div className="w-[260px] shrink-0 border-r border-console-border bg-console-panel flex flex-col h-full overflow-hidden">
-        {/* Mode toggle */}
-        <div className="px-3 py-2 border-b border-console-border flex gap-1 shrink-0">
-          <button
-            onClick={() => setMode("rooms")}
-            className={cn(
-              "px-3 py-1 text-[10px] font-medium rounded transition-colors",
-              mode === "rooms"
-                ? "bg-console-accent text-black"
-                : "text-console-muted hover:text-console-text",
-            )}
-          >
-            Rooms
-          </button>
-          <button
-            onClick={() => setMode("sprints")}
-            className={cn(
-              "px-3 py-1 text-[10px] font-medium rounded transition-colors",
-              mode === "sprints"
-                ? "bg-console-accent text-black"
-                : "text-console-muted hover:text-console-text",
-            )}
-          >
-            Sprints
-          </button>
-        </div>
-
-        {/* Sidebar content */}
-        {mode === "rooms" ? (
-          <RoomList onCreateRoom={() => setCreateDialogOpen(true)} />
-        ) : loading ? (
-          <div className="flex items-center justify-center flex-1 gap-2 text-console-dim">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            <span className="text-[10px]">Loading...</span>
-          </div>
-        ) : (
-          <FlowSidebar
-            flows={flows}
-            selectedFlowId={selectedFlowId}
-            selectedRunId={selectedRunId}
-            onSelectRun={selectRun}
-          />
-        )}
-      </div>
-
-      {/* Main content */}
       <div className="flex-1 min-w-0 min-h-0">
-        {mode === "rooms" ? (
-          <RoomChat />
-        ) : selectedRun ? (
-          <StepTimeline run={selectedRun} />
-        ) : (
-          <div className="flex items-center justify-center h-full text-console-dim text-[11px]">
-            {flows.length === 0
-              ? "No workflows configured."
-              : "Select a run to view its timeline"}
-          </div>
-        )}
+        <RoomChat />
       </div>
 
       {/* Create room dialog */}

@@ -1,14 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  GitCommit,
-  Eye,
-  Upload,
-  AlertTriangle,
-  FileCheck,
-  X,
-} from "lucide-react";
+import { GitCommit, Eye, UploadSimple, Warning, Check, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { RepoStatus } from "@/lib/types";
 
@@ -68,7 +61,7 @@ export function ChangesPopup({
             </p>
           ) : isClean ? (
             <div className="flex items-center gap-2 py-3 justify-center">
-              <FileCheck className="w-4 h-4 text-console-success" />
+              <Check className="w-4 h-4 text-console-success" />
               <span className="text-[11px] text-console-success font-medium">
                 Working tree clean
               </span>
@@ -283,7 +276,7 @@ export function PushModal({
       <div className="bg-console-bg border border-console-border rounded-lg shadow-2xl w-full max-w-sm p-0">
         <div className="flex items-center justify-between px-3 py-2 border-b border-console-border">
           <span className="text-xs font-medium text-console-text flex items-center gap-1.5">
-            <Upload className="w-3.5 h-3.5" />
+            <UploadSimple className="w-3.5 h-3.5" />
             Push: {repo.name}
           </span>
           <button
@@ -296,7 +289,7 @@ export function PushModal({
         <div className="px-3 py-2 space-y-2">
           {isProd && (
             <div className="flex items-start gap-2 px-2 py-2 bg-red-500/10 border border-red-500/30 rounded text-red-400">
-              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+              <Warning className="w-4 h-4 shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <p className="text-[10px] font-bold">
                   WARNING: PRODUCTION REPO

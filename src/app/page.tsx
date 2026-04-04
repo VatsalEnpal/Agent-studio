@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { wsClient } from "@/lib/ws-client";
 import { useSessionsStore } from "@/stores/sessions";
 import { useUIStore } from "@/stores/ui";
@@ -44,7 +44,7 @@ import { Onboarding } from "@/components/setup/onboarding";
 
 import { cn } from "@/lib/utils";
 import type { Session, WsMessage, RepoStatus, ActiveMode } from "@/lib/types";
-import { Terminal, MessageCircle, Play, Brain, Settings } from "lucide-react";
+import { Terminal, ChatCircle, Play, Brain, Gear } from "@phosphor-icons/react";
 
 // ---------------------------------------------------------------------------
 // Preflight types
@@ -139,7 +139,6 @@ export default function Home() {
   const [selectedRepo, setSelectedRepo] = useState<RepoStatus | null>(null);
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
   const [navBadges, setNavBadges] = useState<Partial<Record<NavPage, number>>>({});
-  const prevModeRef = useRef<ActiveMode | null>(null);
 
   useEffect(() => {
     setHydrated(true);
@@ -179,13 +178,7 @@ export default function Home() {
     [sessions],
   );
 
-  // Track mode changes for crossfade animation
-  const modeChanged = prevModeRef.current !== null && prevModeRef.current !== activeMode;
-  useEffect(() => {
-    prevModeRef.current = activeMode;
-  }, [activeMode]);
-
-  // --- Notification manager ---
+// --- Notification manager ---
   useEffect(() => {
     const cleanup = initNotificationManager();
     return cleanup;
@@ -597,9 +590,6 @@ export default function Home() {
   const nonRoomSessions = sessions.filter((s) => s.meta?.group !== "room");
   const showGitView = activeMode === "sessions" && selectedRepo != null;
 
-  // Crossfade class for mode transitions
-  const crossfadeClass = modeChanged ? "animate-page-crossfade" : "";
-
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* Connection status banner */}
@@ -653,81 +643,91 @@ export default function Home() {
             onToggleTheme={toggleTheme}
           />
 
-          {/* Content area with page crossfade */}
-          <main className={cn("flex-1 min-w-0 min-h-0", crossfadeClass)} key={activeMode}>
-            {/* Sessions mode — terminal or git view */}
-            {activeMode === "sessions" && (
-              <div className="h-full">
-                {showGitView && selectedRepo ? (
-                  <ErrorBoundary fallbackLabel="Git view error">
-                    <GitView
-                      repo={selectedRepo}
-                      onBack={() => setSelectedRepo(null)}
-                    />
-                  </ErrorBoundary>
-                ) : nonRoomSessions.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full gap-6">
-                    <div className="text-center space-y-3">
-                      <p className="text-title-md text-text-emphasis">
-                        Ready to go.
-                      </p>
-                      <p className="text-body-sm text-text-tertiary max-w-sm">
-                        Launch a session to start working with Claude. Press{" "}
-                        <kbd className="px-1.5 py-0.5 rounded bg-surface text-text-secondary text-label-xs border border-border-subtle">
-                          Cmd+N
-                        </kbd>{" "}
-                        for the launcher.
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setLauncherOpen(true)}
-                      className={cn(
-                        "px-5 py-3 rounded-lg",
-                        "text-body-sm font-medium",
-                        "bg-accent text-white hover:bg-accent-hover",
-                        "transition-colors duration-[var(--duration-quick)]",
-                      )}
-                    >
-                      New Session
-                    </button>
+          {/* Content area — all pages stay mounted, toggled via CSS.
+              Sessions uses absolute positioning instead of display:none
+              so the terminal container always has real dimensions (xterm
+              needs a measurable container or it renders a black screen). */}
+          <main className="flex-1 min-w-0 min-h-0 relative">
+            {/* Sessions mode — terminal or git view.
+                Uses absolute + invisible instead of hidden so xterm keeps
+                real container dimensions while off-screen. */}
+            <div
+              className={cn(
+                "absolute inset-0",
+                activeMode === "sessions"
+                  ? "visible z-10"
+                  : "invisible z-0 pointer-events-none",
+              )}
+            >
+              {showGitView && selectedRepo ? (
+                <ErrorBoundary fallbackLabel="Git view error">
+                  <GitView
+                    repo={selectedRepo}
+                    onBack={() => setSelectedRepo(null)}
+                  />
+                </ErrorBoundary>
+              ) : nonRoomSessions.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full gap-6">
+                  <div className="text-center space-y-3">
+                    <p className="text-title-md text-text-emphasis">
+                      Ready to go.
+                    </p>
+                    <p className="text-body-sm text-text-tertiary max-w-sm">
+                      Launch a session to start working with Claude. Press{" "}
+                      <kbd className="px-1.5 py-0.5 rounded bg-surface text-text-secondary text-label-xs border border-border-subtle">
+                        Cmd+N
+                      </kbd>{" "}
+                      for the launcher.
+                    </p>
                   </div>
-                ) : (
-                  <ErrorBoundary fallbackLabel="Terminal error">
-                    <TerminalPaneV2
-                      sessionId={focusedId ?? nonRoomSessions[0].id}
-                      visible={activeMode === "sessions" && !showGitView}
-                      fontSize={
-                        focusedId ? zoomLevels[focusedId] ?? 13 : 13
-                      }
-                    />
-                  </ErrorBoundary>
-                )}
-              </div>
-            )}
+                  <button
+                    onClick={() => setLauncherOpen(true)}
+                    className={cn(
+                      "px-5 py-3 rounded-lg",
+                      "text-body-sm font-medium",
+                      "bg-accent text-white hover:bg-accent-hover",
+                      "transition-colors duration-[var(--duration-quick)]",
+                    )}
+                  >
+                    New Session
+                  </button>
+                </div>
+              ) : (
+                <ErrorBoundary fallbackLabel="Terminal error">
+                  <TerminalPaneV2
+                    sessionId={focusedId ?? nonRoomSessions[0].id}
+                    visible={activeMode === "sessions" && !showGitView}
+                    fontSize={
+                      focusedId ? zoomLevels[focusedId] ?? 13 : 13
+                    }
+                  />
+                </ErrorBoundary>
+              )}
+            </div>
 
             {/* Teams */}
-            <div className={activeMode === "teams" ? "h-full" : "hidden"}>
+            <div className={activeMode === "teams" ? "absolute inset-0 z-10" : "hidden"}>
               <ErrorBoundary fallbackLabel="Teams view error">
                 <TeamsView />
               </ErrorBoundary>
             </div>
 
             {/* Sprints */}
-            <div className={activeMode === "sprints" ? "h-full" : "hidden"}>
+            <div className={activeMode === "sprints" ? "absolute inset-0 z-10" : "hidden"}>
               <ErrorBoundary fallbackLabel="Sprints view error">
                 <SprintsView />
               </ErrorBoundary>
             </div>
 
             {/* Memory / Knowledge */}
-            <div className={activeMode === "memory" ? "h-full" : "hidden"}>
+            <div className={activeMode === "memory" ? "absolute inset-0 z-10" : "hidden"}>
               <ErrorBoundary fallbackLabel="Memory view error">
                 <MemoryView />
               </ErrorBoundary>
             </div>
 
             {/* Settings */}
-            <div className={activeMode === "settings" ? "h-full" : "hidden"}>
+            <div className={activeMode === "settings" ? "absolute inset-0 z-10" : "hidden"}>
               <ErrorBoundary fallbackLabel="Settings view error">
                 <SettingsView />
               </ErrorBoundary>

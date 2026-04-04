@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { AlertCircle, X, RotateCw } from "lucide-react";
+import { WarningCircle, X, ArrowClockwise } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -39,9 +39,10 @@ export function ErrorBanner({
         className,
       )}
     >
-      <AlertCircle
-        className="size-4 text-error shrink-0"
-        strokeWidth={1.75}
+      <WarningCircle
+        size={16}
+        weight="light"
+        className="text-error shrink-0"
       />
 
       <p className="flex-1 text-body-sm text-error min-w-0 truncate">
@@ -59,7 +60,7 @@ export function ErrorBanner({
             "transition-colors duration-[var(--duration-instant)] ease-out",
           )}
         >
-          <RotateCw className="size-3" strokeWidth={2} />
+          <ArrowClockwise size={12} weight="light" />
           Retry
         </button>
       )}
@@ -75,7 +76,7 @@ export function ErrorBanner({
           )}
           aria-label="Dismiss error"
         >
-          <X className="size-3.5" strokeWidth={1.75} />
+          <X size={14} weight="light" />
         </button>
       )}
     </div>

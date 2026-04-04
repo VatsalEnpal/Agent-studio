@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Send, Hash, Loader2, Power, PowerOff, Users, Zap } from "lucide-react";
+import { PaperPlaneTilt, Hash, SpinnerGap, Power, Users, Lightning } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import { useRoomsStore } from "@/stores/rooms";
 import { useToastStore } from "@/components/ui/notification-toast";
+import { notifyMention, getNotificationPrefs } from "@/lib/notifications";
 import type { Room, RoomMessage } from "@/stores/rooms";
 import { ChatMessage, StreamingMessage } from "./chat-message";
 import { TypingIndicator } from "./typing-indicator";
@@ -55,7 +56,7 @@ export function RoomChat() {
     }
   }, [selectedRoomId, room?.messages.length]);
 
-  // Fire toast when agent mentions @vatsal or @human
+  // Fire toast + native notification when agent mentions @vatsal or @human
   useEffect(() => {
     if (!room || room.messages.length === 0) return;
     const lastMsg = room.messages[room.messages.length - 1];
@@ -67,6 +68,15 @@ export function RoomChat() {
         title: `${lastMsg.from} mentioned you`,
         body: lastMsg.text?.slice(0, 80) ?? "",
       });
+      // Native macOS notification via Electron IPC
+      const prefs = getNotificationPrefs();
+      if (prefs.approvals) {
+        notifyMention(
+          lastMsg.from ?? "Agent",
+          (lastMsg.text ?? "").slice(0, 100),
+          room.id,
+        );
+      }
     }
   }, [room?.messages.length, room, addToast]);
 
@@ -108,7 +118,13 @@ export function RoomChat() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ from: "user", text, to }),
-    }).catch(() => {});
+    }).catch((err) => {
+      useToastStore.getState().addToast({
+        type: "error",
+        title: "Failed to send message",
+        body: err instanceof Error ? err.message : String(err),
+      });
+    });
   }, [input, selectedRoomId]);
 
   const handleKeyDown = useCallback(
@@ -145,7 +161,13 @@ export function RoomChat() {
     setSpawning(true);
     try {
       await fetch(`/api/rooms/${selectedRoomId}/spawn`, { method: "POST" });
-    } catch {}
+    } catch (err) {
+      useToastStore.getState().addToast({
+        type: "error",
+        title: "Failed to spawn agents",
+        body: err instanceof Error ? err.message : String(err),
+      });
+    }
     setSpawning(false);
   }, [selectedRoomId, spawning]);
 
@@ -160,7 +182,13 @@ export function RoomChat() {
         const active = (data as Room[]).filter((r: Room) => r.active);
         useRoomsStore.getState().selectRoom(active.length > 0 ? active[0].id : null);
       }
-    } catch {}
+    } catch (err) {
+      useToastStore.getState().addToast({
+        type: "error",
+        title: "Failed to refresh rooms after close",
+        body: err instanceof Error ? err.message : String(err),
+      });
+    }
   }, [selectedRoomId]);
 
   // Compute message grouping
@@ -182,7 +210,7 @@ export function RoomChat() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center max-w-sm px-6">
-          <Hash className="w-10 h-10 text-text-tertiary mx-auto mb-4" />
+          <Hash size={40} weight="light" className="text-text-tertiary mx-auto mb-4" />
           <p className="text-title-sm text-text-secondary mb-1">
             No room selected
           </p>
@@ -202,7 +230,7 @@ export function RoomChat() {
       {/* Room header */}
       <div className="px-4 py-3 border-b border-border shrink-0 bg-surface">
         <div className="flex items-center gap-3">
-          <Hash className="w-4 h-4 text-text-tertiary shrink-0" />
+          <Hash size={16} weight="light" className="text-text-tertiary shrink-0" />
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <span className="text-title-sm text-text-emphasis truncate">
               {room.name}
@@ -214,7 +242,7 @@ export function RoomChat() {
 
           {/* Agent count */}
           <div className="flex items-center gap-1 shrink-0">
-            <Users className="w-3.5 h-3.5 text-text-tertiary" />
+            <Users size={14} weight="light" className="text-text-tertiary" />
             <span className="text-label-xs text-text-secondary">
               {room.agents.length}
             </span>
@@ -249,9 +277,9 @@ export function RoomChat() {
               className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium rounded-md bg-accent text-canvas hover:bg-accent-hover transition-colors duration-[100ms] disabled:opacity-50 shrink-0"
             >
               {spawning ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <SpinnerGap size={14} weight="light" className="animate-spin" />
               ) : (
-                <Zap className="w-3.5 h-3.5" />
+                <Lightning size={14} weight="light" />
               )}
               {spawning ? "Starting..." : "Spawn Agents"}
             </button>
@@ -263,18 +291,25 @@ export function RoomChat() {
               onClick={handleClose}
               className="flex items-center gap-1 px-2.5 py-1.5 text-label-xs font-medium rounded-md bg-error-subtle text-error hover:bg-error/20 transition-colors duration-[100ms] shrink-0"
             >
-              <PowerOff className="w-3 h-3" />
+              <Power size={12} weight="light" />
               Close
             </button>
           )}
         </div>
       </div>
 
+      {/* Legacy room banner */}
+      {!room.active && (
+        <div className="px-4 py-2.5 border-b border-warning/20 bg-warning/5 text-body-sm text-warning shrink-0">
+          This room was created in an older version. Messages may contain terminal artifacts.
+        </div>
+      )}
+
       {/* Big spawn CTA when all agents offline and no messages */}
       {room.active && allOffline && room.messages.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-5">
-            <Users className="w-12 h-12 text-text-tertiary mx-auto" />
+            <Users size={48} weight="light" className="text-text-tertiary mx-auto" />
             <h3 className="text-title-md text-text-emphasis">
               Agents are offline
             </h3>
@@ -288,7 +323,7 @@ export function RoomChat() {
             >
               {spawning ? (
                 <span className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <SpinnerGap size={16} weight="light" className="animate-spin" />
                   Starting...
                 </span>
               ) : (
@@ -347,9 +382,9 @@ export function RoomChat() {
                 className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium rounded-md bg-accent text-canvas hover:bg-accent-hover transition-colors duration-[100ms] disabled:opacity-50"
               >
                 {spawning ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <SpinnerGap size={12} weight="light" className="animate-spin" />
                 ) : (
-                  <Power className="w-3 h-3" />
+                  <Power size={12} weight="light" />
                 )}
                 {spawning ? "Starting..." : "Start Room"}
               </button>
@@ -374,7 +409,7 @@ export function RoomChat() {
                           style={{ backgroundColor: agentColor(a.name) + "30" }}
                         >
                           <span
-                            className="text-[8px] font-bold"
+                            className="text-label-xs font-bold"
                             style={{ color: agentColor(a.name) }}
                           >
                             {a.name.charAt(0).toUpperCase()}
@@ -402,7 +437,7 @@ export function RoomChat() {
                       className="w-full text-left px-2.5 py-2 rounded-md text-body-sm hover:bg-surface-hover flex items-center gap-2.5 transition-colors duration-[100ms]"
                     >
                       <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 bg-accent/20">
-                        <span className="text-[8px] font-bold text-accent">*</span>
+                        <span className="text-label-xs font-bold text-accent">*</span>
                       </div>
                       <span className="text-text-primary font-medium">all</span>
                       <span className="text-label-xs text-text-tertiary ml-auto">
@@ -419,7 +454,7 @@ export function RoomChat() {
                   onChange={(e) => handleInputChange(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Message the team... (use @agent to direct)"
-                  className="flex-1 bg-elevation-2 border border-border rounded-md px-3 py-2 text-body font-mono text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors duration-[100ms]"
+                  className="flex-1 bg-elevation-2 border border-border rounded-md px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors duration-[100ms]"
                   disabled={!room.active}
                 />
                 <button
@@ -427,7 +462,7 @@ export function RoomChat() {
                   disabled={!input.trim()}
                   className="p-2.5 rounded-md bg-accent text-canvas hover:bg-accent-hover transition-colors duration-[100ms] disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  <Send className="w-4 h-4" />
+                  <PaperPlaneTilt size={16} weight="light" />
                 </button>
               </div>
             </div>

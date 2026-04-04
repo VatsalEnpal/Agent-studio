@@ -20,6 +20,7 @@ export interface Session {
   status: "starting" | "active" | "idle" | "building" | "exited";
   exitCode?: number;
   createdAt: number;
+  updatedAt: number;
   meta?: SessionMeta;
 }
 

@@ -1,14 +1,20 @@
 "use client";
 
 import type React from "react";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { agentColor, colors } from "@/lib/design-tokens";
-import { Check, X, ChevronDown, ChevronRight, Clock, FileCode, Wrench } from "lucide-react";
+import { Check, X, CaretDown, CaretRight, Clock, FileCode, Wrench } from "@phosphor-icons/react";
 import type { RoomMessage } from "@/stores/rooms";
 
 const Markdown = lazy(() => import("react-markdown"));
-const remarkGfm = lazy(() => import("remark-gfm").then((m) => ({ default: m.default })));
+
+// remark-gfm is a plugin function, not a React component — cannot use React.lazy()
+// Load it dynamically via a module-level promise instead
+let _remarkGfm: any = null;
+const _remarkGfmPromise = import("remark-gfm").then((m) => {
+  _remarkGfm = m.default;
+});
 
 export interface ChatMessageProps {
   msg: RoomMessage;
@@ -18,19 +24,50 @@ export interface ChatMessageProps {
 }
 
 function MessageContent({ text, isSystem }: { text: string; isSystem: boolean }) {
+  const [gfmReady, setGfmReady] = useState(!!_remarkGfm);
+
+  useEffect(() => {
+    if (!_remarkGfm) {
+      _remarkGfmPromise.then(() => setGfmReady(true));
+    }
+  }, []);
+
   if (isSystem) {
-    return <span className="text-text-tertiary italic text-body-sm">{text}</span>;
+    return <span className="text-text-tertiary italic text-label-xs">{text}</span>;
   }
+
+  // Strip ANSI escape codes and terminal artifacts from agent messages (legacy PTY rooms)
+  const cleanText = text
+    // Standard ANSI escape sequences
+    .replace(/\x1B\[[0-9;]*[a-zA-Z]/g, "")
+    // OSC sequences (title set, etc.)
+    .replace(/\x1B\][^\x07\x1B]*(?:\x07|\x1B\\)/g, "")
+    // Private mode sequences
+    .replace(/\x1B\[[\?]?[0-9;]*[a-zA-Z]/g, "")
+    // DEC sequences like [>0q
+    .replace(/\[>[0-9]+[a-z]/g, "")
+    // Remaining raw escape chars
+    .replace(/\x1B/g, "")
+    // Terminal spinner characters and control chars
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+    // Claude Code UI artifacts (spinners, remote-control banner)
+    .replace(/[✢⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏●]/g, "")
+    // Collapse multiple spaces/newlines
+    .replace(/ {3,}/g, "  ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 
   // For short messages without markdown syntax, render as plain text
-  const hasMarkdown = /[*_`#\[\]|>-]/.test(text) && text.length > 40;
+  const hasMarkdown = /[*_`#\[\]|>-]/.test(cleanText) && cleanText.length > 40;
   if (!hasMarkdown) {
-    return <span className="text-text-primary text-body">{highlightMentions(text)}</span>;
+    return <span className="text-body leading-relaxed">{highlightMentions(cleanText)}</span>;
   }
 
+  const plugins = gfmReady && _remarkGfm ? [_remarkGfm] : [];
+
   return (
-    <Suspense fallback={<span className="text-text-primary text-body">{text}</span>}>
-      <div className="text-text-primary text-body prose prose-invert prose-sm max-w-none
+    <Suspense fallback={<span className="text-body leading-relaxed">{cleanText}</span>}>
+      <div className="text-body leading-relaxed prose prose-invert prose-sm max-w-none
         prose-p:my-1 prose-pre:my-2
         prose-code:text-accent prose-code:bg-elevation-2 prose-code:px-1 prose-code:py-0.5 prose-code:rounded-sm prose-code:text-body-sm prose-code:font-mono
         prose-pre:bg-elevation-2 prose-pre:border prose-pre:border-border-subtle prose-pre:rounded-md
@@ -39,8 +76,8 @@ function MessageContent({ text, isSystem }: { text: string; isSystem: boolean })
         prose-strong:text-text-emphasis
         prose-li:my-0.5
         prose-blockquote:border-accent/30 prose-blockquote:text-text-secondary">
-        <Markdown remarkPlugins={[remarkGfm as any]}>
-          {text}
+        <Markdown remarkPlugins={plugins}>
+          {cleanText}
         </Markdown>
       </div>
     </Suspense>
@@ -55,55 +92,104 @@ export function ChatMessage({ msg, grouped, onApprove, onReject }: ChatMessagePr
 
   const color = isUser ? colors.accent : agentColor(msg.from);
 
-  // System messages: centered, smaller, gray
+  // -------------------------------------------------------------------------
+  // System messages — centered divider with text (Slack style)
+  // -------------------------------------------------------------------------
   if (isSystem) {
     return (
-      <div className="flex justify-center py-2 px-4">
-        <div className="text-label-xs text-text-tertiary text-center max-w-md">
+      <div className="flex items-center gap-3 py-3 px-6">
+        <div className="flex-1 h-px bg-border-subtle" />
+        <span className="text-label-xs text-text-tertiary shrink-0 max-w-sm text-center">
           {msg.text}
+        </span>
+        <div className="flex-1 h-px bg-border-subtle" />
+      </div>
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // User messages — right-aligned bubble (iMessage style)
+  // -------------------------------------------------------------------------
+  if (isUser) {
+    return (
+      <div className={cn("px-5", grouped ? "pt-0.5 pb-0.5" : "pt-3 pb-1")}>
+        <div className="flex justify-end gap-3">
+          <div className="max-w-[70%]">
+            {/* Name + timestamp */}
+            {!grouped && (
+              <div className="flex items-center justify-end gap-2 mb-1">
+                <span className="text-label-xs text-text-tertiary shrink-0">
+                  {formatTimestamp(msg.timestamp)}
+                </span>
+                <span className="text-body-sm font-semibold text-accent">
+                  You
+                </span>
+              </div>
+            )}
+            {/* Message bubble */}
+            <div className="rounded-xl rounded-tr-sm bg-accent/15 border border-accent/20 px-3.5 py-2 text-text-primary">
+              <MessageContent text={msg.text ?? ""} isSystem={false} />
+            </div>
+          </div>
+          {/* Avatar */}
+          <div className="w-9 shrink-0">
+            {!grouped && (
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: color + "18", border: `1.5px solid ${color}30` }}
+              >
+                <span className="text-sm font-semibold leading-none" style={{ color }}>
+                  Y
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
   }
 
+  // -------------------------------------------------------------------------
+  // Agent messages — left-aligned bubble (Slack style)
+  // Approval requests get amber highlight
+  // -------------------------------------------------------------------------
   return (
     <div
       className={cn(
-        "px-4 transition-colors duration-[100ms]",
-        grouped ? "pt-0.5 pb-1.5" : "pt-3 pb-1.5",
-        isUser && "bg-accent-subtle/50",
-        isApproval && msg.approvalStatus === "pending" && "bg-warning-subtle shadow-accent-glow",
-        isApproval && msg.approvalStatus === "approved" && "bg-success-subtle/50",
-        isApproval && msg.approvalStatus === "rejected" && "bg-error-subtle/50",
+        "px-5 transition-colors duration-100",
+        grouped ? "pt-0.5 pb-0.5" : "pt-3 pb-1",
+        isApproval && msg.approvalStatus === "pending" && "bg-warning/[0.04]",
+        isApproval && msg.approvalStatus === "approved" && "bg-success/[0.04]",
+        isApproval && msg.approvalStatus === "rejected" && "bg-error/[0.04]",
       )}
     >
-      <div className="flex gap-3">
-        {/* Avatar — only show for non-grouped messages */}
-        <div className="w-8 shrink-0">
+      <div className="flex gap-3 max-w-[85%]">
+        {/* Avatar — 36px, only for non-grouped */}
+        <div className="w-9 shrink-0">
           {!grouped && (
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: color + "20", border: `1.5px solid ${color}40` }}
+              className="w-9 h-9 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: color + "18", border: `1.5px solid ${color}30` }}
             >
               <span
-                className="text-xs font-semibold leading-none"
+                className="text-sm font-semibold leading-none"
                 style={{ color }}
               >
-                {isUser ? "Y" : msg.from.charAt(0).toUpperCase()}
+                {msg.from.charAt(0).toUpperCase()}
               </span>
             </div>
           )}
         </div>
 
         <div className="flex-1 min-w-0">
-          {/* Name + timestamp — only for non-grouped */}
+          {/* Name + timestamp (Slack layout: name bold left, timestamp gray right) */}
           {!grouped && (
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-baseline gap-2 mb-1">
               <span
                 className="text-body-sm font-semibold"
                 style={{ color }}
               >
-                {isUser ? "You" : msg.from}
+                {msg.from}
               </span>
               {msg.to && (
                 <span className="text-label-xs text-text-tertiary">
@@ -116,70 +202,79 @@ export function ChatMessage({ msg, grouped, onApprove, onReject }: ChatMessagePr
             </div>
           )}
 
-          {/* Message body */}
-          <MessageContent text={msg.text ?? ""} isSystem={false} />
+          {/* Message bubble */}
+          <div
+            className={cn(
+              "rounded-xl rounded-tl-sm px-3.5 py-2",
+              isApproval && msg.approvalStatus === "pending"
+                ? "bg-warning/10 border border-warning/20"
+                : "bg-elevation-1 border border-border-subtle",
+            )}
+          >
+            <MessageContent text={msg.text ?? ""} isSystem={false} />
 
-          {/* Approval buttons */}
-          {isApproval && msg.approvalStatus === "pending" && (
-            <div className="flex gap-2 mt-2.5">
-              <button
-                onClick={() => onApprove(msg)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 text-label font-medium bg-success/15 text-success rounded-md hover:bg-success/25 transition-colors duration-[100ms] shadow-[0_0_12px_rgba(52,211,153,0.15)]"
-              >
-                <Check className="w-3.5 h-3.5" />
-                Approve
-              </button>
-              <button
-                onClick={() => onReject(msg)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 text-label font-medium bg-error/15 text-error rounded-md hover:bg-error/25 transition-colors duration-[100ms]"
-              >
-                <X className="w-3.5 h-3.5" />
-                Reject
-              </button>
-            </div>
-          )}
-          {isApproval && msg.approvalStatus === "approved" && (
-            <div className="flex items-center gap-1 mt-1.5 text-label-xs text-success">
-              <Check className="w-3 h-3" />
-              Approved
-            </div>
-          )}
-          {isApproval && msg.approvalStatus === "rejected" && (
-            <div className="flex items-center gap-1 mt-1.5 text-label-xs text-error">
-              <X className="w-3 h-3" />
-              Rejected
-            </div>
-          )}
+            {/* Approval buttons */}
+            {isApproval && msg.approvalStatus === "pending" && (
+              <div className="flex gap-2 mt-2.5 pt-2 border-t border-warning/15">
+                <button
+                  onClick={() => onApprove(msg)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 text-label font-medium bg-success/15 text-success rounded-lg hover:bg-success/25 transition-colors duration-100"
+                >
+                  <Check size={14} weight="light" />
+                  Approve
+                </button>
+                <button
+                  onClick={() => onReject(msg)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 text-label font-medium bg-error/15 text-error rounded-lg hover:bg-error/25 transition-colors duration-100"
+                >
+                  <X size={14} weight="light" />
+                  Reject
+                </button>
+              </div>
+            )}
+            {isApproval && msg.approvalStatus === "approved" && (
+              <div className="flex items-center gap-1 mt-1.5 text-label-xs text-success">
+                <Check size={12} weight="light" />
+                Approved
+              </div>
+            )}
+            {isApproval && msg.approvalStatus === "rejected" && (
+              <div className="flex items-center gap-1 mt-1.5 text-label-xs text-error">
+                <X size={12} weight="light" />
+                Rejected
+              </div>
+            )}
+          </div>
 
           {/* Expandable detail panel (for agent messages) */}
-          {!isUser && msg.type === "message" && (
+          {msg.type === "message" && (
             <button
               onClick={() => setDetailsOpen(!detailsOpen)}
-              className="flex items-center gap-1 mt-1.5 text-label-xs text-text-tertiary hover:text-text-secondary transition-colors duration-[100ms]"
+              className="flex items-center gap-1 mt-1 text-label-xs text-text-tertiary hover:text-text-secondary transition-colors duration-100"
             >
               {detailsOpen ? (
-                <ChevronDown className="w-3 h-3" />
+                <CaretDown size={12} weight="light" />
               ) : (
-                <ChevronRight className="w-3 h-3" />
+                <CaretRight size={12} weight="light" />
               )}
               Details
             </button>
           )}
 
           {detailsOpen && (
-            <div className="mt-2 p-2.5 rounded-md bg-elevation-2 border border-border-subtle text-label-xs text-text-secondary space-y-1.5 animate-slide-up">
+            <div className="mt-1.5 p-2.5 rounded-lg bg-elevation-2 border border-border-subtle text-label-xs text-text-secondary space-y-1.5 animate-slide-up">
               <div className="flex items-center gap-1.5">
-                <Clock className="w-3 h-3 text-text-tertiary" />
+                <Clock size={12} weight="light" className="text-text-tertiary" />
                 <span>{formatTimestamp(msg.timestamp)}</span>
               </div>
               {msg.actionCommand && (
                 <div className="flex items-center gap-1.5">
-                  <Wrench className="w-3 h-3 text-text-tertiary" />
+                  <Wrench size={12} weight="light" className="text-text-tertiary" />
                   <span className="font-mono">{msg.actionCommand}</span>
                 </div>
               )}
               <div className="flex items-center gap-1.5">
-                <FileCode className="w-3 h-3 text-text-tertiary" />
+                <FileCode size={12} weight="light" className="text-text-tertiary" />
                 <span>Message ID: {msg.id.slice(0, 12)}</span>
               </div>
             </div>
@@ -197,18 +292,18 @@ export function StreamingMessage({ agentId, text }: { agentId: string; text: str
   if (!text) {
     // Typing indicator — no text yet
     return (
-      <div className="px-4 pt-3 pb-1.5">
+      <div className="px-5 pt-3 pb-1">
         <div className="flex gap-3">
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 animate-pulse-dot"
-            style={{ backgroundColor: color + "20", border: `1.5px solid ${color}40` }}
+            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 animate-pulse-dot"
+            style={{ backgroundColor: color + "18", border: `1.5px solid ${color}30` }}
           >
-            <span className="text-xs font-semibold leading-none" style={{ color }}>
+            <span className="text-sm font-semibold leading-none" style={{ color }}>
               {agentId.charAt(0).toUpperCase()}
             </span>
           </div>
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-baseline gap-2 mb-1">
               <span className="text-body-sm font-semibold" style={{ color }}>
                 {agentId}
               </span>
@@ -229,25 +324,27 @@ export function StreamingMessage({ agentId, text }: { agentId: string; text: str
 
   // Streaming text — show accumulated markdown with pulsing cursor
   return (
-    <div className="px-4 pt-3 pb-1.5 bg-accent-subtle/30">
-      <div className="flex gap-3">
+    <div className="px-5 pt-3 pb-1">
+      <div className="flex gap-3 max-w-[85%]">
         <div
-          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-          style={{ backgroundColor: color + "20", border: `1.5px solid ${color}40` }}
+          className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+          style={{ backgroundColor: color + "18", border: `1.5px solid ${color}30` }}
         >
-          <span className="text-xs font-semibold leading-none animate-pulse-dot" style={{ color }}>
+          <span className="text-sm font-semibold leading-none animate-pulse-dot" style={{ color }}>
             {agentId.charAt(0).toUpperCase()}
           </span>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-baseline gap-2 mb-1">
             <span className="text-body-sm font-semibold" style={{ color }}>
               {agentId}
             </span>
             <span className="text-label-xs text-text-tertiary italic">typing...</span>
           </div>
-          <MessageContent text={text} isSystem={false} />
-          <span className="inline-block w-1.5 h-4 bg-accent/70 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+          <div className="rounded-xl rounded-tl-sm bg-elevation-1 border border-border-subtle px-3.5 py-2">
+            <MessageContent text={text} isSystem={false} />
+            <span className="inline-block w-1.5 h-4 bg-accent/70 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+          </div>
         </div>
       </div>
     </div>

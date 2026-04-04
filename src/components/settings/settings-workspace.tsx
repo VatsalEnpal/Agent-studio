@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { FolderOpen, Plus, X, RefreshCw, AlertTriangle, Check, Brain, Loader2, Sparkles } from "lucide-react";
+import { FolderOpen, Plus, X, ArrowClockwise, Warning, Check, Brain, SpinnerGap, Sparkle } from "@phosphor-icons/react";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
 import { ScaffoldDialog } from "./scaffold-dialog";
@@ -209,15 +209,15 @@ export function SettingsWorkspace() {
     <>
       <section className="border border-console-border/60 rounded-xl console-panel-bg shadow-card">
         <div className="px-5 py-3.5 border-b border-console-border/60 flex items-center justify-between">
-          <h3 className="text-xs font-medium text-console-text">Workspace</h3>
-          <span className="text-[9px] text-console-dim font-mono">
+          <h3 className="text-body-sm font-medium text-console-text">Workspace</h3>
+          <span className="text-label-xs text-console-dim font-mono">
             .agent-studio.json v{config.version}
           </span>
         </div>
         <div className="px-5 py-4 space-y-5">
           {/* Projects */}
           <div>
-            <label className="text-[10px] text-console-muted block mb-1.5">
+            <label className="text-label-xs text-console-muted block mb-1.5">
               <FolderOpen className="w-3 h-3 inline mr-1 -mt-0.5" />
               Tracked Projects
             </label>
@@ -225,7 +225,7 @@ export function SettingsWorkspace() {
               {config.projects.map((p, i) => (
                 <div
                   key={`${p.path}-${i}`}
-                  className="flex items-center gap-2 px-2 py-1.5 bg-console-bg border border-console-border rounded text-[10px]"
+                  className="flex items-center gap-2 px-2 py-1.5 bg-console-bg border border-console-border rounded text-body-sm"
                 >
                   <span className="flex-1 font-mono text-console-text truncate">
                     {p.path}
@@ -233,7 +233,7 @@ export function SettingsWorkspace() {
                   <button
                     onClick={() => toggleProd(i)}
                     className={cn(
-                      "px-1.5 py-0.5 text-[9px] font-medium rounded border transition-colors",
+                      "px-1.5 py-0.5 text-label-xs font-medium rounded border transition-colors",
                       p.isProd
                         ? "bg-red-500/15 text-red-400 border-red-500/30"
                         : "bg-console-faint text-console-dim border-transparent hover:border-console-border",
@@ -261,12 +261,12 @@ export function SettingsWorkspace() {
                   if (e.key === "Enter") addProject();
                 }}
                 placeholder="/path/to/project"
-                className="flex-1 px-2 py-1 text-[10px] font-mono bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:border-console-accent focus:outline-none"
+                className="flex-1 px-2 py-1 text-body-sm font-mono bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:border-console-accent focus:outline-none"
               />
               <button
                 onClick={addProject}
                 disabled={!newPath.trim()}
-                className="flex items-center gap-1 px-2 py-1 text-[10px] bg-console-faint text-console-dim hover:text-console-accent rounded transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 px-2 py-1 text-label-xs bg-console-faint text-console-dim hover:text-console-accent rounded transition-colors disabled:opacity-50"
               >
                 <Plus className="w-3 h-3" />
                 Add
@@ -276,13 +276,13 @@ export function SettingsWorkspace() {
 
           {/* Agent System */}
           <div>
-            <label className="text-[10px] text-console-muted block mb-1.5">
+            <label className="text-label-xs text-console-muted block mb-1.5">
               <Brain className="w-3 h-3 inline mr-1 -mt-0.5" />
               Agent System
             </label>
             {config.agentSystem ? (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 px-2 py-1.5 bg-console-bg border border-console-border rounded text-[10px]">
+                <div className="flex items-center gap-2 px-2 py-1.5 bg-console-bg border border-console-border rounded text-body-sm">
                   <Check className="w-3 h-3 text-console-success shrink-0" />
                   <span className="flex-1 font-mono text-console-text truncate">
                     {config.agentSystem.path}
@@ -292,12 +292,12 @@ export function SettingsWorkspace() {
                   <button
                     onClick={() => void regenerateAgents()}
                     disabled={regenerating}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded border border-console-accent/20 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded border border-console-accent/20 transition-colors disabled:opacity-50"
                   >
                     {regenerating ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
+                      <SpinnerGap className="w-3 h-3 animate-spin" />
                     ) : (
-                      <Sparkles className="w-3 h-3" />
+                      <Sparkle className="w-3 h-3" />
                     )}
                     {regenerating ? "Generating..." : "Regenerate Agents with AI"}
                   </button>
@@ -305,25 +305,25 @@ export function SettingsWorkspace() {
               </div>
             ) : (
               <div className="space-y-2.5">
-                <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-500/5 border border-amber-500/20 rounded text-[10px]">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-500/5 border border-amber-500/20 rounded text-body-sm">
+                  <Warning className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
                   <div className="space-y-1.5">
                     <p className="text-console-text font-medium">No agent system detected</p>
                     <p className="text-console-muted leading-relaxed">
-                      Teams, Memory, and Workflows need an <code className="text-console-accent bg-console-faint px-1 py-0.5 rounded text-[9px]">ai-agents/</code> folder in your project.
+                      Teams, Memory, and Workflows need an <code className="text-console-accent bg-console-faint px-1 py-0.5 rounded text-label-xs">ai-agents/</code> folder in your project.
                     </p>
                   </div>
                 </div>
                 {config.projects.length > 0 && (
                   <button
                     onClick={() => setShowScaffold(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded border border-console-accent/20 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded border border-console-accent/20 transition-colors"
                   >
                     <Plus className="w-3 h-3" />
                     Create Agent System
                   </button>
                 )}
-                <p className="text-[9px] text-console-dim leading-relaxed pl-0.5">
+                <p className="text-label-xs text-console-dim leading-relaxed pl-0.5">
                   This creates: <code className="text-console-muted">ai-agents/memory/</code>, <code className="text-console-muted">ai-agents/sprints/</code>, <code className="text-console-muted">ai-agents/tools/</code>, and <code className="text-console-muted">.claude/agents/</code> with your custom agent definitions.
                 </p>
               </div>
@@ -332,10 +332,10 @@ export function SettingsWorkspace() {
 
           {/* Working Directory */}
           <div>
-            <label className="text-[10px] text-console-muted block mb-1">
+            <label className="text-label-xs text-console-muted block mb-1">
               Default Working Directory
             </label>
-            <span className="text-[10px] font-mono text-console-text">
+            <span className="text-body-sm font-mono text-console-text">
               {config.defaults.workingDirectory}
             </span>
           </div>
@@ -344,9 +344,9 @@ export function SettingsWorkspace() {
           <div className="flex justify-end pt-1">
             <button
               onClick={resetSetup}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium text-console-dim hover:text-console-muted rounded border border-console-border hover:border-console-muted transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium text-console-dim hover:text-console-muted rounded border border-console-border hover:border-console-muted transition-colors"
             >
-              <RefreshCw className="w-3 h-3" />
+              <ArrowClockwise className="w-3 h-3" />
               Re-run Setup Wizard
             </button>
           </div>

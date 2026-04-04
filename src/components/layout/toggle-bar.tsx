@@ -1,21 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Monitor,
-  Users,
-  Brain,
-  FileText,
-  Settings,
-  Maximize,
-  Minimize,
-  Cpu,
-  MemoryStick,
-  Gauge,
-  ExternalLink,
-  Sun,
-  Moon,
-} from "lucide-react";
+import { Monitor, Users, Brain, FileText, Gear, ArrowsOutSimple, ArrowsInSimple, Cpu, Memory, Gauge, ArrowSquareOut, Sun, Moon } from "@phosphor-icons/react";
 import { useUIStore } from "@/stores/ui";
 import { cn } from "@/lib/utils";
 import type { ActiveMode } from "@/lib/types";
@@ -33,7 +19,7 @@ const ALL_TABS: TabConfig[] = [
   { id: "teams", label: "Teams", icon: Users },
   { id: "memory", label: "Memory", icon: Brain },
   { id: "reports", label: "Reports", icon: FileText },
-  { id: "settings", label: "Settings", icon: Settings },
+  { id: "settings", label: "Gear", icon: Gear },
 ];
 
 /**
@@ -142,7 +128,7 @@ function SystemWidget() {
       <Cpu className="w-3 h-3" />
       <span>{stats.cpu.toFixed(0)}%</span>
       <span className="text-console-border">/</span>
-      <MemoryStick className="w-3 h-3" />
+      <Memory className="w-3 h-3" />
       <span>{stats.memUsed.toFixed(1)}G</span>
     </button>
   );
@@ -172,7 +158,7 @@ function FullscreenButton() {
       className="p-1 text-console-dim hover:text-console-muted transition-colors rounded hover:bg-console-faint/50"
       title={isFs ? "Exit fullscreen" : "Fullscreen"}
     >
-      {isFs ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
+      {isFs ? <ArrowsInSimple className="w-3.5 h-3.5" /> : <ArrowsOutSimple className="w-3.5 h-3.5" />}
     </button>
   );
 }
@@ -262,7 +248,7 @@ export function ToggleBar() {
         >
           <Gauge className="w-3 h-3" />
           <span>Limits</span>
-          <ExternalLink className="w-2.5 h-2.5" />
+          <ArrowSquareOut className="w-2.5 h-2.5" />
         </a>
         <FullscreenButton />
         <ThemeToggle />

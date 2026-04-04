@@ -18,7 +18,7 @@ const STATUS_LABEL: Record<string, { text: string; class: string }> = {
 export function AgentList({ agents }: AgentListProps) {
   if (agents.length === 0) {
     return (
-      <div className="text-[10px] text-[var(--text-tertiary)] text-center py-4">
+      <div className="text-body-sm text-[var(--text-tertiary)] text-center py-4">
         No agents assigned
       </div>
     );
@@ -37,7 +37,7 @@ export function AgentList({ agents }: AgentListProps) {
           >
             {/* Avatar dot */}
             <div
-              className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[8px] font-bold text-white"
+              className="w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[9px] font-bold text-white"
               style={{ backgroundColor: color }}
             >
               {agent.name.charAt(0).toUpperCase()}
@@ -46,7 +46,7 @@ export function AgentList({ agents }: AgentListProps) {
             {/* Name + task */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-medium text-[var(--text-primary)] truncate">
+                <span className="text-body-sm font-medium text-[var(--text-primary)] truncate">
                   {agent.name}
                 </span>
                 {agent.status === "working" && (
@@ -54,14 +54,14 @@ export function AgentList({ agents }: AgentListProps) {
                 )}
               </div>
               {agent.currentTask && (
-                <p className="text-[9px] text-[var(--text-secondary)] truncate mt-0.5">
+                <p className="text-label-xs text-[var(--text-secondary)] truncate mt-0.5">
                   {agent.currentTask}
                 </p>
               )}
             </div>
 
             {/* Status */}
-            <span className={cn("text-[9px] font-medium shrink-0", statusInfo.class)}>
+            <span className={cn("text-label-xs font-medium shrink-0", statusInfo.class)}>
               {statusInfo.text}
             </span>
           </div>

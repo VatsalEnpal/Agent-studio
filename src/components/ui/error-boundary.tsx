@@ -1,7 +1,7 @@
 "use client";
 
 import { Component, type ReactNode } from "react";
-import { AlertTriangle, RotateCcw } from "lucide-react";
+import { Warning, ArrowCounterClockwise } from "@phosphor-icons/react";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -31,7 +31,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (this.state.hasError) {
       return (
         <div className="flex flex-col items-center justify-center h-full gap-3 p-4">
-          <AlertTriangle className="w-6 h-6 text-console-error" />
+          <Warning className="w-6 h-6 text-console-error" />
           <p className="text-xs text-console-muted text-center">
             {this.props.fallbackLabel ?? "Something went wrong"}
           </p>
@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             onClick={this.handleRetry}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded bg-console-faint text-console-text hover:bg-console-faint/70 active:scale-95 transition-all"
           >
-            <RotateCcw className="w-3 h-3" />
+            <ArrowCounterClockwise className="w-3 h-3" />
             Retry
           </button>
         </div>

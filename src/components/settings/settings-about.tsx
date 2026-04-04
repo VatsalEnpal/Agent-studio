@@ -1,12 +1,12 @@
 "use client";
 
-import { Info } from "lucide-react";
+import { Info } from "@phosphor-icons/react";
 
 export function SettingsAbout() {
   return (
     <section className="border border-console-border rounded-lg bg-console-panel">
       <div className="px-4 py-3 border-b border-console-border">
-        <h3 className="text-xs font-medium text-console-text flex items-center gap-1.5">
+        <h3 className="text-body-sm font-medium text-console-text flex items-center gap-1.5">
           <Info className="w-3.5 h-3.5" />
           About
         </h3>
@@ -25,8 +25,8 @@ export function SettingsAbout() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-[10px] text-console-dim">{label}</span>
-      <span className="text-[10px] text-console-text font-mono">{value}</span>
+      <span className="text-body-sm text-console-dim">{label}</span>
+      <span className="text-body-sm text-console-text">{value}</span>
     </div>
   );
 }

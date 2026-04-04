@@ -22,6 +22,7 @@ export interface Session {
   status: SessionStatus;
   exitCode?: number;
   createdAt: number;
+  updatedAt: number;
   meta?: SessionMeta;
 }
 

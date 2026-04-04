@@ -2,25 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import {
-  Rocket,
-  FolderOpen,
-  Brain,
-  Settings,
-  ChevronRight,
-  ChevronLeft,
-  Plus,
-  X,
-  Check,
-  AlertTriangle,
-  Loader2,
-  Users,
-  GitBranch,
-  Bell,
-  Sparkles,
-  Pencil,
-  RotateCcw,
-} from "lucide-react";
+import { Rocket, FolderOpen, Brain, Gear, CaretRight, CaretLeft, Plus, X, Check, Warning, SpinnerGap, Users, GitBranch, Bell, Sparkle, PencilSimple, ArrowCounterClockwise } from "@phosphor-icons/react";
 
 interface ProjectEntry {
   name: string;
@@ -641,7 +623,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
                 : "text-console-muted hover:text-console-text",
             )}
           >
-            <ChevronLeft className="w-3 h-3" />
+            <CaretLeft className="w-3 h-3" />
             Back
           </button>
 
@@ -661,7 +643,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               )}
             >
               Next
-              <ChevronRight className="w-3 h-3" />
+              <CaretRight className="w-3 h-3" />
             </button>
           ) : (
             <button
@@ -670,7 +652,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium rounded bg-console-success/80 text-black hover:bg-console-success transition-all disabled:opacity-50"
             >
               {saving || scaffolding ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
+                <SpinnerGap className="w-3 h-3 animate-spin" />
               ) : (
                 <Check className="w-3 h-3" />
               )}
@@ -719,7 +701,7 @@ function WelcomeStep({
         )}
         {detecting ? (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-console-accent/10 border border-console-accent/20 rounded-full text-[10px] text-console-accent">
-            <Loader2 className="w-3 h-3 animate-spin" />
+            <SpinnerGap className="w-3 h-3 animate-spin" />
             Scanning for projects...
           </span>
         ) : detectedCount > 0 ? (
@@ -832,7 +814,7 @@ function ProjectsStep({
       {/* Scanning indicator */}
       {detecting && (
         <div className="flex items-center gap-2 px-3 py-3 bg-console-accent/5 border border-console-accent/20 rounded text-xs text-console-accent">
-          <Loader2 className="w-4 h-4 animate-spin" />
+          <SpinnerGap className="w-4 h-4 animate-spin" />
           Scanning your machine for projects...
         </div>
       )}
@@ -945,7 +927,7 @@ function ProjectsStep({
 
       {projects.length > 0 && projects.some((p) => p.isProd) && (
         <div className="flex items-start gap-2 px-3 py-2 bg-yellow-500/5 border border-yellow-500/20 rounded text-[10px] text-yellow-400">
-          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <Warning className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           Production repos require confirmation for commits and pushes.
         </div>
       )}
@@ -1129,7 +1111,7 @@ function DescribeProjectStep({
     <div className="space-y-4">
       <div>
         <h2 className="text-sm font-semibold text-console-text mb-1">
-          <Sparkles className="w-4 h-4 inline mr-1.5 -mt-0.5 text-console-accent" />
+          <Sparkle className="w-4 h-4 inline mr-1.5 -mt-0.5 text-console-accent" />
           Tell us about your project
         </h2>
         <p className="text-xs text-console-dim">
@@ -1151,9 +1133,9 @@ function DescribeProjectStep({
         className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-console-accent bg-console-accent/5 hover:bg-console-accent/10 border border-console-accent/20 hover:border-console-accent/40 rounded transition-all disabled:opacity-50"
       >
         {scanning ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          <SpinnerGap className="w-3.5 h-3.5 animate-spin" />
         ) : (
-          <Settings className="w-3.5 h-3.5" />
+          <Gear className="w-3.5 h-3.5" />
         )}
         {scanning ? "Scanning..." : "Scan project for tech stack"}
       </button>
@@ -1254,7 +1236,7 @@ function AgentTeamStep({
     return (
       <div className="flex flex-col items-center text-center pt-10 space-y-4">
         <div className="w-12 h-12 rounded-xl bg-console-accent/10 border border-console-accent/20 flex items-center justify-center">
-          <Loader2 className="w-6 h-6 text-console-accent animate-spin" />
+          <SpinnerGap className="w-6 h-6 text-console-accent animate-spin" />
         </div>
         <div>
           <p className="text-sm font-medium text-console-text">
@@ -1277,7 +1259,7 @@ function AgentTeamStep({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-semibold text-console-text mb-0.5">
-              <Sparkles className="w-4 h-4 inline mr-1.5 -mt-0.5 text-console-accent" />
+              <Sparkle className="w-4 h-4 inline mr-1.5 -mt-0.5 text-console-accent" />
               AI-Generated Agents
             </h2>
             <p className="text-[10px] text-console-dim">
@@ -1323,7 +1305,7 @@ function AgentTeamStep({
                   className="p-1 text-console-dim hover:text-console-accent transition-colors"
                   title="Edit agent definition"
                 >
-                  <Pencil className="w-3 h-3" />
+                  <PencilSimple className="w-3 h-3" />
                 </button>
               </label>
               {editingAgentId === agent.id && (
@@ -1359,7 +1341,7 @@ function AgentTeamStep({
             onClick={() => void triggerAiGeneration()}
             className="flex items-center gap-1 px-2.5 py-1 text-[10px] text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
           >
-            <RotateCcw className="w-2.5 h-2.5" />
+            <ArrowCounterClockwise className="w-2.5 h-2.5" />
             Regenerate
           </button>
           <span className="text-[10px] text-console-dim ml-auto">
@@ -1391,16 +1373,16 @@ function AgentTeamStep({
           onClick={() => void triggerAiGeneration()}
           className="flex items-center gap-2 w-full px-3 py-2.5 text-xs font-medium text-console-accent bg-console-accent/5 hover:bg-console-accent/10 border border-console-accent/20 hover:border-console-accent/40 rounded transition-all"
         >
-          <Sparkles className="w-4 h-4" />
+          <Sparkle className="w-4 h-4" />
           <span>Generate agents tailored to your project with AI</span>
-          <ChevronRight className="w-3 h-3 ml-auto" />
+          <CaretRight className="w-3 h-3 ml-auto" />
         </button>
       )}
 
       {/* AI error message */}
       {aiGen.status === "error" && (
         <div className="flex items-start gap-2 px-3 py-2 bg-yellow-500/5 border border-yellow-500/20 rounded text-[10px] text-yellow-400">
-          <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <Warning className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
             AI generation failed: {aiGen.error}. Using generic templates instead.
           </span>
@@ -1612,7 +1594,7 @@ function AutomationStep({
           </h3>
           {suggestionsLoading ? (
             <div className="flex items-center gap-2 px-3 py-4 text-xs text-console-dim">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <SpinnerGap className="w-3.5 h-3.5 animate-spin" />
               Analyzing project...
             </div>
           ) : (
@@ -1780,7 +1762,7 @@ function PreferencesStep({
     <div className="space-y-5">
       <div>
         <h2 className="text-sm font-semibold text-console-text mb-1">
-          <Settings className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+          <Gear className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           Quick Preferences
         </h2>
         <p className="text-xs text-console-dim">

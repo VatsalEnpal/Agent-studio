@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { X, Clock, Loader2, Pencil } from "lucide-react";
+import { X, Clock, SpinnerGap, PencilSimple } from "@phosphor-icons/react";
 import { cn, statusDotColor } from "@/lib/utils";
 import { useSessionUsage } from "@/hooks/use-usage";
 import type { Session } from "@/lib/types";
@@ -158,7 +158,7 @@ export function SessionItem({
               className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-white/10 shrink-0"
               title="Rename session"
             >
-              <Pencil className="w-3 h-3 text-console-dim" />
+              <PencilSimple className="w-3 h-3 text-console-dim" />
             </button>
           </>
         )}
@@ -191,7 +191,7 @@ export function SessionItem({
           )}
           title={killing ? "Killing..." : "Kill session"}
         >
-          {killing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
+          {killing ? <SpinnerGap className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
         </button>
       </div>
 

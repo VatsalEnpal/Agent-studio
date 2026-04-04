@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { Pencil, X, Loader2 } from "lucide-react";
+import { PencilSimple, X, SpinnerGap, ArrowCounterClockwise } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { contextColor } from "@/lib/design-tokens";
 import { useSessionUsage } from "@/hooks/use-usage";
@@ -39,6 +39,30 @@ function clearCustomName(sessionId: string): void {
   }
 }
 
+function relativeTime(ts: number): string {
+  const diff = Date.now() - ts;
+  if (diff < 60_000) return "just now";
+  if (diff < 3600_000) return `${Math.floor(diff / 60_000)}m ago`;
+  if (diff < 86400_000) return `${Math.floor(diff / 3600_000)}h ago`;
+  if (diff < 172800_000) return "Yesterday";
+  if (diff < 604800_000) return `${Math.floor(diff / 86400_000)}d ago`;
+  return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function readableName(session: Session): string {
+  const name = session.name;
+  const genericNames = new Set([
+    "claude", "claude-opus", "claude-sonnet", "claude-haiku",
+    "opus", "sonnet", "haiku",
+  ]);
+  if (genericNames.has(name.toLowerCase())) {
+    // Use the last segment of cwd as the display name
+    const basename = session.cwd.split("/").filter(Boolean).pop();
+    if (basename) return basename;
+  }
+  return name;
+}
+
 function statusDotClass(status: string): string {
   switch (status) {
     case "active":
@@ -63,6 +87,7 @@ interface SessionCardProps {
   selected: boolean;
   onSelect: () => void;
   onKill: () => void;
+  onResume?: () => void;
 }
 
 export function SessionCard({
@@ -70,8 +95,10 @@ export function SessionCard({
   selected,
   onSelect,
   onKill,
+  onResume,
 }: SessionCardProps) {
   const [killing, setKilling] = useState(false);
+  const [resuming, setResuming] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
   const [customNameState, setCustomNameState] = useState<string | null>(
@@ -89,7 +116,7 @@ export function SessionCard({
   const agentName = session.meta?.agent && session.meta.agent !== "none"
     ? session.meta.agent
     : null;
-  const displayName = customNameState || session.name;
+  const displayName = customNameState || readableName(session);
 
   const startEditing = useCallback(() => {
     setEditValue(displayName);
@@ -115,6 +142,15 @@ export function SessionCard({
     onKill();
     setTimeout(() => setKilling(false), 3000);
   }, [killing, onKill]);
+
+  const handleResume = useCallback(() => {
+    if (resuming || !onResume) return;
+    setResuming(true);
+    onResume();
+    setTimeout(() => setResuming(false), 5000);
+  }, [resuming, onResume]);
+
+  const isExited = session.status === "exited";
 
   return (
     <div
@@ -175,36 +211,67 @@ export function SessionCard({
             )}
             title="Rename session"
           >
-            <Pencil className="size-3" />
+            <PencilSimple size={12} weight="light" />
           </button>
         )}
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleKill();
-          }}
-          disabled={killing}
-          className={cn(
-            "p-0.5 rounded shrink-0",
-            "transition-all duration-[var(--duration-instant)]",
-            killing
-              ? "text-error opacity-70 cursor-not-allowed"
-              : cn(
-                  "text-text-tertiary hover:text-error",
-                  selected
-                    ? "opacity-70 hover:opacity-100"
-                    : "opacity-0 group-hover:opacity-100",
-                ),
-          )}
-          title={killing ? "Killing..." : "Kill session"}
-        >
-          {killing ? (
-            <Loader2 className="size-3 animate-spin" />
-          ) : (
-            <X className="size-3" />
-          )}
-        </button>
+        {isExited && onResume ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleResume();
+            }}
+            disabled={resuming}
+            className={cn(
+              "flex items-center gap-0.5 px-1.5 py-0.5 rounded shrink-0",
+              "text-label-xs font-medium",
+              "transition-all duration-[var(--duration-instant)]",
+              resuming
+                ? "text-text-tertiary cursor-not-allowed"
+                : cn(
+                    "text-accent hover:bg-accent/10",
+                    selected
+                      ? "opacity-80"
+                      : "opacity-0 group-hover:opacity-100",
+                  ),
+            )}
+            title="Resume session"
+          >
+            {resuming ? (
+              <SpinnerGap size={12} weight="light" className="animate-spin" />
+            ) : (
+              <ArrowCounterClockwise size={12} weight="light" />
+            )}
+            {resuming ? "Resuming" : "Resume"}
+          </button>
+        ) : (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleKill();
+            }}
+            disabled={killing}
+            className={cn(
+              "p-0.5 rounded shrink-0",
+              "transition-all duration-[var(--duration-instant)]",
+              killing
+                ? "text-error opacity-70 cursor-not-allowed"
+                : cn(
+                    "text-text-tertiary hover:text-error",
+                    selected
+                      ? "opacity-70 hover:opacity-100"
+                      : "opacity-0 group-hover:opacity-100",
+                  ),
+            )}
+            title={killing ? "Killing..." : "Kill session"}
+          >
+            {killing ? (
+              <SpinnerGap size={12} weight="light" className="animate-spin" />
+            ) : (
+              <X size={12} weight="light" />
+            )}
+          </button>
+        )}
       </div>
 
       {/* Row 2: agent name + context bar + model + cost */}
@@ -253,6 +320,12 @@ export function SessionCard({
         {costDisplay && (
           <span className="text-label-xs text-text-tertiary shrink-0">
             {costDisplay}
+          </span>
+        )}
+
+        {session.updatedAt > 0 && (
+          <span className="text-label-xs text-text-tertiary shrink-0">
+            {relativeTime(session.updatedAt)}
           </span>
         )}
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Cpu, Clock, X } from "lucide-react";
+import { Cpu, Clock, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useSessionsStore } from "@/stores/sessions";
 import { SessionGroup } from "@/components/sessions/session-group";

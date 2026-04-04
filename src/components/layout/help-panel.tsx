@@ -2,16 +2,7 @@
 
 import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import {
-  HelpCircle,
-  X,
-  Terminal,
-  Users,
-  Brain,
-  FileBarChart,
-  Settings,
-  ExternalLink,
-} from "lucide-react";
+import { Question, X, Terminal, Users, Brain, ChartBar, Gear, ArrowSquareOut } from "@phosphor-icons/react";
 
 const HOWTO_URL =
   "https://github.com/VatsalEnpal/Agent-studio/blob/main/HOWTO.md";
@@ -26,7 +17,7 @@ export function HelpPanel() {
           className="flex items-center justify-center w-7 h-7 rounded-md text-console-muted hover:text-console-text hover:bg-white/10 transition-all"
           title="Help & Guide"
         >
-          <HelpCircle className="w-4 h-4" />
+          <Question className="w-4 h-4" />
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -86,12 +77,12 @@ export function HelpPanel() {
                   desc="Browse agent knowledge base"
                 />
                 <FeatureRow
-                  icon={<FileBarChart className="w-3.5 h-3.5" />}
+                  icon={<ChartBar className="w-3.5 h-3.5" />}
                   name="Reports"
                   desc="Review automation results"
                 />
                 <FeatureRow
-                  icon={<Settings className="w-3.5 h-3.5" />}
+                  icon={<Gear className="w-3.5 h-3.5" />}
                   name="Settings"
                   desc="Configure workspace, automations, theme"
                 />
@@ -107,7 +98,7 @@ export function HelpPanel() {
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-xs text-console-accent hover:underline"
             >
-              <ExternalLink className="w-3.5 h-3.5" />
+              <ArrowSquareOut className="w-3.5 h-3.5" />
               Full How-To Guide
             </a>
           </div>

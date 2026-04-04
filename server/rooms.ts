@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { getAgentSystemBase } from "./config.js";
@@ -33,6 +33,97 @@ export interface Room {
   contextFile: string;
   createdAt: string;
   active: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// PTY artifact detection and cleanup
+// Old rooms captured raw terminal output — ANSI codes, spinners, Claude Code
+// UI chrome.  Strip it on load so the chat UI shows clean text.
+// ---------------------------------------------------------------------------
+
+const PTY_ARTIFACT_RE = [
+  /\x1B\[[0-9;]*[a-zA-Z]/g,                     // standard ANSI escape
+  /\x1B\][^\x07\x1B]*(?:\x07|\x1B\\)/g,         // OSC sequences
+  /\x1B\[[\?]?[0-9;]*[a-zA-Z]/g,                // private mode
+  /\[>[0-9]+[a-z]/g,                              // DEC sequences
+  /\x1B/g,                                        // leftover ESC
+  /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g,          // control chars
+  /[✢✶✻✽✳⏺❯·⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏●⎿▗▖▘▝▀▄█▌▐░▒▓]/g,     // spinner / UI / block glyphs
+  /[─━│┃┌┐└┘├┤┬┴┼╋╌╍╎╏═║╒╓╔╕╖╗╘╙╚╛╜╝╞╟╠╡╢╣╤╥╦╧╨╩╪╫╬──]+/g, // box-drawing characters
+  /https?:\/\/claude\.ai\/code\/session_[a-zA-Z0-9]+/g,          // Claude Code session URLs
+];
+
+/** Lines that are pure Claude Code UI chrome — remove entirely */
+const UI_CHROME_RE = [
+  /ctrl\+o\s+to\s+expand/i,
+  /\/remote-control\s+is\s+active/i,
+  /Please\s+upgrade\s+to\s+the\s+latest\s+version\s+of\s+the\s+Claude/i,
+  /Reading\s+\d+\s+files?/i,
+  /Read\s+\d+\s+files?/i,
+  /Searching\s+for\s+\d+\s+pattern/i,
+  /Listing\s+\d+\s+director/i,
+  /^Code\s+in\s+CLI\s+or\s+at$/i,
+  /^ClaudeCode\s*v[\d.]+/i,
+  /^Opus\s*[\d.]+\s*(with|medium|high)/i,
+  /^@\w+~\/Code\//i,
+  /^Searched\s+for\s+\d+\s+pattern/i,
+];
+
+/** Claude Code "verbing" spinners — e.g. "Misting…", "Dilly-dallying…", "Skedaddling…", "Caramelizing…" */
+const SPINNER_VERB_RE = /^[A-Z][a-z]+(?:-[a-z]+)*ing[…\.]{0,3}\s*$/;
+
+function sanitizePtyMessage(text: string): string {
+  let cleaned = text;
+
+  // Strip ANSI and control sequences
+  for (const re of PTY_ARTIFACT_RE) {
+    cleaned = cleaned.replace(re, "");
+  }
+
+  // Remove lines that are pure UI chrome or spinner verbs
+  const lines = cleaned.split("\n").filter(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return false; // blank
+    if (SPINNER_VERB_RE.test(trimmed)) return false;
+    if (UI_CHROME_RE.some(re => re.test(trimmed))) return false;
+    // Single-character junk lines (leftover from character-at-a-time PTY capture)
+    if (trimmed.length <= 2 && !/[a-zA-Z0-9]/.test(trimmed)) return false;
+    // Lines that are mostly non-alpha (symbols, dots, dashes)
+    const alpha = (trimmed.match(/[a-zA-Z]/g) || []).length;
+    if (trimmed.length > 5 && alpha / trimmed.length < 0.3) return false;
+    // Repeated "verbing" words on same line (e.g., "Dilly-dallying.. Dilly-dallying..")
+    if (/([A-Z][a-z]+-?[a-z]*ing).*\1/i.test(trimmed)) return false;
+    return true;
+  });
+
+  cleaned = lines.join("\n")
+    .replace(/ {3,}/g, "  ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  // If after cleanup the message is very short or mostly non-alpha, it's garbage
+  if (!cleaned) return "[Terminal output — legacy session]";
+  const alphaCount = (cleaned.match(/[a-zA-Z]/g) || []).length;
+  if (alphaCount / Math.max(cleaned.length, 1) < 0.2) {
+    return "[Terminal output — legacy session]";
+  }
+
+  return cleaned;
+}
+
+/** Returns true if the raw message looks like it came from a PTY session */
+function hasPtyArtifacts(text: string): boolean {
+  if (!text) return false;
+  // Check for ANSI escapes
+  if (/\x1B/.test(text)) return true;
+  // Check for Claude Code spinner glyphs
+  if (/[✢✶✻✽✳⏺❯·⎿]/.test(text)) return true;
+  // Check for Claude Code UI phrases
+  if (/ctrl\+o\s+to\s+expand/i.test(text)) return true;
+  if (/\/remote-control\s+is\s+active/i.test(text)) return true;
+  // Check for the "Verbing…" spinner pattern appearing multiple times
+  if ((text.match(/[A-Z][a-z]+ing…/g) || []).length >= 2) return true;
+  return false;
 }
 
 const DANGEROUS_PATTERNS = [
@@ -258,7 +349,9 @@ export class RoomManager extends EventEmitter {
     const roomDir = join(this.roomsDir, room.id);
     if (!existsSync(roomDir)) mkdirSync(roomDir, { recursive: true });
     const file = join(roomDir, "room.json");
-    writeFileSync(file, JSON.stringify(room, null, 2));
+    const tmpFile = file + ".tmp";
+    writeFileSync(tmpFile, JSON.stringify(room, null, 2));
+    renameSync(tmpFile, file);
   }
 
   private loadRooms(): void {
@@ -272,6 +365,14 @@ export class RoomManager extends EventEmitter {
             // Filter out broken agents (missing id or name) and reset status
             room.agents = (room.agents ?? []).filter(a => a && a.id && a.name);
             room.agents.forEach(a => { a.status = "offline"; a.sessionId = undefined; });
+
+            // Sanitize legacy PTY messages
+            for (const msg of room.messages) {
+              if (msg.type !== "system" && msg.text && hasPtyArtifacts(msg.text)) {
+                msg.text = sanitizePtyMessage(msg.text);
+              }
+            }
+
             this.rooms.set(room.id, room);
           } catch {
             // skip corrupt files

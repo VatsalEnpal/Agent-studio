@@ -18,18 +18,24 @@
   "scripts": {
     "dev": "tsx server/index.ts",
     "build": "next build",
+    "build:server": "node scripts/build-server.mjs",
+    "build:all": "npm run build && npm run build:server",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:smoke": "bash scripts/smoke-test.sh",
     "electron": "electron electron/main.js",
     "electron:dev": "concurrently \"npm run dev\" \"sleep 8 && EXTERNAL_SERVER_PORT=8080 electron electron/main.js\"",
-    "build:mac": "electron-builder --mac",
-    "build:win": "electron-builder --win",
-    "build:linux": "electron-builder --linux"
+    "build:mac": "npm run build:all && electron-builder --mac",
+    "build:win": "npm run build:all && electron-builder --win",
+    "build:linux": "npm run build:all && electron-builder --linux",
+    "postbuild:mac": "npm rebuild node-pty",
+    "postbuild:win": "npm rebuild node-pty",
+    "postbuild:linux": "npm rebuild node-pty"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.90",
+    "@phosphor-icons/react": "^2.1.10",
     "@radix-ui/react-dialog": "^1.1.0",
     "@radix-ui/react-dropdown-menu": "^2.1.0",
     "@radix-ui/react-tooltip": "^1.1.0",
@@ -67,6 +73,7 @@
     "concurrently": "^9.2.1",
     "electron": "^41.1.1",
     "electron-builder": "^26.8.1",
+    "esbuild": "^0.27.7",
     "postcss": "^8",
     "supertest": "^7.2.2",
     "tsx": "^4.19.0",
@@ -83,20 +90,20 @@
       ],
       "icon": "public/icon.png"
     },
+    "asar": false,
     "files": [
+      "dist-server/**/*",
       "server/**/*",
       "src/**/*",
       "public/**/*",
       "electron/**/*",
+      ".next/**/*",
+      "node_modules/**/*",
       "package.json",
       "next.config.mjs",
       "tailwind.config.ts",
       "tsconfig.json",
-      "postcss.config.mjs",
-      "node_modules/**/*"
-    ],
-    "extraResources": [
-      "node_modules/**/*"
+      "postcss.config.mjs"
     ]
   }
 }

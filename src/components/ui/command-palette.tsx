@@ -8,16 +8,16 @@ import {
   useState,
 } from "react";
 import {
-  Search,
+  MagnifyingGlass,
   Terminal,
-  MessageCircle,
+  ChatCircle,
   Play,
   Brain,
   Plus,
   ArrowRight,
   CheckCircle,
-  type LucideIcon,
-} from "lucide-react";
+  type Icon as PhosphorIcon,
+} from "@phosphor-icons/react";
 import { useUIStore } from "@/stores/ui";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +36,7 @@ export interface CommandItem {
   id: string;
   label: string;
   category: CommandCategory;
-  icon: LucideIcon;
+  icon: PhosphorIcon;
   keywords?: string[];
   onSelect: () => void;
   /** Recently used timestamp — higher = more recent */
@@ -46,7 +46,7 @@ export interface CommandItem {
 interface CommandGroup {
   category: CommandCategory;
   label: string;
-  icon: LucideIcon;
+  icon: PhosphorIcon;
   items: CommandItem[];
 }
 
@@ -56,10 +56,10 @@ interface CommandGroup {
 
 const categoryMeta: Record<
   CommandCategory,
-  { label: string; icon: LucideIcon }
+  { label: string; icon: PhosphorIcon }
 > = {
   sessions: { label: "Sessions", icon: Terminal },
-  rooms: { label: "Rooms", icon: MessageCircle },
+  rooms: { label: "Rooms", icon: ChatCircle },
   sprints: { label: "Sprints", icon: Play },
   memory: { label: "Memory", icon: Brain },
   actions: { label: "Actions", icon: ArrowRight },
@@ -167,7 +167,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
         id: "action-go-teams",
         label: "Go to Teams",
         category: "actions" as CommandCategory,
-        icon: MessageCircle,
+        icon: ChatCircle,
         keywords: ["switch", "navigate", "rooms", "page"],
         onSelect: () => {
           setOpen(false);
@@ -343,9 +343,10 @@ export function CommandPalette({ items }: CommandPaletteProps) {
       >
         {/* Search input */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle">
-          <Search
-            className="size-5 text-text-tertiary shrink-0"
-            strokeWidth={1.75}
+          <MagnifyingGlass
+            size={20}
+            weight="light"
+            className="text-text-tertiary shrink-0"
           />
           <input
             ref={inputRef}
@@ -394,8 +395,9 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                   {/* Category header */}
                   <div className="flex items-center gap-2 px-4 py-1.5">
                     <GroupIcon
-                      className="size-3 text-text-tertiary"
-                      strokeWidth={2}
+                      size={12}
+                      weight="light"
+                      className="text-text-tertiary"
                     />
                     <span className="text-label-xs text-text-tertiary uppercase tracking-wider">
                       {group.label}
@@ -426,13 +428,14 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                         )}
                       >
                         <ItemIcon
+                          size={16}
+                          weight="light"
                           className={cn(
-                            "size-4 shrink-0",
+                            "shrink-0",
                             isSelected
                               ? "text-accent"
                               : "text-text-secondary",
                           )}
-                          strokeWidth={1.75}
                         />
                         <span className="flex-1 truncate">{item.label}</span>
                         {isSelected && (

@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
-  ChevronDown,
-  ChevronRight,
+  CaretDown,
+  CaretRight,
   GitBranch,
   Globe,
   Play,
   Square,
-  ExternalLink,
+  ArrowSquareOut,
   Plus,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useSessionsStore } from "@/stores/sessions";
 import { useGitStore } from "@/stores/git";
@@ -46,9 +46,9 @@ function SectionHeader({
     >
       {collapsible &&
         (collapsed ? (
-          <ChevronRight className="size-3" />
+          <CaretRight size={12} weight="light" />
         ) : (
-          <ChevronDown className="size-3" />
+          <CaretDown size={12} weight="light" />
         ))}
       <span>{label}</span>
       {count != null && count > 0 && (
@@ -83,7 +83,7 @@ function RepoCard({
       )}
     >
       <div className="flex items-center gap-2">
-        <GitBranch className="size-3.5 text-text-secondary shrink-0" />
+        <GitBranch size={14} weight="light" className="text-text-secondary shrink-0" />
         <span className="text-body-sm font-medium text-text-primary truncate flex-1">
           {repo.name}
         </span>
@@ -163,7 +163,7 @@ function ServerCard({
         "transition-colors duration-[var(--duration-quick)]",
       )}
     >
-      <Globe className="size-3.5 text-text-secondary shrink-0" />
+      <Globe size={14} weight="light" className="text-text-secondary shrink-0" />
       <span className="text-body-sm text-text-primary truncate flex-1">
         {server.name}
       </span>
@@ -179,7 +179,7 @@ function ServerCard({
         className="p-0.5 text-text-tertiary hover:text-text-secondary transition-colors"
         title={isRunning ? "Stop" : "Start"}
       >
-        {isRunning ? <Square className="size-3" /> : <Play className="size-3" />}
+        {isRunning ? <Square size={12} weight="light" /> : <Play size={12} weight="light" />}
       </button>
       {isRunning && (
         <button
@@ -187,7 +187,7 @@ function ServerCard({
           className="p-0.5 text-text-tertiary hover:text-text-secondary transition-colors"
           title="Open in browser"
         >
-          <ExternalLink className="size-3" />
+          <ArrowSquareOut size={12} weight="light" />
         </button>
       )}
     </div>
@@ -215,7 +215,7 @@ function groupSessionsByDate(sessions: Session[]): {
   };
 
   for (const s of sessions) {
-    const t = s.createdAt;
+    const t = s.updatedAt || s.createdAt;
     if (t >= todayStart) groups["Today"].push(s);
     else if (t >= yesterdayStart) groups["Yesterday"].push(s);
     else if (t >= weekStart) groups["This Week"].push(s);
@@ -234,6 +234,7 @@ function groupSessionsByDate(sessions: Session[]): {
 interface SessionSidebarProps {
   onNewSession: () => void;
   onKillSession: (id: string) => void;
+  onResumeSession?: (session: Session) => void;
   onRepoClick?: (repo: RepoStatus) => void;
   onPR?: (repo: RepoStatus) => void;
   onPush?: (repo: RepoStatus) => void;
@@ -242,6 +243,7 @@ interface SessionSidebarProps {
 export function SessionSidebar({
   onNewSession,
   onKillSession,
+  onResumeSession,
   onRepoClick,
   onPR,
   onPush,
@@ -271,6 +273,39 @@ export function SessionSidebar({
     [exitedSessions],
   );
 
+  const handleResume = useCallback(
+    async (session: Session) => {
+      if (onResumeSession) {
+        onResumeSession(session);
+        return;
+      }
+      // Default: create a new session with --resume flag
+      const basename = session.cwd.split("/").filter(Boolean).pop() ?? session.name;
+      try {
+        await fetch("/api/sessions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: `${basename} (resumed)`,
+            command: "claude",
+            args: ["--resume", session.id, "--dangerously-skip-permissions"],
+            cwd: session.cwd,
+            meta: {
+              model: session.meta?.model ?? "sonnet",
+              agent: session.meta?.agent ?? "none",
+              permissions: "bypass",
+              channel: "none",
+              group: "standalone",
+            },
+          }),
+        });
+      } catch {
+        // Best effort
+      }
+    },
+    [onResumeSession],
+  );
+
   // Placeholder dev servers — will be wired via WS later
   const devServers: DevServer[] = [];
 
@@ -288,7 +323,7 @@ export function SessionSidebar({
             "transition-colors duration-[var(--duration-quick)]",
           )}
         >
-          <Plus className="size-3.5" />
+          <Plus size={14} weight="light" />
           New Session
         </button>
       </div>
@@ -376,6 +411,7 @@ export function SessionSidebar({
                       selected={session.id === focusedId}
                       onSelect={() => setFocused(session.id)}
                       onKill={() => onKillSession(session.id)}
+                      onResume={() => handleResume(session)}
                     />
                   ))}
                 </div>

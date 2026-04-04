@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { FileText, RefreshCw } from "lucide-react";
+import { FileText, ArrowClockwise } from "@phosphor-icons/react";
 import { useReportsStore, type Report } from "@/stores/reports";
 import { ReportCard } from "./report-card";
 import { ReportDetail } from "./report-detail";
@@ -91,7 +91,7 @@ export function ReportsView() {
             className="p-1 text-console-dim hover:text-console-muted transition-colors"
             title="Refresh reports"
           >
-            <RefreshCw className="w-3 h-3" />
+            <ArrowClockwise className="w-3 h-3" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto">

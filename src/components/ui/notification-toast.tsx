@@ -4,11 +4,11 @@ import { useCallback, useEffect, useRef, type ReactNode } from "react";
 import {
   Info,
   CheckCircle,
-  AlertTriangle,
+  Warning,
   XCircle,
   Bell,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { create } from "zustand";
 import { cn } from "@/lib/utils";
 
@@ -96,7 +96,7 @@ const typeConfig: Record<
     borderClass: "border-success/20",
   },
   warning: {
-    icon: AlertTriangle,
+    icon: Warning,
     colorClass: "text-warning",
     bgClass: "bg-warning-subtle",
     borderClass: "border-warning/20",
@@ -160,7 +160,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
     >
       {/* Icon */}
       <div className={cn("shrink-0 mt-0.5", config.colorClass)}>
-        <Icon className="size-4" strokeWidth={1.75} />
+        <Icon size={16} weight="light" />
       </div>
 
       {/* Content */}
@@ -208,7 +208,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
         )}
         aria-label="Dismiss notification"
       >
-        <X className="size-3.5" strokeWidth={1.75} />
+        <X size={14} weight="light" />
       </button>
     </div>
   );

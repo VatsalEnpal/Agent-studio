@@ -38,7 +38,7 @@ const MAX_BUFFER_SIZE = 100 * 1024; // 100KB per session
 export class TerminalManager {
   private sessions = new Map<
     string,
-    { session: Session; pty: pty.IPty; outputBuffer: string; ready: boolean; pendingWrites: string[] }
+    { session: Session; pty: pty.IPty | null; outputBuffer: string; ready: boolean; pendingWrites: string[] }
   >();
   private listeners = new Set<EventListener>();
   private spawnCount = 0;
@@ -102,6 +102,7 @@ export class TerminalManager {
       env,
     });
 
+    const now = Date.now();
     const session: Session = {
       id,
       name: opts.name,
@@ -110,7 +111,8 @@ export class TerminalManager {
       args,
       cwd,
       status: "active",
-      createdAt: Date.now(),
+      createdAt: now,
+      updatedAt: now,
       meta: opts.meta,
     };
 
@@ -150,6 +152,7 @@ export class TerminalManager {
         if (!flushTimer) {
           flushTimer = setTimeout(() => {
             if (pending) {
+              entry.session.updatedAt = Date.now();
               this.emit({
                 type: "terminal-data",
                 sessionId: id,
@@ -185,6 +188,7 @@ export class TerminalManager {
         if (entry) {
           entry.session.status = "exited";
           entry.session.exitCode = exitCode;
+          entry.pty = null;
         }
         this.spawnCount--;
         this.emit({
@@ -220,6 +224,9 @@ export class TerminalManager {
     if (!entry) {
       throw new Error(`Session ${id} not found`);
     }
+    if (!entry.pty) {
+      throw new Error(`Session ${id} has exited`);
+    }
     if (!entry.ready) {
       entry.pendingWrites.push(data);
       return;
@@ -232,6 +239,7 @@ export class TerminalManager {
     if (!entry) {
       throw new Error(`Session ${id} not found`);
     }
+    if (!entry.pty) return; // Exited session, ignore resize
     entry.pty.resize(cols, rows);
   }
 
@@ -239,6 +247,16 @@ export class TerminalManager {
     const entry = this.sessions.get(id);
     if (!entry) {
       throw new Error(`Session ${id} not found`);
+    }
+
+    // Already exited — just remove from history
+    if (entry.session.status === "exited" || !entry.pty) {
+      this.sessions.delete(id);
+      this.emit({
+        type: "sessions-update",
+        payload: this.listSessions(),
+      });
+      return;
     }
 
     const pid = entry.session.pid;
@@ -262,11 +280,12 @@ export class TerminalManager {
       }
     }, 2000);
 
-    // Step 3: After 3s total, force cleanup regardless
+    // Step 3: After 3s total, force cleanup — keep entry for history but null out pty
     setTimeout(() => {
-      if (this.sessions.has(id)) {
-        entry.session.status = "exited";
-        this.sessions.delete(id);
+      const e = this.sessions.get(id);
+      if (e && e.session.status !== "exited") {
+        e.session.status = "exited";
+        e.pty = null;
         this.emit({
           type: "sessions-update",
           payload: this.listSessions(),

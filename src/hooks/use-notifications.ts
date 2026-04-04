@@ -66,7 +66,7 @@ export function useNotifications() {
         // Fire native OS notification if enabled in prefs
         const prefs = getNotificationPrefs();
         if (prefs.sessionExit) {
-          notifySessionExit(session.name, typeof code === "number" ? code : -1);
+          notifySessionExit(session.name, typeof code === "number" ? code : -1, session.id);
         }
       }
     }

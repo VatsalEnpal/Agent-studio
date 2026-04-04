@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { Loader2, Rocket } from "lucide-react";
+import { SpinnerGap, Rocket } from "@phosphor-icons/react";
 import { useSprintsStore, type Sprint } from "@/stores/sprints";
 import { wsClient } from "@/lib/ws-client";
 import type { WsMessage } from "@/lib/types";
@@ -61,46 +61,28 @@ export function SprintsView() {
 
   const selectedSprint = sprints.find((s) => s.id === selectedSprintId);
 
+  // Sidebar is already provided by page.tsx SidebarShell — only render main content
   return (
-    <div className="flex h-full">
-      {/* Left sidebar */}
-      <div className="w-[240px] shrink-0 border-r border-console-border bg-console-panel flex flex-col h-full overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center flex-1 gap-2 text-console-dim">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            <span className="text-[10px]">Loading...</span>
+    <div className="h-full">
+      {selectedSprint ? (
+        <SprintDetail sprint={selectedSprint} />
+      ) : (
+        <div className="flex flex-col items-center justify-center h-full gap-3">
+          <div className="w-10 h-10 rounded-xl bg-elevation-2 flex items-center justify-center">
+            <Rocket className="w-5 h-5 text-text-tertiary" />
           </div>
-        ) : (
-          <SprintList
-            sprints={sprints}
-            selectedSprintId={selectedSprintId}
-            onSelect={selectSprint}
-          />
-        )}
-      </div>
-
-      {/* Main content */}
-      <div className="flex-1 min-w-0 min-h-0">
-        {selectedSprint ? (
-          <SprintDetail sprint={selectedSprint} />
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full gap-3 text-console-dim">
-            <div className="w-10 h-10 rounded-xl bg-console-faint/50 flex items-center justify-center">
-              <Rocket className="w-5 h-5" />
-            </div>
-            <p className="text-[11px] text-console-muted font-medium">
-              {sprints.length === 0
-                ? "No sprints found"
-                : "Select a sprint to view details"}
+          <p className="text-body-sm text-text-secondary font-medium">
+            {sprints.length === 0
+              ? "No sprints found"
+              : "Select a sprint to view details"}
+          </p>
+          {sprints.length === 0 && (
+            <p className="text-label-xs text-text-tertiary max-w-[240px] text-center leading-relaxed">
+              Sprints are created automatically by the PMO agent when it detects pending work in your projects.
             </p>
-            {sprints.length === 0 && (
-              <p className="text-[10px] text-console-dim max-w-[240px] text-center leading-relaxed">
-                Sprints are created automatically by the PMO agent when it detects pending work in your projects.
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

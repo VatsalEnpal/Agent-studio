@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Circle, Clock } from "lucide-react";
+import { Check, Circle, Clock } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { Sprint } from "@/stores/sprints";
 
@@ -41,8 +41,8 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-3 py-2.5 border-b border-console-border shrink-0">
-        <h3 className="text-[10px] font-medium text-console-muted uppercase tracking-wider">
+      <div className="px-3 py-2.5 border-b border-border shrink-0">
+        <h3 className="text-label-xs font-medium text-text-secondary uppercase tracking-wider">
           Sprints
         </h3>
       </div>
@@ -61,25 +61,25 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                   className={cn(
                     "w-full text-left px-2.5 py-2 rounded transition-colors",
                     sprint.id === selectedSprintId
-                      ? "bg-console-faint border-l-2 border-console-accent"
-                      : "hover:bg-console-faint/30 border-l-2 border-transparent",
+                      ? "bg-elevation-2 border-l-2 border-accent"
+                      : "hover:bg-elevation-2/30 border-l-2 border-transparent",
                   )}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-console-accent animate-pulse shrink-0" />
-                    <span className="text-[11px] font-medium text-console-text truncate flex-1">
+                    <span className="w-2 h-2 rounded-full bg-accent animate-pulse shrink-0" />
+                    <span className="text-body-sm font-medium text-text-primary truncate flex-1">
                       {sprint.name}
                     </span>
                   </div>
                   {/* Gate progress bar */}
                   <div className="mt-1.5 flex items-center gap-2">
-                    <div className="flex-1 h-1 bg-console-border rounded-full overflow-hidden">
+                    <div className="flex-1 h-1 bg-border rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-console-accent rounded-full transition-all"
+                        className="h-full bg-accent rounded-full transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="text-[8px] text-console-dim shrink-0">
+                    <span className="text-label-xs text-text-tertiary shrink-0">
                       {passed}/{total}
                     </span>
                   </div>
@@ -99,13 +99,13 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                 className={cn(
                   "w-full text-left px-2.5 py-2 rounded transition-colors",
                   sprint.id === selectedSprintId
-                    ? "bg-console-faint border-l-2 border-console-accent"
-                    : "hover:bg-console-faint/30 border-l-2 border-transparent",
+                    ? "bg-elevation-2 border-l-2 border-accent"
+                    : "hover:bg-elevation-2/30 border-l-2 border-transparent",
                 )}
               >
                 <div className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span className="text-[11px] font-medium text-console-muted truncate flex-1">
+                  <Check size={14} weight="light" className="text-emerald-400 shrink-0" />
+                  <span className="text-body-sm font-medium text-text-secondary truncate flex-1">
                     {sprint.name}
                   </span>
                 </div>
@@ -113,7 +113,7 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                   {sprint.qaScore != null && (
                     <span
                       className={cn(
-                        "text-[9px] font-medium",
+                        "text-label-xs font-medium",
                         sprint.qaScore >= 95
                           ? "text-emerald-400"
                           : sprint.qaScore >= 80
@@ -125,8 +125,8 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                     </span>
                   )}
                   {sprint.completedAt && (
-                    <span className="text-[8px] text-console-dim flex items-center gap-0.5">
-                      <Clock className="w-2.5 h-2.5" />
+                    <span className="text-label-xs text-text-tertiary flex items-center gap-0.5">
+                      <Clock size={12} weight="light" />
                       {formatDate(sprint.completedAt)}
                     </span>
                   )}
@@ -146,13 +146,13 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                 className={cn(
                   "w-full text-left px-2.5 py-2 rounded transition-colors",
                   sprint.id === selectedSprintId
-                    ? "bg-console-faint border-l-2 border-console-accent"
-                    : "hover:bg-console-faint/30 border-l-2 border-transparent",
+                    ? "bg-elevation-2 border-l-2 border-accent"
+                    : "hover:bg-elevation-2/30 border-l-2 border-transparent",
                 )}
               >
                 <div className="flex items-center gap-2">
-                  <Circle className="w-3 h-3 text-console-dim shrink-0" />
-                  <span className="text-[11px] font-medium text-console-dim truncate">
+                  <Circle size={12} weight="light" className="text-text-tertiary shrink-0" />
+                  <span className="text-body-sm font-medium text-text-tertiary truncate">
                     {sprint.name}
                   </span>
                 </div>
@@ -163,7 +163,7 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
 
         {/* Empty state */}
         {sprints.length === 0 && (
-          <div className="text-[10px] text-console-dim text-center py-6 px-2 leading-relaxed">
+          <div className="text-body-sm text-text-tertiary text-center py-8 px-4 leading-relaxed">
             No sprints found.
             <br />
             The PMO agent creates sprints automatically.
@@ -183,8 +183,8 @@ function SprintSection({
 }) {
   return (
     <div>
-      <div className="px-2 pb-1">
-        <span className="text-[8px] font-medium text-console-dim uppercase tracking-wider">
+      <div className="px-2 pb-1.5">
+        <span className="text-label-xs font-medium text-text-tertiary uppercase tracking-wider">
           {title}
         </span>
       </div>

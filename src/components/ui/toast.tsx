@@ -1,13 +1,13 @@
 "use client";
 
-import { X, CheckCircle, AlertTriangle, Info, XCircle } from "lucide-react";
+import { X, CheckCircle, Warning, Info, XCircle } from "@phosphor-icons/react";
 import { useToastStore, type Toast } from "@/stores/toast";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<Toast["type"], React.ComponentType<{ className?: string }>> = {
   info: Info,
   success: CheckCircle,
-  warning: AlertTriangle,
+  warning: Warning,
   error: XCircle,
 };
 

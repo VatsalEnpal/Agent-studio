@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { X, Plus, Loader2 } from "lucide-react";
+import { X, Plus, SpinnerGap } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import { useRoomsStore } from "@/stores/rooms";
@@ -118,7 +118,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
             onClick={() => onOpenChange(false)}
             className="p-1 rounded-md text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors duration-[100ms]"
           >
-            <X className="w-4 h-4" />
+            <X size={16} weight="light" />
           </button>
         </div>
 
@@ -134,7 +134,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="auth-refactor"
-              className="w-full bg-elevation-2 border border-border rounded-md px-3 py-2 text-body font-mono text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors duration-[100ms]"
+              className="w-full bg-elevation-2 border border-border rounded-md px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors duration-[100ms]"
               autoFocus
             />
           </div>
@@ -149,7 +149,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Refactor auth flow to use server-side sessions"
-              className="w-full bg-elevation-2 border border-border rounded-md px-3 py-2 text-body font-mono text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors duration-[100ms]"
+              className="w-full bg-elevation-2 border border-border rounded-md px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors duration-[100ms]"
             />
           </div>
 
@@ -203,7 +203,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                         className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
                         style={{ backgroundColor: color + "25" }}
                       >
-                        <span className="text-[8px] font-bold" style={{ color }}>
+                        <span className="text-[9px] font-bold" style={{ color }}>
                           {agent.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
@@ -226,7 +226,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                       onChange={(e) =>
                         setAgentModel(agent.id, e.target.value as "opus" | "sonnet" | "haiku")
                       }
-                      className="bg-canvas border border-border rounded-md px-2 py-0.5 text-label-xs font-mono text-text-secondary focus:outline-none focus:border-accent/50 transition-colors duration-[100ms]"
+                      className="bg-canvas border border-border rounded-md px-2 py-1 text-label-xs font-mono text-text-secondary focus:outline-none focus:border-accent/50 transition-colors duration-[100ms]"
                     >
                       <option value="opus">opus</option>
                       <option value="sonnet">sonnet</option>
@@ -253,9 +253,9 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
             className="flex items-center gap-1.5 px-4 py-1.5 text-body-sm font-medium rounded-md bg-accent text-canvas hover:bg-accent-hover transition-colors duration-[100ms] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {creating ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <SpinnerGap size={14} weight="light" className="animate-spin" />
             ) : (
-              <Plus className="w-3.5 h-3.5" />
+              <Plus size={14} weight="light" />
             )}
             Create Room
           </button>

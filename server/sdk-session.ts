@@ -143,18 +143,24 @@ export class SdkSessionManager extends EventEmitter {
         const nextPrompt = queue.shift()!;
         this.messageQueues.set(session.agentId, queue);
         // Fire-and-forget — don't await, so the current call can return
-        this.executeQuery(session, nextPrompt, callbacks).catch(() => {});
+        this.executeQuery(session, nextPrompt, callbacks).catch((err) => {
+          callbacks.onError(session.agentId, err instanceof Error ? err : new Error(String(err)));
+        });
       }
     }
   }
 
   interruptAgent(agentId: string): void {
     const session = this.sessions.get(agentId);
-    if (session?.activeQuery) {
+    if (!session) return;
+    // Clear pending queue so no queued message fires after the interrupt
+    this.messageQueues.set(agentId, []);
+    // Abort active query
+    if (session.activeQuery) {
       session.activeQuery.close();
       session.activeQuery = null;
-      session.busy = false;
     }
+    session.busy = false;
   }
 
   destroySession(agentId: string): void {

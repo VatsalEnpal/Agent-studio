@@ -2,14 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import {
-  X,
-  GitPullRequest,
-  ExternalLink,
-  Loader2,
-  Check,
-  AlertTriangle,
-} from "lucide-react";
+import { X, GitPullRequest, ArrowSquareOut, SpinnerGap, Check, Warning } from "@phosphor-icons/react";
 import { useGitStore } from "@/stores/git";
 import { cn } from "@/lib/utils";
 
@@ -161,7 +154,7 @@ export function PRModal() {
             {/* Prod warning banner */}
             {isProd && (
               <div className="flex items-start gap-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded text-red-400">
-                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <Warning className="w-4 h-4 shrink-0 mt-0.5" />
                 <p className="text-[10px]">
                   This is the <strong>production repository</strong>. This PR
                   will be reviewed by the team. Changes require explicit approval
@@ -238,7 +231,7 @@ export function PRModal() {
             {/* Prod confirmation step */}
             {isProd && showProdConfirm && prStatus !== "success" && (
               <div className="flex items-start gap-2 px-3 py-2 bg-red-500/15 border border-red-500/40 rounded text-red-400">
-                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <Warning className="w-4 h-4 shrink-0 mt-0.5" />
                 <div className="space-y-1.5 flex-1">
                   <p className="text-[10px] font-bold">
                     CONFIRM: You are creating a PR on the PRODUCTION repo.
@@ -282,7 +275,7 @@ export function PRModal() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 text-console-accent hover:underline"
                 >
-                  <ExternalLink className="w-3 h-3" />
+                  <ArrowSquareOut className="w-3 h-3" />
                   Open PR
                 </a>
               </div>
@@ -311,7 +304,7 @@ export function PRModal() {
                 )}
               >
                 {prStatus === "creating" && (
-                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <SpinnerGap className="w-3 h-3 animate-spin" />
                 )}
                 {prStatus === "creating"
                   ? "Creating..."

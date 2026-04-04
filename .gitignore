@@ -21,6 +21,10 @@ ai-agents/
 .agent-studio/reports/
 qa-screenshots-v2/
 
+# QA scripts (dev only)
+scripts/qa-*.mjs
+scripts/readme-screenshots.mjs
+
 # Build artifacts
 tsconfig.tsbuildinfo
 SECURITY_AUDIT.md

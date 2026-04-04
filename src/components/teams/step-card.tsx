@@ -1,18 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ChevronRight,
-  Check,
-  Loader2,
-  Clock,
-  Circle,
-  X,
-  FileText,
-  ArrowRight,
-  Shield,
-  ChevronDown,
-} from "lucide-react";
+import { CaretRight, Check, SpinnerGap, Clock, Circle, X, FileText, ArrowRight, Shield, CaretDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { WorkflowStep, StepRichContent, ScanLogEntry, HandoffEntry } from "@/stores/workflows";
 
@@ -27,7 +16,7 @@ const STATUS_CONFIG: Record<
     borderColor: "border-l-console-success",
   },
   active: {
-    icon: Loader2,
+    icon: SpinnerGap,
     color: "text-console-accent",
     bg: "bg-console-accent/10",
     borderColor: "border-l-console-accent",
@@ -154,7 +143,7 @@ export function StepCard({ step }: { step: WorkflowStep }) {
 
         {/* Expand chevron -- hidden for pending */}
         {canExpand && (
-          <ChevronRight
+          <CaretRight
             className={cn(
               "w-3 h-3 text-console-dim transition-transform duration-150 shrink-0",
               expanded && "rotate-90",
@@ -293,12 +282,12 @@ function PmoScanContent({ content }: { content: StepRichContent }) {
         >
           {showFull ? (
             <>
-              <ChevronDown className="w-2.5 h-2.5 rotate-180" />
+              <CaretDown className="w-2.5 h-2.5 rotate-180" />
               Show less
             </>
           ) : (
             <>
-              <ChevronDown className="w-2.5 h-2.5" />
+              <CaretDown className="w-2.5 h-2.5" />
               View all {content.scanEntries.length} entries
             </>
           )}
@@ -614,7 +603,7 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
             onClick={() => setShowHandoffs(!showHandoffs)}
             className="text-[9px] text-console-accent hover:text-console-accent/80 transition-colors flex items-center gap-1"
           >
-            <ChevronDown className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
+            <CaretDown className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
             View Handoffs ({content.handoffs.length})
           </button>
           {showHandoffs && (
@@ -685,7 +674,7 @@ function DeployContent({ content }: { content: StepRichContent }) {
             onClick={() => setShowHandoffs(!showHandoffs)}
             className="text-[9px] text-console-accent hover:text-console-accent/80 transition-colors flex items-center gap-1"
           >
-            <ChevronDown className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
+            <CaretDown className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
             All Handoffs ({content.handoffs.length})
           </button>
           {showHandoffs && (

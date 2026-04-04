@@ -147,7 +147,13 @@ export function roomsRoutes(
             for (const agent of room.agents) {
               const session = sdkManager.getSession(agent.id);
               if (session) {
-                sdkManager.sendMessage(agent.id, cleanText, callbacks).catch(() => {});
+                sdkManager.sendMessage(agent.id, cleanText, callbacks).catch((err) => {
+                  roomManager.addMessage(roomId, {
+                    from: "system",
+                    text: `Failed to deliver to ${agent.id}: ${err instanceof Error ? err.message : String(err)}`,
+                    type: "system",
+                  });
+                });
               }
             }
             roomManager.updateContextFile(roomId);
@@ -155,9 +161,12 @@ export function roomsRoutes(
             return;
           }
 
-          const mentionedAgent = room.agents.find(a => a.id === mentioned);
-          if (mentionedAgent && sdkManager.getSession(mentioned)) {
-            targetAgentId = mentioned;
+          const mentionedAgent = room.agents.find(a => a.id.toLowerCase() === mentioned.toLowerCase());
+          const mentionedId = mentionedAgent?.id ?? mentioned;
+          const hasSession = !!sdkManager.getSession(mentionedId);
+          console.log(`[room-msg] mentioned="${mentioned}", found agent=${!!mentionedAgent}, agentId=${mentionedId}, has session=${hasSession}, target=${hasSession ? mentionedId : targetAgentId}`);
+          if (mentionedAgent && sdkManager.getSession(mentionedId)) {
+            targetAgentId = mentionedId;
           }
           messageText = text.replace(/@\w+\s*/, "").trim();
         }
@@ -165,7 +174,13 @@ export function roomsRoutes(
         const session = sdkManager.getSession(targetAgentId);
         if (session) {
           const callbacks = makeSdkCallbacks(roomId);
-          sdkManager.sendMessage(targetAgentId, messageText, callbacks).catch(() => {});
+          sdkManager.sendMessage(targetAgentId, messageText, callbacks).catch((err) => {
+            roomManager.addMessage(roomId, {
+              from: "system",
+              text: `Failed to deliver to ${targetAgentId}: ${err instanceof Error ? err.message : String(err)}`,
+              type: "system",
+            });
+          });
           roomManager.updateContextFile(roomId);
         } else {
           roomManager.addMessage(roomId, {
@@ -212,20 +227,31 @@ export function roomsRoutes(
         spawned.push({ agentId: agent.id });
       }
 
-      // Send init message to orchestrator to establish the session
-      const orchestratorSession = sdkManager.getSession("orchestrator");
-      if (orchestratorSession && spawned.length > 0) {
-        const otherAgents = room.agents.filter(a => a.id !== "orchestrator").map(a => a.name).join(", ");
+      // Send init message to ALL agents so they have context about the room
+      const callbacks = makeSdkCallbacks(roomId);
+      for (const agent of room.agents) {
+        const session = sdkManager.getSession(agent.id);
+        if (!session) continue;
+
+        const otherAgents = room.agents.filter(a => a.id !== agent.id).map(a => a.name).join(", ");
         const initMessage = [
-          `You are the orchestrator in team room "#${room.name}".`,
+          `You are agent "${agent.name}" in team room "#${room.name}".`,
           `Topic: ${room.topic}.`,
-          `Team: ${otherAgents}.`,
+          `Team members: ${otherAgents}.`,
           `Read ${room.contextFile} for team status.`,
+          `When you finish a task, write a summary to that file.`,
+          `You can message other agents by including @agentname in your response.`,
           `Acknowledge briefly that you're ready.`,
         ].join(" ");
 
-        const callbacks = makeSdkCallbacks(roomId);
-        sdkManager.sendMessage("orchestrator", initMessage, callbacks).catch(() => {});
+        sdkManager.sendMessage(agent.id, initMessage, callbacks).catch((err) => {
+          // Surface errors to the room so the user can see what went wrong
+          roomManager.addMessage(roomId, {
+            from: "system",
+            text: `Failed to initialize ${agent.name}: ${err instanceof Error ? err.message : String(err)}`,
+            type: "system",
+          });
+        });
       }
 
       roomManager.addMessage(roomId, {

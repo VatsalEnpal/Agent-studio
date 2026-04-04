@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ArrowRightLeft, ShieldCheck, AlertTriangle, Info, Zap, CheckCircle } from "lucide-react";
+import { ArrowsLeftRight, ShieldCheck, Warning, Info, Lightning, CheckCircle } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import type { ActivityEntry } from "@/stores/sprints";
@@ -12,11 +12,11 @@ interface ActivityLogProps {
 }
 
 const TYPE_ICON: Record<string, typeof Info> = {
-  task: Zap,
-  handoff: ArrowRightLeft,
+  task: Lightning,
+  handoff: ArrowsLeftRight,
   gate: CheckCircle,
   qa: ShieldCheck,
-  error: AlertTriangle,
+  error: Warning,
   info: Info,
 };
 
@@ -46,7 +46,7 @@ export function ActivityLog({ entries, onHandoffClick }: ActivityLogProps) {
 
   if (entries.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-[var(--text-tertiary)] text-[10px]">
+      <div className="flex items-center justify-center h-full text-[var(--text-tertiary)] text-body-sm">
         No activity yet
       </div>
     );
@@ -73,14 +73,14 @@ export function ActivityLog({ entries, onHandoffClick }: ActivityLogProps) {
             )}
           >
             {/* Timestamp */}
-            <span className="text-[9px] font-mono text-[var(--text-tertiary)] shrink-0 mt-0.5 w-[56px]">
+            <span className="text-label-xs font-mono text-[var(--text-tertiary)] shrink-0 mt-0.5 w-[56px]">
               {formatTimestamp(entry.timestamp)}
             </span>
 
             {/* Icon */}
             <Icon
               className={cn(
-                "w-3 h-3 shrink-0 mt-0.5",
+                "w-3.5 h-3.5 shrink-0 mt-0.5",
                 entry.type === "error"
                   ? "text-red-400"
                   : entry.type === "qa"
@@ -91,14 +91,14 @@ export function ActivityLog({ entries, onHandoffClick }: ActivityLogProps) {
 
             {/* Agent */}
             <span
-              className="text-[10px] font-medium shrink-0 mt-px"
+              className="text-label-xs font-medium shrink-0 mt-px"
               style={{ color }}
             >
               {entry.agent}
             </span>
 
             {/* Action */}
-            <span className="text-[10px] text-[var(--text-secondary)] flex-1 min-w-0 truncate mt-px">
+            <span className="text-label-xs text-[var(--text-secondary)] flex-1 min-w-0 truncate mt-px">
               {entry.action}
             </span>
 
@@ -106,7 +106,7 @@ export function ActivityLog({ entries, onHandoffClick }: ActivityLogProps) {
             {isQa && (
               <span
                 className={cn(
-                  "text-[9px] font-semibold px-1.5 py-0.5 rounded shrink-0",
+                  "text-label-xs font-semibold px-1.5 py-0.5 rounded shrink-0",
                   entry.qaScore! >= 95
                     ? "bg-emerald-500/15 text-emerald-400"
                     : entry.qaScore! >= 80
@@ -120,7 +120,7 @@ export function ActivityLog({ entries, onHandoffClick }: ActivityLogProps) {
 
             {/* Handoff indicator */}
             {isHandoff && (
-              <span className="text-[8px] text-[var(--accent)] shrink-0 mt-0.5">
+              <span className="text-label-xs text-[var(--accent)] shrink-0 mt-0.5">
                 view
               </span>
             )}

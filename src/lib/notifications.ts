@@ -1,30 +1,31 @@
 // Cross-platform notification helper
 // Works in Electron (native macOS notifications) and browser (Web Notifications API)
 
+import type { ActiveMode } from "./types";
+
 interface NotifyOptions {
   title: string;
   body: string;
+  /** Optional deep-link: which page to navigate to when the notification is clicked */
+  targetPage?: ActiveMode;
+  targetId?: string;
 }
 
-interface AgentStudioBridge {
-  sendNotification: (title: string, body: string) => void;
-  platform: string;
-  isElectron: boolean;
-}
+export function notify({ title, body, targetPage, targetId }: NotifyOptions): void {
+  if (typeof window === "undefined") return;
 
-declare global {
-  interface Window {
-    agentStudio?: AgentStudioBridge;
+  // Electron path — uses the preload bridge at window.electronAPI
+  if (window.electronAPI) {
+    const action =
+      targetPage
+        ? { type: "navigate", path: `/${targetPage}${targetId ? `/${targetId}` : ""}` }
+        : undefined;
+    window.electronAPI.sendNotification(title, body, action);
+    return;
   }
-}
 
-const isElectron =
-  typeof window !== "undefined" && window.agentStudio?.isElectron === true;
-
-export function notify({ title, body }: NotifyOptions): void {
-  if (isElectron) {
-    window.agentStudio!.sendNotification(title, body);
-  } else if (typeof window !== "undefined" && "Notification" in window) {
+  // Browser fallback — Web Notifications API
+  if ("Notification" in window) {
     if (Notification.permission === "granted") {
       new window.Notification(title, { body });
     } else if (Notification.permission !== "denied") {
@@ -37,10 +38,21 @@ export function notify({ title, body }: NotifyOptions): void {
 
 // --- Convenience functions ---
 
-export function notifyApproval(agent: string, action: string): void {
+export function notifyMention(agent: string, snippet: string, roomId?: string): void {
+  notify({
+    title: `${agent} mentioned you`,
+    body: snippet,
+    targetPage: "teams",
+    targetId: roomId,
+  });
+}
+
+export function notifyApproval(agent: string, action: string, sprintId?: string): void {
   notify({
     title: "Approval needed",
     body: `${agent} wants to: ${action}`,
+    targetPage: "sessions",
+    targetId: sprintId,
   });
 }
 
@@ -48,20 +60,34 @@ export function notifyCompletion(agent: string, summary: string): void {
   notify({
     title: `${agent} finished`,
     body: summary,
+    targetPage: "sessions",
   });
 }
 
-export function notifySessionExit(name: string, code: number): void {
+export function notifySessionExit(name: string, code: number, sessionId?: string): void {
   notify({
     title: code === 0 ? "Session done" : "Session exited",
     body: `${name} (exit ${code})`,
+    targetPage: "sessions",
+    targetId: sessionId,
   });
 }
 
-export function notifyGate(gate: string, passed: boolean): void {
+export function notifyGate(gate: string, passed: boolean, sprintId?: string): void {
   notify({
     title: passed ? `${gate} passed` : `${gate} failed`,
     body: passed ? "Proceeding to next phase" : "Check the dashboard",
+    targetPage: "sessions",
+    targetId: sprintId,
+  });
+}
+
+export function notifyContextWarning(sessionName: string, percent: number, sessionId?: string): void {
+  notify({
+    title: "Context window warning",
+    body: `${sessionName} is at ${percent}% context`,
+    targetPage: "sessions",
+    targetId: sessionId,
   });
 }
 
@@ -79,8 +105,8 @@ const DEFAULT_PREFS: NotificationPrefs = {
   approvals: true,
   dangerous: true,
   completion: true,
-  sessionExit: false,
-  contextWarning: false,
+  sessionExit: true,
+  contextWarning: true,
 };
 
 export function getNotificationPrefs(): NotificationPrefs {

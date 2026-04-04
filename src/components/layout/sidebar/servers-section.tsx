@@ -1,13 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  Square,
-  Play,
-  ExternalLink,
-  Trash2,
-  PlusCircle,
-} from "lucide-react";
+import { Square, Play, ArrowSquareOut, Trash, PlusCircle } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { SessionGroup } from "@/components/sessions/session-group";
 import type { DevServer } from "./types";
@@ -161,7 +155,7 @@ function DevServerItem({
           title={`Open http://localhost:${server.port}`}
         >
           :{server.port}
-          <ExternalLink className="w-2.5 h-2.5" />
+          <ArrowSquareOut className="w-2.5 h-2.5" />
         </button>
       )}
       {server.running && !server.isSelf && (
@@ -199,7 +193,7 @@ function DevServerItem({
               className="p-0.5 text-console-dim hover:text-console-error opacity-0 group-hover:opacity-100 transition-all shrink-0"
               title="Remove server"
             >
-              <Trash2 className="w-3 h-3" />
+              <Trash className="w-3 h-3" />
             </button>
           )}
         </>

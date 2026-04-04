@@ -1,24 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import {
-  Rocket,
-  Check,
-  Loader2,
-  Clock,
-  AlertCircle,
-  Plus,
-  Play,
-  Pencil,
-  Trash2,
-  Bug,
-  Shield,
-  Wrench,
-  Zap,
-  GitBranch,
-  Eye,
-  FileCode,
-} from "lucide-react";
+import { Rocket, Check, SpinnerGap, Clock, WarningCircle, Plus, Play, PencilSimple, Trash, Bug, Shield, Wrench, Lightning, GitBranch, Eye, FileCode } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useWorkflowStore, type WorkflowFlow, type WorkflowRun } from "@/stores/workflows";
 import { useToastStore } from "@/stores/toast";
@@ -29,7 +12,7 @@ const FLOW_ICONS: Record<string, typeof Rocket> = {
   Bug,
   Shield,
   Wrench,
-  Zap,
+  Lightning,
   GitBranch,
   Eye,
   FileCode,
@@ -46,7 +29,7 @@ const RUN_STATUS_CONFIG: Record<
     badge: "bg-console-success/15 text-console-success",
   },
   running: {
-    icon: Loader2,
+    icon: SpinnerGap,
     color: "text-console-accent",
     label: "Running",
     badge: "bg-console-accent/15 text-console-accent",
@@ -58,7 +41,7 @@ const RUN_STATUS_CONFIG: Record<
     badge: "bg-amber-400/15 text-amber-400",
   },
   failed: {
-    icon: AlertCircle,
+    icon: WarningCircle,
     color: "text-console-error",
     label: "Failed",
     badge: "bg-console-error/15 text-console-error",
@@ -170,14 +153,14 @@ export function FlowSidebar({
                         className="p-0.5 text-console-dim hover:text-console-muted transition-colors"
                         title="Edit workflow"
                       >
-                        <Pencil className="w-3 h-3" />
+                        <PencilSimple className="w-3 h-3" />
                       </button>
                       <button
                         onClick={(e) => handleDelete(flow.id, e)}
                         className="p-0.5 text-console-dim hover:text-console-error transition-colors"
                         title="Delete workflow"
                       >
-                        <Trash2 className="w-3 h-3" />
+                        <Trash className="w-3 h-3" />
                       </button>
                     </>
                   )}

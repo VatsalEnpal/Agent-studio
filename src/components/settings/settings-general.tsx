@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Save, Check } from "lucide-react";
+import { FloppyDisk, Check } from "@phosphor-icons/react";
 import { useSettingsStore } from "@/stores/settings";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
@@ -38,19 +38,19 @@ export function SettingsGeneral() {
   return (
     <section className="border border-console-border rounded-lg bg-console-panel">
       <div className="px-4 py-3 border-b border-console-border">
-        <h3 className="text-xs font-medium text-console-text">General</h3>
+        <h3 className="text-body-sm font-medium text-console-text">General</h3>
       </div>
       <div className="px-4 py-3 space-y-4">
         {/* Default Model */}
         <div>
-          <label className="text-[10px] text-console-muted block mb-1.5">Default Model</label>
+          <label className="text-label-xs text-console-muted block mb-1.5">Default Model</label>
           <div className="flex items-center gap-2">
             {(["opus", "sonnet", "haiku"] as const).map((model) => (
               <button
                 key={model}
                 onClick={() => updateSetting("defaultModel", model)}
                 className={cn(
-                  "px-3 py-1.5 text-[10px] font-medium rounded transition-all",
+                  "px-3 py-1.5 text-label-xs font-medium rounded transition-all",
                   settings.defaultModel === model
                     ? model === "opus"
                       ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
@@ -68,11 +68,11 @@ export function SettingsGeneral() {
 
         {/* Default Permissions */}
         <div>
-          <label className="text-[10px] text-console-muted block mb-1.5">Default Permissions</label>
+          <label className="text-label-xs text-console-muted block mb-1.5">Default Permissions</label>
           <select
             value={settings.defaultPermissions}
             onChange={(e) => updateSetting("defaultPermissions", e.target.value as "bypass" | "default" | "plan")}
-            className="px-2 py-1.5 text-[10px] bg-console-bg border border-console-border rounded text-console-text focus:outline-none focus:border-console-accent"
+            className="px-2 py-1.5 text-label-xs bg-console-bg border border-console-border rounded text-console-text focus:outline-none focus:border-console-accent"
           >
             <option value="bypass">Bypass (skip permissions)</option>
             <option value="default">Default</option>
@@ -82,12 +82,12 @@ export function SettingsGeneral() {
 
         {/* Default Working Directory */}
         <div>
-          <label className="text-[10px] text-console-muted block mb-1.5">Default Working Directory</label>
+          <label className="text-label-xs text-console-muted block mb-1.5">Default Working Directory</label>
           <input
             type="text"
             value={settings.defaultCwd}
             onChange={(e) => updateSetting("defaultCwd", e.target.value)}
-            className="w-full px-2 py-1.5 text-[10px] font-mono bg-console-bg border border-console-border rounded text-console-text focus:outline-none focus:border-console-accent"
+            className="w-full px-2 py-1.5 text-body-sm font-mono bg-console-bg border border-console-border rounded text-console-text focus:outline-none focus:border-console-accent"
           />
         </div>
 
@@ -97,13 +97,13 @@ export function SettingsGeneral() {
             onClick={() => void handleSave()}
             disabled={saving}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium rounded transition-all",
+              "flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium rounded transition-all",
               saved
                 ? "bg-console-success/20 text-console-success"
                 : "bg-console-accent/20 text-console-accent hover:bg-console-accent/30",
             )}
           >
-            {saved ? <Check className="w-3 h-3" /> : <Save className="w-3 h-3" />}
+            {saved ? <Check className="w-3 h-3" /> : <FloppyDisk className="w-3 h-3" />}
             {saving ? "Saving..." : saved ? "Saved" : "Save Settings"}
           </button>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, PanelLeftClose } from "lucide-react";
+import { Plus, SidebarSimple } from "@phosphor-icons/react";
 import { useUIStore } from "@/stores/ui";
 import { SessionsSection } from "./sessions-section";
 import { ServersSection } from "./servers-section";
@@ -32,7 +32,7 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
           className="p-1 text-console-dim hover:text-console-muted transition-colors"
           title="Collapse sidebar"
         >
-          <PanelLeftClose className="w-4 h-4" />
+          <SidebarSimple className="w-4 h-4" />
         </button>
       </div>
 

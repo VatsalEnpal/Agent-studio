@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { X, Loader2, Tag as TagIcon } from "lucide-react";
+import { X, SpinnerGap, Tag as TagIcon } from "@phosphor-icons/react";
 import { useMemoryStore, type MemoryFormData, type MemoryEntryDetail } from "@/stores/memory";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
@@ -164,7 +164,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
           <div className="px-4 py-3 space-y-3">
             {/* Title */}
             <div>
-              <label className="text-[9px] font-medium text-console-dim uppercase tracking-wider">Title</label>
+              <label className="text-label-xs font-medium text-console-dim uppercase tracking-wider">Title</label>
               <input
                 type="text"
                 value={form.title}
@@ -176,7 +176,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
 
             {/* Category */}
             <div>
-              <label className="text-[9px] font-medium text-console-dim uppercase tracking-wider">Category</label>
+              <label className="text-label-xs font-medium text-console-dim uppercase tracking-wider">Category</label>
               <select
                 value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
@@ -192,10 +192,10 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
             {/* Content fields */}
             {(["observation", "action", "outcome", "lesson"] as const).map((field) => (
               <div key={field}>
-                <label className="text-[9px] font-medium text-console-dim uppercase tracking-wider">
+                <label className="text-label-xs font-medium text-console-dim uppercase tracking-wider">
                   {field.charAt(0).toUpperCase() + field.slice(1)}
                 </label>
-                <p className="text-[8px] text-console-dim mt-0.5">{FIELD_HINTS[field]}</p>
+                <p className="text-label-xs text-console-dim mt-0.5">{FIELD_HINTS[field]}</p>
                 <textarea
                   value={form.content[field]}
                   onChange={(e) =>
@@ -215,12 +215,12 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
 
             {/* Tags */}
             <div>
-              <label className="text-[9px] font-medium text-console-dim uppercase tracking-wider">Tags</label>
+              <label className="text-label-xs font-medium text-console-dim uppercase tracking-wider">Tags</label>
               <div className="mt-1 flex items-center gap-1.5 flex-wrap">
                 {form.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 bg-console-faint text-console-muted rounded"
+                    className="inline-flex items-center gap-1 text-label-xs px-1.5 py-0.5 bg-console-faint text-console-muted rounded"
                   >
                     {tag}
                     <button onClick={() => removeTag(tag)} className="text-console-dim hover:text-console-text">
@@ -242,11 +242,11 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
                     }
                   }}
                   placeholder="Add tag (Enter or comma to add)"
-                  className="flex-1 px-2 py-1 text-[10px] bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent"
+                  className="flex-1 px-2 py-1 text-label-xs bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent"
                 />
                 <button
                   onClick={addTag}
-                  className="text-[9px] px-2 py-1 bg-console-faint text-console-muted rounded hover:bg-console-border transition-colors"
+                  className="text-label-xs px-2 py-1 bg-console-faint text-console-muted rounded hover:bg-console-border transition-colors"
                 >
                   Add
                 </button>
@@ -258,16 +258,16 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
           <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-console-border">
             <button
               onClick={close}
-              className="px-3 py-1.5 text-[10px] text-console-muted hover:text-console-text bg-console-faint rounded transition-colors"
+              className="px-3 py-1.5 text-label-xs text-console-muted hover:text-console-text bg-console-faint rounded transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving || !form.title.trim()}
-              className="px-3 py-1.5 text-[10px] font-medium text-console-bg bg-console-accent rounded hover:bg-console-accent/90 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              className="px-3 py-1.5 text-label-xs font-medium text-console-bg bg-console-accent rounded hover:bg-console-accent/90 transition-colors disabled:opacity-50 flex items-center gap-1.5"
             >
-              {saving && <Loader2 className="w-3 h-3 animate-spin" />}
+              {saving && <SpinnerGap className="w-3 h-3 animate-spin" />}
               {isCreate ? "Create" : "Save"}
             </button>
           </div>

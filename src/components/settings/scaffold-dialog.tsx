@@ -2,17 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import {
-  X,
-  Check,
-  Loader2,
-  Users,
-  GitBranch,
-  Bell,
-  ChevronRight,
-  ChevronLeft,
-  Brain,
-} from "lucide-react";
+import { X, Check, SpinnerGap, Users, GitBranch, Bell, CaretRight, CaretLeft, Brain } from "@phosphor-icons/react";
 
 const AVAILABLE_AGENTS = [
   { id: "orchestrator", label: "orchestrator", desc: "Coordinates the team, delegates work", defaultOn: true },
@@ -110,7 +100,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
             <div
               key={s}
               className={cn(
-                "flex-1 py-1.5 text-center text-[9px] font-medium transition-colors border-b-2",
+                "flex-1 py-1.5 text-center text-label-xs font-medium transition-colors border-b-2",
                 i <= dialogStep
                   ? "text-console-accent border-console-accent"
                   : "text-console-dim border-transparent",
@@ -132,7 +122,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
               <p className="text-sm font-medium text-console-text">
                 Agent system created
               </p>
-              <p className="text-[10px] text-console-muted">
+              <p className="text-label-xs text-console-muted">
                 {result.created.length} files generated in {projectPath}
               </p>
             </div>
@@ -141,7 +131,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
               <p className="text-xs text-red-400">{error}</p>
               <button
                 onClick={() => setError(null)}
-                className="px-3 py-1 text-[10px] text-console-muted hover:text-console-text border border-console-border rounded"
+                className="px-3 py-1 text-label-xs text-console-muted hover:text-console-text border border-console-border rounded"
               >
                 Try Again
               </button>
@@ -177,13 +167,13 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
           <div className="flex items-center justify-between px-5 py-3 border-t border-console-border">
             <button
               onClick={() => dialogStep === 0 ? onCancel() : setDialogStep((s) => s - 1)}
-              className="flex items-center gap-1 px-2 py-1 text-[10px] text-console-muted hover:text-console-text transition-colors"
+              className="flex items-center gap-1 px-2 py-1 text-label-xs text-console-muted hover:text-console-text transition-colors"
             >
-              <ChevronLeft className="w-3 h-3" />
+              <CaretLeft className="w-3 h-3" />
               {dialogStep === 0 ? "Cancel" : "Back"}
             </button>
 
-            <span className="text-[9px] text-console-dim font-mono">
+            <span className="text-label-xs text-console-dim font-mono">
               {projectPath}
             </span>
 
@@ -192,23 +182,23 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
                 onClick={() => setDialogStep((s) => s + 1)}
                 disabled={dialogStep === 0 && selectedAgents.length === 0}
                 className={cn(
-                  "flex items-center gap-1 px-3 py-1 text-[10px] font-medium rounded transition-all",
+                  "flex items-center gap-1 px-3 py-1 text-label-xs font-medium rounded transition-all",
                   selectedAgents.length > 0 || dialogStep > 0
                     ? "bg-console-accent text-black hover:bg-console-accent/90"
                     : "bg-console-faint text-console-dim cursor-not-allowed",
                 )}
               >
                 Next
-                <ChevronRight className="w-3 h-3" />
+                <CaretRight className="w-3 h-3" />
               </button>
             ) : (
               <button
                 onClick={() => void handleCreate()}
                 disabled={creating}
-                className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-medium rounded bg-console-success/80 text-black hover:bg-console-success transition-all disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1 text-label-xs font-medium rounded bg-console-success/80 text-black hover:bg-console-success transition-all disabled:opacity-50"
               >
                 {creating ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <SpinnerGap className="w-3 h-3 animate-spin" />
                 ) : (
                   <Check className="w-3 h-3" />
                 )}
@@ -240,7 +230,7 @@ function DialogAgentsStep({
           <Users className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
           Select agents
         </h3>
-        <p className="text-[10px] text-console-dim">
+        <p className="text-label-xs text-console-dim">
           Choose which agents to include in your system.
         </p>
       </div>
@@ -261,10 +251,10 @@ function DialogAgentsStep({
               onChange={() => toggleAgent(agent.id)}
               className="accent-console-accent"
             />
-            <span className="text-[10px] font-mono text-console-text w-24">
+            <span className="text-label-xs font-mono text-console-text w-24">
               {agent.label}
             </span>
-            <span className="text-[9px] text-console-dim flex-1">
+            <span className="text-label-xs text-console-dim flex-1">
               {agent.desc}
             </span>
           </label>
@@ -273,17 +263,17 @@ function DialogAgentsStep({
       <div className="flex items-center gap-2">
         <button
           onClick={() => setSelectedAgents(AVAILABLE_AGENTS.map((a) => a.id))}
-          className="px-2 py-0.5 text-[9px] text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
+          className="px-2 py-0.5 text-label-xs text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
         >
           All
         </button>
         <button
           onClick={() => setSelectedAgents([])}
-          className="px-2 py-0.5 text-[9px] text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
+          className="px-2 py-0.5 text-label-xs text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
         >
           None
         </button>
-        <span className="text-[9px] text-console-dim ml-auto">
+        <span className="text-label-xs text-console-dim ml-auto">
           {selectedAgents.length} selected
         </span>
       </div>
@@ -311,7 +301,7 @@ function DialogWorkflowStep({
           <GitBranch className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
           Workflow
         </h3>
-        <p className="text-[10px] text-console-dim">
+        <p className="text-label-xs text-console-dim">
           How should your agent team work together?
         </p>
       </div>
@@ -333,8 +323,8 @@ function DialogWorkflowStep({
               className="accent-console-accent mt-0.5"
             />
             <div>
-              <span className="text-[10px] font-medium text-console-text">{opt.label}</span>
-              <p className="text-[9px] text-console-dim mt-0.5">{opt.desc}</p>
+              <span className="text-label-xs font-medium text-console-text">{opt.label}</span>
+              <p className="text-label-xs text-console-dim mt-0.5">{opt.desc}</p>
             </div>
           </label>
         ))}
@@ -365,7 +355,7 @@ function DialogAutomationStep({
           <Bell className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
           Automation (optional)
         </h3>
-        <p className="text-[10px] text-console-dim">
+        <p className="text-label-xs text-console-dim">
           You can enable these later in Settings.
         </p>
       </div>
@@ -385,8 +375,8 @@ function DialogAutomationStep({
             className="accent-console-accent mt-0.5"
           />
           <div>
-            <span className="text-[10px] font-medium text-console-text">Telegram notifications</span>
-            <p className="text-[9px] text-console-dim mt-0.5">
+            <span className="text-label-xs font-medium text-console-text">Telegram notifications</span>
+            <p className="text-label-xs text-console-dim mt-0.5">
               Get pinged when sprints are ready or gates pass.
             </p>
           </div>
@@ -406,22 +396,22 @@ function DialogAutomationStep({
             className="accent-console-accent mt-0.5"
           />
           <div>
-            <span className="text-[10px] font-medium text-console-text">PMO scheduler</span>
-            <p className="text-[9px] text-console-dim mt-0.5">
+            <span className="text-label-xs font-medium text-console-text">PMO scheduler</span>
+            <p className="text-label-xs text-console-dim mt-0.5">
               Automatically scan for tasks every {schedulerInterval} hours.
             </p>
           </div>
         </label>
         {schedulerEnabled && (
           <div className="pl-8">
-            <label className="text-[9px] text-console-muted block mb-1">Interval (hours)</label>
+            <label className="text-label-xs text-console-muted block mb-1">Interval (hours)</label>
             <input
               type="number"
               min={1}
               max={24}
               value={schedulerInterval}
               onChange={(e) => setSchedulerInterval(parseInt(e.target.value, 10) || 2)}
-              className="w-16 px-2 py-0.5 text-[10px] font-mono bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
+              className="w-16 px-2 py-0.5 text-label-xs font-mono bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
             />
           </div>
         )}

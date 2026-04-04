@@ -1,16 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  Zap,
-  Plus,
-  Trash2,
-  Play,
-  Loader2,
-  ChevronDown,
-  ChevronUp,
-  X,
-} from "lucide-react";
+import { Lightning, Plus, Trash, Play, SpinnerGap, CaretDown, CaretUp, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useToastStore } from "@/stores/toast";
 
@@ -307,9 +298,9 @@ export function SettingsAutomations() {
     <section className="border border-console-border rounded-lg bg-console-panel">
       <div className="px-4 py-3 border-b border-console-border flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <Zap className="w-3.5 h-3.5 text-console-accent" />
+          <Lightning className="w-3.5 h-3.5 text-console-accent" />
           <h3 className="text-xs font-medium text-console-text">Automations</h3>
-          <span className="text-[9px] text-console-dim">
+          <span className="text-label-xs text-console-dim">
             ({automations.length})
           </span>
         </div>
@@ -317,18 +308,18 @@ export function SettingsAutomations() {
           <button
             onClick={() => void loadSuggestions()}
             disabled={suggestionsLoading}
-            className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-console-dim hover:text-console-text bg-console-faint/50 hover:bg-console-faint rounded transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 px-2 py-1 text-label-xs font-medium text-console-dim hover:text-console-text bg-console-faint/50 hover:bg-console-faint rounded transition-colors disabled:opacity-50"
           >
             {suggestionsLoading ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
+              <SpinnerGap className="w-3 h-3 animate-spin" />
             ) : (
-              <Zap className="w-3 h-3" />
+              <Lightning className="w-3 h-3" />
             )}
             Suggestions
           </button>
           <button
             onClick={() => setShowCreator(true)}
-            className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors"
+            className="flex items-center gap-1 px-2 py-1 text-label-xs font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors"
           >
             <Plus className="w-3 h-3" />
             Add
@@ -338,7 +329,7 @@ export function SettingsAutomations() {
 
       <div className="px-4 py-3 space-y-2">
         {automations.length === 0 && !showCreator && (
-          <p className="text-[10px] text-console-dim text-center py-4">
+          <p className="text-label-xs text-console-dim text-center py-4">
             No automations configured. Click &quot;Add&quot; to create one.
           </p>
         )}
@@ -371,11 +362,11 @@ export function SettingsAutomations() {
                 <span className="text-xs font-medium text-console-text truncate">
                   {auto.name}
                 </span>
-                <span className="text-[9px] text-console-dim shrink-0">
+                <span className="text-label-xs text-console-dim shrink-0">
                   {auto.schedule}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-[9px] text-console-dim">
+              <div className="flex items-center gap-2 text-label-xs text-console-dim">
                 <span>{auto.model}</span>
                 {auto.lastRun && (
                   <span>Last run: {formatRelativeTime(auto.lastRun)}</span>
@@ -392,7 +383,7 @@ export function SettingsAutomations() {
                 title="Run now"
               >
                 {runningId === auto.id ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <SpinnerGap className="w-3 h-3 animate-spin" />
                 ) : (
                   <Play className="w-3 h-3" />
                 )}
@@ -402,7 +393,7 @@ export function SettingsAutomations() {
                 className="p-1 text-console-dim hover:text-console-error transition-colors"
                 title="Delete"
               >
-                <Trash2 className="w-3 h-3" />
+                <Trash className="w-3 h-3" />
               </button>
             </div>
           </div>
@@ -412,7 +403,7 @@ export function SettingsAutomations() {
         {showSuggestions && suggestions.length > 0 && (
           <div className="border border-console-accent/20 rounded-lg bg-console-accent/5 overflow-hidden">
             <div className="px-3 py-2 border-b border-console-accent/20 flex items-center justify-between">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-console-accent">
+              <span className="text-label-xs font-semibold uppercase tracking-wider text-console-accent">
                 Suggested for your project
               </span>
               <button
@@ -431,19 +422,19 @@ export function SettingsAutomations() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-medium text-console-text">{s.name}</span>
-                      <span className="text-[9px] text-console-dim">{s.schedule}</span>
-                      <span className="text-[9px] text-console-dim">{s.model}</span>
+                      <span className="text-label-xs text-console-dim">{s.schedule}</span>
+                      <span className="text-label-xs text-console-dim">{s.model}</span>
                       {s.priority === "recommended" && (
-                        <span className="text-[8px] px-1.5 py-0.5 bg-console-accent/20 text-console-accent rounded-full">
+                        <span className="text-label-xs px-1.5 py-0.5 bg-console-accent/20 text-console-accent rounded-full">
                           recommended
                         </span>
                       )}
                     </div>
-                    <p className="text-[10px] text-console-dim mt-0.5 italic">{s.reason}</p>
+                    <p className="text-label-xs text-console-dim mt-0.5 italic">{s.reason}</p>
                   </div>
                   <button
                     onClick={() => void addFromSuggestion(s.templateId)}
-                    className="px-2 py-1 text-[10px] font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors shrink-0"
+                    className="px-2 py-1 text-label-xs font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors shrink-0"
                   >
                     <Plus className="w-3 h-3 inline -mt-0.5 mr-0.5" />
                     Add
@@ -471,10 +462,10 @@ export function SettingsAutomations() {
           <button
             onClick={() => void generateFromDescription()}
             disabled={!descriptionInput.trim() || generatingFromDesc}
-            className="px-2 py-1.5 text-[10px] font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            className="px-2 py-1.5 text-label-xs font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
           >
             {generatingFromDesc ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
+              <SpinnerGap className="w-3 h-3 animate-spin" />
             ) : (
               "Generate"
             )}
@@ -546,7 +537,7 @@ function AutomationCreator({
   return (
     <div className="border border-console-accent/30 rounded-lg bg-console-accent/5 overflow-hidden">
       <div className="px-3 py-2 border-b border-console-accent/20 flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-console-accent">
+        <span className="text-label-xs font-semibold uppercase tracking-wider text-console-accent">
           New Automation
         </span>
         <button onClick={onCancel} className="p-0.5 text-console-dim hover:text-console-muted">
@@ -558,7 +549,7 @@ function AutomationCreator({
         {/* Template picker */}
         {!selectedTemplate && (
           <div>
-            <label className="block text-[10px] text-console-muted mb-1.5">
+            <label className="block text-label-xs text-console-muted mb-1.5">
               Choose a template
             </label>
             <div className="grid grid-cols-3 gap-1.5">
@@ -568,10 +559,10 @@ function AutomationCreator({
                   onClick={() => applyTemplate(tmpl.id)}
                   className="flex flex-col items-center gap-1 p-2.5 rounded border border-console-border hover:border-console-accent/50 hover:bg-console-faint/50 transition-colors"
                 >
-                  <span className="text-[10px] font-medium text-console-text">
+                  <span className="text-label-xs font-medium text-console-text">
                     {tmpl.name}
                   </span>
-                  <span className="text-[9px] text-console-dim text-center leading-tight">
+                  <span className="text-label-xs text-console-dim text-center leading-tight">
                     {tmpl.description.slice(0, 50)}
                   </span>
                 </button>
@@ -585,7 +576,7 @@ function AutomationCreator({
           <>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[10px] text-console-muted mb-1">
+                <label className="block text-label-xs text-console-muted mb-1">
                   Name
                 </label>
                 <input
@@ -596,7 +587,7 @@ function AutomationCreator({
                 />
               </div>
               <div>
-                <label className="block text-[10px] text-console-muted mb-1">
+                <label className="block text-label-xs text-console-muted mb-1">
                   Schedule
                 </label>
                 <select
@@ -614,7 +605,7 @@ function AutomationCreator({
             </div>
 
             <div>
-              <label className="block text-[10px] text-console-muted mb-1">
+              <label className="block text-label-xs text-console-muted mb-1">
                 Model
               </label>
               <select
@@ -632,9 +623,9 @@ function AutomationCreator({
             <div>
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="flex items-center gap-1 text-[10px] text-console-muted mb-1 hover:text-console-text transition-colors"
+                className="flex items-center gap-1 text-label-xs text-console-muted mb-1 hover:text-console-text transition-colors"
               >
-                {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                {expanded ? <CaretUp className="w-3 h-3" /> : <CaretDown className="w-3 h-3" />}
                 Prompt
               </button>
               {expanded && (
@@ -654,14 +645,14 @@ function AutomationCreator({
                   setName("");
                   setPrompt("");
                 }}
-                className="px-2 py-1 text-[10px] text-console-dim hover:text-console-muted transition-colors"
+                className="px-2 py-1 text-label-xs text-console-dim hover:text-console-muted transition-colors"
               >
                 Back
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={!name.trim() || !prompt.trim()}
-                className="px-3 py-1 text-[10px] font-medium text-black bg-console-accent hover:bg-console-accent/90 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 text-label-xs font-medium text-black bg-console-accent hover:bg-console-accent/90 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Create
               </button>

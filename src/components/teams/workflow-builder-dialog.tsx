@@ -2,22 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import {
-  X,
-  Loader2,
-  Plus,
-  Trash2,
-  ChevronUp,
-  ChevronDown,
-  Rocket,
-  Bug,
-  Shield,
-  Wrench,
-  Zap,
-  GitBranch,
-  Eye,
-  FileCode,
-} from "lucide-react";
+import { X, SpinnerGap, Plus, Trash, CaretUp, CaretDown, Rocket, Bug, Shield, Wrench, Lightning, GitBranch, Eye, FileCode } from "@phosphor-icons/react";
 import { useWorkflowStore, type WorkflowDraft } from "@/stores/workflows";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
@@ -28,7 +13,7 @@ const ICON_OPTIONS = [
   { value: "Bug", icon: Bug, label: "Bug" },
   { value: "Shield", icon: Shield, label: "Shield" },
   { value: "Wrench", icon: Wrench, label: "Wrench" },
-  { value: "Zap", icon: Zap, label: "Zap" },
+  { value: "Lightning", icon: Lightning, label: "Lightning" },
   { value: "GitBranch", icon: GitBranch, label: "Git" },
   { value: "Eye", icon: Eye, label: "Review" },
   { value: "FileCode", icon: FileCode, label: "Code" },
@@ -70,7 +55,7 @@ const TEMPLATES: { name: string; description: string; icon: string; steps: Array
   {
     name: "Deploy",
     description: "Run tests, security scan, build, then deploy",
-    icon: "Zap",
+    icon: "Lightning",
     steps: [
       { name: "Run Tests", description: "Execute test suite", agent: "qa-tester" },
       { name: "Security Scan", description: "Run security checks", agent: "security-reviewer" },
@@ -342,7 +327,7 @@ export function WorkflowBuilderDialog() {
                   disabled={saving || !draft.name.trim()}
                   className="px-3 py-1.5 text-[10px] font-medium text-console-bg bg-console-accent rounded hover:bg-console-accent/90 transition-colors disabled:opacity-50 flex items-center gap-1.5"
                 >
-                  {saving && <Loader2 className="w-3 h-3 animate-spin" />}
+                  {saving && <SpinnerGap className="w-3 h-3 animate-spin" />}
                   {isEdit ? "Save" : "Create"}
                 </button>
               </>
@@ -383,14 +368,14 @@ function StepRow({
           disabled={index === 0}
           className="p-0.5 text-console-dim hover:text-console-muted disabled:opacity-30 transition-colors"
         >
-          <ChevronUp className="w-3 h-3" />
+          <CaretUp className="w-3 h-3" />
         </button>
         <button
           onClick={onMoveDown}
           disabled={index === total - 1}
           className="p-0.5 text-console-dim hover:text-console-muted disabled:opacity-30 transition-colors"
         >
-          <ChevronDown className="w-3 h-3" />
+          <CaretDown className="w-3 h-3" />
         </button>
       </div>
 
@@ -428,7 +413,7 @@ function StepRow({
         disabled={total <= 1}
         className="p-1 text-console-dim hover:text-console-error disabled:opacity-30 transition-colors shrink-0"
       >
-        <Trash2 className="w-3 h-3" />
+        <Trash className="w-3 h-3" />
       </button>
     </div>
   );

@@ -1,14 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  FolderOpen,
-  GitBranch,
-  GitPullRequest,
-  GitCommit,
-  Eye,
-  Upload,
-} from "lucide-react";
+import { FolderOpen, GitBranch, GitPullRequest, GitCommit, Eye, UploadSimple } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useGitStore } from "@/stores/git";
 import { SessionGroup } from "@/components/sessions/session-group";
@@ -159,7 +152,7 @@ function RepoItem({
           )}
           title={isProd ? "Push (PROD - requires confirmation)" : "Push"}
         >
-          <Upload className="w-3 h-3" />
+          <UploadSimple className="w-3 h-3" />
         </button>
         <button
           onClick={() => onCreatePR(repo)}

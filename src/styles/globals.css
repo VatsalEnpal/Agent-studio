@@ -8,41 +8,41 @@
    ============================================================================= */
 
 :root {
-  /* --- Elevation --- */
-  --elevation-0: #0a0a0a;
-  --elevation-1: #111214;
-  --elevation-2: #161616;
-  --elevation-3: #1a1a1a;
-  --elevation-4: #1f1f1f;
+  /* --- Elevation (cool zinc) --- */
+  --elevation-0: #09090b;
+  --elevation-1: #0f0f12;
+  --elevation-2: #18181b;
+  --elevation-3: #1e1e22;
+  --elevation-4: #27272a;
 
   /* --- Surfaces --- */
-  --surface-active: #1c1c1c;
-  --surface-overlay: rgba(17, 18, 20, 0.80);
+  --surface-active: #1e1e22;
+  --surface-overlay: rgba(15, 15, 18, 0.85);
 
-  /* --- Borders --- */
-  --border: #232323;
-  --border-subtle: #1a1a1a;
+  /* --- Borders (translucent) --- */
+  --border: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.03);
 
   /* --- Text --- */
-  --text-primary: #d4d4d4;
-  --text-emphasis: #f5f5f5;
-  --text-secondary: #737373;
-  --text-tertiary: #525252;
+  --text-primary: #a1a1aa;
+  --text-emphasis: #fafafa;
+  --text-secondary: #71717a;
+  --text-tertiary: #52525b;
 
-  /* --- Accent --- */
-  --accent: #4F8FF7;
-  --accent-hover: #6BA3FA;
-  --accent-pressed: #3A7DE5;
-  --accent-subtle: rgba(79, 143, 247, 0.08);
-  --accent-glow: 0 0 20px rgba(79, 143, 247, 0.25);
+  /* --- Accent (indigo) --- */
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-pressed: #4f46e5;
+  --accent-subtle: rgba(99, 102, 241, 0.08);
+  --accent-glow: 0 0 20px rgba(99, 102, 241, 0.2);
 
   /* --- Semantic --- */
-  --success: #34D399;
-  --success-subtle: rgba(52, 211, 153, 0.08);
-  --warning: #FBBF24;
-  --warning-subtle: rgba(251, 191, 36, 0.08);
-  --error: #F87171;
-  --error-subtle: rgba(248, 113, 113, 0.08);
+  --success: #22c55e;
+  --success-subtle: rgba(34, 197, 94, 0.08);
+  --warning: #eab308;
+  --warning-subtle: rgba(234, 179, 8, 0.08);
+  --error: #ef4444;
+  --error-subtle: rgba(239, 68, 68, 0.08);
 
   /* --- Shadows --- */
   --shadow-elevated: inset 0 1px 0 rgba(255, 255, 255, 0.03);
@@ -61,7 +61,7 @@
   --duration-pulse: 1.5s;
 
   /* --- Easing --- */
-  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* --- Legacy v1 aliases (backward compat) --- */
@@ -85,6 +85,113 @@
 }
 
 /* =============================================================================
+   Light mode — Notion-inspired warm whites, subtle gray borders
+   Applied when the "dark" class is NOT on <html>
+   ============================================================================= */
+
+:root:not(.dark) {
+  /* --- Elevation --- */
+  --elevation-0: #ffffff;
+  --elevation-1: #fafafa;
+  --elevation-2: #f5f5f5;
+  --elevation-3: #eeeeee;
+  --elevation-4: #e5e5e5;
+
+  /* --- Surfaces --- */
+  --surface-active: #f0f0f0;
+  --surface-overlay: rgba(255, 255, 255, 0.85);
+
+  /* --- Borders --- */
+  --border: #0000000f;
+  --border-subtle: #00000008;
+
+  /* --- Text --- */
+  --text-primary: #1a1a1a;
+  --text-emphasis: #000000;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+
+  /* --- Accent --- */
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-pressed: #1e40af;
+  --accent-subtle: rgba(37, 99, 235, 0.06);
+  --accent-glow: 0 0 20px rgba(37, 99, 235, 0.15);
+
+  /* --- Semantic --- */
+  --success: #0f7b6c;
+  --success-subtle: rgba(15, 123, 108, 0.06);
+  --warning: #c77d1a;
+  --warning-subtle: rgba(199, 125, 26, 0.06);
+  --error: #e03e3e;
+  --error-subtle: rgba(224, 62, 62, 0.06);
+
+  /* --- Shadows --- */
+  --shadow-elevated: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-modal: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --shadow-toast: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  /* --- Scrollbar --- */
+  --scrollbar-thumb: #d4d4d2;
+  --scrollbar-hover: #b8b8b6;
+
+  /* --- Legacy v1 aliases --- */
+  --skeleton-from: var(--elevation-1);
+  --skeleton-mid: var(--elevation-2);
+  --skeleton-to: var(--elevation-1);
+  --panel-gradient-start: var(--elevation-1);
+  --panel-gradient-end: var(--elevation-0);
+}
+
+/* =============================================================================
+   Light Mode — Notion-inspired warm whites
+   Applied when the `dark` class is removed from <html>
+   ============================================================================= */
+
+html:not(.dark) {
+  --elevation-0: #ffffff;
+  --elevation-1: #fafafa;
+  --elevation-2: #f4f4f5;
+  --elevation-3: #e4e4e7;
+  --elevation-4: #d4d4d8;
+
+  --surface-active: #f4f4f5;
+  --surface-overlay: rgba(255, 255, 255, 0.9);
+
+  --border: #e4e4e7;
+  --border-subtle: #f4f4f5;
+
+  --text-primary: #3f3f46;
+  --text-emphasis: #18181b;
+  --text-secondary: #71717a;
+  --text-tertiary: #a1a1aa;
+
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --accent-pressed: #3730a3;
+  --accent-subtle: rgba(79, 70, 229, 0.06);
+  --accent-glow: 0 0 20px rgba(79, 70, 229, 0.1);
+
+  --success: #16a34a;
+  --success-subtle: rgba(22, 163, 74, 0.06);
+  --warning: #ca8a04;
+  --warning-subtle: rgba(202, 138, 4, 0.06);
+  --error: #dc2626;
+  --error-subtle: rgba(220, 38, 38, 0.06);
+
+  --shadow-elevated: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --shadow-toast: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  --scrollbar-thumb: #d0d0ce;
+  --scrollbar-hover: #b0b0ae;
+
+  --skeleton-from: var(--elevation-1);
+  --skeleton-mid: var(--elevation-2);
+  --skeleton-to: var(--elevation-1);
+}
+
+/* =============================================================================
    Base styles
    ============================================================================= */
 
@@ -94,23 +201,9 @@ body {
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* =============================================================================
-   Noise texture overlay — subtle grain at 0.4% opacity
-   Uses an inline SVG fractal noise pattern
-   ============================================================================= */
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.004;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 256px 256px;
+  font-feature-settings: "cv01", "cv02", "ss01";
+  letter-spacing: -0.011em;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* =============================================================================
