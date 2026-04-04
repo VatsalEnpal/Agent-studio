@@ -4,45 +4,50 @@
 
 /* =============================================================================
    Agent Studio v2 — CSS Custom Properties
-   "Notion x Whispr Flow" — dark-mode primary
+   "Obsidian x Arc" — dark-mode primary, pillar accent system
    ============================================================================= */
 
 :root {
-  /* --- Elevation (cool zinc) --- */
-  --elevation-0: #09090b;
-  --elevation-1: #0f0f12;
-  --elevation-2: #18181b;
-  --elevation-3: #1e1e22;
-  --elevation-4: #27272a;
-
-  /* --- Surfaces --- */
-  --surface-active: #1e1e22;
-  --surface-overlay: rgba(15, 15, 18, 0.85);
+  /* --- Base palette (true black) --- */
+  --bg-base: #0a0a0a;
+  --bg-surface: #0c0c0c;
+  --bg-elevated: #111111;
+  --bg-input: rgba(255, 255, 255, 0.03);
 
   /* --- Borders (translucent) --- */
-  --border: rgba(255, 255, 255, 0.06);
-  --border-subtle: rgba(255, 255, 255, 0.03);
+  --border-default: rgba(255, 255, 255, 0.04);
+  --border-subtle: rgba(255, 255, 255, 0.06);
 
   /* --- Text --- */
-  --text-primary: #a1a1aa;
-  --text-emphasis: #fafafa;
-  --text-secondary: #71717a;
-  --text-tertiary: #52525b;
+  --text-primary: #ededed;
+  --text-secondary: #aaaaaa;
+  --text-tertiary: #555555;
+  --text-ghost: #333333;
 
-  /* --- Accent (indigo) --- */
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
-  --accent-pressed: #4f46e5;
-  --accent-subtle: rgba(99, 102, 241, 0.08);
-  --accent-glow: 0 0 20px rgba(99, 102, 241, 0.2);
+  /* --- Pillar accents: Sessions (green) --- */
+  --accent-sessions: #3fcf6d;
+  --accent-sessions-glow: rgba(63, 207, 109, 0.25);
+  --accent-sessions-subtle: rgba(63, 207, 109, 0.06);
+
+  /* --- Pillar accents: Rooms (indigo) --- */
+  --accent-rooms: #818cf8;
+  --accent-rooms-glow: rgba(129, 140, 248, 0.25);
+  --accent-rooms-subtle: rgba(129, 140, 248, 0.06);
+
+  /* --- Pillar accents: Sprints (amber) --- */
+  --accent-sprints: #f59e0b;
+  --accent-sprints-glow: rgba(245, 158, 11, 0.25);
+  --accent-sprints-subtle: rgba(245, 158, 11, 0.06);
+
+  /* --- Pillar accents: Memory (purple) --- */
+  --accent-memory: #c084fc;
+  --accent-memory-glow: rgba(192, 132, 252, 0.25);
+  --accent-memory-subtle: rgba(192, 132, 252, 0.06);
 
   /* --- Semantic --- */
-  --success: #22c55e;
-  --success-subtle: rgba(34, 197, 94, 0.08);
-  --warning: #eab308;
-  --warning-subtle: rgba(234, 179, 8, 0.08);
-  --error: #ef4444;
-  --error-subtle: rgba(239, 68, 68, 0.08);
+  --color-success: #3fcf6d;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
 
   /* --- Shadows --- */
   --shadow-elevated: inset 0 1px 0 rgba(255, 255, 255, 0.03);
@@ -50,8 +55,8 @@
   --shadow-toast: 0 4px 12px rgba(0, 0, 0, 0.4);
 
   /* --- Scrollbar --- */
-  --scrollbar-thumb: #2a2a2a;
-  --scrollbar-hover: #3a3a3a;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.08);
+  --scrollbar-hover: rgba(255, 255, 255, 0.15);
 
   /* --- Animation durations --- */
   --duration-instant: 100ms;
@@ -64,67 +69,76 @@
   --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* --- Legacy v1 aliases (backward compat) --- */
-  --bg-base: var(--elevation-0);
-  --bg-panel: var(--elevation-1);
-  --bg-elevated: var(--elevation-2);
-  --bg-faint: var(--elevation-2);
-  --text-bright: var(--text-emphasis);
-  --text-normal: var(--text-primary);
+  /* --- Typography --- */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, monospace;
+
+  /* --- Legacy aliases (backward compat) --- */
+  --elevation-0: var(--bg-base);
+  --elevation-1: var(--bg-surface);
+  --elevation-2: var(--bg-elevated);
+  --elevation-3: #1a1a1a;
+  --elevation-4: #222222;
+  --surface-active: var(--bg-elevated);
+  --surface-overlay: rgba(10, 10, 10, 0.85);
+  --border: var(--border-default);
+  --text-emphasis: var(--text-primary);
+  --accent: var(--accent-rooms);
+  --accent-hover: #9ba3fa;
+  --accent-pressed: #6670f4;
+  --accent-subtle: var(--accent-rooms-subtle);
+  --accent-glow: 0 0 20px var(--accent-rooms-glow);
+  --success: var(--color-success);
+  --success-subtle: var(--accent-sessions-subtle);
+  --warning: var(--color-warning);
+  --warning-subtle: var(--accent-sprints-subtle);
+  --error: var(--color-error);
+  --error-subtle: rgba(239, 68, 68, 0.08);
+  --bg-panel: var(--bg-surface);
+  --bg-faint: var(--bg-elevated);
+  --text-bright: var(--text-primary);
+  --text-normal: var(--text-secondary);
   --text-muted: var(--text-secondary);
   --text-dim: var(--text-tertiary);
-  --border-color: var(--border);
-  --accent-color: var(--accent);
-  --success-color: var(--success);
-  --error-color: var(--error);
-  --skeleton-from: var(--elevation-1);
-  --skeleton-mid: var(--elevation-2);
-  --skeleton-to: var(--elevation-1);
-  --panel-gradient-start: var(--elevation-1);
-  --panel-gradient-end: var(--elevation-0);
+  --border-color: var(--border-default);
+  --accent-color: var(--accent-rooms);
+  --success-color: var(--color-success);
+  --error-color: var(--color-error);
+  --skeleton-from: var(--bg-surface);
+  --skeleton-mid: var(--bg-elevated);
+  --skeleton-to: var(--bg-surface);
+  --panel-gradient-start: var(--bg-surface);
+  --panel-gradient-end: var(--bg-base);
 }
 
 /* =============================================================================
-   Light mode — Notion-inspired warm whites, subtle gray borders
+   Light mode — inverted palette
    Applied when the "dark" class is NOT on <html>
    ============================================================================= */
 
-:root:not(.dark) {
-  /* --- Elevation --- */
-  --elevation-0: #ffffff;
-  --elevation-1: #fafafa;
-  --elevation-2: #f5f5f5;
-  --elevation-3: #eeeeee;
-  --elevation-4: #e5e5e5;
-
-  /* --- Surfaces --- */
-  --surface-active: #f0f0f0;
-  --surface-overlay: rgba(255, 255, 255, 0.85);
+html:not(.dark) {
+  /* --- Base palette --- */
+  --bg-base: #ffffff;
+  --bg-surface: #fafafa;
+  --bg-elevated: #f5f5f5;
+  --bg-input: rgba(0, 0, 0, 0.03);
 
   /* --- Borders --- */
-  --border: #0000000f;
-  --border-subtle: #00000008;
+  --border-default: rgba(0, 0, 0, 0.06);
+  --border-subtle: rgba(0, 0, 0, 0.08);
 
   /* --- Text --- */
-  --text-primary: #1a1a1a;
-  --text-emphasis: #000000;
-  --text-secondary: #666666;
+  --text-primary: #111111;
+  --text-secondary: #555555;
   --text-tertiary: #999999;
+  --text-ghost: #cccccc;
 
-  /* --- Accent --- */
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --accent-pressed: #1e40af;
-  --accent-subtle: rgba(37, 99, 235, 0.06);
-  --accent-glow: 0 0 20px rgba(37, 99, 235, 0.15);
+  /* Pillar accents stay the same in light mode */
 
-  /* --- Semantic --- */
-  --success: #0f7b6c;
-  --success-subtle: rgba(15, 123, 108, 0.06);
-  --warning: #c77d1a;
-  --warning-subtle: rgba(199, 125, 26, 0.06);
-  --error: #e03e3e;
-  --error-subtle: rgba(224, 62, 62, 0.06);
+  /* --- Semantic (same) --- */
+  --color-success: #3fcf6d;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
 
   /* --- Shadows --- */
   --shadow-elevated: 0 1px 2px rgba(0, 0, 0, 0.06);
@@ -135,60 +149,42 @@
   --scrollbar-thumb: #d4d4d2;
   --scrollbar-hover: #b8b8b6;
 
-  /* --- Legacy v1 aliases --- */
-  --skeleton-from: var(--elevation-1);
-  --skeleton-mid: var(--elevation-2);
-  --skeleton-to: var(--elevation-1);
-  --panel-gradient-start: var(--elevation-1);
-  --panel-gradient-end: var(--elevation-0);
-}
-
-/* =============================================================================
-   Light Mode — Notion-inspired warm whites
-   Applied when the `dark` class is removed from <html>
-   ============================================================================= */
-
-html:not(.dark) {
-  --elevation-0: #ffffff;
-  --elevation-1: #fafafa;
-  --elevation-2: #f4f4f5;
-  --elevation-3: #e4e4e7;
-  --elevation-4: #d4d4d8;
-
-  --surface-active: #f4f4f5;
-  --surface-overlay: rgba(255, 255, 255, 0.9);
-
-  --border: #e4e4e7;
-  --border-subtle: #f4f4f5;
-
-  --text-primary: #3f3f46;
-  --text-emphasis: #18181b;
-  --text-secondary: #71717a;
-  --text-tertiary: #a1a1aa;
-
-  --accent: #4f46e5;
-  --accent-hover: #4338ca;
-  --accent-pressed: #3730a3;
-  --accent-subtle: rgba(79, 70, 229, 0.06);
-  --accent-glow: 0 0 20px rgba(79, 70, 229, 0.1);
-
-  --success: #16a34a;
-  --success-subtle: rgba(22, 163, 74, 0.06);
-  --warning: #ca8a04;
-  --warning-subtle: rgba(202, 138, 4, 0.06);
-  --error: #dc2626;
-  --error-subtle: rgba(220, 38, 38, 0.06);
-
-  --shadow-elevated: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-modal: 0 12px 40px rgba(0, 0, 0, 0.12);
-  --shadow-toast: 0 4px 12px rgba(0, 0, 0, 0.08);
-
-  --scrollbar-thumb: #d0d0ce;
-  --scrollbar-hover: #b0b0ae;
-
-  --skeleton-from: var(--elevation-1);
-  --skeleton-mid: var(--elevation-2);
-  --skeleton-to: var(--elevation-1);
+  /* --- Legacy aliases --- */
+  --elevation-0: var(--bg-base);
+  --elevation-1: var(--bg-surface);
+  --elevation-2: var(--bg-elevated);
+  --elevation-3: #eeeeee;
+  --elevation-4: #e5e5e5;
+  --surface-active: var(--bg-elevated);
+  --surface-overlay: rgba(255, 255, 255, 0.85);
+  --border: var(--border-default);
+  --text-emphasis: var(--text-primary);
+  --accent: var(--accent-rooms);
+  --accent-hover: #6670f4;
+  --accent-pressed: #4f46e5;
+  --accent-subtle: var(--accent-rooms-subtle);
+  --accent-glow: 0 0 20px var(--accent-rooms-glow);
+  --success: var(--color-success);
+  --success-subtle: var(--accent-sessions-subtle);
+  --warning: var(--color-warning);
+  --warning-subtle: var(--accent-sprints-subtle);
+  --error: var(--color-error);
+  --error-subtle: rgba(239, 68, 68, 0.06);
+  --bg-panel: var(--bg-surface);
+  --bg-faint: var(--bg-elevated);
+  --text-bright: var(--text-primary);
+  --text-normal: var(--text-secondary);
+  --text-muted: var(--text-secondary);
+  --text-dim: var(--text-tertiary);
+  --border-color: var(--border-default);
+  --accent-color: var(--accent-rooms);
+  --success-color: var(--color-success);
+  --error-color: var(--color-error);
+  --skeleton-from: var(--bg-surface);
+  --skeleton-mid: var(--bg-elevated);
+  --skeleton-to: var(--bg-surface);
+  --panel-gradient-start: var(--bg-surface);
+  --panel-gradient-end: var(--bg-base);
 }
 
 /* =============================================================================
@@ -196,12 +192,12 @@ html:not(.dark) {
    ============================================================================= */
 
 body {
-  background-color: var(--elevation-0);
+  background-color: var(--bg-base);
   color: var(--text-primary);
+  font-family: var(--font-sans);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: "cv01", "cv02", "ss01";
   letter-spacing: -0.011em;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
@@ -211,8 +207,8 @@ body {
    ============================================================================= */
 
 ::selection {
-  background-color: var(--accent-subtle);
-  color: var(--text-emphasis);
+  background: rgba(129, 140, 248, 0.3);
+  color: var(--text-primary);
 }
 
 /* =============================================================================
@@ -220,9 +216,17 @@ body {
    ============================================================================= */
 
 *:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 1px solid var(--text-ghost);
   outline-offset: 2px;
   border-radius: inherit;
+}
+
+/* Accent focus for primary interactive elements */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 1px solid var(--text-tertiary);
+  outline-offset: 1px;
 }
 
 /* =============================================================================
@@ -323,7 +327,7 @@ body {
    ============================================================================= */
 
 kbd {
-  font-family: var(--font-geist-mono), Menlo, Consolas, "Courier New", monospace;
+  font-family: var(--font-mono);
 }
 
 /* =============================================================================

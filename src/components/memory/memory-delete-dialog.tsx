@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { X, SpinnerGap, Trash } from "@phosphor-icons/react";
+import { CloseIcon, TrashIcon } from "@/components/ui/icons";
 import { useMemoryStore } from "@/stores/memory";
 import { useToastStore } from "@/stores/toast";
 
@@ -38,47 +38,47 @@ export function MemoryDeleteDialog() {
   return (
     <Dialog.Root open={open} onOpenChange={(v) => { if (!v) close(); }}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[400px] bg-console-panel border border-console-border rounded-lg shadow-xl">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-console-border">
-            <Dialog.Title className="text-xs font-medium text-console-error flex items-center gap-1.5">
-              <Trash className="w-3.5 h-3.5" />
+        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[400px] bg-bg-elevated border border-border-subtle rounded-lg shadow-modal">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border-default">
+            <Dialog.Title className="text-xs font-medium text-error flex items-center gap-1.5">
+              <TrashIcon size={14} />
               Delete Memory
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button className="p-1 text-console-dim hover:text-console-text transition-colors">
-                <X className="w-3.5 h-3.5" />
+              <button className="p-1 rounded-md text-text-ghost hover:text-text-primary hover:bg-bg-input transition-colors">
+                <CloseIcon size={14} />
               </button>
             </Dialog.Close>
           </div>
 
           <div className="px-4 py-4">
-            <p className="text-xs text-console-text leading-relaxed">
+            <p className="text-xs text-text-primary leading-relaxed">
               Are you sure you want to delete this memory?
             </p>
             {entry && (
-              <p className="text-label-xs text-console-muted mt-2 font-medium truncate">
+              <p className="text-label text-text-secondary mt-2 font-medium truncate">
                 &ldquo;{entry.title}&rdquo;
               </p>
             )}
-            <p className="text-label-xs text-console-dim mt-2">
+            <p className="text-label text-text-ghost mt-2">
               This action cannot be undone. The memory file and its index entry will be permanently removed.
             </p>
           </div>
 
-          <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-console-border">
+          <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-border-default">
             <button
               onClick={close}
-              className="px-3 py-1.5 text-label-xs text-console-muted hover:text-console-text bg-console-faint rounded transition-colors"
+              className="px-3 py-1.5 text-label text-text-secondary hover:text-text-primary bg-bg-elevated rounded transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleDelete}
               disabled={saving}
-              className="px-3 py-1.5 text-label-xs font-medium text-white bg-console-error/80 rounded hover:bg-console-error transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              className="px-3 py-1.5 text-label font-medium text-white bg-error/80 rounded hover:bg-error active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100 flex items-center gap-1.5"
             >
-              {saving && <SpinnerGap className="w-3 h-3 animate-spin" />}
+              {saving && <span className="animate-spin text-[10px]">...</span>}
               Delete
             </button>
           </div>

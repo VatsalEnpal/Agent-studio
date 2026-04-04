@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Square, Play, ArrowSquareOut, Trash, PlusCircle } from "@phosphor-icons/react";
+import { StopIcon, PlayIcon, ExternalLinkIcon, TrashIcon, PlusCircleIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { SessionGroup } from "@/components/sessions/session-group";
 import type { DevServer } from "./types";
@@ -155,7 +155,7 @@ function DevServerItem({
           title={`Open http://localhost:${server.port}`}
         >
           :{server.port}
-          <ArrowSquareOut className="w-2.5 h-2.5" />
+          <ExternalLinkIcon className="w-2.5 h-2.5" />
         </button>
       )}
       {server.running && !server.isSelf && (
@@ -169,7 +169,7 @@ function DevServerItem({
           className="p-0.5 text-console-dim hover:text-console-error opacity-0 group-hover:opacity-100 transition-all shrink-0"
           title="Stop server"
         >
-          <Square className="w-3 h-3" />
+          <StopIcon className="w-3 h-3" />
         </button>
       )}
       {!server.running && (
@@ -184,7 +184,7 @@ function DevServerItem({
             className="flex items-center gap-0.5 px-1.5 py-0.5 text-[8px] font-medium text-console-success bg-console-success/10 hover:bg-console-success/20 rounded transition-all shrink-0"
             title="Start server"
           >
-            <Play className="w-2 h-2" />
+            <PlayIcon className="w-2 h-2" />
             {acting ? "Starting..." : "Start"}
           </button>
           {server.isCustom && onRemove && (
@@ -193,7 +193,7 @@ function DevServerItem({
               className="p-0.5 text-console-dim hover:text-console-error opacity-0 group-hover:opacity-100 transition-all shrink-0"
               title="Remove server"
             >
-              <Trash className="w-3 h-3" />
+              <TrashIcon className="w-3 h-3" />
             </button>
           )}
         </>
@@ -233,7 +233,7 @@ function AddServerForm({
         onClick={() => setOpen(true)}
         className="flex items-center gap-1 px-2 py-1 text-[9px] text-console-dim hover:text-console-text transition-colors w-full"
       >
-        <PlusCircle className="w-3 h-3" />
+        <PlusCircleIcon className="w-3 h-3" />
         Add Server
       </button>
     );

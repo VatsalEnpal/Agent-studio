@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Brain, Monitor, Pulse, Timer, Hash, Play, Pause, ArrowClockwise } from "@phosphor-icons/react";
+import { MemoryIcon, SessionsIcon, HashIcon, ChevronRightIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useUsage, formatTokensDisplay } from "@/hooks/use-usage";
 import { useToastStore } from "@/stores/toast";
@@ -162,14 +162,14 @@ export function SystemPanel() {
   );
 
   return (
-    <div className="space-y-1.5 pt-2 border-t border-console-border mt-2">
-      <h4 className="text-[8px] font-medium text-console-dim uppercase tracking-widest px-1">
+    <div className="space-y-1.5 pt-2 border-t border-border-default mt-2">
+      <h4 className="text-[8px] font-medium text-text-ghost uppercase tracking-widest px-1">
         System
       </h4>
 
       {/* Avg Context Usage */}
       <StatRow
-        icon={<Pulse className="w-3 h-3" />}
+        icon={<SprintsIconInline />}
         label="Avg Context"
         value={usageData.all.length > 0
           ? `${Math.round(usageData.all.reduce((sum, s) => sum + (s.contextPercent ?? 0), 0) / usageData.all.length)}%`
@@ -177,17 +177,17 @@ export function SystemPanel() {
         valueColor={
           usageData.all.length > 0 &&
           usageData.all.reduce((sum, s) => sum + (s.contextPercent ?? 0), 0) / usageData.all.length >= 90
-            ? "text-console-error"
+            ? "text-error"
             : usageData.all.length > 0 &&
               usageData.all.reduce((sum, s) => sum + (s.contextPercent ?? 0), 0) / usageData.all.length >= 70
-              ? "text-yellow-400"
-              : "text-console-success"
+              ? "text-sprints"
+              : "text-sessions"
         }
       />
 
       {/* Total Tokens */}
       <StatRow
-        icon={<Hash className="w-3 h-3" />}
+        icon={<HashIcon size={12} className="text-text-ghost" />}
         label="Tokens"
         value={formatTokensDisplay(totalTokens)}
       />
@@ -199,19 +199,19 @@ export function SystemPanel() {
         onMouseLeave={() => setHoveredStat(null)}
       >
         <StatRow
-          icon={<Brain className="w-3 h-3" />}
+          icon={<MemoryIcon size={12} className="text-text-ghost" />}
           label="Memory"
           value={`${stats.memoryEntries} entries`}
         />
         {hoveredStat === "memory" && categoryEntries.length > 0 && (
-          <div className="absolute bottom-full left-0 mb-1 w-48 p-2 bg-console-panel border border-console-border rounded shadow-lg z-20">
-            <span className="text-[8px] text-console-dim uppercase tracking-wider block mb-1">
+          <div className="absolute bottom-full left-0 mb-1 w-48 p-2 bg-bg-elevated border border-border-subtle rounded shadow-lg z-20">
+            <span className="text-[8px] text-text-ghost uppercase tracking-wider block mb-1">
               Categories
             </span>
             {categoryEntries.map(([cat, count]) => (
               <div key={cat} className="flex items-center justify-between py-0.5">
-                <span className="text-[9px] text-console-muted capitalize">{cat}</span>
-                <span className="text-[9px] text-console-dim font-mono">{count}</span>
+                <span className="text-[9px] text-text-secondary capitalize">{cat}</span>
+                <span className="text-[9px] text-text-ghost font-mono">{count}</span>
               </div>
             ))}
           </div>
@@ -220,30 +220,30 @@ export function SystemPanel() {
 
       {/* Sessions */}
       <StatRow
-        icon={<Monitor className="w-3 h-3" />}
+        icon={<SessionsIcon size={12} className="text-text-ghost" />}
         label="Sessions"
         value={`${stats.sessionCount} active`}
       />
 
       {/* PMO Scheduler Control */}
-      <div className="pt-1.5 mt-1.5 border-t border-console-border/50 space-y-1">
-        <h4 className="text-[8px] font-medium text-console-dim uppercase tracking-widest px-1">
+      <div className="pt-1.5 mt-1.5 border-t border-border-default/50 space-y-1">
+        <h4 className="text-[8px] font-medium text-text-ghost uppercase tracking-widest px-1">
           PMO Scheduler
         </h4>
 
         {/* Status */}
         <div className="flex items-center gap-2 px-1 py-0.5">
-          <span className="text-console-dim shrink-0">
-            <Pulse className="w-3 h-3" />
+          <span className="text-text-ghost shrink-0">
+            <SprintsIconInline />
           </span>
-          <span className="text-[9px] text-console-dim flex-1">Status</span>
+          <span className="text-[9px] text-text-ghost flex-1">Status</span>
           <span className={cn(
             "flex items-center gap-1 text-[9px] font-mono shrink-0",
-            pmoFull?.loaded ? "text-console-success" : "text-console-dim",
+            pmoFull?.loaded ? "text-sessions" : "text-text-ghost",
           )}>
             <span className={cn(
               "w-1.5 h-1.5 rounded-full shrink-0",
-              pmoFull?.loaded ? "bg-console-success" : "bg-console-dim",
+              pmoFull?.loaded ? "bg-sessions" : "bg-text-ghost",
             )} />
             {pmoFull?.loaded ? "Running (every 2h)" : "Paused"}
           </span>
@@ -252,14 +252,12 @@ export function SystemPanel() {
         {/* Last scan */}
         {pmoFull?.lastScan && (
           <div className="flex items-center gap-2 px-1 py-0.5">
-            <span className="text-console-dim shrink-0">
-              <Timer className="w-3 h-3" />
-            </span>
-            <span className="text-[9px] text-console-dim flex-1">Last Scan</span>
+            <span className="text-text-ghost shrink-0 w-3" />
+            <span className="text-[9px] text-text-ghost flex-1">Last Scan</span>
             <span className={cn(
               "text-[9px] font-mono shrink-0 max-w-[120px] truncate",
-              pmoFull.lastStatus?.includes("NOT READY") ? "text-console-error" :
-              pmoFull.lastStatus?.includes("READY") ? "text-console-success" : "text-console-muted",
+              pmoFull.lastStatus?.includes("NOT READY") ? "text-error" :
+              pmoFull.lastStatus?.includes("READY") ? "text-sessions" : "text-text-secondary",
             )}>
               {formatScanTime(pmoFull.lastScan)} — {pmoFull.lastStatus ?? "?"}
             </span>
@@ -270,8 +268,8 @@ export function SystemPanel() {
         {pmoFull?.loaded && pmoFull?.nextScanIn && (
           <div className="flex items-center gap-2 px-1 py-0.5">
             <span className="w-3 shrink-0" />
-            <span className="text-[9px] text-console-dim flex-1">Next Scan</span>
-            <span className="text-[9px] text-console-muted font-mono shrink-0">
+            <span className="text-[9px] text-text-ghost flex-1">Next Scan</span>
+            <span className="text-[9px] text-text-secondary font-mono shrink-0">
               in {pmoFull.nextScanIn}
             </span>
           </div>
@@ -285,19 +283,13 @@ export function SystemPanel() {
             className={cn(
               "flex items-center gap-1 px-2 py-1 text-[9px] font-medium rounded transition-all",
               pmoAction
-                ? "bg-console-faint text-console-dim cursor-not-allowed"
+                ? "bg-bg-input text-text-ghost cursor-not-allowed"
                 : pmoFull?.loaded
-                  ? "bg-console-error/15 text-console-error hover:bg-console-error/25 active:bg-console-error/35"
-                  : "bg-console-success/15 text-console-success hover:bg-console-success/25 active:bg-console-success/35",
+                  ? "bg-error/15 text-error hover:bg-error/25"
+                  : "bg-sessions/15 text-sessions hover:bg-sessions/25",
             )}
           >
-            {pmoAction ? (
-              <ArrowClockwise className="w-2.5 h-2.5 animate-spin" />
-            ) : pmoFull?.loaded ? (
-              <Pause className="w-2.5 h-2.5" />
-            ) : (
-              <Play className="w-2.5 h-2.5" />
-            )}
+            <ChevronRightIcon size={10} />
             {pmoAction ?? (pmoFull?.loaded ? "Pause" : "Start")}
           </button>
 
@@ -307,16 +299,26 @@ export function SystemPanel() {
             className={cn(
               "flex items-center gap-1 px-2 py-1 text-[9px] font-medium rounded transition-all",
               scanning
-                ? "bg-console-faint text-console-dim cursor-not-allowed"
-                : "bg-console-accent/15 text-console-accent hover:bg-console-accent/25 active:bg-console-accent/35",
+                ? "bg-bg-input text-text-ghost cursor-not-allowed"
+                : "bg-rooms/15 text-rooms hover:bg-rooms/25",
             )}
           >
-            <ArrowClockwise className={cn("w-2.5 h-2.5", scanning && "animate-spin")} />
+            <ChevronRightIcon size={10} className={cn(scanning && "animate-spin")} />
             {scanning ? "Scanning..." : "Scan Now"}
           </button>
         </div>
       </div>
     </div>
+  );
+}
+
+/** Inline sprints-style icon at small size */
+function SprintsIconInline() {
+  return (
+    <svg width={12} height={12} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" className="text-text-ghost">
+      <circle cx="8" cy="8" r="6" />
+      <polyline points="5.5 8 7.2 9.8 10.5 6.2" />
+    </svg>
   );
 }
 
@@ -333,12 +335,12 @@ function StatRow({
 }) {
   return (
     <div className="flex items-center gap-2 px-1 py-0.5">
-      <span className="text-console-dim shrink-0">{icon}</span>
-      <span className="text-[9px] text-console-dim flex-1">{label}</span>
+      <span className="shrink-0">{icon}</span>
+      <span className="text-[9px] text-text-ghost flex-1">{label}</span>
       <span
         className={cn(
           "text-[9px] font-mono shrink-0 max-w-[120px] truncate",
-          valueColor ?? "text-console-muted",
+          valueColor ?? "text-text-secondary",
         )}
       >
         {value}

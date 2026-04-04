@@ -20,14 +20,20 @@ ai-agents/
 .agent-studio/rooms/
 .agent-studio/reports/
 qa-screenshots-v2/
+qa-screenshots-v3/
 
 # QA scripts (dev only)
-scripts/qa-*.mjs
+scripts/qa-*
 scripts/readme-screenshots.mjs
+
+# Superpowers / QA snapshots
+.superpowers/
+.qa-screenshots/
 
 # Build artifacts
 tsconfig.tsbuildinfo
 SECURITY_AUDIT.md
 dist/
+dist-server/
 out/
 *.dmg

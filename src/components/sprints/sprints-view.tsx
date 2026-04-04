@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { SpinnerGap, Rocket } from "@phosphor-icons/react";
+import { SprintsIcon } from "@/components/ui/icons";
 import { useSprintsStore, type Sprint } from "@/stores/sprints";
 import { wsClient } from "@/lib/ws-client";
 import type { WsMessage } from "@/lib/types";
@@ -65,19 +65,19 @@ export function SprintsView() {
   return (
     <div className="h-full">
       {selectedSprint ? (
-        <SprintDetail sprint={selectedSprint} />
+        <SprintDetail sprint={selectedSprint} onBack={() => selectSprint(null)} />
       ) : (
-        <div className="flex flex-col items-center justify-center h-full gap-3">
-          <div className="w-10 h-10 rounded-xl bg-elevation-2 flex items-center justify-center">
-            <Rocket className="w-5 h-5 text-text-tertiary" />
+        <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
+          <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center">
+            <SprintsIcon size={20} className="text-text-ghost" />
           </div>
-          <p className="text-body-sm text-text-secondary font-medium">
+          <p className="text-[10px] font-medium text-text-secondary">
             {sprints.length === 0
               ? "No sprints found"
               : "Select a sprint to view details"}
           </p>
           {sprints.length === 0 && (
-            <p className="text-label-xs text-text-tertiary max-w-[240px] text-center leading-relaxed">
+            <p className="text-[10px] text-text-tertiary max-w-[240px] leading-relaxed">
               Sprints are created automatically by the PMO agent when it detects pending work in your projects.
             </p>
           )}

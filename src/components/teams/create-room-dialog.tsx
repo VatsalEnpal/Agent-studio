@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { X, Plus, SpinnerGap } from "@phosphor-icons/react";
+import { CloseIcon, PlusIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import { useRoomsStore } from "@/stores/rooms";
@@ -45,6 +45,16 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
       setCreating(false);
     }
   }, [open]);
+
+  // Escape key to close
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onOpenChange(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open, onOpenChange]);
 
   const toggleAgent = useCallback((id: string) => {
     setAgents((prev) =>
@@ -100,7 +110,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
   const enabledCount = agents.filter((a) => a.enabled).length;
 
   return (
-    <div className="fixed inset-0 z-modal flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
@@ -108,25 +118,25 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
       />
 
       {/* Dialog */}
-      <div className="relative z-10 w-full max-w-lg bg-elevation-3 border border-border rounded-xl shadow-modal animate-slide-up">
+      <div className="relative z-10 w-full max-w-md bg-bg-elevated border border-border-subtle rounded-lg shadow-modal animate-slide-up">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
-          <h2 className="text-title-sm text-text-emphasis">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border-default">
+          <h2 className="text-[10px] font-semibold text-text-primary">
             Create Team Room
           </h2>
           <button
             onClick={() => onOpenChange(false)}
-            className="p-1 rounded-md text-text-tertiary hover:text-text-primary hover:bg-surface-hover transition-colors duration-[100ms]"
+            className="p-0.5 rounded text-text-ghost hover:text-text-secondary transition-colors"
           >
-            <X size={16} weight="light" />
+            <CloseIcon size={12} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-5 py-4 space-y-5">
+        <div className="px-4 py-3 space-y-3">
           {/* Room name */}
           <div>
-            <label className="block text-label-xs text-text-secondary uppercase tracking-[0.04em] mb-1.5">
+            <label className="block text-[9px] font-medium text-text-ghost uppercase tracking-[0.5px] mb-1">
               Room Name
             </label>
             <input
@@ -134,14 +144,14 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="auth-refactor"
-              className="w-full bg-elevation-2 border border-border rounded-md px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors duration-[100ms]"
+              className="w-full bg-bg-input border border-border-default rounded-md px-2 py-1 text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-colors"
               autoFocus
             />
           </div>
 
           {/* Topic */}
           <div>
-            <label className="block text-label-xs text-text-secondary uppercase tracking-[0.04em] mb-1.5">
+            <label className="block text-[9px] font-medium text-text-ghost uppercase tracking-[0.5px] mb-1">
               Topic / Goal
             </label>
             <input
@@ -149,26 +159,26 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Refactor auth flow to use server-side sessions"
-              className="w-full bg-elevation-2 border border-border rounded-md px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors duration-[100ms]"
+              className="w-full bg-bg-input border border-border-default rounded-md px-2 py-1 text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-colors"
             />
           </div>
 
           {/* Agent picker */}
           <div>
-            <label className="block text-label-xs text-text-secondary uppercase tracking-[0.04em] mb-2">
+            <label className="block text-[9px] font-medium text-text-ghost uppercase tracking-[0.5px] mb-1">
               Agents ({enabledCount} selected)
             </label>
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               {agents.map((agent) => {
                 const color = agentColor(agent.name);
                 return (
                   <div
                     key={agent.id}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-md border transition-colors duration-[100ms]",
+                      "flex items-center gap-2 px-2.5 py-1.5 rounded-md border transition-colors",
                       agent.enabled
-                        ? "border-accent/30 bg-accent-subtle"
-                        : "border-border bg-transparent hover:bg-surface-hover/30",
+                        ? "border-rooms/30 bg-rooms-subtle"
+                        : "border-border-default bg-transparent hover:bg-bg-input/30",
                     )}
                   >
                     {/* Checkbox */}
@@ -176,15 +186,15 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                       onClick={() => toggleAgent(agent.id)}
                       disabled={agent.locked}
                       className={cn(
-                        "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors duration-[100ms]",
+                        "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors",
                         agent.enabled
-                          ? "bg-accent border-accent"
+                          ? "bg-rooms border-rooms"
                           : "border-text-tertiary",
                         agent.locked && "opacity-60 cursor-not-allowed",
                       )}
                     >
                       {agent.enabled && (
-                        <svg className="w-3 h-3 text-canvas" viewBox="0 0 12 12">
+                        <svg className="w-3 h-3 text-bg-base" viewBox="0 0 12 12">
                           <path
                             d="M2 6l3 3 5-6"
                             stroke="currentColor"
@@ -198,24 +208,24 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                     </button>
 
                     {/* Avatar + Name */}
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
                       <div
-                        className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                        className="w-[18px] h-[18px] rounded-[4px] flex items-center justify-center shrink-0"
                         style={{ backgroundColor: color + "25" }}
                       >
-                        <span className="text-[9px] font-bold" style={{ color }}>
+                        <span className="text-[8px] font-bold" style={{ color }}>
                           {agent.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <span
                         className={cn(
-                          "text-body-sm font-medium truncate",
+                          "text-[10px] font-medium truncate",
                           agent.enabled ? "text-text-primary" : "text-text-secondary",
                         )}
                       >
                         {agent.name}
                         {agent.locked && (
-                          <span className="text-label-xs text-text-tertiary ml-1">(required)</span>
+                          <span className="text-label text-text-tertiary ml-1">(required)</span>
                         )}
                       </span>
                     </div>
@@ -226,7 +236,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                       onChange={(e) =>
                         setAgentModel(agent.id, e.target.value as "opus" | "sonnet" | "haiku")
                       }
-                      className="bg-canvas border border-border rounded-md px-2 py-1 text-label-xs font-mono text-text-secondary focus:outline-none focus:border-accent/50 transition-colors duration-[100ms]"
+                      className="bg-bg-base border border-border-default rounded-md px-2 py-1 text-label font-mono text-text-secondary focus:outline-none focus:border-border-subtle transition-colors"
                     >
                       <option value="opus">opus</option>
                       <option value="sonnet">sonnet</option>
@@ -240,24 +250,20 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 px-5 py-3.5 border-t border-border">
+        <div className="flex items-center justify-end gap-2 px-4 py-2.5 border-t border-border-default">
           <button
             onClick={() => onOpenChange(false)}
-            className="px-4 py-1.5 text-body-sm font-medium text-text-secondary hover:text-text-primary rounded-md transition-colors duration-[100ms]"
+            className="px-2.5 py-1 text-[10px] font-medium text-text-secondary hover:text-text-primary rounded-md transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={() => void handleCreate()}
             disabled={!name.trim() || !topic.trim() || creating}
-            className="flex items-center gap-1.5 px-4 py-1.5 text-body-sm font-medium rounded-md bg-accent text-canvas hover:bg-accent-hover transition-colors duration-[100ms] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
           >
-            {creating ? (
-              <SpinnerGap size={14} weight="light" className="animate-spin" />
-            ) : (
-              <Plus size={14} weight="light" />
-            )}
-            Create Room
+            <PlusIcon size={12} />
+            {creating ? "Creating..." : "Create Room"}
           </button>
         </div>
       </div>

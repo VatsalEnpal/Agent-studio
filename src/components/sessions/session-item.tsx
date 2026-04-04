@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { X, Clock, SpinnerGap, PencilSimple } from "@phosphor-icons/react";
-import { cn, statusDotColor } from "@/lib/utils";
+import { CloseIcon, EditIcon } from "@/components/ui/icons";
+import { cn } from "@/lib/utils";
 import { useSessionUsage } from "@/hooks/use-usage";
 import type { Session } from "@/lib/types";
 
@@ -60,7 +60,6 @@ export function SessionItem({
     try {
       await onKill();
     } finally {
-      // Keep killing state — session will disappear from list via WS update
       setTimeout(() => setKilling(false), 3000);
     }
   }, [killing, onKill]);
@@ -105,7 +104,6 @@ export function SessionItem({
       setCustomName(session.id, trimmed);
       setCustomNameState(trimmed);
     } else if (!trimmed) {
-      // Clear custom name — revert to auto-detected or default
       const names = getCustomNames();
       delete names[session.id];
       try { localStorage.setItem(RENAME_KEY, JSON.stringify(names)); } catch { /* ignore */ }
@@ -114,6 +112,21 @@ export function SessionItem({
     setEditing(false);
   }, [editValue, session.id, session.name]);
 
+  const statusDot = (() => {
+    switch (session.status) {
+      case "active":
+      case "building":
+        return "bg-sessions";
+      case "idle":
+      case "starting":
+        return "bg-sprints";
+      case "exited":
+        return "bg-text-tertiary";
+      default:
+        return "bg-text-tertiary";
+    }
+  })();
+
   return (
     <div
       onClick={onFocus}
@@ -121,15 +134,24 @@ export function SessionItem({
       className={cn(
         "sidebar-item flex flex-col gap-0.5 px-2 py-2 rounded-md cursor-pointer group",
         focused
-          ? "bg-console-faint text-console-text border-l-2 border-l-console-accent"
-          : "text-console-muted hover:bg-console-faint/40 hover:text-console-text border-l-2 border-l-transparent",
+          ? "bg-bg-elevated text-text-primary border-l-2 border-l-sessions"
+          : "text-text-secondary hover:bg-bg-elevated/40 hover:text-text-primary border-l-2 border-l-transparent",
         !visible && "opacity-60",
       )}
     >
       {/* Row 1: status dot + name + model + kill */}
       <div className="flex items-center gap-2">
         <span
-          className={cn("w-2 h-2 rounded-full shrink-0", statusDotColor(session.status))}
+          className={cn(
+            "w-[5px] h-[5px] rounded-full shrink-0",
+            statusDot,
+            (session.status === "building" || session.status === "starting") && "animate-pulse-dot",
+          )}
+          style={
+            (session.status === "active" || session.status === "building")
+              ? { boxShadow: "0 0 6px var(--accent-sessions-glow)" }
+              : undefined
+          }
         />
         {editing ? (
           <input
@@ -142,7 +164,7 @@ export function SessionItem({
               if (e.key === "Escape") setEditing(false);
             }}
             onClick={(e) => e.stopPropagation()}
-            className="text-xs font-medium truncate flex-1 bg-console-bg border border-console-accent/50 rounded px-1 py-0 text-console-text focus:outline-none focus:border-console-accent"
+            className="text-xs font-medium truncate flex-1 bg-bg-base border border-sessions/30 rounded px-1 py-0 text-text-primary focus:outline-none focus:border-sessions"
             autoFocus
           />
         ) : (
@@ -155,22 +177,22 @@ export function SessionItem({
                 e.stopPropagation();
                 startEditing();
               }}
-              className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-white/10 shrink-0"
+              className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-bg-elevated shrink-0"
               title="Rename session"
             >
-              <PencilSimple className="w-3 h-3 text-console-dim" />
+              <EditIcon size={10} className="text-text-ghost" />
             </button>
           </>
         )}
         {effectiveModel && effectiveModel !== "unknown" && (
           <span
             className={cn(
-              "text-[9px] px-1 py-0.5 rounded shrink-0 font-medium",
+              "text-label px-1 py-0.5 rounded shrink-0 font-medium",
               effectiveModel === "opus"
-                ? "bg-purple-500/20 text-purple-400"
+                ? "bg-memory/10 text-memory"
                 : effectiveModel === "haiku"
-                  ? "bg-teal-500/20 text-teal-400"
-                  : "bg-console-border text-console-dim",
+                  ? "bg-sessions/10 text-sessions"
+                  : "bg-border-default text-text-tertiary",
             )}
           >
             {effectiveModel}
@@ -185,39 +207,38 @@ export function SessionItem({
           className={cn(
             "p-0.5 transition-all shrink-0 rounded",
             killing
-              ? "text-console-error opacity-70 cursor-not-allowed"
-              : "text-console-dim hover:text-console-error hover:bg-console-error/10 active:bg-console-error/20",
+              ? "text-error opacity-70 cursor-not-allowed"
+              : "text-text-ghost hover:text-error hover:bg-error/10 active:bg-error/20",
             !killing && (focused ? "opacity-70 hover:opacity-100" : "opacity-0 group-hover:opacity-100"),
           )}
           title={killing ? "Killing..." : "Kill session"}
         >
-          {killing ? <SpinnerGap className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
+          <CloseIcon size={12} />
         </button>
       </div>
 
       {/* Row 2: uptime + cwd + cost */}
-      <div className="flex items-center gap-2 pl-4">
+      <div className="flex items-center gap-2 pl-[13px]">
         {isRunning && (
-          <span className="flex items-center gap-0.5 text-[8px] text-console-dim">
-            <Clock className="w-2.5 h-2.5" />
+          <span className="flex items-center gap-0.5 text-[10px] text-text-ghost">
             {formatUptime(session.createdAt)}
           </span>
         )}
         {session.cwd && (
-          <span className="text-[8px] text-console-dim truncate flex-1 min-w-0">
+          <span className="text-[10px] text-text-ghost truncate flex-1 min-w-0">
             {shortenCwd(session.cwd)}
           </span>
         )}
         {hasContext && (
           <span className="flex items-center gap-1 shrink-0">
-            <span className="text-[8px] text-console-dim">
+            <span className="text-label text-text-ghost">
               {contextPercent}%
             </span>
-            <span className="w-10 h-1 rounded-full bg-console-border overflow-hidden">
+            <span className="w-10 h-1 rounded-full bg-border-default overflow-hidden">
               <span
                 className={cn(
                   "h-full rounded-full block transition-all",
-                  contextPercent >= 90 ? "bg-red-400" : contextPercent >= 70 ? "bg-yellow-400" : "bg-emerald-400",
+                  contextPercent >= 90 ? "bg-error" : contextPercent >= 70 ? "bg-sprints" : "bg-sessions",
                 )}
                 style={{ width: `${Math.min(100, contextPercent)}%` }}
               />
@@ -231,7 +252,6 @@ export function SessionItem({
 
 /** Shorten cwd for display — strips common home prefixes */
 function shortenCwd(cwd: string): string {
-  // Match /Users/<username> or /home/<username> patterns
   const homeMatch = cwd.match(/^\/(?:Users|home)\/[^/]+/);
   if (homeMatch) return "~" + cwd.slice(homeMatch[0].length);
   return cwd;

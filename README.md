@@ -2,98 +2,140 @@
 
 # Agent Studio
 
-**The command center for AI coding agents.**
+### The engineering manager for your AI coding team.
 
-Manage sessions, coordinate agent teams, run autonomous sprints with gate protocols, and build shared agent memory — from one native Mac app.
+You run multiple AI agents. They don't talk to each other.<br>
+Agent Studio turns them into a real engineering team.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node 22+](https://img.shields.io/badge/node-22%2B-green.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org)
 [![Electron](https://img.shields.io/badge/Electron-Mac%20App-9B59B6.svg)](https://www.electronjs.org)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-SDK-4F8FF7.svg)](https://docs.anthropic.com/en/docs/claude-code)
+[![Claude Code](https://img.shields.io/badge/Powered%20by-Claude%20Code-4F8FF7.svg)](https://docs.anthropic.com/en/docs/claude-code)
 
-[Get Started](#quick-start) · [Features](#features) · [Architecture](#architecture)
+[Get Started](#getting-started) · [Features](#key-features) · [Architecture](#architecture) · [Compare](#compared-to-alternatives)
 
 </div>
 
 ---
 
+<!-- Replace with actual screenshot when available -->
 ![Agent Studio — Sessions](public/screenshot-sessions.png)
 
-## What is this?
+## The Problem
 
-Agent Studio is a native Mac desktop app for managing AI coding agents. It gives you one dashboard for everything: terminal sessions with live cost tracking, team rooms where agents collaborate, sprint automation with gate protocols, and a shared knowledge base that agents learn from.
+You've got 8 AI agents running across frontend, backend, QA, security, and orchestration. They're all powerful individually. But they don't coordinate. They don't share context. They step on each other's work.
 
-Every session is a real Claude Code process on your machine. Agent Studio doesn't call the Anthropic API directly — your permissions, MCP servers, and tools work exactly as in the terminal.
+It's like hiring 8 senior engineers and putting them in separate rooms with no Slack, no standups, and no project manager.
 
-## Why this exists
+## The Solution
 
-Running one Claude Code session is simple. Running a team of 8 agents across frontend, backend, QA, security, and orchestration — with autonomous sprints — is not.
+Agent Studio gives your AI agents the infrastructure real engineering teams have. Three pillars:
 
-Agent Studio was built out of that need. It manages the full agent lifecycle: spawn, coordinate, track, learn, repeat.
+**Team Rooms** — Agents collaborate via @mentions, hand off work, and build on each other's output. One agent finds a bug, another fixes it, a third writes the test. All in structured chat, no terminal noise.
 
-## Features
+**Autonomous Sprints** — Gate-based workflows that take a feature from planning to production. PMO scans the codebase, design phase produces specs, builders implement, QA validates, security audits. Human approval gates keep you in control.
+
+**Shared Memory** — When one agent discovers that your API needs pagination headers, every agent knows it next session. Learnings, corrections, and architectural decisions persist across the entire team.
+
+---
+
+## Key Features
 
 ### Sessions
-
-Real terminals via `node-pty` + xterm.js. Each session runs Claude Code in a full PTY with color output, scroll, and zoom. Terminal instances are pooled and reattached on switch (VS Code pattern — no re-render flicker).
-
-- **Live metrics** — Token count, dollar cost, context window %, model name per session
-- **Resume any session** — Browse and resume past sessions with one click
-- **Presets** — Quick Chat, Start Sprint, Security Audit, or create your own
-- **Cmd+K palette** — Fast navigation, session switching, sprint search
+- Real terminal sessions via `node-pty` + xterm.js with full color, scroll, and zoom
+- Live metrics — token count, dollar cost, context window %, model name
+- Resume any past session with one click
+- Presets — Quick Chat, Start Sprint, Security Audit, or build your own
+- `Cmd+K` command palette for instant navigation
 
 ![Agent Studio — Teams](public/screenshot-teams.png)
 
 ### Team Rooms
-
-Rooms where agents collaborate via `@anthropic-ai/claude-agent-sdk`. Clean structured text — no terminal noise.
-
-- **@mention routing** — Direct messages to specific agents or `@all` for broadcast
-- **Turn-based protocol** — One agent at a time, depth limit of 10, no self-loops
-- **Streaming** — Typing indicators and real-time text deltas
-- **Spawn/stop** — Start and tear down agent sessions per room
+- Agents collaborate through `@anthropic-ai/claude-agent-sdk`
+- @mention routing to specific agents or `@all` broadcast
+- Turn-based protocol — one agent at a time, depth limit, no self-loops
+- Real-time streaming with typing indicators
+- Spawn and tear down agent sessions per room
 
 ![Agent Studio — Sprints](public/screenshot-sprints.png)
 
 ### Sprint Automation
-
-Track autonomous multi-agent work through a gate-based protocol. Each sprint passes through stages (PMO scan, readiness report, approval, design, build, test, security) with visual progress.
-
-- **Gate stepper** — Horizontal visualization with pass/fail/in-progress states
-- **Sprint history** — Archived sprints with completion dates and QA scores
-- **Pause/resume/cancel** — Full lifecycle control
-- **File watching** — Live state from `ai-agents/sprints/state.json` via chokidar
+- Gate-based pipeline: PMO Scan → Readiness → Approval → Design → Build → Test → Security → Ship
+- Visual gate stepper with pass/fail/in-progress states
+- Sprint history with completion dates and QA scores
+- Pause, resume, and cancel with full lifecycle control
+- Live state updates via file watching
 
 ![Agent Studio — Knowledge](public/screenshot-knowledge.png)
 
 ### Knowledge Base
+- Agents write learnings, corrections, and decisions to shared memory
+- Search and filter by title, content, tags, or category
+- Pin important memories — agents load pinned entries first
+- Create and edit entries from the UI or let agents manage them
 
-Agents write learnings, corrections, and decisions to shared memory. When one agent discovers a production pattern, every other agent knows it next session.
+### Dev Servers
+- Auto-detect local development servers running on your machine
+- Monitor port status and quick-access links
 
-- **Search + filter** — By title, content, tags, or category
-- **Pin important memories** — Agents always load pinned entries first
-- **Create/edit from UI** — Manual memory management alongside auto-generated entries
-
-### Settings & Git
-
-- Auto-discovered agents from `.claude/agents/`
-- Multi-repo git status with branch, dirty state, PR creation
-- System monitoring (CPU, RAM, disk, WebSocket connections)
-- Default model, permissions, and working directory config
-- Notification preferences (gate approvals, dangerous actions, task completion)
+### Desktop App
+- Native macOS notifications for gate approvals, dangerous actions, task completion
+- System tray with quick controls
+- Crash recovery and health watchdog
+- Keyboard shortcuts throughout (`Cmd+K`, `Cmd+N`, `Cmd+1-5`)
 
 ![Agent Studio — Settings](public/screenshot-settings.png)
 
-## Requirements
+### Settings & Git
+- Auto-discovered agents from `.claude/agents/`
+- Multi-repo git status with branch, dirty state, PR creation
+- System monitor (CPU, RAM, disk, WebSocket connections)
+- Default model, permissions, and working directory config
+- Notification preferences per event type
 
-- **macOS** (Electron desktop app)
+---
+
+## Compared to Alternatives
+
+| | **Agent Studio** | **Multiple terminals** | **Other dashboards** |
+|---|---|---|---|
+| Agent collaboration | Team rooms with @mentions, turn protocol | Copy-paste between tabs | Isolated sessions |
+| Autonomous workflows | Gate-based sprints with human approval | Manual coordination | Basic task queues |
+| Shared memory | Persistent knowledge base across sessions | None | None |
+| Real terminals | Full PTY with color, scroll, cost tracking | Yes, but no metrics | Web-only, limited |
+| Desktop app | Native Mac app, notifications, tray | Terminal emulator | Browser tab |
+| Sprint visualization | Gate stepper, history, QA scores | `tail -f` a log file | Varies |
+
+---
+
+## Screenshots
+
+| Sessions | Team Rooms |
+|----------|-----------|
+| ![Sessions](public/screenshot-sessions.png) | ![Teams](public/screenshot-teams.png) |
+
+| Sprints | Knowledge Base |
+|---------|---------------|
+| ![Sprints](public/screenshot-sprints.png) | ![Knowledge](public/screenshot-knowledge.png) |
+
+| Settings |
+|----------|
+| ![Settings](public/screenshot-settings.png) |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- **macOS** (Electron desktop app — browser mode works on any OS)
 - **Node.js 22+**
-- **Claude Code CLI** installed and authenticated ([install guide](https://docs.anthropic.com/en/docs/claude-code))
+- **Claude Code CLI** installed and authenticated — [install guide](https://docs.anthropic.com/en/docs/claude-code)
 
-Agent Studio checks all of this on startup and tells you exactly what's missing.
+Agent Studio checks all prerequisites on startup and tells you exactly what's missing.
 
-## Quick Start
+### Install
 
 ```bash
 git clone https://github.com/VatsalEnpal/Agent-studio.git
@@ -101,79 +143,141 @@ cd Agent-studio
 npm install
 ```
 
-**Browser:**
+### Run in browser
+
 ```bash
 npm run dev
 # Open http://localhost:8080
 ```
 
-**Mac app:**
+### Run as Mac app
+
 ```bash
 npm run electron:dev
 ```
 
-**Build .dmg:**
+### Build distributable
+
 ```bash
-npm run build:mac
+npm run build:mac    # macOS .dmg
 ```
+
+---
 
 ## Architecture
 
 ```
-Electron shell  ←→  Express 5 server  ←→  Claude Code CLI
-                         ↕
-                    Next.js 16 UI
+Electron shell  ←→  Express 5 server  ←→  Claude Code CLI (node-pty)
+                         ↕                         ↕
+                    Next.js 16 UI         Claude Agent SDK (rooms)
 ```
 
-| Layer | What it does |
-|-------|-------------|
-| **Frontend** | Next.js 16, React 19, Tailwind CSS, Zustand, xterm.js |
-| **Server** | Express 5, WebSocket (ws), node-pty, chokidar file watching |
-| **Terminal sessions** | `node-pty` spawns real Claude Code processes |
-| **Room agents** | `@anthropic-ai/claude-agent-sdk` for structured chat |
-| **Electron** | Thin shell — server lifecycle, crash recovery, health watchdog, native notifications, tray icon |
+| Layer | Stack | Role |
+|-------|-------|------|
+| **Frontend** | Next.js 16, React 19, Tailwind CSS, Zustand, xterm.js | UI, state management, terminal rendering |
+| **Server** | Express 5, WebSocket (ws), node-pty, chokidar | API, PTY management, file watching, agent orchestration |
+| **Rooms** | `@anthropic-ai/claude-agent-sdk` | Structured agent chat, turn protocol |
+| **Desktop** | Electron | Native shell, notifications, tray, crash recovery |
 
-### Project Structure
+---
+
+## Project Structure
 
 ```
-server/                 Express backend
-  routes/               API route modules
-  managers/             Process tracker, message filter, conversation protocol, sprint manager
-  workflows/            Sprint planning engine
-src/                    Next.js frontend
-  components/           Organized by page (sessions, teams, sprints, memory, settings)
-  stores/               Zustand state stores
-  lib/                  WebSocket client, design tokens, utilities
-electron/               Main process, preload, IPC bridge
+server/                  Express backend
+  index.ts               Main server — API routes, WebSocket, session lifecycle
+  sdk-session.ts         Claude Agent SDK session manager (rooms)
+  terminal-manager.ts    PTY lifecycle, kill escalation, readiness detection
+  rooms.ts               Room state, persistence, context files
+  routes/                API route modules
+    sessions.ts            Session CRUD, spawn, kill
+    rooms.ts               Room chat, agent management
+    memory.ts              Knowledge base API
+    sprint.ts              Sprint lifecycle
+    git.ts                 Git status, PR creation
+    settings.ts            Configuration
+    health.ts              Health check
+    system.ts              System metrics
+  managers/              Process tracker, conversation protocol, sprint manager
+  workflows/             Sprint planning engine
+
+src/                     Next.js frontend
+  app/                   Pages and layouts
+  components/
+    sessions/            Session cards, launcher, sidebar, presets
+    teams/               Room chat, agent list, workflow builder
+    sprints/             Sprint detail, gate stepper, activity log
+    memory/              Knowledge base CRUD
+    settings/            Configuration panels
+    dev-servers/         Local server monitoring
+    terminal/            Terminal grid and pane components
+    layout/              Sidebar, command palette, help panel, toggle bar
+    ui/                  Shared primitives — nav rail, status bar, toasts, icons
+  stores/                Zustand state (sessions, rooms, sprints, memory, UI, git)
+  hooks/                 Keyboard shortcuts, notifications, config, theme, usage
+  lib/                   WebSocket client, design tokens, types, utilities
+  styles/                Global CSS
+
+electron/                Desktop app shell
+  main.js                Main process — server lifecycle, crash recovery, tray
+  preload.js             IPC bridge for native notifications
+
+docs/                    Design specs and research
 ```
 
-## Testing
+---
 
-```bash
-npm run test           # Vitest unit tests (140+ tests)
-npm run type-check     # TypeScript strict mode
-npm run test:smoke     # 30-second endpoint + WebSocket smoke test
-```
+## Tech Stack
 
-Electron QA uses Playwright with `_electron.launch()` to test the actual Mac app — window management, native features, and all 5 pages.
+| Category | Technology |
+|----------|-----------|
+| Framework | Next.js 16, React 19 |
+| Language | TypeScript (strict mode) |
+| Styling | Tailwind CSS |
+| State | Zustand 5 |
+| Server | Express 5 |
+| Terminal | node-pty, xterm.js |
+| AI | Claude Agent SDK, Claude Code CLI |
+| Desktop | Electron |
+| WebSocket | ws |
+| File watching | chokidar |
+| Build | esbuild, electron-builder |
+| Testing | Vitest, Playwright, supertest |
+| Validation | Zod |
+
+---
 
 ## Development
 
 ```bash
-npm run dev            # Dev server with hot reload
-npm run electron:dev   # Dev server + Electron together
-npm run build:mac      # Build macOS .dmg
-npm run build:server   # Pre-compile server for packaging (esbuild)
+npm run dev              # Dev server with hot reload (localhost:8080)
+npm run electron:dev     # Dev server + Electron together
+npm run type-check       # TypeScript strict mode check
+npm run test             # Vitest unit tests
+npm run test:smoke       # Endpoint + WebSocket smoke test
+npm run build:mac        # Build macOS .dmg
 ```
+
+---
+
+## Contributing
+
+1. Fork the repo
+2. Create your branch (`git checkout -b feat/your-feature`)
+3. Make your changes
+4. Run `npm run type-check` and `npm run test`
+5. Open a pull request
+
+---
 
 ## License
 
-MIT
+[MIT](LICENSE)
 
 ---
 
 <div align="center">
 
-Built by [Vatsal](https://github.com/VatsalEnpal) — for managing AI agent teams on real production codebases.
+Built by [Vatsal](https://github.com/VatsalEnpal) — for teams that run AI agents on real production codebases.
 
 </div>

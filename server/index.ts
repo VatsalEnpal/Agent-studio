@@ -25,7 +25,7 @@ import { GitWatcher } from "./git-status.js";
 import { createPR, getRepoBranches } from "./pr-creator.js";
 import { getDevServers, startDevServer, stopDevServer, addCustomServer, removeCustomServer } from "./dev-servers.js";
 import { execSync, exec } from "node:child_process";
-import { whichCommand, isAllowedPath, killProcess as platformKill, openInOS, openTerminal, openVSCode, getDiskUsage, isSchedulerLoaded, loadScheduler, unloadScheduler, IS_MAC } from "./platform.js";
+import { whichCommand, isAllowedPath, killProcess as platformKill, openInOS, openTerminal, openVSCode, getDiskUsage, isSchedulerLoaded, loadScheduler, unloadScheduler, IS_MAC, findListeningPorts, getProcessCwd } from "./platform.js";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
@@ -1911,6 +1911,35 @@ Choose the schedule and model based on the task:
     }
   });
 
+  // --- All Listening Ports API (for Dev Servers view) ---
+  app.get("/api/servers/all", (_req, res) => {
+    try {
+      const selfPid = process.pid;
+      const selfPort = parseInt(process.env["PORT"] ?? "8080", 10);
+      const raw = findListeningPorts();
+      const seen = new Map<number, { pid: number; port: number; command: string; cwd: string; isSelf: boolean }>();
+
+      for (const entry of raw) {
+        // Deduplicate by pid — take the first (lowest) port
+        if (seen.has(entry.pid)) continue;
+        const cwd = getProcessCwd(entry.pid) ?? "unknown";
+        const isSelf = entry.pid === selfPid || entry.port === selfPort;
+        seen.set(entry.pid, {
+          pid: entry.pid,
+          port: entry.port,
+          command: entry.command ?? "unknown",
+          cwd,
+          isSelf,
+        });
+      }
+
+      res.json(Array.from(seen.values()).sort((a, b) => a.port - b.port));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
   // --- Dev Servers API ---
   app.get("/api/servers", (_req, res) => {
     try {
@@ -2436,6 +2465,52 @@ Choose the schedule and model based on the task:
         uptime: Math.round(process.uptime()),
         wsConnections: wss.clients.size,
       });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- Dev Servers API ---
+  app.get("/api/dev-servers", (_req, res) => {
+    try {
+      const servers = getDevServers();
+      res.json(servers);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/dev-servers/start", async (req, res) => {
+    try {
+      const { cwd, command } = req.body as { cwd: string; command: string };
+      if (!cwd || !command) {
+        res.status(400).json({ error: "cwd and command are required" });
+        return;
+      }
+      const validPath = validateProjectPath(cwd);
+      if (!validPath) {
+        res.status(403).json({ error: "Path not allowed" });
+        return;
+      }
+      const result = await startDevServer(validPath, command);
+      res.json(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/dev-servers/:pid/stop", (req, res) => {
+    try {
+      const pid = parseInt(req.params.pid, 10);
+      if (isNaN(pid) || pid <= 0) {
+        res.status(400).json({ error: "Invalid PID" });
+        return;
+      }
+      const success = stopDevServer(pid);
+      res.json({ ok: success });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });

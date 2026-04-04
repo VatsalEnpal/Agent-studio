@@ -569,22 +569,7 @@ export default function PageV2() {
         {/* Main content area */}
         <div className="flex flex-col flex-1 min-w-0 min-h-0">
           {/* Top bar */}
-          <TopBar
-            title={
-              activeMode === "sessions"
-                ? "Sessions"
-                : activeMode === "teams"
-                  ? "Teams"
-                  : activeMode === "memory"
-                    ? "Knowledge"
-                    : activeMode === "reports"
-                      ? "Sprints"
-                      : "Settings"
-            }
-            activeSessionCount={activeSessionCount}
-            theme={theme}
-            onToggleTheme={toggleTheme}
-          />
+          <TopBar />
 
           {/* Content */}
           <main className="flex-1 min-w-0 min-h-0">

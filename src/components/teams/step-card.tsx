@@ -1,40 +1,40 @@
 "use client";
 
 import { useState } from "react";
-import { CaretRight, Check, SpinnerGap, Clock, Circle, X, FileText, ArrowRight, Shield, CaretDown } from "@phosphor-icons/react";
+import { ChevronRightIcon, CheckIcon, SpinnerIcon, ClockIcon, CircleIcon, CloseIcon, FileIcon, ArrowRightIcon, ShieldIcon, ChevronDownIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import type { WorkflowStep, StepRichContent, ScanLogEntry, HandoffEntry } from "@/stores/workflows";
 
 const STATUS_CONFIG: Record<
   WorkflowStep["status"],
-  { icon: typeof Check; color: string; bg: string; borderColor: string }
+  { icon: typeof CheckIcon; color: string; bg: string; borderColor: string }
 > = {
   completed: {
-    icon: Check,
+    icon: CheckIcon,
     color: "text-console-success",
     bg: "bg-console-success/10",
     borderColor: "border-l-console-success",
   },
   active: {
-    icon: SpinnerGap,
+    icon: SpinnerIcon,
     color: "text-console-accent",
     bg: "bg-console-accent/10",
     borderColor: "border-l-console-accent",
   },
   waiting: {
-    icon: Clock,
+    icon: ClockIcon,
     color: "text-amber-400",
     bg: "bg-amber-400/10",
     borderColor: "border-l-amber-400",
   },
   pending: {
-    icon: Circle,
+    icon: CircleIcon,
     color: "text-console-dim",
     bg: "bg-console-faint/50",
     borderColor: "border-l-console-dim",
   },
   failed: {
-    icon: X,
+    icon: CloseIcon,
     color: "text-console-error",
     bg: "bg-console-error/10",
     borderColor: "border-l-console-error",
@@ -99,7 +99,7 @@ export function StepCard({ step }: { step: WorkflowStep }) {
         {/* Step name */}
         <span
           className={cn(
-            "text-[11px] font-medium flex-1 min-w-0 truncate",
+            "text-[10px] font-medium flex-1 min-w-0 truncate",
             step.status === "waiting"
               ? "text-amber-300"
               : step.status === "pending"
@@ -143,7 +143,7 @@ export function StepCard({ step }: { step: WorkflowStep }) {
 
         {/* Expand chevron -- hidden for pending */}
         {canExpand && (
-          <CaretRight
+          <ChevronRightIcon
             className={cn(
               "w-3 h-3 text-console-dim transition-transform duration-150 shrink-0",
               expanded && "rotate-90",
@@ -282,12 +282,12 @@ function PmoScanContent({ content }: { content: StepRichContent }) {
         >
           {showFull ? (
             <>
-              <CaretDown className="w-2.5 h-2.5 rotate-180" />
+              <ChevronDownIcon className="w-2.5 h-2.5 rotate-180" />
               Show less
             </>
           ) : (
             <>
-              <CaretDown className="w-2.5 h-2.5" />
+              <ChevronDownIcon className="w-2.5 h-2.5" />
               View all {content.scanEntries.length} entries
             </>
           )}
@@ -360,7 +360,7 @@ function ReadinessContent({ content }: { content: StepRichContent }) {
           </span>
           {content.buildSummary.map((item, i) => (
             <div key={i} className="flex items-start gap-1.5 py-0.5">
-              <ArrowRight className="w-2.5 h-2.5 text-console-accent shrink-0 mt-0.5" />
+              <ArrowRightIcon className="w-2.5 h-2.5 text-console-accent shrink-0 mt-0.5" />
               <span className="text-[10px] text-console-muted">{item}</span>
             </div>
           ))}
@@ -387,7 +387,7 @@ function ReadinessContent({ content }: { content: StepRichContent }) {
           onClick={() => setShowFull(!showFull)}
           className="text-[9px] text-console-accent hover:text-console-accent/80 transition-colors flex items-center gap-1"
         >
-          <FileText className="w-2.5 h-2.5" />
+          <FileIcon className="w-2.5 h-2.5" />
           {showFull ? "Hide full report" : "View full report"}
         </button>
       )}
@@ -479,7 +479,7 @@ function SprintSpecContent({ content }: { content: StepRichContent }) {
           onClick={() => setShowFull(!showFull)}
           className="text-[9px] text-console-accent hover:text-console-accent/80 transition-colors flex items-center gap-1"
         >
-          <FileText className="w-2.5 h-2.5" />
+          <FileIcon className="w-2.5 h-2.5" />
           {showFull ? "Hide full spec" : "View full spec"}
         </button>
       )}
@@ -500,7 +500,7 @@ function ApprovalContent({ content }: { content: StepRichContent }) {
           <div className="bg-console-faint/30 rounded p-2 space-y-1">
             {content.buildSummary.map((item, i) => (
               <div key={i} className="flex items-start gap-1.5 py-0.5">
-                <ArrowRight className="w-2.5 h-2.5 text-console-accent shrink-0 mt-0.5" />
+                <ArrowRightIcon className="w-2.5 h-2.5 text-console-accent shrink-0 mt-0.5" />
                 <span className="text-[10px] text-console-muted">{item}</span>
               </div>
             ))}
@@ -511,7 +511,7 @@ function ApprovalContent({ content }: { content: StepRichContent }) {
       {/* Estimated scope */}
       {content.estimatedScope && (
         <div className="flex items-center gap-2 px-2.5 py-2 bg-console-faint/30 rounded border border-console-border/50">
-          <Clock className="w-3.5 h-3.5 text-console-dim" />
+          <ClockIcon className="w-3.5 h-3.5 text-console-dim" />
           <span className="text-[10px] text-console-muted font-medium">
             Estimated: {content.estimatedScope}
           </span>
@@ -522,7 +522,7 @@ function ApprovalContent({ content }: { content: StepRichContent }) {
       {content.taskCount && content.taskCount.total > 0 && (
         <div className="flex items-center gap-3 text-[9px]">
           <span className="flex items-center gap-1 text-console-success">
-            <Shield className="w-2.5 h-2.5" /> {content.taskCount.safe} safe
+            <ShieldIcon className="w-2.5 h-2.5" /> {content.taskCount.safe} safe
           </span>
           <span className="text-amber-400">{content.taskCount.medium} medium risk</span>
           <span className="text-console-error">{content.taskCount.high} high risk</span>
@@ -541,7 +541,7 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
       {/* Completed banner */}
       {stepStatus === "completed" && (
         <div className="flex items-center gap-2 px-2 py-1.5 bg-console-success/10 rounded">
-          <Check className="w-3.5 h-3.5 text-console-success shrink-0" />
+          <CheckIcon className="w-3.5 h-3.5 text-console-success shrink-0" />
           <span className="text-[10px] text-console-success font-medium">All checks passed</span>
         </div>
       )}
@@ -555,9 +555,9 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
           {content.gateChecks.map((check, i) => (
             <div key={i} className="flex items-center gap-1.5 py-0.5">
               {stepStatus === "completed" ? (
-                <Check className="w-2.5 h-2.5 text-console-success shrink-0" />
+                <CheckIcon className="w-2.5 h-2.5 text-console-success shrink-0" />
               ) : (
-                <Circle className="w-2.5 h-2.5 text-console-dim shrink-0" />
+                <CircleIcon className="w-2.5 h-2.5 text-console-dim shrink-0" />
               )}
               <span className="text-[10px] text-console-muted">{check}</span>
             </div>
@@ -603,7 +603,7 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
             onClick={() => setShowHandoffs(!showHandoffs)}
             className="text-[9px] text-console-accent hover:text-console-accent/80 transition-colors flex items-center gap-1"
           >
-            <CaretDown className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
+            <ChevronDownIcon className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
             View Handoffs ({content.handoffs.length})
           </button>
           {showHandoffs && (
@@ -637,7 +637,7 @@ function DeployContent({ content }: { content: StepRichContent }) {
     <div className="mt-2 space-y-2.5">
       {content.deploySummary && (
         <div className="flex items-center gap-2 px-2.5 py-2 bg-console-faint/30 rounded border border-console-border/50">
-          <Check className="w-3.5 h-3.5 text-console-success shrink-0" />
+          <CheckIcon className="w-3.5 h-3.5 text-console-success shrink-0" />
           <span className="text-[10px] text-console-muted font-medium">{content.deploySummary}</span>
         </div>
       )}
@@ -663,7 +663,7 @@ function DeployContent({ content }: { content: StepRichContent }) {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 text-[10px] text-console-accent hover:underline font-medium"
         >
-          <ArrowRight className="w-2.5 h-2.5" />
+          <ArrowRightIcon className="w-2.5 h-2.5" />
           View Pull Request
         </a>
       )}
@@ -674,7 +674,7 @@ function DeployContent({ content }: { content: StepRichContent }) {
             onClick={() => setShowHandoffs(!showHandoffs)}
             className="text-[9px] text-console-accent hover:text-console-accent/80 transition-colors flex items-center gap-1"
           >
-            <CaretDown className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
+            <ChevronDownIcon className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
             All Handoffs ({content.handoffs.length})
           </button>
           {showHandoffs && (
@@ -739,7 +739,7 @@ function HandoffCard({ handoff }: { handoff: HandoffEntry }) {
   return (
     <div className="flex items-center gap-2 px-2 py-1 bg-console-faint/20 rounded">
       <span className="text-[8px] font-mono text-console-accent shrink-0">{handoff.from}</span>
-      <ArrowRight className="w-2.5 h-2.5 text-console-dim shrink-0" />
+      <ArrowRightIcon className="w-2.5 h-2.5 text-console-dim shrink-0" />
       <span className="text-[8px] font-mono text-console-accent shrink-0">{handoff.to}</span>
       <span className="text-[9px] text-console-dim truncate flex-1 min-w-0">
         {handoff.detail.length > 80 ? handoff.detail.slice(0, 80) + "..." : handoff.detail}
@@ -759,7 +759,7 @@ function MarkdownRenderer({ text }: { text: string }) {
         // H1
         if (trimmed.startsWith("# ")) {
           return (
-            <h3 key={i} className="text-[11px] font-semibold text-console-text mt-2 mb-0.5">
+            <h3 key={i} className="text-[10px] font-semibold text-console-text mt-2 mb-0.5">
               {trimmed.slice(2)}
             </h3>
           );

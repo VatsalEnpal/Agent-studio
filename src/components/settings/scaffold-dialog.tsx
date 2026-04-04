@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { X, Check, SpinnerGap, Users, GitBranch, Bell, CaretRight, CaretLeft, Brain } from "@phosphor-icons/react";
+import { CloseIcon, CheckIcon, ChevronRightIcon, ChevronDownIcon, MemoryIcon, SprintsIcon, BellIcon } from "@/components/ui/icons";
 
 const AVAILABLE_AGENTS = [
   { id: "orchestrator", label: "orchestrator", desc: "Coordinates the team, delegates work", defaultOn: true },
@@ -37,6 +37,15 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
   const [error, setError] = useState<string | null>(null);
 
   const DIALOG_STEPS = ["Agents", "Workflow", "Automation"] as const;
+
+  // Escape key to close
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onCancel]);
 
   const toggleAgent = useCallback((id: string) => {
     setSelectedAgents((prev) =>
@@ -76,35 +85,40 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
   }, [projectPath, selectedAgents, workflow, telegramEnabled, schedulerEnabled, schedulerInterval, onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="w-[520px] bg-console-panel border border-console-border rounded-xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
+        onClick={onCancel}
+      />
+      <div className="relative z-10 w-[480px] bg-bg-elevated border border-border-subtle rounded-[8px] shadow-modal overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-console-border">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-border-default">
           <div className="flex items-center gap-2">
-            <Brain className="w-4 h-4 text-console-accent" />
-            <h2 className="text-xs font-semibold text-console-text">
+            <MemoryIcon size={14} className="text-text-secondary" />
+            <h2 className="text-xs font-semibold text-text-primary">
               Create Agent System
             </h2>
           </div>
           <button
             onClick={onCancel}
-            className="p-1 text-console-dim hover:text-console-text transition-colors"
+            className="p-1 text-text-ghost hover:text-text-secondary transition-colors rounded"
           >
-            <X className="w-3.5 h-3.5" />
+            <CloseIcon size={14} />
           </button>
         </div>
 
-        {/* Progress */}
-        <div className="flex border-b border-console-border">
+        {/* Progress steps */}
+        <div className="flex border-b border-border-default">
           {DIALOG_STEPS.map((s, i) => (
             <div
               key={s}
               className={cn(
-                "flex-1 py-1.5 text-center text-label-xs font-medium transition-colors border-b-2",
-                i <= dialogStep
-                  ? "text-console-accent border-console-accent"
-                  : "text-console-dim border-transparent",
-                i < dialogStep && "text-console-success border-console-success",
+                "flex-1 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.8px] border-b-2 transition-colors",
+                i === dialogStep
+                  ? "text-[#f59e0b] border-[#f59e0b]"
+                  : i < dialogStep
+                    ? "text-sessions border-sessions"
+                    : "text-text-ghost border-transparent",
               )}
             >
               {s}
@@ -116,22 +130,22 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
         <div className="px-5 py-4 min-h-[280px]">
           {result ? (
             <div className="flex flex-col items-center text-center pt-4 space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
-                <Check className="w-6 h-6 text-green-400" />
+              <div className="w-12 h-12 rounded-xl bg-sessions/10 border border-sessions/20 flex items-center justify-center">
+                <CheckIcon size={24} className="text-sessions" />
               </div>
-              <p className="text-sm font-medium text-console-text">
+              <p className="text-xs font-medium text-text-primary">
                 Agent system created
               </p>
-              <p className="text-label-xs text-console-muted">
+              <p className="text-[10px] text-text-ghost">
                 {result.created.length} files generated in {projectPath}
               </p>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center text-center pt-6 space-y-3">
-              <p className="text-xs text-red-400">{error}</p>
+              <p className="text-xs text-error">{error}</p>
               <button
                 onClick={() => setError(null)}
-                className="px-3 py-1 text-label-xs text-console-muted hover:text-console-text border border-console-border rounded"
+                className="px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-colors"
               >
                 Try Again
               </button>
@@ -164,16 +178,15 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
 
         {/* Footer */}
         {!result && !error && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-console-border">
+          <div className="flex items-center justify-between px-5 py-3 border-t border-border-default">
             <button
               onClick={() => dialogStep === 0 ? onCancel() : setDialogStep((s) => s - 1)}
-              className="flex items-center gap-1 px-2 py-1 text-label-xs text-console-muted hover:text-console-text transition-colors"
+              className="flex items-center gap-1 px-2 py-1.5 text-xs text-text-secondary hover:text-text-primary transition-colors rounded-md"
             >
-              <CaretLeft className="w-3 h-3" />
               {dialogStep === 0 ? "Cancel" : "Back"}
             </button>
 
-            <span className="text-label-xs text-console-dim font-mono">
+            <span className="text-[10px] text-text-ghost font-mono">
               {projectPath}
             </span>
 
@@ -182,26 +195,21 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
                 onClick={() => setDialogStep((s) => s + 1)}
                 disabled={dialogStep === 0 && selectedAgents.length === 0}
                 className={cn(
-                  "flex items-center gap-1 px-3 py-1 text-label-xs font-medium rounded transition-all",
+                  "flex items-center gap-1 px-4 py-1.5 text-xs font-semibold rounded-md transition-all",
                   selectedAgents.length > 0 || dialogStep > 0
-                    ? "bg-console-accent text-black hover:bg-console-accent/90"
-                    : "bg-console-faint text-console-dim cursor-not-allowed",
+                    ? "bg-[#f59e0b] text-[#0a0a0a] hover:bg-[#fbbf24]"
+                    : "bg-border-default text-text-ghost cursor-not-allowed",
                 )}
               >
                 Next
-                <CaretRight className="w-3 h-3" />
+                <ChevronRightIcon size={12} />
               </button>
             ) : (
               <button
                 onClick={() => void handleCreate()}
                 disabled={creating}
-                className="flex items-center gap-1.5 px-3 py-1 text-label-xs font-medium rounded bg-console-success/80 text-black hover:bg-console-success transition-all disabled:opacity-50"
+                className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-md bg-sessions text-bg-base hover:bg-sessions/90 transition-all disabled:opacity-50"
               >
-                {creating ? (
-                  <SpinnerGap className="w-3 h-3 animate-spin" />
-                ) : (
-                  <Check className="w-3 h-3" />
-                )}
                 {creating ? "Creating..." : "Create"}
               </button>
             )}
@@ -226,35 +234,34 @@ function DialogAgentsStep({
   return (
     <div className="space-y-3">
       <div>
-        <h3 className="text-xs font-medium text-console-text mb-0.5">
-          <Users className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
+        <h3 className="text-xs font-medium text-text-primary mb-0.5">
           Select agents
         </h3>
-        <p className="text-label-xs text-console-dim">
+        <p className="text-[10px] text-text-ghost">
           Choose which agents to include in your system.
         </p>
       </div>
-      <div className="space-y-1 max-h-[170px] overflow-y-auto">
+      <div className="space-y-1 max-h-[170px] overflow-y-auto scrollbar-thin">
         {AVAILABLE_AGENTS.map((agent) => (
           <label
             key={agent.id}
             className={cn(
-              "flex items-center gap-2.5 px-2.5 py-1.5 rounded border cursor-pointer transition-all",
+              "flex items-center gap-2.5 px-3 py-2 rounded-md border cursor-pointer transition-all",
               selectedAgents.includes(agent.id)
-                ? "bg-console-accent/10 border-console-accent/30"
-                : "bg-console-bg border-console-border hover:border-console-muted",
+                ? "bg-[#f59e0b]/5 border-[#f59e0b]/30"
+                : "bg-transparent border-border-default hover:border-border-subtle",
             )}
           >
             <input
               type="checkbox"
               checked={selectedAgents.includes(agent.id)}
               onChange={() => toggleAgent(agent.id)}
-              className="accent-console-accent"
+              className="accent-[#f59e0b]"
             />
-            <span className="text-label-xs font-mono text-console-text w-24">
+            <span className="text-xs font-mono text-text-primary w-24">
               {agent.label}
             </span>
-            <span className="text-label-xs text-console-dim flex-1">
+            <span className="text-[10px] text-text-ghost flex-1">
               {agent.desc}
             </span>
           </label>
@@ -263,17 +270,17 @@ function DialogAgentsStep({
       <div className="flex items-center gap-2">
         <button
           onClick={() => setSelectedAgents(AVAILABLE_AGENTS.map((a) => a.id))}
-          className="px-2 py-0.5 text-label-xs text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
+          className="px-2 py-1 text-[10px] text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-colors"
         >
           All
         </button>
         <button
           onClick={() => setSelectedAgents([])}
-          className="px-2 py-0.5 text-label-xs text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
+          className="px-2 py-1 text-[10px] text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-colors"
         >
           None
         </button>
-        <span className="text-label-xs text-console-dim ml-auto">
+        <span className="text-[10px] text-text-ghost ml-auto">
           {selectedAgents.length} selected
         </span>
       </div>
@@ -289,7 +296,7 @@ function DialogWorkflowStep({
   setWorkflow: (w: WorkflowType) => void;
 }) {
   const options: { id: WorkflowType; label: string; desc: string }[] = [
-    { id: "sprint", label: "Sprint Planning", desc: "Scan, spec, approve, build (phases + gates), test, ship" },
+    { id: "sprint", label: "Sprint Planning", desc: "Scan, spec, approve, build, test, ship" },
     { id: "simple", label: "Simple Pipeline", desc: "Plan, build, test, deploy" },
     { id: "custom", label: "Custom", desc: "Define your own steps later" },
   ];
@@ -297,11 +304,10 @@ function DialogWorkflowStep({
   return (
     <div className="space-y-3">
       <div>
-        <h3 className="text-xs font-medium text-console-text mb-0.5">
-          <GitBranch className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
+        <h3 className="text-xs font-medium text-text-primary mb-0.5">
           Workflow
         </h3>
-        <p className="text-label-xs text-console-dim">
+        <p className="text-[10px] text-text-ghost">
           How should your agent team work together?
         </p>
       </div>
@@ -310,21 +316,21 @@ function DialogWorkflowStep({
           <label
             key={opt.id}
             className={cn(
-              "flex items-start gap-2.5 px-3 py-2.5 rounded border cursor-pointer transition-all",
+              "flex items-start gap-2.5 px-3 py-2.5 rounded-md border cursor-pointer transition-all",
               workflow === opt.id
-                ? "bg-console-accent/10 border-console-accent/30"
-                : "bg-console-bg border-console-border hover:border-console-muted",
+                ? "bg-[#f59e0b]/5 border-[#f59e0b]/30"
+                : "bg-transparent border-border-default hover:border-border-subtle",
             )}
           >
             <input
               type="radio"
               checked={workflow === opt.id}
               onChange={() => setWorkflow(opt.id)}
-              className="accent-console-accent mt-0.5"
+              className="accent-[#f59e0b] mt-0.5"
             />
             <div>
-              <span className="text-label-xs font-medium text-console-text">{opt.label}</span>
-              <p className="text-label-xs text-console-dim mt-0.5">{opt.desc}</p>
+              <span className="text-xs font-medium text-text-primary">{opt.label}</span>
+              <p className="text-[10px] text-text-ghost mt-0.5">{opt.desc}</p>
             </div>
           </label>
         ))}
@@ -351,67 +357,68 @@ function DialogAutomationStep({
   return (
     <div className="space-y-3">
       <div>
-        <h3 className="text-xs font-medium text-console-text mb-0.5">
-          <Bell className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
+        <h3 className="text-xs font-medium text-text-primary mb-0.5">
           Automation (optional)
         </h3>
-        <p className="text-label-xs text-console-dim">
+        <p className="text-[10px] text-text-ghost">
           You can enable these later in Settings.
         </p>
       </div>
       <div className="space-y-2">
         <label
           className={cn(
-            "flex items-start gap-2.5 px-3 py-2.5 rounded border cursor-pointer transition-all",
+            "flex items-start gap-2.5 px-3 py-2.5 rounded-md border cursor-pointer transition-all",
             telegramEnabled
-              ? "bg-console-accent/10 border-console-accent/30"
-              : "bg-console-bg border-console-border hover:border-console-muted",
+              ? "bg-[#f59e0b]/5 border-[#f59e0b]/30"
+              : "bg-transparent border-border-default hover:border-border-subtle",
           )}
         >
           <input
             type="checkbox"
             checked={telegramEnabled}
             onChange={(e) => setTelegramEnabled(e.target.checked)}
-            className="accent-console-accent mt-0.5"
+            className="accent-[#f59e0b] mt-0.5"
           />
           <div>
-            <span className="text-label-xs font-medium text-console-text">Telegram notifications</span>
-            <p className="text-label-xs text-console-dim mt-0.5">
+            <span className="text-xs font-medium text-text-primary">Telegram notifications</span>
+            <p className="text-[10px] text-text-ghost mt-0.5">
               Get pinged when sprints are ready or gates pass.
             </p>
           </div>
         </label>
         <label
           className={cn(
-            "flex items-start gap-2.5 px-3 py-2.5 rounded border cursor-pointer transition-all",
+            "flex items-start gap-2.5 px-3 py-2.5 rounded-md border cursor-pointer transition-all",
             schedulerEnabled
-              ? "bg-console-accent/10 border-console-accent/30"
-              : "bg-console-bg border-console-border hover:border-console-muted",
+              ? "bg-[#f59e0b]/5 border-[#f59e0b]/30"
+              : "bg-transparent border-border-default hover:border-border-subtle",
           )}
         >
           <input
             type="checkbox"
             checked={schedulerEnabled}
             onChange={(e) => setSchedulerEnabled(e.target.checked)}
-            className="accent-console-accent mt-0.5"
+            className="accent-[#f59e0b] mt-0.5"
           />
           <div>
-            <span className="text-label-xs font-medium text-console-text">PMO scheduler</span>
-            <p className="text-label-xs text-console-dim mt-0.5">
+            <span className="text-xs font-medium text-text-primary">PMO scheduler</span>
+            <p className="text-[10px] text-text-ghost mt-0.5">
               Automatically scan for tasks every {schedulerInterval} hours.
             </p>
           </div>
         </label>
         {schedulerEnabled && (
           <div className="pl-8">
-            <label className="text-label-xs text-console-muted block mb-1">Interval (hours)</label>
+            <span className="text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] block mb-1">
+              Interval (hours)
+            </span>
             <input
               type="number"
               min={1}
               max={24}
               value={schedulerInterval}
               onChange={(e) => setSchedulerInterval(parseInt(e.target.value, 10) || 2)}
-              className="w-16 px-2 py-0.5 text-label-xs font-mono bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
+              className="w-16 px-2 py-1 text-xs font-mono bg-bg-input border border-border-default rounded-md text-text-primary focus:border-[#f59e0b]/40 focus:outline-none"
             />
           </div>
         )}

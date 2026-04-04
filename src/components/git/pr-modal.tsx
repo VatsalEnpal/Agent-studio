@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { X, GitPullRequest, ArrowSquareOut, SpinnerGap, Check, Warning } from "@phosphor-icons/react";
+import { CloseIcon, CheckIcon, WarningIcon } from "@/components/ui/icons";
 import { useGitStore } from "@/stores/git";
 import { cn } from "@/lib/utils";
 
@@ -104,7 +104,6 @@ export function PRModal() {
 
   const handleSubmit = useCallback(() => {
     if (isProd && !showProdConfirm) {
-      // Step 1: show confirmation
       setShowProdConfirm(true);
       return;
     }
@@ -121,75 +120,80 @@ export function PRModal() {
     prStatus !== "creating" &&
     (!isProd || !showProdConfirm || confirmText === "CONFIRM");
 
+  const inputCls =
+    "w-full px-2.5 py-1.5 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-colors";
+
   return (
     <Dialog.Root
       open={prModalOpen}
-      onOpenChange={(open) => {
-        if (!open) closePrModal();
+      onOpenChange={(o) => {
+        if (!o) closePrModal();
       }}
     >
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-console-bg border border-console-border rounded-lg shadow-2xl z-50 p-0 outline-none">
+        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-bg-elevated border border-border-subtle rounded-[8px] shadow-modal z-50 outline-none">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-console-border">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-border-default">
             <div className="flex items-center gap-2">
-              <GitPullRequest className="w-4 h-4 text-console-accent" />
-              <Dialog.Title className="text-sm font-medium text-console-text">
+              <Dialog.Title className="text-xs font-semibold text-text-primary">
                 Create Pull Request
               </Dialog.Title>
               {isProd && (
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 font-bold">
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-error/20 text-error font-bold uppercase">
                   PROD
                 </span>
               )}
             </div>
-            <Dialog.Close className="p-1 text-console-dim hover:text-console-text transition-colors">
-              <X className="w-4 h-4" />
+            <Dialog.Close className="p-1 text-text-ghost hover:text-text-secondary transition-colors rounded">
+              <CloseIcon size={14} />
             </Dialog.Close>
           </div>
 
           {/* Body */}
-          <div className="px-4 py-3 space-y-3">
+          <div className="px-5 py-4 space-y-3">
             {/* Prod warning banner */}
             {isProd && (
-              <div className="flex items-start gap-2 px-3 py-2 bg-red-500/10 border border-red-500/30 rounded text-red-400">
-                <Warning className="w-4 h-4 shrink-0 mt-0.5" />
-                <p className="text-[10px]">
+              <div className="flex items-start gap-2 px-3 py-2 bg-error/10 border border-error/20 rounded-md text-error">
+                <WarningIcon size={14} className="shrink-0 mt-0.5" />
+                <p className="text-[10px] leading-relaxed">
                   This is the <strong>production repository</strong>. This PR
-                  will be reviewed by the team. Changes require explicit approval
-                  from a team lead.
+                  will be reviewed by the team. Changes require explicit approval.
                 </p>
               </div>
             )}
 
             {/* Repo */}
-            <div className="text-xs text-console-dim">
+            <div className="text-[10px] text-text-ghost">
               Repo:{" "}
-              <span className="text-console-muted">
+              <span className="text-text-secondary">
                 {prModalRepo?.name ?? "unknown"}
               </span>
             </div>
 
             {/* Source branch */}
-            <div className="space-y-1">
-              <label className="text-xs text-console-dim">Source branch</label>
+            <div>
+              <span className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1">
+                Source Branch
+              </span>
               <input
                 type="text"
                 value={sourceBranch}
                 onChange={(e) => setSourceBranch(e.target.value)}
-                className="w-full px-2 py-1.5 text-xs bg-console-panel border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent"
+                className={inputCls}
                 disabled={prStatus === "creating"}
               />
             </div>
 
             {/* Target branch */}
-            <div className="space-y-1">
-              <label className="text-xs text-console-dim">Target branch</label>
+            <div>
+              <span className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1">
+                Target Branch
+              </span>
               <select
                 value={targetBranch}
                 onChange={(e) => setTargetBranch(e.target.value)}
-                className="w-full px-2 py-1.5 text-xs bg-console-panel border border-console-border rounded text-console-text focus:outline-none focus:border-console-accent"
+                className={inputCls}
                 disabled={prStatus === "creating"}
               >
                 {branches
@@ -203,26 +207,30 @@ export function PRModal() {
             </div>
 
             {/* Title */}
-            <div className="space-y-1">
-              <label className="text-xs text-console-dim">Title</label>
+            <div>
+              <span className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1">
+                Title
+              </span>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-2 py-1.5 text-xs bg-console-panel border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent"
+                className={inputCls}
                 placeholder="PR title"
                 disabled={prStatus === "creating"}
               />
             </div>
 
             {/* Description */}
-            <div className="space-y-1">
-              <label className="text-xs text-console-dim">Description</label>
+            <div>
+              <span className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1">
+                Description
+              </span>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                className="w-full px-2 py-1.5 text-xs bg-console-panel border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent resize-none"
+                className={cn(inputCls, "resize-none")}
                 placeholder="Optional description..."
                 disabled={prStatus === "creating"}
               />
@@ -230,15 +238,15 @@ export function PRModal() {
 
             {/* Prod confirmation step */}
             {isProd && showProdConfirm && prStatus !== "success" && (
-              <div className="flex items-start gap-2 px-3 py-2 bg-red-500/15 border border-red-500/40 rounded text-red-400">
-                <Warning className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 px-3 py-2 bg-error/15 border border-error/30 rounded-md text-error">
+                <WarningIcon size={14} className="shrink-0 mt-0.5" />
                 <div className="space-y-1.5 flex-1">
                   <p className="text-[10px] font-bold">
-                    CONFIRM: You are creating a PR on the PRODUCTION repo.
+                    CONFIRM: Creating a PR on the PRODUCTION repo.
                   </p>
-                  <p className="text-[9px]">
+                  <p className="text-[10px]">
                     Type{" "}
-                    <span className="font-mono font-bold bg-red-500/20 px-1 rounded">
+                    <span className="font-mono font-bold bg-error/20 px-1 rounded">
                       CONFIRM
                     </span>{" "}
                     to proceed:
@@ -248,7 +256,7 @@ export function PRModal() {
                     value={confirmText}
                     onChange={(e) => setConfirmText(e.target.value)}
                     placeholder="Type CONFIRM"
-                    className="w-full px-2 py-1 text-xs bg-console-bg border border-red-500/40 rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-red-400"
+                    className="w-full px-2 py-1 text-xs bg-bg-base border border-error/30 rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-error"
                     autoFocus
                   />
                 </div>
@@ -257,25 +265,24 @@ export function PRModal() {
 
             {/* Error */}
             {prStatus === "error" && prError && (
-              <div className="px-2 py-1.5 text-xs bg-console-error/10 border border-console-error/30 rounded text-console-error">
+              <div className="px-3 py-2 text-xs bg-error/10 border border-error/20 rounded-md text-error">
                 {prError}
               </div>
             )}
 
             {/* Success */}
             {prStatus === "success" && prResult && (
-              <div className="px-2 py-1.5 text-xs bg-console-success/10 border border-console-success/30 rounded text-console-success space-y-1">
-                <div className="flex items-center gap-1">
-                  <Check className="w-3 h-3" />
+              <div className="px-3 py-2 bg-sessions/10 border border-sessions/20 rounded-md text-sessions space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs font-medium">
+                  <CheckIcon size={14} />
                   <span>PR #{prResult.id} created</span>
                 </div>
                 <a
                   href={prResult.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-console-accent hover:underline"
+                  className="text-xs text-rooms hover:underline block"
                 >
-                  <ArrowSquareOut className="w-3 h-3" />
                   Open PR
                 </a>
               </div>
@@ -283,10 +290,10 @@ export function PRModal() {
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-console-border">
+          <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border-default">
             <button
               onClick={closePrModal}
-              className="px-3 py-1.5 text-xs text-console-muted hover:text-console-text transition-colors"
+              className="px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary transition-colors rounded-md"
             >
               {prStatus === "success" ? "Close" : "Cancel"}
             </button>
@@ -295,17 +302,14 @@ export function PRModal() {
                 onClick={handleSubmit}
                 disabled={!canSubmit}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors",
+                  "px-4 py-1.5 text-xs font-semibold rounded-md transition-all",
                   !canSubmit
-                    ? "bg-console-border text-console-dim cursor-not-allowed"
+                    ? "bg-border-default text-text-ghost cursor-not-allowed"
                     : isProd
-                      ? "bg-red-500 text-white hover:bg-red-600"
-                      : "bg-console-accent text-white hover:bg-console-accent/80",
+                      ? "bg-error text-white hover:bg-error/90 active:scale-[0.98]"
+                      : "bg-[#f59e0b] text-[#0a0a0a] hover:bg-[#fbbf24] active:scale-[0.98]",
                 )}
               >
-                {prStatus === "creating" && (
-                  <SpinnerGap className="w-3 h-3 animate-spin" />
-                )}
                 {prStatus === "creating"
                   ? "Creating..."
                   : isProd && !showProdConfirm

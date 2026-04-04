@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell } from "@phosphor-icons/react";
+import { BellIcon } from "@/components/ui/icons";
+import { cn } from "@/lib/utils";
 import {
   notify,
   getNotificationPrefs,
@@ -41,6 +42,29 @@ const NOTIFICATION_OPTIONS: {
   },
 ];
 
+/** Toggle switch component */
+function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={onChange}
+      className={cn(
+        "relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0",
+        checked ? "bg-sessions" : "bg-border-default",
+      )}
+    >
+      <span
+        className={cn(
+          "inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform",
+          checked ? "translate-x-[18px]" : "translate-x-[3px]",
+        )}
+      />
+    </button>
+  );
+}
+
 export function SettingsNotifications() {
   const [prefs, setPrefs] = useState<NotificationPrefs>(getNotificationPrefs);
 
@@ -60,35 +84,33 @@ export function SettingsNotifications() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-title-sm text-console-text flex items-center gap-2">
-          <Bell className="w-4 h-4" /> Notifications
+    <section className="border border-border-default rounded-lg bg-bg-surface">
+      <div className="px-4 py-3 border-b border-border-default flex items-center justify-between">
+        <h3 className="text-[10px] font-medium text-text-primary flex items-center gap-2">
+          <BellIcon size={14} className="text-text-secondary" />
+          Notifications
         </h3>
         <button
           onClick={handleTest}
-          className="text-label-xs text-console-dim hover:text-console-muted transition-colors"
+          className="text-label text-text-ghost hover:text-text-tertiary transition-colors"
         >
-          Test
+          Send Test
         </button>
       </div>
 
-      {NOTIFICATION_OPTIONS.map(({ key, label, desc }) => (
-        <label key={key} className="flex items-start gap-3 cursor-pointer group">
-          <input
-            type="checkbox"
-            checked={prefs[key]}
-            onChange={() => toggle(key)}
-            className="mt-0.5 accent-amber-500"
-          />
-          <div>
-            <span className="text-body-sm text-console-text group-hover:text-console-accent transition-colors">
-              {label}
-            </span>
-            <p className="text-label-xs text-console-dim">{desc}</p>
+      <div className="px-4 py-3 space-y-4">
+        {NOTIFICATION_OPTIONS.map(({ key, label, desc }) => (
+          <div key={key} className="flex items-start gap-3">
+            <Toggle checked={prefs[key]} onChange={() => toggle(key)} />
+            <div className="flex-1 min-w-0">
+              <span className="text-[10px] text-text-primary block">
+                {label}
+              </span>
+              <p className="text-[9px] text-text-tertiary mt-0.5">{desc}</p>
+            </div>
           </div>
-        </label>
-      ))}
-    </div>
+        ))}
+      </div>
+    </section>
   );
 }

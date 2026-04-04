@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { Lightning, FolderOpen, CaretRight, SpinnerGap, Check, PencilSimple, ArrowClockwise } from "@phosphor-icons/react";
+import { BoltIcon, FolderIcon, ChevronRightIcon, SpinnerIcon, CheckIcon, PencilIcon, RefreshIcon } from "@/components/ui/icons";
 
 // ---------- Types ----------
 
@@ -119,7 +119,7 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
         {/* Brand */}
         <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
-            <Lightning className="w-6 h-6 text-amber-400" />
+            <BoltIcon className="w-6 h-6 text-amber-400" />
             <h1 className="text-2xl font-semibold text-white tracking-tight">Agent Studio</h1>
           </div>
           <p className="text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
@@ -172,7 +172,7 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
           </button>
           {showProject && (
             <div className="flex items-center gap-2 pl-5.5">
-              <FolderOpen className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+              <FolderIcon className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
               <input
                 type="text"
                 value={projectPath}
@@ -197,7 +197,7 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
             )}
           >
             Set me up
-            <CaretRight className="w-4 h-4" />
+            <ChevronRightIcon className="w-4 h-4" />
           </button>
           <button
             onClick={onSkip}
@@ -296,7 +296,7 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
                       : "border-zinc-600",
                   )}>
                     {enabledAutomations.has(auto.template.id) && (
-                      <Check className="w-2.5 h-2.5 text-amber-400" />
+                      <CheckIcon className="w-2.5 h-2.5 text-amber-400" />
                     )}
                   </span>
                   <div className="flex-1 min-w-0">
@@ -324,13 +324,13 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
           >
             {applying ? (
               <>
-                <SpinnerGap className="w-4 h-4 animate-spin" />
+                <SpinnerIcon className="w-4 h-4 animate-spin" />
                 Applying...
               </>
             ) : (
               <>
                 Looks good &mdash; let&apos;s go
-                <CaretRight className="w-4 h-4" />
+                <ChevronRightIcon className="w-4 h-4" />
               </>
             )}
           </button>
@@ -362,7 +362,7 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
                     : "bg-zinc-800 text-zinc-600 cursor-not-allowed",
                 )}
               >
-                {refining ? <SpinnerGap className="w-3 h-3 animate-spin" /> : "Update"}
+                {refining ? <SpinnerIcon className="w-3 h-3 animate-spin" /> : "Update"}
               </button>
             </div>
           </div>
@@ -378,7 +378,7 @@ function LoadingScreen() {
   return (
     <div className="h-screen flex items-center justify-center bg-canvas">
       <div className="text-center space-y-4">
-        <SpinnerGap className="w-8 h-8 text-amber-400 animate-spin mx-auto" />
+        <SpinnerIcon className="w-8 h-8 text-amber-400 animate-spin mx-auto" />
         <div>
           <p className="text-sm text-zinc-300 font-medium">Building your setup...</p>
           <p className="text-xs text-zinc-600 mt-1">Analyzing your needs and generating agents</p>

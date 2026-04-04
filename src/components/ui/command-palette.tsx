@@ -8,18 +8,19 @@ import {
   useState,
 } from "react";
 import {
-  MagnifyingGlass,
-  Terminal,
-  ChatCircle,
-  Play,
-  Brain,
-  Plus,
-  ArrowRight,
-  CheckCircle,
-  type Icon as PhosphorIcon,
-} from "@phosphor-icons/react";
+  SearchIcon,
+  SessionsIcon,
+  RoomsIcon,
+  SprintsIcon,
+  MemoryIcon,
+  PlusIcon,
+  ChevronRightIcon,
+} from "@/components/ui/icons";
 import { useUIStore } from "@/stores/ui";
 import { cn } from "@/lib/utils";
+
+/** Icon component type matching our custom icon API */
+type IconComponent = React.ComponentType<{ className?: string; size?: number }>;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -36,7 +37,7 @@ export interface CommandItem {
   id: string;
   label: string;
   category: CommandCategory;
-  icon: PhosphorIcon;
+  icon: IconComponent;
   keywords?: string[];
   onSelect: () => void;
   /** Recently used timestamp — higher = more recent */
@@ -46,7 +47,8 @@ export interface CommandItem {
 interface CommandGroup {
   category: CommandCategory;
   label: string;
-  icon: PhosphorIcon;
+  icon: IconComponent;
+  colorClass: string;
   items: CommandItem[];
 }
 
@@ -56,13 +58,13 @@ interface CommandGroup {
 
 const categoryMeta: Record<
   CommandCategory,
-  { label: string; icon: PhosphorIcon }
+  { label: string; icon: IconComponent; colorClass: string }
 > = {
-  sessions: { label: "Sessions", icon: Terminal },
-  rooms: { label: "Rooms", icon: ChatCircle },
-  sprints: { label: "Sprints", icon: Play },
-  memory: { label: "Memory", icon: Brain },
-  actions: { label: "Actions", icon: ArrowRight },
+  sessions: { label: "Sessions", icon: SessionsIcon, colorClass: "text-sessions" },
+  rooms: { label: "Rooms", icon: RoomsIcon, colorClass: "text-rooms" },
+  sprints: { label: "Sprints", icon: SprintsIcon, colorClass: "text-sprints" },
+  memory: { label: "Memory", icon: MemoryIcon, colorClass: "text-memory" },
+  actions: { label: "Actions", icon: ChevronRightIcon, colorClass: "text-text-tertiary" },
 };
 
 // ---------------------------------------------------------------------------
@@ -134,7 +136,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
         id: "action-new-session",
         label: "New Session",
         category: "actions" as CommandCategory,
-        icon: Plus,
+        icon: PlusIcon,
         keywords: ["create", "launch", "start", "terminal"],
         onSelect: () => {
           setOpen(false);
@@ -145,7 +147,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
         id: "action-new-room",
         label: "New Room",
         category: "actions" as CommandCategory,
-        icon: Plus,
+        icon: PlusIcon,
         keywords: ["create", "team", "chat"],
         onSelect: () => {
           setOpen(false);
@@ -156,7 +158,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
         id: "action-go-sessions",
         label: "Go to Sessions",
         category: "actions" as CommandCategory,
-        icon: Terminal,
+        icon: SessionsIcon,
         keywords: ["switch", "navigate", "page"],
         onSelect: () => {
           setOpen(false);
@@ -167,7 +169,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
         id: "action-go-teams",
         label: "Go to Teams",
         category: "actions" as CommandCategory,
-        icon: ChatCircle,
+        icon: RoomsIcon,
         keywords: ["switch", "navigate", "rooms", "page"],
         onSelect: () => {
           setOpen(false);
@@ -178,7 +180,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
         id: "action-go-memory",
         label: "Go to Memory",
         category: "actions" as CommandCategory,
-        icon: Brain,
+        icon: MemoryIcon,
         keywords: ["switch", "navigate", "knowledge", "page"],
         onSelect: () => {
           setOpen(false);
@@ -239,6 +241,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
           category: cat,
           label: meta.label,
           icon: meta.icon,
+          colorClass: meta.colorClass,
           items: catItems,
         });
         flatItems.push(...catItems);
@@ -329,10 +332,10 @@ export function CommandPalette({ items }: CommandPaletteProps) {
     >
       <div
         className={cn(
-          "w-[600px] max-w-[calc(100vw-32px)]",
-          "max-h-[400px] flex flex-col",
-          "rounded-xl border border-border",
-          "glass shadow-modal",
+          "w-[480px] max-w-[calc(100vw-32px)]",
+          "max-h-[360px] flex flex-col",
+          "rounded-xl border border-border-subtle",
+          "bg-bg-elevated shadow-modal backdrop-blur-xl",
           "animate-cmd-palette-in",
         )}
         onClick={handleContentClick}
@@ -342,10 +345,9 @@ export function CommandPalette({ items }: CommandPaletteProps) {
         aria-haspopup="listbox"
       >
         {/* Search input */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle">
-          <MagnifyingGlass
-            size={20}
-            weight="light"
+        <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border-subtle">
+          <SearchIcon
+            size={14}
             className="text-text-tertiary shrink-0"
           />
           <input
@@ -359,7 +361,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
             placeholder="Type a command or search..."
             className={cn(
               "flex-1 bg-transparent border-none outline-none",
-              "text-[16px] text-text-emphasis placeholder:text-text-tertiary",
+              "text-[10px] text-text-primary placeholder:text-text-tertiary",
             )}
             aria-label="Command palette search"
             autoComplete="off"
@@ -369,8 +371,8 @@ export function CommandPalette({ items }: CommandPaletteProps) {
             className={cn(
               "hidden sm:inline-flex items-center",
               "px-1.5 py-0.5 rounded",
-              "text-label-xs text-text-tertiary",
-              "bg-surface-hover border border-border-subtle",
+              "text-label text-text-tertiary",
+              "bg-bg-elevated border border-border-subtle",
             )}
           >
             ESC
@@ -384,7 +386,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
           role="listbox"
         >
           {flatItems.length === 0 ? (
-            <div className="px-4 py-8 text-center text-body-sm text-text-tertiary">
+            <div className="px-3 py-6 text-center text-[10px] text-text-tertiary">
               No results found
             </div>
           ) : (
@@ -396,10 +398,9 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                   <div className="flex items-center gap-2 px-4 py-1.5">
                     <GroupIcon
                       size={12}
-                      weight="light"
-                      className="text-text-tertiary"
+                      className={group.colorClass}
                     />
-                    <span className="text-label-xs text-text-tertiary uppercase tracking-wider">
+                    <span className={cn("text-label uppercase tracking-wider", group.colorClass)}>
                       {group.label}
                     </span>
                   </div>
@@ -419,27 +420,26 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                         onClick={() => item.onSelect()}
                         onMouseEnter={() => setSelectedIndex(idx)}
                         className={cn(
-                          "flex items-center gap-3 w-full px-4 py-2",
-                          "text-left text-body-sm",
+                          "flex items-center gap-2.5 w-full px-3 py-1.5",
+                          "text-left text-[10px]",
                           "transition-colors duration-[var(--duration-instant)]",
                           isSelected
-                            ? "bg-accent-subtle text-text-emphasis"
-                            : "text-text-primary hover:bg-surface-hover",
+                            ? "bg-bg-elevated text-text-primary"
+                            : "text-text-secondary hover:bg-bg-elevated/50",
                         )}
                       >
                         <ItemIcon
-                          size={16}
-                          weight="light"
+                          size={14}
                           className={cn(
                             "shrink-0",
                             isSelected
-                              ? "text-accent"
-                              : "text-text-secondary",
+                              ? "text-text-primary"
+                              : "text-text-tertiary",
                           )}
                         />
                         <span className="flex-1 truncate">{item.label}</span>
                         {isSelected && (
-                          <span className="text-label-xs text-text-tertiary">
+                          <span className="text-label text-text-ghost">
                             Enter
                           </span>
                         )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Cpu, Clock, X } from "@phosphor-icons/react";
+import { CpuIcon, ClockIcon, CloseIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useSessionsStore } from "@/stores/sessions";
 import { SessionGroup } from "@/components/sessions/session-group";
@@ -88,7 +88,7 @@ function RunningProcessItem({
       title={`PID ${proc.pid}\nCommand: ${proc.command} ${proc.args}\nCwd: ${proc.cwd}\nStarted: ${proc.startTime}`}
     >
       <div className="flex items-center gap-2">
-        <Cpu className="w-3 h-3 text-console-muted shrink-0" />
+        <CpuIcon className="w-3 h-3 text-console-muted shrink-0" />
         <span className="text-[10px] text-console-text flex-1 truncate">
           {roomName
             ? `${roomSession?.meta?.agent ?? "Agent"}`
@@ -114,7 +114,7 @@ function RunningProcessItem({
           </span>
         )}
         <span className="flex items-center gap-0.5 text-[9px] text-console-dim shrink-0">
-          <Clock className="w-2.5 h-2.5" />
+          <ClockIcon className="w-2.5 h-2.5" />
           {uptime}
         </span>
 
@@ -146,7 +146,7 @@ function RunningProcessItem({
             )}
             title={`Kill process ${proc.pid}`}
           >
-            <X className="w-3 h-3" />
+            <CloseIcon className="w-3 h-3" />
           </button>
         )}
       </div>

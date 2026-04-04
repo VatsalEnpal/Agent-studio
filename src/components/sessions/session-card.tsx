@@ -1,11 +1,31 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-import { PencilSimple, X, SpinnerGap, ArrowCounterClockwise } from "@phosphor-icons/react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { EditIcon, CloseIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { contextColor } from "@/lib/design-tokens";
 import { useSessionUsage } from "@/hooks/use-usage";
 import type { Session } from "@/lib/types";
+
+/** Pin icon — small thumbtack */
+function PinIcon({ size = 12, className }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M5 2.5h6l-1 4h2l-1 2.5H5L4 6.5h2z" />
+      <line x1="8" y1="9" x2="8" y2="14" />
+    </svg>
+  );
+}
 
 const RENAME_KEY = "agent-studio-session-names";
 
@@ -56,7 +76,6 @@ function readableName(session: Session): string {
     "opus", "sonnet", "haiku",
   ]);
   if (genericNames.has(name.toLowerCase())) {
-    // Use the last segment of cwd as the display name
     const basename = session.cwd.split("/").filter(Boolean).pop();
     if (basename) return basename;
   }
@@ -67,10 +86,10 @@ function statusDotClass(status: string): string {
   switch (status) {
     case "active":
     case "building":
-      return "bg-success";
+      return "bg-sessions";
     case "idle":
     case "starting":
-      return "bg-warning";
+      return "bg-sprints";
     case "exited":
       return "bg-text-tertiary";
     default:
@@ -78,8 +97,46 @@ function statusDotClass(status: string): string {
   }
 }
 
+function statusGlow(status: string): boolean {
+  return status === "active" || status === "building";
+}
+
 function statusPulse(status: string): boolean {
   return status === "building" || status === "starting";
+}
+
+/** Shorten cwd for display */
+function shortenCwd(cwd: string): string {
+  const homeMatch = cwd.match(/^\/(?:Users|home)\/[^/]+/);
+  if (homeMatch) return "~" + cwd.slice(homeMatch[0].length);
+  return cwd;
+}
+
+/** Live elapsed timer hook — ticks every second for running sessions */
+function useElapsedTimer(createdAt: number, isRunning: boolean): string {
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    if (!isRunning) return;
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [isRunning]);
+
+  if (!isRunning) return "";
+  const diffSec = Math.floor((now - createdAt) / 1000);
+  if (diffSec < 60) return `${diffSec}s`;
+  const min = Math.floor(diffSec / 60);
+  const sec = diffSec % 60;
+  if (min < 60) return `${min}m ${sec}s`;
+  const hr = Math.floor(min / 60);
+  return `${hr}h ${min % 60}m`;
+}
+
+/** Token border color — yellow at >50k, red at >100k */
+function tokenBorderColor(totalTokens: number): string | undefined {
+  if (totalTokens > 100_000) return "var(--accent-error, #F87171)";
+  if (totalTokens > 50_000) return "var(--accent-sprints, #FBBF24)";
+  return undefined;
 }
 
 interface SessionCardProps {
@@ -88,6 +145,8 @@ interface SessionCardProps {
   onSelect: () => void;
   onKill: () => void;
   onResume?: () => void;
+  pinned?: boolean;
+  onTogglePin?: () => void;
 }
 
 export function SessionCard({
@@ -96,6 +155,8 @@ export function SessionCard({
   onSelect,
   onKill,
   onResume,
+  pinned,
+  onTogglePin,
 }: SessionCardProps) {
   const [killing, setKilling] = useState(false);
   const [resuming, setResuming] = useState(false);
@@ -113,9 +174,6 @@ export function SessionCard({
     usage.totalCost > 0
       ? `$${usage.totalCost.toFixed(2)}`
       : session.meta?.cost ?? null;
-  const agentName = session.meta?.agent && session.meta.agent !== "none"
-    ? session.meta.agent
-    : null;
   const displayName = customNameState || readableName(session);
 
   const startEditing = useCallback(() => {
@@ -151,26 +209,46 @@ export function SessionCard({
   }, [resuming, onResume]);
 
   const isExited = session.status === "exited";
+  const isRunning =
+    session.status === "active" ||
+    session.status === "building" ||
+    session.status === "starting";
+
+  // UX #3: Live elapsed timer
+  const elapsed = useElapsedTimer(session.createdAt, isRunning);
+
+  // UX #1: Token count border indicator
+  const borderColor = tokenBorderColor(usage.totalTokens);
 
   return (
     <div
       onClick={onSelect}
       className={cn(
-        "group relative flex flex-col gap-1 px-3 py-2 rounded-lg cursor-pointer",
-        "transition-colors duration-[var(--duration-quick)] ease-out",
+        "group relative flex flex-col gap-1 px-3 py-2 rounded-md cursor-pointer overflow-hidden",
+        "transition-colors",
         selected
-          ? "bg-accent-subtle border border-accent/20"
-          : "hover:bg-surface-hover border border-transparent",
+          ? "bg-bg-elevated border border-border-subtle"
+          : "hover:bg-bg-elevated/50 border border-transparent",
       )}
+      style={borderColor ? { borderLeftColor: borderColor, borderLeftWidth: 2 } : undefined}
     >
       {/* Row 1: status dot + name + pencil + kill */}
       <div className="flex items-center gap-2">
+        {/* Status dot — 5px with glow for active */}
         <span
           className={cn(
-            "size-2 rounded-full shrink-0",
+            "w-[5px] h-[5px] rounded-full shrink-0",
             statusDotClass(session.status),
             statusPulse(session.status) && "animate-pulse-dot",
+            // Hollow dot for paused/exited
+            (session.status === "exited" || session.status === "idle") &&
+              "bg-transparent border border-text-tertiary",
           )}
+          style={
+            statusGlow(session.status)
+              ? { boxShadow: "0 0 6px var(--accent-sessions-glow)" }
+              : undefined
+          }
         />
 
         {editing ? (
@@ -185,14 +263,14 @@ export function SessionCard({
             }}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "text-body-sm font-medium truncate flex-1 min-w-0",
-              "bg-canvas border border-accent/40 rounded px-1 py-0",
-              "text-text-primary focus:outline-none focus:border-accent",
+              "text-[10px] font-medium truncate flex-1 min-w-0",
+              "bg-bg-base border border-border-subtle rounded px-1 py-0",
+              "text-text-primary focus:outline-none focus:border-sessions/40",
             )}
             autoFocus
           />
         ) : (
-          <span className="text-body-sm font-medium text-text-primary truncate flex-1 min-w-0">
+          <span className="text-[10px] font-medium text-text-primary truncate flex-1 min-w-0">
             {displayName}
           </span>
         )}
@@ -206,12 +284,31 @@ export function SessionCard({
             className={cn(
               "p-0.5 rounded shrink-0",
               "opacity-0 group-hover:opacity-100",
-              "text-text-tertiary hover:text-text-secondary",
-              "transition-opacity duration-[var(--duration-instant)]",
+              "text-text-ghost hover:text-text-tertiary",
+              "transition-opacity",
             )}
             title="Rename session"
           >
-            <PencilSimple size={12} weight="light" />
+            <EditIcon size={10} />
+          </button>
+        )}
+
+        {/* UX #4: Pin button */}
+        {onTogglePin && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onTogglePin();
+            }}
+            className={cn(
+              "p-0.5 rounded shrink-0 transition-opacity",
+              pinned
+                ? "text-sprints opacity-100"
+                : "text-text-ghost hover:text-text-tertiary opacity-0 group-hover:opacity-100",
+            )}
+            title={pinned ? "Unpin session" : "Pin session"}
+          >
+            <PinIcon size={10} />
           </button>
         )}
 
@@ -224,12 +321,12 @@ export function SessionCard({
             disabled={resuming}
             className={cn(
               "flex items-center gap-0.5 px-1.5 py-0.5 rounded shrink-0",
-              "text-label-xs font-medium",
-              "transition-all duration-[var(--duration-instant)]",
+              "text-label font-medium",
+              "transition-all",
               resuming
-                ? "text-text-tertiary cursor-not-allowed"
+                ? "text-text-ghost cursor-not-allowed"
                 : cn(
-                    "text-accent hover:bg-accent/10",
+                    "text-sessions hover:bg-sessions/10",
                     selected
                       ? "opacity-80"
                       : "opacity-0 group-hover:opacity-100",
@@ -237,12 +334,7 @@ export function SessionCard({
             )}
             title="Resume session"
           >
-            {resuming ? (
-              <SpinnerGap size={12} weight="light" className="animate-spin" />
-            ) : (
-              <ArrowCounterClockwise size={12} weight="light" />
-            )}
-            {resuming ? "Resuming" : "Resume"}
+            {resuming ? "Resuming..." : "Resume"}
           </button>
         ) : (
           <button
@@ -253,11 +345,11 @@ export function SessionCard({
             disabled={killing}
             className={cn(
               "p-0.5 rounded shrink-0",
-              "transition-all duration-[var(--duration-instant)]",
+              "transition-all",
               killing
                 ? "text-error opacity-70 cursor-not-allowed"
                 : cn(
-                    "text-text-tertiary hover:text-error",
+                    "text-text-ghost hover:text-error",
                     selected
                       ? "opacity-70 hover:opacity-100"
                       : "opacity-0 group-hover:opacity-100",
@@ -265,38 +357,23 @@ export function SessionCard({
             )}
             title={killing ? "Killing..." : "Kill session"}
           >
-            {killing ? (
-              <SpinnerGap size={12} weight="light" className="animate-spin" />
-            ) : (
-              <X size={12} weight="light" />
-            )}
+            <CloseIcon size={10} />
           </button>
         )}
       </div>
 
-      {/* Row 2: agent name + context bar + model + cost */}
-      <div className="flex items-center gap-2 pl-4">
-        {agentName && (
-          <span className="text-label-xs text-text-secondary truncate max-w-[80px]">
-            {agentName}
+      {/* Row 2: cwd + live timer + model + time */}
+      <div className="flex items-center gap-2 pl-[13px]">
+        {session.cwd && (
+          <span className="text-[10px] text-text-ghost truncate flex-1 min-w-0">
+            {shortenCwd(session.cwd)}
           </span>
         )}
 
-        {/* Context % bar — 3px tall, color-coded */}
-        {contextPercent > 0 && (
-          <span className="flex items-center gap-1 shrink-0">
-            <span className="w-10 h-[3px] rounded-full bg-border overflow-hidden">
-              <span
-                className="h-full rounded-full block transition-all duration-[var(--duration-smooth)]"
-                style={{
-                  width: `${Math.min(100, contextPercent)}%`,
-                  backgroundColor: contextColor(contextPercent),
-                }}
-              />
-            </span>
-            <span className="text-label-xs text-text-tertiary">
-              {contextPercent}%
-            </span>
+        {/* UX #3: Live elapsed timer */}
+        {elapsed && (
+          <span className="text-[10px] text-text-ghost tabular-nums shrink-0">
+            {elapsed}
           </span>
         )}
 
@@ -305,30 +382,37 @@ export function SessionCard({
         {effectiveModel && effectiveModel !== "unknown" && (
           <span
             className={cn(
-              "text-label-xs px-1 py-0.5 rounded shrink-0",
+              "text-label px-1 py-0.5 rounded shrink-0",
               effectiveModel === "opus"
-                ? "bg-[rgba(167,139,250,0.12)] text-[#A78BFA]"
+                ? "bg-memory/10 text-memory"
                 : effectiveModel === "haiku"
-                  ? "bg-success-subtle text-success"
-                  : "bg-accent-subtle text-accent",
+                  ? "bg-sessions/10 text-sessions"
+                  : "bg-rooms/10 text-rooms",
             )}
           >
             {effectiveModel}
           </span>
         )}
 
-        {costDisplay && (
-          <span className="text-label-xs text-text-tertiary shrink-0">
-            {costDisplay}
-          </span>
-        )}
-
-        {session.updatedAt > 0 && (
-          <span className="text-label-xs text-text-tertiary shrink-0">
+        {!elapsed && session.updatedAt > 0 && (
+          <span className="text-label text-text-ghost shrink-0">
             {relativeTime(session.updatedAt)}
           </span>
         )}
       </div>
+
+      {/* UX #2: Context window 2px progress bar at bottom of card */}
+      {contextPercent > 0 && (
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-border-default">
+          <div
+            className="h-full transition-all"
+            style={{
+              width: `${Math.min(100, contextPercent)}%`,
+              backgroundColor: contextColor(contextPercent),
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

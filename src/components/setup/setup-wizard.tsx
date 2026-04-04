@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { Rocket, FolderOpen, Brain, Gear, CaretRight, CaretLeft, Plus, X, Check, Warning, SpinnerGap, Users, GitBranch, Bell, Sparkle, PencilSimple, ArrowCounterClockwise } from "@phosphor-icons/react";
+import { RocketIcon, FolderIcon, BrainIcon, SettingsIcon, ChevronRightIcon, ArrowLeftIcon, PlusIcon, CloseIcon, CheckIcon, WarningIcon, SpinnerIcon, UsersIcon, GitBranchIcon, BellIcon, SparkleIcon, PencilIcon, UndoIcon } from "@/components/ui/icons";
 
 interface ProjectEntry {
   name: string;
@@ -623,7 +623,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
                 : "text-console-muted hover:text-console-text",
             )}
           >
-            <CaretLeft className="w-3 h-3" />
+            <ArrowLeftIcon className="w-3 h-3" />
             Back
           </button>
 
@@ -643,7 +643,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               )}
             >
               Next
-              <CaretRight className="w-3 h-3" />
+              <ChevronRightIcon className="w-3 h-3" />
             </button>
           ) : (
             <button
@@ -652,9 +652,9 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium rounded bg-console-success/80 text-black hover:bg-console-success transition-all disabled:opacity-50"
             >
               {saving || scaffolding ? (
-                <SpinnerGap className="w-3 h-3 animate-spin" />
+                <SpinnerIcon className="w-3 h-3 animate-spin" />
               ) : (
-                <Check className="w-3 h-3" />
+                <CheckIcon className="w-3 h-3" />
               )}
               {scaffolding ? "Creating agents..." : saving ? "Saving..." : "Finish Setup"}
             </button>
@@ -679,7 +679,7 @@ function WelcomeStep({
   return (
     <div className="flex flex-col items-center text-center pt-6 space-y-5">
       <div className="w-16 h-16 rounded-2xl bg-console-accent/10 border border-console-accent/20 flex items-center justify-center">
-        <Rocket className="w-8 h-8 text-console-accent" />
+        <RocketIcon className="w-8 h-8 text-console-accent" />
       </div>
       <div>
         <h2 className="text-lg font-semibold text-console-text mb-2">
@@ -695,18 +695,18 @@ function WelcomeStep({
       <div className="flex flex-wrap justify-center gap-2">
         {claudeVersion && (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-[10px] text-green-400">
-            <Check className="w-3 h-3" />
+            <CheckIcon className="w-3 h-3" />
             Claude Code {claudeVersion}
           </span>
         )}
         {detecting ? (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-console-accent/10 border border-console-accent/20 rounded-full text-[10px] text-console-accent">
-            <SpinnerGap className="w-3 h-3 animate-spin" />
+            <SpinnerIcon className="w-3 h-3 animate-spin" />
             Scanning for projects...
           </span>
         ) : detectedCount > 0 ? (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-console-accent/10 border border-console-accent/20 rounded-full text-[10px] text-console-accent">
-            <FolderOpen className="w-3 h-3" />
+            <FolderIcon className="w-3 h-3" />
             Found {detectedCount} project{detectedCount !== 1 ? "s" : ""} on your machine
           </span>
         ) : null}
@@ -799,7 +799,7 @@ function ProjectsStep({
     <div className="space-y-4">
       <div>
         <h2 className="text-sm font-semibold text-console-text mb-1">
-          <FolderOpen className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+          <FolderIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           {detectedProjects.length > 0
             ? "We found these projects. Select the ones you want to manage:"
             : "Where are your projects?"}
@@ -814,7 +814,7 @@ function ProjectsStep({
       {/* Scanning indicator */}
       {detecting && (
         <div className="flex items-center gap-2 px-3 py-3 bg-console-accent/5 border border-console-accent/20 rounded text-xs text-console-accent">
-          <SpinnerGap className="w-4 h-4 animate-spin" />
+          <SpinnerIcon className="w-4 h-4 animate-spin" />
           Scanning your machine for projects...
         </div>
       )}
@@ -835,9 +835,9 @@ function ProjectsStep({
             >
               <div className="mt-0.5">
                 {isSelected(dp.path) ? (
-                  <Check className="w-4 h-4 text-console-accent" />
+                  <CheckIcon className="w-4 h-4 text-console-accent" />
                 ) : (
-                  <FolderOpen className="w-4 h-4 text-console-dim" />
+                  <FolderIcon className="w-4 h-4 text-console-dim" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
@@ -869,7 +869,7 @@ function ProjectsStep({
           key={`manual-${p.path}-${i}`}
           className="flex items-center gap-2 px-3 py-2 bg-console-accent/10 border border-console-accent/30 rounded text-xs"
         >
-          <Check className="w-3.5 h-3.5 text-console-accent shrink-0" />
+          <CheckIcon className="w-3.5 h-3.5 text-console-accent shrink-0" />
           <span className="flex-1 text-console-text font-mono truncate text-[10px]">{p.path}</span>
           <button
             onClick={() => toggleProd(projects.indexOf(p))}
@@ -886,7 +886,7 @@ function ProjectsStep({
             onClick={() => removeProject(projects.indexOf(p))}
             className="p-0.5 text-console-dim hover:text-console-error transition-colors"
           >
-            <X className="w-3 h-3" />
+            <CloseIcon className="w-3 h-3" />
           </button>
         </div>
       ))}
@@ -912,7 +912,7 @@ function ProjectsStep({
                 : "bg-console-faint text-console-dim cursor-not-allowed",
             )}
           >
-            <Plus className="w-3 h-3" />
+            <PlusIcon className="w-3 h-3" />
             Add
           </button>
         </div>
@@ -927,7 +927,7 @@ function ProjectsStep({
 
       {projects.length > 0 && projects.some((p) => p.isProd) && (
         <div className="flex items-start gap-2 px-3 py-2 bg-yellow-500/5 border border-yellow-500/20 rounded text-[10px] text-yellow-400">
-          <Warning className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <WarningIcon className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           Production repos require confirmation for commits and pushes.
         </div>
       )}
@@ -946,7 +946,7 @@ function AgentSystemStep({
     <div className="space-y-4">
       <div>
         <h2 className="text-sm font-semibold text-console-text mb-1">
-          <Brain className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+          <BrainIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           AI Agent System
         </h2>
         <p className="text-xs text-console-dim">
@@ -1048,7 +1048,7 @@ function AgentSystemStep({
       {agentSystem.enabled && agentSystem.createNew && (
         <div className="pl-6 space-y-3">
           <div className="flex items-start gap-2 px-3 py-2 bg-console-accent/5 border border-console-accent/20 rounded text-[10px] text-console-muted">
-            <Brain className="w-3.5 h-3.5 shrink-0 mt-0.5 text-console-accent" />
+            <BrainIcon className="w-3.5 h-3.5 shrink-0 mt-0.5 text-console-accent" />
             <span>
               We&apos;ll create <code className="text-console-accent">ai-agents/</code> and{" "}
               <code className="text-console-accent">.claude/agents/</code> in your first
@@ -1111,7 +1111,7 @@ function DescribeProjectStep({
     <div className="space-y-4">
       <div>
         <h2 className="text-sm font-semibold text-console-text mb-1">
-          <Sparkle className="w-4 h-4 inline mr-1.5 -mt-0.5 text-console-accent" />
+          <SparkleIcon className="w-4 h-4 inline mr-1.5 -mt-0.5 text-console-accent" />
           Tell us about your project
         </h2>
         <p className="text-xs text-console-dim">
@@ -1133,9 +1133,9 @@ function DescribeProjectStep({
         className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-console-accent bg-console-accent/5 hover:bg-console-accent/10 border border-console-accent/20 hover:border-console-accent/40 rounded transition-all disabled:opacity-50"
       >
         {scanning ? (
-          <SpinnerGap className="w-3.5 h-3.5 animate-spin" />
+          <SpinnerIcon className="w-3.5 h-3.5 animate-spin" />
         ) : (
-          <Gear className="w-3.5 h-3.5" />
+          <SettingsIcon className="w-3.5 h-3.5" />
         )}
         {scanning ? "Scanning..." : "Scan project for tech stack"}
       </button>
@@ -1175,7 +1175,7 @@ function DescribeProjectStep({
 
       <div>
         <label className="text-[10px] text-console-muted block mb-1.5">
-          <Users className="w-3 h-3 inline mr-1 -mt-0.5" />
+          <UsersIcon className="w-3 h-3 inline mr-1 -mt-0.5" />
           Team size
         </label>
         <div className="flex gap-2">
@@ -1236,7 +1236,7 @@ function AgentTeamStep({
     return (
       <div className="flex flex-col items-center text-center pt-10 space-y-4">
         <div className="w-12 h-12 rounded-xl bg-console-accent/10 border border-console-accent/20 flex items-center justify-center">
-          <SpinnerGap className="w-6 h-6 text-console-accent animate-spin" />
+          <SpinnerIcon className="w-6 h-6 text-console-accent animate-spin" />
         </div>
         <div>
           <p className="text-sm font-medium text-console-text">
@@ -1259,7 +1259,7 @@ function AgentTeamStep({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-semibold text-console-text mb-0.5">
-              <Sparkle className="w-4 h-4 inline mr-1.5 -mt-0.5 text-console-accent" />
+              <SparkleIcon className="w-4 h-4 inline mr-1.5 -mt-0.5 text-console-accent" />
               AI-Generated Agents
             </h2>
             <p className="text-[10px] text-console-dim">
@@ -1305,7 +1305,7 @@ function AgentTeamStep({
                   className="p-1 text-console-dim hover:text-console-accent transition-colors"
                   title="Edit agent definition"
                 >
-                  <PencilSimple className="w-3 h-3" />
+                  <PencilIcon className="w-3 h-3" />
                 </button>
               </label>
               {editingAgentId === agent.id && (
@@ -1341,7 +1341,7 @@ function AgentTeamStep({
             onClick={() => void triggerAiGeneration()}
             className="flex items-center gap-1 px-2.5 py-1 text-[10px] text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
           >
-            <ArrowCounterClockwise className="w-2.5 h-2.5" />
+            <UndoIcon className="w-2.5 h-2.5" />
             Regenerate
           </button>
           <span className="text-[10px] text-console-dim ml-auto">
@@ -1358,7 +1358,7 @@ function AgentTeamStep({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold text-console-text mb-1">
-            <Users className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+            <UsersIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
             Which agents do you want in your team?
           </h2>
           <p className="text-xs text-console-dim">
@@ -1373,16 +1373,16 @@ function AgentTeamStep({
           onClick={() => void triggerAiGeneration()}
           className="flex items-center gap-2 w-full px-3 py-2.5 text-xs font-medium text-console-accent bg-console-accent/5 hover:bg-console-accent/10 border border-console-accent/20 hover:border-console-accent/40 rounded transition-all"
         >
-          <Sparkle className="w-4 h-4" />
+          <SparkleIcon className="w-4 h-4" />
           <span>Generate agents tailored to your project with AI</span>
-          <CaretRight className="w-3 h-3 ml-auto" />
+          <ChevronRightIcon className="w-3 h-3 ml-auto" />
         </button>
       )}
 
       {/* AI error message */}
       {aiGen.status === "error" && (
         <div className="flex items-start gap-2 px-3 py-2 bg-yellow-500/5 border border-yellow-500/20 rounded text-[10px] text-yellow-400">
-          <Warning className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <WarningIcon className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
             AI generation failed: {aiGen.error}. Using generic templates instead.
           </span>
@@ -1487,7 +1487,7 @@ function WorkflowStep({
     <div className="space-y-4">
       <div>
         <h2 className="text-sm font-semibold text-console-text mb-1">
-          <GitBranch className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+          <GitBranchIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           How does your team work?
         </h2>
         <p className="text-xs text-console-dim">
@@ -1578,7 +1578,7 @@ function AutomationStep({
     <div className="space-y-4">
       <div>
         <h2 className="text-sm font-semibold text-console-text mb-1">
-          <Bell className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+          <BellIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           Notifications & Automation
         </h2>
         <p className="text-xs text-console-dim">
@@ -1594,7 +1594,7 @@ function AutomationStep({
           </h3>
           {suggestionsLoading ? (
             <div className="flex items-center gap-2 px-3 py-4 text-xs text-console-dim">
-              <SpinnerGap className="w-3.5 h-3.5 animate-spin" />
+              <SpinnerIcon className="w-3.5 h-3.5 animate-spin" />
               Analyzing project...
             </div>
           ) : (
@@ -1718,9 +1718,9 @@ function ValidationRow({
   return (
     <div className="flex items-center gap-2 text-[10px]">
       {found ? (
-        <Check className="w-3 h-3 text-console-success" />
+        <CheckIcon className="w-3 h-3 text-console-success" />
       ) : (
-        <X className="w-3 h-3 text-console-dim" />
+        <CloseIcon className="w-3 h-3 text-console-dim" />
       )}
       <span
         className={cn(
@@ -1762,7 +1762,7 @@ function PreferencesStep({
     <div className="space-y-5">
       <div>
         <h2 className="text-sm font-semibold text-console-text mb-1">
-          <Gear className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+          <SettingsIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           Quick Preferences
         </h2>
         <p className="text-xs text-console-dim">
@@ -1773,7 +1773,7 @@ function PreferencesStep({
       {/* Scaffold summary */}
       {scaffoldResult && scaffoldResult.created.length > 0 && (
         <div className="flex items-start gap-2 px-3 py-2 bg-green-500/5 border border-green-500/20 rounded text-[10px] text-green-400">
-          <Check className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <CheckIcon className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
             Agent system created: {scaffoldResult.created.length} files generated.
           </span>

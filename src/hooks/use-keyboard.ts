@@ -3,16 +3,32 @@
 import { useEffect } from "react";
 import { useUIStore } from "@/stores/ui";
 import { useSessionsStore } from "@/stores/sessions";
+import type { ActiveMode } from "@/lib/types";
+
+// ---------------------------------------------------------------------------
+// Section order for ⌘1-4 shortcuts
+// ---------------------------------------------------------------------------
+
+const sectionByIndex: ActiveMode[] = [
+  "sessions",
+  "teams",
+  "sprints",
+  "memory",
+];
 
 /**
  * Global keyboard shortcuts.
- * Uses Cmd+Shift (Mac) / Ctrl+Shift (Windows) to avoid Chrome conflicts.
  *
+ * Section navigation:
+ * - ⌘1-4: switch between Sessions / Teams / Sprints / Memory
+ * - ⌘[: previous sidebar item, ⌘]: next sidebar item
+ *
+ * Session management (Cmd+Shift to avoid browser/OS conflicts):
  * - Cmd+Shift+N: open launcher
  * - Cmd+Shift+K: open command palette
  * - Cmd+Shift+1-6: focus session by position
  * - Cmd+Shift+F: toggle fullscreen
- * - Cmd+Shift+\: toggle sidebar
+ * - Cmd+Shift+\: toggle sidebar (legacy, ⌘B also works via sidebar-shell)
  * - Cmd+Enter: fullscreen focused pane
  * - Escape: exit fullscreen / close launcher / close command palette
  * - Tab (when not in terminal): cycle focus
@@ -23,6 +39,7 @@ export function useKeyboardShortcuts() {
   const fullscreenId = useUIStore((s) => s.fullscreenId);
   const setFullscreen = useUIStore((s) => s.setFullscreen);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
+  const setActiveMode = useUIStore((s) => s.setActiveMode);
   const commandPaletteOpen = useUIStore((s) => s.commandPaletteOpen);
   const setCommandPaletteOpen = useUIStore((s) => s.setCommandPaletteOpen);
 
@@ -34,6 +51,12 @@ export function useKeyboardShortcuts() {
     function handleKeyDown(e: KeyboardEvent) {
       const mod = e.metaKey || e.ctrlKey;
       const shift = e.shiftKey;
+
+      // Don't capture shortcuts when typing in inputs
+      const isTyping =
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement;
 
       // Cmd+Shift+K: open command palette
       if (mod && shift && e.key.toLowerCase() === "k") {
@@ -49,10 +72,51 @@ export function useKeyboardShortcuts() {
         return;
       }
 
-      // Cmd+Shift+\: toggle sidebar
+      // Cmd+Shift+\: toggle sidebar (legacy shortcut)
       if (mod && shift && e.key === "\\") {
         e.preventDefault();
         toggleSidebar();
+        return;
+      }
+
+      // ⌘,: open settings (standard macOS pattern)
+      if (mod && !shift && e.key === ",") {
+        e.preventDefault();
+        setActiveMode("settings");
+        return;
+      }
+
+      // ⌘N: open launcher (when not typing in input)
+      if (mod && !shift && !isTyping && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        setLauncherOpen(true);
+        return;
+      }
+
+      // ⌘1-4: switch sections (without shift — only when not typing)
+      if (mod && !shift && !isTyping && e.key >= "1" && e.key <= "4") {
+        e.preventDefault();
+        const index = parseInt(e.key) - 1;
+        setActiveMode(sectionByIndex[index]);
+        return;
+      }
+
+      // ⌘[ / ⌘]: cycle sidebar items (previous / next)
+      if (mod && !shift && !isTyping && (e.key === "[" || e.key === "]")) {
+        e.preventDefault();
+        const direction = e.key === "]" ? 1 : -1;
+        // For sessions mode, cycle through visible session tabs
+        const mode = useUIStore.getState().activeMode;
+        if (mode === "sessions" && visibleIds.length > 0) {
+          const currentIndex = focusedId
+            ? visibleIds.indexOf(focusedId)
+            : -1;
+          const nextIndex =
+            (currentIndex + direction + visibleIds.length) %
+            visibleIds.length;
+          setFocused(visibleIds[nextIndex]);
+        }
+        // Other modes: sections agent can hook into this via a store event
         return;
       }
 
@@ -110,9 +174,7 @@ export function useKeyboardShortcuts() {
         !launcherOpen &&
         !commandPaletteOpen &&
         !mod &&
-        !(e.target instanceof HTMLInputElement) &&
-        !(e.target instanceof HTMLSelectElement) &&
-        !(e.target instanceof HTMLTextAreaElement)
+        !isTyping
       ) {
         e.preventDefault();
         if (visibleIds.length === 0) return;
@@ -133,6 +195,7 @@ export function useKeyboardShortcuts() {
     fullscreenId,
     setFullscreen,
     toggleSidebar,
+    setActiveMode,
     commandPaletteOpen,
     setCommandPaletteOpen,
     visibleIds,

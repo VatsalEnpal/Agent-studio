@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Lightning, Plus, Trash, Play, SpinnerGap, CaretDown, CaretUp, X } from "@phosphor-icons/react";
+import { BoltIcon, PlusIcon, TrashIcon, PlayIcon, SpinnerIcon, ChevronDownIcon, ChevronUpIcon, CloseIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useToastStore } from "@/stores/toast";
 
@@ -298,7 +298,7 @@ export function SettingsAutomations() {
     <section className="border border-console-border rounded-lg bg-console-panel">
       <div className="px-4 py-3 border-b border-console-border flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <Lightning className="w-3.5 h-3.5 text-console-accent" />
+          <BoltIcon className="w-3.5 h-3.5 text-console-accent" />
           <h3 className="text-xs font-medium text-console-text">Automations</h3>
           <span className="text-label-xs text-console-dim">
             ({automations.length})
@@ -311,9 +311,9 @@ export function SettingsAutomations() {
             className="flex items-center gap-1 px-2 py-1 text-label-xs font-medium text-console-dim hover:text-console-text bg-console-faint/50 hover:bg-console-faint rounded transition-colors disabled:opacity-50"
           >
             {suggestionsLoading ? (
-              <SpinnerGap className="w-3 h-3 animate-spin" />
+              <SpinnerIcon className="w-3 h-3 animate-spin" />
             ) : (
-              <Lightning className="w-3 h-3" />
+              <BoltIcon className="w-3 h-3" />
             )}
             Suggestions
           </button>
@@ -321,7 +321,7 @@ export function SettingsAutomations() {
             onClick={() => setShowCreator(true)}
             className="flex items-center gap-1 px-2 py-1 text-label-xs font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors"
           >
-            <Plus className="w-3 h-3" />
+            <PlusIcon className="w-3 h-3" />
             Add
           </button>
         </div>
@@ -383,9 +383,9 @@ export function SettingsAutomations() {
                 title="Run now"
               >
                 {runningId === auto.id ? (
-                  <SpinnerGap className="w-3 h-3 animate-spin" />
+                  <SpinnerIcon className="w-3 h-3 animate-spin" />
                 ) : (
-                  <Play className="w-3 h-3" />
+                  <PlayIcon className="w-3 h-3" />
                 )}
               </button>
               <button
@@ -393,7 +393,7 @@ export function SettingsAutomations() {
                 className="p-1 text-console-dim hover:text-console-error transition-colors"
                 title="Delete"
               >
-                <Trash className="w-3 h-3" />
+                <TrashIcon className="w-3 h-3" />
               </button>
             </div>
           </div>
@@ -410,7 +410,7 @@ export function SettingsAutomations() {
                 onClick={() => setShowSuggestions(false)}
                 className="p-0.5 text-console-dim hover:text-console-muted"
               >
-                <X className="w-3 h-3" />
+                <CloseIcon className="w-3 h-3" />
               </button>
             </div>
             <div className="px-3 py-2 space-y-1.5">
@@ -436,7 +436,7 @@ export function SettingsAutomations() {
                     onClick={() => void addFromSuggestion(s.templateId)}
                     className="px-2 py-1 text-label-xs font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors shrink-0"
                   >
-                    <Plus className="w-3 h-3 inline -mt-0.5 mr-0.5" />
+                    <PlusIcon className="w-3 h-3 inline -mt-0.5 mr-0.5" />
                     Add
                   </button>
                 </div>
@@ -465,7 +465,7 @@ export function SettingsAutomations() {
             className="px-2 py-1.5 text-label-xs font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
           >
             {generatingFromDesc ? (
-              <SpinnerGap className="w-3 h-3 animate-spin" />
+              <SpinnerIcon className="w-3 h-3 animate-spin" />
             ) : (
               "Generate"
             )}
@@ -541,7 +541,7 @@ function AutomationCreator({
           New Automation
         </span>
         <button onClick={onCancel} className="p-0.5 text-console-dim hover:text-console-muted">
-          <X className="w-3 h-3" />
+          <CloseIcon className="w-3 h-3" />
         </button>
       </div>
 
@@ -625,7 +625,7 @@ function AutomationCreator({
                 onClick={() => setExpanded(!expanded)}
                 className="flex items-center gap-1 text-label-xs text-console-muted mb-1 hover:text-console-text transition-colors"
               >
-                {expanded ? <CaretUp className="w-3 h-3" /> : <CaretDown className="w-3 h-3" />}
+                {expanded ? <ChevronUpIcon className="w-3 h-3" /> : <ChevronDownIcon className="w-3 h-3" />}
                 Prompt
               </button>
               {expanded && (

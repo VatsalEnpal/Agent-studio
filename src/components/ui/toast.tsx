@@ -1,14 +1,14 @@
 "use client";
 
-import { X, CheckCircle, Warning, Info, XCircle } from "@phosphor-icons/react";
+import { CloseIcon, CheckCircleIcon, WarningIcon, InfoIcon, XCircleIcon } from "@/components/ui/icons";
 import { useToastStore, type Toast } from "@/stores/toast";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<Toast["type"], React.ComponentType<{ className?: string }>> = {
-  info: Info,
-  success: CheckCircle,
-  warning: Warning,
-  error: XCircle,
+  info: InfoIcon,
+  success: CheckCircleIcon,
+  warning: WarningIcon,
+  error: XCircleIcon,
 };
 
 const colorMap: Record<Toast["type"], string> = {
@@ -38,7 +38,7 @@ function ToastItem({ toast }: { toast: Toast }) {
         onClick={() => removeToast(toast.id)}
         className="p-0.5 text-console-dim hover:text-console-muted transition-colors shrink-0"
       >
-        <X className="w-3 h-3" />
+        <CloseIcon className="w-3 h-3" />
       </button>
     </div>
   );

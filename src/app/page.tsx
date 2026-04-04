@@ -10,13 +10,11 @@ import type { RoomMessage, RoomAgent } from "@/stores/rooms";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useThemeSync } from "@/hooks/use-theme-sync";
-import { useSessionUsage } from "@/hooks/use-usage";
 import { initNotificationManager } from "@/lib/notification-manager";
 import { onBadgeUpdate } from "@/lib/notification-manager";
 
 import { NavRail, type NavPage } from "@/components/ui/nav-rail";
-import { TopBar } from "@/components/ui/top-bar";
-import { StatusBar } from "@/components/ui/status-bar";
+import { TitleBar } from "@/components/ui/top-bar";
 import { SidebarShell } from "@/components/ui/sidebar-shell";
 import { ConnectionBanner } from "@/components/ui/connection-banner";
 import { ToastContainer } from "@/components/ui/notification-toast";
@@ -38,13 +36,17 @@ import { useSprintsStore } from "@/stores/sprints";
 
 import { MemoryView } from "@/components/memory/memory-view";
 import { SettingsView } from "@/components/settings/settings-view";
+import { DevServersView } from "@/components/dev-servers/dev-servers-view";
 
 import { PRModal } from "@/components/git/pr-modal";
 import { Onboarding } from "@/components/setup/onboarding";
 
 import { cn } from "@/lib/utils";
 import type { Session, WsMessage, RepoStatus, ActiveMode } from "@/lib/types";
-import { Terminal, ChatCircle, Play, Brain, Gear } from "@phosphor-icons/react";
+import {
+  SessionsIcon,
+  SprintsIcon,
+} from "@/components/ui/icons";
 
 // ---------------------------------------------------------------------------
 // Preflight types
@@ -66,44 +68,6 @@ interface PreflightResult {
   checks: PreflightCheck;
   blockers: string[];
 }
-
-// ---------------------------------------------------------------------------
-// Focused session status bar adapter
-// ---------------------------------------------------------------------------
-
-function useFocusedSessionStatus() {
-  const sessions = useSessionsStore((s) => s.sessions);
-  const focusedId = useSessionsStore((s) => s.focusedId);
-  const focused = sessions.find((s) => s.id === focusedId);
-  const usage = useSessionUsage(focusedId);
-  const repos = useGitStore((s) => s.repos);
-
-  if (!focused) return null;
-
-  const branch = repos.find((r) => focused.cwd.startsWith(r.path))?.branch;
-
-  return {
-    agent: focused.meta?.agent ?? focused.name,
-    model: usage.modelShort ?? focused.meta?.model ?? "unknown",
-    contextPercent: usage.contextPercent ?? focused.meta?.contextPercent ?? null,
-    cost: usage.totalCost,
-    lastActivity: focused.status,
-    branch,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Page title map
-// ---------------------------------------------------------------------------
-
-const pageTitles: Record<ActiveMode, string> = {
-  sessions: "Sessions",
-  teams: "Teams",
-  sprints: "Sprints",
-  memory: "Knowledge",
-  reports: "Reports",
-  settings: "Settings",
-};
 
 // ---------------------------------------------------------------------------
 // ActiveMode ↔ NavPage mapping
@@ -137,6 +101,7 @@ export default function Home() {
   const [preflight, setPreflight] = useState<PreflightResult | null>(null);
   const [preflightLoading, setPreflightLoading] = useState(true);
   const [selectedRepo, setSelectedRepo] = useState<RepoStatus | null>(null);
+  const [showDevServers, setShowDevServers] = useState(false);
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
   const [navBadges, setNavBadges] = useState<Partial<Record<NavPage, number>>>({});
 
@@ -156,8 +121,6 @@ export default function Home() {
   const setLauncherOpen = useUIStore((s) => s.setLauncherOpen);
   const activeMode = useUIStore((s) => s.activeMode);
   const setActiveMode = useUIStore((s) => s.setActiveMode);
-  const theme = useUIStore((s) => s.theme);
-  const toggleTheme = useUIStore((s) => s.toggleTheme);
   const zoomLevels = useSessionsStore((s) => s.zoomLevels);
 
   const sprints = useSprintsStore((s) => s.sprints);
@@ -168,9 +131,6 @@ export default function Home() {
   useKeyboardShortcuts();
   useThemeSync();
   useNotifications();
-
-  // Status bar data
-  const focusedStatus = useFocusedSessionStatus();
 
   // Active session count
   const activeSessionCount = useMemo(
@@ -475,7 +435,10 @@ export default function Home() {
   const handleNavigate = useCallback(
     (page: NavPage) => {
       setActiveMode(navToMode[page]);
-      if (page !== "sessions") setSelectedRepo(null);
+      if (page !== "sessions") {
+        setSelectedRepo(null);
+        setShowDevServers(false);
+      }
     },
     [setActiveMode],
   );
@@ -490,7 +453,7 @@ export default function Home() {
         id: `session-${session.id}`,
         label: session.name,
         category: "sessions",
-        icon: Terminal,
+        icon: SessionsIcon,
         keywords: [session.meta?.agent ?? "", session.meta?.model ?? "", session.cwd],
         onSelect: () => {
           setActiveMode("sessions");
@@ -506,7 +469,7 @@ export default function Home() {
         id: `sprint-${sprint.id}`,
         label: sprint.name,
         category: "sprints",
-        icon: Play,
+        icon: SprintsIcon,
         keywords: [sprint.status],
         onSelect: () => {
           setActiveMode("sprints");
@@ -536,11 +499,11 @@ export default function Home() {
   if (preflight && !preflight.ready) {
     return (
       <div className="h-screen flex items-center justify-center bg-canvas">
-        <div className="text-center space-y-4">
-          <p className="text-title-md text-text-emphasis">
+        <div className="text-center space-y-3">
+          <p className="text-[10px] font-medium text-text-primary">
             Agent Studio needs Claude Code
           </p>
-          <p className="text-body-sm text-text-secondary max-w-sm">
+          <p className="text-[10px] text-text-secondary max-w-sm">
             Please install and authenticate Claude Code to continue.
           </p>
           <button
@@ -548,7 +511,7 @@ export default function Home() {
               setPreflightLoading(true);
               void runPreflight().then(() => setPreflightLoading(false));
             }}
-            className="px-4 py-2 bg-accent text-white rounded-lg text-body-sm font-medium hover:bg-accent-hover transition-colors"
+            className="px-2.5 py-1 bg-accent text-white rounded-md text-[10px] font-medium hover:bg-accent-hover transition-colors"
           >
             Check Again
           </button>
@@ -591,10 +554,17 @@ export default function Home() {
   const showGitView = activeMode === "sessions" && selectedRepo != null;
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-screen overflow-hidden bg-bg-base">
       {/* Connection status banner */}
       <ConnectionBanner />
 
+      {/* Title bar — full width across top */}
+      <TitleBar
+        sessionName={focusedId ? sessions.find((s) => s.id === focusedId)?.name : undefined}
+        sessionCount={activeSessionCount}
+      />
+
+      {/* Main 3-column layout below title bar */}
       <div className="flex flex-1 min-h-0">
         {/* Nav rail */}
         <NavRail
@@ -612,6 +582,7 @@ export default function Home() {
               onRepoClick={(repo) => setSelectedRepo(repo)}
               onPR={(repo) => openPrModal(repo)}
               onPush={handlePush}
+              onDevServers={() => setShowDevServers((prev) => !prev)}
             />
           )}
           {activeMode === "teams" && (
@@ -624,9 +595,16 @@ export default function Home() {
               onSelect={selectSprint}
             />
           )}
+          {activeMode === "memory" && (
+            <div className="px-3 py-2.5">
+              <h3 className="text-label uppercase tracking-wider text-text-ghost">
+                Knowledge
+              </h3>
+            </div>
+          )}
           {activeMode === "settings" && (
             <div className="px-3 py-2.5">
-              <h3 className="text-label-xs text-text-secondary uppercase tracking-wider">
+              <h3 className="text-label uppercase tracking-wider text-text-ghost">
                 Settings
               </h3>
             </div>
@@ -634,23 +612,13 @@ export default function Home() {
         </SidebarShell>
 
         {/* Main content area */}
-        <div className="flex flex-col flex-1 min-w-0 min-h-0">
-          {/* Top bar */}
-          <TopBar
-            title={pageTitles[activeMode]}
-            activeSessionCount={activeSessionCount}
-            theme={theme}
-            onToggleTheme={toggleTheme}
-          />
-
+        <div className="flex flex-col flex-1 min-w-0 min-h-0 bg-bg-base">
           {/* Content area — all pages stay mounted, toggled via CSS.
               Sessions uses absolute positioning instead of display:none
               so the terminal container always has real dimensions (xterm
               needs a measurable container or it renders a black screen). */}
           <main className="flex-1 min-w-0 min-h-0 relative">
-            {/* Sessions mode — terminal or git view.
-                Uses absolute + invisible instead of hidden so xterm keeps
-                real container dimensions while off-screen. */}
+            {/* Sessions mode — terminal or git view. */}
             <div
               className={cn(
                 "absolute inset-0",
@@ -659,7 +627,11 @@ export default function Home() {
                   : "invisible z-0 pointer-events-none",
               )}
             >
-              {showGitView && selectedRepo ? (
+              {showDevServers ? (
+                <ErrorBoundary fallbackLabel="Dev Servers error">
+                  <DevServersView />
+                </ErrorBoundary>
+              ) : showGitView && selectedRepo ? (
                 <ErrorBoundary fallbackLabel="Git view error">
                   <GitView
                     repo={selectedRepo}
@@ -667,14 +639,14 @@ export default function Home() {
                   />
                 </ErrorBoundary>
               ) : nonRoomSessions.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full gap-6">
-                  <div className="text-center space-y-3">
-                    <p className="text-title-md text-text-emphasis">
+                <div className="flex flex-col items-center justify-center h-full gap-4">
+                  <div className="text-center space-y-2">
+                    <p className="text-[10px] font-medium text-text-secondary">
                       Ready to go.
                     </p>
-                    <p className="text-body-sm text-text-tertiary max-w-sm">
+                    <p className="text-[10px] text-text-tertiary max-w-sm">
                       Launch a session to start working with Claude. Press{" "}
-                      <kbd className="px-1.5 py-0.5 rounded bg-surface text-text-secondary text-label-xs border border-border-subtle">
+                      <kbd className="px-1 py-0.5 rounded-[3px] bg-bg-input text-text-ghost text-[9px] border border-border-default">
                         Cmd+N
                       </kbd>{" "}
                       for the launcher.
@@ -683,10 +655,11 @@ export default function Home() {
                   <button
                     onClick={() => setLauncherOpen(true)}
                     className={cn(
-                      "px-5 py-3 rounded-lg",
-                      "text-body-sm font-medium",
-                      "bg-accent text-white hover:bg-accent-hover",
-                      "transition-colors duration-[var(--duration-quick)]",
+                      "px-4 py-1.5 rounded-[5px]",
+                      "text-[10px] font-medium",
+                      "bg-text-primary text-bg-base",
+                      "hover:bg-text-secondary",
+                      "transition-colors duration-150",
                     )}
                   >
                     New Session
@@ -696,7 +669,7 @@ export default function Home() {
                 <ErrorBoundary fallbackLabel="Terminal error">
                   <TerminalPaneV2
                     sessionId={focusedId ?? nonRoomSessions[0].id}
-                    visible={activeMode === "sessions" && !showGitView}
+                    visible={activeMode === "sessions" && !showGitView && !showDevServers}
                     fontSize={
                       focusedId ? zoomLevels[focusedId] ?? 13 : 13
                     }
@@ -706,36 +679,33 @@ export default function Home() {
             </div>
 
             {/* Teams */}
-            <div className={activeMode === "teams" ? "absolute inset-0 z-10" : "hidden"}>
+            <div className={activeMode === "teams" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"}>
               <ErrorBoundary fallbackLabel="Teams view error">
                 <TeamsView />
               </ErrorBoundary>
             </div>
 
             {/* Sprints */}
-            <div className={activeMode === "sprints" ? "absolute inset-0 z-10" : "hidden"}>
+            <div className={activeMode === "sprints" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"}>
               <ErrorBoundary fallbackLabel="Sprints view error">
                 <SprintsView />
               </ErrorBoundary>
             </div>
 
             {/* Memory / Knowledge */}
-            <div className={activeMode === "memory" ? "absolute inset-0 z-10" : "hidden"}>
+            <div className={activeMode === "memory" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"}>
               <ErrorBoundary fallbackLabel="Memory view error">
                 <MemoryView />
               </ErrorBoundary>
             </div>
 
             {/* Settings */}
-            <div className={activeMode === "settings" ? "absolute inset-0 z-10" : "hidden"}>
+            <div className={activeMode === "settings" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"}>
               <ErrorBoundary fallbackLabel="Settings view error">
                 <SettingsView />
               </ErrorBoundary>
             </div>
           </main>
-
-          {/* Status bar */}
-          <StatusBar session={focusedStatus} />
         </div>
       </div>
 

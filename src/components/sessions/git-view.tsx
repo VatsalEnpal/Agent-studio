@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ArrowLeft, GitBranch, GitCommit, CaretDown, Plus, UploadSimple, GitMerge, FileText, FilePlus, FileMinus } from "@phosphor-icons/react";
+import { ArrowLeftIcon, GitBranchIcon, GitCommitIcon, ChevronDownIcon, PlusIcon, UploadIcon, GitMergeIcon, FileIcon, FilePlusIcon, FileMinusIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useGitStore } from "@/stores/git";
 import type { RepoStatus, BranchInfo } from "@/lib/types";
@@ -152,9 +152,9 @@ export function GitView({ repo, onBack }: GitViewProps) {
           className="p-1 rounded-md text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
           title="Back to terminal"
         >
-          <ArrowLeft className="size-4" />
+          <ArrowLeftIcon className="size-4" />
         </button>
-        <GitBranch className="size-4 text-text-secondary" />
+        <GitBranchIcon className="size-4 text-text-secondary" />
         <h2 className="text-title-sm text-text-emphasis truncate">{repo.name}</h2>
 
         {/* Branch switcher */}
@@ -167,9 +167,9 @@ export function GitView({ repo, onBack }: GitViewProps) {
               "hover:bg-accent/10 transition-colors",
             )}
           >
-            <GitBranch className="size-3" />
+            <GitBranchIcon className="size-3" />
             {currentBranch}
-            <CaretDown className="size-3" />
+            <ChevronDownIcon className="size-3" />
           </button>
           {branchDropdownOpen && branches.length > 0 && (
             <div className="absolute right-0 top-full mt-1 w-56 bg-surface border border-border rounded-md shadow-modal z-dropdown max-h-48 overflow-y-auto">
@@ -210,7 +210,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
               "transition-colors disabled:opacity-50",
             )}
           >
-            <UploadSimple className="size-3.5" />
+            <UploadIcon className="size-3.5" />
             {pushing ? "Pushing..." : "Push"}
           </button>
           <button
@@ -222,7 +222,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
               "transition-colors",
             )}
           >
-            <Plus className="size-3.5" />
+            <PlusIcon className="size-3.5" />
             Create PR
           </button>
           <button
@@ -233,7 +233,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
               "transition-colors",
             )}
           >
-            <GitMerge className="size-3.5" />
+            <GitMergeIcon className="size-3.5" />
             Merge
           </button>
         </div>
@@ -274,7 +274,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
                   key={commit.hash}
                   className="flex items-start gap-2 px-2 py-2 rounded-md hover:bg-surface-hover transition-colors"
                 >
-                  <GitCommit className="size-3.5 text-text-tertiary mt-0.5 shrink-0" />
+                  <GitCommitIcon className="size-3.5 text-text-tertiary mt-0.5 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-body-sm text-text-primary truncate">
                       {commit.message}

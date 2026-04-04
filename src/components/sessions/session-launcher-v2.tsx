@@ -1,19 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import {
-  X,
-  Lightning,
-  Shield,
-  MagnifyingGlass,
-  ChatCircle,
-  Folder,
-  ArrowCounterClockwise,
-  ClockCounterClockwise,
-  CaretDown,
-  Rocket,
-  type IconProps,
-} from "@phosphor-icons/react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { CloseIcon, ChevronDownIcon, SearchIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import type { LauncherPreset } from "@/lib/types";
 
@@ -54,13 +43,9 @@ interface SessionLauncherV2Props {
 // Constants
 // ---------------------------------------------------------------------------
 
-const PRESETS: (LauncherPreset & {
-  icon: React.ComponentType<IconProps>;
-  description: string;
-})[] = [
+const PRESETS: (LauncherPreset & { description: string })[] = [
   {
     name: "Continue",
-    icon: ArrowCounterClockwise,
     description: "Resume last session",
     model: "sonnet",
     agent: "none",
@@ -70,7 +55,6 @@ const PRESETS: (LauncherPreset & {
   },
   {
     name: "Quick Chat",
-    icon: ChatCircle,
     description: "Sonnet, no agent",
     model: "sonnet",
     agent: "none",
@@ -80,7 +64,6 @@ const PRESETS: (LauncherPreset & {
   },
   {
     name: "Start Sprint",
-    icon: Lightning,
     description: "Opus + orchestrator",
     model: "opus",
     agent: "orchestrator",
@@ -90,7 +73,6 @@ const PRESETS: (LauncherPreset & {
   },
   {
     name: "Security Audit",
-    icon: Shield,
     description: "Opus + security",
     model: "opus",
     agent: "security-reviewer",
@@ -100,7 +82,6 @@ const PRESETS: (LauncherPreset & {
   },
   {
     name: "PMO Scan",
-    icon: MagnifyingGlass,
     description: "Sonnet + PMO",
     model: "sonnet",
     agent: "pmo",
@@ -169,6 +150,7 @@ export function SessionLauncherV2({
   const [permissions, setPermissions] =
     useState<"bypass" | "default" | "plan" | "auto">("default");
   const [channel, setChannel] = useState<"none" | "telegram">("none");
+  const [defaultCwd, setDefaultCwd] = useState("~");
   const [cwd, setCwd] = useState("~");
   const [resume, setResume] = useState("");
   const [launching, setLaunching] = useState(false);
@@ -178,9 +160,8 @@ export function SessionLauncherV2({
   const [resumeDropdownOpen, setResumeDropdownOpen] = useState(false);
   const [resumeSearch, setResumeSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
 
-  // Reset form on open
+  // Reset form on open — use defaultCwd so user always sees their configured dir
   useEffect(() => {
     if (open) {
       setCustomName("");
@@ -188,13 +169,14 @@ export function SessionLauncherV2({
       setAgent("none");
       setPermissions("default");
       setChannel("none");
+      setCwd(defaultCwd);
       setResume("");
       setError(null);
       setLaunching(false);
     }
-  }, [open]);
+  }, [open, defaultCwd]);
 
-  // Fetch default cwd
+  // Fetch default cwd once
   const [defaultCwdLoaded, setDefaultCwdLoaded] = useState(false);
   useEffect(() => {
     if (defaultCwdLoaded) return;
@@ -207,8 +189,8 @@ export function SessionLauncherV2({
           };
           const configCwd = data.config?.defaults?.workingDirectory;
           if (configCwd) {
+            setDefaultCwd(configCwd);
             setCwd(configCwd);
-            for (const p of PRESETS) p.cwd = configCwd;
           }
           setDefaultCwdLoaded(true);
         }
@@ -264,29 +246,6 @@ export function SessionLauncherV2({
     return () => document.removeEventListener("mousedown", handler);
   }, [resumeDropdownOpen]);
 
-  // Close panel on Escape
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onOpenChange(false);
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [open, onOpenChange]);
-
-  // Cmd+Enter to launch
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-        e.preventDefault();
-        void handleLaunch();
-      }
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const filteredSessions = recentSessions.filter((s) => {
     if (!resumeSearch) return true;
     const q = resumeSearch.toLowerCase();
@@ -296,23 +255,6 @@ export function SessionLauncherV2({
       shortProject(s.project).toLowerCase().includes(q)
     );
   });
-
-  const applyPreset = useCallback(
-    (preset: (typeof PRESETS)[number]) => {
-      if (preset.name === "Continue") {
-        // Instant launch — continue last session
-        void handleLaunchContinue();
-        return;
-      }
-      setModel(preset.model);
-      setAgent(preset.agent);
-      setPermissions(preset.permissions);
-      setChannel(preset.channel);
-      setCwd(preset.cwd);
-      setResume("");
-    },
-    [], // eslint-disable-line react-hooks/exhaustive-deps
-  );
 
   const handleLaunch = useCallback(async () => {
     if (launching) return;
@@ -360,216 +302,208 @@ export function SessionLauncherV2({
     }
   }, [launching, model, cwd, onLaunch, onOpenChange]);
 
-  // Native file picker via electronAPI
-  const handlePickDirectory = useCallback(async () => {
-    try {
-      const electronAPI = (window as unknown as { electronAPI?: { selectDirectory?: () => Promise<string | null> } }).electronAPI;
-      if (electronAPI?.selectDirectory) {
-        const dir = await electronAPI.selectDirectory();
-        if (dir) setCwd(dir);
+  // Cmd+Enter to launch
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        void handleLaunch();
       }
-    } catch {
-      // Not in Electron — ignore
-    }
-  }, []);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open, handleLaunch]);
 
-  if (!open) return null;
+  const applyPreset = useCallback(
+    (preset: (typeof PRESETS)[number]) => {
+      if (preset.name === "Continue") {
+        void handleLaunchContinue();
+        return;
+      }
+      setModel(preset.model);
+      setAgent(preset.agent);
+      setPermissions(preset.permissions);
+      setChannel(preset.channel);
+      // Use current cwd (already set from /api/config), not the preset's hardcoded "~"
+      // This ensures Quick Chat etc. use the user's configured working directory
+      setResume("");
+    },
+    [handleLaunchContinue],
+  );
+
+  const inputCls =
+    "w-full px-2 py-1 text-[10px] bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-colors";
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-modal bg-black/40 animate-fade-in"
-        onClick={() => onOpenChange(false)}
-      />
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] max-h-[85vh] overflow-y-auto bg-bg-elevated border border-border-subtle rounded-[8px] shadow-modal scrollbar-thin outline-none">
+          <Dialog.Description className="sr-only">Launch a new Claude Code session</Dialog.Description>
 
-      {/* Slide-in panel from right */}
-      <div
-        ref={panelRef}
-        className={cn(
-          "fixed top-0 right-0 z-modal",
-          "w-[420px] h-full",
-          "glass border-l border-border",
-          "shadow-modal",
-          "animate-slide-in-right",
-          "flex flex-col",
-        )}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-border-subtle">
-          <h2 className="text-title-sm text-text-emphasis">New Session</h2>
-          <button
-            onClick={() => onOpenChange(false)}
-            className="p-1 text-text-tertiary hover:text-text-secondary transition-colors"
-          >
-            <X size={16} weight="light" />
-          </button>
-        </div>
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-2 border-b border-border-default">
+            <Dialog.Title className="text-xs font-semibold text-text-primary tracking-[-0.2px]">
+              New Session
+            </Dialog.Title>
+            <Dialog.Close className="p-0.5 text-text-ghost hover:text-text-secondary transition-colors rounded">
+              <CloseIcon size={10} />
+            </Dialog.Close>
+          </div>
 
-        {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto scrollbar-thin px-5 py-4 space-y-5">
-          {/* Resume previous */}
-          {recentSessions.length > 0 && (
+          <div className="px-4 py-3 space-y-3">
+            {/* Quick Start — clean text buttons in a row */}
             <div>
-              <label className="block text-label-xs uppercase text-text-tertiary mb-1.5">
-                <ClockCounterClockwise size={12} weight="light" className="inline mr-1 -mt-0.5" />
-                Resume Previous
-              </label>
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  type="button"
-                  onClick={() => setResumeDropdownOpen(!resumeDropdownOpen)}
-                  className={cn(
-                    "w-full flex items-center gap-2 px-2 py-1.5 text-body-sm",
-                    "bg-canvas border rounded transition-colors",
-                    resume
-                      ? "border-accent text-text-primary"
-                      : "border-border text-text-tertiary",
-                    "hover:border-accent/50 focus:border-accent focus:outline-none",
-                  )}
-                >
-                  {resume ? (
-                    <>
-                      <ClockCounterClockwise size={12} weight="light" className="text-accent shrink-0" />
-                      <span className="truncate flex-1">
-                        {shortProject(
-                          recentSessions.find((s) => s.id === resume)?.project ??
-                            resume,
-                        )}
-                      </span>
-                      <span className="text-label-xs text-text-tertiary font-mono">
-                        {resume.slice(0, 8)}
-                      </span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setResume("");
-                        }}
-                        className="p-0.5 text-text-tertiary hover:text-text-secondary"
-                      >
-                        <X size={12} weight="light" />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="flex-1 text-left">
-                        Select a previous session...
-                      </span>
-                      <CaretDown size={12} weight="light" className="text-text-tertiary" />
-                    </>
-                  )}
-                </button>
-
-                {resumeDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-surface border border-border rounded-md shadow-modal z-dropdown max-h-48 overflow-hidden flex flex-col">
-                    <div className="p-1.5 border-b border-border-subtle">
-                      <input
-                        type="text"
-                        value={resumeSearch}
-                        onChange={(e) => setResumeSearch(e.target.value)}
-                        placeholder="Search sessions..."
-                        className="w-full px-2 py-1 text-body-sm bg-canvas border border-border rounded text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none"
-                        autoFocus
-                      />
-                    </div>
-                    <div className="overflow-y-auto max-h-36">
-                      {filteredSessions.length === 0 ? (
-                        <p className="px-3 py-2 text-label-xs text-text-tertiary">
-                          No sessions found
-                        </p>
-                      ) : (
-                        filteredSessions.slice(0, 15).map((session) => (
-                          <button
-                            key={session.id}
-                            onClick={() => {
-                              setResume(session.id);
-                              setResumeDropdownOpen(false);
-                              setResumeSearch("");
-                            }}
-                            className={cn(
-                              "flex items-center gap-2 w-full px-3 py-1.5 text-left",
-                              "hover:bg-surface-hover transition-colors",
-                              resume === session.id && "bg-accent-subtle",
-                            )}
-                          >
-                            <ClockCounterClockwise size={12} weight="light" className="text-text-tertiary shrink-0" />
-                            <span className="text-label text-text-primary truncate flex-1">
-                              {shortProject(session.project)}
-                            </span>
-                            <span className="text-label-xs text-text-tertiary shrink-0">
-                              {formatRelativeTime(session.date)}
-                            </span>
-                            <span className="text-label-xs text-text-tertiary font-mono shrink-0">
-                              {session.id.slice(0, 8)}
-                            </span>
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Quick presets */}
-          <div>
-            <label className="block text-label-xs uppercase text-text-tertiary mb-2">
-              Quick Start
-            </label>
-            <div className="grid grid-cols-5 gap-1.5">
-              {PRESETS.map((preset) => {
-                const Icon = preset.icon;
-                return (
+              <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1.5">
+                Quick Start
+              </span>
+              <div className="flex gap-1 flex-wrap">
+                {PRESETS.map((preset) => (
                   <button
                     key={preset.name}
                     onClick={() => applyPreset(preset)}
                     disabled={launching}
                     className={cn(
-                      "flex flex-col items-center gap-1 p-2 rounded-lg border",
-                      "transition-all duration-[var(--duration-quick)]",
+                      "px-2 py-1 rounded-md text-[10px] font-medium transition-all",
+                      "border border-border-default",
                       launching
-                        ? "border-border opacity-50 cursor-not-allowed"
-                        : "border-border-subtle hover:border-accent/30 hover:bg-surface-hover active:scale-[0.97]",
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:border-[#f59e0b]/40 hover:bg-[#f59e0b]/5 active:bg-[#f59e0b]/10 active:scale-[0.98]",
                     )}
                   >
-                    <Icon size={16} weight="light" className="text-accent" />
-                    <span className="text-label-xs text-text-primary leading-tight text-center">
-                      {preset.name}
-                    </span>
+                    <span className="text-text-primary">{preset.name}</span>
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-border-subtle" />
-            <span className="text-label-xs text-text-tertiary">
-              or customize
-            </span>
-            <div className="flex-1 h-px bg-border-subtle" />
-          </div>
+            {/* Resume previous */}
+            {recentSessions.length > 0 && (
+              <div>
+                <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
+                  Resume Previous
+                </span>
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setResumeDropdownOpen(!resumeDropdownOpen)}
+                    className={cn(
+                      "w-full flex items-center gap-2 px-2 py-1 text-[10px] bg-bg-input border rounded-md text-left transition-colors",
+                      resume
+                        ? "border-[#f59e0b]/40 text-text-primary"
+                        : "border-border-default text-text-ghost",
+                      "hover:border-border-subtle focus:outline-none",
+                    )}
+                  >
+                    {resume ? (
+                      <>
+                        <span className="truncate flex-1">
+                          {shortProject(
+                            recentSessions.find((s) => s.id === resume)?.project ??
+                              resume,
+                          )}
+                        </span>
+                        <span className="text-[10px] text-text-ghost font-mono">
+                          {resume.slice(0, 8)}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setResume("");
+                          }}
+                          className="p-0.5 text-text-ghost hover:text-text-secondary"
+                        >
+                          <CloseIcon size={10} />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <span className="flex-1">Select a previous session...</span>
+                        <ChevronDownIcon size={12} className="text-text-ghost" />
+                      </>
+                    )}
+                  </button>
 
-          {/* Custom config */}
-          <div className="space-y-4">
-            {/* Model radio group */}
+                  {resumeDropdownOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-bg-elevated border border-border-subtle rounded-[6px] shadow-modal z-10 max-h-48 overflow-hidden flex flex-col">
+                      <div className="p-1.5 border-b border-border-default">
+                        <div className="relative">
+                          <SearchIcon size={10} className="absolute left-2 top-1/2 -translate-y-1/2 text-text-ghost" />
+                          <input
+                            type="text"
+                            value={resumeSearch}
+                            onChange={(e) => setResumeSearch(e.target.value)}
+                            placeholder="Search..."
+                            className="w-full pl-6 pr-2 py-1 text-[10px] bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle"
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+                      <div className="overflow-y-auto max-h-36 scrollbar-thin">
+                        {filteredSessions.length === 0 ? (
+                          <p className="px-3 py-2 text-[10px] text-text-ghost">
+                            No sessions found
+                          </p>
+                        ) : (
+                          filteredSessions.slice(0, 15).map((session) => (
+                            <button
+                              key={session.id}
+                              onClick={() => {
+                                setResume(session.id);
+                                setResumeDropdownOpen(false);
+                                setResumeSearch("");
+                              }}
+                              className={cn(
+                                "flex items-center gap-2 w-full px-2.5 py-1 text-left transition-colors",
+                                "hover:bg-bg-input",
+                                resume === session.id && "bg-[#f59e0b]/10",
+                              )}
+                            >
+                              <span className="text-[10px] text-text-primary truncate flex-1">
+                                {shortProject(session.project)}
+                              </span>
+                              <span className="text-[10px] text-text-ghost shrink-0">
+                                {formatRelativeTime(session.date)}
+                              </span>
+                              <span className="text-[10px] text-text-ghost font-mono shrink-0">
+                                {session.id.slice(0, 8)}
+                              </span>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Divider */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-border-default" />
+              <span className="text-[10px] text-text-ghost uppercase tracking-[0.5px]">
+                customize
+              </span>
+              <div className="flex-1 h-px bg-border-default" />
+            </div>
+
+            {/* Model — pills */}
             <div>
-              <label className="block text-label-xs uppercase text-text-tertiary mb-1.5">
+              <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
                 Model
-              </label>
-              <div className="flex gap-2">
+              </span>
+              <div className="flex gap-1">
                 {MODELS.map((m) => (
                   <button
                     key={m}
                     onClick={() => setModel(m)}
                     className={cn(
-                      "flex-1 py-1.5 rounded-md text-body-sm font-medium text-center",
-                      "border transition-colors duration-[var(--duration-quick)]",
+                      "px-2.5 py-1 rounded-md text-[10px] font-medium text-center transition-all",
+                      "border",
                       model === m
-                        ? "border-accent bg-accent-subtle text-accent"
-                        : "border-border-subtle text-text-secondary hover:border-border hover:text-text-primary",
+                        ? "border-[#f59e0b]/50 bg-[#f59e0b]/10 text-[#f59e0b]"
+                        : "border-border-default text-text-secondary hover:border-border-subtle hover:text-text-primary",
                     )}
                   >
                     {m}
@@ -578,11 +512,11 @@ export function SessionLauncherV2({
               </div>
             </div>
 
-            {/* Agent dropdown */}
+            {/* Agent */}
             <div>
-              <label className="block text-label-xs uppercase text-text-tertiary mb-1.5">
+              <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
                 Agent
-              </label>
+              </span>
               <select
                 value={agent}
                 onChange={(e) => {
@@ -591,12 +525,7 @@ export function SessionLauncherV2({
                   const selectedAgent = agents.find((a) => a.id === selectedId);
                   if (selectedAgent?.model) setModel(selectedAgent.model);
                 }}
-                className={cn(
-                  "w-full px-2 py-1.5 text-body-sm",
-                  "bg-canvas border border-border rounded-md",
-                  "text-text-primary",
-                  "focus:border-accent focus:outline-none",
-                )}
+                className={inputCls}
               >
                 {agents.map((a) => (
                   <option key={a.id} value={a.id} title={a.description}>
@@ -606,22 +535,22 @@ export function SessionLauncherV2({
               </select>
             </div>
 
-            {/* Permissions */}
+            {/* Permissions — subtle pills */}
             <div>
-              <label className="block text-label-xs uppercase text-text-tertiary mb-1.5">
+              <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
                 Permissions
-              </label>
-              <div className="flex gap-1.5">
+              </span>
+              <div className="flex gap-1">
                 {PERMISSIONS.map((p) => (
                   <button
                     key={p}
                     onClick={() => setPermissions(p)}
                     className={cn(
-                      "flex-1 py-1.5 rounded-md text-label text-center",
-                      "border transition-colors duration-[var(--duration-quick)]",
+                      "px-2 py-0.5 rounded text-[9px] font-medium uppercase tracking-[0.5px] text-center transition-all",
+                      "border",
                       permissions === p
-                        ? "border-accent bg-accent-subtle text-accent"
-                        : "border-border-subtle text-text-secondary hover:border-border",
+                        ? "border-[#f59e0b]/50 bg-[#f59e0b]/10 text-[#f59e0b]"
+                        : "border-border-default text-text-ghost hover:text-text-tertiary hover:border-border-subtle",
                     )}
                   >
                     {p}
@@ -632,87 +561,68 @@ export function SessionLauncherV2({
 
             {/* Working directory */}
             <div>
-              <label className="block text-label-xs uppercase text-text-tertiary mb-1.5">
+              <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
                 Working Directory
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={cwd}
-                  onChange={(e) => setCwd(e.target.value)}
-                  className={cn(
-                    "flex-1 px-2 py-1.5 text-body-sm font-mono",
-                    "bg-canvas border border-border rounded-md",
-                    "text-text-primary",
-                    "focus:border-accent focus:outline-none",
-                  )}
-                />
-                <button
-                  onClick={handlePickDirectory}
-                  className="p-1.5 rounded-md border border-border-subtle text-text-tertiary hover:text-text-secondary hover:bg-surface-hover transition-colors"
-                  title="Browse"
-                >
-                  <Folder size={16} weight="light" />
-                </button>
-              </div>
+              </span>
+              <input
+                type="text"
+                value={cwd}
+                onChange={(e) => setCwd(e.target.value)}
+                className={cn(inputCls, "font-mono")}
+              />
             </div>
 
             {/* Session name */}
             <div>
-              <label className="block text-label-xs uppercase text-text-tertiary mb-1.5">
+              <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
                 Session Name
-              </label>
+              </span>
               <input
                 type="text"
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder="Auto-generated if empty"
-                className={cn(
-                  "w-full px-2 py-1.5 text-body-sm",
-                  "bg-canvas border border-border rounded-md",
-                  "text-text-primary placeholder:text-text-tertiary",
-                  "focus:border-accent focus:outline-none",
-                )}
+                className={inputCls}
               />
             </div>
           </div>
-        </div>
 
-        {/* Error */}
-        {error && (
-          <div className="mx-5 mb-2 px-3 py-2 bg-error-subtle border border-error/20 rounded-md text-body-sm text-error">
-            {error}
+          {/* Error */}
+          {error && (
+            <div className="mx-4 mb-2 px-2.5 py-1.5 bg-error/10 border border-error/20 rounded-md text-[10px] text-error">
+              {error}
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="flex items-center justify-between px-4 py-2.5 border-t border-border-default">
+            <span className="text-[10px] text-text-ghost font-mono">
+              {resume
+                ? `resume: ${resume.slice(0, 16)}...`
+                : `${model}${agent !== "none" ? ` + ${agent}` : ""}`}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => void handleLaunch()}
+                disabled={launching}
+                className={cn(
+                  "px-3 py-1 rounded-md text-[10px] font-semibold transition-all",
+                  "bg-[#f59e0b] text-[#0a0a0a]",
+                  "hover:bg-[#fbbf24] active:scale-[0.98]",
+                  "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
+                )}
+              >
+                {launching ? "Launching..." : resume ? "Resume" : "Launch"}
+              </button>
+              {!launching && (
+                <kbd className="text-[10px] text-text-ghost bg-bg-input border border-border-default rounded px-1.5 py-0.5">
+                  {typeof navigator !== "undefined" && navigator.platform?.includes("Mac") ? "Cmd" : "Ctrl"}+Enter
+                </kbd>
+              )}
+            </div>
           </div>
-        )}
-
-        {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-border-subtle">
-          <span className="text-label-xs text-text-tertiary">
-            {resume
-              ? `resume: ${resume.slice(0, 16)}...`
-              : `${model}${agent !== "none" ? ` + ${agent}` : ""}`}
-          </span>
-          <button
-            onClick={() => void handleLaunch()}
-            disabled={launching}
-            className={cn(
-              "inline-flex items-center gap-1.5 px-4 py-2",
-              "text-body-sm font-medium rounded-lg",
-              "bg-accent text-white hover:bg-accent-hover",
-              "transition-all duration-[var(--duration-quick)]",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
-            )}
-          >
-            <Rocket size={14} weight="light" />
-            {launching ? "Launching..." : resume ? "Resume" : "Launch"}
-            {!launching && (
-              <kbd className="ml-1 text-label-xs opacity-60">
-                {navigator.platform?.includes("Mac") ? "Cmd" : "Ctrl"}+Enter
-              </kbd>
-            )}
-          </button>
-        </div>
-      </div>
-    </>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { WarningCircle, X, ArrowClockwise } from "@phosphor-icons/react";
+import { WarningCircleIcon, CloseIcon, RefreshIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -39,9 +39,8 @@ export function ErrorBanner({
         className,
       )}
     >
-      <WarningCircle
+      <WarningCircleIcon
         size={16}
-        weight="light"
         className="text-error shrink-0"
       />
 
@@ -60,7 +59,7 @@ export function ErrorBanner({
             "transition-colors duration-[var(--duration-instant)] ease-out",
           )}
         >
-          <ArrowClockwise size={12} weight="light" />
+          <RefreshIcon size={12} />
           Retry
         </button>
       )}
@@ -76,7 +75,7 @@ export function ErrorBanner({
           )}
           aria-label="Dismiss error"
         >
-          <X size={14} weight="light" />
+          <CloseIcon size={14} />
         </button>
       )}
     </div>

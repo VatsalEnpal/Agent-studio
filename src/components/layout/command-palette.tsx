@@ -2,16 +2,26 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Plus, XCircle, Users, Monitor, Brain, MagnifyingGlass as SearchIcon, Lightning, Terminal, Command } from "@phosphor-icons/react";
+import {
+  PlusIcon,
+  CloseIcon,
+  MemoryIcon,
+  SearchIcon,
+  SessionsIcon,
+  RoomsIcon,
+  SprintsIcon,
+} from "@/components/ui/icons";
 import { useUIStore } from "@/stores/ui";
 import { useSessionsStore } from "@/stores/sessions";
 import { cn } from "@/lib/utils";
+
+type IconComponent = React.ComponentType<{ className?: string; size?: number }>;
 
 interface PaletteAction {
   id: string;
   label: string;
   description?: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: IconComponent;
   keywords: string[];
   onSelect: () => void;
 }
@@ -55,6 +65,15 @@ export function CommandPalette({
     setSelectedIndex(0);
   }, [onOpenChange]);
 
+  /** Map action IDs to pillar accent colors for their icons */
+  const accentForAction = (id: string): string | undefined => {
+    if (id.startsWith("focus-") || id === "new-session" || id === "view-sessions") return "text-sessions";
+    if (id === "view-teams" || id === "new-room") return "text-rooms";
+    if (id === "view-memory") return "text-memory";
+    if (id === "pmo-scan") return "text-sprints";
+    return undefined;
+  };
+
   // Build actions list
   const actions: PaletteAction[] = useMemo(() => {
     const list: PaletteAction[] = [
@@ -62,7 +81,7 @@ export function CommandPalette({
         id: "new-session",
         label: "New Session",
         description: "Launch a new Claude Code session",
-        icon: Plus,
+        icon: PlusIcon,
         keywords: ["new", "create", "launch", "start", "session"],
         onSelect: () => {
           close();
@@ -75,7 +94,7 @@ export function CommandPalette({
         description: focusedId
           ? `Kill ${sessions.find((s) => s.id === focusedId)?.name ?? "session"}`
           : "No session focused",
-        icon: XCircle,
+        icon: CloseIcon,
         keywords: ["kill", "stop", "end", "terminate", "close"],
         onSelect: () => {
           if (focusedId) {
@@ -88,7 +107,7 @@ export function CommandPalette({
         id: "view-sessions",
         label: "Sessions View",
         description: "Switch to terminal grid",
-        icon: Monitor,
+        icon: SessionsIcon,
         keywords: ["sessions", "terminals", "grid", "view"],
         onSelect: () => {
           close();
@@ -99,7 +118,7 @@ export function CommandPalette({
         id: "view-teams",
         label: "Teams / Sprint View",
         description: "Switch to sprint dashboard",
-        icon: Users,
+        icon: RoomsIcon,
         keywords: ["teams", "sprint", "dashboard", "agents"],
         onSelect: () => {
           close();
@@ -110,7 +129,7 @@ export function CommandPalette({
         id: "view-memory",
         label: "Memory Stats",
         description: `${memoryTotal} entries in memory index`,
-        icon: Brain,
+        icon: MemoryIcon,
         keywords: ["memory", "stats", "knowledge", "learnings"],
         onSelect: () => {
           close();
@@ -121,7 +140,7 @@ export function CommandPalette({
         id: "pmo-scan",
         label: "Trigger PMO Scan",
         description: "Start a PMO scan to check for ready tickets",
-        icon: Lightning,
+        icon: SearchIcon,
         keywords: ["scan", "pmo", "tickets", "notion", "ready"],
         onSelect: () => {
           close();
@@ -136,7 +155,7 @@ export function CommandPalette({
         id: `focus-${session.id}`,
         label: session.name,
         description: `Focus ${session.name} (${session.status})`,
-        icon: Terminal,
+        icon: SessionsIcon,
         keywords: [
           session.name.toLowerCase(),
           session.status,
@@ -218,47 +237,48 @@ export function CommandPalette({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/60 z-[60]" />
+        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-[60]" />
         <Dialog.Content
-          className="fixed top-[20%] left-1/2 -translate-x-1/2 z-[60] w-[480px] max-h-[60vh] bg-console-panel border border-console-border rounded-lg shadow-2xl overflow-hidden"
+          className="fixed top-[20%] left-1/2 -translate-x-1/2 z-[60] w-[480px] max-h-[60vh] bg-bg-elevated border border-border-subtle rounded-lg shadow-modal overflow-hidden"
           onKeyDown={handleKeyDown}
         >
           <Dialog.Title className="sr-only">Command Palette</Dialog.Title>
           <Dialog.Description className="sr-only">
-            MagnifyingGlass for actions, sessions, and commands
+            Search for actions, sessions, and commands
           </Dialog.Description>
 
           {/* Search input */}
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-console-border">
-            <Command className="w-4 h-4 text-console-dim shrink-0" />
+          <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border-default">
+            <SearchIcon size={14} className="text-text-ghost shrink-0" />
             <input
               ref={inputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Type a command..."
-              className="flex-1 bg-transparent text-sm text-console-text placeholder:text-console-dim focus:outline-none"
+              className="flex-1 bg-transparent text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none"
             />
             {query && (
               <button
                 onClick={() => setQuery("")}
-                className="text-console-dim hover:text-console-muted transition-colors"
+                className="text-text-ghost hover:text-text-secondary transition-colors"
               >
-                <XCircle className="w-3.5 h-3.5" />
+                <CloseIcon size={14} />
               </button>
             )}
           </div>
 
           {/* Results */}
-          <div ref={listRef} className="overflow-y-auto max-h-[calc(60vh-52px)] py-1">
+          <div ref={listRef} className="overflow-y-auto max-h-[calc(60vh-52px)] py-1 scrollbar-thin">
             {filtered.length === 0 ? (
-              <div className="flex items-center justify-center py-8 text-console-dim text-xs">
-                <SearchIcon className="w-4 h-4 mr-2" />
+              <div className="flex items-center justify-center py-6 text-text-ghost text-[10px]">
+                <SearchIcon size={14} className="mr-2" />
                 No matching commands
               </div>
             ) : (
               filtered.map((action, index) => {
                 const Icon = action.icon;
+                const accent = accentForAction(action.id);
                 return (
                   <button
                     key={action.id}
@@ -266,25 +286,26 @@ export function CommandPalette({
                     onClick={action.onSelect}
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={cn(
-                      "flex items-center gap-3 w-full px-4 py-2.5 text-left transition-colors",
+                      "flex items-center gap-3 w-full px-4 py-2 text-left",
+                      "transition-colors duration-[var(--duration-instant)]",
                       index === selectedIndex
-                        ? "bg-console-faint/80 text-console-text"
-                        : "text-console-muted hover:bg-console-faint/40",
+                        ? "bg-bg-elevated text-text-primary"
+                        : "text-text-secondary hover:bg-bg-input/50",
                     )}
                   >
-                    <Icon className="w-4 h-4 shrink-0 text-console-dim" />
+                    <Icon size={14} className={cn("shrink-0", index === selectedIndex && accent ? accent : "text-text-ghost")} />
                     <div className="flex-1 min-w-0">
-                      <span className="text-xs font-medium block truncate">
+                      <span className="text-[10px] font-medium block truncate">
                         {action.label}
                       </span>
                       {action.description && (
-                        <span className="text-[10px] text-console-dim block truncate">
+                        <span className="text-label text-text-ghost block truncate">
                           {action.description}
                         </span>
                       )}
                     </div>
                     {index === selectedIndex && (
-                      <kbd className="text-[9px] px-1 py-0.5 rounded bg-console-border text-console-dim font-mono shrink-0">
+                      <kbd className="text-[9px] px-1.5 py-0.5 rounded bg-bg-input border border-border-subtle text-text-tertiary font-mono shrink-0">
                         Enter
                       </kbd>
                     )}
@@ -295,21 +316,21 @@ export function CommandPalette({
           </div>
 
           {/* Footer hint */}
-          <div className="flex items-center gap-4 px-4 py-2 border-t border-console-border text-[9px] text-console-dim">
+          <div className="flex items-center gap-4 px-4 py-2 border-t border-border-default text-[9px] text-text-ghost">
             <span className="flex items-center gap-1">
-              <kbd className="px-1 py-0 rounded bg-console-border font-mono">
+              <kbd className="px-1 py-0 rounded bg-bg-input border border-border-subtle font-mono">
                 Up/Down
               </kbd>
               navigate
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1 py-0 rounded bg-console-border font-mono">
+              <kbd className="px-1 py-0 rounded bg-bg-input border border-border-subtle font-mono">
                 Enter
               </kbd>
               select
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1 py-0 rounded bg-console-border font-mono">
+              <kbd className="px-1 py-0 rounded bg-bg-input border border-border-subtle font-mono">
                 Esc
               </kbd>
               close

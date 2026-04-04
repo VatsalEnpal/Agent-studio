@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Play, Pause, ArrowClockwise, Clock } from "@phosphor-icons/react";
+import { PlayIcon, PauseIcon, RefreshIcon, ClockIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
 interface PmoStatus {
@@ -64,7 +64,7 @@ export function SettingsPmo() {
           </div>
           {status?.nextScanIn && (
             <span className="text-label-xs text-console-dim flex items-center gap-1">
-              <Clock className="w-3 h-3" />
+              <ClockIcon className="w-3 h-3" />
               Next scan in {status.nextScanIn}
             </span>
           )}
@@ -109,7 +109,7 @@ export function SettingsPmo() {
               disabled={actionLoading !== null}
               className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium rounded bg-console-error/15 text-console-error hover:bg-console-error/25 transition-all"
             >
-              <Pause className="w-3 h-3" />
+              <PauseIcon className="w-3 h-3" />
               {actionLoading === "stop" ? "Stopping..." : "Stop"}
             </button>
           ) : (
@@ -118,7 +118,7 @@ export function SettingsPmo() {
               disabled={actionLoading !== null}
               className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium rounded bg-console-success/15 text-console-success hover:bg-console-success/25 transition-all"
             >
-              <Play className="w-3 h-3" />
+              <PlayIcon className="w-3 h-3" />
               {actionLoading === "start" ? "Starting..." : "Start"}
             </button>
           )}
@@ -127,7 +127,7 @@ export function SettingsPmo() {
             disabled={actionLoading !== null}
             className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium rounded bg-console-accent/15 text-console-accent hover:bg-console-accent/25 transition-all"
           >
-            <ArrowClockwise className={cn("w-3 h-3", actionLoading === "scan" && "animate-spin")} />
+            <RefreshIcon className={cn("w-3 h-3", actionLoading === "scan" && "animate-spin")} />
             {actionLoading === "scan" ? "Scanning..." : "Run Scan Now"}
           </button>
         </div>

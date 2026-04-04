@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { PaperPlaneTilt, Hash, SpinnerGap, Power, Users, Lightning } from "@phosphor-icons/react";
+import { SendIcon, HashIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import { useRoomsStore } from "@/stores/rooms";
+import { useUIStore } from "@/stores/ui";
 import { useToastStore } from "@/components/ui/notification-toast";
 import { notifyMention, getNotificationPrefs } from "@/lib/notifications";
 import type { Room, RoomMessage } from "@/stores/rooms";
@@ -68,7 +69,6 @@ export function RoomChat() {
         title: `${lastMsg.from} mentioned you`,
         body: lastMsg.text?.slice(0, 80) ?? "",
       });
-      // Native macOS notification via Electron IPC
       const prefs = getNotificationPrefs();
       if (prefs.approvals) {
         notifyMention(
@@ -171,6 +171,17 @@ export function RoomChat() {
     setSpawning(false);
   }, [selectedRoomId, spawning]);
 
+  // UX #6: Click agent name → navigate to their session
+  const handleAgentClick = useCallback(
+    (agentId: string) => {
+      const agent = room?.agents.find((a) => a.id === agentId || a.name === agentId);
+      if (agent?.sessionId) {
+        useUIStore.getState().navigateToSession(agent.sessionId);
+      }
+    },
+    [room?.agents],
+  );
+
   const handleClose = useCallback(async () => {
     if (!selectedRoomId) return;
     await fetch(`/api/rooms/${selectedRoomId}`, { method: "DELETE" });
@@ -210,11 +221,13 @@ export function RoomChat() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center max-w-sm px-6">
-          <Hash size={40} weight="light" className="text-text-tertiary mx-auto mb-4" />
-          <p className="text-title-sm text-text-secondary mb-1">
+          <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center mx-auto mb-3">
+            <HashIcon size={20} className="text-text-ghost" />
+          </div>
+          <p className="text-[10px] font-medium text-text-secondary mb-1">
             No room selected
           </p>
-          <p className="text-body-sm text-text-tertiary leading-relaxed">
+          <p className="text-[10px] text-text-tertiary leading-relaxed">
             Select a room from the sidebar or create a new one to start chatting
             with your agent team.
           </p>
@@ -228,59 +241,49 @@ export function RoomChat() {
   return (
     <div className="flex flex-col h-full">
       {/* Room header */}
-      <div className="px-4 py-3 border-b border-border shrink-0 bg-surface">
-        <div className="flex items-center gap-3">
-          <Hash size={16} weight="light" className="text-text-tertiary shrink-0" />
+      <div className="px-3 py-2 border-b border-border-default shrink-0 bg-bg-surface">
+        <div className="flex items-center gap-2">
+          <HashIcon size={12} className="text-rooms shrink-0" />
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className="text-title-sm text-text-emphasis truncate">
+            <span className="text-[10px] font-semibold text-text-primary truncate">
               {room.name}
             </span>
-            <span className="text-body-sm text-text-tertiary truncate hidden sm:inline">
+            <span className="text-[10px] text-text-ghost truncate hidden sm:inline">
               {room.topic}
             </span>
           </div>
 
-          {/* Agent count */}
-          <div className="flex items-center gap-1 shrink-0">
-            <Users size={14} weight="light" className="text-text-tertiary" />
-            <span className="text-label-xs text-text-secondary">
-              {room.agents.length}
-            </span>
+          {/* Agent avatars — 16px colored squares */}
+          <div className="flex items-center -space-x-1 shrink-0">
+            {room.agents.slice(0, 5).map((a) => {
+              const color = agentColor(a.name);
+              return (
+                <div
+                  key={a.id}
+                  className="w-4 h-4 rounded-[4px] flex items-center justify-center border border-bg-surface"
+                  style={{ backgroundColor: color }}
+                  title={`${a.name}: ${a.status}`}
+                >
+                  <span className="text-[7px] font-bold text-white leading-none">
+                    {a.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Agent status dots */}
-          <div className="flex items-center gap-1 shrink-0">
-            {room.agents.map((a) => (
-              <div
-                key={a.id}
-                className="flex items-center gap-1"
-                title={`${a.name}: ${a.status}`}
-              >
-                <span
-                  className={cn(
-                    "w-2 h-2 rounded-full transition-colors duration-[150ms]",
-                    a.status === "idle" && "bg-success",
-                    a.status === "working" && "bg-accent animate-pulse-dot",
-                    a.status === "waiting" && "bg-warning animate-pulse-dot",
-                    a.status === "offline" && "bg-text-tertiary",
-                  )}
-                />
-              </div>
-            ))}
-          </div>
+          {/* Member count */}
+          <span className="text-[10px] text-text-ghost shrink-0">
+            {room.agents.length}
+          </span>
 
           {/* Spawn button */}
           {room.active && allOffline && (
             <button
               onClick={handleSpawn}
               disabled={spawning}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium rounded-md bg-accent text-canvas hover:bg-accent-hover transition-colors duration-[100ms] disabled:opacity-50 shrink-0"
+              className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-colors disabled:opacity-50 shrink-0"
             >
-              {spawning ? (
-                <SpinnerGap size={14} weight="light" className="animate-spin" />
-              ) : (
-                <Lightning size={14} weight="light" />
-              )}
               {spawning ? "Starting..." : "Spawn Agents"}
             </button>
           )}
@@ -289,9 +292,8 @@ export function RoomChat() {
           {room.active && (
             <button
               onClick={handleClose}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-label-xs font-medium rounded-md bg-error-subtle text-error hover:bg-error/20 transition-colors duration-[100ms] shrink-0"
+              className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded-md text-error hover:bg-error/10 transition-colors shrink-0"
             >
-              <Power size={12} weight="light" />
               Close
             </button>
           )}
@@ -300,7 +302,7 @@ export function RoomChat() {
 
       {/* Legacy room banner */}
       {!room.active && (
-        <div className="px-4 py-2.5 border-b border-warning/20 bg-warning/5 text-body-sm text-warning shrink-0">
+        <div className="px-3 py-2 border-b border-sprints/20 bg-sprints/5 text-[10px] text-sprints shrink-0">
           This room was created in an older version. Messages may contain terminal artifacts.
         </div>
       )}
@@ -308,27 +310,22 @@ export function RoomChat() {
       {/* Big spawn CTA when all agents offline and no messages */}
       {room.active && allOffline && room.messages.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-5">
-            <Users size={48} weight="light" className="text-text-tertiary mx-auto" />
-            <h3 className="text-title-md text-text-emphasis">
+          <div className="text-center space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center mx-auto">
+              <HashIcon size={20} className="text-text-ghost" />
+            </div>
+            <h3 className="text-[10px] font-medium text-text-secondary">
               Agents are offline
             </h3>
-            <p className="text-body-sm text-text-secondary max-w-xs">
+            <p className="text-[10px] text-text-tertiary max-w-xs">
               Spawn all agents to start chatting in this room
             </p>
             <button
               onClick={handleSpawn}
               disabled={spawning}
-              className="px-6 py-2.5 bg-accent text-canvas text-body font-semibold rounded-lg hover:bg-accent-hover transition-colors duration-[100ms] disabled:opacity-50 shadow-accent-glow"
+              className="px-2.5 py-1 bg-rooms text-bg-base text-[10px] font-medium rounded-md hover:bg-rooms/90 transition-colors disabled:opacity-50 shadow-rooms-glow"
             >
-              {spawning ? (
-                <span className="flex items-center gap-2">
-                  <SpinnerGap size={16} weight="light" className="animate-spin" />
-                  Starting...
-                </span>
-              ) : (
-                "Start Room"
-              )}
+              {spawning ? "Starting..." : "Start Room"}
             </button>
           </div>
         </div>
@@ -337,8 +334,9 @@ export function RoomChat() {
           {/* Messages area */}
           <div className="flex-1 overflow-y-auto scrollbar-thin">
             {messages.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-body-sm text-text-tertiary">
-                No messages yet. Send a message to begin.
+              <div className="flex flex-col items-center justify-center h-full gap-2 text-center px-6">
+                <p className="text-[10px] text-text-secondary font-medium">No messages yet</p>
+                <p className="text-[10px] text-text-tertiary">Type a message below to start the conversation</p>
               </div>
             ) : (
               <div>
@@ -349,6 +347,7 @@ export function RoomChat() {
                     grouped={groupedFlags[i]}
                     onApprove={handleApprove}
                     onReject={handleReject}
+                    onAgentClick={handleAgentClick}
                   />
                 ))}
                 {/* Streaming ghost messages */}
@@ -372,20 +371,15 @@ export function RoomChat() {
 
           {/* Spawn banner when offline but has messages */}
           {room.active && allOffline && messages.length > 0 && (
-            <div className="px-4 py-3 border-t border-border bg-elevation-2 flex items-center justify-between">
-              <span className="text-body-sm text-text-secondary">
+            <div className="px-3 py-2 border-t border-border-default bg-bg-elevated flex items-center justify-between">
+              <span className="text-[10px] text-text-tertiary">
                 All agents are offline
               </span>
               <button
                 onClick={handleSpawn}
                 disabled={spawning}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium rounded-md bg-accent text-canvas hover:bg-accent-hover transition-colors duration-[100ms] disabled:opacity-50"
+                className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-colors disabled:opacity-50"
               >
-                {spawning ? (
-                  <SpinnerGap size={12} weight="light" className="animate-spin" />
-                ) : (
-                  <Power size={12} weight="light" />
-                )}
                 {spawning ? "Starting..." : "Start Room"}
               </button>
             </div>
@@ -393,25 +387,22 @@ export function RoomChat() {
 
           {/* Input bar */}
           {room.active && (
-            <div className="px-4 py-3 border-t border-border shrink-0 bg-surface">
+            <div className="px-3 py-2 border-t border-border-default shrink-0 bg-bg-surface">
               <div className="relative flex items-center gap-2">
                 {/* @mention dropdown */}
                 {showMentions && (
-                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-elevation-3 border border-border rounded-lg shadow-modal p-1 z-dropdown animate-slide-up">
+                  <div className="absolute bottom-full left-0 mb-2 w-56 bg-bg-elevated border border-border-subtle rounded-lg shadow-modal p-1 z-40 animate-slide-up">
                     {filteredAgents.map((a) => (
                       <button
                         key={a.id}
                         onClick={() => selectMention(a.id)}
-                        className="w-full text-left px-2.5 py-2 rounded-md text-body-sm hover:bg-surface-hover flex items-center gap-2.5 transition-colors duration-[100ms]"
+                        className="w-full text-left px-2 py-1.5 rounded-md text-[10px] hover:bg-bg-input flex items-center gap-2 transition-colors"
                       >
                         <div
-                          className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                          style={{ backgroundColor: agentColor(a.name) + "30" }}
+                          className="w-4 h-4 rounded-[4px] flex items-center justify-center shrink-0"
+                          style={{ backgroundColor: agentColor(a.name) }}
                         >
-                          <span
-                            className="text-label-xs font-bold"
-                            style={{ color: agentColor(a.name) }}
-                          >
+                          <span className="text-[7px] font-bold text-white">
                             {a.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
@@ -421,26 +412,26 @@ export function RoomChat() {
                         <span
                           className={cn(
                             "w-1.5 h-1.5 rounded-full shrink-0 ml-auto",
-                            a.status === "idle" && "bg-success",
-                            a.status === "working" && "bg-accent",
-                            a.status === "waiting" && "bg-warning",
-                            a.status === "offline" && "bg-text-tertiary",
+                            a.status === "idle" && "bg-sessions",
+                            a.status === "working" && "bg-rooms",
+                            a.status === "waiting" && "bg-sprints",
+                            a.status === "offline" && "bg-text-ghost",
                           )}
                         />
-                        <span className="text-label-xs text-text-tertiary">
+                        <span className="text-label text-text-ghost">
                           {a.model}
                         </span>
                       </button>
                     ))}
                     <button
                       onClick={() => selectMention("all")}
-                      className="w-full text-left px-2.5 py-2 rounded-md text-body-sm hover:bg-surface-hover flex items-center gap-2.5 transition-colors duration-[100ms]"
+                      className="w-full text-left px-2 py-1.5 rounded-md text-[10px] hover:bg-bg-input flex items-center gap-2 transition-colors"
                     >
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 bg-accent/20">
-                        <span className="text-label-xs font-bold text-accent">*</span>
+                      <div className="w-4 h-4 rounded-[4px] flex items-center justify-center shrink-0 bg-rooms/20">
+                        <span className="text-[7px] font-bold text-rooms">*</span>
                       </div>
                       <span className="text-text-primary font-medium">all</span>
-                      <span className="text-label-xs text-text-tertiary ml-auto">
+                      <span className="text-label text-text-ghost ml-auto">
                         everyone in room
                       </span>
                     </button>
@@ -453,16 +444,16 @@ export function RoomChat() {
                   value={input}
                   onChange={(e) => handleInputChange(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Message the team... (use @agent to direct)"
-                  className="flex-1 bg-elevation-2 border border-border rounded-md px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors duration-[100ms]"
+                  placeholder={`Message #${room.name}...`}
+                  className="flex-1 bg-bg-input border border-border-default rounded-md px-3 py-1.5 text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-colors"
                   disabled={!room.active}
                 />
                 <button
                   onClick={() => void handleSend()}
                   disabled={!input.trim()}
-                  className="p-2.5 rounded-md bg-accent text-canvas hover:bg-accent-hover transition-colors duration-[100ms] disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-2 rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  <PaperPlaneTilt size={16} weight="light" />
+                  <SendIcon size={14} />
                 </button>
               </div>
             </div>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Question, X, Terminal, Users, Brain, ChartBar, Gear, ArrowSquareOut } from "@phosphor-icons/react";
+import { HelpIcon, CloseIcon, SessionsIcon, UsersIcon, BrainIcon, ChartBarIcon, SettingsIcon, ExternalLinkIcon } from "@/components/ui/icons";
 
 const HOWTO_URL =
   "https://github.com/VatsalEnpal/Agent-studio/blob/main/HOWTO.md";
@@ -17,19 +17,19 @@ export function HelpPanel() {
           className="flex items-center justify-center w-7 h-7 rounded-md text-console-muted hover:text-console-text hover:bg-white/10 transition-all"
           title="Help & Guide"
         >
-          <Question className="w-4 h-4" />
+          <HelpIcon className="w-4 h-4" />
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] bg-console-panel border border-console-border rounded-lg shadow-2xl focus:outline-none animate-in fade-in zoom-in-95 duration-150">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] bg-bg-elevated border border-border-subtle rounded-lg shadow-modal focus:outline-none animate-cmd-palette-in">
           <div className="flex items-center justify-between px-5 py-3 border-b border-console-border">
             <Dialog.Title className="text-sm font-semibold text-console-text">
               Help & Guide
             </Dialog.Title>
             <Dialog.Close asChild>
               <button className="text-console-muted hover:text-console-text transition-colors">
-                <X className="w-4 h-4" />
+                <CloseIcon className="w-4 h-4" />
               </button>
             </Dialog.Close>
           </div>
@@ -40,7 +40,7 @@ export function HelpPanel() {
           <div className="px-5 py-4 space-y-4">
             {/* Shortcuts */}
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-console-muted mb-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-console-muted mb-2">
                 Shortcuts
               </p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
@@ -57,32 +57,32 @@ export function HelpPanel() {
 
             {/* Features */}
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-console-muted mb-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-console-muted mb-2">
                 Features
               </p>
               <div className="space-y-2">
                 <FeatureRow
-                  icon={<Terminal className="w-3.5 h-3.5" />}
+                  icon={<SessionsIcon className="w-3.5 h-3.5" />}
                   name="Sessions"
                   desc="Run multiple Claude Code terminals"
                 />
                 <FeatureRow
-                  icon={<Users className="w-3.5 h-3.5" />}
+                  icon={<UsersIcon className="w-3.5 h-3.5" />}
                   name="Teams"
                   desc="Track agent workflows and sprints"
                 />
                 <FeatureRow
-                  icon={<Brain className="w-3.5 h-3.5" />}
+                  icon={<BrainIcon className="w-3.5 h-3.5" />}
                   name="Memory"
                   desc="Browse agent knowledge base"
                 />
                 <FeatureRow
-                  icon={<ChartBar className="w-3.5 h-3.5" />}
+                  icon={<ChartBarIcon className="w-3.5 h-3.5" />}
                   name="Reports"
                   desc="Review automation results"
                 />
                 <FeatureRow
-                  icon={<Gear className="w-3.5 h-3.5" />}
+                  icon={<SettingsIcon className="w-3.5 h-3.5" />}
                   name="Settings"
                   desc="Configure workspace, automations, theme"
                 />
@@ -98,7 +98,7 @@ export function HelpPanel() {
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-xs text-console-accent hover:underline"
             >
-              <ArrowSquareOut className="w-3.5 h-3.5" />
+              <ExternalLinkIcon className="w-3.5 h-3.5" />
               Full How-To Guide
             </a>
           </div>
@@ -121,7 +121,7 @@ function ShortcutRow({ keys, label }: { keys: string; label: string }) {
       <kbd className="inline-flex items-center justify-center min-w-[44px] px-1.5 py-0.5 rounded bg-console-border/60 text-console-text font-mono text-[10px] leading-tight">
         {keys}
       </kbd>
-      <span className="text-[11px] text-console-muted">{label}</span>
+      <span className="text-[10px] text-console-muted">{label}</span>
     </div>
   );
 }
@@ -141,7 +141,7 @@ function FeatureRow({
       <span className="text-xs text-console-text font-medium w-16 shrink-0">
         {name}
       </span>
-      <span className="text-[11px] text-console-muted">{desc}</span>
+      <span className="text-[10px] text-console-muted">{desc}</span>
     </div>
   );
 }

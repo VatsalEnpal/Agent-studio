@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FloppyDisk, Check } from "@phosphor-icons/react";
+import { SaveIcon, CheckIcon } from "@/components/ui/icons";
 import { useSettingsStore } from "@/stores/settings";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
@@ -103,7 +103,7 @@ export function SettingsGeneral() {
                 : "bg-console-accent/20 text-console-accent hover:bg-console-accent/30",
             )}
           >
-            {saved ? <Check className="w-3 h-3" /> : <FloppyDisk className="w-3 h-3" />}
+            {saved ? <CheckIcon className="w-3 h-3" /> : <SaveIcon className="w-3 h-3" />}
             {saving ? "Saving..." : saved ? "Saved" : "Save Settings"}
           </button>
         </div>

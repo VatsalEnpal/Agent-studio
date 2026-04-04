@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { ActiveMode } from "@/lib/types";
+import { useSessionsStore } from "@/stores/sessions";
 
 type Theme = "dark" | "light";
 
@@ -19,6 +20,8 @@ interface UIState {
   setCommandPaletteOpen: (open: boolean) => void;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
+  /** Navigate to a specific session by id — switches to sessions mode and focuses it */
+  navigateToSession: (sessionId: string) => void;
 }
 
 function getInitialTheme(): Theme {
@@ -52,4 +55,8 @@ export const useUIStore = create<UIState>((set) => ({
       localStorage.setItem("agent-studio-theme", next);
       return { theme: next };
     }),
+  navigateToSession: (sessionId) => {
+    set({ activeMode: "sessions" });
+    useSessionsStore.getState().setFocused(sessionId);
+  },
 }));

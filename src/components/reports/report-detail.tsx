@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Check, X, Play, Clock } from "@phosphor-icons/react";
+import { CheckIcon, CloseIcon, PlayIcon, ClockIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useReportsStore, type Report } from "@/stores/reports";
 
@@ -85,7 +85,7 @@ export function ReportDetail({ report }: ReportDetailProps) {
           </span>
         </div>
         <div className="flex items-center gap-2 text-[10px] text-console-dim">
-          <Clock className="w-3 h-3" />
+          <ClockIcon className="w-3 h-3" />
           {formatTimestamp(report.timestamp)}
         </div>
       </div>
@@ -128,14 +128,14 @@ export function ReportDetail({ report }: ReportDetailProps) {
                         {action.description}
                       </p>
                       <p className="text-[9px] text-console-muted mt-1">
-                        <Play className="w-2.5 h-2.5 inline mr-0.5 -mt-0.5" />
+                        <PlayIcon className="w-2.5 h-2.5 inline mr-0.5 -mt-0.5" />
                         Agent: {action.agent}
                       </p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       {action.approved ? (
                         <span className="flex items-center gap-1 px-2 py-1 text-[10px] text-emerald-400 font-medium">
-                          <Check className="w-3 h-3" />
+                          <CheckIcon className="w-3 h-3" />
                           Approved
                         </span>
                       ) : (
@@ -171,14 +171,14 @@ export function ReportDetail({ report }: ReportDetailProps) {
             onClick={() => void handleDismiss()}
             className="px-3 py-1.5 text-xs text-console-dim hover:text-console-muted border border-console-border rounded transition-colors"
           >
-            <X className="w-3 h-3 inline mr-1 -mt-0.5" />
+            <CloseIcon className="w-3 h-3 inline mr-1 -mt-0.5" />
             Dismiss
           </button>
           <button
             onClick={() => void handleApproveAll()}
             className="px-3 py-1.5 text-xs font-medium text-black bg-emerald-500 hover:bg-emerald-400 rounded transition-colors"
           >
-            <Check className="w-3 h-3 inline mr-1 -mt-0.5" />
+            <CheckIcon className="w-3 h-3 inline mr-1 -mt-0.5" />
             Approve All
           </button>
         </div>

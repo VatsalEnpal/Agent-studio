@@ -2,21 +2,21 @@
 
 import { useState, useEffect, useCallback } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { X, SpinnerGap, Plus, Trash, CaretUp, CaretDown, Rocket, Bug, Shield, Wrench, Lightning, GitBranch, Eye, FileCode } from "@phosphor-icons/react";
+import { CloseIcon, SpinnerIcon, PlusIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon, RocketIcon, BugIcon, ShieldIcon, WrenchIcon, BoltIcon, GitBranchIcon, EyeIcon, FileCodeIcon } from "@/components/ui/icons";
 import { useWorkflowStore, type WorkflowDraft } from "@/stores/workflows";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
 
 // Icons available for workflows
 const ICON_OPTIONS = [
-  { value: "Rocket", icon: Rocket, label: "Rocket" },
-  { value: "Bug", icon: Bug, label: "Bug" },
-  { value: "Shield", icon: Shield, label: "Shield" },
-  { value: "Wrench", icon: Wrench, label: "Wrench" },
-  { value: "Lightning", icon: Lightning, label: "Lightning" },
-  { value: "GitBranch", icon: GitBranch, label: "Git" },
-  { value: "Eye", icon: Eye, label: "Review" },
-  { value: "FileCode", icon: FileCode, label: "Code" },
+  { value: "Rocket", icon: RocketIcon, label: "Rocket" },
+  { value: "Bug", icon: BugIcon, label: "Bug" },
+  { value: "Shield", icon: ShieldIcon, label: "Shield" },
+  { value: "Wrench", icon: WrenchIcon, label: "Wrench" },
+  { value: "Lightning", icon: BoltIcon, label: "Lightning" },
+  { value: "GitBranch", icon: GitBranchIcon, label: "Git" },
+  { value: "Eye", icon: EyeIcon, label: "Review" },
+  { value: "FileCode", icon: FileCodeIcon, label: "Code" },
 ] as const;
 
 // Pre-built templates
@@ -180,7 +180,7 @@ export function WorkflowBuilderDialog() {
             </Dialog.Title>
             <Dialog.Close asChild>
               <button className="p-1 text-console-dim hover:text-console-text transition-colors">
-                <X className="w-3.5 h-3.5" />
+                <CloseIcon className="w-3.5 h-3.5" />
               </button>
             </Dialog.Close>
           </div>
@@ -193,7 +193,7 @@ export function WorkflowBuilderDialog() {
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {TEMPLATES.map((tpl) => {
-                  const TplIcon = ICON_OPTIONS.find((i) => i.value === tpl.icon)?.icon ?? Rocket;
+                  const TplIcon = ICON_OPTIONS.find((i) => i.value === tpl.icon)?.icon ?? RocketIcon;
                   return (
                     <button
                       key={tpl.name}
@@ -278,7 +278,7 @@ export function WorkflowBuilderDialog() {
                   onClick={addStep}
                   className="flex items-center gap-1 px-2 py-0.5 text-[9px] text-console-accent hover:text-console-accent/80 transition-colors"
                 >
-                  <Plus className="w-3 h-3" />
+                  <PlusIcon className="w-3 h-3" />
                   Add Step
                 </button>
               </div>
@@ -327,7 +327,7 @@ export function WorkflowBuilderDialog() {
                   disabled={saving || !draft.name.trim()}
                   className="px-3 py-1.5 text-[10px] font-medium text-console-bg bg-console-accent rounded hover:bg-console-accent/90 transition-colors disabled:opacity-50 flex items-center gap-1.5"
                 >
-                  {saving && <SpinnerGap className="w-3 h-3 animate-spin" />}
+                  {saving && <SpinnerIcon className="w-3 h-3 animate-spin" />}
                   {isEdit ? "Save" : "Create"}
                 </button>
               </>
@@ -368,14 +368,14 @@ function StepRow({
           disabled={index === 0}
           className="p-0.5 text-console-dim hover:text-console-muted disabled:opacity-30 transition-colors"
         >
-          <CaretUp className="w-3 h-3" />
+          <ChevronUpIcon className="w-3 h-3" />
         </button>
         <button
           onClick={onMoveDown}
           disabled={index === total - 1}
           className="p-0.5 text-console-dim hover:text-console-muted disabled:opacity-30 transition-colors"
         >
-          <CaretDown className="w-3 h-3" />
+          <ChevronDownIcon className="w-3 h-3" />
         </button>
       </div>
 
@@ -413,7 +413,7 @@ function StepRow({
         disabled={total <= 1}
         className="p-1 text-console-dim hover:text-console-error disabled:opacity-30 transition-colors shrink-0"
       >
-        <Trash className="w-3 h-3" />
+        <TrashIcon className="w-3 h-3" />
       </button>
     </div>
   );

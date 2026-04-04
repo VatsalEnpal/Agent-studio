@@ -2,23 +2,41 @@
 
 import { useState, useMemo, useCallback } from "react";
 import {
-  CaretDown,
-  CaretRight,
-  GitBranch,
-  Globe,
-  Play,
-  Square,
-  ArrowSquareOut,
-  Plus,
-} from "@phosphor-icons/react";
+  ChevronDownIcon,
+  ChevronRightIcon,
+  CloseIcon,
+  PlusIcon,
+  SearchIcon,
+} from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useSessionsStore } from "@/stores/sessions";
 import { useGitStore } from "@/stores/git";
 import { SessionCard } from "./session-card";
+import { DevServersView } from "@/components/dev-servers/dev-servers-view";
 import type { Session, RepoStatus } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
-// Section header — labelXs style
+// Pin persistence (localStorage)
+// ---------------------------------------------------------------------------
+
+const PIN_KEY = "agent-studio-pinned-sessions";
+
+function getPinnedIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(PIN_KEY);
+    if (raw) return new Set(JSON.parse(raw) as string[]);
+  } catch { /* ignore */ }
+  return new Set();
+}
+
+function savePinnedIds(ids: Set<string>): void {
+  try {
+    localStorage.setItem(PIN_KEY, JSON.stringify([...ids]));
+  } catch { /* ignore */ }
+}
+
+// ---------------------------------------------------------------------------
+// Section header — 10px uppercase label
 // ---------------------------------------------------------------------------
 
 function SectionHeader({
@@ -39,158 +57,22 @@ function SectionHeader({
       onClick={collapsible ? onToggle : undefined}
       className={cn(
         "flex items-center gap-1.5 w-full px-3 py-1.5",
-        "text-label-xs uppercase text-text-tertiary",
-        collapsible && "cursor-pointer hover:text-text-secondary",
+        "text-label uppercase text-text-ghost",
+        collapsible && "cursor-pointer hover:text-text-tertiary",
         !collapsible && "cursor-default",
       )}
     >
       {collapsible &&
         (collapsed ? (
-          <CaretRight size={12} weight="light" />
+          <ChevronRightIcon size={10} className="text-text-ghost" />
         ) : (
-          <CaretDown size={12} weight="light" />
+          <ChevronDownIcon size={10} className="text-text-ghost" />
         ))}
       <span>{label}</span>
       {count != null && count > 0 && (
-        <span className="text-label-xs text-text-tertiary ml-auto">{count}</span>
+        <span className="text-label text-text-ghost ml-auto">{count}</span>
       )}
     </button>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Repo card
-// ---------------------------------------------------------------------------
-
-function RepoCard({
-  repo,
-  onPR,
-  onPush,
-  onClick,
-}: {
-  repo: RepoStatus;
-  onPR?: (repo: RepoStatus) => void;
-  onPush?: (repo: RepoStatus) => void;
-  onClick?: (repo: RepoStatus) => void;
-}) {
-  return (
-    <div
-      onClick={() => onClick?.(repo)}
-      className={cn(
-        "flex flex-col gap-1 px-3 py-2 rounded-lg cursor-pointer",
-        "hover:bg-surface-hover",
-        "transition-colors duration-[var(--duration-quick)]",
-      )}
-    >
-      <div className="flex items-center gap-2">
-        <GitBranch size={14} weight="light" className="text-text-secondary shrink-0" />
-        <span className="text-body-sm font-medium text-text-primary truncate flex-1">
-          {repo.name}
-        </span>
-        <span
-          className={cn(
-            "size-1.5 rounded-full shrink-0",
-            repo.dirty ? "bg-warning" : "bg-success",
-          )}
-          title={repo.dirty ? "Dirty" : "Clean"}
-        />
-      </div>
-      <div className="flex items-center gap-2 pl-[22px]">
-        <span className="text-label-xs text-text-tertiary truncate">
-          {repo.branch}
-        </span>
-        {repo.changedFiles > 0 && (
-          <span className="text-label-xs text-warning">
-            {repo.changedFiles} changed
-          </span>
-        )}
-        <span className="flex-1" />
-        {onPR && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onPR(repo);
-            }}
-            className="text-label-xs text-accent hover:text-accent-hover transition-colors"
-            title="Create PR"
-          >
-            PR
-          </button>
-        )}
-        {onPush && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onPush(repo);
-            }}
-            className="text-label-xs text-text-secondary hover:text-text-primary transition-colors"
-            title="Push"
-          >
-            Push
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Server card (dev servers)
-// ---------------------------------------------------------------------------
-
-interface DevServer {
-  id: string;
-  name: string;
-  port: number;
-  status: "running" | "stopped";
-}
-
-function ServerCard({
-  server,
-  onToggle,
-  onOpen,
-}: {
-  server: DevServer;
-  onToggle?: () => void;
-  onOpen?: () => void;
-}) {
-  const isRunning = server.status === "running";
-  return (
-    <div
-      className={cn(
-        "flex items-center gap-2 px-3 py-2 rounded-lg",
-        "hover:bg-surface-hover",
-        "transition-colors duration-[var(--duration-quick)]",
-      )}
-    >
-      <Globe size={14} weight="light" className="text-text-secondary shrink-0" />
-      <span className="text-body-sm text-text-primary truncate flex-1">
-        {server.name}
-      </span>
-      <span className="text-label-xs text-text-tertiary">:{server.port}</span>
-      <span
-        className={cn(
-          "size-1.5 rounded-full shrink-0",
-          isRunning ? "bg-success" : "bg-text-tertiary",
-        )}
-      />
-      <button
-        onClick={onToggle}
-        className="p-0.5 text-text-tertiary hover:text-text-secondary transition-colors"
-        title={isRunning ? "Stop" : "Start"}
-      >
-        {isRunning ? <Square size={12} weight="light" /> : <Play size={12} weight="light" />}
-      </button>
-      {isRunning && (
-        <button
-          onClick={onOpen}
-          className="p-0.5 text-text-tertiary hover:text-text-secondary transition-colors"
-          title="Open in browser"
-        >
-          <ArrowSquareOut size={12} weight="light" />
-        </button>
-      )}
-    </div>
   );
 }
 
@@ -228,6 +110,12 @@ function groupSessionsByDate(sessions: Session[]): {
 }
 
 // ---------------------------------------------------------------------------
+// Tab control
+// ---------------------------------------------------------------------------
+
+type SidebarTab = "sessions" | "history" | "servers";
+
+// ---------------------------------------------------------------------------
 // Main sidebar
 // ---------------------------------------------------------------------------
 
@@ -238,6 +126,7 @@ interface SessionSidebarProps {
   onRepoClick?: (repo: RepoStatus) => void;
   onPR?: (repo: RepoStatus) => void;
   onPush?: (repo: RepoStatus) => void;
+  onDevServers?: () => void;
 }
 
 export function SessionSidebar({
@@ -247,14 +136,25 @@ export function SessionSidebar({
   onRepoClick,
   onPR,
   onPush,
+  onDevServers,
 }: SessionSidebarProps) {
   const sessions = useSessionsStore((s) => s.sessions);
   const focusedId = useSessionsStore((s) => s.focusedId);
   const setFocused = useSessionsStore((s) => s.setFocused);
-  const repos = useGitStore((s) => s.repos);
 
-  const [reposCollapsed, setReposCollapsed] = useState(false);
-  const [serversCollapsed, setServersCollapsed] = useState(true);
+  const [activeTab, setActiveTab] = useState<SidebarTab>("sessions");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => getPinnedIds());
+
+  const togglePin = useCallback((id: string) => {
+    setPinnedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      savePinnedIds(next);
+      return next;
+    });
+  }, []);
 
   // Separate active vs exited sessions
   const activeSessions = useMemo(
@@ -273,13 +173,27 @@ export function SessionSidebar({
     [exitedSessions],
   );
 
+  // Paused sessions (idle status)
+  const pausedSessions = useMemo(
+    () => sessions.filter((s) => s.status === "idle" && s.meta?.group !== "room"),
+    [sessions],
+  );
+
+  // Running sessions (active, building, starting)
+  const runningSessions = useMemo(
+    () =>
+      activeSessions.filter(
+        (s) => s.status === "active" || s.status === "building" || s.status === "starting",
+      ),
+    [activeSessions],
+  );
+
   const handleResume = useCallback(
     async (session: Session) => {
       if (onResumeSession) {
         onResumeSession(session);
         return;
       }
-      // Default: create a new session with --resume flag
       const basename = session.cwd.split("/").filter(Boolean).pop() ?? session.name;
       try {
         await fetch("/api/sessions", {
@@ -306,105 +220,117 @@ export function SessionSidebar({
     [onResumeSession],
   );
 
-  // Placeholder dev servers — will be wired via WS later
-  const devServers: DevServer[] = [];
+  // Filter sessions by search, sort pinned to top
+  const filteredRunning = useMemo(() => {
+    let list = runningSessions;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (s) => s.name.toLowerCase().includes(q) || s.cwd.toLowerCase().includes(q),
+      );
+    }
+    return [...list].sort((a, b) => {
+      const ap = pinnedIds.has(a.id) ? 0 : 1;
+      const bp = pinnedIds.has(b.id) ? 0 : 1;
+      return ap - bp;
+    });
+  }, [runningSessions, searchQuery, pinnedIds]);
+
+  const filteredPaused = useMemo(() => {
+    let list = pausedSessions;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (s) => s.name.toLowerCase().includes(q) || s.cwd.toLowerCase().includes(q),
+      );
+    }
+    return [...list].sort((a, b) => {
+      const ap = pinnedIds.has(a.id) ? 0 : 1;
+      const bp = pinnedIds.has(b.id) ? 0 : 1;
+      return ap - bp;
+    });
+  }, [pausedSessions, searchQuery, pinnedIds]);
 
   return (
     <div className="flex flex-col h-full">
-      {/* New session button */}
-      <div className="px-3 py-2 border-b border-border-subtle">
-        <button
-          onClick={onNewSession}
-          className={cn(
-            "flex items-center justify-center gap-1.5 w-full",
-            "px-3 py-1.5 rounded-lg",
-            "text-body-sm font-medium text-accent",
-            "bg-accent-subtle hover:bg-accent/10",
-            "transition-colors duration-[var(--duration-quick)]",
+      {/* Segmented tab nav */}
+      <div className="px-3 pt-3 pb-2">
+        <div className="flex rounded-md bg-bg-input p-0.5">
+          {(["sessions", "history", "servers"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={cn(
+                "flex-1 px-2 py-1 text-[10px] font-medium rounded-[3px] transition-colors",
+                activeTab === tab
+                  ? "bg-bg-elevated text-text-primary"
+                  : "text-text-ghost hover:text-text-tertiary",
+              )}
+            >
+              {tab === "sessions" ? "Sessions" : tab === "history" ? "History" : "Servers"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Search bar */}
+      <div className="px-3 pb-2">
+        <div className="relative">
+          <SearchIcon size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-ghost" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search..."
+            className="w-full pl-7 pr-2 py-1.5 text-[10px] bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-ghost hover:text-text-secondary transition-colors"
+              aria-label="Clear search"
+            >
+              <CloseIcon size={10} />
+            </button>
           )}
-        >
-          <Plus size={14} weight="light" />
-          New Session
-        </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
-        {/* ACTIVE */}
-        <SectionHeader label="Active" count={activeSessions.length} />
-        <div className="px-1 pb-2 space-y-0.5">
-          {activeSessions.map((session) => (
-            <SessionCard
-              key={session.id}
-              session={session}
-              selected={session.id === focusedId}
-              onSelect={() => setFocused(session.id)}
-              onKill={() => onKillSession(session.id)}
-            />
-          ))}
-          {activeSessions.length === 0 && (
-            <p className="px-3 py-2 text-label-xs text-text-tertiary">
-              No active sessions
-            </p>
-          )}
-        </div>
-
-        {/* REPOS */}
-        {repos.length > 0 && (
+        {activeTab === "sessions" && (
           <>
-            <SectionHeader
-              label="Repos"
-              count={repos.length}
-              collapsible
-              collapsed={reposCollapsed}
-              onToggle={() => setReposCollapsed((v) => !v)}
-            />
-            {!reposCollapsed && (
-              <div className="px-1 pb-2 space-y-0.5">
-                {repos.map((repo) => (
-                  <RepoCard
-                    key={repo.path}
-                    repo={repo}
-                    onClick={onRepoClick}
-                    onPR={onPR}
-                    onPush={onPush}
-                  />
-                ))}
-              </div>
-            )}
-          </>
-        )}
+            {/* RUNNING */}
+            <SectionHeader label="Running" count={filteredRunning.length} />
+            <div className="px-1 pb-2 space-y-0.5">
+              {filteredRunning.map((session) => (
+                <SessionCard
+                  key={session.id}
+                  session={session}
+                  selected={session.id === focusedId}
+                  onSelect={() => setFocused(session.id)}
+                  onKill={() => onKillSession(session.id)}
+                  pinned={pinnedIds.has(session.id)}
+                  onTogglePin={() => togglePin(session.id)}
+                />
+              ))}
+              {filteredRunning.length === 0 && (
+                <div className="px-3 py-4 text-center">
+                  <p className="text-[10px] text-text-tertiary">
+                    No running sessions
+                  </p>
+                  <p className="text-[10px] text-text-ghost mt-1">
+                    Click "New Session" below to get started
+                  </p>
+                </div>
+              )}
+            </div>
 
-        {/* SERVERS */}
-        {devServers.length > 0 && (
-          <>
-            <SectionHeader
-              label="Servers"
-              count={devServers.length}
-              collapsible
-              collapsed={serversCollapsed}
-              onToggle={() => setServersCollapsed((v) => !v)}
-            />
-            {!serversCollapsed && (
-              <div className="px-1 pb-2 space-y-0.5">
-                {devServers.map((server) => (
-                  <ServerCard key={server.id} server={server} />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* HISTORY */}
-        {historyGroups.length > 0 && (
-          <>
-            <SectionHeader label="History" />
-            {historyGroups.map((group) => (
-              <div key={group.label} className="px-1 pb-1">
-                <span className="block px-3 py-1 text-label-xs text-text-tertiary">
-                  {group.label}
-                </span>
-                <div className="space-y-0.5">
-                  {group.sessions.map((session) => (
+            {/* PAUSED */}
+            {filteredPaused.length > 0 && (
+              <>
+                <SectionHeader label="Paused" count={filteredPaused.length} />
+                <div className="px-1 pb-2 space-y-0.5">
+                  {filteredPaused.map((session) => (
                     <SessionCard
                       key={session.id}
                       session={session}
@@ -412,13 +338,79 @@ export function SessionSidebar({
                       onSelect={() => setFocused(session.id)}
                       onKill={() => onKillSession(session.id)}
                       onResume={() => handleResume(session)}
+                      pinned={pinnedIds.has(session.id)}
+                      onTogglePin={() => togglePin(session.id)}
                     />
                   ))}
                 </div>
-              </div>
-            ))}
+              </>
+            )}
           </>
         )}
+        {activeTab === "history" && (
+          <>
+            {historyGroups.length > 0 ? (
+              historyGroups.map((group) => (
+                <div key={group.label} className="px-1 pb-1">
+                  <span className="block px-3 py-1 text-label uppercase text-text-ghost">
+                    {group.label}
+                  </span>
+                  <div className="space-y-0.5">
+                    {group.sessions.map((session) => (
+                      <SessionCard
+                        key={session.id}
+                        session={session}
+                        selected={session.id === focusedId}
+                        onSelect={() => setFocused(session.id)}
+                        onKill={() => onKillSession(session.id)}
+                        onResume={() => handleResume(session)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="px-3 py-8 text-center">
+                <p className="text-[10px] text-text-secondary font-medium">No session history</p>
+                <p className="text-[10px] text-text-tertiary mt-1">
+                  Past sessions will appear here after they end
+                </p>
+              </div>
+            )}
+          </>
+        )}
+        {activeTab === "servers" && <DevServersView />}
+      </div>
+
+      {/* Bottom: Servers link + New Session button */}
+      <div className="px-3 py-2 border-t border-border-default space-y-1.5">
+        {onDevServers && (
+          <button
+            onClick={onDevServers}
+            className="flex items-center gap-1.5 w-full px-2 py-1 text-[10px] text-text-tertiary hover:text-sessions transition-colors rounded"
+          >
+            <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
+            Dev Servers
+          </button>
+        )}
+        <button
+          onClick={onNewSession}
+          className={cn(
+            "flex items-center justify-center gap-1.5 w-full",
+            "px-3 py-1.5 rounded-md",
+            "text-[10px] font-medium",
+            "bg-text-primary text-bg-base",
+            "hover:bg-text-secondary active:scale-[0.98]",
+            "transition-all",
+          )}
+          title="New Session (Cmd+Shift+N)"
+        >
+          <PlusIcon size={12} />
+          New Session
+          <kbd className="ml-auto text-[9px] font-mono opacity-40">
+            {"\u21E7\u2318N"}
+          </kbd>
+        </button>
       </div>
     </div>
   );

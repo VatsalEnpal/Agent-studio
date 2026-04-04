@@ -69,7 +69,7 @@ export function TerminalGrid({
           <div className="w-14 h-14 rounded-2xl bg-console-faint/50 flex items-center justify-center mx-auto mb-2">
             <span className="text-2xl">&#9889;</span>
           </div>
-          <p className="text-console-text text-base font-semibold tracking-tight">
+          <p className="text-console-text text-sm font-medium tracking-tight">
             Ready to go.
           </p>
           <p className="text-console-dim text-xs max-w-sm leading-relaxed">
@@ -101,7 +101,7 @@ export function TerminalGrid({
             onClick={onContinueLast ?? onCreateSession}
             className="w-full flex flex-col items-center gap-1 px-5 py-3 rounded-xl border border-console-border hover:border-console-accent/40 hover:bg-console-faint/40 active:scale-[0.98] transition-all"
           >
-            <span className="text-[11px] font-medium text-console-text">Continue Last Session</span>
+            <span className="text-[10px] font-medium text-console-text">Continue Last Session</span>
             <span className="text-[9px] text-console-dim">Pick up where you left off.</span>
           </button>
         </div>

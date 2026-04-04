@@ -1,6 +1,6 @@
 "use client";
 
-import { GitBranch } from "@phosphor-icons/react";
+import { GitBranchIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { contextColor } from "@/lib/design-tokens";
 
@@ -119,7 +119,7 @@ export function StatusBar({ session }: StatusBarProps) {
             <>
               <Dot />
               <span className="inline-flex items-center gap-1 text-text-secondary">
-                <GitBranch size={12} weight="light" />
+                <GitBranchIcon size={12} />
                 <span className="truncate max-w-[120px]">
                   {session.branch}
                 </span>

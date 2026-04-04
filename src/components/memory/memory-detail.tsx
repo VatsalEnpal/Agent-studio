@@ -1,19 +1,19 @@
 "use client";
 
 import { useCallback } from "react";
-import { Tag, Calendar, User, FileText, ArrowRight, Brain, PushPin, PencilSimple, Trash } from "@phosphor-icons/react";
+import { MemoryIcon, EditIcon, TrashIcon, ChevronRightIcon, UserIcon, ArrowLeftIcon } from "@/components/ui/icons";
 import { useMemoryStore } from "@/stores/memory";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
 
 function categoryColor(cat: string): string {
   switch (cat) {
-    case "learnings": return "bg-blue-500/20 text-blue-400";
-    case "corrections": return "bg-red-500/20 text-red-400";
-    case "decisions": return "bg-purple-500/20 text-purple-400";
-    case "human-inputs": return "bg-amber-500/20 text-amber-400";
-    case "knowledge": return "bg-emerald-500/20 text-emerald-400";
-    default: return "bg-console-border text-console-dim";
+    case "learnings": return "bg-rooms/20 text-rooms";
+    case "corrections": return "bg-error/20 text-error";
+    case "decisions": return "bg-memory/20 text-memory";
+    case "human-inputs": return "bg-sprints/20 text-sprints";
+    case "knowledge": return "bg-sessions/20 text-sessions";
+    default: return "bg-border-default text-text-ghost";
   }
 }
 
@@ -23,6 +23,7 @@ export function MemoryDetail() {
   const detailLoading = useMemoryStore((s) => s.detailLoading);
   const openEditDialog = useMemoryStore((s) => s.openEditDialog);
   const openDeleteDialog = useMemoryStore((s) => s.openDeleteDialog);
+  const selectEntry = useMemoryStore((s) => s.selectEntry);
   const updateEntry = useMemoryStore((s) => s.updateEntry);
   const addToast = useToastStore((s) => s.addToast);
 
@@ -45,16 +46,21 @@ export function MemoryDetail() {
 
   if (!selectedEntry) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 text-console-dim">
-        <Brain className="w-8 h-8" />
-        <p className="text-body-sm">Select a memory to view details</p>
+      <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
+        <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center">
+          <MemoryIcon size={20} className="text-text-ghost" />
+        </div>
+        <p className="text-[10px] text-text-secondary font-medium">No memory selected</p>
+        <p className="text-[10px] text-text-tertiary max-w-[200px]">
+          Select a memory from the list to view its full details
+        </p>
       </div>
     );
   }
 
   if (detailLoading) {
     return (
-      <div className="flex items-center justify-center h-full text-console-dim text-xs animate-pulse">
+      <div className="flex items-center justify-center h-full text-text-ghost text-label animate-pulse">
         Loading detail...
       </div>
     );
@@ -63,14 +69,22 @@ export function MemoryDetail() {
   const detail = selectedDetail;
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-3 space-y-3">
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
+        {/* UX #10: Back navigation */}
+        <button
+          onClick={() => selectEntry(null)}
+          className="p-1 rounded text-text-tertiary hover:text-text-primary hover:bg-bg-elevated transition-colors shrink-0 mt-0.5"
+          title="Back to list"
+        >
+          <ArrowLeftIcon size={14} />
+        </button>
         <div className="flex-1 min-w-0">
-          <h2 className="text-title-sm text-console-text leading-snug">
+          <h2 className="text-[13px] font-semibold text-text-primary tracking-[-0.3px] leading-snug">
             {selectedEntry.title}
           </h2>
-          <p className="text-body-sm text-console-muted mt-1 leading-relaxed">
+          <p className="text-[10px] text-text-secondary mt-0.5 leading-relaxed">
             {selectedEntry.key_point}
           </p>
         </div>
@@ -78,28 +92,27 @@ export function MemoryDetail() {
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={() => openEditDialog(selectedEntry)}
-            className="flex items-center gap-1 px-2 py-1 text-label-xs font-medium text-console-muted bg-console-faint hover:bg-console-faint/80 rounded transition-colors"
+            className="flex items-center gap-1 px-2 py-1 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded transition-colors"
           >
-            <PencilSimple className="w-3 h-3" />
+            <EditIcon size={12} />
             Edit
           </button>
           <button
             onClick={() => void handlePin()}
             className={cn(
-              "flex items-center gap-1 px-2 py-1 text-label-xs font-medium rounded transition-colors",
+              "flex items-center gap-1 px-2 py-1 text-label font-medium rounded transition-colors",
               selectedEntry.pinned
-                ? "text-amber-400 bg-amber-500/10 hover:bg-amber-500/20"
-                : "text-console-muted bg-console-faint hover:bg-console-faint/80",
+                ? "text-sprints bg-sprints/10 hover:bg-sprints/20"
+                : "text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80",
             )}
           >
-            <PushPin className="w-3 h-3" />
             {selectedEntry.pinned ? "Unpin" : "Pin"}
           </button>
           <button
             onClick={() => openDeleteDialog(selectedEntry)}
-            className="flex items-center gap-1 px-2 py-1 text-label-xs font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 rounded transition-colors"
+            className="flex items-center gap-1 px-2 py-1 text-label font-medium text-error bg-error/10 hover:bg-error/20 rounded transition-colors"
           >
-            <Trash className="w-3 h-3" />
+            <TrashIcon size={12} />
             Delete
           </button>
         </div>
@@ -107,16 +120,15 @@ export function MemoryDetail() {
 
       {/* Meta info */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className={cn("text-label-xs px-2 py-0.5 rounded-full font-medium", categoryColor(selectedEntry.category))}>
+        <span className={cn("text-label px-2 py-0.5 rounded-full font-medium", categoryColor(selectedEntry.category))}>
           {selectedEntry.category}
         </span>
-        <span className="text-label-xs text-console-dim flex items-center gap-1">
-          <User className="w-3 h-3" />
+        <span className="text-label text-text-ghost flex items-center gap-1">
+          <UserIcon size={12} />
           {selectedEntry.agent_type}
         </span>
         {detail?.created_at && (
-          <span className="text-label-xs text-console-dim flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
+          <span className="text-label text-text-ghost">
             {new Date(detail.created_at).toLocaleDateString("en-GB", {
               day: "2-digit",
               month: "2-digit",
@@ -127,7 +139,7 @@ export function MemoryDetail() {
           </span>
         )}
         {detail?.created_by && (
-          <span className="text-label-xs text-console-dim">
+          <span className="text-label text-text-ghost">
             by {detail.created_by}
           </span>
         )}
@@ -135,9 +147,8 @@ export function MemoryDetail() {
 
       {/* Tags */}
       <div className="flex items-center gap-1.5 flex-wrap">
-        <Tag className="w-3 h-3 text-console-dim shrink-0" />
         {selectedEntry.tags.map((tag) => (
-          <span key={tag} className="text-label-xs px-1.5 py-0.5 bg-console-faint text-console-muted rounded">
+          <span key={tag} className="text-label px-1.5 py-0.5 bg-bg-elevated text-text-secondary rounded">
             {tag}
           </span>
         ))}
@@ -173,23 +184,23 @@ export function MemoryDetail() {
 
       {/* Superseded by info */}
       {detail?.superseded_by && (
-        <div className="flex items-center gap-2 text-label-xs text-console-accent bg-console-accent/5 border border-console-accent/20 px-3 py-2 rounded">
-          <ArrowRight className="w-3 h-3" />
+        <div className="flex items-center gap-2 text-label text-memory bg-memory/5 border border-memory/20 px-3 py-2 rounded">
+          <ChevronRightIcon size={12} />
           <span>Superseded by: <span className="font-mono">{detail.superseded_by}</span></span>
         </div>
       )}
 
       {/* Supersedes info */}
       {detail?.supersedes && (
-        <div className="flex items-center gap-2 text-label-xs text-console-dim bg-console-faint px-3 py-2 rounded">
-          <ArrowRight className="w-3 h-3" />
+        <div className="flex items-center gap-2 text-label text-text-ghost bg-bg-elevated px-3 py-2 rounded">
+          <ChevronRightIcon size={12} />
           <span>Supersedes: <span className="font-mono">{detail.supersedes}</span></span>
         </div>
       )}
 
       {/* File path */}
-      <div className="flex items-center gap-2 text-label-xs text-console-dim pt-2 border-t border-console-border">
-        <FileText className="w-3 h-3" />
+      <div className="flex items-center gap-2 text-label text-text-ghost pt-2 border-t border-border-default">
+        <MemoryIcon size={12} />
         <span className="font-mono truncate">{selectedEntry.file}</span>
       </div>
     </div>
@@ -210,14 +221,14 @@ function ContentSection({
       className={cn(
         "rounded-md border px-3 py-2.5",
         accent
-          ? "border-console-accent/30 bg-console-accent/5"
-          : "border-console-border bg-console-bg",
+          ? "border-memory/30 bg-memory/5"
+          : "border-border-default bg-bg-base",
       )}
     >
-      <p className={cn("text-label-xs font-medium mb-1", accent ? "text-console-accent" : "text-console-dim")}>
+      <p className={cn("text-label font-medium mb-1", accent ? "text-memory" : "text-text-ghost")}>
         {title}
       </p>
-      <p className="text-body-sm text-console-text leading-relaxed whitespace-pre-wrap">
+      <p className="text-[10px] text-text-primary leading-relaxed whitespace-pre-wrap">
         {value}
       </p>
     </div>

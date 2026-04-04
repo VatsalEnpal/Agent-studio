@@ -1,6 +1,6 @@
 "use client";
 
-import { Cpu, HardDrive, Memory, Desktop, Terminal, Clock } from "@phosphor-icons/react";
+import { CpuIcon, DiskIcon, MemoryChipIcon, MonitorIcon, SessionsIcon, ClockIcon } from "@/components/ui/icons";
 import { useSettingsStore } from "@/stores/settings";
 import { cn } from "@/lib/utils";
 
@@ -59,7 +59,7 @@ export function SettingsMonitor() {
         <div className="bg-console-bg rounded-md px-3 py-2.5 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-label-xs text-console-dim flex items-center gap-1">
-              <Cpu className="w-3 h-3" />
+              <CpuIcon className="w-3 h-3" />
               CPU
             </span>
             <span className={cn(
@@ -80,7 +80,7 @@ export function SettingsMonitor() {
         <div className="bg-console-bg rounded-md px-3 py-2.5 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-label-xs text-console-dim flex items-center gap-1">
-              <Memory className="w-3 h-3" />
+              <MemoryChipIcon className="w-3 h-3" />
               Memory
             </span>
             <span className={cn(
@@ -103,7 +103,7 @@ export function SettingsMonitor() {
         <div className="bg-console-bg rounded-md px-3 py-2.5 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-label-xs text-console-dim flex items-center gap-1">
-              <HardDrive className="w-3 h-3" />
+              <DiskIcon className="w-3 h-3" />
               Disk
             </span>
             <span className={cn(
@@ -126,19 +126,19 @@ export function SettingsMonitor() {
         <div className="bg-console-bg rounded-md px-3 py-2.5 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-label-xs text-console-dim flex items-center gap-1">
-              <Desktop className="w-3 h-3" />
+              <MonitorIcon className="w-3 h-3" />
               Active Servers
             </span>
-            <span className="text-[11px] font-mono font-medium text-console-text">
+            <span className="text-[10px] font-mono font-medium text-console-text">
               {stats.activeServers}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-label-xs text-console-dim flex items-center gap-1">
-              <Terminal className="w-3 h-3" />
+              <SessionsIcon className="w-3 h-3" />
               Claude Sessions
             </span>
-            <span className="text-[11px] font-mono font-medium text-console-text">
+            <span className="text-[10px] font-mono font-medium text-console-text">
               {stats.activeSessions}
             </span>
           </div>
@@ -149,7 +149,7 @@ export function SettingsMonitor() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <span className="text-label-xs text-console-dim flex items-center gap-1">
-                <Clock className="w-3 h-3" />
+                <ClockIcon className="w-3 h-3" />
                 Uptime: <span className="text-console-text font-mono">{formatUptime(stats.uptime)}</span>
               </span>
               <span className="text-label-xs text-console-dim">

@@ -72,16 +72,16 @@ export function SettingsView() {
   return (
     <div className="flex h-full">
       {/* Tab sidebar */}
-      <div className="w-[180px] shrink-0 border-r border-border bg-surface py-3 px-2 space-y-0.5">
+      <div className="w-[180px] shrink-0 border-r border-border-default bg-bg-surface py-3 px-2 space-y-0.5">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              "w-full text-left px-3 py-2 text-body-sm font-medium rounded transition-colors",
+              "w-full text-left px-3 py-1.5 text-[10px] font-medium rounded-md transition-colors",
               activeTab === tab.id
-                ? "bg-accent/10 text-accent"
-                : "text-text-secondary hover:text-text-primary hover:bg-elevation-2/50",
+                ? "bg-bg-elevated text-text-primary"
+                : "text-text-secondary hover:text-text-primary hover:bg-bg-elevated/50",
             )}
           >
             {tab.label}
@@ -91,7 +91,7 @@ export function SettingsView() {
 
       {/* Tab content */}
       <div className="flex-1 overflow-y-auto scrollbar-thin">
-        <div className="max-w-3xl mx-auto px-6 py-8 space-y-8">
+        <div className="max-w-3xl mx-auto px-5 py-6 space-y-6">
           {activeTab === "general" && (
             <>
               <SettingsGeneral />
@@ -144,11 +144,11 @@ function SettingsAgentsDiscovery() {
   }, []);
 
   return (
-    <section className="border border-border rounded-lg bg-surface">
-      <div className="px-4 py-3 border-b border-border">
-        <h3 className="text-body-sm font-medium text-text-primary">Agents</h3>
-        <p className="text-label-xs text-text-tertiary mt-0.5">
-          Auto-discovered from <code className="text-text-secondary bg-elevation-2 px-1 py-0.5 rounded text-label-xs">.claude/agents/</code>
+    <section className="border border-border-default rounded-lg bg-bg-surface">
+      <div className="px-4 py-3 border-b border-border-default">
+        <h3 className="text-[10px] font-medium text-text-primary">Agents</h3>
+        <p className="text-label text-text-tertiary mt-0.5">
+          Auto-discovered from <code className="text-text-secondary bg-bg-elevated px-1 py-0.5 rounded text-label">.claude/agents/</code>
         </p>
       </div>
       <div className="px-4 py-3">
@@ -162,7 +162,7 @@ function SettingsAgentsDiscovery() {
             ))}
           </div>
         ) : agents.length === 0 ? (
-          <p className="text-body-sm text-text-tertiary text-center py-4">
+          <p className="text-[10px] text-text-tertiary text-center py-4">
             No agents discovered. Create agent definitions in <code className="text-text-secondary">.claude/agents/</code>.
           </p>
         ) : (
@@ -170,18 +170,18 @@ function SettingsAgentsDiscovery() {
             {agents.map((agent) => (
               <div
                 key={agent.id}
-                className="flex items-center gap-3 px-3 py-2 bg-canvas border border-border rounded"
+                className="flex items-center gap-3 px-3 py-2 bg-bg-base border border-border-default rounded-md"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-body-sm font-medium text-text-primary">
+                    <span className="text-[10px] font-medium text-text-primary">
                       {agent.name}
                     </span>
-                    <span className="text-label-xs px-1.5 py-0.5 rounded bg-elevation-2 text-text-tertiary font-mono">
+                    <span className="text-label px-1.5 py-0.5 rounded bg-bg-elevated text-text-tertiary font-mono">
                       {agent.model}
                     </span>
                   </div>
-                  <p className="text-label-xs text-text-secondary mt-0.5 truncate">
+                  <p className="text-label text-text-secondary mt-0.5 truncate">
                     {agent.description}
                   </p>
                 </div>

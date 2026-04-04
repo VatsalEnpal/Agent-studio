@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useRef, type ReactNode } from "react";
 import {
-  Info,
-  CheckCircle,
-  Warning,
-  XCircle,
-  Bell,
-  X,
-} from "@phosphor-icons/react";
+  InfoIcon,
+  CheckCircleIcon,
+  WarningIcon,
+  XCircleIcon,
+  BellIcon,
+  CloseIcon,
+} from "@/components/ui/icons";
 import { create } from "zustand";
 import { cn } from "@/lib/utils";
 
@@ -76,7 +76,7 @@ const AUTO_DISMISS_MS = 5000;
 const typeConfig: Record<
   ToastType,
   {
-    icon: typeof Info;
+    icon: typeof InfoIcon;
     colorClass: string;
     bgClass: string;
     borderClass: string;
@@ -84,31 +84,31 @@ const typeConfig: Record<
   }
 > = {
   info: {
-    icon: Info,
+    icon: InfoIcon,
     colorClass: "text-accent",
     bgClass: "bg-accent-subtle",
     borderClass: "border-accent/20",
   },
   success: {
-    icon: CheckCircle,
+    icon: CheckCircleIcon,
     colorClass: "text-success",
     bgClass: "bg-success-subtle",
     borderClass: "border-success/20",
   },
   warning: {
-    icon: Warning,
+    icon: WarningIcon,
     colorClass: "text-warning",
     bgClass: "bg-warning-subtle",
     borderClass: "border-warning/20",
   },
   error: {
-    icon: XCircle,
+    icon: XCircleIcon,
     colorClass: "text-error",
     bgClass: "bg-error-subtle",
     borderClass: "border-error/20",
   },
   "action-required": {
-    icon: Bell,
+    icon: BellIcon,
     colorClass: "text-accent",
     bgClass: "bg-accent-subtle",
     borderClass: "border-accent/20",
@@ -160,7 +160,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
     >
       {/* Icon */}
       <div className={cn("shrink-0 mt-0.5", config.colorClass)}>
-        <Icon size={16} weight="light" />
+        <Icon size={16} />
       </div>
 
       {/* Content */}
@@ -208,7 +208,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
         )}
         aria-label="Dismiss notification"
       >
-        <X size={14} weight="light" />
+        <CloseIcon size={14} />
       </button>
     </div>
   );

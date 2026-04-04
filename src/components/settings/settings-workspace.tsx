@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { FolderOpen, Plus, X, ArrowClockwise, Warning, Check, Brain, SpinnerGap, Sparkle } from "@phosphor-icons/react";
+import { FolderIcon, PlusIcon, CloseIcon, RefreshIcon, WarningIcon, CheckIcon, BrainIcon, SpinnerIcon, SparkleIcon } from "@/components/ui/icons";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
 import { ScaffoldDialog } from "./scaffold-dialog";
@@ -218,7 +218,7 @@ export function SettingsWorkspace() {
           {/* Projects */}
           <div>
             <label className="text-label-xs text-console-muted block mb-1.5">
-              <FolderOpen className="w-3 h-3 inline mr-1 -mt-0.5" />
+              <FolderIcon className="w-3 h-3 inline mr-1 -mt-0.5" />
               Tracked Projects
             </label>
             <div className="space-y-1.5">
@@ -245,7 +245,7 @@ export function SettingsWorkspace() {
                     onClick={() => removeProject(i)}
                     className="p-0.5 text-console-dim hover:text-console-error transition-colors"
                   >
-                    <X className="w-3 h-3" />
+                    <CloseIcon className="w-3 h-3" />
                   </button>
                 </div>
               ))}
@@ -268,7 +268,7 @@ export function SettingsWorkspace() {
                 disabled={!newPath.trim()}
                 className="flex items-center gap-1 px-2 py-1 text-label-xs bg-console-faint text-console-dim hover:text-console-accent rounded transition-colors disabled:opacity-50"
               >
-                <Plus className="w-3 h-3" />
+                <PlusIcon className="w-3 h-3" />
                 Add
               </button>
             </div>
@@ -277,13 +277,13 @@ export function SettingsWorkspace() {
           {/* Agent System */}
           <div>
             <label className="text-label-xs text-console-muted block mb-1.5">
-              <Brain className="w-3 h-3 inline mr-1 -mt-0.5" />
+              <BrainIcon className="w-3 h-3 inline mr-1 -mt-0.5" />
               Agent System
             </label>
             {config.agentSystem ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 px-2 py-1.5 bg-console-bg border border-console-border rounded text-body-sm">
-                  <Check className="w-3 h-3 text-console-success shrink-0" />
+                  <CheckIcon className="w-3 h-3 text-console-success shrink-0" />
                   <span className="flex-1 font-mono text-console-text truncate">
                     {config.agentSystem.path}
                   </span>
@@ -295,9 +295,9 @@ export function SettingsWorkspace() {
                     className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded border border-console-accent/20 transition-colors disabled:opacity-50"
                   >
                     {regenerating ? (
-                      <SpinnerGap className="w-3 h-3 animate-spin" />
+                      <SpinnerIcon className="w-3 h-3 animate-spin" />
                     ) : (
-                      <Sparkle className="w-3 h-3" />
+                      <SparkleIcon className="w-3 h-3" />
                     )}
                     {regenerating ? "Generating..." : "Regenerate Agents with AI"}
                   </button>
@@ -306,7 +306,7 @@ export function SettingsWorkspace() {
             ) : (
               <div className="space-y-2.5">
                 <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-500/5 border border-amber-500/20 rounded text-body-sm">
-                  <Warning className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                  <WarningIcon className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
                   <div className="space-y-1.5">
                     <p className="text-console-text font-medium">No agent system detected</p>
                     <p className="text-console-muted leading-relaxed">
@@ -319,7 +319,7 @@ export function SettingsWorkspace() {
                     onClick={() => setShowScaffold(true)}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded border border-console-accent/20 transition-colors"
                   >
-                    <Plus className="w-3 h-3" />
+                    <PlusIcon className="w-3 h-3" />
                     Create Agent System
                   </button>
                 )}
@@ -346,7 +346,7 @@ export function SettingsWorkspace() {
               onClick={resetSetup}
               className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium text-console-dim hover:text-console-muted rounded border border-console-border hover:border-console-muted transition-colors"
             >
-              <ArrowClockwise className="w-3 h-3" />
+              <RefreshIcon className="w-3 h-3" />
               Re-run Setup Wizard
             </button>
           </div>

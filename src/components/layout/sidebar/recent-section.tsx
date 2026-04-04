@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ClockCounterClockwise, Play } from "@phosphor-icons/react";
+import { HistoryIcon, PlayIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { SessionGroup } from "@/components/sessions/session-group";
 import type { PastSession } from "./types";
@@ -117,7 +117,7 @@ function RecentSessionItem({
       className="flex items-center gap-2 px-2 py-1.5 group"
       title={`${session.preview ?? ""}\n${session.agent ? `Agent: ${session.agent}\n` : ""}${session.project}\nSession: ${session.id}`}
     >
-      <ClockCounterClockwise className="w-3 h-3 text-console-dim shrink-0" />
+      <HistoryIcon className="w-3 h-3 text-console-dim shrink-0" />
       <div className="flex-1 min-w-0">
         <span className="text-[10px] text-console-muted truncate block">
           {displayName}
@@ -137,7 +137,7 @@ function RecentSessionItem({
         )}
         title={`Resume session ${session.id.slice(0, 8)}`}
       >
-        <Play className="w-2 h-2" />
+        <PlayIcon className="w-2 h-2" />
         {resumingId === session.id ? "Resuming..." : "Resume"}
       </button>
     </div>

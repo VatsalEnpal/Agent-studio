@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { FileText, ArrowClockwise } from "@phosphor-icons/react";
+import { FileIcon, RefreshIcon } from "@/components/ui/icons";
 import { useReportsStore, type Report } from "@/stores/reports";
 import { ReportCard } from "./report-card";
 import { ReportDetail } from "./report-detail";
@@ -64,7 +64,7 @@ export function ReportsView() {
       <div className="h-full flex items-center justify-center">
         <div className="text-center space-y-4 max-w-sm">
           <div className="w-12 h-12 rounded-xl bg-console-faint/60 flex items-center justify-center mx-auto">
-            <FileText className="w-6 h-6 text-console-dim" />
+            <FileIcon className="w-6 h-6 text-console-dim" />
           </div>
           <div>
             <p className="text-sm font-medium text-console-muted mb-1.5">No reports yet</p>
@@ -91,7 +91,7 @@ export function ReportsView() {
             className="p-1 text-console-dim hover:text-console-muted transition-colors"
             title="Refresh reports"
           >
-            <ArrowClockwise className="w-3 h-3" />
+            <RefreshIcon className="w-3 h-3" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto">

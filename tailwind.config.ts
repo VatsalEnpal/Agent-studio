@@ -6,34 +6,94 @@ const config: Config = {
   theme: {
     extend: {
       // -----------------------------------------------------------------
-      // Fonts
+      // Fonts — system font stack (no Geist)
       // -----------------------------------------------------------------
       fontFamily: {
         sans: [
-          "var(--font-geist-sans)",
-          "system-ui",
           "-apple-system",
+          "BlinkMacSystemFont",
+          '"Segoe UI"',
+          "Helvetica",
+          "Arial",
           "sans-serif",
         ],
         mono: [
-          "var(--font-geist-mono)",
-          "SF Mono",
-          "JetBrains Mono",
+          '"SF Mono"',
+          "SFMono-Regular",
+          "ui-monospace",
           "Menlo",
           "monospace",
         ],
       },
 
       // -----------------------------------------------------------------
-      // Colors — semantic tokens from design-tokens.ts exposed as
-      // CSS custom properties so both Tailwind and raw CSS can use them
+      // Colors — new pillar accent system with semantic tokens
       // -----------------------------------------------------------------
       colors: {
-        // Elevation surfaces
-        canvas: "var(--elevation-0)",
+        // Base surfaces
+        bg: {
+          base: "var(--bg-base)",
+          surface: "var(--bg-surface)",
+          elevated: "var(--bg-elevated)",
+          input: "var(--bg-input)",
+        },
+
+        // Borders
+        border: {
+          DEFAULT: "var(--border-default)",
+          default: "var(--border-default)",
+          subtle: "var(--border-subtle)",
+        },
+
+        // Text
+        text: {
+          primary: "var(--text-primary)",
+          secondary: "var(--text-secondary)",
+          tertiary: "var(--text-tertiary)",
+          ghost: "var(--text-ghost)",
+        },
+
+        // Pillar accents
+        sessions: {
+          DEFAULT: "var(--accent-sessions)",
+          glow: "var(--accent-sessions-glow)",
+          subtle: "var(--accent-sessions-subtle)",
+        },
+        rooms: {
+          DEFAULT: "var(--accent-rooms)",
+          glow: "var(--accent-rooms-glow)",
+          subtle: "var(--accent-rooms-subtle)",
+        },
+        sprints: {
+          DEFAULT: "var(--accent-sprints)",
+          glow: "var(--accent-sprints-glow)",
+          subtle: "var(--accent-sprints-subtle)",
+        },
+        memory: {
+          DEFAULT: "var(--accent-memory)",
+          glow: "var(--accent-memory-glow)",
+          subtle: "var(--accent-memory-subtle)",
+        },
+
+        // Semantic status
+        success: {
+          DEFAULT: "var(--color-success)",
+          subtle: "var(--success-subtle)",
+        },
+        warning: {
+          DEFAULT: "var(--color-warning)",
+          subtle: "var(--warning-subtle)",
+        },
+        error: {
+          DEFAULT: "var(--color-error)",
+          subtle: "var(--error-subtle)",
+        },
+
+        // Legacy aliases (backward compat for existing components)
+        canvas: "var(--bg-base)",
         surface: {
-          DEFAULT: "var(--elevation-1)",
-          hover: "var(--elevation-2)",
+          DEFAULT: "var(--bg-surface)",
+          hover: "var(--bg-elevated)",
           active: "var(--surface-active)",
           overlay: "var(--surface-overlay)",
         },
@@ -44,53 +104,27 @@ const config: Config = {
           3: "var(--elevation-3)",
           4: "var(--elevation-4)",
         },
-
-        // Borders
-        border: {
-          DEFAULT: "var(--border)",
-          subtle: "var(--border-subtle)",
-        },
-
-        // Text
         "text-primary": "var(--text-primary)",
         "text-emphasis": "var(--text-emphasis)",
         "text-secondary": "var(--text-secondary)",
         "text-tertiary": "var(--text-tertiary)",
-
-        // Accent
         accent: {
           DEFAULT: "var(--accent)",
           hover: "var(--accent-hover)",
           pressed: "var(--accent-pressed)",
           subtle: "var(--accent-subtle)",
         },
-
-        // Semantic status
-        success: {
-          DEFAULT: "var(--success)",
-          subtle: "var(--success-subtle)",
-        },
-        warning: {
-          DEFAULT: "var(--warning)",
-          subtle: "var(--warning-subtle)",
-        },
-        error: {
-          DEFAULT: "var(--error)",
-          subtle: "var(--error-subtle)",
-        },
-
-        // Legacy v1 aliases (backwards compat)
         "console-bg": "var(--elevation-0)",
         "console-panel": "var(--elevation-1)",
-        "console-border": "var(--border)",
+        "console-border": "var(--border-default)",
         "console-accent": "var(--accent)",
-        "console-accent-glow": "rgba(79, 143, 247, 0.15)",
-        "console-success": "var(--success)",
-        "console-error": "var(--error)",
+        "console-accent-glow": "var(--accent-rooms-glow)",
+        "console-success": "var(--color-success)",
+        "console-error": "var(--color-error)",
         "console-text": "var(--text-primary)",
         "console-muted": "var(--text-secondary)",
         "console-dim": "var(--text-tertiary)",
-        "console-faint": "var(--elevation-2)",
+        "console-faint": "var(--bg-elevated)",
       },
 
       // -----------------------------------------------------------------
@@ -115,16 +149,19 @@ const config: Config = {
       },
 
       // -----------------------------------------------------------------
-      // Shadows
+      // Shadows — updated to use new tokens
       // -----------------------------------------------------------------
       boxShadow: {
-        elevated: "inset 0 1px 0 rgba(255, 255, 255, 0.03)",
-        modal: "0 25px 50px rgba(0, 0, 0, 0.5)",
-        toast: "0 4px 12px rgba(0, 0, 0, 0.4)",
-        "accent-glow": "0 0 20px rgba(79, 143, 247, 0.25)",
-        // Legacy
-        "glow-amber": "0 0 16px rgba(245, 158, 11, 0.12)",
-        "glow-sm": "0 0 8px rgba(245, 158, 11, 0.08)",
+        elevated: "var(--shadow-elevated)",
+        modal: "var(--shadow-modal)",
+        toast: "var(--shadow-toast)",
+        "accent-glow": "0 0 20px var(--accent-rooms-glow)",
+        "sessions-glow": "0 0 6px var(--accent-sessions-glow)",
+        "rooms-glow": "0 0 6px var(--accent-rooms-glow)",
+        "sprints-glow": "0 0 6px var(--accent-sprints-glow)",
+        "memory-glow": "0 0 6px var(--accent-memory-glow)",
+        "glow-amber": "0 0 16px var(--accent-sprints-glow)",
+        "glow-sm": "0 0 8px var(--accent-sprints-glow)",
         card: "0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2)",
         "card-hover":
           "0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3)",
@@ -147,37 +184,47 @@ const config: Config = {
       // Font size presets (maps to typography tokens)
       // -----------------------------------------------------------------
       fontSize: {
+        // Override Tailwind's built-in text-xs (12px → 10px) to match our compact body text
+        xs: ["10px", { lineHeight: "1.5" }],
         display: [
-          "24px",
+          "16px",
           { lineHeight: "1.2", letterSpacing: "-0.025em", fontWeight: "600" },
         ],
         "title-lg": [
-          "20px",
-          { lineHeight: "1.3", letterSpacing: "-0.01em", fontWeight: "500" },
+          "14px",
+          { lineHeight: "1.3", letterSpacing: "-0.3px", fontWeight: "600" },
         ],
         "title-md": [
-          "16px",
-          { lineHeight: "1.4", letterSpacing: "-0.01em", fontWeight: "500" },
+          "13px",
+          { lineHeight: "1.4", letterSpacing: "-0.2px", fontWeight: "500" },
         ],
         "title-sm": [
-          "14px",
-          { lineHeight: "1.4", letterSpacing: "0", fontWeight: "500" },
+          "12px",
+          { lineHeight: "1.4", letterSpacing: "-0.1px", fontWeight: "500" },
+        ],
+        "section-heading": [
+          "11px",
+          { lineHeight: "1.4", letterSpacing: "-0.1px", fontWeight: "600" },
         ],
         body: [
-          "14px",
-          { lineHeight: "1.6", letterSpacing: "0", fontWeight: "400" },
+          "11px",
+          { lineHeight: "1.5", letterSpacing: "0", fontWeight: "400" },
         ],
         "body-sm": [
-          "13px",
+          "10px",
           { lineHeight: "1.5", letterSpacing: "0", fontWeight: "400" },
         ],
         label: [
-          "12px",
-          { lineHeight: "1.4", letterSpacing: "0.02em", fontWeight: "500" },
+          "9px",
+          {
+            lineHeight: "1.4",
+            letterSpacing: "0.5px",
+            fontWeight: "600",
+          },
         ],
         "label-xs": [
-          "11px",
-          { lineHeight: "1.4", letterSpacing: "0.02em", fontWeight: "500" },
+          "9px",
+          { lineHeight: "1.4", letterSpacing: "0.02em", fontWeight: "400" },
         ],
       },
 

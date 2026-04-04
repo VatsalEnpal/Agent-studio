@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
 import "@/styles/globals.css";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { ThemeScript } from "@/components/ui/theme-script";
@@ -8,6 +6,10 @@ import { ThemeScript } from "@/components/ui/theme-script";
 export const metadata: Metadata = {
   title: "Agent Studio",
   description: "Your agents, one place.",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -16,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} dark`} suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>

@@ -3,8 +3,8 @@
 import type React from "react";
 import { lazy, Suspense, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { agentColor, colors } from "@/lib/design-tokens";
-import { Check, X, CaretDown, CaretRight, Clock, FileCode, Wrench } from "@phosphor-icons/react";
+import { agentColor } from "@/lib/design-tokens";
+import { CheckIcon, CloseIcon, ChevronDownIcon, ChevronRightIcon } from "@/components/ui/icons";
 import type { RoomMessage } from "@/stores/rooms";
 
 const Markdown = lazy(() => import("react-markdown"));
@@ -21,6 +21,8 @@ export interface ChatMessageProps {
   grouped?: boolean; // consecutive message from same agent within 2min
   onApprove: (msg: RoomMessage) => void;
   onReject: (msg: RoomMessage) => void;
+  /** UX #6: Click agent name to navigate to their session */
+  onAgentClick?: (agentId: string) => void;
 }
 
 function MessageContent({ text, isSystem }: { text: string; isSystem: boolean }) {
@@ -33,7 +35,7 @@ function MessageContent({ text, isSystem }: { text: string; isSystem: boolean })
   }, []);
 
   if (isSystem) {
-    return <span className="text-text-tertiary italic text-label-xs">{text}</span>;
+    return <span className="text-text-tertiary italic text-label">{text}</span>;
   }
 
   // Strip ANSI escape codes and terminal artifacts from agent messages (legacy PTY rooms)
@@ -60,22 +62,22 @@ function MessageContent({ text, isSystem }: { text: string; isSystem: boolean })
   // For short messages without markdown syntax, render as plain text
   const hasMarkdown = /[*_`#\[\]|>-]/.test(cleanText) && cleanText.length > 40;
   if (!hasMarkdown) {
-    return <span className="text-body leading-relaxed">{highlightMentions(cleanText)}</span>;
+    return <span className="text-xs leading-relaxed">{highlightMentions(cleanText)}</span>;
   }
 
   const plugins = gfmReady && _remarkGfm ? [_remarkGfm] : [];
 
   return (
-    <Suspense fallback={<span className="text-body leading-relaxed">{cleanText}</span>}>
-      <div className="text-body leading-relaxed prose prose-invert prose-sm max-w-none
+    <Suspense fallback={<span className="text-xs leading-relaxed">{cleanText}</span>}>
+      <div className="text-xs leading-relaxed prose prose-invert prose-sm max-w-none
         prose-p:my-1 prose-pre:my-2
-        prose-code:text-accent prose-code:bg-elevation-2 prose-code:px-1 prose-code:py-0.5 prose-code:rounded-sm prose-code:text-body-sm prose-code:font-mono
-        prose-pre:bg-elevation-2 prose-pre:border prose-pre:border-border-subtle prose-pre:rounded-md
-        prose-headings:text-text-emphasis prose-headings:mt-3 prose-headings:mb-1
-        prose-a:text-accent prose-a:no-underline hover:prose-a:underline
-        prose-strong:text-text-emphasis
+        prose-code:text-rooms prose-code:bg-bg-elevated prose-code:px-1 prose-code:py-0.5 prose-code:rounded-sm prose-code:text-xs prose-code:font-mono
+        prose-pre:bg-bg-elevated prose-pre:border prose-pre:border-border-subtle prose-pre:rounded-md
+        prose-headings:text-text-primary prose-headings:mt-3 prose-headings:mb-1
+        prose-a:text-rooms prose-a:no-underline hover:prose-a:underline
+        prose-strong:text-text-primary
         prose-li:my-0.5
-        prose-blockquote:border-accent/30 prose-blockquote:text-text-secondary">
+        prose-blockquote:border-rooms/30 prose-blockquote:text-text-secondary">
         <Markdown remarkPlugins={plugins}>
           {cleanText}
         </Markdown>
@@ -84,13 +86,13 @@ function MessageContent({ text, isSystem }: { text: string; isSystem: boolean })
   );
 }
 
-export function ChatMessage({ msg, grouped, onApprove, onReject }: ChatMessageProps) {
+export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }: ChatMessageProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const isUser = msg.from === "user";
   const isSystem = msg.type === "system";
   const isApproval = msg.type === "approval-request";
 
-  const color = isUser ? colors.accent : agentColor(msg.from);
+  const color = isUser ? "var(--accent-rooms)" : agentColor(msg.from);
 
   // -------------------------------------------------------------------------
   // System messages — centered divider with text (Slack style)
@@ -99,7 +101,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject }: ChatMessagePr
     return (
       <div className="flex items-center gap-3 py-3 px-6">
         <div className="flex-1 h-px bg-border-subtle" />
-        <span className="text-label-xs text-text-tertiary shrink-0 max-w-sm text-center">
+        <span className="text-label text-text-tertiary shrink-0 max-w-sm text-center">
           {msg.text}
         </span>
         <div className="flex-1 h-px bg-border-subtle" />
@@ -118,27 +120,27 @@ export function ChatMessage({ msg, grouped, onApprove, onReject }: ChatMessagePr
             {/* Name + timestamp */}
             {!grouped && (
               <div className="flex items-center justify-end gap-2 mb-1">
-                <span className="text-label-xs text-text-tertiary shrink-0">
+                <span className="text-label text-text-tertiary shrink-0">
                   {formatTimestamp(msg.timestamp)}
                 </span>
-                <span className="text-body-sm font-semibold text-accent">
+                <span className="text-xs font-semibold text-rooms">
                   You
                 </span>
               </div>
             )}
             {/* Message bubble */}
-            <div className="rounded-xl rounded-tr-sm bg-accent/15 border border-accent/20 px-3.5 py-2 text-text-primary">
+            <div className="rounded-xl rounded-tr-sm bg-rooms/15 border border-rooms/20 px-3.5 py-2 text-text-primary">
               <MessageContent text={msg.text ?? ""} isSystem={false} />
             </div>
           </div>
           {/* Avatar */}
-          <div className="w-9 shrink-0">
+          <div className="w-6 shrink-0">
             {!grouped && (
               <div
-                className="w-9 h-9 rounded-full flex items-center justify-center"
+                className="w-6 h-6 rounded-[4px] flex items-center justify-center"
                 style={{ backgroundColor: color + "18", border: `1.5px solid ${color}30` }}
               >
-                <span className="text-sm font-semibold leading-none" style={{ color }}>
+                <span className="text-[10px] font-semibold leading-none" style={{ color }}>
                   Y
                 </span>
               </div>
@@ -158,21 +160,21 @@ export function ChatMessage({ msg, grouped, onApprove, onReject }: ChatMessagePr
       className={cn(
         "px-5 transition-colors duration-100",
         grouped ? "pt-0.5 pb-0.5" : "pt-3 pb-1",
-        isApproval && msg.approvalStatus === "pending" && "bg-warning/[0.04]",
-        isApproval && msg.approvalStatus === "approved" && "bg-success/[0.04]",
+        isApproval && msg.approvalStatus === "pending" && "bg-sprints/[0.04]",
+        isApproval && msg.approvalStatus === "approved" && "bg-sessions/[0.04]",
         isApproval && msg.approvalStatus === "rejected" && "bg-error/[0.04]",
       )}
     >
       <div className="flex gap-3 max-w-[85%]">
-        {/* Avatar — 36px, only for non-grouped */}
-        <div className="w-9 shrink-0">
+        {/* Avatar — 36px rounded-[5px], only for non-grouped */}
+        <div className="w-6 shrink-0">
           {!grouped && (
             <div
-              className="w-9 h-9 rounded-full flex items-center justify-center"
+              className="w-6 h-6 rounded-[4px] flex items-center justify-center"
               style={{ backgroundColor: color + "18", border: `1.5px solid ${color}30` }}
             >
               <span
-                className="text-sm font-semibold leading-none"
+                className="text-[10px] font-semibold leading-none"
                 style={{ color }}
               >
                 {msg.from.charAt(0).toUpperCase()}
@@ -186,17 +188,22 @@ export function ChatMessage({ msg, grouped, onApprove, onReject }: ChatMessagePr
           {!grouped && (
             <div className="flex items-baseline gap-2 mb-1">
               <span
-                className="text-body-sm font-semibold"
+                className={cn(
+                  "text-xs font-semibold",
+                  onAgentClick && "cursor-pointer hover:underline",
+                )}
                 style={{ color }}
+                onClick={onAgentClick ? (e) => { e.stopPropagation(); onAgentClick(msg.from); } : undefined}
+                title={onAgentClick ? "View session" : undefined}
               >
                 {msg.from}
               </span>
               {msg.to && (
-                <span className="text-label-xs text-text-tertiary">
+                <span className="text-label text-text-tertiary">
                   &rarr; {msg.to}
                 </span>
               )}
-              <span className="text-label-xs text-text-tertiary ml-auto shrink-0">
+              <span className="text-label text-text-tertiary ml-auto shrink-0">
                 {formatTimestamp(msg.timestamp)}
               </span>
             </div>
@@ -207,40 +214,40 @@ export function ChatMessage({ msg, grouped, onApprove, onReject }: ChatMessagePr
             className={cn(
               "rounded-xl rounded-tl-sm px-3.5 py-2",
               isApproval && msg.approvalStatus === "pending"
-                ? "bg-warning/10 border border-warning/20"
-                : "bg-elevation-1 border border-border-subtle",
+                ? "bg-sprints/10 border border-sprints/20"
+                : "bg-bg-elevated border border-border-subtle",
             )}
           >
             <MessageContent text={msg.text ?? ""} isSystem={false} />
 
             {/* Approval buttons */}
             {isApproval && msg.approvalStatus === "pending" && (
-              <div className="flex gap-2 mt-2.5 pt-2 border-t border-warning/15">
+              <div className="flex gap-1.5 mt-2 pt-1.5 border-t border-sprints/15">
                 <button
                   onClick={() => onApprove(msg)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 text-label font-medium bg-success/15 text-success rounded-lg hover:bg-success/25 transition-colors duration-100"
+                  className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium bg-sessions/15 text-sessions rounded-md hover:bg-sessions/25 transition-colors duration-100"
                 >
-                  <Check size={14} weight="light" />
+                  <CheckIcon size={12} />
                   Approve
                 </button>
                 <button
                   onClick={() => onReject(msg)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 text-label font-medium bg-error/15 text-error rounded-lg hover:bg-error/25 transition-colors duration-100"
+                  className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium bg-error/15 text-error rounded-md hover:bg-error/25 transition-colors duration-100"
                 >
-                  <X size={14} weight="light" />
+                  <CloseIcon size={12} />
                   Reject
                 </button>
               </div>
             )}
             {isApproval && msg.approvalStatus === "approved" && (
-              <div className="flex items-center gap-1 mt-1.5 text-label-xs text-success">
-                <Check size={12} weight="light" />
+              <div className="flex items-center gap-1 mt-1.5 text-label text-sessions">
+                <CheckIcon size={12} />
                 Approved
               </div>
             )}
             {isApproval && msg.approvalStatus === "rejected" && (
-              <div className="flex items-center gap-1 mt-1.5 text-label-xs text-error">
-                <X size={12} weight="light" />
+              <div className="flex items-center gap-1 mt-1.5 text-label text-error">
+                <CloseIcon size={12} />
                 Rejected
               </div>
             )}
@@ -250,32 +257,32 @@ export function ChatMessage({ msg, grouped, onApprove, onReject }: ChatMessagePr
           {msg.type === "message" && (
             <button
               onClick={() => setDetailsOpen(!detailsOpen)}
-              className="flex items-center gap-1 mt-1 text-label-xs text-text-tertiary hover:text-text-secondary transition-colors duration-100"
+              className="flex items-center gap-1 mt-1 text-label text-text-tertiary hover:text-text-secondary transition-colors duration-100"
             >
               {detailsOpen ? (
-                <CaretDown size={12} weight="light" />
+                <ChevronDownIcon size={12} />
               ) : (
-                <CaretRight size={12} weight="light" />
+                <ChevronRightIcon size={12} />
               )}
               Details
             </button>
           )}
 
           {detailsOpen && (
-            <div className="mt-1.5 p-2.5 rounded-lg bg-elevation-2 border border-border-subtle text-label-xs text-text-secondary space-y-1.5 animate-slide-up">
+            <div className="mt-1.5 p-2.5 rounded-lg bg-bg-elevated border border-border-subtle text-label text-text-secondary space-y-1.5 animate-slide-up">
               <div className="flex items-center gap-1.5">
-                <Clock size={12} weight="light" className="text-text-tertiary" />
+                <span className="text-text-tertiary">Time:</span>
                 <span>{formatTimestamp(msg.timestamp)}</span>
               </div>
               {msg.actionCommand && (
                 <div className="flex items-center gap-1.5">
-                  <Wrench size={12} weight="light" className="text-text-tertiary" />
+                  <span className="text-text-tertiary">Tool:</span>
                   <span className="font-mono">{msg.actionCommand}</span>
                 </div>
               )}
               <div className="flex items-center gap-1.5">
-                <FileCode size={12} weight="light" className="text-text-tertiary" />
-                <span>Message ID: {msg.id.slice(0, 12)}</span>
+                <span className="text-text-tertiary">ID:</span>
+                <span className="font-mono">{msg.id.slice(0, 12)}</span>
               </div>
             </div>
           )}
@@ -295,19 +302,19 @@ export function StreamingMessage({ agentId, text }: { agentId: string; text: str
       <div className="px-5 pt-3 pb-1">
         <div className="flex gap-3">
           <div
-            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 animate-pulse-dot"
+            className="w-6 h-6 rounded-[4px] flex items-center justify-center shrink-0 animate-pulse-dot"
             style={{ backgroundColor: color + "18", border: `1.5px solid ${color}30` }}
           >
-            <span className="text-sm font-semibold leading-none" style={{ color }}>
+            <span className="text-[10px] font-semibold leading-none" style={{ color }}>
               {agentId.charAt(0).toUpperCase()}
             </span>
           </div>
           <div>
             <div className="flex items-baseline gap-2 mb-1">
-              <span className="text-body-sm font-semibold" style={{ color }}>
+              <span className="text-xs font-semibold" style={{ color }}>
                 {agentId}
               </span>
-              <span className="text-label-xs text-text-tertiary italic">
+              <span className="text-label text-text-tertiary italic">
                 is thinking...
               </span>
             </div>
@@ -327,23 +334,23 @@ export function StreamingMessage({ agentId, text }: { agentId: string; text: str
     <div className="px-5 pt-3 pb-1">
       <div className="flex gap-3 max-w-[85%]">
         <div
-          className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+          className="w-6 h-6 rounded-[4px] flex items-center justify-center shrink-0"
           style={{ backgroundColor: color + "18", border: `1.5px solid ${color}30` }}
         >
-          <span className="text-sm font-semibold leading-none animate-pulse-dot" style={{ color }}>
+          <span className="text-[10px] font-semibold leading-none animate-pulse-dot" style={{ color }}>
             {agentId.charAt(0).toUpperCase()}
           </span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-body-sm font-semibold" style={{ color }}>
+            <span className="text-xs font-semibold" style={{ color }}>
               {agentId}
             </span>
-            <span className="text-label-xs text-text-tertiary italic">typing...</span>
+            <span className="text-label text-text-tertiary italic">typing...</span>
           </div>
-          <div className="rounded-xl rounded-tl-sm bg-elevation-1 border border-border-subtle px-3.5 py-2">
+          <div className="rounded-xl rounded-tl-sm bg-bg-elevated border border-border-subtle px-3.5 py-2">
             <MessageContent text={text} isSystem={false} />
-            <span className="inline-block w-1.5 h-4 bg-accent/70 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+            <span className="inline-block w-1.5 h-4 bg-rooms/70 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
           </div>
         </div>
       </div>
@@ -355,7 +362,7 @@ function highlightMentions(text: string): React.ReactNode {
   const parts = text.split(/(@\w+)/g);
   return parts.map((part, i) =>
     part.startsWith("@") ? (
-      <span key={i} className="text-accent font-semibold">{part}</span>
+      <span key={i} className="text-rooms font-semibold">{part}</span>
     ) : (
       part
     ),

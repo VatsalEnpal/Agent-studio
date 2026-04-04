@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { X, Lightning, Shield, MagnifyingGlass, ChatCircle, Folder, ArrowCounterClockwise, ClockCounterClockwise, CaretDown } from "@phosphor-icons/react";
+import { CloseIcon, SearchIcon, ChevronDownIcon, SessionsIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import type { LauncherPreset } from "@/lib/types";
 
@@ -13,10 +13,9 @@ interface PastSession {
   date: string;
 }
 
-const PRESETS: (LauncherPreset & { icon: React.ComponentType<{ className?: string }>; description: string })[] = [
+const PRESETS: (LauncherPreset & { description: string })[] = [
   {
     name: "Quick Chat",
-    icon: ChatCircle,
     description: "Sonnet, no agent",
     model: "sonnet",
     agent: "none",
@@ -26,7 +25,6 @@ const PRESETS: (LauncherPreset & { icon: React.ComponentType<{ className?: strin
   },
   {
     name: "Start Sprint",
-    icon: Lightning,
     description: "Opus + orchestrator",
     model: "opus",
     agent: "orchestrator",
@@ -36,7 +34,6 @@ const PRESETS: (LauncherPreset & { icon: React.ComponentType<{ className?: strin
   },
   {
     name: "Security Audit",
-    icon: Shield,
     description: "Opus + security",
     model: "opus",
     agent: "security-reviewer",
@@ -46,7 +43,6 @@ const PRESETS: (LauncherPreset & { icon: React.ComponentType<{ className?: strin
   },
   {
     name: "PMO Scan",
-    icon: MagnifyingGlass,
     description: "Sonnet + PMO",
     model: "sonnet",
     agent: "pmo",
@@ -63,7 +59,6 @@ interface AgentOption {
   model?: "opus" | "sonnet" | "haiku";
 }
 
-// Fallback agents used until API responds
 const DEFAULT_AGENTS: AgentOption[] = [
   { id: "none", name: "No Agent", description: "Plain Claude session" },
   { id: "orchestrator", name: "orchestrator", description: "Coordinates agent teams" },
@@ -83,6 +78,10 @@ const PERMISSIONS: ("bypass" | "default" | "plan" | "auto")[] = [
   "auto",
 ];
 const CHANNELS: ("none" | "telegram")[] = ["none", "telegram"];
+
+// Amber accent for launcher
+const AMBER = "#f59e0b";
+const AMBER_HOVER = "#fbbf24";
 
 interface SessionLauncherProps {
   open: boolean;
@@ -136,16 +135,12 @@ export function SessionLauncher({
   const [launching, setLaunching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Dynamic agents from API
   const [agents, setAgents] = useState<AgentOption[]>(DEFAULT_AGENTS);
-
-  // Recent sessions for dropdown
   const [recentSessions, setRecentSessions] = useState<PastSession[]>([]);
   const [resumeDropdownOpen, setResumeDropdownOpen] = useState(false);
   const [resumeSearch, setResumeSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Reset form state when dialog opens — ensures no stale preset lingers
   useEffect(() => {
     if (open) {
       setCustomName("");
@@ -156,11 +151,9 @@ export function SessionLauncher({
       setResume("");
       setError(null);
       setLaunching(false);
-      // Don't reset cwd — keep the user's configured default
     }
   }, [open]);
 
-  // Fetch default cwd from config on first open
   const [defaultCwdLoaded, setDefaultCwdLoaded] = useState(false);
   useEffect(() => {
     if (defaultCwdLoaded) return;
@@ -172,7 +165,6 @@ export function SessionLauncher({
           const configCwd = data.config?.defaults?.workingDirectory;
           if (configCwd) {
             setCwd(configCwd);
-            // Also update presets
             for (const p of PRESETS) { p.cwd = configCwd; }
           }
           setDefaultCwdLoaded(true);
@@ -181,7 +173,6 @@ export function SessionLauncher({
     })();
   }, [defaultCwdLoaded]);
 
-  // Fetch agents from API
   useEffect(() => {
     void (async () => {
       try {
@@ -198,7 +189,6 @@ export function SessionLauncher({
     })();
   }, []);
 
-  // Fetch recent sessions when dialog opens
   useEffect(() => {
     if (!open) return;
     void (async () => {
@@ -214,7 +204,6 @@ export function SessionLauncher({
     })();
   }, [open]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     if (!resumeDropdownOpen) return;
     const handler = (e: MouseEvent) => {
@@ -304,28 +293,30 @@ export function SessionLauncher({
     }
   }, [launching, model, cwd, onLaunch, onOpenChange]);
 
+  // Helper for input/select styling
+  const inputCls = "w-full px-2.5 py-1.5 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:border-border-subtle focus:outline-none transition-colors";
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[520px] max-h-[85vh] overflow-y-auto console-panel-bg border border-console-border rounded-xl shadow-2xl">
+        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[480px] max-h-[85vh] overflow-y-auto bg-bg-elevated border border-border-subtle rounded-[8px] shadow-modal scrollbar-thin outline-none">
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-console-border">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-border-default">
             <Dialog.Description className="sr-only">Launch a new Claude Code session</Dialog.Description>
-          <Dialog.Title className="text-sm font-semibold text-console-text">
+            <Dialog.Title className="text-section-heading text-text-primary">
               New Session
             </Dialog.Title>
-            <Dialog.Close className="p-1 text-console-dim hover:text-console-muted transition-colors">
-              <X className="w-4 h-4" />
+            <Dialog.Close className="p-1 text-text-ghost hover:text-text-secondary transition-colors">
+              <CloseIcon size={14} />
             </Dialog.Close>
           </div>
 
           <div className="px-5 py-4 space-y-5">
-            {/* Resume Previous Session — FIRST and prominent */}
+            {/* Resume Previous Session */}
             {recentSessions.length > 0 && (
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-console-dim mb-1.5">
-                  <ClockCounterClockwise className="w-3 h-3 inline mr-1 -mt-0.5" />
+                <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                   Resume Previous Session
                 </label>
                 <div className="relative" ref={dropdownRef}>
@@ -333,54 +324,50 @@ export function SessionLauncher({
                     type="button"
                     onClick={() => setResumeDropdownOpen(!resumeDropdownOpen)}
                     className={cn(
-                      "w-full flex items-center gap-2 px-2 py-1.5 text-xs bg-console-bg border rounded text-left transition-colors",
+                      "w-full flex items-center gap-2 px-2.5 py-1.5 text-xs bg-bg-input border rounded-md text-left transition-colors",
                       resume
-                        ? "border-console-accent text-console-text"
-                        : "border-console-border text-console-dim",
-                      "hover:border-console-accent/50 focus:border-console-accent focus:outline-none",
+                        ? "border-[#f59e0b]/40 text-text-primary"
+                        : "border-border-default text-text-ghost",
+                      "hover:border-border-subtle focus:border-border-subtle focus:outline-none",
                     )}
                   >
                     {resume ? (
                       <>
-                        <ClockCounterClockwise className="w-3 h-3 text-console-accent shrink-0" />
                         <span className="truncate flex-1">{shortProject(recentSessions.find(s => s.id === resume)?.project ?? resume)}</span>
-                        <span className="text-[9px] text-console-dim font-mono">{resume.slice(0, 8)}</span>
+                        <span className="text-label text-text-ghost font-mono">{resume.slice(0, 8)}</span>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setResume("");
                           }}
-                          className="p-0.5 text-console-dim hover:text-console-muted"
+                          className="p-0.5 text-text-ghost hover:text-text-secondary"
                         >
-                          <X className="w-3 h-3" />
+                          <CloseIcon size={10} />
                         </button>
                       </>
                     ) : (
                       <>
                         <span className="flex-1">Select a previous session...</span>
-                        <CaretDown className="w-3 h-3 text-console-dim" />
+                        <ChevronDownIcon size={12} className="text-text-ghost" />
                       </>
                     )}
                   </button>
 
-                  {/* Dropdown */}
                   {resumeDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-console-panel border border-console-border rounded-md shadow-lg z-10 max-h-48 overflow-hidden flex flex-col">
-                      {/* Search input */}
-                      <div className="p-1.5 border-b border-console-border">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-bg-elevated border border-border-subtle rounded-md shadow-modal z-10 max-h-48 overflow-hidden flex flex-col">
+                      <div className="p-1.5 border-b border-border-default">
                         <input
                           type="text"
                           value={resumeSearch}
                           onChange={(e) => setResumeSearch(e.target.value)}
                           placeholder="Search sessions..."
-                          className="w-full px-2 py-1 text-xs bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:border-console-accent focus:outline-none"
+                          className="w-full px-2 py-1 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:border-border-subtle focus:outline-none"
                           autoFocus
                         />
                       </div>
-                      {/* Session list */}
                       <div className="overflow-y-auto max-h-36">
                         {filteredSessions.length === 0 ? (
-                          <p className="px-3 py-2 text-[10px] text-console-dim">No sessions found</p>
+                          <p className="px-3 py-2 text-label text-text-ghost">No sessions found</p>
                         ) : (
                           filteredSessions.slice(0, 15).map((session) => (
                             <button
@@ -391,18 +378,17 @@ export function SessionLauncher({
                                 setResumeSearch("");
                               }}
                               className={cn(
-                                "flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-console-faint/50 transition-colors",
-                                resume === session.id && "bg-console-accent/10",
+                                "flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-bg-input transition-colors",
+                                resume === session.id && "bg-[#f59e0b]/10",
                               )}
                             >
-                              <ClockCounterClockwise className="w-3 h-3 text-console-dim shrink-0" />
-                              <span className="text-[10px] text-console-text truncate flex-1">
+                              <span className="text-label text-text-primary truncate flex-1">
                                 {shortProject(session.project)}
                               </span>
-                              <span className="text-[9px] text-console-dim shrink-0">
+                              <span className="text-label text-text-ghost shrink-0">
                                 {formatRelativeTime(session.date)}
                               </span>
-                              <span className="text-[8px] text-console-dim font-mono shrink-0">
+                              <span className="text-label text-text-ghost font-mono shrink-0">
                                 {session.id.slice(0, 8)}
                               </span>
                             </button>
@@ -415,68 +401,64 @@ export function SessionLauncher({
               </div>
             )}
 
-            {/* Quick Actions: Continue Last + Presets */}
+            {/* Quick Actions */}
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-console-dim mb-2">
+              <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-2">
                 Quick Start
               </label>
               <div className="grid grid-cols-5 gap-2">
-                {/* Continue Last button */}
                 <button
                   onClick={handleContinueLast}
                   disabled={launching}
                   className={cn(
-                    "flex flex-col items-center gap-1.5 p-2.5 rounded border transition-colors",
+                    "flex flex-col items-center gap-1.5 p-2.5 rounded-md border transition-colors",
                     launching
-                      ? "border-console-border bg-console-faint/30 opacity-50 cursor-not-allowed"
-                      : "border-console-accent/30 bg-console-accent/5 hover:border-console-accent/60 hover:bg-console-accent/10 active:bg-console-accent/20",
+                      ? "border-border-default bg-bg-input opacity-50 cursor-not-allowed"
+                      : "border-[#f59e0b]/30 bg-[#f59e0b]/5 hover:border-[#f59e0b]/60 hover:bg-[#f59e0b]/10 active:bg-[#f59e0b]/20",
                   )}
                 >
-                  <ArrowCounterClockwise className={cn("w-4 h-4 text-console-accent", launching && "animate-spin")} />
-                  <span className="text-[10px] font-medium text-console-text">
+                  <SessionsIcon size={16} className="text-[#f59e0b]" />
+                  <span className="text-label font-medium text-text-primary">
                     {launching ? "Starting..." : "Continue"}
                   </span>
-                  <span className="text-[9px] text-console-dim">
+                  <span className="text-label text-text-ghost">
                     last session
                   </span>
                 </button>
-                {PRESETS.map((preset) => {
-                  const Icon = preset.icon;
-                  return (
-                    <button
-                      key={preset.name}
-                      onClick={() => applyPreset(preset)}
-                      disabled={launching}
-                      className={cn(
-                        "flex flex-col items-center gap-1.5 p-2.5 rounded-lg border transition-all",
-                        launching
-                          ? "border-console-border opacity-50 cursor-not-allowed"
-                          : "border-console-border hover:border-console-accent/40 hover:bg-console-faint/40 hover:shadow-card active:bg-console-faint active:scale-[0.98]",
-                      )}
-                    >
-                      <Icon className="w-4 h-4 text-console-accent" />
-                      <span className="text-[10px] font-medium text-console-text">
-                        {preset.name}
-                      </span>
-                      <span className="text-[9px] text-console-dim">
-                        {preset.description}
-                      </span>
-                    </button>
-                  );
-                })}
+                {PRESETS.map((preset) => (
+                  <button
+                    key={preset.name}
+                    onClick={() => applyPreset(preset)}
+                    disabled={launching}
+                    className={cn(
+                      "flex flex-col items-center gap-1.5 p-2.5 rounded-md border transition-all",
+                      launching
+                        ? "border-border-default opacity-50 cursor-not-allowed"
+                        : "border-border-default hover:border-border-subtle hover:bg-bg-input active:bg-bg-elevated active:scale-[0.98]",
+                    )}
+                  >
+                    <SessionsIcon size={16} className="text-[#f59e0b]" />
+                    <span className="text-label font-medium text-text-primary">
+                      {preset.name}
+                    </span>
+                    <span className="text-label text-text-ghost">
+                      {preset.description}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Divider between presets and manual config */}
+            {/* Divider */}
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-console-border" />
-              <span className="text-[9px] text-console-dim">or customize below</span>
-              <div className="flex-1 h-px bg-console-border" />
+              <div className="flex-1 h-px bg-border-default" />
+              <span className="text-label text-text-ghost">or customize below</span>
+              <div className="flex-1 h-px bg-border-default" />
             </div>
 
             {/* Session Name */}
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-console-dim mb-1.5">
+              <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                 Session Name
               </label>
               <input
@@ -484,15 +466,14 @@ export function SessionLauncher({
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder="Name this session (optional)"
-                className="w-full px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:border-console-accent focus:outline-none"
+                className={inputCls}
               />
             </div>
 
             {/* Options grid */}
             <div className="grid grid-cols-2 gap-4">
-              {/* Model */}
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-console-dim mb-1.5">
+                <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                   Model
                 </label>
                 <select
@@ -500,7 +481,7 @@ export function SessionLauncher({
                   onChange={(e) =>
                     setModel(e.target.value as "opus" | "sonnet" | "haiku")
                   }
-                  className="w-full px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
+                  className={inputCls}
                 >
                   {MODELS.map((m) => (
                     <option key={m} value={m}>
@@ -510,9 +491,8 @@ export function SessionLauncher({
                 </select>
               </div>
 
-              {/* Agent */}
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-console-dim mb-1.5">
+                <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                   Agent
                 </label>
                 <select
@@ -520,13 +500,12 @@ export function SessionLauncher({
                   onChange={(e) => {
                     const selectedId = e.target.value;
                     setAgent(selectedId);
-                    // Auto-select model if agent has a preferred one
                     const selectedAgent = agents.find((a) => a.id === selectedId);
                     if (selectedAgent?.model) {
                       setModel(selectedAgent.model);
                     }
                   }}
-                  className="w-full px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
+                  className={inputCls}
                 >
                   {agents.map((a) => (
                     <option key={a.id} value={a.id} title={a.description}>
@@ -536,9 +515,8 @@ export function SessionLauncher({
                 </select>
               </div>
 
-              {/* Permissions */}
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-console-dim mb-1.5">
+                <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                   Permissions
                 </label>
                 <select
@@ -552,7 +530,7 @@ export function SessionLauncher({
                         | "auto",
                     )
                   }
-                  className="w-full px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
+                  className={inputCls}
                 >
                   {PERMISSIONS.map((p) => (
                     <option key={p} value={p}>
@@ -562,9 +540,8 @@ export function SessionLauncher({
                 </select>
               </div>
 
-              {/* Channel */}
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-console-dim mb-1.5">
+                <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                   Channel
                 </label>
                 <select
@@ -572,7 +549,7 @@ export function SessionLauncher({
                   onChange={(e) =>
                     setChannel(e.target.value as "none" | "telegram")
                   }
-                  className="w-full px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
+                  className={inputCls}
                 >
                   {CHANNELS.map((c) => (
                     <option key={c} value={c}>
@@ -585,31 +562,28 @@ export function SessionLauncher({
 
             {/* Working Directory */}
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-console-dim mb-1.5">
+              <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                 Working Directory
               </label>
-              <div className="flex items-center gap-2">
-                <Folder className="w-3.5 h-3.5 text-console-dim shrink-0" />
-                <input
-                  type="text"
-                  value={cwd}
-                  onChange={(e) => setCwd(e.target.value)}
-                  className="flex-1 px-2 py-1.5 text-xs font-mono bg-console-bg border border-console-border rounded-md text-console-text focus:border-console-accent/60 focus:ring-1 focus:ring-console-accent/15 focus:outline-none transition-colors"
-                />
-              </div>
+              <input
+                type="text"
+                value={cwd}
+                onChange={(e) => setCwd(e.target.value)}
+                className={cn(inputCls, "font-mono")}
+              />
             </div>
           </div>
 
           {/* Error display */}
           {error && (
-            <div className="mx-5 mb-0 px-3 py-2 bg-console-error/10 border border-console-error/30 rounded text-xs text-console-error">
+            <div className="mx-5 mb-0 px-3 py-2 bg-error/10 border border-error/30 rounded text-xs text-error">
               {error}
             </div>
           )}
 
           {/* Footer */}
-          <div className="flex items-center justify-between px-5 py-3 border-t border-console-border">
-            <span className="text-[10px] text-console-dim">
+          <div className="flex items-center justify-between px-5 py-3 border-t border-border-default">
+            <span className="text-label text-text-ghost">
               {resume ? `resume: ${resume.slice(0, 20)}${resume.length > 20 ? "..." : ""}` : (
                 <>
                   {model} {agent !== "none" ? `+ ${agent}` : ""}{" "}
@@ -621,13 +595,13 @@ export function SessionLauncher({
               onClick={handleLaunch}
               disabled={launching}
               className={cn(
-                "btn-lift px-5 py-2 text-xs font-medium rounded-lg transition-all",
-                "bg-console-accent text-black hover:bg-amber-400 hover:shadow-glow-sm active:scale-[0.98]",
-                "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:shadow-none",
+                "px-5 py-2 text-xs font-medium rounded-md transition-all",
+                "bg-[#f59e0b] text-[#0a0a0a] hover:bg-[#fbbf24] active:scale-[0.98]",
+                "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
               )}
             >
               {launching ? "Launching..." : resume ? "Resume" : "Launch"}
-              {!launching && <span className="ml-2 text-[10px] opacity-60">Enter</span>}
+              {!launching && <span className="ml-2 text-label opacity-60">Enter</span>}
             </button>
           </div>
         </Dialog.Content>

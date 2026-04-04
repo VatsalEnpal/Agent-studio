@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Circle, Clock } from "@phosphor-icons/react";
+import { CheckIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import type { Sprint } from "@/stores/sprints";
 
@@ -41,13 +41,13 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-3 py-2.5 border-b border-border shrink-0">
-        <h3 className="text-label-xs font-medium text-text-secondary uppercase tracking-wider">
+      <div className="px-3 py-2.5 border-b border-border-default shrink-0">
+        <h3 className="text-label text-text-ghost uppercase tracking-[0.06em]">
           Sprints
         </h3>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-2 py-2 space-y-4">
+      <div className="flex-1 overflow-y-auto px-2 py-2 space-y-4 scrollbar-thin">
         {/* ACTIVE */}
         {active.length > 0 && (
           <SprintSection title="Active">
@@ -59,27 +59,33 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                   key={sprint.id}
                   onClick={() => onSelect(sprint.id)}
                   className={cn(
-                    "w-full text-left px-2.5 py-2 rounded transition-colors",
+                    "w-full text-left px-2.5 py-2 rounded-md transition-colors",
                     sprint.id === selectedSprintId
-                      ? "bg-elevation-2 border-l-2 border-accent"
-                      : "hover:bg-elevation-2/30 border-l-2 border-transparent",
+                      ? "bg-bg-elevated border-l-2 border-sprints"
+                      : "hover:bg-bg-elevated/30 border-l-2 border-transparent",
                   )}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-accent animate-pulse shrink-0" />
-                    <span className="text-body-sm font-medium text-text-primary truncate flex-1">
+                    <span className="w-[4px] h-[4px] rounded-full bg-sprints animate-pulse-dot shrink-0" />
+                    <span className="text-[10px] font-medium text-text-primary truncate flex-1">
                       {sprint.name}
                     </span>
+                    {/* UX #8: Headless run indicator */}
+                    {sprint.agents.length === 0 && (
+                      <span className="text-label px-1 py-0.5 rounded bg-sprints/10 text-sprints shrink-0" title="Headless run — no agents attached">
+                        headless
+                      </span>
+                    )}
                   </div>
                   {/* Gate progress bar */}
                   <div className="mt-1.5 flex items-center gap-2">
-                    <div className="flex-1 h-1 bg-border rounded-full overflow-hidden">
+                    <div className="flex-1 h-1 bg-border-default rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-accent rounded-full transition-all"
+                        className="h-full bg-sprints rounded-full transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="text-label-xs text-text-tertiary shrink-0">
+                    <span className="text-label text-text-tertiary shrink-0">
                       {passed}/{total}
                     </span>
                   </div>
@@ -97,15 +103,15 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                 key={sprint.id}
                 onClick={() => onSelect(sprint.id)}
                 className={cn(
-                  "w-full text-left px-2.5 py-2 rounded transition-colors",
+                  "w-full text-left px-2.5 py-2 rounded-md transition-colors",
                   sprint.id === selectedSprintId
-                    ? "bg-elevation-2 border-l-2 border-accent"
-                    : "hover:bg-elevation-2/30 border-l-2 border-transparent",
+                    ? "bg-bg-elevated border-l-2 border-sprints"
+                    : "hover:bg-bg-elevated/30 border-l-2 border-transparent",
                 )}
               >
                 <div className="flex items-center gap-2">
-                  <Check size={14} weight="light" className="text-emerald-400 shrink-0" />
-                  <span className="text-body-sm font-medium text-text-secondary truncate flex-1">
+                  <CheckIcon size={12} className="text-sessions shrink-0" />
+                  <span className="text-[10px] font-medium text-text-secondary truncate flex-1">
                     {sprint.name}
                   </span>
                 </div>
@@ -113,20 +119,19 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                   {sprint.qaScore != null && (
                     <span
                       className={cn(
-                        "text-label-xs font-medium",
+                        "text-label font-medium",
                         sprint.qaScore >= 95
-                          ? "text-emerald-400"
+                          ? "text-sessions"
                           : sprint.qaScore >= 80
-                            ? "text-amber-400"
-                            : "text-red-400",
+                            ? "text-sprints"
+                            : "text-error",
                       )}
                     >
                       QA {sprint.qaScore}%
                     </span>
                   )}
                   {sprint.completedAt && (
-                    <span className="text-label-xs text-text-tertiary flex items-center gap-0.5">
-                      <Clock size={12} weight="light" />
+                    <span className="text-label text-text-tertiary">
                       {formatDate(sprint.completedAt)}
                     </span>
                   )}
@@ -144,15 +149,15 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                 key={sprint.id}
                 onClick={() => onSelect(sprint.id)}
                 className={cn(
-                  "w-full text-left px-2.5 py-2 rounded transition-colors",
+                  "w-full text-left px-2.5 py-2 rounded-md transition-colors",
                   sprint.id === selectedSprintId
-                    ? "bg-elevation-2 border-l-2 border-accent"
-                    : "hover:bg-elevation-2/30 border-l-2 border-transparent",
+                    ? "bg-bg-elevated border-l-2 border-sprints"
+                    : "hover:bg-bg-elevated/30 border-l-2 border-transparent",
                 )}
               >
                 <div className="flex items-center gap-2">
-                  <Circle size={12} weight="light" className="text-text-tertiary shrink-0" />
-                  <span className="text-body-sm font-medium text-text-tertiary truncate">
+                  <span className="w-2.5 h-2.5 rounded-full border border-text-ghost shrink-0" />
+                  <span className="text-[10px] text-text-tertiary truncate">
                     {sprint.name}
                   </span>
                 </div>
@@ -163,10 +168,12 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
 
         {/* Empty state */}
         {sprints.length === 0 && (
-          <div className="text-body-sm text-text-tertiary text-center py-8 px-4 leading-relaxed">
-            No sprints found.
-            <br />
-            The PMO agent creates sprints automatically.
+          <div className="text-center py-6 px-4">
+            <CheckIcon size={20} className="text-text-ghost mx-auto mb-2" />
+            <p className="text-[10px] text-text-secondary font-medium">No sprints found</p>
+            <p className="text-[10px] text-text-tertiary mt-1 leading-relaxed">
+              The PMO agent creates sprints automatically when it detects pending work.
+            </p>
           </div>
         )}
       </div>
@@ -184,7 +191,7 @@ function SprintSection({
   return (
     <div>
       <div className="px-2 pb-1.5">
-        <span className="text-label-xs font-medium text-text-tertiary uppercase tracking-wider">
+        <span className="text-label text-text-ghost uppercase tracking-[0.06em]">
           {title}
         </span>
       </div>

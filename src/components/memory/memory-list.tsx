@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useCallback } from "react";
-import { MagnifyingGlass, Calendar, Brain, Plus, PushPin, PencilSimple, Trash, Gear } from "@phosphor-icons/react";
+import { SearchIcon, MemoryIcon, PlusIcon, EditIcon, TrashIcon, SettingsIcon } from "@/components/ui/icons";
 import { useMemoryStore, type MemoryEntry, type MemoryEntryDetail } from "@/stores/memory";
 import { useToastStore } from "@/stores/toast";
 import { useUIStore } from "@/stores/ui";
@@ -29,12 +29,12 @@ function categoryLabel(cat: string): string {
 
 function categoryColor(cat: string): string {
   switch (cat) {
-    case "learnings": return "bg-blue-500/20 text-blue-400";
-    case "corrections": return "bg-red-500/20 text-red-400";
-    case "decisions": return "bg-purple-500/20 text-purple-400";
-    case "human-inputs": return "bg-amber-500/20 text-amber-400";
-    case "knowledge": return "bg-emerald-500/20 text-emerald-400";
-    default: return "bg-console-border text-console-dim";
+    case "learnings": return "bg-rooms/20 text-rooms";
+    case "corrections": return "bg-error/20 text-error";
+    case "decisions": return "bg-memory/20 text-memory";
+    case "human-inputs": return "bg-sprints/20 text-sprints";
+    case "knowledge": return "bg-sessions/20 text-sessions";
+    default: return "bg-border-default text-text-ghost";
   }
 }
 
@@ -131,28 +131,28 @@ export function MemoryList({ onSelectEntry }: MemoryListProps) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Search bar + create button */}
-      <div className="px-3 py-2.5 border-b border-console-border flex items-center gap-2 shrink-0">
+      <div className="px-3 py-2.5 border-b border-border-default flex items-center gap-2 shrink-0">
         <div className="relative flex-1">
-          <MagnifyingGlass className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-console-dim" />
+          <SearchIcon size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-text-ghost" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search memories..."
-            className="w-full pl-7 pr-2 py-1.5 text-label-xs bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent transition-colors"
+            className="w-full pl-7 pr-2 py-1.5 text-label bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-memory transition-colors"
           />
         </div>
         <button
           onClick={openCreateDialog}
-          className="p-1.5 text-console-dim hover:text-console-accent hover:bg-console-faint rounded transition-colors"
+          className="p-1.5 text-text-ghost hover:text-memory hover:bg-bg-elevated rounded transition-colors"
           title="New memory"
         >
-          <Plus className="w-3.5 h-3.5" />
+          <PlusIcon size={14} />
         </button>
       </div>
 
       {/* Category pills + Pinned filter */}
-      <div className="px-3 py-2 border-b border-console-border flex items-center gap-1 overflow-x-auto shrink-0">
+      <div className="px-3 py-2 border-b border-border-default flex items-center gap-1 overflow-x-auto shrink-0">
         {CATEGORIES.map((cat) => {
           const isActive = cat === "All" ? !selectedCategory || selectedCategory === "All" : selectedCategory === cat;
           const count = categoryCounts[cat] ?? 0;
@@ -161,36 +161,35 @@ export function MemoryList({ onSelectEntry }: MemoryListProps) {
               key={cat}
               onClick={() => setCategory(cat === "All" ? null : cat)}
               className={cn(
-                "flex items-center gap-0.5 px-2 py-0.5 text-label-xs font-medium rounded-full whitespace-nowrap transition-all",
+                "flex items-center gap-0.5 px-2 py-0.5 text-label font-medium rounded-full whitespace-nowrap transition-all",
                 isActive
-                  ? "bg-console-accent/20 text-console-accent border border-console-accent/30"
-                  : "bg-console-faint text-console-muted hover:text-console-text border border-transparent",
+                  ? "bg-memory/20 text-memory border border-memory/30"
+                  : "bg-bg-elevated text-text-secondary hover:text-text-primary border border-transparent",
               )}
             >
               {cat === "All" ? "All" : categoryLabel(cat)}
-              <span className={cn("text-label-xs", isActive ? "text-console-accent/70" : "text-console-dim")}>
+              <span className={cn("text-label", isActive ? "text-memory/70" : "text-text-ghost")}>
                 {count}
               </span>
             </button>
           );
         })}
-        <div className="w-px h-3 bg-console-border mx-0.5" />
+        <div className="w-px h-3 bg-border-default mx-0.5" />
         <button
           onClick={() => setShowPinnedOnly(!showPinnedOnly)}
           className={cn(
-            "flex items-center gap-0.5 px-2 py-0.5 text-label-xs font-medium rounded-full whitespace-nowrap transition-all",
+            "flex items-center gap-0.5 px-2 py-0.5 text-label font-medium rounded-full whitespace-nowrap transition-all",
             showPinnedOnly
-              ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-              : "bg-console-faint text-console-muted hover:text-console-text border border-transparent",
+              ? "bg-sprints/20 text-sprints border border-sprints/30"
+              : "bg-bg-elevated text-text-secondary hover:text-text-primary border border-transparent",
           )}
         >
-          <PushPin className="w-2 h-2" />
           {pinnedCount}
         </button>
       </div>
 
       {/* Entry list */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
         {loading ? (
           <div className="px-3 py-4 space-y-3">
             {[1, 2, 3, 4].map((i) => (
@@ -202,10 +201,10 @@ export function MemoryList({ onSelectEntry }: MemoryListProps) {
           </div>
         ) : filtered.length === 0 && superseded.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 gap-3 px-6 text-center">
-            <div className="w-10 h-10 rounded-xl bg-console-faint/50 flex items-center justify-center">
-              <Brain className="w-5 h-5 text-console-dim" />
+            <div className="w-10 h-10 rounded-xl bg-bg-elevated/50 flex items-center justify-center">
+              <MemoryIcon size={20} className="text-text-ghost" />
             </div>
-            <span className="text-console-muted text-xs font-medium">
+            <span className="text-text-secondary text-xs font-medium">
               {selectedCategory || showPinnedOnly
                 ? "No memories match this filter"
                 : "No memories yet"}
@@ -213,9 +212,9 @@ export function MemoryList({ onSelectEntry }: MemoryListProps) {
             {!selectedCategory && !showPinnedOnly && entries.length === 0 && (
               <button
                 onClick={() => useUIStore.getState().setActiveMode("settings")}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium text-console-muted bg-console-faint hover:bg-console-faint/80 rounded border border-console-border hover:border-console-muted transition-colors mt-1"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded border border-border-default hover:border-text-secondary transition-colors mt-1"
               >
-                <Gear className="w-3 h-3" />
+                <SettingsIcon size={12} />
                 Create Agent System
               </button>
             )}
@@ -235,7 +234,7 @@ export function MemoryList({ onSelectEntry }: MemoryListProps) {
             {superseded.length > 0 && !showPinnedOnly && (
               <>
                 <div className="px-3 pt-3 pb-1">
-                  <span className="text-label-xs font-medium text-console-dim uppercase tracking-wider">
+                  <span className="text-label text-text-ghost uppercase tracking-[0.06em]">
                     Superseded
                   </span>
                 </div>
@@ -316,29 +315,29 @@ function MemoryListItem({
       onClick={onSelect}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(); }}
       className={cn(
-        "w-full text-left px-3 py-2.5 border-b border-console-border/50 transition-colors group cursor-pointer",
+        "w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-colors group cursor-pointer",
         selected
-          ? "bg-console-accent/10 border-l-2 border-l-console-accent"
-          : "hover:bg-console-faint/50 border-l-2 border-l-transparent",
+          ? "bg-memory/10 border-l-2 border-l-memory"
+          : "hover:bg-bg-elevated/50 border-l-2 border-l-transparent",
         superseded && "opacity-50",
       )}
     >
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            {entry.pinned && <PushPin className="w-2.5 h-2.5 text-amber-400 shrink-0" />}
+            {entry.pinned && <span className="text-sprints shrink-0 text-[10px] font-bold">*</span>}
             <p
               className={cn(
-                "text-[11px] font-medium leading-snug truncate",
+                "text-[10px] font-medium leading-snug truncate",
                 superseded
-                  ? "text-console-dim line-through"
-                  : "text-console-text",
+                  ? "text-text-ghost line-through"
+                  : "text-text-primary",
               )}
             >
               {entry.title}
             </p>
           </div>
-          <p className="text-label-xs text-console-muted mt-0.5 line-clamp-2 leading-relaxed">
+          <p className="text-label text-text-secondary mt-0.5 line-clamp-2 leading-relaxed">
             {entry.key_point}
           </p>
         </div>
@@ -349,46 +348,45 @@ function MemoryListItem({
             className={cn(
               "p-1 rounded transition-colors",
               entry.pinned
-                ? "text-amber-400 hover:text-amber-300"
-                : "text-console-dim hover:text-console-muted",
+                ? "text-sprints hover:text-sprints/80"
+                : "text-text-ghost hover:text-text-secondary",
             )}
             title={entry.pinned ? "Unpin" : "Pin"}
           >
-            <PushPin className="w-3 h-3" />
+            <span className="text-[10px] font-bold">*</span>
           </button>
           <button
             onClick={handleEdit}
-            className="p-1 text-console-dim hover:text-console-muted rounded transition-colors"
+            className="p-1 text-text-ghost hover:text-text-secondary rounded transition-colors"
             title="Edit"
           >
-            <PencilSimple className="w-3 h-3" />
+            <EditIcon size={12} />
           </button>
           <button
             onClick={handleDelete}
-            className="p-1 text-console-dim hover:text-console-error rounded transition-colors"
+            className="p-1 text-text-ghost hover:text-error rounded transition-colors"
             title="Delete"
           >
-            <Trash className="w-3 h-3" />
+            <TrashIcon size={12} />
           </button>
         </div>
       </div>
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-        <span className={cn("text-label-xs px-1.5 py-0.5 rounded-full font-medium", categoryColor(entry.category))}>
+        <span className={cn("text-label px-1.5 py-0.5 rounded-full font-medium", categoryColor(entry.category))}>
           {categoryLabel(entry.category)}
         </span>
         {superseded && (
-          <span className="text-label-xs px-1.5 py-0.5 rounded-full font-medium bg-console-border text-console-dim">
+          <span className="text-label px-1.5 py-0.5 rounded-full font-medium bg-border-default text-text-ghost">
             Superseded
           </span>
         )}
         {entry.agent_type && (
-          <span className="text-label-xs text-console-dim bg-console-border px-1 py-0.5 rounded">
+          <span className="text-label text-text-ghost bg-border-default px-1 py-0.5 rounded">
             {entry.agent_type}
           </span>
         )}
         {date && (
-          <span className="text-label-xs text-console-dim flex items-center gap-0.5">
-            <Calendar className="w-2.5 h-2.5" />
+          <span className="text-label text-text-ghost">
             {date}
           </span>
         )}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { SpinnerGap } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { wsClient } from "@/lib/ws-client";
 import {

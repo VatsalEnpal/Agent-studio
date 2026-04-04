@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { GitCommit, Eye, UploadSimple, Warning, Check, X } from "@phosphor-icons/react";
+import { GitCommitIcon, EyeIcon, UploadIcon, WarningIcon, CheckIcon, CloseIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import type { RepoStatus } from "@/lib/types";
 
@@ -44,14 +44,14 @@ export function ChangesPopup({
       >
         <div className="flex items-center justify-between px-3 py-2 border-b border-console-border">
           <span className="text-xs font-medium text-console-text flex items-center gap-1.5">
-            <Eye className="w-3.5 h-3.5" />
+            <EyeIcon className="w-3.5 h-3.5" />
             Changes: {repo.name}
           </span>
           <button
             onClick={onClose}
             className="p-0.5 text-console-dim hover:text-console-text"
           >
-            <X className="w-3.5 h-3.5" />
+            <CloseIcon className="w-3.5 h-3.5" />
           </button>
         </div>
         <div className="px-3 py-2 max-h-72 overflow-auto">
@@ -61,8 +61,8 @@ export function ChangesPopup({
             </p>
           ) : isClean ? (
             <div className="flex items-center gap-2 py-3 justify-center">
-              <Check className="w-4 h-4 text-console-success" />
-              <span className="text-[11px] text-console-success font-medium">
+              <CheckIcon className="w-4 h-4 text-console-success" />
+              <span className="text-[10px] text-console-success font-medium">
                 Working tree clean
               </span>
             </div>
@@ -163,14 +163,14 @@ export function CommitModal({
       <div className="bg-console-bg border border-console-border rounded-lg shadow-2xl w-full max-w-sm p-0">
         <div className="flex items-center justify-between px-3 py-2 border-b border-console-border">
           <span className="text-xs font-medium text-console-text flex items-center gap-1.5">
-            <GitCommit className="w-3.5 h-3.5" />
+            <GitCommitIcon className="w-3.5 h-3.5" />
             Commit: {repo.name}
           </span>
           <button
             onClick={onClose}
             className="p-0.5 text-console-dim hover:text-console-text"
           >
-            <X className="w-3.5 h-3.5" />
+            <CloseIcon className="w-3.5 h-3.5" />
           </button>
         </div>
         <div className="px-3 py-2 space-y-2">
@@ -276,20 +276,20 @@ export function PushModal({
       <div className="bg-console-bg border border-console-border rounded-lg shadow-2xl w-full max-w-sm p-0">
         <div className="flex items-center justify-between px-3 py-2 border-b border-console-border">
           <span className="text-xs font-medium text-console-text flex items-center gap-1.5">
-            <UploadSimple className="w-3.5 h-3.5" />
+            <UploadIcon className="w-3.5 h-3.5" />
             Push: {repo.name}
           </span>
           <button
             onClick={onClose}
             className="p-0.5 text-console-dim hover:text-console-text"
           >
-            <X className="w-3.5 h-3.5" />
+            <CloseIcon className="w-3.5 h-3.5" />
           </button>
         </div>
         <div className="px-3 py-2 space-y-2">
           {isProd && (
             <div className="flex items-start gap-2 px-2 py-2 bg-red-500/10 border border-red-500/30 rounded text-red-400">
-              <Warning className="w-4 h-4 shrink-0 mt-0.5" />
+              <WarningIcon className="w-4 h-4 shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <p className="text-[10px] font-bold">
                   WARNING: PRODUCTION REPO

@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, SidebarSimple } from "@phosphor-icons/react";
+import { PlusIcon, SidebarIcon } from "@/components/ui/icons";
 import { useUIStore } from "@/stores/ui";
 import { SessionsSection } from "./sessions-section";
 import { ServersSection } from "./servers-section";
@@ -24,7 +24,7 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
           onClick={onNewSession}
           className="flex items-center gap-1.5 flex-1 px-2 py-1.5 text-xs font-medium rounded bg-console-accent/15 text-console-accent hover:bg-console-accent/25 active:bg-console-accent/35 active:scale-95 transition-all btn-lift"
         >
-          <Plus className="w-3.5 h-3.5" />
+          <PlusIcon className="w-3.5 h-3.5" />
           New Session
         </button>
         <button
@@ -32,7 +32,7 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
           className="p-1 text-console-dim hover:text-console-muted transition-colors"
           title="Collapse sidebar"
         >
-          <SidebarSimple className="w-4 h-4" />
+          <SidebarIcon className="w-4 h-4" />
         </button>
       </div>
 

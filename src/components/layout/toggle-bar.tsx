@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Monitor, Users, Brain, FileText, Gear, ArrowsOutSimple, ArrowsInSimple, Cpu, Memory, Gauge, ArrowSquareOut, Sun, Moon } from "@phosphor-icons/react";
+import { MonitorIcon, UsersIcon, BrainIcon, FileIcon, SettingsIcon, ExpandIcon, CollapseIcon, CpuIcon, MemoryChipIcon, GaugeIcon, ExternalLinkIcon, SunIcon, MoonIcon } from "@/components/ui/icons";
 import { useUIStore } from "@/stores/ui";
 import { cn } from "@/lib/utils";
 import type { ActiveMode } from "@/lib/types";
@@ -15,11 +15,11 @@ interface TabConfig {
 }
 
 const ALL_TABS: TabConfig[] = [
-  { id: "sessions", label: "Sessions", icon: Monitor },
-  { id: "teams", label: "Teams", icon: Users },
-  { id: "memory", label: "Memory", icon: Brain },
-  { id: "reports", label: "Reports", icon: FileText },
-  { id: "settings", label: "Gear", icon: Gear },
+  { id: "sessions", label: "Sessions", icon: MonitorIcon },
+  { id: "teams", label: "Teams", icon: UsersIcon },
+  { id: "memory", label: "Memory", icon: BrainIcon },
+  { id: "reports", label: "Reports", icon: FileIcon },
+  { id: "settings", label: "Gear", icon: SettingsIcon },
 ];
 
 /**
@@ -125,10 +125,10 @@ function SystemWidget() {
       className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-mono text-console-dim hover:text-console-muted transition-colors"
       title="System monitor"
     >
-      <Cpu className="w-3 h-3" />
+      <CpuIcon className="w-3 h-3" />
       <span>{stats.cpu.toFixed(0)}%</span>
       <span className="text-console-border">/</span>
-      <Memory className="w-3 h-3" />
+      <MemoryChipIcon className="w-3 h-3" />
       <span>{stats.memUsed.toFixed(1)}G</span>
     </button>
   );
@@ -158,7 +158,7 @@ function FullscreenButton() {
       className="p-1 text-console-dim hover:text-console-muted transition-colors rounded hover:bg-console-faint/50"
       title={isFs ? "Exit fullscreen" : "Fullscreen"}
     >
-      {isFs ? <ArrowsInSimple className="w-3.5 h-3.5" /> : <ArrowsOutSimple className="w-3.5 h-3.5" />}
+      {isFs ? <CollapseIcon className="w-3.5 h-3.5" /> : <ExpandIcon className="w-3.5 h-3.5" />}
     </button>
   );
 }
@@ -174,9 +174,9 @@ function ThemeToggle() {
       title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
     >
       {theme === "dark" ? (
-        <Sun className="w-3.5 h-3.5" />
+        <SunIcon className="w-3.5 h-3.5" />
       ) : (
-        <Moon className="w-3.5 h-3.5" />
+        <MoonIcon className="w-3.5 h-3.5" />
       )}
     </button>
   );
@@ -217,7 +217,7 @@ export function ToggleBar() {
               disabled={tab.disabled}
               title={tab.disabled ? "Coming soon" : undefined}
               className={cn(
-                "relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                "relative flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-medium rounded-md transition-all",
                 isActive
                   ? "text-console-text"
                   : tab.disabled
@@ -225,7 +225,7 @@ export function ToggleBar() {
                     : "text-console-muted hover:text-console-text hover:bg-console-faint/40 active:scale-95",
               )}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-3.5 h-3.5" />
               {tab.label}
               {/* Active indicator line */}
               {isActive && (
@@ -246,9 +246,9 @@ export function ToggleBar() {
           className="text-xs text-console-dim hover:text-console-muted transition-colors flex items-center gap-1"
           title="Check your usage limits on claude.ai"
         >
-          <Gauge className="w-3 h-3" />
+          <GaugeIcon className="w-3 h-3" />
           <span>Limits</span>
-          <ArrowSquareOut className="w-2.5 h-2.5" />
+          <ExternalLinkIcon className="w-2.5 h-2.5" />
         </a>
         <FullscreenButton />
         <ThemeToggle />

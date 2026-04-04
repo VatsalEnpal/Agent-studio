@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FolderOpen, GitBranch, GitPullRequest, GitCommit, Eye, UploadSimple } from "@phosphor-icons/react";
+import { FolderIcon, GitBranchIcon, GitPRIcon, GitCommitIcon, EyeIcon, UploadIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useGitStore } from "@/stores/git";
 import { SessionGroup } from "@/components/sessions/session-group";
@@ -72,7 +72,7 @@ function RepoItem({
       title={repo.path}
     >
       <div className="flex items-center gap-2">
-        <FolderOpen className="w-3.5 h-3.5 shrink-0 text-console-muted" />
+        <FolderIcon className="w-3.5 h-3.5 shrink-0 text-console-muted" />
         <span className="text-[10px] text-console-text font-medium truncate flex-1">
           {repo.name}
         </span>
@@ -108,7 +108,7 @@ function RepoItem({
                     className="flex items-center gap-1.5 text-[9px] text-console-dim"
                     title={b.lastCommit}
                   >
-                    <GitBranch className="w-2.5 h-2.5 shrink-0" />
+                    <GitBranchIcon className="w-2.5 h-2.5 shrink-0" />
                     <span className="font-mono text-console-muted shrink-0">
                       {b.name}
                     </span>
@@ -131,7 +131,7 @@ function RepoItem({
           className="p-0.5 text-console-dim hover:text-console-accent transition-all"
           title="View Changes"
         >
-          <Eye className="w-3 h-3" />
+          <EyeIcon className="w-3 h-3" />
         </button>
         {!isProd && (
           <button
@@ -139,7 +139,7 @@ function RepoItem({
             className="p-0.5 text-console-dim hover:text-console-accent transition-all"
             title="Commit"
           >
-            <GitCommit className="w-3 h-3" />
+            <GitCommitIcon className="w-3 h-3" />
           </button>
         )}
         <button
@@ -152,7 +152,7 @@ function RepoItem({
           )}
           title={isProd ? "Push (PROD - requires confirmation)" : "Push"}
         >
-          <UploadSimple className="w-3 h-3" />
+          <UploadIcon className="w-3 h-3" />
         </button>
         <button
           onClick={() => onCreatePR(repo)}
@@ -164,7 +164,7 @@ function RepoItem({
           )}
           title="Create Pull Request"
         >
-          <GitPullRequest className="w-3 h-3" />
+          <GitPRIcon className="w-3 h-3" />
         </button>
       </div>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useCallback } from "react";
-import { MagnifyingGlass, Calendar, Brain, Plus, PushPin, PencilSimple, Trash, Gear } from "@phosphor-icons/react";
+import { SearchIcon, MemoryIcon, PlusIcon, EditIcon, TrashIcon, SettingsIcon } from "@/components/ui/icons";
 import { useMemoryStore, type MemoryEntry, type MemoryEntryDetail } from "@/stores/memory";
 import { useToastStore } from "@/stores/toast";
 import { useUIStore } from "@/stores/ui";
@@ -32,12 +32,12 @@ function categoryLabel(cat: string): string {
 
 function categoryColor(cat: string): string {
   switch (cat) {
-    case "learnings": return "bg-blue-500/20 text-blue-400";
-    case "corrections": return "bg-red-500/20 text-red-400";
-    case "decisions": return "bg-purple-500/20 text-purple-400";
-    case "human-inputs": return "bg-amber-500/20 text-amber-400";
-    case "knowledge": return "bg-emerald-500/20 text-emerald-400";
-    default: return "bg-border text-text-tertiary";
+    case "learnings": return "bg-rooms/20 text-rooms";
+    case "corrections": return "bg-error/20 text-error";
+    case "decisions": return "bg-memory/20 text-memory";
+    case "human-inputs": return "bg-sprints/20 text-sprints";
+    case "knowledge": return "bg-sessions/20 text-sessions";
+    default: return "bg-border-default text-text-tertiary";
   }
 }
 
@@ -148,28 +148,28 @@ export function MemoryView() {
   return (
     <div className="flex flex-col h-full">
       {/* Search bar + create button */}
-      <div className="px-4 py-3 border-b border-border flex items-center gap-2">
+      <div className="px-3 py-2 border-b border-border-default flex items-center gap-2">
         <div className="relative flex-1">
-          <MagnifyingGlass size={14} weight="light" className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary" />
+          <SearchIcon size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-text-ghost" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search memories by title, content, or tags..."
-            className="w-full pl-8 pr-3 py-2 text-body-sm bg-canvas border border-border rounded-md text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent transition-colors"
+            placeholder="Search memories..."
+            className="w-full pl-7 pr-2 py-1 text-[10px] bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-colors"
           />
         </div>
         <button
           onClick={openCreateDialog}
-          className="flex items-center gap-1 px-2.5 py-2 text-label-xs font-medium bg-accent text-canvas rounded-md hover:bg-accent/90 transition-colors shrink-0"
+          className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium bg-memory text-bg-base rounded-md hover:bg-memory/90 transition-colors shrink-0"
         >
-          <Plus size={14} weight="light" />
+          <PlusIcon size={10} />
           New
         </button>
       </div>
 
       {/* Category pills + Pinned filter */}
-      <div className="px-4 py-2 border-b border-border flex items-center gap-1.5 overflow-x-auto">
+      <div className="px-3 py-1.5 border-b border-border-default flex items-center gap-1 overflow-x-auto">
         {CATEGORIES.map((cat) => {
           const isActive = cat === "All" ? !selectedCategory || selectedCategory === "All" : selectedCategory === cat;
           const count = categoryCounts[cat] ?? 0;
@@ -178,32 +178,31 @@ export function MemoryView() {
               key={cat}
               onClick={() => setCategory(cat === "All" ? null : cat)}
               className={cn(
-                "flex items-center gap-1 px-2.5 py-1 text-label-xs font-medium rounded-full whitespace-nowrap transition-all",
+                "flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-medium rounded-full whitespace-nowrap transition-all",
                 isActive
-                  ? "bg-accent/20 text-accent border border-accent/30"
-                  : "bg-elevation-2 text-text-secondary hover:text-text-primary hover:bg-elevation-2/80 border border-transparent",
+                  ? "bg-memory/20 text-memory border border-memory/30"
+                  : "bg-bg-elevated text-text-secondary hover:text-text-primary hover:bg-bg-elevated/80 border border-transparent",
               )}
             >
               {cat === "All" ? "All" : categoryLabel(cat)}
-              <span className={cn("text-label-xs", isActive ? "text-accent/70" : "text-text-tertiary")}>
+              <span className={cn("text-label", isActive ? "text-memory/70" : "text-text-tertiary")}>
                 {count}
               </span>
             </button>
           );
         })}
-        <div className="w-px h-4 bg-border mx-1" />
+        <div className="w-px h-4 bg-border-default mx-1" />
         <button
           onClick={() => setShowPinnedOnly(!showPinnedOnly)}
           className={cn(
-            "flex items-center gap-1 px-2.5 py-1 text-label-xs font-medium rounded-full whitespace-nowrap transition-all",
+            "flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-medium rounded-full whitespace-nowrap transition-all",
             showPinnedOnly
-              ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-              : "bg-elevation-2 text-text-secondary hover:text-text-primary hover:bg-elevation-2/80 border border-transparent",
+              ? "bg-sprints/20 text-sprints border border-sprints/30"
+              : "bg-bg-elevated text-text-secondary hover:text-text-primary hover:bg-bg-elevated/80 border border-transparent",
           )}
         >
-          <PushPin size={12} weight="light" />
           Pinned
-          <span className={cn("text-label-xs", showPinnedOnly ? "text-amber-400/70" : "text-text-tertiary")}>
+          <span className={cn("text-label", showPinnedOnly ? "text-sprints/70" : "text-text-tertiary")}>
             {pinnedCount}
           </span>
         </button>
@@ -212,7 +211,7 @@ export function MemoryView() {
       {/* Main content: list + detail */}
       <div className="flex flex-1 min-h-0">
         {/* Entry list */}
-        <div className="w-80 border-r border-border overflow-y-auto">
+        <div className="w-80 border-r border-border-default overflow-y-auto scrollbar-thin">
           {loading ? (
             <div className="px-3 py-4 space-y-3">
               {[1, 2, 3, 4].map((i) => (
@@ -224,26 +223,26 @@ export function MemoryView() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 gap-3 px-6 text-center">
-              <div className="w-10 h-10 rounded-xl bg-elevation-2/50 flex items-center justify-center">
-                <Brain size={20} weight="light" className="text-text-tertiary" />
+              <div className="w-10 h-10 rounded-xl bg-bg-elevated/50 flex items-center justify-center">
+                <MemoryIcon size={20} className="text-text-ghost" />
               </div>
-              <span className="text-text-secondary text-body-sm font-medium">
+              <span className="text-text-secondary text-[10px] font-medium">
                 {selectedCategory || showPinnedOnly ? "No memories match this filter" : "No memories yet"}
               </span>
               {!selectedCategory && !showPinnedOnly && (
                 <>
-                  <p className="text-text-tertiary text-label-xs leading-relaxed max-w-[260px]">
-                    Agent memories are stored in <code className="text-text-secondary bg-elevation-2 px-1 py-0.5 rounded text-label-xs">ai-agents/memory/</code> and help your agents learn from past work.
+                  <p className="text-text-tertiary text-label leading-relaxed max-w-[260px]">
+                    Agent memories are stored in <code className="text-text-secondary bg-bg-elevated px-1 py-0.5 rounded text-label">ai-agents/memory/</code> and help your agents learn from past work.
                   </p>
-                  <p className="text-text-tertiary text-label-xs leading-relaxed max-w-[260px]">
+                  <p className="text-text-tertiary text-label leading-relaxed max-w-[260px]">
                     Memories are created automatically when agents complete tasks, or you can create them manually.
                   </p>
                   {entries.length === 0 && (
                     <button
                       onClick={() => useUIStore.getState().setActiveMode("settings")}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium text-text-secondary bg-elevation-2 hover:bg-elevation-2/80 rounded border border-border hover:border-text-secondary transition-colors mt-1"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded border border-border-default hover:border-text-secondary transition-colors mt-1"
                     >
-                      <Gear size={12} weight="light" />
+                      <SettingsIcon size={12} />
                       Create Agent System
                     </button>
                   )}
@@ -263,7 +262,7 @@ export function MemoryView() {
         </div>
 
         {/* Detail panel */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto scrollbar-thin">
           <MemoryDetail />
         </div>
       </div>
@@ -332,21 +331,21 @@ function MemoryListItem({
       onClick={onSelect}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(); }}
       className={cn(
-        "w-full text-left px-3 py-2.5 border-b border-border/50 transition-colors group cursor-pointer",
+        "w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-colors group cursor-pointer",
         selected
-          ? "bg-accent/10 border-l-2 border-l-accent"
-          : "hover:bg-elevation-2/50 border-l-2 border-l-transparent",
+          ? "bg-memory/10 border-l-2 border-l-memory"
+          : "hover:bg-bg-elevated/50 border-l-2 border-l-transparent",
       )}
     >
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            {entry.pinned && <PushPin size={10} weight="fill" className="text-amber-400 shrink-0" />}
-            <p className="text-body-sm text-text-primary font-medium leading-snug truncate">
+            {entry.pinned && <span className="text-sprints shrink-0 text-[10px]">*</span>}
+            <p className="text-xs text-text-primary font-medium leading-snug truncate">
               {entry.title}
             </p>
           </div>
-          <p className="text-label-xs text-text-secondary mt-0.5 line-clamp-2 leading-relaxed">
+          <p className="text-label text-text-secondary mt-0.5 line-clamp-2 leading-relaxed">
             {entry.key_point}
           </p>
         </div>
@@ -357,46 +356,45 @@ function MemoryListItem({
             className={cn(
               "p-1 rounded transition-colors",
               entry.pinned
-                ? "text-amber-400 hover:text-amber-300"
+                ? "text-sprints hover:text-sprints/80"
                 : "text-text-tertiary hover:text-text-secondary",
             )}
             title={entry.pinned ? "Unpin" : "Pin"}
           >
-            <PushPin size={12} weight="light" />
+            <span className="text-[10px] font-bold">*</span>
           </button>
           <button
             onClick={handleEdit}
             className="p-1 text-text-tertiary hover:text-text-secondary rounded transition-colors"
             title="Edit"
           >
-            <PencilSimple size={12} weight="light" />
+            <EditIcon size={12} />
           </button>
           <button
             onClick={handleDelete}
             className="p-1 text-text-tertiary hover:text-error rounded transition-colors"
             title="Delete"
           >
-            <Trash size={12} weight="light" />
+            <TrashIcon size={12} />
           </button>
         </div>
       </div>
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-        <span className={cn("text-label-xs px-1.5 py-0.5 rounded-full font-medium", categoryColor(entry.category))}>
+        <span className={cn("text-label px-1.5 py-0.5 rounded-full font-medium", categoryColor(entry.category))}>
           {categoryLabel(entry.category)}
         </span>
         {date && (
-          <span className="text-label-xs text-text-tertiary flex items-center gap-0.5">
-            <Calendar size={12} weight="light" />
+          <span className="text-label text-text-tertiary">
             {date}
           </span>
         )}
         {entry.tags.slice(0, 3).map((tag) => (
-          <span key={tag} className="text-label-xs text-text-tertiary bg-border px-1 py-0.5 rounded">
+          <span key={tag} className="text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded">
             {tag}
           </span>
         ))}
         {entry.tags.length > 3 && (
-          <span className="text-label-xs text-text-tertiary">+{entry.tags.length - 3}</span>
+          <span className="text-label text-text-tertiary">+{entry.tags.length - 3}</span>
         )}
       </div>
     </div>
