@@ -39,6 +39,7 @@ import { SprintList } from "@/components/sprints/sprint-list";
 import { useSprintsStore } from "@/stores/sprints";
 
 import { MemoryView } from "@/components/memory/memory-view";
+import { ReportsView } from "@/components/reports/reports-view";
 import { SettingsView } from "@/components/settings/settings-view";
 import { DevServersView } from "@/components/dev-servers/dev-servers-view";
 
@@ -77,11 +78,11 @@ interface PreflightResult {
 // ActiveMode ↔ NavPage mapping
 // ---------------------------------------------------------------------------
 
-const modeToNav: Record<ActiveMode, NavPage> = {
+const modeToNav: Record<ActiveMode, NavPage | null> = {
   sessions: "sessions",
   teams: "teams",
   sprints: "sprints",
-  reports: "sessions",
+  reports: null,
   memory: "knowledge",
   settings: "settings",
 };
@@ -574,7 +575,7 @@ export default function Home() {
   }
 
   // --- Derived state ---
-  const currentNavPage: NavPage = modeToNav[activeMode];
+  const currentNavPage: NavPage | null = modeToNav[activeMode];
   const nonRoomSessions = sessions.filter((s) => s.meta?.group !== "room");
   const showGitView = activeMode === "sessions" && selectedRepo != null;
 
@@ -626,6 +627,16 @@ export default function Home() {
               <h3 className="text-label uppercase tracking-wider text-text-ghost">
                 Knowledge
               </h3>
+            </div>
+          )}
+          {activeMode === "reports" && (
+            <div className="px-3 py-2.5">
+              <h3 className="text-label uppercase tracking-wider text-text-ghost">
+                Reports
+              </h3>
+              <p className="text-[9px] text-text-tertiary mt-1 leading-snug">
+                Automation output and approvals. Configure schedules in Settings.
+              </p>
             </div>
           )}
           {activeMode === "settings" && (
@@ -736,6 +747,13 @@ export default function Home() {
             <div className={activeMode === "memory" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"}>
               <ErrorBoundary fallbackLabel="Memory view error">
                 <MemoryView />
+              </ErrorBoundary>
+            </div>
+
+            {/* Reports (scheduled automations) */}
+            <div className={activeMode === "reports" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"}>
+              <ErrorBoundary fallbackLabel="Reports view error">
+                <ReportsView />
               </ErrorBoundary>
             </div>
 

@@ -23,6 +23,9 @@ import { GitView } from "@/components/sessions/git-view";
 import { TerminalPaneV2 } from "@/components/terminal/terminal-pane-v2";
 
 import { TeamsView } from "@/components/teams/teams-view";
+import { SprintsView } from "@/components/sprints/sprints-view";
+import { SprintList } from "@/components/sprints/sprint-list";
+import { useSprintsStore } from "@/stores/sprints";
 import { MemoryView } from "@/components/memory/memory-view";
 import { SettingsView } from "@/components/settings/settings-view";
 import { ReportsView } from "@/components/reports/reports-view";
@@ -154,6 +157,10 @@ export default function PageV2() {
   const theme = useUIStore((s) => s.theme);
   const toggleTheme = useUIStore((s) => s.toggleTheme);
   const zoomLevels = useSessionsStore((s) => s.zoomLevels);
+
+  const sprints = useSprintsStore((s) => s.sprints);
+  const selectedSprintId = useSprintsStore((s) => s.selectedSprintId);
+  const selectSprint = useSprintsStore((s) => s.selectSprint);
 
   // Hooks
   useKeyboardShortcuts();
@@ -438,7 +445,7 @@ export default function PageV2() {
       const modeMap: Record<NavPage, string> = {
         sessions: "sessions",
         teams: "teams",
-        sprints: "reports",
+        sprints: "sprints",
         knowledge: "memory",
         settings: "settings",
       };
@@ -524,12 +531,17 @@ export default function PageV2() {
   }
 
   // --- Current nav page from activeMode ---
-  const currentNavPage: NavPage =
+  const currentNavPage: NavPage | null =
     activeMode === "reports"
-      ? "sprints"
+      ? null
       : activeMode === "memory"
         ? "knowledge"
-        : (activeMode as NavPage);
+        : activeMode === "sessions" ||
+            activeMode === "teams" ||
+            activeMode === "sprints" ||
+            activeMode === "settings"
+          ? (activeMode as NavPage)
+          : null;
 
   // Find the focused session for terminal
   const focusedSession = sessions.find((s) => s.id === focusedId);
@@ -562,6 +574,13 @@ export default function PageV2() {
               onRepoClick={(repo) => setSelectedRepo(repo)}
               onPR={(repo) => openPrModal(repo)}
               onPush={handlePush}
+            />
+          )}
+          {activeMode === "sprints" && (
+            <SprintList
+              sprints={sprints}
+              selectedSprintId={selectedSprintId}
+              onSelect={selectSprint}
             />
           )}
         </SidebarShell>
@@ -629,6 +648,11 @@ export default function PageV2() {
             <div className={activeMode === "teams" ? "h-full" : "hidden"}>
               <ErrorBoundary fallbackLabel="Teams view error">
                 <TeamsView />
+              </ErrorBoundary>
+            </div>
+            <div className={activeMode === "sprints" ? "h-full" : "hidden"}>
+              <ErrorBoundary fallbackLabel="Sprints view error">
+                <SprintsView />
               </ErrorBoundary>
             </div>
             <div className={activeMode === "memory" ? "h-full" : "hidden"}>

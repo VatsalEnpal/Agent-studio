@@ -79,7 +79,13 @@ Agent Studio gives your AI agents the infrastructure real engineering teams have
 - Auto-detect local development servers running on your machine
 - Monitor port status and quick-access links
 
-### Desktop App
+### Reports & automations
+- Scheduled headless Claude Code runs (automations) with output saved as **reports**
+- Review, approve, or dismiss reports from the **Reports** tab (top toggle)
+- Configure schedules and templates under **Settings → Automations**
+
+### Desktop App (macOS)
+- **Native Mac app** built with Electron — menu bar, traffic lights, and OS integration
 - Native macOS notifications for gate approvals, dangerous actions, task completion
 - System tray with quick controls
 - Crash recovery and health watchdog
@@ -130,6 +136,17 @@ In-app walkthrough: [HOWTO.md](HOWTO.md) (features, shortcuts, agents, automatio
 - **Claude Code CLI** authenticated — [install guide](https://docs.anthropic.com/en/docs/claude-code)
 
 On first launch, Agent Studio checks prerequisites and runs onboarding if everything passes.
+
+### Docker (browser / server stack)
+
+Use this when you want the **Next.js + Express** app in a Linux container (e.g. remote or headless). It serves the same URL as `npm run dev`.
+
+```bash
+docker compose up --build
+# http://localhost:8080
+```
+
+**Important:** This is **not** the macOS Electron shell. The **native Mac app** (`npm run electron:dev` or a `.dmg` from `npm run build:mac`) only runs on **macOS with a GUI**. Inside Docker you get the web UI; local PTY terminals and OS integrations depend on your mount and host setup (see `docker-compose.yml`).
 
 ### Build a `.dmg` (optional)
 
@@ -226,10 +243,11 @@ docs/                    Design specs and research
 
 ```bash
 npm run dev              # Dev server with hot reload (localhost:8080)
-npm run electron:dev     # Dev server + Electron together
+npm run electron:dev     # Dev server + Electron together (macOS GUI)
 npm run type-check       # TypeScript strict mode check
 npm run test             # Vitest unit tests
-npm run test:smoke       # Endpoint + WebSocket smoke test
+npm run test:smoke       # Endpoint + WebSocket smoke test (needs `npm run dev` in another terminal)
+docker compose up --build   # Same stack in Docker → localhost:8080
 npm run build:mac        # Build macOS .dmg
 ```
 

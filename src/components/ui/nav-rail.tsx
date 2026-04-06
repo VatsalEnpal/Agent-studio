@@ -29,7 +29,8 @@ interface NavItem {
 }
 
 interface NavRailProps {
-  activePage: NavPage;
+  /** When `null` (e.g. Reports from the top toggle), no pillar is highlighted. */
+  activePage: NavPage | null;
   onNavigate: (page: NavPage) => void;
   /** Badge counts keyed by page id */
   badges?: Partial<Record<NavPage, number>>;
@@ -112,7 +113,7 @@ export function NavRail({ activePage, onNavigate, badges }: NavRailProps) {
           <NavRailItem
             key={item.id}
             item={item}
-            isActive={activePage === item.id}
+            isActive={activePage != null && activePage === item.id}
             badge={badges?.[item.id]}
             onNavigate={onNavigate}
           />
