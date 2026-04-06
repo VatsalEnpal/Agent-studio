@@ -126,7 +126,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
           </h2>
           <button
             onClick={() => onOpenChange(false)}
-            className="p-0.5 rounded text-text-ghost hover:text-text-secondary transition-colors"
+            className="p-0.5 rounded text-text-ghost hover:text-text-secondary transition-all"
           >
             <CloseIcon size={12} />
           </button>
@@ -144,7 +144,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="auth-refactor"
-              className="w-full bg-bg-input border border-border-default rounded-md px-2 py-1 text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-colors"
+              className="w-full bg-bg-input border border-border-default rounded-md px-2 py-1 text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
               autoFocus
             />
           </div>
@@ -159,7 +159,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Refactor auth flow to use server-side sessions"
-              className="w-full bg-bg-input border border-border-default rounded-md px-2 py-1 text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-colors"
+              className="w-full bg-bg-input border border-border-default rounded-md px-2 py-1 text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
             />
           </div>
 
@@ -175,10 +175,10 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                   <div
                     key={agent.id}
                     className={cn(
-                      "flex items-center gap-2 px-2.5 py-1.5 rounded-md border transition-colors",
+                      "flex items-center gap-2 px-2.5 py-1.5 rounded-md border transition-all",
                       agent.enabled
-                        ? "border-rooms/30 bg-rooms-subtle"
-                        : "border-border-default bg-transparent hover:bg-bg-input/30",
+                        ? "border-rooms/30 bg-rooms-subtle shadow-[0_0_8px_rgba(124,131,247,0.06)]"
+                        : "border-border-default bg-transparent hover:bg-bg-input/30 hover:shadow-[0_0_12px_rgba(124,131,247,0.06)]",
                     )}
                   >
                     {/* Checkbox */}
@@ -186,7 +186,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                       onClick={() => toggleAgent(agent.id)}
                       disabled={agent.locked}
                       className={cn(
-                        "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors",
+                        "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all",
                         agent.enabled
                           ? "bg-rooms border-rooms"
                           : "border-text-tertiary",
@@ -236,7 +236,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                       onChange={(e) =>
                         setAgentModel(agent.id, e.target.value as "opus" | "sonnet" | "haiku")
                       }
-                      className="bg-bg-base border border-border-default rounded-md px-2 py-1 text-label font-mono text-text-secondary focus:outline-none focus:border-border-subtle transition-colors"
+                      className="bg-bg-base border border-border-default rounded-md px-2 py-1 text-label font-mono text-text-secondary focus:outline-none focus:border-border-subtle transition-all"
                     >
                       <option value="opus">opus</option>
                       <option value="sonnet">sonnet</option>
@@ -253,7 +253,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
         <div className="flex items-center justify-end gap-2 px-4 py-2.5 border-t border-border-default">
           <button
             onClick={() => onOpenChange(false)}
-            className="px-2.5 py-1 text-[10px] font-medium text-text-secondary hover:text-text-primary rounded-md transition-colors"
+            className="px-2.5 py-1 text-[10px] font-medium text-text-secondary hover:text-text-primary rounded-md transition-all"
           >
             Cancel
           </button>

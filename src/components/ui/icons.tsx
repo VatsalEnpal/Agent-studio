@@ -254,6 +254,15 @@ export const FolderIcon = icon(
   "FolderIcon",
 );
 
+/** Copy / clipboard */
+export const CopyIcon = icon(
+  <>
+    <rect x="5" y="5" width="8" height="8" rx="1" />
+    <path d="M3 11V4a1 1 0 0 1 1-1h7" />
+  </>,
+  "CopyIcon",
+);
+
 /** Refresh / arrow clockwise */
 export const RefreshIcon = icon(
   <>

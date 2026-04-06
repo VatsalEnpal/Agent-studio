@@ -120,7 +120,7 @@ export function DevServersView() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Filter..."
-            className="w-full pl-6 pr-2 py-1 text-[10px] bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-colors"
+            className="w-full pl-6 pr-2 py-1 text-[10px] bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
           />
         </div>
 
@@ -129,7 +129,7 @@ export function DevServersView() {
             setLoading(true);
             void fetchServers();
           }}
-          className="p-1.5 text-text-tertiary hover:text-text-primary rounded transition-colors"
+          className="p-1.5 text-text-tertiary hover:text-text-primary rounded transition-all active:scale-[0.92]"
           title="Refresh"
         >
           <RefreshIcon size={14} />
@@ -162,7 +162,7 @@ export function DevServersView() {
             <p className="text-[10px] font-medium text-text-secondary">
               {search ? "No matching services" : "No services detected"}
             </p>
-            <p className="text-xs text-text-tertiary max-w-[280px] text-center">
+            <p className="text-[10px] text-text-tertiary max-w-[280px] text-center leading-relaxed">
               {search
                 ? "Try a different search term."
                 : "Start a dev server (npm run dev, etc.) and it will appear here."}
@@ -173,28 +173,29 @@ export function DevServersView() {
             <div
               key={`${server.pid}-${server.port}`}
               className={cn(
-                "flex items-center gap-3 px-5 py-2 border-b border-border-subtle/50 hover:bg-bg-elevated/30 transition-colors group",
+                "flex items-center gap-3 px-5 py-2 border-b border-border-subtle/50 transition-all group",
+                "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(52,211,153,0.04)]",
                 server.isSelf && "bg-sessions/[0.02]",
               )}
             >
               {/* Port */}
               <div className="w-14 shrink-0 flex items-center gap-1.5">
                 <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
-                <span className="text-xs font-mono text-sessions font-medium">
+                <span className="text-[10px] font-mono text-sessions font-medium">
                   {server.port}
                 </span>
               </div>
 
               {/* Process name */}
               <div className="w-24 shrink-0">
-                <span className="text-xs text-text-primary truncate block">
+                <span className="text-[10px] text-text-primary truncate block">
                   {processLabel(server.command)}
                 </span>
               </div>
 
               {/* Directory */}
               <div className="flex-1 min-w-0">
-                <span className="text-xs text-text-tertiary font-mono truncate block">
+                <span className="text-[10px] text-text-tertiary font-mono truncate block">
                   {shortenCwd(server.cwd)}
                 </span>
               </div>
@@ -213,7 +214,7 @@ export function DevServersView() {
                     href={`http://localhost:${server.port}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-1 text-text-tertiary hover:text-sessions rounded transition-colors"
+                    className="p-1 text-text-tertiary hover:text-sessions rounded transition-all"
                     title={`Open http://localhost:${server.port}`}
                   >
                     <ExternalLinkIcon size={12} />

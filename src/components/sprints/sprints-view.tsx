@@ -73,7 +73,7 @@ export function SprintsView() {
           </div>
           <p className="text-[10px] font-medium text-text-secondary">
             {sprints.length === 0
-              ? "No sprints found"
+              ? "No sprints running"
               : "Select a sprint to view details"}
           </p>
           {sprints.length === 0 && (

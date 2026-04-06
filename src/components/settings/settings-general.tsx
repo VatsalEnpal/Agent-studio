@@ -36,28 +36,28 @@ export function SettingsGeneral() {
   };
 
   return (
-    <section className="border border-console-border rounded-lg bg-console-panel">
-      <div className="px-4 py-3 border-b border-console-border">
-        <h3 className="text-body-sm font-medium text-console-text">General</h3>
+    <section className="border border-border-default rounded-lg bg-bg-surface">
+      <div className="px-4 py-3 border-b border-border-default">
+        <h3 className="text-[11px] font-medium text-text-primary">General</h3>
       </div>
       <div className="px-4 py-3 space-y-4">
         {/* Default Model */}
         <div>
-          <label className="text-label-xs text-console-muted block mb-1.5">Default Model</label>
+          <label className="text-label text-text-secondary block mb-1.5">Default Model</label>
           <div className="flex items-center gap-2">
             {(["opus", "sonnet", "haiku"] as const).map((model) => (
               <button
                 key={model}
                 onClick={() => updateSetting("defaultModel", model)}
                 className={cn(
-                  "px-3 py-1.5 text-label-xs font-medium rounded transition-all",
+                  "px-2 py-0.5 text-[10px] font-medium rounded-md transition-all active:scale-[0.98]",
                   settings.defaultModel === model
                     ? model === "opus"
-                      ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
+                      ? "bg-memory/15 text-memory border border-memory/30"
                       : model === "haiku"
-                        ? "bg-teal-500/20 text-teal-400 border border-teal-500/30"
-                        : "bg-console-accent/20 text-console-accent border border-console-accent/30"
-                    : "bg-console-faint text-console-dim hover:text-console-muted border border-transparent",
+                        ? "bg-sessions/15 text-sessions border border-sessions/30"
+                        : "bg-rooms/15 text-rooms border border-rooms/30"
+                    : "bg-bg-elevated text-text-tertiary hover:text-text-secondary border border-border-default",
                 )}
               >
                 {model}
@@ -68,11 +68,11 @@ export function SettingsGeneral() {
 
         {/* Default Permissions */}
         <div>
-          <label className="text-label-xs text-console-muted block mb-1.5">Default Permissions</label>
+          <label className="text-label text-text-secondary block mb-1.5">Default Permissions</label>
           <select
             value={settings.defaultPermissions}
             onChange={(e) => updateSetting("defaultPermissions", e.target.value as "bypass" | "default" | "plan")}
-            className="px-2 py-1.5 text-label-xs bg-console-bg border border-console-border rounded text-console-text focus:outline-none focus:border-console-accent"
+            className="px-2 py-1.5 text-label bg-bg-base border border-border-default rounded text-text-primary focus:outline-none focus:border-border-subtle"
           >
             <option value="bypass">Bypass (skip permissions)</option>
             <option value="default">Default</option>
@@ -82,12 +82,12 @@ export function SettingsGeneral() {
 
         {/* Default Working Directory */}
         <div>
-          <label className="text-label-xs text-console-muted block mb-1.5">Default Working Directory</label>
+          <label className="text-label text-text-secondary block mb-1.5">Default Working Directory</label>
           <input
             type="text"
             value={settings.defaultCwd}
             onChange={(e) => updateSetting("defaultCwd", e.target.value)}
-            className="w-full px-2 py-1.5 text-body-sm font-mono bg-console-bg border border-console-border rounded text-console-text focus:outline-none focus:border-console-accent"
+            className="w-full px-2 py-1.5 text-[11px] font-mono bg-bg-base border border-border-default rounded text-text-primary focus:outline-none focus:border-border-subtle"
           />
         </div>
 
@@ -97,10 +97,10 @@ export function SettingsGeneral() {
             onClick={() => void handleSave()}
             disabled={saving}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium rounded transition-all",
+              "flex items-center gap-1.5 px-3 py-1.5 text-label font-medium rounded transition-all active:scale-[0.98]",
               saved
-                ? "bg-console-success/20 text-console-success"
-                : "bg-console-accent/20 text-console-accent hover:bg-console-accent/30",
+                ? "bg-sessions/20 text-sessions"
+                : "bg-rooms/20 text-rooms hover:bg-rooms/30",
             )}
           >
             {saved ? <CheckIcon className="w-3 h-3" /> : <SaveIcon className="w-3 h-3" />}

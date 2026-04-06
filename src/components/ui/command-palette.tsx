@@ -42,6 +42,8 @@ export interface CommandItem {
   onSelect: () => void;
   /** Recently used timestamp — higher = more recent */
   recentTs?: number;
+  /** Keyboard shortcut hint displayed on the right */
+  shortcut?: string;
 }
 
 interface CommandGroup {
@@ -387,13 +389,13 @@ export function CommandPalette({ items }: CommandPaletteProps) {
         >
           {flatItems.length === 0 ? (
             <div className="px-3 py-6 text-center text-[10px] text-text-tertiary">
-              No results found
+              No matching commands
             </div>
           ) : (
             groups.map((group) => {
               const GroupIcon = group.icon;
               return (
-                <div key={group.category}>
+                <div key={group.category} className="pt-1">
                   {/* Category header */}
                   <div className="flex items-center gap-2 px-4 py-1.5">
                     <GroupIcon
@@ -402,6 +404,9 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                     />
                     <span className={cn("text-label uppercase tracking-wider", group.colorClass)}>
                       {group.label}
+                    </span>
+                    <span className="text-[9px] text-text-ghost ml-auto">
+                      {group.items.length}
                     </span>
                   </div>
 
@@ -422,7 +427,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                         className={cn(
                           "flex items-center gap-2.5 w-full px-3 py-1.5",
                           "text-left text-[10px]",
-                          "transition-colors duration-[var(--duration-instant)]",
+                          "transition-all duration-[var(--duration-instant)] active:scale-[0.99]",
                           isSelected
                             ? "bg-bg-elevated text-text-primary"
                             : "text-text-secondary hover:bg-bg-elevated/50",
@@ -438,7 +443,12 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                           )}
                         />
                         <span className="flex-1 truncate">{item.label}</span>
-                        {isSelected && (
+                        {item.shortcut && (
+                          <kbd className="text-[9px] font-mono text-text-ghost bg-bg-base px-1 py-0.5 rounded border border-border-default shrink-0">
+                            {item.shortcut}
+                          </kbd>
+                        )}
+                        {isSelected && !item.shortcut && (
                           <span className="text-label text-text-ghost">
                             Enter
                           </span>

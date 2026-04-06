@@ -11,15 +11,15 @@ const STATUS_CONFIG: Record<
 > = {
   completed: {
     icon: CheckIcon,
-    color: "text-console-success",
-    bg: "bg-console-success/10",
-    borderColor: "border-l-console-success",
+    color: "text-sessions",
+    bg: "bg-sessions/10",
+    borderColor: "border-l-sessions",
   },
   active: {
     icon: SpinnerIcon,
-    color: "text-console-accent",
-    bg: "bg-console-accent/10",
-    borderColor: "border-l-console-accent",
+    color: "text-rooms",
+    bg: "bg-rooms/10",
+    borderColor: "border-l-rooms",
   },
   waiting: {
     icon: ClockIcon,
@@ -29,15 +29,15 @@ const STATUS_CONFIG: Record<
   },
   pending: {
     icon: CircleIcon,
-    color: "text-console-dim",
-    bg: "bg-console-faint/50",
-    borderColor: "border-l-console-dim",
+    color: "text-text-tertiary",
+    bg: "bg-bg-elevated/50",
+    borderColor: "border-l-text-tertiary",
   },
   failed: {
     icon: CloseIcon,
-    color: "text-console-error",
-    bg: "bg-console-error/10",
-    borderColor: "border-l-console-error",
+    color: "text-error",
+    bg: "bg-error/10",
+    borderColor: "border-l-error",
   },
 };
 
@@ -67,12 +67,12 @@ export function StepCard({ step }: { step: WorkflowStep }) {
         step.status === "waiting"
           ? "border-amber-400/40 border-l-amber-400 bg-amber-400/[0.04] shadow-sm shadow-amber-400/10"
           : step.status === "completed"
-            ? "border-console-border border-l-console-success bg-transparent"
+            ? "border-border-default border-l-sessions bg-transparent"
             : step.status === "active"
-              ? "border-console-accent/40 border-l-console-accent bg-console-accent/[0.03] shadow-sm shadow-console-accent/10"
+              ? "border-rooms/40 border-l-rooms bg-rooms/[0.03] shadow-sm shadow-rooms/10"
               : step.status === "failed"
-                ? "border-console-error/40 border-l-console-error bg-console-error/[0.03]"
-                : "border-console-border/60 border-l-console-dim/40 bg-transparent opacity-50",
+                ? "border-error/40 border-l-error bg-error/[0.03]"
+                : "border-border-default border-l-text-tertiary/40 bg-transparent opacity-50",
       )}
     >
       {/* Collapsed row */}
@@ -80,8 +80,8 @@ export function StepCard({ step }: { step: WorkflowStep }) {
         onClick={() => canExpand && setExpanded(!expanded)}
         disabled={!canExpand}
         className={cn(
-          "flex items-center gap-2.5 w-full px-3 py-2.5 text-left transition-colors",
-          canExpand && "hover:bg-console-faint/30 cursor-pointer",
+          "flex items-center gap-2.5 w-full px-3 py-2.5 text-left transition-all",
+          canExpand && "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(124,131,247,0.04)] cursor-pointer",
           !canExpand && "cursor-default",
         )}
       >
@@ -103,10 +103,10 @@ export function StepCard({ step }: { step: WorkflowStep }) {
             step.status === "waiting"
               ? "text-amber-300"
               : step.status === "pending"
-                ? "text-console-dim"
+                ? "text-text-tertiary"
                 : step.status === "completed"
-                  ? "text-console-muted"
-                  : "text-console-text",
+                  ? "text-text-secondary"
+                  : "text-text-primary",
           )}
         >
           {step.name}
@@ -120,8 +120,8 @@ export function StepCard({ step }: { step: WorkflowStep }) {
               className={cn(
                 "inline-flex px-1.5 py-0.5 rounded text-[8px] font-mono",
                 step.status === "pending"
-                  ? "bg-console-faint/50 text-console-dim"
-                  : (AGENT_COLORS[agent] ?? "bg-console-faint text-console-muted"),
+                  ? "bg-bg-elevated/50 text-text-tertiary"
+                  : (AGENT_COLORS[agent] ?? "bg-bg-elevated text-text-secondary"),
               )}
             >
               {agent.replace("-worker", "").replace("-tester", "").replace("-reviewer", "")}
@@ -131,12 +131,12 @@ export function StepCard({ step }: { step: WorkflowStep }) {
 
         {/* Duration for completed steps */}
         {step.durationMs != null && (
-          <span className="text-[9px] text-console-dim font-mono shrink-0">
+          <span className="text-[9px] text-text-tertiary font-mono shrink-0">
             {formatDuration(step.durationMs)}
           </span>
         )}
         {step.status === "completed" && step.completedAt && step.startedAt && step.durationMs == null && (
-          <span className="text-[9px] text-console-dim/60 font-mono shrink-0">
+          <span className="text-[9px] text-text-tertiary/60 font-mono shrink-0">
             done
           </span>
         )}
@@ -145,7 +145,7 @@ export function StepCard({ step }: { step: WorkflowStep }) {
         {canExpand && (
           <ChevronRightIcon
             className={cn(
-              "w-3 h-3 text-console-dim transition-transform duration-150 shrink-0",
+              "w-3 h-3 text-text-tertiary transition-transform duration-150 shrink-0",
               expanded && "rotate-90",
             )}
           />
@@ -154,11 +154,11 @@ export function StepCard({ step }: { step: WorkflowStep }) {
 
       {/* Expanded rich content */}
       {expanded && canExpand && (
-        <div className="px-3 pb-3 pt-0 border-t border-console-border/50">
+        <div className="px-3 pb-3 pt-0 border-t border-border-default/50">
           {step.richContent ? (
             <RichContentRenderer content={step.richContent} stepStatus={step.status} />
           ) : step.details ? (
-            <p className="text-[10px] text-console-muted leading-relaxed mt-2 whitespace-pre-wrap">
+            <p className="text-[10px] text-text-secondary leading-relaxed mt-2 whitespace-pre-wrap">
               {step.details}
             </p>
           ) : null}
@@ -200,7 +200,7 @@ export function StepCard({ step }: { step: WorkflowStep }) {
                   "rounded font-medium transition-all",
                   step.status === "waiting"
                     ? "px-5 py-2.5 text-xs bg-amber-500 text-black hover:bg-amber-400 animate-pulse shadow-lg shadow-amber-500/25"
-                    : "px-3 py-1.5 text-[10px] bg-console-accent text-black hover:bg-console-accent/80",
+                    : "px-3 py-1.5 text-[10px] bg-rooms text-black hover:bg-rooms/80",
                 )}
               >
                 {step.action.label}
@@ -248,12 +248,12 @@ function PmoScanContent({ content }: { content: StepRichContent }) {
         <div className="flex items-center gap-2">
           <StatusBadge status={content.readinessStatus} />
           {content.ticketsFound != null && content.ticketsFound > 0 && (
-            <span className="text-[10px] text-console-muted">
+            <span className="text-[10px] text-text-secondary">
               {content.ticketsFound} tickets found
             </span>
           )}
           {content.domains && content.domains.length > 0 && (
-            <span className="text-[10px] text-console-dim">
+            <span className="text-[10px] text-text-tertiary">
               in {content.domains.join(", ")}
             </span>
           )}
@@ -263,7 +263,7 @@ function PmoScanContent({ content }: { content: StepRichContent }) {
       {/* Latest scan entries */}
       {content.scanEntries && content.scanEntries.length > 0 && (
         <div className="space-y-1">
-          <span className="text-[9px] text-console-dim uppercase tracking-wider font-medium">
+          <span className="text-[9px] text-text-tertiary uppercase tracking-wider font-medium">
             Recent Scans
           </span>
           <div className="space-y-0.5 max-h-40 overflow-y-auto">
@@ -278,7 +278,7 @@ function PmoScanContent({ content }: { content: StepRichContent }) {
       {content.scanEntries && content.scanEntries.length > 3 && (
         <button
           onClick={() => setShowFull(!showFull)}
-          className="text-[9px] text-console-accent hover:text-console-accent/80 transition-colors flex items-center gap-1"
+          className="text-[9px] text-rooms hover:text-rooms/80 transition-all flex items-center gap-1"
         >
           {showFull ? (
             <>
@@ -302,32 +302,32 @@ function ScanEntry({ entry }: { entry: ScanLogEntry }) {
   const isNotReady = entry.status.includes("NOT READY");
 
   return (
-    <div className="flex items-start gap-2 py-1 px-2 rounded bg-console-faint/30">
+    <div className="flex items-start gap-2 py-1 px-2 rounded bg-bg-elevated/30">
       <span
         className={cn(
           "shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full",
-          isReady ? "bg-console-success" : isNotReady ? "bg-console-error" : "bg-console-dim",
+          isReady ? "bg-sessions" : isNotReady ? "bg-error" : "bg-text-tertiary",
         )}
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-[9px] text-console-dim font-mono shrink-0">
+          <span className="text-[9px] text-text-tertiary font-mono shrink-0">
             {formatTimestamp(entry.timestamp)}
           </span>
           <span
             className={cn(
               "text-[8px] px-1 py-0.5 rounded font-medium",
               isReady
-                ? "bg-console-success/15 text-console-success"
+                ? "bg-sessions/15 text-sessions"
                 : isNotReady
-                  ? "bg-console-error/15 text-console-error"
-                  : "bg-console-faint text-console-dim",
+                  ? "bg-error/15 text-error"
+                  : "bg-bg-elevated text-text-tertiary",
             )}
           >
             {entry.status}
           </span>
         </div>
-        <p className="text-[9px] text-console-muted leading-relaxed mt-0.5 break-words">
+        <p className="text-[9px] text-text-secondary leading-relaxed mt-0.5 break-words">
           {entry.detail.length > 200 ? entry.detail.slice(0, 200) + "..." : entry.detail}
         </p>
       </div>
@@ -345,7 +345,7 @@ function ReadinessContent({ content }: { content: StepRichContent }) {
         <div className="flex items-center gap-2">
           <StatusBadge status={content.readinessStatus} />
           {content.ticketsFound != null && content.ticketsFound > 0 && (
-            <span className="text-[10px] text-console-muted">
+            <span className="text-[10px] text-text-secondary">
               {content.ticketsFound} To Do tickets across {content.domains?.length ?? 0} domains
             </span>
           )}
@@ -355,13 +355,13 @@ function ReadinessContent({ content }: { content: StepRichContent }) {
       {/* Sprint recommendations */}
       {content.buildSummary && content.buildSummary.length > 0 && (
         <div className="space-y-1">
-          <span className="text-[9px] text-console-dim uppercase tracking-wider font-medium">
+          <span className="text-[9px] text-text-tertiary uppercase tracking-wider font-medium">
             Recommended Sprints
           </span>
           {content.buildSummary.map((item, i) => (
             <div key={i} className="flex items-start gap-1.5 py-0.5">
-              <ArrowRightIcon className="w-2.5 h-2.5 text-console-accent shrink-0 mt-0.5" />
-              <span className="text-[10px] text-console-muted">{item}</span>
+              <ArrowRightIcon className="w-2.5 h-2.5 text-rooms shrink-0 mt-0.5" />
+              <span className="text-[10px] text-text-secondary">{item}</span>
             </div>
           ))}
         </div>
@@ -369,15 +369,15 @@ function ReadinessContent({ content }: { content: StepRichContent }) {
 
       {/* Preview / Full */}
       {content.specPreview && !showFull && (
-        <div className="bg-console-faint/30 rounded p-2 max-h-32 overflow-y-auto">
-          <p className="text-[9px] text-console-dim font-mono whitespace-pre-wrap leading-relaxed">
+        <div className="bg-bg-elevated/30 rounded p-2 max-h-32 overflow-y-auto">
+          <p className="text-[9px] text-text-tertiary font-mono whitespace-pre-wrap leading-relaxed">
             {content.specPreview}
           </p>
         </div>
       )}
 
       {showFull && content.fullSpec && (
-        <div className="bg-console-faint/30 rounded p-2.5 max-h-64 overflow-y-auto">
+        <div className="bg-bg-elevated/30 rounded p-2.5 max-h-64 overflow-y-auto">
           <MarkdownRenderer text={content.fullSpec} />
         </div>
       )}
@@ -385,7 +385,7 @@ function ReadinessContent({ content }: { content: StepRichContent }) {
       {content.fullSpec && (
         <button
           onClick={() => setShowFull(!showFull)}
-          className="text-[9px] text-console-accent hover:text-console-accent/80 transition-colors flex items-center gap-1"
+          className="text-[9px] text-rooms hover:text-rooms/80 transition-all flex items-center gap-1"
         >
           <FileIcon className="w-2.5 h-2.5" />
           {showFull ? "Hide full report" : "View full report"}
@@ -404,7 +404,7 @@ function SprintSpecContent({ content }: { content: StepRichContent }) {
       {/* Sprint info header */}
       <div className="flex flex-wrap items-center gap-2">
         {content.sprintTitle && (
-          <span className="text-[10px] font-medium text-console-text">
+          <span className="text-[10px] font-medium text-text-primary">
             {content.sprintTitle}
           </span>
         )}
@@ -414,7 +414,7 @@ function SprintSpecContent({ content }: { content: StepRichContent }) {
           </span>
         )}
         {content.sprintCreated && (
-          <span className="text-[9px] text-console-dim">
+          <span className="text-[9px] text-text-tertiary">
             Created {content.sprintCreated}
           </span>
         )}
@@ -423,12 +423,12 @@ function SprintSpecContent({ content }: { content: StepRichContent }) {
       {/* Task counts */}
       {content.taskCount && content.taskCount.total > 0 && (
         <div className="flex items-center gap-3">
-          <span className="text-[10px] text-console-muted font-medium">
+          <span className="text-[10px] text-text-secondary font-medium">
             {content.taskCount.total} tasks
           </span>
           <div className="flex items-center gap-2 text-[9px]">
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-console-success" />
+              <span className="w-1.5 h-1.5 rounded-full bg-sessions" />
               {content.taskCount.safe} safe
             </span>
             <span className="flex items-center gap-1">
@@ -436,7 +436,7 @@ function SprintSpecContent({ content }: { content: StepRichContent }) {
               {content.taskCount.medium} medium
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-console-error" />
+              <span className="w-1.5 h-1.5 rounded-full bg-error" />
               {content.taskCount.high} high risk
             </span>
           </div>
@@ -446,13 +446,13 @@ function SprintSpecContent({ content }: { content: StepRichContent }) {
       {/* Assigned agents */}
       {content.assignedAgents && content.assignedAgents.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[9px] text-console-dim">Agents:</span>
+          <span className="text-[9px] text-text-tertiary">Agents:</span>
           {content.assignedAgents.map((agent) => (
             <span
               key={agent}
               className={cn(
                 "text-[8px] px-1.5 py-0.5 rounded font-mono",
-                AGENT_COLORS[agent] ?? "bg-console-faint text-console-muted",
+                AGENT_COLORS[agent] ?? "bg-bg-elevated text-text-secondary",
               )}
             >
               {agent.replace("-worker", "").replace("-tester", "").replace("-reviewer", "")}
@@ -463,13 +463,13 @@ function SprintSpecContent({ content }: { content: StepRichContent }) {
 
       {/* Spec preview */}
       {!showFull && content.specPreview && (
-        <div className="bg-console-faint/30 rounded p-2 max-h-40 overflow-y-auto">
+        <div className="bg-bg-elevated/30 rounded p-2 max-h-40 overflow-y-auto">
           <MarkdownRenderer text={content.specPreview} />
         </div>
       )}
 
       {showFull && content.fullSpec && (
-        <div className="bg-console-faint/30 rounded p-2.5 max-h-[400px] overflow-y-auto">
+        <div className="bg-bg-elevated/30 rounded p-2.5 max-h-[400px] overflow-y-auto">
           <MarkdownRenderer text={content.fullSpec} />
         </div>
       )}
@@ -477,7 +477,7 @@ function SprintSpecContent({ content }: { content: StepRichContent }) {
       {content.fullSpec && (
         <button
           onClick={() => setShowFull(!showFull)}
-          className="text-[9px] text-console-accent hover:text-console-accent/80 transition-colors flex items-center gap-1"
+          className="text-[9px] text-rooms hover:text-rooms/80 transition-all flex items-center gap-1"
         >
           <FileIcon className="w-2.5 h-2.5" />
           {showFull ? "Hide full spec" : "View full spec"}
@@ -494,14 +494,14 @@ function ApprovalContent({ content }: { content: StepRichContent }) {
       {/* What will be built */}
       {content.buildSummary && content.buildSummary.length > 0 && (
         <div className="space-y-1.5">
-          <span className="text-[9px] text-console-dim uppercase tracking-wider font-medium">
+          <span className="text-[9px] text-text-tertiary uppercase tracking-wider font-medium">
             What Will Be Built
           </span>
-          <div className="bg-console-faint/30 rounded p-2 space-y-1">
+          <div className="bg-bg-elevated/30 rounded p-2 space-y-1">
             {content.buildSummary.map((item, i) => (
               <div key={i} className="flex items-start gap-1.5 py-0.5">
-                <ArrowRightIcon className="w-2.5 h-2.5 text-console-accent shrink-0 mt-0.5" />
-                <span className="text-[10px] text-console-muted">{item}</span>
+                <ArrowRightIcon className="w-2.5 h-2.5 text-rooms shrink-0 mt-0.5" />
+                <span className="text-[10px] text-text-secondary">{item}</span>
               </div>
             ))}
           </div>
@@ -510,9 +510,9 @@ function ApprovalContent({ content }: { content: StepRichContent }) {
 
       {/* Estimated scope */}
       {content.estimatedScope && (
-        <div className="flex items-center gap-2 px-2.5 py-2 bg-console-faint/30 rounded border border-console-border/50">
-          <ClockIcon className="w-3.5 h-3.5 text-console-dim" />
-          <span className="text-[10px] text-console-muted font-medium">
+        <div className="flex items-center gap-2 px-2.5 py-2 bg-bg-elevated/30 rounded border border-border-default/50">
+          <ClockIcon className="w-3.5 h-3.5 text-text-tertiary" />
+          <span className="text-[10px] text-text-secondary font-medium">
             Estimated: {content.estimatedScope}
           </span>
         </div>
@@ -521,11 +521,11 @@ function ApprovalContent({ content }: { content: StepRichContent }) {
       {/* Task breakdown */}
       {content.taskCount && content.taskCount.total > 0 && (
         <div className="flex items-center gap-3 text-[9px]">
-          <span className="flex items-center gap-1 text-console-success">
+          <span className="flex items-center gap-1 text-sessions">
             <ShieldIcon className="w-2.5 h-2.5" /> {content.taskCount.safe} safe
           </span>
           <span className="text-amber-400">{content.taskCount.medium} medium risk</span>
-          <span className="text-console-error">{content.taskCount.high} high risk</span>
+          <span className="text-error">{content.taskCount.high} high risk</span>
         </div>
       )}
     </div>
@@ -540,26 +540,26 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
     <div className="mt-2 space-y-2.5">
       {/* Completed banner */}
       {stepStatus === "completed" && (
-        <div className="flex items-center gap-2 px-2 py-1.5 bg-console-success/10 rounded">
-          <CheckIcon className="w-3.5 h-3.5 text-console-success shrink-0" />
-          <span className="text-[10px] text-console-success font-medium">All checks passed</span>
+        <div className="flex items-center gap-2 px-2 py-1.5 bg-sessions/10 rounded">
+          <CheckIcon className="w-3.5 h-3.5 text-sessions shrink-0" />
+          <span className="text-[10px] text-sessions font-medium">All checks passed</span>
         </div>
       )}
 
       {/* Gate checks */}
       {content.gateChecks && content.gateChecks.length > 0 && (
         <div className="space-y-1">
-          <span className="text-[9px] text-console-dim uppercase tracking-wider font-medium">
+          <span className="text-[9px] text-text-tertiary uppercase tracking-wider font-medium">
             Gate Checks
           </span>
           {content.gateChecks.map((check, i) => (
             <div key={i} className="flex items-center gap-1.5 py-0.5">
               {stepStatus === "completed" ? (
-                <CheckIcon className="w-2.5 h-2.5 text-console-success shrink-0" />
+                <CheckIcon className="w-2.5 h-2.5 text-sessions shrink-0" />
               ) : (
-                <CircleIcon className="w-2.5 h-2.5 text-console-dim shrink-0" />
+                <CircleIcon className="w-2.5 h-2.5 text-text-tertiary shrink-0" />
               )}
-              <span className="text-[10px] text-console-muted">{check}</span>
+              <span className="text-[10px] text-text-secondary">{check}</span>
             </div>
           ))}
         </div>
@@ -568,12 +568,12 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
       {/* Gate results */}
       {content.gateResults && content.gateResults.length > 0 && (
         <div className="space-y-1">
-          <span className="text-[9px] text-console-dim uppercase tracking-wider font-medium">
+          <span className="text-[9px] text-text-tertiary uppercase tracking-wider font-medium">
             Results
           </span>
-          <div className="bg-console-faint/30 rounded p-2 space-y-0.5">
+          <div className="bg-bg-elevated/30 rounded p-2 space-y-0.5">
             {content.gateResults.map((result, i) => (
-              <p key={i} className="text-[9px] text-console-muted font-mono">
+              <p key={i} className="text-[9px] text-text-secondary font-mono">
                 {result}
               </p>
             ))}
@@ -583,7 +583,7 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
 
       {/* Files changed */}
       {content.filesChanged != null && (
-        <span className="text-[9px] text-console-dim">
+        <span className="text-[9px] text-text-tertiary">
           {content.filesChanged} files changed
         </span>
       )}
@@ -591,7 +591,7 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
       {/* QA health */}
       {content.qaHealth != null && (
         <div className="flex items-center gap-2">
-          <span className="text-[9px] text-console-dim">Health:</span>
+          <span className="text-[9px] text-text-tertiary">Health:</span>
           <HealthBadge score={content.qaHealth} />
         </div>
       )}
@@ -601,7 +601,7 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
         <div className="space-y-1">
           <button
             onClick={() => setShowHandoffs(!showHandoffs)}
-            className="text-[9px] text-console-accent hover:text-console-accent/80 transition-colors flex items-center gap-1"
+            className="text-[9px] text-rooms hover:text-rooms/80 transition-all flex items-center gap-1"
           >
             <ChevronDownIcon className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
             View Handoffs ({content.handoffs.length})
@@ -618,9 +618,9 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
 
       {/* Agent notes */}
       {content.agentNotes && (
-        <div className="bg-console-faint/30 rounded p-2">
-          <span className="text-[8px] text-console-dim uppercase tracking-wider">Agent Notes</span>
-          <p className="text-[9px] text-console-muted mt-0.5 leading-relaxed">
+        <div className="bg-bg-elevated/30 rounded p-2">
+          <span className="text-[8px] text-text-tertiary uppercase tracking-wider">Agent Notes</span>
+          <p className="text-[9px] text-text-secondary mt-0.5 leading-relaxed">
             {content.agentNotes.length > 300 ? content.agentNotes.slice(0, 300) + "..." : content.agentNotes}
           </p>
         </div>
@@ -636,21 +636,21 @@ function DeployContent({ content }: { content: StepRichContent }) {
   return (
     <div className="mt-2 space-y-2.5">
       {content.deploySummary && (
-        <div className="flex items-center gap-2 px-2.5 py-2 bg-console-faint/30 rounded border border-console-border/50">
-          <CheckIcon className="w-3.5 h-3.5 text-console-success shrink-0" />
-          <span className="text-[10px] text-console-muted font-medium">{content.deploySummary}</span>
+        <div className="flex items-center gap-2 px-2.5 py-2 bg-bg-elevated/30 rounded border border-border-default/50">
+          <CheckIcon className="w-3.5 h-3.5 text-sessions shrink-0" />
+          <span className="text-[10px] text-text-secondary font-medium">{content.deploySummary}</span>
         </div>
       )}
 
       <div className="flex items-center gap-3">
         {content.qaHealth != null && (
           <div className="flex items-center gap-1.5">
-            <span className="text-[9px] text-console-dim">QA Health:</span>
+            <span className="text-[9px] text-text-tertiary">QA Health:</span>
             <HealthBadge score={content.qaHealth} />
           </div>
         )}
         {content.filesChanged != null && (
-          <span className="text-[9px] text-console-dim">
+          <span className="text-[9px] text-text-tertiary">
             {content.filesChanged} files changed
           </span>
         )}
@@ -661,7 +661,7 @@ function DeployContent({ content }: { content: StepRichContent }) {
           href={content.prLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-[10px] text-console-accent hover:underline font-medium"
+          className="inline-flex items-center gap-1.5 text-[10px] text-rooms hover:underline font-medium"
         >
           <ArrowRightIcon className="w-2.5 h-2.5" />
           View Pull Request
@@ -672,7 +672,7 @@ function DeployContent({ content }: { content: StepRichContent }) {
         <div className="space-y-1">
           <button
             onClick={() => setShowHandoffs(!showHandoffs)}
-            className="text-[9px] text-console-accent hover:text-console-accent/80 transition-colors flex items-center gap-1"
+            className="text-[9px] text-rooms hover:text-rooms/80 transition-all flex items-center gap-1"
           >
             <ChevronDownIcon className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
             All Handoffs ({content.handoffs.length})
@@ -701,16 +701,16 @@ function StatusBadge({ status }: { status: string }) {
       className={cn(
         "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-medium",
         isReady
-          ? "bg-console-success/15 text-console-success"
+          ? "bg-sessions/15 text-sessions"
           : isNotReady
-            ? "bg-console-error/15 text-console-error"
+            ? "bg-error/15 text-error"
             : "bg-amber-400/15 text-amber-400",
       )}
     >
       <span
         className={cn(
           "w-1.5 h-1.5 rounded-full",
-          isReady ? "bg-console-success" : isNotReady ? "bg-console-error" : "bg-amber-400",
+          isReady ? "bg-sessions" : isNotReady ? "bg-error" : "bg-amber-400",
         )}
       />
       {status}
@@ -724,10 +724,10 @@ function HealthBadge({ score }: { score: number }) {
       className={cn(
         "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-medium",
         score >= 95
-          ? "bg-console-success/15 text-console-success"
+          ? "bg-sessions/15 text-sessions"
           : score >= 80
             ? "bg-amber-400/15 text-amber-400"
-            : "bg-console-error/15 text-console-error",
+            : "bg-error/15 text-error",
       )}
     >
       {score}%
@@ -737,11 +737,11 @@ function HealthBadge({ score }: { score: number }) {
 
 function HandoffCard({ handoff }: { handoff: HandoffEntry }) {
   return (
-    <div className="flex items-center gap-2 px-2 py-1 bg-console-faint/20 rounded">
-      <span className="text-[8px] font-mono text-console-accent shrink-0">{handoff.from}</span>
-      <ArrowRightIcon className="w-2.5 h-2.5 text-console-dim shrink-0" />
-      <span className="text-[8px] font-mono text-console-accent shrink-0">{handoff.to}</span>
-      <span className="text-[9px] text-console-dim truncate flex-1 min-w-0">
+    <div className="flex items-center gap-2 px-2 py-1 bg-bg-elevated/20 rounded">
+      <span className="text-[8px] font-mono text-rooms shrink-0">{handoff.from}</span>
+      <ArrowRightIcon className="w-2.5 h-2.5 text-text-tertiary shrink-0" />
+      <span className="text-[8px] font-mono text-rooms shrink-0">{handoff.to}</span>
+      <span className="text-[9px] text-text-tertiary truncate flex-1 min-w-0">
         {handoff.detail.length > 80 ? handoff.detail.slice(0, 80) + "..." : handoff.detail}
       </span>
     </div>
@@ -759,7 +759,7 @@ function MarkdownRenderer({ text }: { text: string }) {
         // H1
         if (trimmed.startsWith("# ")) {
           return (
-            <h3 key={i} className="text-[10px] font-semibold text-console-text mt-2 mb-0.5">
+            <h3 key={i} className="text-[10px] font-semibold text-text-primary mt-2 mb-0.5">
               {trimmed.slice(2)}
             </h3>
           );
@@ -767,7 +767,7 @@ function MarkdownRenderer({ text }: { text: string }) {
         // H2
         if (trimmed.startsWith("## ")) {
           return (
-            <h4 key={i} className="text-[10px] font-semibold text-console-muted mt-1.5 mb-0.5">
+            <h4 key={i} className="text-[10px] font-semibold text-text-secondary mt-1.5 mb-0.5">
               {trimmed.slice(3)}
             </h4>
           );
@@ -775,7 +775,7 @@ function MarkdownRenderer({ text }: { text: string }) {
         // H3
         if (trimmed.startsWith("### ")) {
           return (
-            <h5 key={i} className="text-[9px] font-semibold text-console-muted mt-1">
+            <h5 key={i} className="text-[9px] font-semibold text-text-secondary mt-1">
               {trimmed.slice(4)}
             </h5>
           );
@@ -784,15 +784,15 @@ function MarkdownRenderer({ text }: { text: string }) {
         if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
           return (
             <div key={i} className="flex items-start gap-1.5 pl-1">
-              <span className="text-console-accent mt-[3px] text-[6px]">&#x25CF;</span>
-              <span className="text-[9px] text-console-dim leading-relaxed">{trimmed.slice(2)}</span>
+              <span className="text-rooms mt-[3px] text-[6px]">&#x25CF;</span>
+              <span className="text-[9px] text-text-tertiary leading-relaxed">{trimmed.slice(2)}</span>
             </div>
           );
         }
         // Bold metadata lines like "Status: PLANNING"
         if (trimmed.match(/^[A-Z][a-z]+:/) || trimmed.match(/^\*\*.+\*\*/)) {
           return (
-            <p key={i} className="text-[9px] text-console-muted font-medium leading-relaxed">
+            <p key={i} className="text-[9px] text-text-secondary font-medium leading-relaxed">
               {trimmed.replace(/\*\*/g, "")}
             </p>
           );
@@ -801,7 +801,7 @@ function MarkdownRenderer({ text }: { text: string }) {
         if (trimmed === "") return <div key={i} className="h-1" />;
         // Normal text
         return (
-          <p key={i} className="text-[9px] text-console-dim leading-relaxed">
+          <p key={i} className="text-[9px] text-text-tertiary leading-relaxed">
             {trimmed}
           </p>
         );

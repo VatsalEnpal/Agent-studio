@@ -4,9 +4,9 @@ import { InfoIcon } from "@/components/ui/icons";
 
 export function SettingsAbout() {
   return (
-    <section className="border border-console-border rounded-lg bg-console-panel">
-      <div className="px-4 py-3 border-b border-console-border">
-        <h3 className="text-body-sm font-medium text-console-text flex items-center gap-1.5">
+    <section className="border border-border-default rounded-lg bg-bg-surface">
+      <div className="px-4 py-3 border-b border-border-default">
+        <h3 className="text-[11px] font-medium text-text-primary flex items-center gap-1.5">
           <InfoIcon className="w-3.5 h-3.5" />
           About
         </h3>
@@ -25,8 +25,8 @@ export function SettingsAbout() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-body-sm text-console-dim">{label}</span>
-      <span className="text-body-sm text-console-text">{value}</span>
+      <span className="text-[11px] text-text-tertiary">{label}</span>
+      <span className="text-[11px] text-text-primary">{value}</span>
     </div>
   );
 }

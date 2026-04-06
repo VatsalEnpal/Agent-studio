@@ -486,7 +486,7 @@ export default function PageV2() {
               setPreflightLoading(true);
               void runPreflight().then(() => setPreflightLoading(false));
             }}
-            className="px-4 py-2 bg-accent text-white rounded-lg text-body-sm font-medium hover:bg-accent-hover transition-colors"
+            className="px-4 py-2 bg-accent text-white rounded-lg text-body-sm font-medium hover:bg-accent-hover transition-all"
           >
             Check Again
           </button>
@@ -603,7 +603,7 @@ export default function PageV2() {
                         "px-5 py-3 rounded-lg",
                         "text-body-sm font-medium",
                         "bg-accent text-white hover:bg-accent-hover",
-                        "transition-colors duration-[var(--duration-quick)]",
+                        "transition-all duration-[var(--duration-quick)]",
                       )}
                     >
                       New Session

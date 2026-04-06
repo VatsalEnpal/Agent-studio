@@ -224,9 +224,17 @@ body {
 /* Accent focus for primary interactive elements */
 button:focus-visible,
 a:focus-visible,
-[role="button"]:focus-visible {
-  outline: 1px solid var(--text-tertiary);
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 1.5px solid var(--accent-rooms);
   outline-offset: 1px;
+}
+
+/* Remove inner ring on inputs — they have their own border styling */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
 }
 
 /* =============================================================================
@@ -508,14 +516,16 @@ kbd {
 @keyframes pageCrossfade {
   from {
     opacity: 0;
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
 .animate-page-crossfade {
-  animation: pageCrossfade 200ms ease-out;
+  animation: pageCrossfade 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* =============================================================================
@@ -666,5 +676,16 @@ kbd {
   100% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes typing-bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
   }
 }

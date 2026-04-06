@@ -56,7 +56,7 @@ export function ErrorBanner({
             "px-2.5 py-1 rounded-md",
             "text-label-xs font-medium",
             "text-error bg-error/10 hover:bg-error/15",
-            "transition-colors duration-[var(--duration-instant)] ease-out",
+            "transition-all duration-[var(--duration-instant)] ease-out",
           )}
         >
           <RefreshIcon size={12} />
@@ -71,7 +71,7 @@ export function ErrorBanner({
             "shrink-0 flex items-center justify-center",
             "size-5 rounded",
             "text-error/60 hover:text-error hover:bg-error/10",
-            "transition-colors duration-[var(--duration-instant)] ease-out",
+            "transition-all duration-[var(--duration-instant)] ease-out",
           )}
           aria-label="Dismiss error"
         >

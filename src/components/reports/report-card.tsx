@@ -28,7 +28,7 @@ function StatusBadge({ status }: { status: Report["status"] }) {
         "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium",
         status === "pending" && "bg-amber-500/12 text-amber-400",
         status === "approved" && "bg-emerald-500/12 text-emerald-400",
-        status === "dismissed" && "bg-console-faint/60 text-console-dim",
+        status === "dismissed" && "bg-bg-elevated/60 text-text-tertiary",
       )}
     >
       <span
@@ -36,7 +36,7 @@ function StatusBadge({ status }: { status: Report["status"] }) {
           "w-1.5 h-1.5 rounded-full",
           status === "pending" && "bg-amber-400",
           status === "approved" && "bg-emerald-400",
-          status === "dismissed" && "bg-console-dim",
+          status === "dismissed" && "bg-text-tertiary",
         )}
       />
       {status}
@@ -57,29 +57,30 @@ export function ReportCard({ report, isSelected, onClick }: ReportCardProps) {
     <button
       onClick={onClick}
       className={cn(
-        "sidebar-item w-full text-left px-3 py-2.5 border-b border-console-border/60",
+        "sidebar-item w-full text-left px-3 py-2.5 border-b border-border-default",
+        "transition-all active:scale-[0.98]",
         isSelected
-          ? "bg-console-accent/8 border-l-2 border-l-console-accent"
-          : "hover:bg-console-faint/30 border-l-2 border-l-transparent",
+          ? "bg-rooms/8 border-l-2 border-l-rooms"
+          : "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(124,131,247,0.06)] border-l-2 border-l-transparent",
       )}
     >
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-medium text-console-text truncate">
+        <span className="text-[10px] font-medium text-text-primary truncate">
           {report.automationName}
         </span>
         <StatusBadge status={report.status} />
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-[10px] text-console-dim truncate max-w-[70%]">
+        <span className="text-[10px] text-text-tertiary truncate max-w-[70%]">
           {preview || "(empty report)"}
         </span>
-        <span className="text-[9px] text-console-dim shrink-0">
+        <span className="text-[9px] text-text-tertiary shrink-0">
           {formatRelativeTime(report.timestamp)}
         </span>
       </div>
       {report.suggestedActions.length > 0 && (
         <div className="mt-1">
-          <span className="text-[9px] text-console-muted">
+          <span className="text-[9px] text-text-secondary">
             {report.suggestedActions.length} action{report.suggestedActions.length !== 1 ? "s" : ""}
           </span>
         </div>

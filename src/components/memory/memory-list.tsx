@@ -139,12 +139,12 @@ export function MemoryList({ onSelectEntry }: MemoryListProps) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search memories..."
-            className="w-full pl-7 pr-2 py-1.5 text-label bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-memory transition-colors"
+            className="w-full pl-7 pr-2 py-1.5 text-label bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-memory transition-all"
           />
         </div>
         <button
           onClick={openCreateDialog}
-          className="p-1.5 text-text-ghost hover:text-memory hover:bg-bg-elevated rounded transition-colors"
+          className="p-1.5 text-text-ghost hover:text-memory hover:bg-bg-elevated rounded transition-all"
           title="New memory"
         >
           <PlusIcon size={14} />
@@ -204,15 +204,15 @@ export function MemoryList({ onSelectEntry }: MemoryListProps) {
             <div className="w-10 h-10 rounded-xl bg-bg-elevated/50 flex items-center justify-center">
               <MemoryIcon size={20} className="text-text-ghost" />
             </div>
-            <span className="text-text-secondary text-xs font-medium">
+            <span className="text-text-secondary text-[10px] font-medium">
               {selectedCategory || showPinnedOnly
                 ? "No memories match this filter"
-                : "No memories yet"}
+                : "No memories stored"}
             </span>
             {!selectedCategory && !showPinnedOnly && entries.length === 0 && (
               <button
                 onClick={() => useUIStore.getState().setActiveMode("settings")}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded border border-border-default hover:border-text-secondary transition-colors mt-1"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded border border-border-default hover:border-text-secondary transition-all active:scale-[0.98] mt-1"
               >
                 <SettingsIcon size={12} />
                 Create Agent System
@@ -315,7 +315,7 @@ function MemoryListItem({
       onClick={onSelect}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(); }}
       className={cn(
-        "w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-colors group cursor-pointer",
+        "w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer",
         selected
           ? "bg-memory/10 border-l-2 border-l-memory"
           : "hover:bg-bg-elevated/50 border-l-2 border-l-transparent",
@@ -346,7 +346,7 @@ function MemoryListItem({
           <button
             onClick={handlePin}
             className={cn(
-              "p-1 rounded transition-colors",
+              "p-1 rounded transition-all",
               entry.pinned
                 ? "text-sprints hover:text-sprints/80"
                 : "text-text-ghost hover:text-text-secondary",
@@ -357,14 +357,14 @@ function MemoryListItem({
           </button>
           <button
             onClick={handleEdit}
-            className="p-1 text-text-ghost hover:text-text-secondary rounded transition-colors"
+            className="p-1 text-text-ghost hover:text-text-secondary rounded transition-all"
             title="Edit"
           >
             <EditIcon size={12} />
           </button>
           <button
             onClick={handleDelete}
-            className="p-1 text-text-ghost hover:text-error rounded transition-colors"
+            className="p-1 text-text-ghost hover:text-error rounded transition-all"
             title="Delete"
           >
             <TrashIcon size={12} />

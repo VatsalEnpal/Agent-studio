@@ -149,7 +149,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle shrink-0">
         <button
           onClick={onBack}
-          className="p-1 rounded-md text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-colors"
+          className="p-1 rounded-md text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-all"
           title="Back to terminal"
         >
           <ArrowLeftIcon className="size-4" />
@@ -164,7 +164,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
             className={cn(
               "inline-flex items-center gap-1.5 px-2 py-1 rounded-md",
               "text-body-sm text-accent border border-accent/20 bg-accent-subtle",
-              "hover:bg-accent/10 transition-colors",
+              "hover:bg-accent/10 transition-all",
             )}
           >
             <GitBranchIcon className="size-3" />
@@ -179,7 +179,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
                   onClick={() => handleSwitchBranch(b.name)}
                   className={cn(
                     "flex items-center gap-2 w-full px-3 py-1.5 text-left",
-                    "text-body-sm hover:bg-surface-hover transition-colors",
+                    "text-body-sm hover:bg-surface-hover transition-all",
                     b.name === currentBranch
                       ? "text-accent bg-accent-subtle"
                       : "text-text-primary",
@@ -207,7 +207,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
               "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md",
               "text-body-sm font-medium",
               "border border-border hover:border-accent/30 hover:bg-surface-hover",
-              "transition-colors disabled:opacity-50",
+              "transition-all disabled:opacity-50",
             )}
           >
             <UploadIcon className="size-3.5" />
@@ -219,7 +219,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
               "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md",
               "text-body-sm font-medium",
               "border border-border hover:border-accent/30 hover:bg-surface-hover",
-              "transition-colors",
+              "transition-all",
             )}
           >
             <PlusIcon className="size-3.5" />
@@ -230,7 +230,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
               "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md",
               "text-body-sm font-medium text-text-secondary",
               "border border-border hover:border-accent/30 hover:bg-surface-hover",
-              "transition-colors",
+              "transition-all",
             )}
           >
             <GitMergeIcon className="size-3.5" />
@@ -248,7 +248,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
               {changedFiles.map((file) => (
                 <div
                   key={file.path}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-surface-hover transition-colors"
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-surface-hover transition-all"
                 >
                   <FileStatusBadge status={file.status} />
                   <span className="text-body-sm text-text-primary truncate font-mono">
@@ -272,7 +272,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
               {commits.map((commit) => (
                 <div
                   key={commit.hash}
-                  className="flex items-start gap-2 px-2 py-2 rounded-md hover:bg-surface-hover transition-colors"
+                  className="flex items-start gap-2 px-2 py-2 rounded-md hover:bg-surface-hover transition-all"
                 >
                   <GitCommitIcon className="size-3.5 text-text-tertiary mt-0.5 shrink-0" />
                   <div className="flex-1 min-w-0">

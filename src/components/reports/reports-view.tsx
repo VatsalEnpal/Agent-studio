@@ -63,14 +63,14 @@ export function ReportsView() {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-center space-y-4 max-w-sm">
-          <div className="w-12 h-12 rounded-xl bg-console-faint/60 flex items-center justify-center mx-auto">
-            <FileIcon className="w-6 h-6 text-console-dim" />
+          <div className="w-10 h-10 rounded-xl bg-bg-elevated/60 flex items-center justify-center mx-auto">
+            <FileIcon className="w-5 h-5 text-text-ghost" />
           </div>
           <div>
-            <p className="text-sm font-medium text-console-muted mb-1.5">No reports yet</p>
-            <p className="text-xs text-console-dim leading-relaxed">
-              Set up automations in Settings to get started. Automations run on a
-              schedule and produce reports for your review.
+            <p className="text-[10px] font-medium text-text-secondary mb-1">No reports generated</p>
+            <p className="text-[10px] text-text-tertiary leading-relaxed">
+              Configure automations in Settings to generate reports on a schedule.
+              Reports will appear here for review.
             </p>
           </div>
         </div>
@@ -81,14 +81,14 @@ export function ReportsView() {
   return (
     <div className="h-full flex">
       {/* Left panel: report list */}
-      <div className="w-80 shrink-0 border-r border-console-border flex flex-col">
-        <div className="px-3 py-2.5 border-b border-console-border flex items-center justify-between">
-          <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-console-dim">
+      <div className="w-80 shrink-0 border-r border-border-default flex flex-col">
+        <div className="px-3 py-2.5 border-b border-border-default flex items-center justify-between">
+          <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-text-tertiary">
             Reports ({reports.length})
           </span>
           <button
             onClick={() => void fetchReports()}
-            className="p-1 text-console-dim hover:text-console-muted transition-colors"
+            className="p-1 text-text-tertiary hover:text-text-secondary transition-all"
             title="Refresh reports"
           >
             <RefreshIcon className="w-3 h-3" />
@@ -112,7 +112,7 @@ export function ReportsView() {
           <ReportDetail report={selectedReport} />
         ) : (
           <div className="h-full flex items-center justify-center">
-            <p className="text-xs text-console-dim">
+            <p className="text-[10px] text-text-tertiary">
               Select a report to view details
             </p>
           </div>

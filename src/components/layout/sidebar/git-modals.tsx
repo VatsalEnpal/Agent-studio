@@ -39,51 +39,51 @@ export function ChangesPopup({
       onClick={onClose}
     >
       <div
-        className="bg-console-bg border border-console-border rounded-lg shadow-2xl w-full max-w-md p-0"
+        className="bg-bg-base border border-border-default rounded-lg shadow-2xl w-full max-w-md p-0"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-3 py-2 border-b border-console-border">
-          <span className="text-xs font-medium text-console-text flex items-center gap-1.5">
+        <div className="flex items-center justify-between px-3 py-2 border-b border-border-default">
+          <span className="text-xs font-medium text-text-primary flex items-center gap-1.5">
             <EyeIcon className="w-3.5 h-3.5" />
             Changes: {repo.name}
           </span>
           <button
             onClick={onClose}
-            className="p-0.5 text-console-dim hover:text-console-text"
+            className="p-0.5 text-text-tertiary hover:text-text-primary"
           >
             <CloseIcon className="w-3.5 h-3.5" />
           </button>
         </div>
         <div className="px-3 py-2 max-h-72 overflow-auto">
           {changes === "Loading..." ? (
-            <p className="text-[10px] text-console-dim animate-pulse py-2">
+            <p className="text-[10px] text-text-tertiary animate-pulse py-2">
               Loading...
             </p>
           ) : isClean ? (
             <div className="flex items-center gap-2 py-3 justify-center">
-              <CheckIcon className="w-4 h-4 text-console-success" />
-              <span className="text-[10px] text-console-success font-medium">
+              <CheckIcon className="w-4 h-4 text-sessions" />
+              <span className="text-[10px] text-sessions font-medium">
                 Working tree clean
               </span>
             </div>
           ) : (
             <div className="space-y-0.5">
-              <p className="text-[9px] text-console-dim mb-1.5">
+              <p className="text-[9px] text-text-tertiary mb-1.5">
                 {lines.length} changed file{lines.length !== 1 ? "s" : ""}
               </p>
               {lines.map((line, i) => {
                 const status = line.slice(0, 2).trim();
                 const file = line.slice(3);
-                let statusColor = "text-console-muted";
+                let statusColor = "text-text-secondary";
                 let statusLabel = status;
                 if (status === "M") {
-                  statusColor = "text-console-accent";
+                  statusColor = "text-rooms";
                   statusLabel = "M";
                 } else if (status === "A") {
-                  statusColor = "text-console-success";
+                  statusColor = "text-sessions";
                   statusLabel = "A";
                 } else if (status === "D") {
-                  statusColor = "text-console-error";
+                  statusColor = "text-error";
                   statusLabel = "D";
                 } else if (status === "??") {
                   statusColor = "text-blue-400";
@@ -102,7 +102,7 @@ export function ChangesPopup({
                     >
                       {statusLabel}
                     </span>
-                    <span className="text-[10px] font-mono text-console-muted truncate">
+                    <span className="text-[10px] font-mono text-text-secondary truncate">
                       {file}
                     </span>
                   </div>
@@ -160,15 +160,15 @@ export function CommitModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-console-bg border border-console-border rounded-lg shadow-2xl w-full max-w-sm p-0">
-        <div className="flex items-center justify-between px-3 py-2 border-b border-console-border">
-          <span className="text-xs font-medium text-console-text flex items-center gap-1.5">
+      <div className="bg-bg-base border border-border-default rounded-lg shadow-2xl w-full max-w-sm p-0">
+        <div className="flex items-center justify-between px-3 py-2 border-b border-border-default">
+          <span className="text-xs font-medium text-text-primary flex items-center gap-1.5">
             <GitCommitIcon className="w-3.5 h-3.5" />
             Commit: {repo.name}
           </span>
           <button
             onClick={onClose}
-            className="p-0.5 text-console-dim hover:text-console-text"
+            className="p-0.5 text-text-tertiary hover:text-text-primary"
           >
             <CloseIcon className="w-3.5 h-3.5" />
           </button>
@@ -180,26 +180,26 @@ export function CommitModal({
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Commit message..."
             disabled={status === "committing" || status === "success"}
-            className="w-full px-2 py-1.5 text-xs bg-console-panel border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent"
+            className="w-full px-2 py-1.5 text-xs bg-bg-surface border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-rooms"
             onKeyDown={(e) => {
               if (e.key === "Enter") void handleCommit();
             }}
           />
           {status === "error" && (
-            <div className="text-[10px] text-console-error bg-console-error/10 px-2 py-1 rounded">
+            <div className="text-[10px] text-error bg-error/10 px-2 py-1 rounded">
               {output}
             </div>
           )}
           {status === "success" && (
-            <div className="text-[10px] text-console-success bg-console-success/10 px-2 py-1 rounded">
+            <div className="text-[10px] text-sessions bg-sessions/10 px-2 py-1 rounded">
               {output}
             </div>
           )}
         </div>
-        <div className="flex justify-end gap-2 px-3 py-2 border-t border-console-border">
+        <div className="flex justify-end gap-2 px-3 py-2 border-t border-border-default">
           <button
             onClick={onClose}
-            className="px-2 py-1 text-[10px] text-console-muted hover:text-console-text"
+            className="px-2 py-1 text-[10px] text-text-secondary hover:text-text-primary"
           >
             {status === "success" ? "Close" : "Cancel"}
           </button>
@@ -208,10 +208,10 @@ export function CommitModal({
               onClick={() => void handleCommit()}
               disabled={!message.trim() || status === "committing"}
               className={cn(
-                "px-2 py-1 text-[10px] font-medium rounded transition-colors",
+                "px-2 py-1 text-[10px] font-medium rounded transition-all",
                 !message.trim() || status === "committing"
-                  ? "bg-console-border text-console-dim cursor-not-allowed"
-                  : "bg-console-accent text-white hover:bg-console-accent/80",
+                  ? "bg-border-default text-text-tertiary cursor-not-allowed"
+                  : "bg-rooms text-white hover:bg-rooms/80",
               )}
             >
               {status === "committing" ? "Committing..." : "Commit"}
@@ -273,15 +273,15 @@ export function PushModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-console-bg border border-console-border rounded-lg shadow-2xl w-full max-w-sm p-0">
-        <div className="flex items-center justify-between px-3 py-2 border-b border-console-border">
-          <span className="text-xs font-medium text-console-text flex items-center gap-1.5">
+      <div className="bg-bg-base border border-border-default rounded-lg shadow-2xl w-full max-w-sm p-0">
+        <div className="flex items-center justify-between px-3 py-2 border-b border-border-default">
+          <span className="text-xs font-medium text-text-primary flex items-center gap-1.5">
             <UploadIcon className="w-3.5 h-3.5" />
             Push: {repo.name}
           </span>
           <button
             onClick={onClose}
-            className="p-0.5 text-console-dim hover:text-console-text"
+            className="p-0.5 text-text-tertiary hover:text-text-primary"
           >
             <CloseIcon className="w-3.5 h-3.5" />
           </button>
@@ -307,31 +307,31 @@ export function PushModal({
                   value={confirmText}
                   onChange={(e) => setConfirmText(e.target.value)}
                   placeholder="Type CONFIRM"
-                  className="w-full px-2 py-1 text-xs bg-console-bg border border-red-500/40 rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-red-400"
+                  className="w-full px-2 py-1 text-xs bg-bg-base border border-red-500/40 rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-red-400"
                 />
               </div>
             </div>
           )}
           {!isProd && (
-            <p className="text-[10px] text-console-muted">
+            <p className="text-[10px] text-text-secondary">
               Push current branch to origin?
             </p>
           )}
           {status === "error" && (
-            <div className="text-[10px] text-console-error bg-console-error/10 px-2 py-1 rounded">
+            <div className="text-[10px] text-error bg-error/10 px-2 py-1 rounded">
               {output}
             </div>
           )}
           {status === "success" && (
-            <div className="text-[10px] text-console-success bg-console-success/10 px-2 py-1 rounded">
+            <div className="text-[10px] text-sessions bg-sessions/10 px-2 py-1 rounded">
               {output}
             </div>
           )}
         </div>
-        <div className="flex justify-end gap-2 px-3 py-2 border-t border-console-border">
+        <div className="flex justify-end gap-2 px-3 py-2 border-t border-border-default">
           <button
             onClick={onClose}
-            className="px-2 py-1 text-[10px] text-console-muted hover:text-console-text"
+            className="px-2 py-1 text-[10px] text-text-secondary hover:text-text-primary"
           >
             {status === "success" ? "Close" : "Cancel"}
           </button>
@@ -340,12 +340,12 @@ export function PushModal({
               onClick={() => void handlePush()}
               disabled={!canPush || status === "pushing"}
               className={cn(
-                "px-2 py-1 text-[10px] font-medium rounded transition-colors",
+                "px-2 py-1 text-[10px] font-medium rounded transition-all",
                 !canPush || status === "pushing"
-                  ? "bg-console-border text-console-dim cursor-not-allowed"
+                  ? "bg-border-default text-text-tertiary cursor-not-allowed"
                   : isProd
                     ? "bg-red-500 text-white hover:bg-red-600"
-                    : "bg-console-accent text-white hover:bg-console-accent/80",
+                    : "bg-rooms text-white hover:bg-rooms/80",
               )}
             >
               {status === "pushing" ? "Pushing..." : "Push"}

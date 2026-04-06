@@ -72,8 +72,8 @@ function RepoItem({
       title={repo.path}
     >
       <div className="flex items-center gap-2">
-        <FolderIcon className="w-3.5 h-3.5 shrink-0 text-console-muted" />
-        <span className="text-[10px] text-console-text font-medium truncate flex-1">
+        <FolderIcon className="w-3.5 h-3.5 shrink-0 text-text-secondary" />
+        <span className="text-[10px] text-text-primary font-medium truncate flex-1">
           {repo.name}
         </span>
         {isProd && (
@@ -81,13 +81,13 @@ function RepoItem({
             PROD
           </span>
         )}
-        <span className="text-[9px] px-1 py-0.5 rounded bg-console-accent/10 text-console-accent font-mono shrink-0 max-w-[80px] truncate">
+        <span className="text-[9px] px-1 py-0.5 rounded bg-rooms/10 text-rooms font-mono shrink-0 max-w-[80px] truncate">
           {repo.branch}
         </span>
         <span
           className={cn(
             "w-2 h-2 rounded-full shrink-0",
-            repo.dirty ? "bg-console-error" : "bg-console-success",
+            repo.dirty ? "bg-error" : "bg-sessions",
           )}
           title={repo.dirty ? `${repo.changedFiles} changed files` : "Clean"}
         />
@@ -105,11 +105,11 @@ function RepoItem({
                 return (
                   <div
                     key={b.name}
-                    className="flex items-center gap-1.5 text-[9px] text-console-dim"
+                    className="flex items-center gap-1.5 text-[9px] text-text-tertiary"
                     title={b.lastCommit}
                   >
                     <GitBranchIcon className="w-2.5 h-2.5 shrink-0" />
-                    <span className="font-mono text-console-muted shrink-0">
+                    <span className="font-mono text-text-secondary shrink-0">
                       {b.name}
                     </span>
                     <span className="truncate opacity-60">
@@ -128,7 +128,7 @@ function RepoItem({
       >
         <button
           onClick={() => onViewChanges(repo)}
-          className="p-0.5 text-console-dim hover:text-console-accent transition-all"
+          className="p-0.5 text-text-tertiary hover:text-rooms transition-all"
           title="View Changes"
         >
           <EyeIcon className="w-3 h-3" />
@@ -136,7 +136,7 @@ function RepoItem({
         {!isProd && (
           <button
             onClick={() => onCommit(repo)}
-            className="p-0.5 text-console-dim hover:text-console-accent transition-all"
+            className="p-0.5 text-text-tertiary hover:text-rooms transition-all"
             title="Commit"
           >
             <GitCommitIcon className="w-3 h-3" />
@@ -148,7 +148,7 @@ function RepoItem({
             "p-0.5 transition-all",
             isProd
               ? "text-red-400/60 hover:text-red-400"
-              : "text-console-dim hover:text-console-accent",
+              : "text-text-tertiary hover:text-rooms",
           )}
           title={isProd ? "Push (PROD - requires confirmation)" : "Push"}
         >
@@ -160,7 +160,7 @@ function RepoItem({
             "p-0.5 transition-all",
             isProd
               ? "text-red-400/60 hover:text-red-400"
-              : "text-console-dim hover:text-console-accent",
+              : "text-text-tertiary hover:text-rooms",
           )}
           title="Create Pull Request"
         >

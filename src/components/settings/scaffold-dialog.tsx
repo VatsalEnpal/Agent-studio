@@ -101,7 +101,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
           </div>
           <button
             onClick={onCancel}
-            className="p-1 text-text-ghost hover:text-text-secondary transition-colors rounded"
+            className="p-1 text-text-ghost hover:text-text-secondary transition-all rounded"
           >
             <CloseIcon size={14} />
           </button>
@@ -113,7 +113,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
             <div
               key={s}
               className={cn(
-                "flex-1 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.8px] border-b-2 transition-colors",
+                "flex-1 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.8px] border-b-2 transition-all",
                 i === dialogStep
                   ? "text-[#f59e0b] border-[#f59e0b]"
                   : i < dialogStep
@@ -145,7 +145,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
               <p className="text-xs text-error">{error}</p>
               <button
                 onClick={() => setError(null)}
-                className="px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-colors"
+                className="px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-all"
               >
                 Try Again
               </button>
@@ -181,7 +181,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
           <div className="flex items-center justify-between px-5 py-3 border-t border-border-default">
             <button
               onClick={() => dialogStep === 0 ? onCancel() : setDialogStep((s) => s - 1)}
-              className="flex items-center gap-1 px-2 py-1.5 text-xs text-text-secondary hover:text-text-primary transition-colors rounded-md"
+              className="flex items-center gap-1 px-2 py-1.5 text-xs text-text-secondary hover:text-text-primary transition-all rounded-md"
             >
               {dialogStep === 0 ? "Cancel" : "Back"}
             </button>
@@ -197,7 +197,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
                 className={cn(
                   "flex items-center gap-1 px-4 py-1.5 text-xs font-semibold rounded-md transition-all",
                   selectedAgents.length > 0 || dialogStep > 0
-                    ? "bg-[#f59e0b] text-[#0a0a0a] hover:bg-[#fbbf24]"
+                    ? "bg-[#f59e0b] text-[#0a0a0a] hover:bg-[#fbbf24] active:scale-[0.98]"
                     : "bg-border-default text-text-ghost cursor-not-allowed",
                 )}
               >
@@ -270,13 +270,13 @@ function DialogAgentsStep({
       <div className="flex items-center gap-2">
         <button
           onClick={() => setSelectedAgents(AVAILABLE_AGENTS.map((a) => a.id))}
-          className="px-2 py-1 text-[10px] text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-colors"
+          className="px-2 py-1 text-[10px] text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-all"
         >
           All
         </button>
         <button
           onClick={() => setSelectedAgents([])}
-          className="px-2 py-1 text-[10px] text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-colors"
+          className="px-2 py-1 text-[10px] text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-all"
         >
           None
         </button>

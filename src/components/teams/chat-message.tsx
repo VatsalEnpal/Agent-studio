@@ -4,8 +4,56 @@ import type React from "react";
 import { lazy, Suspense, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
-import { CheckIcon, CloseIcon, ChevronDownIcon, ChevronRightIcon } from "@/components/ui/icons";
+import { useRelativeTime } from "@/hooks/use-relative-time";
+import { CheckIcon, CloseIcon, ChevronDownIcon, ChevronRightIcon, CopyIcon } from "@/components/ui/icons";
 import type { RoomMessage } from "@/stores/rooms";
+
+/** Code block with copy button overlay */
+function CopyableCodeBlock({ children, ...props }: React.HTMLAttributes<HTMLPreElement>) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    // Extract plain text from children
+    const el = document.createElement("div");
+    // Render the children text content
+    const codeText = extractText(children);
+    void navigator.clipboard.writeText(codeText).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
+
+  return (
+    <div className="relative group/code">
+      <pre {...props}>{children}</pre>
+      <button
+        onClick={handleCopy}
+        className={cn(
+          "absolute top-1.5 right-1.5 p-1 rounded",
+          "opacity-0 group-hover/code:opacity-100 transition-opacity duration-150",
+          "bg-bg-surface border border-border-subtle",
+          "text-text-tertiary hover:text-text-primary",
+        )}
+        title="Copy code"
+      >
+        {copied ? <CheckIcon size={12} className="text-sessions" /> : <CopyIcon size={12} />}
+      </button>
+    </div>
+  );
+}
+
+/** Recursively extract text from React children */
+function extractText(node: React.ReactNode): string {
+  if (typeof node === "string") return node;
+  if (typeof node === "number") return String(node);
+  if (!node) return "";
+  if (Array.isArray(node)) return node.map(extractText).join("");
+  if (typeof node === "object" && "props" in node) {
+    const props = (node as React.ReactElement).props as Record<string, unknown>;
+    return extractText(props.children as React.ReactNode);
+  }
+  return "";
+}
 
 const Markdown = lazy(() => import("react-markdown"));
 
@@ -78,7 +126,14 @@ function MessageContent({ text, isSystem }: { text: string; isSystem: boolean })
         prose-strong:text-text-primary
         prose-li:my-0.5
         prose-blockquote:border-rooms/30 prose-blockquote:text-text-secondary">
-        <Markdown remarkPlugins={plugins}>
+        <Markdown
+          remarkPlugins={plugins}
+          components={{
+            pre: ({ children, ...props }) => (
+              <CopyableCodeBlock {...props}>{children}</CopyableCodeBlock>
+            ),
+          }}
+        >
           {cleanText}
         </Markdown>
       </div>
@@ -93,6 +148,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
   const isApproval = msg.type === "approval-request";
 
   const color = isUser ? "var(--accent-rooms)" : agentColor(msg.from);
+  const liveTimestamp = useRelativeTime(msg.timestamp);
 
   // -------------------------------------------------------------------------
   // System messages — centered divider with text (Slack style)
@@ -114,14 +170,14 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
   // -------------------------------------------------------------------------
   if (isUser) {
     return (
-      <div className={cn("px-5", grouped ? "pt-0.5 pb-0.5" : "pt-3 pb-1")}>
+      <div className={cn("px-5 group/msg", grouped ? "pt-0.5 pb-0.5" : "pt-3 pb-1")}>
         <div className="flex justify-end gap-3">
           <div className="max-w-[70%]">
-            {/* Name + timestamp */}
+            {/* Name + timestamp (timestamp shows on hover like Slack) */}
             {!grouped && (
               <div className="flex items-center justify-end gap-2 mb-1">
-                <span className="text-label text-text-tertiary shrink-0">
-                  {formatTimestamp(msg.timestamp)}
+                <span className="text-label text-text-tertiary shrink-0 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-150">
+                  {liveTimestamp}
                 </span>
                 <span className="text-xs font-semibold text-rooms">
                   You
@@ -158,7 +214,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
   return (
     <div
       className={cn(
-        "px-5 transition-colors duration-100",
+        "px-5 group/msg transition-all duration-100",
         grouped ? "pt-0.5 pb-0.5" : "pt-3 pb-1",
         isApproval && msg.approvalStatus === "pending" && "bg-sprints/[0.04]",
         isApproval && msg.approvalStatus === "approved" && "bg-sessions/[0.04]",
@@ -203,8 +259,8 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
                   &rarr; {msg.to}
                 </span>
               )}
-              <span className="text-label text-text-tertiary ml-auto shrink-0">
-                {formatTimestamp(msg.timestamp)}
+              <span className="text-label text-text-tertiary ml-auto shrink-0 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-150">
+                {liveTimestamp}
               </span>
             </div>
           )}
@@ -225,14 +281,14 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
               <div className="flex gap-1.5 mt-2 pt-1.5 border-t border-sprints/15">
                 <button
                   onClick={() => onApprove(msg)}
-                  className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium bg-sessions/15 text-sessions rounded-md hover:bg-sessions/25 transition-colors duration-100"
+                  className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium bg-sessions/15 text-sessions rounded-md hover:bg-sessions/25 active:scale-[0.98] transition-all duration-100"
                 >
                   <CheckIcon size={12} />
                   Approve
                 </button>
                 <button
                   onClick={() => onReject(msg)}
-                  className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium bg-error/15 text-error rounded-md hover:bg-error/25 transition-colors duration-100"
+                  className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium bg-error/15 text-error rounded-md hover:bg-error/25 active:scale-[0.98] transition-all duration-100"
                 >
                   <CloseIcon size={12} />
                   Reject
@@ -257,7 +313,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
           {msg.type === "message" && (
             <button
               onClick={() => setDetailsOpen(!detailsOpen)}
-              className="flex items-center gap-1 mt-1 text-label text-text-tertiary hover:text-text-secondary transition-colors duration-100"
+              className="flex items-center gap-1 mt-1 text-label text-text-tertiary hover:text-text-secondary transition-all duration-100"
             >
               {detailsOpen ? (
                 <ChevronDownIcon size={12} />

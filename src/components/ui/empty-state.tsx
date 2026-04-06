@@ -46,7 +46,7 @@ export function EmptyState({
             "px-3 py-1.5 rounded-md",
             "text-[10px] font-medium",
             "text-bg-base bg-text-primary hover:bg-text-secondary",
-            "transition-colors",
+            "transition-all",
           )}
         >
           {actionLabel}
@@ -64,8 +64,8 @@ export function EmptySessionsState({ onAction }: { onAction?: () => void }) {
   return (
     <EmptyState
       icon={SessionsIcon}
-      title="No sessions yet"
-      description="Launch a new Claude Code session to get started. Sessions give you interactive terminals with AI agents."
+      title="No active sessions"
+      description="Launch an interactive Claude Code terminal to start coding with AI. Each session runs in its own workspace."
       actionLabel="New Session"
       onAction={onAction}
     />
@@ -76,9 +76,9 @@ export function EmptyRoomsState({ onAction }: { onAction?: () => void }) {
   return (
     <EmptyState
       icon={RoomsIcon}
-      title="No rooms yet"
-      description="Create a team room to collaborate with multiple AI agents in a shared chat."
-      actionLabel="New Room"
+      title="No active rooms"
+      description="Rooms let multiple AI agents collaborate on a task together in a shared chat thread."
+      actionLabel="Create Room"
       onAction={onAction}
     />
   );
@@ -88,8 +88,8 @@ export function EmptySprintsState({ onAction }: { onAction?: () => void }) {
   return (
     <EmptyState
       icon={PlayIcon}
-      title="No sprints yet"
-      description="Sprints are automated multi-step workflows. Define a plan and let agents execute it."
+      title="No sprints running"
+      description="Sprints are multi-step automated workflows. The PMO agent creates them when it detects pending work, or you can start one manually."
       actionLabel="New Sprint"
       onAction={onAction}
     />
@@ -100,8 +100,8 @@ export function EmptyMemoryState() {
   return (
     <EmptyState
       icon={MemoryIcon}
-      title="No memories yet"
-      description="As agents work, they store learnings, corrections, and decisions here for future reference."
+      title="No memories stored"
+      description="Agents automatically save learnings, corrections, and decisions here as they work. This builds institutional knowledge over time."
     />
   );
 }

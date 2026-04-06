@@ -44,28 +44,28 @@ export function TerminalFullscreen({ onKillSession }: TerminalFullscreenProps) {
       />
 
       {/* Fullscreen header */}
-      <div className="relative z-10 flex items-center justify-between px-4 py-2 bg-console-panel border-b border-console-border">
+      <div className="relative z-10 flex items-center justify-between px-4 py-2 bg-bg-surface border-b border-border-default">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-console-text">
+          <span className="text-xs font-medium text-text-primary">
             {session.name}
           </span>
           {session.meta?.model && (
-            <span className="text-[9px] px-1 py-0.5 rounded bg-console-border text-console-dim">
+            <span className="text-[9px] px-1 py-0.5 rounded bg-border-default text-text-tertiary">
               {session.meta.model}
             </span>
           )}
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[10px] text-console-dim">
+          <span className="text-[10px] text-text-tertiary">
             Press{" "}
-            <kbd className="px-1 py-0.5 rounded bg-console-border text-console-muted text-[9px] font-mono">
+            <kbd className="px-1 py-0.5 rounded bg-border-default text-text-secondary text-[9px] font-mono">
               Esc
             </kbd>{" "}
             to exit
           </span>
           <button
             onClick={() => setFullscreen(null)}
-            className="text-xs text-console-dim hover:text-console-muted transition-colors"
+            className="text-xs text-text-tertiary hover:text-text-secondary transition-all"
           >
             Exit Fullscreen
           </button>

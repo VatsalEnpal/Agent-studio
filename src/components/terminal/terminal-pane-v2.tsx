@@ -32,7 +32,7 @@ function getOrCreateTerminal(sessionId: string): TerminalEntry {
   const term = new Terminal({
     cursorBlink: true,
     fontSize: 13,
-    fontFamily: "'Geist Mono', 'SF Mono', 'JetBrains Mono', Menlo, monospace",
+    fontFamily: "'SF Mono', SFMono-Regular, ui-monospace, Menlo, monospace",
     theme: {
       background: "#050505",
       foreground: "#d4d4d4",
@@ -155,21 +155,71 @@ export function TerminalPaneV2({
       container.innerHTML = "";
     }
 
+    // Open or re-parent the terminal into the container.
+    // xterm.js v5 only allows open() once — for subsequent attaches, move
+    // the existing DOM element instead of calling open() again.
+    const openOrReparent = (el: HTMLDivElement, e: TerminalEntry) => {
+      const termEl = e.term.element;
+      if (termEl) {
+        // Terminal was previously opened — just move its DOM into the container
+        el.innerHTML = "";
+        el.appendChild(termEl);
+      } else {
+        // First time — use open() to create DOM elements
+        el.innerHTML = "";
+        e.term.open(el);
+      }
+    };
+
+    // Wait for container to have real dimensions before attaching terminal.
+    // When there's only one session the layout may not have settled yet,
+    // resulting in a 0×0 container and a blank black screen.
+    const attachTerminal = () => {
+      if (attachedRef.current === sessionId) return;
+      const { offsetWidth, offsetHeight } = container;
+      if (offsetWidth > 0 && offsetHeight > 0) {
+        openOrReparent(container, entry);
+        attachedRef.current = sessionId;
+        loadBufferOnce(sessionId, entry);
+        fitAndResize(entry);
+      }
+    };
+
     // Attach this terminal to the DOM
     if (attachedRef.current !== sessionId) {
-      container.innerHTML = "";
-      entry.term.open(container);
-      attachedRef.current = sessionId;
-      loadBufferOnce(sessionId, entry);
+      // Try immediately, then retry with increasing delays until container is sized
+      attachTerminal();
+      const t0 = requestAnimationFrame(() => attachTerminal());
+      const t1 = setTimeout(() => attachTerminal(), 50);
+      const t2 = setTimeout(() => attachTerminal(), 150);
+      const t3 = setTimeout(() => attachTerminal(), 400);
+      // Final fallback — force attach even if container still reports 0 dims
+      const fallbackTimer = setTimeout(() => {
+        if (attachedRef.current !== sessionId) {
+          openOrReparent(container, entry);
+          attachedRef.current = sessionId;
+          loadBufferOnce(sessionId, entry);
+        }
+        fitAndResize(entry);
+      }, 800);
+
+      var cleanupTimers = () => {
+        cancelAnimationFrame(t0);
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+        clearTimeout(fallbackTimer);
+      };
     }
 
-    // Fit after attach — use rAF + fallback for layout settling
-    requestAnimationFrame(() => fitAndResize(entry));
-    const fallbackTimer = setTimeout(() => fitAndResize(entry), 120);
-
-    // Debounced resize observer
+    // Debounced resize observer — also handles the case where container
+    // transitions from 0×0 to real dimensions
     let fitTimeout: ReturnType<typeof setTimeout> | null = null;
     const resizeObserver = new ResizeObserver(() => {
+      // If terminal hasn't been attached yet and container now has dimensions, attach
+      if (attachedRef.current !== sessionId) {
+        attachTerminal();
+      }
       if (fitTimeout) clearTimeout(fitTimeout);
       fitTimeout = setTimeout(() => fitAndResize(entry), 80);
     });
@@ -180,7 +230,7 @@ export function TerminalPaneV2({
     window.addEventListener("terminal-refit", refitHandler);
 
     return () => {
-      clearTimeout(fallbackTimer);
+      cleanupTimers?.();
       if (fitTimeout) clearTimeout(fitTimeout);
       resizeObserver.disconnect();
       window.removeEventListener("terminal-refit", refitHandler);

@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { CheckIcon, CloseIcon, PlayIcon, ClockIcon } from "@/components/ui/icons";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 import { useReportsStore, type Report } from "@/stores/reports";
 
@@ -28,13 +29,18 @@ export function ReportDetail({ report }: ReportDetailProps) {
   const dismissReport = useReportsStore((s) => s.dismissReport);
   const approveAction = useReportsStore((s) => s.approveAction);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [approvingAll, setApprovingAll] = useState(false);
+  const [confirmDismiss, setConfirmDismiss] = useState(false);
 
   const handleApproveAll = useCallback(async () => {
+    setApprovingAll(true);
     try {
       const res = await fetch(`/api/reports/${report.id}/approve`, { method: "POST" });
       if (res.ok) approveReport(report.id);
     } catch {
       // Best effort
+    } finally {
+      setApprovingAll(false);
     }
   }, [report.id, approveReport]);
 
@@ -68,9 +74,9 @@ export function ReportDetail({ report }: ReportDetailProps) {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-console-border shrink-0">
+      <div className="px-4 py-3 border-b border-border-default shrink-0">
         <div className="flex items-center justify-between mb-1">
-          <h2 className="text-sm font-semibold text-console-text">
+          <h2 className="text-xs font-semibold text-text-primary">
             {report.automationName}
           </h2>
           <span
@@ -78,13 +84,13 @@ export function ReportDetail({ report }: ReportDetailProps) {
               "px-2 py-0.5 rounded text-[10px] font-medium",
               report.status === "pending" && "bg-yellow-500/15 text-yellow-400",
               report.status === "approved" && "bg-emerald-500/15 text-emerald-400",
-              report.status === "dismissed" && "bg-console-faint text-console-dim",
+              report.status === "dismissed" && "bg-bg-elevated text-text-tertiary",
             )}
           >
             {report.status}
           </span>
         </div>
-        <div className="flex items-center gap-2 text-[10px] text-console-dim">
+        <div className="flex items-center gap-2 text-[10px] text-text-tertiary">
           <ClockIcon className="w-3 h-3" />
           {formatTimestamp(report.timestamp)}
         </div>
@@ -94,10 +100,10 @@ export function ReportDetail({ report }: ReportDetailProps) {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {/* Summary */}
         <div>
-          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-console-dim mb-2">
+          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary mb-2">
             Summary
           </h3>
-          <div className="px-3 py-2 bg-console-bg border border-console-border rounded text-xs text-console-text whitespace-pre-wrap font-mono leading-relaxed max-h-[400px] overflow-y-auto">
+          <div className="px-3 py-2 bg-bg-base border border-border-default rounded text-[10px] text-text-primary whitespace-pre-wrap font-mono leading-relaxed max-h-[400px] overflow-y-auto">
             {report.summary}
           </div>
         </div>
@@ -105,7 +111,7 @@ export function ReportDetail({ report }: ReportDetailProps) {
         {/* Suggested Actions */}
         {report.suggestedActions.length > 0 && (
           <div>
-            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-console-dim mb-2">
+            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary mb-2">
               Suggested Actions ({report.suggestedActions.length})
             </h3>
             <div className="space-y-2">
@@ -113,21 +119,21 @@ export function ReportDetail({ report }: ReportDetailProps) {
                 <div
                   key={action.id}
                   className={cn(
-                    "px-3 py-2.5 rounded border transition-colors",
+                    "px-3 py-2.5 rounded border transition-all",
                     action.approved
                       ? "bg-emerald-500/5 border-emerald-500/20"
-                      : "bg-console-bg border-console-border",
+                      : "bg-bg-base border-border-default",
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-console-text mb-0.5">
+                      <p className="text-[10px] font-medium text-text-primary mb-0.5">
                         {action.title}
                       </p>
-                      <p className="text-[10px] text-console-dim">
+                      <p className="text-[10px] text-text-tertiary">
                         {action.description}
                       </p>
-                      <p className="text-[9px] text-console-muted mt-1">
+                      <p className="text-[9px] text-text-secondary mt-1">
                         <PlayIcon className="w-2.5 h-2.5 inline mr-0.5 -mt-0.5" />
                         Agent: {action.agent}
                       </p>
@@ -143,13 +149,13 @@ export function ReportDetail({ report }: ReportDetailProps) {
                           <button
                             onClick={() => void handleApproveAction(action.id)}
                             disabled={actionLoading === action.id || report.status !== "pending"}
-                            className="px-2 py-1 text-[10px] font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-2 py-1 text-[10px] font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            Approve
+                            {actionLoading === action.id ? "..." : "Approve"}
                           </button>
                           <button
                             disabled={report.status !== "pending"}
-                            className="px-2 py-1 text-[10px] font-medium text-console-dim hover:text-console-muted rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-2 py-1 text-[10px] font-medium text-text-tertiary hover:text-text-secondary rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Skip
                           </button>
@@ -166,23 +172,39 @@ export function ReportDetail({ report }: ReportDetailProps) {
 
       {/* Footer */}
       {report.status === "pending" && (
-        <div className="px-4 py-3 border-t border-console-border shrink-0 flex items-center justify-end gap-2">
+        <div className="px-4 py-3 border-t border-border-default shrink-0 flex items-center justify-end gap-2">
           <button
-            onClick={() => void handleDismiss()}
-            className="px-3 py-1.5 text-xs text-console-dim hover:text-console-muted border border-console-border rounded transition-colors"
+            onClick={() => setConfirmDismiss(true)}
+            className="px-3 py-1.5 text-[10px] text-text-tertiary hover:text-text-secondary border border-border-default rounded transition-all active:scale-[0.98]"
           >
             <CloseIcon className="w-3 h-3 inline mr-1 -mt-0.5" />
             Dismiss
           </button>
           <button
             onClick={() => void handleApproveAll()}
-            className="px-3 py-1.5 text-xs font-medium text-black bg-emerald-500 hover:bg-emerald-400 rounded transition-colors"
+            disabled={approvingAll}
+            className="px-3 py-1.5 text-[10px] font-medium text-black bg-emerald-500 hover:bg-emerald-400 rounded transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
           >
             <CheckIcon className="w-3 h-3 inline mr-1 -mt-0.5" />
-            Approve All
+            {approvingAll ? "Approving..." : "Approve All"}
           </button>
         </div>
       )}
+
+      {/* Dismiss confirmation dialog */}
+      <ConfirmDialog
+        open={confirmDismiss}
+        onOpenChange={setConfirmDismiss}
+        title="Dismiss Report"
+        description="This will dismiss the report and all its suggested actions. You can still view it in the report history."
+        detail={report.automationName}
+        confirmLabel="Dismiss"
+        variant="warning"
+        onConfirm={() => {
+          setConfirmDismiss(false);
+          void handleDismiss();
+        }}
+      />
     </div>
   );
 }

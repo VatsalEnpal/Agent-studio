@@ -9,11 +9,11 @@ interface StepTimelineProps {
 }
 
 const STATUS_LINE_COLORS: Record<string, string> = {
-  completed: "bg-console-success",
-  active: "bg-console-accent",
+  completed: "bg-sessions",
+  active: "bg-rooms",
   waiting: "bg-amber-400",
-  pending: "bg-console-dim/50",
-  failed: "bg-console-error",
+  pending: "bg-text-tertiary/50",
+  failed: "bg-error",
 };
 
 export function StepTimeline({ run }: StepTimelineProps) {
@@ -23,52 +23,52 @@ export function StepTimeline({ run }: StepTimelineProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Run header */}
-      <div className="px-4 py-3 border-b border-console-border shrink-0">
+      <div className="px-4 py-3 border-b border-border-default shrink-0">
         <div className="flex items-center gap-2">
           <div
             className={cn(
               "w-2 h-2 rounded-full shrink-0",
               run.status === "running"
-                ? "bg-console-accent animate-pulse"
+                ? "bg-rooms animate-pulse"
                 : run.status === "waiting"
                   ? "bg-amber-400 animate-pulse"
                   : run.status === "completed"
-                    ? "bg-console-success"
-                    : "bg-console-error",
+                    ? "bg-sessions"
+                    : "bg-error",
             )}
           />
-          <h2 className="text-[13px] font-medium text-console-text truncate">
+          <h2 className="text-[13px] font-medium text-text-primary truncate">
             {run.name}
           </h2>
           <span
             className={cn(
               "text-[8px] px-1.5 py-0.5 rounded font-medium ml-1",
               run.status === "completed"
-                ? "bg-console-success/15 text-console-success"
+                ? "bg-sessions/15 text-sessions"
                 : run.status === "running"
-                  ? "bg-console-accent/15 text-console-accent"
+                  ? "bg-rooms/15 text-rooms"
                   : run.status === "waiting"
                     ? "bg-amber-400/15 text-amber-400"
-                    : "bg-console-error/15 text-console-error",
+                    : "bg-error/15 text-error",
             )}
           >
             {run.status.charAt(0).toUpperCase() + run.status.slice(1)}
           </span>
         </div>
         <div className="flex items-center gap-4 mt-1.5">
-          <span className="text-[10px] text-console-dim font-mono">
+          <span className="text-[10px] text-text-tertiary font-mono">
             {formatDate(run.startedAt)}
           </span>
-          <span className="text-[10px] text-console-muted">
+          <span className="text-[10px] text-text-secondary">
             {completedSteps}/{totalSteps} steps
           </span>
           {run.stats.agentsUsed.length > 0 && (
-            <span className="text-[10px] text-console-dim">
+            <span className="text-[10px] text-text-tertiary">
               {run.stats.agentsUsed.length} agents
             </span>
           )}
           {run.stats.filesChanged != null && (
-            <span className="text-[10px] text-console-dim">
+            <span className="text-[10px] text-text-tertiary">
               {run.stats.filesChanged} files
             </span>
           )}
@@ -77,10 +77,10 @@ export function StepTimeline({ run }: StepTimelineProps) {
               className={cn(
                 "text-[10px] font-medium",
                 run.stats.qaHealth >= 95
-                  ? "text-console-success"
+                  ? "text-sessions"
                   : run.stats.qaHealth >= 80
                     ? "text-amber-400"
-                    : "text-console-error",
+                    : "text-error",
               )}
             >
               QA {run.stats.qaHealth}%
@@ -89,14 +89,14 @@ export function StepTimeline({ run }: StepTimelineProps) {
         </div>
         {/* Overall progress bar */}
         {totalSteps > 0 && (
-          <div className="mt-2 h-1 bg-console-border rounded-full overflow-hidden">
+          <div className="mt-2 h-1 bg-border-default rounded-full overflow-hidden">
             <div
               className={cn(
                 "h-full rounded-full transition-all",
                 run.status === "completed"
-                  ? "bg-console-success"
+                  ? "bg-sessions"
                   : run.status === "running"
-                    ? "bg-console-accent"
+                    ? "bg-rooms"
                     : "bg-amber-400",
               )}
               style={{
@@ -111,7 +111,7 @@ export function StepTimeline({ run }: StepTimelineProps) {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="relative pl-4">
           {/* Vertical connecting line */}
-          <div className="absolute left-[7px] top-3 bottom-3 w-px bg-console-border" />
+          <div className="absolute left-[7px] top-3 bottom-3 w-px bg-border-default" />
 
           <div className="space-y-2 relative">
             {run.steps.map((step, i) => (
@@ -119,8 +119,8 @@ export function StepTimeline({ run }: StepTimelineProps) {
                 {/* Timeline dot */}
                 <div
                   className={cn(
-                    "absolute -left-4 top-3 w-[7px] h-[7px] rounded-full z-10 ring-2 ring-console-bg",
-                    STATUS_LINE_COLORS[step.status] ?? "bg-console-dim",
+                    "absolute -left-4 top-3 w-[7px] h-[7px] rounded-full z-10 ring-2 ring-bg-base",
+                    STATUS_LINE_COLORS[step.status] ?? "bg-text-tertiary",
                     step.status === "active" && "animate-pulse",
                     step.status === "waiting" && "animate-pulse",
                   )}
@@ -131,7 +131,7 @@ export function StepTimeline({ run }: StepTimelineProps) {
                   <div
                     className={cn(
                       "absolute -left-[13px] top-[18px] w-px",
-                      STATUS_LINE_COLORS[step.status] ?? "bg-console-dim",
+                      STATUS_LINE_COLORS[step.status] ?? "bg-text-tertiary",
                     )}
                     style={{ height: "calc(100% + 8px)" }}
                   />

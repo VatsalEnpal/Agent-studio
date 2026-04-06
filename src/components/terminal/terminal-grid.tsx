@@ -66,15 +66,15 @@ export function TerminalGrid({
     return (
       <div className="flex flex-col items-center justify-center h-full gap-8 animate-tab-enter">
         <div className="text-center space-y-3">
-          <div className="w-14 h-14 rounded-2xl bg-console-faint/50 flex items-center justify-center mx-auto mb-2">
+          <div className="w-14 h-14 rounded-2xl bg-bg-elevated/50 flex items-center justify-center mx-auto mb-2">
             <span className="text-2xl">&#9889;</span>
           </div>
-          <p className="text-console-text text-sm font-medium tracking-tight">
+          <p className="text-text-primary text-sm font-medium tracking-tight">
             Ready to go.
           </p>
-          <p className="text-console-dim text-xs max-w-sm leading-relaxed">
+          <p className="text-text-tertiary text-xs max-w-sm leading-relaxed">
             Launch a session to start working with Claude. Press{" "}
-            <kbd className="px-1 py-0.5 rounded bg-console-border text-console-muted text-[10px]">
+            <kbd className="px-1 py-0.5 rounded bg-border-default text-text-secondary text-[10px]">
               Cmd+N
             </kbd>{" "}
             anytime for the full launcher.
@@ -85,24 +85,24 @@ export function TerminalGrid({
         <div className="flex flex-col items-center gap-3 w-full max-w-xs">
           <button
             onClick={onQuickChat ?? onCreateSession}
-            className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded-xl border border-console-accent/30 bg-console-accent/5 hover:border-console-accent/50 hover:bg-console-accent/8 hover:shadow-glow-sm active:scale-[0.98] transition-all"
+            className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded-xl border border-rooms/30 bg-rooms/5 hover:border-rooms/50 hover:bg-rooms/8 hover:shadow-glow-sm active:scale-[0.98] transition-all"
           >
-            <span className="text-sm font-medium text-console-text">Start a Quick Chat</span>
-            <span className="text-[10px] text-console-dim">Ask Claude anything — uses Sonnet, no agent needed.</span>
+            <span className="text-sm font-medium text-text-primary">Start a Quick Chat</span>
+            <span className="text-[10px] text-text-tertiary">Ask Claude anything — uses Sonnet, no agent needed.</span>
           </button>
           <button
             onClick={onStartSprint ?? onCreateSession}
-            className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded-xl border border-console-border hover:border-console-accent/40 hover:bg-console-faint/40 hover:shadow-card active:scale-[0.98] transition-all"
+            className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded-xl border border-border-default hover:border-rooms/40 hover:bg-bg-elevated/40 hover:shadow-card active:scale-[0.98] transition-all"
           >
-            <span className="text-sm font-medium text-console-text">Start a Sprint</span>
-            <span className="text-[10px] text-console-dim">Launch a full agent team to work on your project.</span>
+            <span className="text-sm font-medium text-text-primary">Start a Sprint</span>
+            <span className="text-[10px] text-text-tertiary">Launch a full agent team to work on your project.</span>
           </button>
           <button
             onClick={onContinueLast ?? onCreateSession}
-            className="w-full flex flex-col items-center gap-1 px-5 py-3 rounded-xl border border-console-border hover:border-console-accent/40 hover:bg-console-faint/40 active:scale-[0.98] transition-all"
+            className="w-full flex flex-col items-center gap-1 px-5 py-3 rounded-xl border border-border-default hover:border-rooms/40 hover:bg-bg-elevated/40 active:scale-[0.98] transition-all"
           >
-            <span className="text-[10px] font-medium text-console-text">Continue Last Session</span>
-            <span className="text-[9px] text-console-dim">Pick up where you left off.</span>
+            <span className="text-[10px] font-medium text-text-primary">Continue Last Session</span>
+            <span className="text-[9px] text-text-tertiary">Pick up where you left off.</span>
           </button>
         </div>
       </div>
@@ -135,27 +135,27 @@ export function TerminalGrid({
 
             {/* Fullscreen header bar */}
             {isFullscreen && (
-              <div className="relative z-10 flex items-center justify-between px-4 py-2 bg-console-panel border-b border-console-border">
+              <div className="relative z-10 flex items-center justify-between px-4 py-2 bg-bg-surface border-b border-border-default">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-console-text">
+                  <span className="text-xs font-medium text-text-primary">
                     {session.name}
                   </span>
                   {session.meta?.model && (
-                    <span className="text-[9px] px-1 py-0.5 rounded bg-console-border text-console-dim">
+                    <span className="text-[9px] px-1 py-0.5 rounded bg-border-default text-text-tertiary">
                       {session.meta.model}
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-[10px] text-console-dim">
-                    <kbd className="px-1 py-0.5 rounded bg-console-border text-console-muted text-[9px] font-mono">
+                  <span className="text-[10px] text-text-tertiary">
+                    <kbd className="px-1 py-0.5 rounded bg-border-default text-text-secondary text-[9px] font-mono">
                       Esc
                     </kbd>{" "}
                     to exit
                   </span>
                   <button
                     onClick={() => setFullscreen(null)}
-                    className="text-xs text-console-dim hover:text-console-muted transition-colors"
+                    className="text-xs text-text-tertiary hover:text-text-secondary transition-all"
                   >
                     Exit
                   </button>

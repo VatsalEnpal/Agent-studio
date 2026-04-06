@@ -13,21 +13,21 @@ const SHORTCUTS = [
 
 export function SettingsShortcuts() {
   return (
-    <section className="border border-console-border rounded-lg bg-console-panel">
-      <div className="px-4 py-3 border-b border-console-border">
-        <h3 className="text-body-sm font-medium text-console-text">Keyboard Shortcuts</h3>
+    <section className="border border-border-default rounded-lg bg-bg-surface">
+      <div className="px-4 py-3 border-b border-border-default">
+        <h3 className="text-[11px] font-medium text-text-primary">Keyboard Shortcuts</h3>
       </div>
       <div className="px-4 py-2">
         <table className="w-full">
           <tbody>
             {SHORTCUTS.map((shortcut) => (
-              <tr key={shortcut.keys} className="border-b border-console-border/30 last:border-0">
+              <tr key={shortcut.keys} className="border-b border-border-default/30 last:border-0">
                 <td className="py-2 pr-4">
-                  <kbd className="px-2 py-0.5 text-label-xs font-mono bg-console-bg border border-console-border rounded text-console-text">
+                  <kbd className="px-2 py-0.5 text-label font-mono bg-bg-base border border-border-default rounded text-text-primary">
                     {shortcut.keys}
                   </kbd>
                 </td>
-                <td className="py-2 text-label-xs text-console-muted">
+                <td className="py-2 text-label text-text-secondary">
                   {shortcut.description}
                 </td>
               </tr>

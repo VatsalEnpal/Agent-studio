@@ -10,6 +10,9 @@ import type { RoomMessage, RoomAgent } from "@/stores/rooms";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useThemeSync } from "@/hooks/use-theme-sync";
+import { useContextWarning } from "@/hooks/use-context-warning";
+import { useUsage } from "@/hooks/use-usage";
+import { useMemoryStore } from "@/stores/memory";
 import { initNotificationManager } from "@/lib/notification-manager";
 import { onBadgeUpdate } from "@/lib/notification-manager";
 
@@ -25,6 +28,7 @@ import { SessionSidebar } from "@/components/sessions/session-sidebar";
 import { SessionLauncherV2 } from "@/components/sessions/session-launcher-v2";
 import { GitView } from "@/components/sessions/git-view";
 import { TerminalPaneV2 } from "@/components/terminal/terminal-pane-v2";
+import { SessionStatsBar } from "@/components/terminal/session-stats-bar";
 
 import { TeamsView } from "@/components/teams/teams-view";
 import { RoomList } from "@/components/teams/room-list";
@@ -127,16 +131,31 @@ export default function Home() {
   const selectedSprintId = useSprintsStore((s) => s.selectedSprintId);
   const selectSprint = useSprintsStore((s) => s.selectSprint);
 
+  const memoryEntryCount = useMemoryStore((s) =>
+    s.entries.filter((e) => !e.superseded_by).length,
+  );
+
   // Hooks
   useKeyboardShortcuts();
   useThemeSync();
   useNotifications();
+  useContextWarning();
+  const usageData = useUsage();
 
   // Active session count
   const activeSessionCount = useMemo(
     () => sessions.filter((s) => s.status !== "exited").length,
     [sessions],
   );
+
+  // Total cost across all managed sessions
+  const totalCost = useMemo(() => {
+    let sum = 0;
+    for (const u of Object.values(usageData.managed)) {
+      sum += u.totalCost;
+    }
+    return sum;
+  }, [usageData.managed]);
 
 // --- Notification manager ---
   useEffect(() => {
@@ -156,11 +175,14 @@ export default function Home() {
         // Always show active session count
         if (activeSessionCount > 0) next.sessions = activeSessionCount;
         else delete next.sessions;
+        // Memory entry count
+        if (memoryEntryCount > 0) next.knowledge = memoryEntryCount;
+        else delete next.knowledge;
         return next;
       });
     });
     return unsub;
-  }, [activeSessionCount]);
+  }, [activeSessionCount, memoryEntryCount]);
 
   // --- Preflight ---
   const runPreflight = useCallback(async () => {
@@ -391,14 +413,17 @@ export default function Home() {
         args.push("--agent", config.agent);
       }
 
+      // Auto-name: use directory basename instead of generic "claude-opus"
+      const cwdBasename = resolvedCwd.split("/").filter(Boolean).pop() ?? "session";
+      const autoName = config.agent !== "none"
+        ? config.agent
+        : config.name || cwdBasename;
+
       const res = await fetch("/api/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name:
-            config.agent !== "none"
-              ? config.agent
-              : `claude-${config.model}`,
+          name: autoName,
           command: "claude",
           args: args.length > 0 ? args : ["--dangerously-skip-permissions"],
           cwd: resolvedCwd,
@@ -511,7 +536,7 @@ export default function Home() {
               setPreflightLoading(true);
               void runPreflight().then(() => setPreflightLoading(false));
             }}
-            className="px-2.5 py-1 bg-accent text-white rounded-md text-[10px] font-medium hover:bg-accent-hover transition-colors"
+            className="px-2.5 py-1 bg-accent text-white rounded-md text-[10px] font-medium hover:bg-accent-hover transition-all"
           >
             Check Again
           </button>
@@ -562,6 +587,7 @@ export default function Home() {
       <TitleBar
         sessionName={focusedId ? sessions.find((s) => s.id === focusedId)?.name : undefined}
         sessionCount={activeSessionCount}
+        totalCost={totalCost}
       />
 
       {/* Main 3-column layout below title bar */}
@@ -582,7 +608,7 @@ export default function Home() {
               onRepoClick={(repo) => setSelectedRepo(repo)}
               onPR={(repo) => openPrModal(repo)}
               onPush={handlePush}
-              onDevServers={() => setShowDevServers((prev) => !prev)}
+              onDevServers={(show) => setShowDevServers(show ?? false)}
             />
           )}
           {activeMode === "teams" && (
@@ -627,18 +653,29 @@ export default function Home() {
                   : "invisible z-0 pointer-events-none",
               )}
             >
-              {showDevServers ? (
-                <ErrorBoundary fallbackLabel="Dev Servers error">
-                  <DevServersView />
-                </ErrorBoundary>
-              ) : showGitView && selectedRepo ? (
-                <ErrorBoundary fallbackLabel="Git view error">
-                  <GitView
-                    repo={selectedRepo}
-                    onBack={() => setSelectedRepo(null)}
-                  />
-                </ErrorBoundary>
-              ) : nonRoomSessions.length === 0 ? (
+              {/* Dev servers overlay — shown above terminal, doesn't unmount it */}
+              {showDevServers && (
+                <div className="absolute inset-0 z-20">
+                  <ErrorBoundary fallbackLabel="Dev Servers error">
+                    <DevServersView />
+                  </ErrorBoundary>
+                </div>
+              )}
+
+              {/* Git view overlay */}
+              {showGitView && selectedRepo && (
+                <div className="absolute inset-0 z-20">
+                  <ErrorBoundary fallbackLabel="Git view error">
+                    <GitView
+                      repo={selectedRepo}
+                      onBack={() => setSelectedRepo(null)}
+                    />
+                  </ErrorBoundary>
+                </div>
+              )}
+
+              {/* Terminal or empty state — always mounted so terminal doesn't lose state */}
+              {nonRoomSessions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4">
                   <div className="text-center space-y-2">
                     <p className="text-[10px] font-medium text-text-secondary">
@@ -659,7 +696,7 @@ export default function Home() {
                       "text-[10px] font-medium",
                       "bg-text-primary text-bg-base",
                       "hover:bg-text-secondary",
-                      "transition-colors duration-150",
+                      "transition-all duration-150",
                     )}
                   >
                     New Session
@@ -667,13 +704,16 @@ export default function Home() {
                 </div>
               ) : (
                 <ErrorBoundary fallbackLabel="Terminal error">
-                  <TerminalPaneV2
-                    sessionId={focusedId ?? nonRoomSessions[0].id}
-                    visible={activeMode === "sessions" && !showGitView && !showDevServers}
-                    fontSize={
-                      focusedId ? zoomLevels[focusedId] ?? 13 : 13
-                    }
-                  />
+                  <div className="flex flex-col h-full">
+                    <SessionStatsBar sessionId={focusedId ?? nonRoomSessions[0].id} />
+                    <TerminalPaneV2
+                      sessionId={focusedId ?? nonRoomSessions[0].id}
+                      visible={activeMode === "sessions" && !showGitView && !showDevServers}
+                      fontSize={
+                        focusedId ? zoomLevels[focusedId] ?? 13 : 13
+                      }
+                    />
+                  </div>
                 </ErrorBoundary>
               )}
             </div>

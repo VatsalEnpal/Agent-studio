@@ -46,7 +46,7 @@ export function MemoryDeleteDialog() {
               Delete Memory
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button className="p-1 rounded-md text-text-ghost hover:text-text-primary hover:bg-bg-input transition-colors">
+              <button className="p-1 rounded-md text-text-ghost hover:text-text-primary hover:bg-bg-input transition-all">
                 <CloseIcon size={14} />
               </button>
             </Dialog.Close>
@@ -69,7 +69,7 @@ export function MemoryDeleteDialog() {
           <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-border-default">
             <button
               onClick={close}
-              className="px-3 py-1.5 text-label text-text-secondary hover:text-text-primary bg-bg-elevated rounded transition-colors"
+              className="px-3 py-1.5 text-label text-text-secondary hover:text-text-primary bg-bg-elevated rounded transition-all"
             >
               Cancel
             </button>

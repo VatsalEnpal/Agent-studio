@@ -51,7 +51,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
       aria-checked={checked}
       onClick={onChange}
       className={cn(
-        "relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0",
+        "relative inline-flex h-5 w-9 items-center rounded-full transition-all shrink-0",
         checked ? "bg-sessions" : "bg-border-default",
       )}
     >
@@ -92,7 +92,7 @@ export function SettingsNotifications() {
         </h3>
         <button
           onClick={handleTest}
-          className="text-label text-text-ghost hover:text-text-tertiary transition-colors"
+          className="text-label text-text-ghost hover:text-text-tertiary transition-all"
         >
           Send Test
         </button>

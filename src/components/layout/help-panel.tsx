@@ -14,7 +14,7 @@ export function HelpPanel() {
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
         <button
-          className="flex items-center justify-center w-7 h-7 rounded-md text-console-muted hover:text-console-text hover:bg-white/10 transition-all"
+          className="flex items-center justify-center w-7 h-7 rounded-md text-text-secondary hover:text-text-primary hover:bg-white/10 transition-all"
           title="Help & Guide"
         >
           <HelpIcon className="w-4 h-4" />
@@ -23,12 +23,12 @@ export function HelpPanel() {
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] bg-bg-elevated border border-border-subtle rounded-lg shadow-modal focus:outline-none animate-cmd-palette-in">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-console-border">
-            <Dialog.Title className="text-sm font-semibold text-console-text">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-border-default">
+            <Dialog.Title className="text-sm font-semibold text-text-primary">
               Help & Guide
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button className="text-console-muted hover:text-console-text transition-colors">
+              <button className="text-text-secondary hover:text-text-primary transition-all">
                 <CloseIcon className="w-4 h-4" />
               </button>
             </Dialog.Close>
@@ -40,7 +40,7 @@ export function HelpPanel() {
           <div className="px-5 py-4 space-y-4">
             {/* Shortcuts */}
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-console-muted mb-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary mb-2">
                 Shortcuts
               </p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
@@ -53,11 +53,11 @@ export function HelpPanel() {
               </div>
             </div>
 
-            <hr className="border-console-border" />
+            <hr className="border-border-default" />
 
             {/* Features */}
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-console-muted mb-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary mb-2">
                 Features
               </p>
               <div className="space-y-2">
@@ -89,14 +89,14 @@ export function HelpPanel() {
               </div>
             </div>
 
-            <hr className="border-console-border" />
+            <hr className="border-border-default" />
 
             {/* Guide link */}
             <a
               href={HOWTO_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-console-accent hover:underline"
+              className="flex items-center gap-1.5 text-xs text-rooms hover:underline"
             >
               <ExternalLinkIcon className="w-3.5 h-3.5" />
               Full How-To Guide
@@ -104,8 +104,8 @@ export function HelpPanel() {
           </div>
 
           {/* Version footer */}
-          <div className="px-5 py-2 border-t border-console-border">
-            <p className="text-[10px] text-console-muted/60">
+          <div className="px-5 py-2 border-t border-border-default">
+            <p className="text-[10px] text-text-secondary/60">
               Agent Studio v0.1.0
             </p>
           </div>
@@ -118,10 +118,10 @@ export function HelpPanel() {
 function ShortcutRow({ keys, label }: { keys: string; label: string }) {
   return (
     <div className="flex items-center gap-2">
-      <kbd className="inline-flex items-center justify-center min-w-[44px] px-1.5 py-0.5 rounded bg-console-border/60 text-console-text font-mono text-[10px] leading-tight">
+      <kbd className="inline-flex items-center justify-center min-w-[44px] px-1.5 py-0.5 rounded bg-border-default text-text-primary font-mono text-[10px] leading-tight">
         {keys}
       </kbd>
-      <span className="text-[10px] text-console-muted">{label}</span>
+      <span className="text-[10px] text-text-secondary">{label}</span>
     </div>
   );
 }
@@ -137,11 +137,11 @@ function FeatureRow({
 }) {
   return (
     <div className="flex items-center gap-2.5">
-      <span className="text-console-accent shrink-0">{icon}</span>
-      <span className="text-xs text-console-text font-medium w-16 shrink-0">
+      <span className="text-rooms shrink-0">{icon}</span>
+      <span className="text-xs text-text-primary font-medium w-16 shrink-0">
         {name}
       </span>
-      <span className="text-[10px] text-console-muted">{desc}</span>
+      <span className="text-[10px] text-text-secondary">{desc}</span>
     </div>
   );
 }

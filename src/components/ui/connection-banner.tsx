@@ -59,7 +59,7 @@ export function ConnectionBanner() {
         "flex items-center justify-center gap-2 px-4 py-1.5",
         "text-label-xs font-medium",
         "z-topBar",
-        "transition-colors duration-[var(--duration-smooth)]",
+        "transition-all duration-[var(--duration-smooth)]",
         isReconnecting
           ? "bg-warning-subtle text-warning"
           : "bg-success-subtle text-success",

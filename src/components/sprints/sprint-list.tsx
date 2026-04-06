@@ -2,6 +2,7 @@
 
 import { CheckIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
+import { formatRelative } from "@/hooks/use-relative-time";
 import type { Sprint } from "@/stores/sprints";
 
 interface SprintListProps {
@@ -41,10 +42,15 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-3 py-2.5 border-b border-border-default shrink-0">
+      <div className="px-3 py-2.5 border-b border-border-default shrink-0 flex items-center justify-between">
         <h3 className="text-label text-text-ghost uppercase tracking-[0.06em]">
           Sprints
         </h3>
+        {sprints.length > 0 && (
+          <span className="text-[9px] text-text-ghost tabular-nums">
+            {active.length > 0 ? `${active.length} active` : `${sprints.length} total`}
+          </span>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto px-2 py-2 space-y-4 scrollbar-thin">
@@ -59,10 +65,10 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                   key={sprint.id}
                   onClick={() => onSelect(sprint.id)}
                   className={cn(
-                    "w-full text-left px-2.5 py-2 rounded-md transition-colors",
+                    "w-full text-left px-2.5 py-2 rounded-md transition-all",
                     sprint.id === selectedSprintId
-                      ? "bg-bg-elevated border-l-2 border-sprints"
-                      : "hover:bg-bg-elevated/30 border-l-2 border-transparent",
+                      ? "bg-bg-elevated border-l-2 border-l-sprints shadow-[inset_0_0_0_1px_var(--accent-sprints-glow,rgba(251,191,36,0.08))]"
+                      : "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(251,191,36,0.06)] border-l-2 border-transparent",
                   )}
                 >
                   <div className="flex items-center gap-2">
@@ -77,7 +83,7 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                       </span>
                     )}
                   </div>
-                  {/* Gate progress bar */}
+                  {/* Gate progress bar + elapsed time */}
                   <div className="mt-1.5 flex items-center gap-2">
                     <div className="flex-1 h-1 bg-border-default rounded-full overflow-hidden">
                       <div
@@ -86,8 +92,13 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                       />
                     </div>
                     <span className="text-label text-text-tertiary shrink-0">
-                      {passed}/{total}
+                      {Math.round(pct)}%
                     </span>
+                    {sprint.startedAt && (
+                      <span className="text-label text-text-ghost shrink-0">
+                        {formatRelative(new Date(sprint.startedAt).getTime())}
+                      </span>
+                    )}
                   </div>
                 </button>
               );
@@ -103,10 +114,10 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                 key={sprint.id}
                 onClick={() => onSelect(sprint.id)}
                 className={cn(
-                  "w-full text-left px-2.5 py-2 rounded-md transition-colors",
+                  "w-full text-left px-2.5 py-2 rounded-md transition-all",
                   sprint.id === selectedSprintId
-                    ? "bg-bg-elevated border-l-2 border-sprints"
-                    : "hover:bg-bg-elevated/30 border-l-2 border-transparent",
+                    ? "bg-bg-elevated border-l-2 border-l-sprints"
+                    : "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(251,191,36,0.06)] border-l-2 border-transparent",
                 )}
               >
                 <div className="flex items-center gap-2">
@@ -149,10 +160,10 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                 key={sprint.id}
                 onClick={() => onSelect(sprint.id)}
                 className={cn(
-                  "w-full text-left px-2.5 py-2 rounded-md transition-colors",
+                  "w-full text-left px-2.5 py-2 rounded-md transition-all",
                   sprint.id === selectedSprintId
-                    ? "bg-bg-elevated border-l-2 border-sprints"
-                    : "hover:bg-bg-elevated/30 border-l-2 border-transparent",
+                    ? "bg-bg-elevated border-l-2 border-l-sprints"
+                    : "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(251,191,36,0.06)] border-l-2 border-transparent",
                 )}
               >
                 <div className="flex items-center gap-2">
@@ -170,9 +181,9 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
         {sprints.length === 0 && (
           <div className="text-center py-6 px-4">
             <CheckIcon size={20} className="text-text-ghost mx-auto mb-2" />
-            <p className="text-[10px] text-text-secondary font-medium">No sprints found</p>
+            <p className="text-[10px] text-text-secondary font-medium">No sprints running</p>
             <p className="text-[10px] text-text-tertiary mt-1 leading-relaxed">
-              The PMO agent creates sprints automatically when it detects pending work.
+              Sprints are created automatically by the PMO agent, or you can start one manually from a plan.
             </p>
           </div>
         )}

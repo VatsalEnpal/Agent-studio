@@ -20,7 +20,7 @@ export function SessionsSection({ onKillSession }: SessionsSectionProps) {
   return (
     <SessionGroup title="Sessions" count={managedSessions.length}>
       {managedSessions.length === 0 ? (
-        <p className="text-[10px] text-console-dim px-2 py-2">
+        <p className="text-[10px] text-text-tertiary px-2 py-2">
           Click + New Session to start
         </p>
       ) : (

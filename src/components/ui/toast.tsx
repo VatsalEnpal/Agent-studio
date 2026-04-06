@@ -12,10 +12,10 @@ const iconMap: Record<Toast["type"], React.ComponentType<{ className?: string }>
 };
 
 const colorMap: Record<Toast["type"], string> = {
-  info: "border-console-muted/30 text-console-muted",
-  success: "border-console-success/30 text-console-success",
-  warning: "border-console-accent/30 text-console-accent",
-  error: "border-console-error/30 text-console-error",
+  info: "border-text-secondary/30 text-text-secondary",
+  success: "border-sessions/30 text-sessions",
+  warning: "border-rooms/30 text-rooms",
+  error: "border-error/30 text-error",
 };
 
 function ToastItem({ toast }: { toast: Toast }) {
@@ -25,18 +25,18 @@ function ToastItem({ toast }: { toast: Toast }) {
   return (
     <div
       className={cn(
-        "flex items-start gap-2 px-3 py-2.5 rounded-lg border bg-console-panel shadow-lg",
+        "flex items-start gap-2 px-3 py-2.5 rounded-lg border bg-bg-surface shadow-lg",
         "animate-toast-in",
         colorMap[toast.type],
       )}
     >
       <Icon className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-      <span className="text-xs text-console-text flex-1 leading-relaxed">
+      <span className="text-[10px] text-text-primary flex-1 leading-relaxed">
         {toast.message}
       </span>
       <button
         onClick={() => removeToast(toast.id)}
-        className="p-0.5 text-console-dim hover:text-console-muted transition-colors shrink-0"
+        className="p-0.5 text-text-tertiary hover:text-text-secondary transition-all shrink-0"
       >
         <CloseIcon className="w-3 h-3" />
       </button>

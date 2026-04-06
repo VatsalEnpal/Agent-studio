@@ -333,7 +333,7 @@ export function SessionLauncherV2({
   );
 
   const inputCls =
-    "w-full px-2 py-1 text-[10px] bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-colors";
+    "w-full px-2 py-1 text-[10px] bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all";
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -347,7 +347,7 @@ export function SessionLauncherV2({
             <Dialog.Title className="text-xs font-semibold text-text-primary tracking-[-0.2px]">
               New Session
             </Dialog.Title>
-            <Dialog.Close className="p-0.5 text-text-ghost hover:text-text-secondary transition-colors rounded">
+            <Dialog.Close className="p-0.5 text-text-ghost hover:text-text-secondary transition-all rounded">
               <CloseIcon size={10} />
             </Dialog.Close>
           </div>
@@ -389,7 +389,7 @@ export function SessionLauncherV2({
                     type="button"
                     onClick={() => setResumeDropdownOpen(!resumeDropdownOpen)}
                     className={cn(
-                      "w-full flex items-center gap-2 px-2 py-1 text-[10px] bg-bg-input border rounded-md text-left transition-colors",
+                      "w-full flex items-center gap-2 px-2 py-1 text-[10px] bg-bg-input border rounded-md text-left transition-all",
                       resume
                         ? "border-[#f59e0b]/40 text-text-primary"
                         : "border-border-default text-text-ghost",
@@ -455,7 +455,7 @@ export function SessionLauncherV2({
                                 setResumeSearch("");
                               }}
                               className={cn(
-                                "flex items-center gap-2 w-full px-2.5 py-1 text-left transition-colors",
+                                "flex items-center gap-2 w-full px-2.5 py-1 text-left transition-all",
                                 "hover:bg-bg-input",
                                 resume === session.id && "bg-[#f59e0b]/10",
                               )}

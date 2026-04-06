@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 import { SearchIcon, MemoryIcon, PlusIcon, EditIcon, TrashIcon, SettingsIcon } from "@/components/ui/icons";
 import { useMemoryStore, type MemoryEntry, type MemoryEntryDetail } from "@/stores/memory";
 import { useToastStore } from "@/stores/toast";
@@ -49,6 +49,7 @@ function extractDate(filePath: string): string {
 }
 
 export function MemoryView() {
+  const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
   const entries = useMemoryStore((s) => s.entries);
   const search = useMemoryStore((s) => s.search);
   const selectedCategory = useMemoryStore((s) => s.selectedCategory);
@@ -109,6 +110,13 @@ export function MemoryView() {
       result = result.filter((e) => e.category === selectedCategory);
     }
 
+    // Tag filter (OR: entry must have at least one active tag)
+    if (activeTags.size > 0) {
+      result = result.filter((e) =>
+        e.tags.some((t) => activeTags.has(t)),
+      );
+    }
+
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -128,7 +136,7 @@ export function MemoryView() {
     });
 
     return result;
-  }, [entries, search, selectedCategory, showPinnedOnly]);
+  }, [entries, search, selectedCategory, showPinnedOnly, activeTags]);
 
   // Category counts (excluding superseded)
   const categoryCounts = useMemo(() => {
@@ -145,6 +153,30 @@ export function MemoryView() {
     [entries],
   );
 
+  // Top tags with counts
+  const tagCounts = useMemo(() => {
+    const active = entries.filter((e) => !e.superseded_by);
+    const counts: Record<string, number> = {};
+    for (const entry of active) {
+      for (const tag of entry.tags) {
+        counts[tag] = (counts[tag] ?? 0) + 1;
+      }
+    }
+    // Sort by count descending, take top 10
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+  }, [entries]);
+
+  const toggleTag = useCallback((tag: string) => {
+    setActiveTags((prev) => {
+      const next = new Set(prev);
+      if (next.has(tag)) next.delete(tag);
+      else next.add(tag);
+      return next;
+    });
+  }, []);
+
   return (
     <div className="flex flex-col h-full">
       {/* Search bar + create button */}
@@ -156,12 +188,12 @@ export function MemoryView() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search memories..."
-            className="w-full pl-7 pr-2 py-1 text-[10px] bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-colors"
+            className="w-full pl-7 pr-2 py-1 text-[10px] bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
           />
         </div>
         <button
           onClick={openCreateDialog}
-          className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium bg-memory text-bg-base rounded-md hover:bg-memory/90 transition-colors shrink-0"
+          className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium bg-memory text-bg-base rounded-md hover:bg-memory/90 transition-all shrink-0"
         >
           <PlusIcon size={10} />
           New
@@ -208,6 +240,38 @@ export function MemoryView() {
         </button>
       </div>
 
+      {/* Tag filter chips */}
+      {tagCounts.length > 0 && (
+        <div className="px-3 py-1 border-b border-border-default flex items-center gap-1 overflow-x-auto scrollbar-thin">
+          <span className="text-[9px] text-text-ghost uppercase tracking-wider shrink-0 mr-1">Tags</span>
+          {tagCounts.map(([tag, count]) => (
+            <button
+              key={tag}
+              onClick={() => toggleTag(tag)}
+              className={cn(
+                "flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] rounded-full whitespace-nowrap transition-all",
+                activeTags.has(tag)
+                  ? "bg-memory/15 text-memory border border-memory/30 font-medium"
+                  : "bg-bg-input text-text-ghost hover:text-text-tertiary border border-transparent",
+              )}
+            >
+              {tag}
+              <span className={cn("text-[8px]", activeTags.has(tag) ? "text-memory/60" : "text-text-ghost/60")}>
+                {count}
+              </span>
+            </button>
+          ))}
+          {activeTags.size > 0 && (
+            <button
+              onClick={() => setActiveTags(new Set())}
+              className="text-[9px] text-text-ghost hover:text-text-secondary ml-1 shrink-0"
+            >
+              clear
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Main content: list + detail */}
       <div className="flex flex-1 min-h-0">
         {/* Entry list */}
@@ -227,7 +291,7 @@ export function MemoryView() {
                 <MemoryIcon size={20} className="text-text-ghost" />
               </div>
               <span className="text-text-secondary text-[10px] font-medium">
-                {selectedCategory || showPinnedOnly ? "No memories match this filter" : "No memories yet"}
+                {selectedCategory || showPinnedOnly ? "No memories match this filter" : "No memories stored"}
               </span>
               {!selectedCategory && !showPinnedOnly && (
                 <>
@@ -240,7 +304,7 @@ export function MemoryView() {
                   {entries.length === 0 && (
                     <button
                       onClick={() => useUIStore.getState().setActiveMode("settings")}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded border border-border-default hover:border-text-secondary transition-colors mt-1"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded border border-border-default hover:border-text-secondary transition-all mt-1"
                     >
                       <SettingsIcon size={12} />
                       Create Agent System
@@ -331,17 +395,17 @@ function MemoryListItem({
       onClick={onSelect}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(); }}
       className={cn(
-        "w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-colors group cursor-pointer",
+        "w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer",
         selected
           ? "bg-memory/10 border-l-2 border-l-memory"
-          : "hover:bg-bg-elevated/50 border-l-2 border-l-transparent",
+          : "hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent",
       )}
     >
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
             {entry.pinned && <span className="text-sprints shrink-0 text-[10px]">*</span>}
-            <p className="text-xs text-text-primary font-medium leading-snug truncate">
+            <p className="text-[10px] text-text-primary font-medium leading-snug truncate">
               {entry.title}
             </p>
           </div>
@@ -354,7 +418,7 @@ function MemoryListItem({
           <button
             onClick={handlePin}
             className={cn(
-              "p-1 rounded transition-colors",
+              "p-1 rounded transition-all",
               entry.pinned
                 ? "text-sprints hover:text-sprints/80"
                 : "text-text-tertiary hover:text-text-secondary",
@@ -365,14 +429,14 @@ function MemoryListItem({
           </button>
           <button
             onClick={handleEdit}
-            className="p-1 text-text-tertiary hover:text-text-secondary rounded transition-colors"
+            className="p-1 text-text-tertiary hover:text-text-secondary rounded transition-all"
             title="Edit"
           >
             <EditIcon size={12} />
           </button>
           <button
             onClick={handleDelete}
-            className="p-1 text-text-tertiary hover:text-error rounded transition-colors"
+            className="p-1 text-text-tertiary hover:text-error rounded transition-all"
             title="Delete"
           >
             <TrashIcon size={12} />

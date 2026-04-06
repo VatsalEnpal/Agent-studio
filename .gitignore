@@ -26,6 +26,9 @@ qa-screenshots-v3/
 scripts/qa-*
 scripts/readme-screenshots.mjs
 
+# Maintainer-only handoff (local context for AI sessions; not for contributors)
+docs/HANDOFF.md
+
 # Superpowers / QA snapshots
 .superpowers/
 .qa-screenshots/

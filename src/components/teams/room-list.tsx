@@ -1,11 +1,23 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
-import { HashIcon, PlusIcon, CloseIcon } from "@/components/ui/icons";
+import { useEffect, useCallback, useRef } from "react";
+import { HashIcon, PlusIcon, CloseIcon, CheckIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import { useRoomsStore } from "@/stores/rooms";
 import type { Room } from "@/stores/rooms";
+
+function relativeMessageTime(iso: string): string {
+  try {
+    const diff = Date.now() - new Date(iso).getTime();
+    if (diff < 60_000) return "now";
+    if (diff < 3600_000) return `${Math.floor(diff / 60_000)}m`;
+    if (diff < 86400_000) return `${Math.floor(diff / 3600_000)}h`;
+    return `${Math.floor(diff / 86400_000)}d`;
+  } catch {
+    return "";
+  }
+}
 
 interface RoomListProps {
   onCreateRoom: () => void;
@@ -19,6 +31,18 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
   const setLoading = useRoomsStore((s) => s.setLoading);
   const loading = useRoomsStore((s) => s.loading);
   const lastSeenByRoom = useRoomsStore((s) => s.lastSeenByRoom);
+  const markAllSeen = useRoomsStore((s) => s.markAllSeen);
+
+  // Compute total unread across all rooms
+  const totalUnread = rooms.reduce((acc, room) => {
+    if (!room.active) return acc;
+    const seen = lastSeenByRoom[room.id];
+    const msgs = room.messages ?? [];
+    const unread = seen
+      ? msgs.filter((m) => new Date(m.timestamp) > new Date(seen) && m.from !== "user").length
+      : msgs.filter((m) => m.from !== "user").length;
+    return acc + unread;
+  }, 0);
 
   const loadRooms = useCallback(async () => {
     setLoading(true);
@@ -66,16 +90,36 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
 
   const activeRooms = rooms.filter((r) => r.active);
   const archivedRooms = rooms.filter((r) => !r.active);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  // Keyboard navigation: arrow keys to cycle rooms
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      e.preventDefault();
+      const allRooms = [...activeRooms, ...archivedRooms];
+      if (allRooms.length === 0) return;
+      const currentIdx = allRooms.findIndex((r) => r.id === selectedRoomId);
+      let nextIdx: number;
+      if (e.key === "ArrowDown") {
+        nextIdx = currentIdx < allRooms.length - 1 ? currentIdx + 1 : 0;
+      } else {
+        nextIdx = currentIdx > 0 ? currentIdx - 1 : allRooms.length - 1;
+      }
+      selectRoom(allRooms[nextIdx].id);
+    },
+    [activeRooms, archivedRooms, selectedRoomId, selectRoom],
+  );
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden" onKeyDown={handleKeyDown} tabIndex={-1} ref={listRef}>
       {/* Tab nav area */}
       <div className="px-3 pt-3 pb-2">
         <div className="flex rounded-md bg-bg-input p-0.5">
           <button className="flex-1 px-2 py-1 text-[10px] font-medium rounded-[3px] bg-bg-elevated text-text-primary">
             Rooms
           </button>
-          <button className="flex-1 px-2 py-1 text-[10px] font-medium rounded-[3px] text-text-ghost hover:text-text-tertiary transition-colors">
+          <button className="flex-1 px-2 py-1 text-[10px] font-medium rounded-[3px] text-text-ghost hover:text-text-tertiary transition-all">
             Agents
           </button>
         </div>
@@ -100,10 +144,20 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
 
         {/* Active section */}
         {activeRooms.length > 0 && (
-          <div className="px-2 pt-1 pb-2">
+          <div className="px-2 pt-1 pb-2 flex items-center justify-between">
             <span className="text-label uppercase text-text-ghost tracking-[0.06em]">
               Active
             </span>
+            {totalUnread > 0 && (
+              <button
+                onClick={markAllSeen}
+                className="flex items-center gap-1 text-[9px] text-text-ghost hover:text-rooms transition-all"
+                title="Mark all as read"
+              >
+                <CheckIcon size={10} />
+                Read all
+              </button>
+            )}
           </div>
         )}
         {activeRooms.map((room) => (
@@ -120,8 +174,8 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
         {activeRooms.length === 0 && (
           <div className="text-center py-6 px-4">
             <HashIcon size={20} className="text-text-ghost mx-auto mb-2" />
-            <p className="text-[10px] text-text-secondary font-medium">No rooms yet</p>
-            <p className="text-[10px] text-text-tertiary mt-1">Create one to start a team chat</p>
+            <p className="text-[10px] text-text-secondary font-medium">No active rooms</p>
+            <p className="text-[10px] text-text-tertiary mt-1">Create a room to start collaborating with agents</p>
           </div>
         )}
 
@@ -185,7 +239,6 @@ function RoomItem({
   lastSeen?: string;
 }) {
   const agents = room.agents ?? [];
-  const onlineCount = agents.filter((a) => a.status !== "offline").length;
   const workingCount = agents.filter((a) => a.status === "working").length;
 
   const messages = room.messages ?? [];
@@ -195,6 +248,11 @@ function RoomItem({
       ).length
     : messages.filter((m) => m.from !== "user").length;
 
+  // Last message metadata
+  const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
+  const lastMsgTime = lastMsg ? relativeMessageTime(lastMsg.timestamp) : null;
+  const lastMsgSender = lastMsg?.from === "user" ? "You" : lastMsg?.from ?? null;
+
   return (
     <div
       role="button"
@@ -202,10 +260,10 @@ function RoomItem({
       onClick={onSelect}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(); }}
       className={cn(
-        "group flex items-center gap-2.5 w-full px-2.5 py-2 rounded-md text-left transition-colors cursor-pointer",
+        "group flex items-center gap-2.5 w-full px-2.5 py-2 rounded-md text-left transition-all cursor-pointer",
         selected
-          ? "bg-rooms-subtle border border-rooms/20"
-          : "hover:bg-bg-elevated/50 border border-transparent",
+          ? "bg-rooms-subtle border border-rooms/20 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.06)]"
+          : "hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(99,102,241,0.06)] border border-transparent",
         !room.active && "opacity-50",
       )}
     >
@@ -247,11 +305,26 @@ function RoomItem({
               <span className="text-[10px] text-text-ghost">
                 {agents.length} agent{agents.length !== 1 ? "s" : ""}
               </span>
+              {lastMsgTime && (
+                <>
+                  <span className="text-text-ghost/40 text-[8px]">&middot;</span>
+                  <span className="text-[9px] text-text-ghost tabular-nums shrink-0">
+                    {lastMsgTime}
+                  </span>
+                </>
+              )}
             </>
           ) : (
             <span className="text-[10px] text-text-ghost italic">Legacy</span>
           )}
         </div>
+        {/* Last message preview */}
+        {lastMsg && room.active && (
+          <p className="text-[9px] text-text-ghost truncate mt-0.5">
+            <span className="font-medium text-text-tertiary">{lastMsgSender}: </span>
+            {(lastMsg.text ?? "").slice(0, 60).replace(/\n/g, " ")}
+          </p>
+        )}
       </div>
 
       {/* Unread badge */}

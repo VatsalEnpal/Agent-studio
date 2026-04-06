@@ -283,11 +283,11 @@ export function SettingsAutomations() {
 
   if (loading) {
     return (
-      <section className="border border-console-border rounded-lg bg-console-panel">
-        <div className="px-4 py-3 border-b border-console-border">
-          <h3 className="text-xs font-medium text-console-text">Automations</h3>
+      <section className="border border-border-default rounded-lg bg-bg-surface">
+        <div className="px-4 py-3 border-b border-border-default">
+          <h3 className="text-xs font-medium text-text-primary">Automations</h3>
         </div>
-        <div className="px-4 py-6 text-center text-xs text-console-dim animate-pulse">
+        <div className="px-4 py-6 text-center text-xs text-text-tertiary animate-pulse">
           Loading automations...
         </div>
       </section>
@@ -295,12 +295,12 @@ export function SettingsAutomations() {
   }
 
   return (
-    <section className="border border-console-border rounded-lg bg-console-panel">
-      <div className="px-4 py-3 border-b border-console-border flex items-center justify-between">
+    <section className="border border-border-default rounded-lg bg-bg-surface">
+      <div className="px-4 py-3 border-b border-border-default flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <BoltIcon className="w-3.5 h-3.5 text-console-accent" />
-          <h3 className="text-xs font-medium text-console-text">Automations</h3>
-          <span className="text-label-xs text-console-dim">
+          <BoltIcon className="w-3.5 h-3.5 text-rooms" />
+          <h3 className="text-xs font-medium text-text-primary">Automations</h3>
+          <span className="text-label text-text-tertiary">
             ({automations.length})
           </span>
         </div>
@@ -308,7 +308,7 @@ export function SettingsAutomations() {
           <button
             onClick={() => void loadSuggestions()}
             disabled={suggestionsLoading}
-            className="flex items-center gap-1 px-2 py-1 text-label-xs font-medium text-console-dim hover:text-console-text bg-console-faint/50 hover:bg-console-faint rounded transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 px-2 py-1 text-label font-medium text-text-tertiary hover:text-text-primary bg-bg-elevated/50 hover:bg-bg-elevated rounded transition-all disabled:opacity-50"
           >
             {suggestionsLoading ? (
               <SpinnerIcon className="w-3 h-3 animate-spin" />
@@ -319,7 +319,7 @@ export function SettingsAutomations() {
           </button>
           <button
             onClick={() => setShowCreator(true)}
-            className="flex items-center gap-1 px-2 py-1 text-label-xs font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors"
+            className="flex items-center gap-1 px-2 py-1 text-label font-medium text-rooms bg-rooms/10 hover:bg-rooms/20 rounded transition-all"
           >
             <PlusIcon className="w-3 h-3" />
             Add
@@ -329,7 +329,7 @@ export function SettingsAutomations() {
 
       <div className="px-4 py-3 space-y-2">
         {automations.length === 0 && !showCreator && (
-          <p className="text-label-xs text-console-dim text-center py-4">
+          <p className="text-label text-text-tertiary text-center py-4">
             No automations configured. Click &quot;Add&quot; to create one.
           </p>
         )}
@@ -337,14 +337,14 @@ export function SettingsAutomations() {
         {automations.map((auto) => (
           <div
             key={auto.id}
-            className="flex items-center gap-3 px-3 py-2.5 bg-console-bg border border-console-border rounded"
+            className="flex items-center gap-3 px-3 py-2.5 bg-bg-base border border-border-default rounded hover:border-border-subtle hover:shadow-[0_0_12px_rgba(124,131,247,0.04)] transition-all"
           >
             {/* Toggle */}
             <button
               onClick={() => void toggleEnabled(auto.id, !auto.enabled)}
               className={cn(
-                "w-8 h-4 rounded-full relative transition-colors shrink-0",
-                auto.enabled ? "bg-console-accent" : "bg-console-faint",
+                "w-8 h-4 rounded-full relative transition-all shrink-0",
+                auto.enabled ? "bg-rooms" : "bg-bg-elevated",
               )}
             >
               <span
@@ -359,14 +359,14 @@ export function SettingsAutomations() {
             {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-console-text truncate">
+                <span className="text-xs font-medium text-text-primary truncate">
                   {auto.name}
                 </span>
-                <span className="text-label-xs text-console-dim shrink-0">
+                <span className="text-label text-text-tertiary shrink-0">
                   {auto.schedule}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-label-xs text-console-dim">
+              <div className="flex items-center gap-2 text-label text-text-tertiary">
                 <span>{auto.model}</span>
                 {auto.lastRun && (
                   <span>Last run: {formatRelativeTime(auto.lastRun)}</span>
@@ -379,7 +379,7 @@ export function SettingsAutomations() {
               <button
                 onClick={() => void handleRunNow(auto.id)}
                 disabled={runningId === auto.id}
-                className="p-1 text-console-dim hover:text-console-accent transition-colors disabled:opacity-50"
+                className="p-1 text-text-tertiary hover:text-rooms transition-all disabled:opacity-50"
                 title="Run now"
               >
                 {runningId === auto.id ? (
@@ -390,7 +390,7 @@ export function SettingsAutomations() {
               </button>
               <button
                 onClick={() => void handleDelete(auto.id)}
-                className="p-1 text-console-dim hover:text-console-error transition-colors"
+                className="p-1 text-text-tertiary hover:text-error transition-all"
                 title="Delete"
               >
                 <TrashIcon className="w-3 h-3" />
@@ -401,14 +401,14 @@ export function SettingsAutomations() {
 
         {/* Suggestions */}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="border border-console-accent/20 rounded-lg bg-console-accent/5 overflow-hidden">
-            <div className="px-3 py-2 border-b border-console-accent/20 flex items-center justify-between">
-              <span className="text-label-xs font-semibold uppercase tracking-wider text-console-accent">
+          <div className="border border-rooms/20 rounded-lg bg-rooms/5 overflow-hidden">
+            <div className="px-3 py-2 border-b border-rooms/20 flex items-center justify-between">
+              <span className="text-label font-semibold uppercase tracking-wider text-rooms">
                 Suggested for your project
               </span>
               <button
                 onClick={() => setShowSuggestions(false)}
-                className="p-0.5 text-console-dim hover:text-console-muted"
+                className="p-0.5 text-text-tertiary hover:text-text-secondary"
               >
                 <CloseIcon className="w-3 h-3" />
               </button>
@@ -417,24 +417,24 @@ export function SettingsAutomations() {
               {suggestions.map((s) => (
                 <div
                   key={s.templateId}
-                  className="flex items-center gap-3 px-2 py-2 bg-console-bg border border-console-border rounded"
+                  className="flex items-center gap-3 px-2 py-2 bg-bg-base border border-border-default rounded"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-console-text">{s.name}</span>
-                      <span className="text-label-xs text-console-dim">{s.schedule}</span>
-                      <span className="text-label-xs text-console-dim">{s.model}</span>
+                      <span className="text-xs font-medium text-text-primary">{s.name}</span>
+                      <span className="text-label text-text-tertiary">{s.schedule}</span>
+                      <span className="text-label text-text-tertiary">{s.model}</span>
                       {s.priority === "recommended" && (
-                        <span className="text-label-xs px-1.5 py-0.5 bg-console-accent/20 text-console-accent rounded-full">
+                        <span className="text-label px-1.5 py-0.5 bg-rooms/20 text-rooms rounded-full">
                           recommended
                         </span>
                       )}
                     </div>
-                    <p className="text-label-xs text-console-dim mt-0.5 italic">{s.reason}</p>
+                    <p className="text-label text-text-tertiary mt-0.5 italic">{s.reason}</p>
                   </div>
                   <button
                     onClick={() => void addFromSuggestion(s.templateId)}
-                    className="px-2 py-1 text-label-xs font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors shrink-0"
+                    className="px-2 py-1 text-label font-medium text-rooms bg-rooms/10 hover:bg-rooms/20 rounded transition-all shrink-0"
                   >
                     <PlusIcon className="w-3 h-3 inline -mt-0.5 mr-0.5" />
                     Add
@@ -457,12 +457,12 @@ export function SettingsAutomations() {
                 void generateFromDescription();
               }
             }}
-            className="flex-1 px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim/50 focus:border-console-accent focus:outline-none"
+            className="flex-1 px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary/50 focus:border-rooms focus:outline-none"
           />
           <button
             onClick={() => void generateFromDescription()}
             disabled={!descriptionInput.trim() || generatingFromDesc}
-            className="px-2 py-1.5 text-label-xs font-medium text-console-accent bg-console-accent/10 hover:bg-console-accent/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            className="px-2 py-1.5 text-label font-medium text-rooms bg-rooms/10 hover:bg-rooms/20 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
           >
             {generatingFromDesc ? (
               <SpinnerIcon className="w-3 h-3 animate-spin" />
@@ -535,12 +535,12 @@ function AutomationCreator({
   }, [name, description, schedule, model, prompt, onCreate]);
 
   return (
-    <div className="border border-console-accent/30 rounded-lg bg-console-accent/5 overflow-hidden">
-      <div className="px-3 py-2 border-b border-console-accent/20 flex items-center justify-between">
-        <span className="text-label-xs font-semibold uppercase tracking-wider text-console-accent">
+    <div className="border border-rooms/30 rounded-lg bg-rooms/5 overflow-hidden">
+      <div className="px-3 py-2 border-b border-rooms/20 flex items-center justify-between">
+        <span className="text-label font-semibold uppercase tracking-wider text-rooms">
           New Automation
         </span>
-        <button onClick={onCancel} className="p-0.5 text-console-dim hover:text-console-muted">
+        <button onClick={onCancel} className="p-0.5 text-text-tertiary hover:text-text-secondary">
           <CloseIcon className="w-3 h-3" />
         </button>
       </div>
@@ -549,7 +549,7 @@ function AutomationCreator({
         {/* Template picker */}
         {!selectedTemplate && (
           <div>
-            <label className="block text-label-xs text-console-muted mb-1.5">
+            <label className="block text-label text-text-secondary mb-1.5">
               Choose a template
             </label>
             <div className="grid grid-cols-3 gap-1.5">
@@ -557,12 +557,12 @@ function AutomationCreator({
                 <button
                   key={tmpl.id}
                   onClick={() => applyTemplate(tmpl.id)}
-                  className="flex flex-col items-center gap-1 p-2.5 rounded border border-console-border hover:border-console-accent/50 hover:bg-console-faint/50 transition-colors"
+                  className="flex flex-col items-center gap-1 p-2.5 rounded border border-border-default hover:border-rooms/50 hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(124,131,247,0.06)] transition-all"
                 >
-                  <span className="text-label-xs font-medium text-console-text">
+                  <span className="text-label font-medium text-text-primary">
                     {tmpl.name}
                   </span>
-                  <span className="text-label-xs text-console-dim text-center leading-tight">
+                  <span className="text-label text-text-tertiary text-center leading-tight">
                     {tmpl.description.slice(0, 50)}
                   </span>
                 </button>
@@ -576,24 +576,24 @@ function AutomationCreator({
           <>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-label-xs text-console-muted mb-1">
+                <label className="block text-label text-text-secondary mb-1">
                   Name
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
+                  className="w-full px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary focus:border-rooms focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-label-xs text-console-muted mb-1">
+                <label className="block text-label text-text-secondary mb-1">
                   Schedule
                 </label>
                 <select
                   value={schedule}
                   onChange={(e) => setSchedule(e.target.value)}
-                  className="w-full px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
+                  className="w-full px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary focus:border-rooms focus:outline-none"
                 >
                   {SCHEDULE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -605,13 +605,13 @@ function AutomationCreator({
             </div>
 
             <div>
-              <label className="block text-label-xs text-console-muted mb-1">
+              <label className="block text-label text-text-secondary mb-1">
                 Model
               </label>
               <select
                 value={model}
                 onChange={(e) => setModel(e.target.value as "opus" | "sonnet" | "haiku")}
-                className="w-full px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
+                className="w-full px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary focus:border-rooms focus:outline-none"
               >
                 <option value="opus">Opus</option>
                 <option value="sonnet">Sonnet</option>
@@ -623,7 +623,7 @@ function AutomationCreator({
             <div>
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="flex items-center gap-1 text-label-xs text-console-muted mb-1 hover:text-console-text transition-colors"
+                className="flex items-center gap-1 text-label text-text-secondary mb-1 hover:text-text-primary transition-all"
               >
                 {expanded ? <ChevronUpIcon className="w-3 h-3" /> : <ChevronDownIcon className="w-3 h-3" />}
                 Prompt
@@ -633,7 +633,7 @@ function AutomationCreator({
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   rows={5}
-                  className="w-full px-2 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text font-mono focus:border-console-accent focus:outline-none resize-none"
+                  className="w-full px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary font-mono focus:border-rooms focus:outline-none resize-none"
                 />
               )}
             </div>
@@ -645,14 +645,14 @@ function AutomationCreator({
                   setName("");
                   setPrompt("");
                 }}
-                className="px-2 py-1 text-label-xs text-console-dim hover:text-console-muted transition-colors"
+                className="px-2 py-1 text-label text-text-tertiary hover:text-text-secondary transition-all"
               >
                 Back
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={!name.trim() || !prompt.trim()}
-                className="px-3 py-1 text-label-xs font-medium text-black bg-console-accent hover:bg-console-accent/90 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 text-label font-medium text-black bg-rooms hover:bg-rooms/90 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Create
               </button>

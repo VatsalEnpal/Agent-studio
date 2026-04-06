@@ -109,57 +109,32 @@ Agent Studio gives your AI agents the infrastructure real engineering teams have
 
 ---
 
-## Screenshots
-
-| Sessions | Team Rooms |
-|----------|-----------|
-| ![Sessions](public/screenshot-sessions.png) | ![Teams](public/screenshot-teams.png) |
-
-| Sprints | Knowledge Base |
-|---------|---------------|
-| ![Sprints](public/screenshot-sprints.png) | ![Knowledge](public/screenshot-knowledge.png) |
-
-| Settings |
-|----------|
-| ![Settings](public/screenshot-settings.png) |
-
----
-
 ## Getting Started
 
-### Prerequisites
-
-- **macOS** (Electron desktop app — browser mode works on any OS)
-- **Node.js 22+**
-- **Claude Code CLI** installed and authenticated — [install guide](https://docs.anthropic.com/en/docs/claude-code)
-
-Agent Studio checks all prerequisites on startup and tells you exactly what's missing.
-
-### Install
+**Use the `main` branch** (default when you clone). Everything you need is there.
 
 ```bash
 git clone https://github.com/VatsalEnpal/Agent-studio.git
 cd Agent-studio
 npm install
+npm run electron:dev    # Mac desktop app + dev server (wait for server, then Electron opens)
+# or: npm run dev       # browser only → http://localhost:8080
 ```
 
-### Run in browser
+In-app walkthrough: [HOWTO.md](HOWTO.md) (features, shortcuts, agents, automations).
+
+### Prerequisites
+
+- **macOS** for the Electron app (the UI also works in a browser on other OSes)
+- **Node.js 22+**
+- **Claude Code CLI** authenticated — [install guide](https://docs.anthropic.com/en/docs/claude-code)
+
+On first launch, Agent Studio checks prerequisites and runs onboarding if everything passes.
+
+### Build a `.dmg` (optional)
 
 ```bash
-npm run dev
-# Open http://localhost:8080
-```
-
-### Run as Mac app
-
-```bash
-npm run electron:dev
-```
-
-### Build distributable
-
-```bash
-npm run build:mac    # macOS .dmg
+npm run build:mac
 ```
 
 ---
@@ -262,11 +237,9 @@ npm run build:mac        # Build macOS .dmg
 
 ## Contributing
 
-1. Fork the repo
-2. Create your branch (`git checkout -b feat/your-feature`)
-3. Make your changes
-4. Run `npm run type-check` and `npm run test`
-5. Open a pull request
+1. Fork and clone; stay on **`main`** or branch from it
+2. `npm run type-check` and `npm run test` before you PR
+3. Open a pull request into `main`
 
 ---
 

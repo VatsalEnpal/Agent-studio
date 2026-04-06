@@ -88,14 +88,14 @@ function RunningProcessItem({
       title={`PID ${proc.pid}\nCommand: ${proc.command} ${proc.args}\nCwd: ${proc.cwd}\nStarted: ${proc.startTime}`}
     >
       <div className="flex items-center gap-2">
-        <CpuIcon className="w-3 h-3 text-console-muted shrink-0" />
-        <span className="text-[10px] text-console-text flex-1 truncate">
+        <CpuIcon className="w-3 h-3 text-text-secondary shrink-0" />
+        <span className="text-[10px] text-text-primary flex-1 truncate">
           {roomName
             ? `${roomSession?.meta?.agent ?? "Agent"}`
             : "Claude Session"}
         </span>
         {roomName && (
-          <span className="text-[9px] px-1 py-0.5 rounded bg-console-accent/20 text-console-accent font-mono shrink-0">
+          <span className="text-[9px] px-1 py-0.5 rounded bg-rooms/20 text-rooms font-mono shrink-0">
             #{roomName}
           </span>
         )}
@@ -107,13 +107,13 @@ function RunningProcessItem({
                 ? "bg-purple-500/20 text-purple-400"
                 : proc.modelShort === "haiku"
                   ? "bg-teal-500/20 text-teal-400"
-                  : "bg-console-border text-console-dim",
+                  : "bg-border-default text-text-tertiary",
             )}
           >
             {proc.modelShort}
           </span>
         )}
-        <span className="flex items-center gap-0.5 text-[9px] text-console-dim shrink-0">
+        <span className="flex items-center gap-0.5 text-[9px] text-text-tertiary shrink-0">
           <ClockIcon className="w-2.5 h-2.5" />
           {uptime}
         </span>
@@ -127,7 +127,7 @@ function RunningProcessItem({
               setTimeout(() => setKilling(false), 3000);
             }}
             disabled={killing}
-            className="text-[8px] px-1.5 py-0.5 rounded bg-console-error/20 text-console-error hover:bg-console-error/30 font-medium shrink-0 transition-colors"
+            className="text-[8px] px-1.5 py-0.5 rounded bg-error/20 text-error hover:bg-error/30 font-medium shrink-0 transition-all"
           >
             Kill?
           </button>
@@ -141,8 +141,8 @@ function RunningProcessItem({
             className={cn(
               "p-0.5 shrink-0 rounded transition-all",
               killing
-                ? "text-console-error cursor-not-allowed"
-                : "text-console-dim hover:text-console-error opacity-0 group-hover:opacity-100",
+                ? "text-error cursor-not-allowed"
+                : "text-text-tertiary hover:text-error opacity-0 group-hover:opacity-100",
             )}
             title={`Kill process ${proc.pid}`}
           >
@@ -151,10 +151,10 @@ function RunningProcessItem({
         )}
       </div>
       <div className="pl-5 flex items-center gap-2">
-        <span className="text-[9px] text-console-muted truncate flex-1 min-w-0">
+        <span className="text-[9px] text-text-secondary truncate flex-1 min-w-0">
           {projectName}
         </span>
-        <span className="text-[9px] text-console-dim">running {uptime}</span>
+        <span className="text-[9px] text-text-tertiary">running {uptime}</span>
       </div>
     </div>
   );

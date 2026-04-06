@@ -121,7 +121,7 @@ export function PRModal() {
     (!isProd || !showProdConfirm || confirmText === "CONFIRM");
 
   const inputCls =
-    "w-full px-2.5 py-1.5 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-colors";
+    "w-full px-2.5 py-1.5 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all";
 
   return (
     <Dialog.Root
@@ -145,7 +145,7 @@ export function PRModal() {
                 </span>
               )}
             </div>
-            <Dialog.Close className="p-1 text-text-ghost hover:text-text-secondary transition-colors rounded">
+            <Dialog.Close className="p-1 text-text-ghost hover:text-text-secondary transition-all rounded">
               <CloseIcon size={14} />
             </Dialog.Close>
           </div>
@@ -293,7 +293,7 @@ export function PRModal() {
           <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border-default">
             <button
               onClick={closePrModal}
-              className="px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary transition-colors rounded-md"
+              className="px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary transition-all rounded-md"
             >
               {prStatus === "success" ? "Close" : "Cancel"}
             </button>

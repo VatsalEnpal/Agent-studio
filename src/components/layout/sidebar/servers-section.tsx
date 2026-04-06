@@ -137,13 +137,13 @@ function DevServerItem({
       <span
         className={cn(
           "w-2 h-2 rounded-full shrink-0",
-          server.running ? "bg-emerald-400" : "bg-console-dim",
+          server.running ? "bg-emerald-400" : "bg-text-tertiary",
         )}
       />
-      <span className="text-[10px] text-console-text truncate flex-1">
+      <span className="text-[10px] text-text-primary truncate flex-1">
         {server.name}
         {server.isSelf && (
-          <span className="ml-1 text-[8px] px-1 py-0.5 rounded bg-console-accent/15 text-console-accent">
+          <span className="ml-1 text-[8px] px-1 py-0.5 rounded bg-rooms/15 text-rooms">
             this app
           </span>
         )}
@@ -151,7 +151,7 @@ function DevServerItem({
       {server.running && server.port > 0 && (
         <button
           onClick={openInBrowser}
-          className="flex items-center gap-0.5 text-[9px] font-mono text-console-muted hover:text-console-accent transition-colors shrink-0"
+          className="flex items-center gap-0.5 text-[9px] font-mono text-text-secondary hover:text-rooms transition-all shrink-0"
           title={`Open http://localhost:${server.port}`}
         >
           :{server.port}
@@ -166,7 +166,7 @@ function DevServerItem({
             setTimeout(() => setActing(false), 2000);
           }}
           disabled={acting}
-          className="p-0.5 text-console-dim hover:text-console-error opacity-0 group-hover:opacity-100 transition-all shrink-0"
+          className="p-0.5 text-text-tertiary hover:text-error opacity-0 group-hover:opacity-100 transition-all shrink-0"
           title="Stop server"
         >
           <StopIcon className="w-3 h-3" />
@@ -181,7 +181,7 @@ function DevServerItem({
               setTimeout(() => setActing(false), 5000);
             }}
             disabled={acting}
-            className="flex items-center gap-0.5 px-1.5 py-0.5 text-[8px] font-medium text-console-success bg-console-success/10 hover:bg-console-success/20 rounded transition-all shrink-0"
+            className="flex items-center gap-0.5 px-1.5 py-0.5 text-[8px] font-medium text-sessions bg-sessions/10 hover:bg-sessions/20 rounded transition-all shrink-0"
             title="Start server"
           >
             <PlayIcon className="w-2 h-2" />
@@ -190,7 +190,7 @@ function DevServerItem({
           {server.isCustom && onRemove && (
             <button
               onClick={() => onRemove(server.name)}
-              className="p-0.5 text-console-dim hover:text-console-error opacity-0 group-hover:opacity-100 transition-all shrink-0"
+              className="p-0.5 text-text-tertiary hover:text-error opacity-0 group-hover:opacity-100 transition-all shrink-0"
               title="Remove server"
             >
               <TrashIcon className="w-3 h-3" />
@@ -231,7 +231,7 @@ function AddServerForm({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1 px-2 py-1 text-[9px] text-console-dim hover:text-console-text transition-colors w-full"
+        className="flex items-center gap-1 px-2 py-1 text-[9px] text-text-tertiary hover:text-text-primary transition-all w-full"
       >
         <PlusCircleIcon className="w-3 h-3" />
         Add Server
@@ -240,39 +240,39 @@ function AddServerForm({
   }
 
   return (
-    <div className="px-2 py-1.5 space-y-1.5 border-t border-console-border/50">
+    <div className="px-2 py-1.5 space-y-1.5 border-t border-border-default/50">
       <input
         type="text"
         placeholder="Name (e.g. my-app)"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="w-full px-2 py-1 text-[10px] bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent"
+        className="w-full px-2 py-1 text-[10px] bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-rooms"
       />
       <input
         type="text"
         placeholder="Directory (e.g. ~/Code/my-app)"
         value={cwd}
         onChange={(e) => setCwd(e.target.value)}
-        className="w-full px-2 py-1 text-[10px] bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent"
+        className="w-full px-2 py-1 text-[10px] bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-rooms"
       />
       <input
         type="text"
         placeholder="Command (default: npm run dev)"
         value={command}
         onChange={(e) => setCommand(e.target.value)}
-        className="w-full px-2 py-1 text-[10px] bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent"
+        className="w-full px-2 py-1 text-[10px] bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-rooms"
       />
       <div className="flex gap-1">
         <button
           onClick={handleSubmit}
           disabled={!name.trim() || !cwd.trim()}
-          className="flex-1 px-2 py-1 text-[9px] font-medium text-console-bg bg-console-accent hover:bg-console-accent/90 disabled:opacity-40 disabled:cursor-not-allowed rounded transition-colors"
+          className="flex-1 px-2 py-1 text-[9px] font-medium text-bg-base bg-rooms hover:bg-rooms/90 disabled:opacity-40 disabled:cursor-not-allowed rounded transition-all"
         >
           Add
         </button>
         <button
           onClick={() => setOpen(false)}
-          className="px-2 py-1 text-[9px] text-console-dim hover:text-console-text transition-colors"
+          className="px-2 py-1 text-[9px] text-text-tertiary hover:text-text-primary transition-all"
         >
           Cancel
         </button>

@@ -6,6 +6,24 @@ import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import type { TypingAgent, RoomAgent } from "@/stores/rooms";
 
+/** Three bouncing dots animation — classic typing indicator */
+function ThreeDotAnimation() {
+  return (
+    <span className="inline-flex items-center gap-[2px]">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="w-[3px] h-[3px] rounded-full bg-text-ghost"
+          style={{
+            animation: "typing-bounce 1.4s infinite ease-in-out",
+            animationDelay: `${i * 0.16}s`,
+          }}
+        />
+      ))}
+    </span>
+  );
+}
+
 interface TypingIndicatorProps {
   typingAgents: TypingAgent[];
   roomAgents: RoomAgent[];
@@ -15,7 +33,15 @@ export function TypingIndicator({ typingAgents, roomAgents }: TypingIndicatorPro
   if (typingAgents.length === 0) return null;
 
   return (
-    <div className="px-4 py-2 border-t border-border-subtle bg-bg-surface/50 space-y-1.5">
+    <div className="px-4 py-2 border-t border-border-subtle bg-bg-surface/50 space-y-1">
+      <div className="flex items-center gap-1 mb-0.5">
+        <ThreeDotAnimation />
+        <span className="text-[9px] text-text-ghost uppercase tracking-wider">
+          {typingAgents.length === 1
+            ? `${typingAgents[0].agentId} is working`
+            : `${typingAgents.length} agents working`}
+        </span>
+      </div>
       {typingAgents.map((ta) => {
         const agent = roomAgents.find((a) => a.id === ta.agentId);
         return (
@@ -90,7 +116,7 @@ function TypingAgentLine({
       {sessionId && (
         <a
           href={`#session-${sessionId}`}
-          className="text-rooms hover:text-rooms/80 text-label transition-colors shrink-0 flex items-center gap-0.5"
+          className="text-rooms hover:text-rooms/80 text-label transition-all shrink-0 flex items-center gap-0.5"
           title="View terminal session"
         >
           <SessionsIcon size={12} />

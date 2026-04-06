@@ -28,10 +28,10 @@ export function GateStepper({ gates, expandedGateId, onGateClick }: GateStepperP
               className="flex flex-col items-center gap-1 group shrink-0"
               title={gate.name}
             >
-              {/* Gate label — tiny below */}
+              {/* Gate label */}
               <span
                 className={cn(
-                  "text-[9px] leading-none max-w-[48px] truncate",
+                  "text-[9px] leading-none max-w-[72px] truncate",
                   isExpanded
                     ? "text-text-primary font-medium"
                     : isPassed
@@ -49,7 +49,7 @@ export function GateStepper({ gates, expandedGateId, onGateClick }: GateStepperP
               {/* Bar segment */}
               <div
                 className={cn(
-                  "w-10 h-[3px] rounded-[1.5px] transition-all",
+                  "w-12 h-[3px] rounded-[1.5px] transition-all",
                   isPassed && "bg-sessions",
                   isCurrent && "bg-sprints animate-[pulse_2s_ease-in-out_infinite]",
                   isFailed && "bg-error",

@@ -3,6 +3,15 @@
 import { useState, useEffect } from "react";
 import { useSettingsStore, type AppSettings } from "@/stores/settings";
 import { cn } from "@/lib/utils";
+import {
+  SettingsIcon,
+  FolderIcon,
+  UserIcon,
+  MonitorIcon,
+  SprintsIcon,
+  BoltIcon,
+  InfoIcon,
+} from "@/components/ui/icons";
 import { SettingsWorkspace } from "./settings-workspace";
 import { SettingsGeneral } from "./settings-general";
 import { SettingsPmo } from "./settings-pmo";
@@ -21,14 +30,14 @@ type SettingsTab =
   | "shortcuts"
   | "about";
 
-const TABS: { id: SettingsTab; label: string }[] = [
-  { id: "general", label: "General" },
-  { id: "projects", label: "Projects" },
-  { id: "agents", label: "Agents" },
-  { id: "dev-servers", label: "Dev Servers" },
-  { id: "sprint-protocol", label: "Sprint Protocol" },
-  { id: "shortcuts", label: "Shortcuts" },
-  { id: "about", label: "About" },
+const TABS: { id: SettingsTab; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; desc: string }[] = [
+  { id: "general", label: "General", icon: SettingsIcon, desc: "Model, theme, notifications" },
+  { id: "projects", label: "Projects", icon: FolderIcon, desc: "Tracked repos and agent system" },
+  { id: "agents", label: "Agents", icon: UserIcon, desc: "Discovered agent definitions" },
+  { id: "dev-servers", label: "Dev Servers", icon: MonitorIcon, desc: "Server monitoring and ports" },
+  { id: "sprint-protocol", label: "Sprint Protocol", icon: SprintsIcon, desc: "PMO rules and automations" },
+  { id: "shortcuts", label: "Shortcuts", icon: BoltIcon, desc: "Keyboard shortcuts reference" },
+  { id: "about", label: "About", icon: InfoIcon, desc: "Version and system info" },
 ];
 
 export function SettingsView() {
@@ -72,21 +81,39 @@ export function SettingsView() {
   return (
     <div className="flex h-full">
       {/* Tab sidebar */}
-      <div className="w-[180px] shrink-0 border-r border-border-default bg-bg-surface py-3 px-2 space-y-0.5">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              "w-full text-left px-3 py-1.5 text-[10px] font-medium rounded-md transition-colors",
-              activeTab === tab.id
-                ? "bg-bg-elevated text-text-primary"
-                : "text-text-secondary hover:text-text-primary hover:bg-bg-elevated/50",
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="w-[200px] shrink-0 border-r border-border-default bg-bg-surface py-3 px-2 space-y-0.5">
+        {TABS.map((tab) => {
+          const TabIcon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "w-full text-left px-3 py-2 rounded-md transition-all group",
+                activeTab === tab.id
+                  ? "bg-bg-elevated text-text-primary"
+                  : "text-text-secondary hover:text-text-primary hover:bg-bg-elevated/50",
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <TabIcon
+                  size={12}
+                  className={cn(
+                    "shrink-0",
+                    activeTab === tab.id ? "text-text-primary" : "text-text-ghost",
+                  )}
+                />
+                <span className="text-[10px] font-medium">{tab.label}</span>
+              </div>
+              <p className={cn(
+                "text-[9px] mt-0.5 pl-5 leading-snug",
+                activeTab === tab.id ? "text-text-tertiary" : "text-text-ghost",
+              )}>
+                {tab.desc}
+              </p>
+            </button>
+          );
+        })}
       </div>
 
       {/* Tab content */}

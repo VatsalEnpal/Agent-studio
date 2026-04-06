@@ -294,7 +294,7 @@ export function SessionLauncher({
   }, [launching, model, cwd, onLaunch, onOpenChange]);
 
   // Helper for input/select styling
-  const inputCls = "w-full px-2.5 py-1.5 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:border-border-subtle focus:outline-none transition-colors";
+  const inputCls = "w-full px-2.5 py-1.5 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:border-border-subtle focus:outline-none transition-all";
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -307,7 +307,7 @@ export function SessionLauncher({
             <Dialog.Title className="text-section-heading text-text-primary">
               New Session
             </Dialog.Title>
-            <Dialog.Close className="p-1 text-text-ghost hover:text-text-secondary transition-colors">
+            <Dialog.Close className="p-1 text-text-ghost hover:text-text-secondary transition-all">
               <CloseIcon size={14} />
             </Dialog.Close>
           </div>
@@ -324,7 +324,7 @@ export function SessionLauncher({
                     type="button"
                     onClick={() => setResumeDropdownOpen(!resumeDropdownOpen)}
                     className={cn(
-                      "w-full flex items-center gap-2 px-2.5 py-1.5 text-xs bg-bg-input border rounded-md text-left transition-colors",
+                      "w-full flex items-center gap-2 px-2.5 py-1.5 text-xs bg-bg-input border rounded-md text-left transition-all",
                       resume
                         ? "border-[#f59e0b]/40 text-text-primary"
                         : "border-border-default text-text-ghost",
@@ -378,7 +378,7 @@ export function SessionLauncher({
                                 setResumeSearch("");
                               }}
                               className={cn(
-                                "flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-bg-input transition-colors",
+                                "flex items-center gap-2 w-full px-3 py-1.5 text-left hover:bg-bg-input transition-all",
                                 resume === session.id && "bg-[#f59e0b]/10",
                               )}
                             >
@@ -411,7 +411,7 @@ export function SessionLauncher({
                   onClick={handleContinueLast}
                   disabled={launching}
                   className={cn(
-                    "flex flex-col items-center gap-1.5 p-2.5 rounded-md border transition-colors",
+                    "flex flex-col items-center gap-1.5 p-2.5 rounded-md border transition-all",
                     launching
                       ? "border-border-default bg-bg-input opacity-50 cursor-not-allowed"
                       : "border-[#f59e0b]/30 bg-[#f59e0b]/5 hover:border-[#f59e0b]/60 hover:bg-[#f59e0b]/10 active:bg-[#f59e0b]/20",

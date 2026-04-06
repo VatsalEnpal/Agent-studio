@@ -261,7 +261,7 @@ export function CommandPalette({
             {query && (
               <button
                 onClick={() => setQuery("")}
-                className="text-text-ghost hover:text-text-secondary transition-colors"
+                className="text-text-ghost hover:text-text-secondary transition-all"
               >
                 <CloseIcon size={14} />
               </button>
@@ -287,7 +287,7 @@ export function CommandPalette({
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={cn(
                       "flex items-center gap-3 w-full px-4 py-2 text-left",
-                      "transition-colors duration-[var(--duration-instant)]",
+                      "transition-all duration-[var(--duration-instant)]",
                       index === selectedIndex
                         ? "bg-bg-elevated text-text-primary"
                         : "text-text-secondary hover:bg-bg-input/50",

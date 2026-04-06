@@ -54,6 +54,7 @@ interface RoomsState {
   updateAgentStatus: (roomId: string, agentId: string, status: RoomAgent["status"]) => void;
   updateApproval: (roomId: string, messageId: string, approved: boolean) => void;
   markRoomSeen: (roomId: string) => void;
+  markAllSeen: () => void;
 
   // Streaming actions
   setAgentTyping: (roomId: string, agentId: string) => void;
@@ -106,6 +107,16 @@ export const useRoomsStore = create<RoomsState>((set) => ({
     set((state) => ({
       lastSeenByRoom: { ...state.lastSeenByRoom, [roomId]: new Date().toISOString() },
     })),
+
+  markAllSeen: () =>
+    set((state) => {
+      const now = new Date().toISOString();
+      const updated: Record<string, string> = { ...state.lastSeenByRoom };
+      for (const room of state.rooms) {
+        if (room.active) updated[room.id] = now;
+      }
+      return { lastSeenByRoom: updated };
+    }),
 
   updateAgentStatus: (roomId, agentId, status) =>
     set((state) => ({

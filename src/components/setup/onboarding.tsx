@@ -63,7 +63,7 @@ function ModelBadge({ model }: { model: string }) {
     haiku: "bg-emerald-500/15 text-emerald-400",
   };
   return (
-    <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-medium", colors[model] ?? "bg-console-faint text-console-dim")}>
+    <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-medium", colors[model] ?? "bg-bg-elevated text-text-tertiary")}>
       {model}
     </span>
   );
@@ -160,10 +160,10 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
         <div className="space-y-2">
           <button
             onClick={() => setShowProject(!showProject)}
-            className="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-400 transition-colors"
+            className="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-400 transition-all"
           >
             <span className={cn(
-              "w-3.5 h-3.5 rounded-full border border-zinc-600 flex items-center justify-center transition-colors",
+              "w-3.5 h-3.5 rounded-full border border-zinc-600 flex items-center justify-center transition-all",
               showProject && "bg-amber-500/20 border-amber-500/50",
             )}>
               {showProject && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
@@ -178,7 +178,7 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
                 value={projectPath}
                 onChange={(e) => setProjectPath(e.target.value)}
                 placeholder="/path/to/project"
-                className="flex-1 px-3 py-2 text-xs bg-zinc-900/80 border border-zinc-700/60 rounded-md text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 transition-colors font-mono"
+                className="flex-1 px-3 py-2 text-xs bg-zinc-900/80 border border-zinc-700/60 rounded-md text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 transition-all font-mono"
               />
             </div>
           )}
@@ -201,7 +201,7 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
           </button>
           <button
             onClick={onSkip}
-            className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+            className="text-xs text-zinc-600 hover:text-zinc-400 transition-all"
           >
             Skip setup &mdash; just give me a terminal
           </button>
@@ -259,7 +259,7 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
           </div>
           <div className="space-y-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-3">
             {agents.map((agent) => (
-              <div key={agent.id} className="flex items-start gap-3 py-2 px-2 rounded-md hover:bg-zinc-800/40 transition-colors">
+              <div key={agent.id} className="flex items-start gap-3 py-2 px-2 rounded-md hover:bg-zinc-800/40 transition-all">
                 <span className="text-base mt-0.5">{agentIcon(agent.name)}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -287,10 +287,10 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
                 <button
                   key={auto.template.id}
                   onClick={() => toggleAutomation(auto.template.id)}
-                  className="flex items-center gap-3 w-full py-2 px-2 rounded-md hover:bg-zinc-800/40 transition-colors text-left"
+                  className="flex items-center gap-3 w-full py-2 px-2 rounded-md hover:bg-zinc-800/40 transition-all text-left"
                 >
                   <span className={cn(
-                    "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors",
+                    "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all",
                     enabledAutomations.has(auto.template.id)
                       ? "bg-amber-500/20 border-amber-500/50"
                       : "border-zinc-600",
@@ -344,7 +344,7 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
                 value={refinementInput}
                 onChange={(e) => setRefinementInput(e.target.value)}
                 placeholder="Remove the inventory one, add a social media agent..."
-                className="flex-1 px-3 py-2 text-xs bg-zinc-900/80 border border-zinc-700/60 rounded-md text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 transition-colors"
+                className="flex-1 px-3 py-2 text-xs bg-zinc-900/80 border border-zinc-700/60 rounded-md text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 transition-all"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();

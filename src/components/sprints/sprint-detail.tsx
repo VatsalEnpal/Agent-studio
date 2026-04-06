@@ -78,7 +78,7 @@ function ExpandedGatePanel({ gate, onClose }: { gate: Sprint["gates"][number]; o
         </span>
         <button
           onClick={onClose}
-          className="p-0.5 text-text-tertiary hover:text-text-secondary transition-colors rounded"
+          className="p-0.5 text-text-tertiary hover:text-text-secondary transition-all rounded"
         >
           <CloseIcon size={12} />
         </button>
@@ -173,6 +173,11 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
   const badge = statusBadge(sprint.status);
   const eta = estimateETA(sprint);
 
+  // Sprint progress percentage
+  const passedGates = sprint.gates.filter((g) => g.status === "passed").length;
+  const totalGates = sprint.gates.length;
+  const progressPct = totalGates > 0 ? Math.round((passedGates / totalGates) * 100) : 0;
+
   const expandedGate = sprint.gates.find((g) => g.id === expandedGateId);
 
   const handleApproveGate = useCallback(async (gateId: string) => {
@@ -228,12 +233,12 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
   return (
     <div className="flex flex-col h-full font-sans">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-border-default shrink-0">
-        <div className="flex items-center gap-2">
+      <div className="px-4 py-3 border-b border-border-default shrink-0 overflow-hidden">
+        <div className="flex items-center gap-2 min-w-0">
           {onBack && (
             <button
               onClick={onBack}
-              className="p-0.5 rounded text-text-tertiary hover:text-text-primary hover:bg-bg-elevated transition-colors shrink-0"
+              className="p-0.5 rounded text-text-tertiary hover:text-text-primary hover:bg-bg-elevated transition-all shrink-0"
               title="Back to sprint list"
             >
               <ArrowLeftIcon size={14} />
@@ -245,11 +250,30 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
           <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded-full", badge.class)}>
             {badge.label}
           </span>
+          {totalGates > 0 && (
+            <div className="flex items-center gap-1.5 ml-1">
+              <div className="w-16 h-1.5 bg-border-default rounded-full overflow-hidden">
+                <div
+                  className={cn(
+                    "h-full rounded-full transition-all duration-500",
+                    progressPct === 100 ? "bg-sessions" : "bg-sprints",
+                  )}
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+              <span className={cn(
+                "text-[9px] font-medium",
+                progressPct === 100 ? "text-sessions" : "text-text-tertiary",
+              )}>
+                {progressPct}%
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-2 ml-auto shrink-0">
             <button
               onClick={handleViewSpec}
               className={cn(
-                "flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded transition-colors",
+                "flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded active:scale-[0.98] transition-all",
                 specPanelOpen
                   ? "bg-sprints/15 text-sprints"
                   : "text-text-ghost hover:text-text-secondary hover:bg-bg-elevated",
@@ -295,13 +319,13 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
           <button
             onClick={() => void handleApproveGate(readyGate.id)}
             disabled={approvingGate === readyGate.id}
-            className="px-3 py-1 text-[10px] font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 transition-colors disabled:opacity-50"
+            className="px-3 py-1 text-[10px] font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100"
           >
             {approvingGate === readyGate.id ? "Approving..." : "Approve"}
           </button>
           <button
             onClick={() => setExpandedGate(readyGate.id)}
-            className="px-2 py-1 text-[10px] font-medium text-sprints bg-sprints/10 rounded-md hover:bg-sprints/20 transition-colors"
+            className="px-2 py-1 text-[10px] font-medium text-sprints bg-sprints/10 rounded-md hover:bg-sprints/20 active:scale-[0.98] transition-all"
           >
             Details
           </button>
@@ -325,7 +349,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
           <button
             onClick={() => void handleApproveGate(gate.id)}
             disabled={approvingGate === gate.id}
-            className="px-2.5 py-1 text-[10px] font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 transition-colors disabled:opacity-50"
+            className="px-2.5 py-1 text-[10px] font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 transition-all disabled:opacity-50"
           >
             {approvingGate === gate.id ? "..." : (gate.action?.label ?? "Approve")}
           </button>
@@ -347,7 +371,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              "px-2.5 py-2 text-[10px] font-medium border-b transition-colors",
+              "px-2.5 py-2 text-[10px] font-medium border-b transition-all",
               activeTab === tab
                 ? "border-text-primary text-text-primary"
                 : "border-transparent text-text-tertiary hover:text-text-primary",
@@ -369,15 +393,19 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
               </span>
               <button
                 onClick={() => setSpecPanel(false)}
-                className="p-0.5 text-text-tertiary hover:text-text-secondary transition-colors rounded"
+                className="p-0.5 text-text-tertiary hover:text-text-secondary transition-all rounded"
               >
                 <CloseIcon size={12} />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-3 scrollbar-thin">
               {specLoading ? (
-                <div className="flex items-center justify-center py-6">
-                  <span className="text-[10px] text-text-tertiary animate-pulse">Loading...</span>
+                <div className="space-y-2 animate-pulse">
+                  <div className="skeleton h-3 w-full" />
+                  <div className="skeleton h-3 w-5/6" />
+                  <div className="skeleton h-3 w-4/6" />
+                  <div className="skeleton h-3 w-full" />
+                  <div className="skeleton h-3 w-3/4" />
                 </div>
               ) : (
                 <pre className="text-[10px] font-mono text-text-secondary whitespace-pre-wrap break-words leading-relaxed">
@@ -400,41 +428,75 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
               </div>
             )}
 
-            {/* Gates overview */}
+            {/* Gates timeline */}
             <div>
               <h4 className="text-[10px] font-medium uppercase tracking-[0.5px] text-text-ghost mb-1.5">
                 Gates
               </h4>
-              <div className="space-y-1">
-                {sprint.gates.map((gate) => (
-                  <button
-                    key={gate.id}
-                    onClick={() => setExpandedGate(expandedGateId === gate.id ? null : gate.id)}
-                    className="flex items-center gap-2 w-full text-left px-2.5 py-1.5 rounded-md hover:bg-bg-elevated transition-colors"
-                  >
-                    <div
-                      className={cn(
-                        "w-[5px] h-[5px] rounded-full shrink-0",
-                        gate.status === "passed" ? "bg-sessions"
-                          : gate.status === "in_progress" ? "bg-sprints"
-                          : gate.status === "failed" ? "bg-error"
-                          : "bg-text-ghost",
-                      )}
-                    />
-                    <span className="text-[10px] text-text-primary font-medium flex-1">
-                      {gate.name}
-                    </span>
-                    <span className={cn(
-                      "text-[9px] font-medium px-1.5 py-0.5 rounded-full",
-                      gate.status === "passed" ? "bg-sessions/10 text-sessions"
-                        : gate.status === "in_progress" ? "bg-sprints/10 text-sprints"
-                        : gate.status === "failed" ? "bg-error/10 text-error"
-                        : "bg-bg-input text-text-tertiary",
-                    )}>
-                      {gate.status === "passed" ? "Passed" : gate.status === "in_progress" ? "In Progress" : gate.status === "failed" ? "Failed" : "Pending"}
-                    </span>
-                  </button>
-                ))}
+              <div className="relative">
+                {sprint.gates.map((gate, idx) => {
+                  const isLast = idx === sprint.gates.length - 1;
+                  const isPassed = gate.status === "passed";
+                  const isCurrent = gate.status === "in_progress";
+                  const isFailed = gate.status === "failed";
+
+                  return (
+                    <button
+                      key={gate.id}
+                      onClick={() => setExpandedGate(expandedGateId === gate.id ? null : gate.id)}
+                      className="flex items-start gap-3 w-full text-left group relative"
+                    >
+                      {/* Timeline track */}
+                      <div className="flex flex-col items-center shrink-0 pt-0.5">
+                        {/* Node */}
+                        <div
+                          className={cn(
+                            "w-2.5 h-2.5 rounded-full border-[1.5px] shrink-0 z-10",
+                            isPassed && "bg-sessions border-sessions",
+                            isCurrent && "bg-sprints border-sprints animate-pulse-dot",
+                            isFailed && "bg-error border-error",
+                            !isPassed && !isCurrent && !isFailed && "bg-bg-base border-border-default",
+                          )}
+                        />
+                        {/* Connecting line */}
+                        {!isLast && (
+                          <div
+                            className={cn(
+                              "w-[1.5px] flex-1 min-h-[24px]",
+                              isPassed ? "bg-sessions/40" : "bg-border-default",
+                            )}
+                          />
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className={cn(
+                        "flex-1 min-w-0 pb-3 -mt-0.5",
+                        "group-hover:bg-bg-elevated/50 rounded-md px-2 py-1 -ml-1 transition-all",
+                      )}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-text-primary font-medium flex-1 truncate">
+                            {gate.name}
+                          </span>
+                          <span className={cn(
+                            "text-[9px] font-medium px-1.5 py-0.5 rounded-full shrink-0",
+                            isPassed && "bg-sessions/10 text-sessions",
+                            isCurrent && "bg-sprints/10 text-sprints",
+                            isFailed && "bg-error/10 text-error",
+                            !isPassed && !isCurrent && !isFailed && "bg-bg-input text-text-tertiary",
+                          )}>
+                            {isPassed ? "Passed" : isCurrent ? "In Progress" : isFailed ? "Failed" : "Pending"}
+                          </span>
+                        </div>
+                        {gate.details && (
+                          <p className="text-[9px] text-text-ghost mt-0.5 truncate">
+                            {gate.details}
+                          </p>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -488,7 +550,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                   </span>
                   <button
                     onClick={() => setHandoffPanelData(null)}
-                    className="p-0.5 text-text-tertiary hover:text-text-secondary transition-colors"
+                    className="p-0.5 text-text-tertiary hover:text-text-secondary transition-all"
                   >
                     <CloseIcon size={12} />
                   </button>

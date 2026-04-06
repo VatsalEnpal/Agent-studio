@@ -23,7 +23,7 @@ export function SessionGroup({
     <div>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 w-full px-2 py-1 text-label font-semibold uppercase tracking-[0.08em] text-text-ghost hover:text-text-tertiary active:text-text-primary transition-colors"
+        className="flex items-center gap-1.5 w-full px-2 py-1 text-label font-semibold uppercase tracking-[0.08em] text-text-ghost hover:text-text-tertiary active:text-text-primary transition-all"
       >
         <ChevronRightIcon className={cn(
           "w-2.5 h-2.5 transition-transform duration-150",

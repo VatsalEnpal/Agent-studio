@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { SendIcon, HashIcon } from "@/components/ui/icons";
+import { SendIcon, HashIcon, ChevronDownIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import { useRoomsStore } from "@/stores/rooms";
@@ -37,13 +37,35 @@ export function RoomChat() {
   const [showMentions, setShowMentions] = useState(false);
   const [mentionFilter, setMentionFilter] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [showScrollDown, setShowScrollDown] = useState(false);
   const addToast = useToastStore((s) => s.addToast);
 
-  // Auto-scroll on new messages
+  // Auto-scroll on new messages (only if near bottom)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const container = scrollContainerRef.current;
+    if (!container) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    if (isNearBottom) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [room?.messages.length, typingAgentIds.length]);
+
+  // Track scroll position to show/hide "scroll to bottom" button
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const handleScroll = () => {
+      const distFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+      setShowScrollDown(distFromBottom > 200);
+    };
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Focus input when room changes
   useEffect(() => {
@@ -282,7 +304,7 @@ export function RoomChat() {
             <button
               onClick={handleSpawn}
               disabled={spawning}
-              className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-colors disabled:opacity-50 shrink-0"
+              className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50 shrink-0"
             >
               {spawning ? "Starting..." : "Spawn Agents"}
             </button>
@@ -292,7 +314,7 @@ export function RoomChat() {
           {room.active && (
             <button
               onClick={handleClose}
-              className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded-md text-error hover:bg-error/10 transition-colors shrink-0"
+              className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded-md text-error hover:bg-error/10 transition-all active:scale-[0.98] shrink-0"
             >
               Close
             </button>
@@ -323,7 +345,7 @@ export function RoomChat() {
             <button
               onClick={handleSpawn}
               disabled={spawning}
-              className="px-2.5 py-1 bg-rooms text-bg-base text-[10px] font-medium rounded-md hover:bg-rooms/90 transition-colors disabled:opacity-50 shadow-rooms-glow"
+              className="px-2.5 py-1 bg-rooms text-bg-base text-[10px] font-medium rounded-md hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50 shadow-rooms-glow"
             >
               {spawning ? "Starting..." : "Start Room"}
             </button>
@@ -332,11 +354,21 @@ export function RoomChat() {
       ) : (
         <>
           {/* Messages area */}
-          <div className="flex-1 overflow-y-auto scrollbar-thin">
+          <div ref={scrollContainerRef} className="relative flex-1 overflow-y-auto scrollbar-thin">
+            {/* Scroll to bottom button */}
+            {showScrollDown && (
+              <button
+                onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })}
+                className="sticky top-2 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 px-2.5 py-1 text-[9px] font-medium bg-bg-elevated border border-border-default rounded-full text-text-secondary hover:text-text-primary hover:border-rooms/30 shadow-card transition-all"
+              >
+                <ChevronDownIcon size={10} />
+                New messages
+              </button>
+            )}
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full gap-2 text-center px-6">
-                <p className="text-[10px] text-text-secondary font-medium">No messages yet</p>
-                <p className="text-[10px] text-text-tertiary">Type a message below to start the conversation</p>
+                <p className="text-[10px] text-text-secondary font-medium">Start the conversation</p>
+                <p className="text-[10px] text-text-tertiary">Send a message to begin collaborating with agents in this room</p>
               </div>
             ) : (
               <div>
@@ -378,7 +410,7 @@ export function RoomChat() {
               <button
                 onClick={handleSpawn}
                 disabled={spawning}
-                className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {spawning ? "Starting..." : "Start Room"}
               </button>
@@ -396,7 +428,7 @@ export function RoomChat() {
                       <button
                         key={a.id}
                         onClick={() => selectMention(a.id)}
-                        className="w-full text-left px-2 py-1.5 rounded-md text-[10px] hover:bg-bg-input flex items-center gap-2 transition-colors"
+                        className="w-full text-left px-2 py-1.5 rounded-md text-[10px] hover:bg-bg-input flex items-center gap-2 transition-all"
                       >
                         <div
                           className="w-4 h-4 rounded-[4px] flex items-center justify-center shrink-0"
@@ -425,7 +457,7 @@ export function RoomChat() {
                     ))}
                     <button
                       onClick={() => selectMention("all")}
-                      className="w-full text-left px-2 py-1.5 rounded-md text-[10px] hover:bg-bg-input flex items-center gap-2 transition-colors"
+                      className="w-full text-left px-2 py-1.5 rounded-md text-[10px] hover:bg-bg-input flex items-center gap-2 transition-all"
                     >
                       <div className="w-4 h-4 rounded-[4px] flex items-center justify-center shrink-0 bg-rooms/20">
                         <span className="text-[7px] font-bold text-rooms">*</span>
@@ -445,13 +477,13 @@ export function RoomChat() {
                   onChange={(e) => handleInputChange(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={`Message #${room.name}...`}
-                  className="flex-1 bg-bg-input border border-border-default rounded-md px-3 py-1.5 text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-colors"
+                  className="flex-1 bg-bg-input border border-border-default rounded-md px-3 py-1.5 text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
                   disabled={!room.active}
                 />
                 <button
                   onClick={() => void handleSend()}
                   disabled={!input.trim()}
-                  className="p-2 rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-2 rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <SendIcon size={14} />
                 </button>

@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { CloseIcon, EditIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useSessionUsage } from "@/hooks/use-usage";
+import { useRelativeTime } from "@/hooks/use-relative-time";
 import type { Session } from "@/lib/types";
 
 // Local storage map for user-renamed sessions
@@ -81,6 +82,9 @@ export function SessionItem({
   const effectiveModel = usage.modelShort ?? session.meta?.model ?? null;
   const contextPercent = usage.contextPercent ?? 0;
   const hasContext = contextPercent > 0 && !usage.loading;
+
+  // Live uptime that auto-updates
+  const liveUptime = useRelativeTime(session.createdAt);
 
   // Display name: custom rename > auto-detected from first message > session.name
   const [customNameState, setCustomNameState] = useState<string | null>(() => {
@@ -164,12 +168,12 @@ export function SessionItem({
               if (e.key === "Escape") setEditing(false);
             }}
             onClick={(e) => e.stopPropagation()}
-            className="text-xs font-medium truncate flex-1 bg-bg-base border border-sessions/30 rounded px-1 py-0 text-text-primary focus:outline-none focus:border-sessions"
+            className="text-[10px] font-medium truncate flex-1 bg-bg-base border border-sessions/30 rounded px-1 py-0 text-text-primary focus:outline-none focus:border-sessions"
             autoFocus
           />
         ) : (
           <>
-            <span className="text-xs font-medium truncate flex-1">
+            <span className="text-[10px] font-medium truncate flex-1">
               {displayName}
             </span>
             <button
@@ -221,7 +225,7 @@ export function SessionItem({
       <div className="flex items-center gap-2 pl-[13px]">
         {isRunning && (
           <span className="flex items-center gap-0.5 text-[10px] text-text-ghost">
-            {formatUptime(session.createdAt)}
+            {liveUptime}
           </span>
         )}
         {session.cwd && (

@@ -164,7 +164,7 @@ function NavRailItem({
       className={cn(
         "relative flex items-center justify-center",
         "w-8 h-8 rounded-[6px]",
-        "transition-colors duration-150 ease-out",
+        "transition-all duration-150 ease-out active:scale-[0.92]",
         isActive
           ? cn("bg-bg-elevated", accentClass ?? "text-text-primary")
           : "text-text-ghost hover:text-text-secondary hover:bg-bg-elevated/50",

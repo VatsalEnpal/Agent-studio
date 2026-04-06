@@ -61,7 +61,7 @@ function PeakHoursIndicator() {
     <div className="relative group">
       <div
         className={cn(
-          "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-medium transition-colors cursor-default",
+          "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-medium transition-all cursor-default",
           info.isPeak
             ? "bg-red-500/10 text-red-400/90"
             : "bg-emerald-500/8 text-emerald-400/80",
@@ -79,20 +79,20 @@ function PeakHoursIndicator() {
       </div>
 
       {/* Tooltip */}
-      <div className="absolute right-0 top-full mt-1.5 w-52 p-2.5 rounded-lg border border-console-border bg-console-panel shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
-        <p className="text-[10px] text-console-text font-medium mb-1.5">
+      <div className="absolute right-0 top-full mt-1.5 w-52 p-2.5 rounded-lg border border-border-default bg-bg-surface shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
+        <p className="text-[10px] text-text-primary font-medium mb-1.5">
           {info.isPeak ? "Peak Hours Active" : "Off-Peak Hours"}
         </p>
-        <p className="text-[9px] text-console-muted leading-relaxed mb-2">
+        <p className="text-[9px] text-text-secondary leading-relaxed mb-2">
           Anthropic throttles during peak (14:00-20:00 Berlin). Expect slower responses.
         </p>
         <div className="flex items-center justify-between text-[9px]">
-          <span className="text-console-dim">Berlin time</span>
-          <span className="text-console-text font-mono">{info.berlinTime}</span>
+          <span className="text-text-tertiary">Berlin time</span>
+          <span className="text-text-primary font-mono">{info.berlinTime}</span>
         </div>
         <div className="flex items-center justify-between text-[9px] mt-0.5">
-          <span className="text-console-dim">Peak window</span>
-          <span className="text-console-text font-mono">{info.peakStart}-{info.peakEnd}</span>
+          <span className="text-text-tertiary">Peak window</span>
+          <span className="text-text-primary font-mono">{info.peakStart}-{info.peakEnd}</span>
         </div>
       </div>
     </div>
@@ -122,12 +122,12 @@ function SystemWidget() {
   return (
     <button
       onClick={() => setActiveMode("settings")}
-      className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-mono text-console-dim hover:text-console-muted transition-colors"
+      className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-mono text-text-tertiary hover:text-text-secondary transition-all"
       title="System monitor"
     >
       <CpuIcon className="w-3 h-3" />
       <span>{stats.cpu.toFixed(0)}%</span>
-      <span className="text-console-border">/</span>
+      <span className="text-border-default">/</span>
       <MemoryChipIcon className="w-3 h-3" />
       <span>{stats.memUsed.toFixed(1)}G</span>
     </button>
@@ -155,7 +155,7 @@ function FullscreenButton() {
           void document.documentElement.requestFullscreen();
         }
       }}
-      className="p-1 text-console-dim hover:text-console-muted transition-colors rounded hover:bg-console-faint/50"
+      className="p-1 text-text-tertiary hover:text-text-secondary transition-all rounded hover:bg-bg-elevated/50"
       title={isFs ? "Exit fullscreen" : "Fullscreen"}
     >
       {isFs ? <CollapseIcon className="w-3.5 h-3.5" /> : <ExpandIcon className="w-3.5 h-3.5" />}
@@ -170,7 +170,7 @@ function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="p-1 text-console-dim hover:text-console-muted transition-colors rounded hover:bg-console-faint/50"
+      className="p-1 text-text-tertiary hover:text-text-secondary transition-all rounded hover:bg-bg-elevated/50"
       title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
     >
       {theme === "dark" ? (
@@ -204,7 +204,7 @@ export function ToggleBar() {
     : ALL_TABS.filter((t) => t.id !== "teams" && t.id !== "memory");
 
   return (
-    <header className="flex items-center justify-between px-3 h-10 border-b border-console-border console-panel-bg shrink-0">
+    <header className="flex items-center justify-between px-3 h-10 border-b border-border-default bg-bg-surface shrink-0">
       {/* Left: tabs */}
       <div className="flex items-center gap-0.5">
         {tabs.map((tab) => {
@@ -219,17 +219,17 @@ export function ToggleBar() {
               className={cn(
                 "relative flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-medium rounded-md transition-all",
                 isActive
-                  ? "text-console-text"
+                  ? "text-text-primary"
                   : tab.disabled
-                    ? "text-console-dim cursor-not-allowed opacity-40"
-                    : "text-console-muted hover:text-console-text hover:bg-console-faint/40 active:scale-95",
+                    ? "text-text-tertiary cursor-not-allowed opacity-40"
+                    : "text-text-secondary hover:text-text-primary hover:bg-bg-elevated/40 active:scale-95",
               )}
             >
               <Icon className="w-3.5 h-3.5" />
               {tab.label}
               {/* Active indicator line */}
               {isActive && (
-                <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-console-accent rounded-full" />
+                <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-rooms rounded-full" />
               )}
             </button>
           );
@@ -243,7 +243,7 @@ export function ToggleBar() {
           href="https://claude.ai/settings/usage"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-console-dim hover:text-console-muted transition-colors flex items-center gap-1"
+          className="text-[10px] text-text-tertiary hover:text-text-secondary transition-all flex items-center gap-1"
           title="Check your usage limits on claude.ai"
         >
           <GaugeIcon className="w-3 h-3" />
@@ -254,7 +254,7 @@ export function ToggleBar() {
         <ThemeToggle />
         <PeakHoursIndicator />
         <HelpPanel />
-        <span className="text-[9px] text-console-dim/70 font-mono tracking-wide">
+        <span className="text-[9px] text-text-tertiary/70 font-mono tracking-wide">
           agent-studio
         </span>
       </div>

@@ -44,9 +44,9 @@ export function SettingsPmo() {
   const isRunning = status?.loaded ?? false;
 
   return (
-    <section className="border border-console-border rounded-lg bg-console-panel">
-      <div className="px-4 py-3 border-b border-console-border">
-        <h3 className="text-body-sm font-medium text-console-text">PMO Scheduler</h3>
+    <section className="border border-border-default rounded-lg bg-bg-surface">
+      <div className="px-4 py-3 border-b border-border-default">
+        <h3 className="text-[11px] font-medium text-text-primary">PMO Scheduler</h3>
       </div>
       <div className="px-4 py-3 space-y-3">
         {/* Status */}
@@ -55,15 +55,15 @@ export function SettingsPmo() {
             <span
               className={cn(
                 "w-2 h-2 rounded-full",
-                isRunning ? "bg-console-success animate-pulse" : "bg-console-dim",
+                isRunning ? "bg-sessions animate-pulse" : "bg-text-tertiary",
               )}
             />
-            <span className="text-body-sm text-console-text font-medium">
+            <span className="text-[11px] text-text-primary font-medium">
               {isRunning ? "Running" : "Paused"}
             </span>
           </div>
           {status?.nextScanIn && (
-            <span className="text-label-xs text-console-dim flex items-center gap-1">
+            <span className="text-label text-text-tertiary flex items-center gap-1">
               <ClockIcon className="w-3 h-3" />
               Next scan in {status.nextScanIn}
             </span>
@@ -72,10 +72,10 @@ export function SettingsPmo() {
 
         {/* Last scan info */}
         {status?.lastScan && (
-          <div className="bg-console-bg rounded px-3 py-2 space-y-1">
+          <div className="bg-bg-base rounded px-3 py-2 space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-label-xs text-console-dim">Last scan</span>
-              <span className="text-label-xs text-console-muted font-mono">
+              <span className="text-label text-text-tertiary">Last scan</span>
+              <span className="text-label text-text-secondary font-mono">
                 {new Date(status.lastScan).toLocaleString("de-DE", {
                   day: "2-digit",
                   month: "2-digit",
@@ -86,17 +86,17 @@ export function SettingsPmo() {
             </div>
             {status.lastStatus && (
               <div className="flex items-center justify-between">
-                <span className="text-label-xs text-console-dim">Status</span>
+                <span className="text-label text-text-tertiary">Status</span>
                 <span className={cn(
-                  "text-label-xs font-medium",
-                  status.lastStatus === "ok" ? "text-console-success" : "text-console-error",
+                  "text-label font-medium",
+                  status.lastStatus === "ok" ? "text-sessions" : "text-error",
                 )}>
                   {status.lastStatus}
                 </span>
               </div>
             )}
             {status.lastDetail && (
-              <p className="text-label-xs text-console-muted mt-1">{status.lastDetail}</p>
+              <p className="text-label text-text-secondary mt-1">{status.lastDetail}</p>
             )}
           </div>
         )}
@@ -107,7 +107,7 @@ export function SettingsPmo() {
             <button
               onClick={() => void handleAction("stop")}
               disabled={actionLoading !== null}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium rounded bg-console-error/15 text-console-error hover:bg-console-error/25 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium rounded bg-error/15 text-error hover:bg-error/25 transition-all"
             >
               <PauseIcon className="w-3 h-3" />
               {actionLoading === "stop" ? "Stopping..." : "Stop"}
@@ -116,7 +116,7 @@ export function SettingsPmo() {
             <button
               onClick={() => void handleAction("start")}
               disabled={actionLoading !== null}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium rounded bg-console-success/15 text-console-success hover:bg-console-success/25 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium rounded bg-sessions/15 text-sessions hover:bg-sessions/25 transition-all"
             >
               <PlayIcon className="w-3 h-3" />
               {actionLoading === "start" ? "Starting..." : "Start"}
@@ -125,7 +125,7 @@ export function SettingsPmo() {
           <button
             onClick={() => void handleAction("scan")}
             disabled={actionLoading !== null}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-label-xs font-medium rounded bg-console-accent/15 text-console-accent hover:bg-console-accent/25 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium rounded bg-rooms/15 text-rooms hover:bg-rooms/25 transition-all"
           >
             <RefreshIcon className={cn("w-3 h-3", actionLoading === "scan" && "animate-spin")} />
             {actionLoading === "scan" ? "Scanning..." : "Run Scan Now"}

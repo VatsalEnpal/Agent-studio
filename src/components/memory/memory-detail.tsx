@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { MemoryIcon, EditIcon, TrashIcon, ChevronRightIcon, UserIcon, ArrowLeftIcon } from "@/components/ui/icons";
+import { MemoryIcon, EditIcon, TrashIcon, ChevronRightIcon, UserIcon, ArrowLeftIcon, CopyIcon } from "@/components/ui/icons";
 import { useMemoryStore } from "@/stores/memory";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,35 @@ export function MemoryDetail() {
   const selectEntry = useMemoryStore((s) => s.selectEntry);
   const updateEntry = useMemoryStore((s) => s.updateEntry);
   const addToast = useToastStore((s) => s.addToast);
+
+  const handleExport = useCallback(() => {
+    if (!selectedEntry || !selectedDetail) return;
+    const lines: string[] = [
+      `# ${selectedEntry.title}`,
+      "",
+      `> ${selectedEntry.key_point}`,
+      "",
+      `**Category:** ${selectedEntry.category}`,
+      `**Agent:** ${selectedEntry.agent_type}`,
+      selectedDetail.created_at ? `**Created:** ${new Date(selectedDetail.created_at).toLocaleString()}` : "",
+      selectedDetail.created_by ? `**By:** ${selectedDetail.created_by}` : "",
+      "",
+      `**Tags:** ${selectedEntry.tags.join(", ")}`,
+      "",
+    ].filter(Boolean);
+
+    if (selectedDetail.content) {
+      for (const [key, value] of Object.entries(selectedDetail.content)) {
+        const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " ");
+        lines.push(`## ${label}`, "", String(value), "");
+      }
+    }
+
+    const markdown = lines.join("\n");
+    void navigator.clipboard.writeText(markdown).then(() => {
+      addToast("Copied as Markdown", "success");
+    });
+  }, [selectedEntry, selectedDetail, addToast]);
 
   const handlePin = useCallback(async () => {
     if (!selectedEntry) return;
@@ -60,8 +89,27 @@ export function MemoryDetail() {
 
   if (detailLoading) {
     return (
-      <div className="flex items-center justify-center h-full text-text-ghost text-label animate-pulse">
-        Loading detail...
+      <div className="p-3 space-y-3 animate-pulse">
+        <div className="flex items-start gap-3">
+          <div className="skeleton h-5 w-5 rounded shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="skeleton h-4 w-3/4" />
+            <div className="skeleton h-3 w-1/2" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="skeleton h-5 w-16 rounded-full" />
+          <div className="skeleton h-3 w-20" />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="skeleton h-5 w-12 rounded" />
+          <div className="skeleton h-5 w-14 rounded" />
+          <div className="skeleton h-5 w-10 rounded" />
+        </div>
+        <div className="space-y-2 pt-1">
+          <div className="skeleton h-20 w-full rounded-md" />
+          <div className="skeleton h-16 w-full rounded-md" />
+        </div>
       </div>
     );
   }
@@ -75,7 +123,7 @@ export function MemoryDetail() {
         {/* UX #10: Back navigation */}
         <button
           onClick={() => selectEntry(null)}
-          className="p-1 rounded text-text-tertiary hover:text-text-primary hover:bg-bg-elevated transition-colors shrink-0 mt-0.5"
+          className="p-1 rounded text-text-tertiary hover:text-text-primary hover:bg-bg-elevated transition-all shrink-0 mt-0.5"
           title="Back to list"
         >
           <ArrowLeftIcon size={14} />
@@ -91,8 +139,16 @@ export function MemoryDetail() {
         {/* Action buttons */}
         <div className="flex items-center gap-1 shrink-0">
           <button
+            onClick={handleExport}
+            className="flex items-center gap-1 px-2 py-1 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded active:scale-[0.98] transition-all"
+            title="Copy as Markdown"
+          >
+            <CopyIcon size={12} />
+            Export
+          </button>
+          <button
             onClick={() => openEditDialog(selectedEntry)}
-            className="flex items-center gap-1 px-2 py-1 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded transition-colors"
+            className="flex items-center gap-1 px-2 py-1 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded active:scale-[0.98] transition-all"
           >
             <EditIcon size={12} />
             Edit
@@ -100,7 +156,7 @@ export function MemoryDetail() {
           <button
             onClick={() => void handlePin()}
             className={cn(
-              "flex items-center gap-1 px-2 py-1 text-label font-medium rounded transition-colors",
+              "flex items-center gap-1 px-2 py-1 text-label font-medium rounded active:scale-[0.98] transition-all",
               selectedEntry.pinned
                 ? "text-sprints bg-sprints/10 hover:bg-sprints/20"
                 : "text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80",
@@ -110,7 +166,7 @@ export function MemoryDetail() {
           </button>
           <button
             onClick={() => openDeleteDialog(selectedEntry)}
-            className="flex items-center gap-1 px-2 py-1 text-label font-medium text-error bg-error/10 hover:bg-error/20 rounded transition-colors"
+            className="flex items-center gap-1 px-2 py-1 text-label font-medium text-error bg-error/10 hover:bg-error/20 rounded active:scale-[0.98] transition-all"
           >
             <TrashIcon size={12} />
             Delete

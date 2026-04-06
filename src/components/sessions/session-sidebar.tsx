@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 import { useSessionsStore } from "@/stores/sessions";
 import { useGitStore } from "@/stores/git";
 import { SessionCard } from "./session-card";
-import { DevServersView } from "@/components/dev-servers/dev-servers-view";
 import type { Session, RepoStatus } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
@@ -116,6 +115,57 @@ function groupSessionsByDate(sessions: Session[]): {
 type SidebarTab = "sessions" | "history" | "servers";
 
 // ---------------------------------------------------------------------------
+// Compact server list for sidebar (full view is in main content)
+// ---------------------------------------------------------------------------
+
+function SidebarServerList() {
+  const [servers, setServers] = useState<{ pid: number; port: number; command: string; running: boolean }[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    const fetchServers = async () => {
+      try {
+        const res = await fetch("/api/dev-servers");
+        if (res.ok && active) {
+          setServers(await res.json());
+        }
+      } catch { /* best effort */ }
+    };
+    void fetchServers();
+    const interval = setInterval(() => void fetchServers(), 5000);
+    return () => { active = false; clearInterval(interval); };
+  }, []);
+
+  if (servers.length === 0) {
+    return (
+      <div className="px-3 py-6 text-center">
+        <p className="text-[10px] text-text-tertiary">No services detected</p>
+        <p className="text-[10px] text-text-ghost mt-1">Start a dev server to see it here</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-1 py-1 space-y-0.5">
+      {servers.map((s) => (
+        <div
+          key={`${s.pid}-${s.port}`}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-bg-elevated/50 transition-all"
+        >
+          <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
+          <span className="text-[10px] font-mono text-sessions font-medium shrink-0">
+            :{s.port}
+          </span>
+          <span className="text-[10px] text-text-tertiary truncate flex-1 min-w-0">
+            {s.command.split("/").pop() ?? s.command}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main sidebar
 // ---------------------------------------------------------------------------
 
@@ -126,7 +176,7 @@ interface SessionSidebarProps {
   onRepoClick?: (repo: RepoStatus) => void;
   onPR?: (repo: RepoStatus) => void;
   onPush?: (repo: RepoStatus) => void;
-  onDevServers?: () => void;
+  onDevServers?: (show?: boolean) => void;
 }
 
 export function SessionSidebar({
@@ -144,6 +194,7 @@ export function SessionSidebar({
 
   const [activeTab, setActiveTab] = useState<SidebarTab>("sessions");
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "idle">("all");
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => getPinnedIds());
 
   const togglePin = useCallback((id: string) => {
@@ -220,8 +271,9 @@ export function SessionSidebar({
     [onResumeSession],
   );
 
-  // Filter sessions by search, sort pinned to top
+  // Filter sessions by search + status filter, sort pinned to top
   const filteredRunning = useMemo(() => {
+    if (statusFilter === "idle") return [];
     let list = runningSessions;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -234,9 +286,10 @@ export function SessionSidebar({
       const bp = pinnedIds.has(b.id) ? 0 : 1;
       return ap - bp;
     });
-  }, [runningSessions, searchQuery, pinnedIds]);
+  }, [runningSessions, searchQuery, pinnedIds, statusFilter]);
 
   const filteredPaused = useMemo(() => {
+    if (statusFilter === "active") return [];
     let list = pausedSessions;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -249,7 +302,7 @@ export function SessionSidebar({
       const bp = pinnedIds.has(b.id) ? 0 : 1;
       return ap - bp;
     });
-  }, [pausedSessions, searchQuery, pinnedIds]);
+  }, [pausedSessions, searchQuery, pinnedIds, statusFilter]);
 
   return (
     <div className="flex flex-col h-full">
@@ -259,9 +312,13 @@ export function SessionSidebar({
           {(["sessions", "history", "servers"] as const).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => {
+                setActiveTab(tab);
+                // Tell parent whether dev servers view should be shown
+                onDevServers?.(tab === "servers");
+              }}
               className={cn(
-                "flex-1 px-2 py-1 text-[10px] font-medium rounded-[3px] transition-colors",
+                "flex-1 px-2 py-1 text-[10px] font-medium rounded-[3px] transition-all",
                 activeTab === tab
                   ? "bg-bg-elevated text-text-primary"
                   : "text-text-ghost hover:text-text-tertiary",
@@ -282,12 +339,12 @@ export function SessionSidebar({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search..."
-            className="w-full pl-7 pr-2 py-1.5 text-[10px] bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-colors"
+            className="w-full pl-7 pr-2 py-1.5 text-[10px] bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-ghost hover:text-text-secondary transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-ghost hover:text-text-secondary transition-all"
               aria-label="Clear search"
             >
               <CloseIcon size={10} />
@@ -296,34 +353,58 @@ export function SessionSidebar({
         </div>
       </div>
 
+      {/* Status filter chips — only show when there are both running and paused sessions */}
+      {activeTab === "sessions" && (runningSessions.length > 0 && pausedSessions.length > 0) && (
+        <div className="px-3 pb-2 flex items-center gap-1">
+          {(["all", "active", "idle"] as const).map((filter) => (
+            <button
+              key={filter}
+              onClick={() => setStatusFilter(filter)}
+              className={cn(
+                "px-2 py-0.5 text-[9px] font-medium rounded-full transition-all",
+                statusFilter === filter
+                  ? "bg-sessions/15 text-sessions"
+                  : "text-text-ghost hover:text-text-tertiary hover:bg-bg-elevated/50",
+              )}
+            >
+              {filter === "all" ? "All" : filter === "active" ? "Running" : "Paused"}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {activeTab === "sessions" && (
           <>
             {/* RUNNING */}
-            <SectionHeader label="Running" count={filteredRunning.length} />
-            <div className="px-1 pb-2 space-y-0.5">
-              {filteredRunning.map((session) => (
-                <SessionCard
-                  key={session.id}
-                  session={session}
-                  selected={session.id === focusedId}
-                  onSelect={() => setFocused(session.id)}
-                  onKill={() => onKillSession(session.id)}
-                  pinned={pinnedIds.has(session.id)}
-                  onTogglePin={() => togglePin(session.id)}
-                />
-              ))}
-              {filteredRunning.length === 0 && (
-                <div className="px-3 py-4 text-center">
-                  <p className="text-[10px] text-text-tertiary">
-                    No running sessions
-                  </p>
-                  <p className="text-[10px] text-text-ghost mt-1">
-                    Click "New Session" below to get started
-                  </p>
-                </div>
-              )}
-            </div>
+            {(statusFilter === "all" || statusFilter === "active") && (
+              <SectionHeader label="Running" count={filteredRunning.length} />
+            )}
+            {statusFilter !== "idle" && (
+              <div className="px-1 pb-2 space-y-0.5">
+                {filteredRunning.map((session) => (
+                  <SessionCard
+                    key={session.id}
+                    session={session}
+                    selected={session.id === focusedId}
+                    onSelect={() => setFocused(session.id)}
+                    onKill={() => onKillSession(session.id)}
+                    pinned={pinnedIds.has(session.id)}
+                    onTogglePin={() => togglePin(session.id)}
+                  />
+                ))}
+                {filteredRunning.length === 0 && (
+                  <div className="px-3 py-4 text-center">
+                    <p className="text-[10px] text-text-tertiary">
+                      No running sessions
+                    </p>
+                    <p className="text-[10px] text-text-ghost mt-1">
+                      Click &ldquo;New Session&rdquo; below to get started
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* PAUSED */}
             {filteredPaused.length > 0 && (
@@ -379,15 +460,15 @@ export function SessionSidebar({
             )}
           </>
         )}
-        {activeTab === "servers" && <DevServersView />}
+        {activeTab === "servers" && <SidebarServerList />}
       </div>
 
       {/* Bottom: Servers link + New Session button */}
       <div className="px-3 py-2 border-t border-border-default space-y-1.5">
         {onDevServers && (
           <button
-            onClick={onDevServers}
-            className="flex items-center gap-1.5 w-full px-2 py-1 text-[10px] text-text-tertiary hover:text-sessions transition-colors rounded"
+            onClick={() => { setActiveTab("servers"); onDevServers(true); }}
+            className="flex items-center gap-1.5 w-full px-2 py-1 text-[10px] text-text-tertiary hover:text-sessions transition-all rounded"
           >
             <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
             Dev Servers

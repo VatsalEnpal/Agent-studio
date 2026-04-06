@@ -463,19 +463,19 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
   const currentStep = STEPS[step];
 
   return (
-    <div className="h-screen flex items-center justify-center bg-console-bg">
-      <div className="w-[560px] bg-console-panel border border-console-border rounded-xl shadow-2xl overflow-hidden">
+    <div className="h-screen flex items-center justify-center bg-bg-base">
+      <div className="w-[560px] bg-bg-surface border border-border-default rounded-xl shadow-2xl overflow-hidden">
         {/* Progress bar */}
-        <div className="flex border-b border-console-border">
+        <div className="flex border-b border-border-default">
           {STEPS.map((s, i) => (
             <div
               key={s}
               className={cn(
-                "flex-1 py-2 text-center text-[10px] font-medium transition-colors border-b-2",
+                "flex-1 py-2 text-center text-[10px] font-medium transition-all border-b-2",
                 i <= step
-                  ? "text-console-accent border-console-accent"
-                  : "text-console-dim border-transparent",
-                i < step && "text-console-success border-console-success",
+                  ? "text-rooms border-rooms"
+                  : "text-text-tertiary border-transparent",
+                i < step && "text-sessions border-sessions",
               )}
             >
               {s}
@@ -612,22 +612,22 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-8 py-4 border-t border-console-border">
+        <div className="flex items-center justify-between px-8 py-4 border-t border-border-default">
           <button
             onClick={() => setStep((s) => Math.max(0, s - 1))}
             disabled={step === 0}
             className={cn(
               "flex items-center gap-1 px-3 py-1.5 text-xs rounded transition-all",
               step === 0
-                ? "text-console-dim cursor-not-allowed"
-                : "text-console-muted hover:text-console-text",
+                ? "text-text-tertiary cursor-not-allowed"
+                : "text-text-secondary hover:text-text-primary",
             )}
           >
             <ArrowLeftIcon className="w-3 h-3" />
             Back
           </button>
 
-          <span className="text-[10px] text-console-dim">
+          <span className="text-[10px] text-text-tertiary">
             {step + 1} / {STEPS.length}
           </span>
 
@@ -638,8 +638,8 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               className={cn(
                 "flex items-center gap-1 px-4 py-1.5 text-xs font-medium rounded transition-all",
                 canAdvance()
-                  ? "bg-console-accent text-black hover:bg-console-accent/90"
-                  : "bg-console-faint text-console-dim cursor-not-allowed",
+                  ? "bg-rooms text-black hover:bg-rooms/90"
+                  : "bg-bg-elevated text-text-tertiary cursor-not-allowed",
               )}
             >
               Next
@@ -649,7 +649,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
             <button
               onClick={() => void handleFinish()}
               disabled={saving || scaffolding}
-              className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium rounded bg-console-success/80 text-black hover:bg-console-success transition-all disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium rounded bg-sessions/80 text-black hover:bg-sessions transition-all disabled:opacity-50"
             >
               {saving || scaffolding ? (
                 <SpinnerIcon className="w-3 h-3 animate-spin" />
@@ -678,14 +678,14 @@ function WelcomeStep({
 }) {
   return (
     <div className="flex flex-col items-center text-center pt-6 space-y-5">
-      <div className="w-16 h-16 rounded-2xl bg-console-accent/10 border border-console-accent/20 flex items-center justify-center">
-        <RocketIcon className="w-8 h-8 text-console-accent" />
+      <div className="w-16 h-16 rounded-2xl bg-rooms/10 border border-rooms/20 flex items-center justify-center">
+        <RocketIcon className="w-8 h-8 text-rooms" />
       </div>
       <div>
-        <h2 className="text-lg font-semibold text-console-text mb-2">
+        <h2 className="text-lg font-semibold text-text-primary mb-2">
           Welcome to Agent Studio
         </h2>
-        <p className="text-sm text-console-muted max-w-md">
+        <p className="text-sm text-text-secondary max-w-md">
           Your command center for AI coding agents. Manage sessions, monitor
           sprints, and track agent memory — all from one dashboard.
         </p>
@@ -700,19 +700,19 @@ function WelcomeStep({
           </span>
         )}
         {detecting ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-console-accent/10 border border-console-accent/20 rounded-full text-[10px] text-console-accent">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rooms/10 border border-rooms/20 rounded-full text-[10px] text-rooms">
             <SpinnerIcon className="w-3 h-3 animate-spin" />
             Scanning for projects...
           </span>
         ) : detectedCount > 0 ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-console-accent/10 border border-console-accent/20 rounded-full text-[10px] text-console-accent">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rooms/10 border border-rooms/20 rounded-full text-[10px] text-rooms">
             <FolderIcon className="w-3 h-3" />
             Found {detectedCount} project{detectedCount !== 1 ? "s" : ""} on your machine
           </span>
         ) : null}
       </div>
 
-      <p className="text-xs text-console-dim">
+      <p className="text-xs text-text-tertiary">
         Let&apos;s set up your workspace in a few quick steps.
       </p>
     </div>
@@ -792,19 +792,19 @@ function ProjectsStep({
     if (tech.includes("Rust")) return "bg-orange-500/15 text-orange-400 border-orange-500/25";
     if (tech.includes("Tailwind")) return "bg-teal-500/15 text-teal-400 border-teal-500/25";
     if (tech.includes("TypeScript")) return "bg-blue-400/15 text-blue-300 border-blue-400/25";
-    return "bg-console-faint text-console-muted border-console-border";
+    return "bg-bg-elevated text-text-secondary border-border-default";
   };
 
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-sm font-semibold text-console-text mb-1">
+        <h2 className="text-sm font-semibold text-text-primary mb-1">
           <FolderIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           {detectedProjects.length > 0
             ? "We found these projects. Select the ones you want to manage:"
             : "Where are your projects?"}
         </h2>
-        <p className="text-xs text-console-dim">
+        <p className="text-xs text-text-tertiary">
           {detectedProjects.length > 0
             ? "Click to select or deselect. Recently active projects are pre-selected."
             : "Add the git repositories you work with."}
@@ -813,7 +813,7 @@ function ProjectsStep({
 
       {/* Scanning indicator */}
       {detecting && (
-        <div className="flex items-center gap-2 px-3 py-3 bg-console-accent/5 border border-console-accent/20 rounded text-xs text-console-accent">
+        <div className="flex items-center gap-2 px-3 py-3 bg-rooms/5 border border-rooms/20 rounded text-xs text-rooms">
           <SpinnerIcon className="w-4 h-4 animate-spin" />
           Scanning your machine for projects...
         </div>
@@ -829,21 +829,21 @@ function ProjectsStep({
               className={cn(
                 "flex items-start gap-3 w-full px-3 py-2.5 rounded border text-left transition-all",
                 isSelected(dp.path)
-                  ? "bg-console-accent/10 border-console-accent/30"
-                  : "bg-console-bg border-console-border hover:border-console-muted",
+                  ? "bg-rooms/10 border-rooms/30"
+                  : "bg-bg-base border-border-default hover:border-text-secondary",
               )}
             >
               <div className="mt-0.5">
                 {isSelected(dp.path) ? (
-                  <CheckIcon className="w-4 h-4 text-console-accent" />
+                  <CheckIcon className="w-4 h-4 text-rooms" />
                 ) : (
-                  <FolderIcon className="w-4 h-4 text-console-dim" />
+                  <FolderIcon className="w-4 h-4 text-text-tertiary" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-console-text">{dp.name}</span>
-                  <span className="text-[9px] text-console-dim">{dp.lastCommit}</span>
+                  <span className="text-xs font-medium text-text-primary">{dp.name}</span>
+                  <span className="text-[9px] text-text-tertiary">{dp.lastCommit}</span>
                   {dp.hasAgentSystem && (
                     <span className="text-[9px] px-1.5 py-0.5 bg-purple-500/15 text-purple-400 border border-purple-500/25 rounded">
                       agents
@@ -867,24 +867,24 @@ function ProjectsStep({
       {projects.filter((p) => !detectedProjects.some((d) => d.path === p.path)).map((p, i) => (
         <div
           key={`manual-${p.path}-${i}`}
-          className="flex items-center gap-2 px-3 py-2 bg-console-accent/10 border border-console-accent/30 rounded text-xs"
+          className="flex items-center gap-2 px-3 py-2 bg-rooms/10 border border-rooms/30 rounded text-xs"
         >
-          <CheckIcon className="w-3.5 h-3.5 text-console-accent shrink-0" />
-          <span className="flex-1 text-console-text font-mono truncate text-[10px]">{p.path}</span>
+          <CheckIcon className="w-3.5 h-3.5 text-rooms shrink-0" />
+          <span className="flex-1 text-text-primary font-mono truncate text-[10px]">{p.path}</span>
           <button
             onClick={() => toggleProd(projects.indexOf(p))}
             className={cn(
-              "px-2 py-0.5 text-[9px] font-medium rounded border transition-colors",
+              "px-2 py-0.5 text-[9px] font-medium rounded border transition-all",
               p.isProd
                 ? "bg-red-500/15 text-red-400 border-red-500/30"
-                : "bg-console-faint text-console-dim border-transparent hover:border-console-border",
+                : "bg-bg-elevated text-text-tertiary border-transparent hover:border-border-default",
             )}
           >
             {p.isProd ? "PROD" : "dev"}
           </button>
           <button
             onClick={() => removeProject(projects.indexOf(p))}
-            className="p-0.5 text-console-dim hover:text-console-error transition-colors"
+            className="p-0.5 text-text-tertiary hover:text-error transition-all"
           >
             <CloseIcon className="w-3 h-3" />
           </button>
@@ -900,7 +900,7 @@ function ProjectsStep({
             onChange={(e) => setNewProjectPath(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") addProject(); }}
             placeholder="/path/to/project"
-            className="flex-1 px-3 py-2 text-xs font-mono bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:border-console-accent focus:outline-none"
+            className="flex-1 px-3 py-2 text-xs font-mono bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:border-rooms focus:outline-none"
           />
           <button
             onClick={addProject}
@@ -908,8 +908,8 @@ function ProjectsStep({
             className={cn(
               "flex items-center gap-1 px-3 py-2 text-xs font-medium rounded transition-all",
               newProjectPath.trim()
-                ? "bg-console-accent/20 text-console-accent hover:bg-console-accent/30"
-                : "bg-console-faint text-console-dim cursor-not-allowed",
+                ? "bg-rooms/20 text-rooms hover:bg-rooms/30"
+                : "bg-bg-elevated text-text-tertiary cursor-not-allowed",
             )}
           >
             <PlusIcon className="w-3 h-3" />
@@ -919,7 +919,7 @@ function ProjectsStep({
       ) : (
         <button
           onClick={() => setShowManualInput(true)}
-          className="text-[10px] text-console-dim hover:text-console-muted transition-colors"
+          className="text-[10px] text-text-tertiary hover:text-text-secondary transition-all"
         >
           + Add a project not listed here
         </button>
@@ -945,11 +945,11 @@ function AgentSystemStep({
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-sm font-semibold text-console-text mb-1">
+        <h2 className="text-sm font-semibold text-text-primary mb-1">
           <BrainIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           AI Agent System
         </h2>
-        <p className="text-xs text-console-dim">
+        <p className="text-xs text-text-tertiary">
           An agent system gives your AI agents memory, sprint management, and
           structured communication.
         </p>
@@ -963,11 +963,11 @@ function AgentSystemStep({
             onChange={() =>
               setAgentSystem((prev) => ({ ...prev, enabled: false, createNew: false }))
             }
-            className="accent-console-accent"
+            className="accent-rooms"
           />
           <div>
-            <span className="text-xs text-console-text">Skip for now</span>
-            <span className="text-[10px] text-console-dim ml-2">
+            <span className="text-xs text-text-primary">Skip for now</span>
+            <span className="text-[10px] text-text-tertiary ml-2">
               — Teams and Memory tabs will be hidden
             </span>
           </div>
@@ -980,9 +980,9 @@ function AgentSystemStep({
             onChange={() =>
               setAgentSystem((prev) => ({ ...prev, enabled: true, createNew: false }))
             }
-            className="accent-console-accent"
+            className="accent-rooms"
           />
-          <span className="text-xs text-console-text">
+          <span className="text-xs text-text-primary">
             I have one already
           </span>
         </label>
@@ -994,13 +994,13 @@ function AgentSystemStep({
             onChange={() =>
               setAgentSystem((prev) => ({ ...prev, enabled: true, createNew: true }))
             }
-            className="accent-console-accent"
+            className="accent-rooms"
           />
           <div>
-            <span className="text-xs text-console-accent font-medium">
+            <span className="text-xs text-rooms font-medium">
               Create a new one
             </span>
-            <span className="text-[10px] text-console-dim ml-2">
+            <span className="text-[10px] text-text-tertiary ml-2">
               — we&apos;ll scaffold it in your project
             </span>
           </div>
@@ -1017,7 +1017,7 @@ function AgentSystemStep({
               setAgentSystem((prev) => ({ ...prev, path: e.target.value }))
             }
             placeholder="/path/to/ai-agents"
-            className="w-full px-3 py-2 text-xs font-mono bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:border-console-accent focus:outline-none"
+            className="w-full px-3 py-2 text-xs font-mono bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:border-rooms focus:outline-none"
           />
 
           {agentSystem.path && (
@@ -1047,17 +1047,17 @@ function AgentSystemStep({
       {/* Create new — info + project description */}
       {agentSystem.enabled && agentSystem.createNew && (
         <div className="pl-6 space-y-3">
-          <div className="flex items-start gap-2 px-3 py-2 bg-console-accent/5 border border-console-accent/20 rounded text-[10px] text-console-muted">
-            <BrainIcon className="w-3.5 h-3.5 shrink-0 mt-0.5 text-console-accent" />
+          <div className="flex items-start gap-2 px-3 py-2 bg-rooms/5 border border-rooms/20 rounded text-[10px] text-text-secondary">
+            <BrainIcon className="w-3.5 h-3.5 shrink-0 mt-0.5 text-rooms" />
             <span>
-              We&apos;ll create <code className="text-console-accent">ai-agents/</code> and{" "}
-              <code className="text-console-accent">.claude/agents/</code> in your first
+              We&apos;ll create <code className="text-rooms">ai-agents/</code> and{" "}
+              <code className="text-rooms">.claude/agents/</code> in your first
               project directory. Choose your agents on the next page.
             </span>
           </div>
           <div>
-            <label className="block text-[10px] text-console-muted mb-1">
-              What kind of project are you building? <span className="text-console-dim">(optional)</span>
+            <label className="block text-[10px] text-text-secondary mb-1">
+              What kind of project are you building? <span className="text-text-tertiary">(optional)</span>
             </label>
             <input
               type="text"
@@ -1066,7 +1066,7 @@ function AgentSystemStep({
                 setAgentSystem((prev) => ({ ...prev, projectDescription: e.target.value }))
               }
               placeholder="e.g., React app with Python backend, Go microservices, mobile app..."
-              className="w-full px-3 py-2 text-xs bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:border-console-accent focus:outline-none"
+              className="w-full px-3 py-2 text-xs bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:border-rooms focus:outline-none"
             />
           </div>
         </div>
@@ -1110,11 +1110,11 @@ function DescribeProjectStep({
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-sm font-semibold text-console-text mb-1">
-          <SparkleIcon className="w-4 h-4 inline mr-1.5 -mt-0.5 text-console-accent" />
+        <h2 className="text-sm font-semibold text-text-primary mb-1">
+          <SparkleIcon className="w-4 h-4 inline mr-1.5 -mt-0.5 text-rooms" />
           Tell us about your project
         </h2>
-        <p className="text-xs text-console-dim">
+        <p className="text-xs text-text-tertiary">
           This helps us generate agents tailored to YOUR project, not generic templates.
         </p>
       </div>
@@ -1124,13 +1124,13 @@ function DescribeProjectStep({
         onChange={(e) => setProjectDescription(e.target.value)}
         placeholder={"Describe your project in a few sentences. For example:\n\"React Native fitness app with FastAPI backend on AWS...\"\n\nThe more detail, the better the agents."}
         rows={4}
-        className="w-full px-3 py-2 text-xs bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:border-console-accent focus:outline-none resize-y"
+        className="w-full px-3 py-2 text-xs bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:border-rooms focus:outline-none resize-y"
       />
 
       <button
         onClick={() => void onScan()}
         disabled={scanning}
-        className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-console-accent bg-console-accent/5 hover:bg-console-accent/10 border border-console-accent/20 hover:border-console-accent/40 rounded transition-all disabled:opacity-50"
+        className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-rooms bg-rooms/5 hover:bg-rooms/10 border border-rooms/20 hover:border-rooms/40 rounded transition-all disabled:opacity-50"
       >
         {scanning ? (
           <SpinnerIcon className="w-3.5 h-3.5 animate-spin" />
@@ -1141,11 +1141,11 @@ function DescribeProjectStep({
       </button>
 
       {scanData && (
-        <div className="px-3 py-2.5 bg-console-bg border border-console-border rounded space-y-2">
-          <span className="text-[10px] text-console-muted font-medium">Detected:</span>
+        <div className="px-3 py-2.5 bg-bg-base border border-border-default rounded space-y-2">
+          <span className="text-[10px] text-text-secondary font-medium">Detected:</span>
           <div className="flex flex-wrap gap-1.5">
             {scanData.frameworks?.map((fw) => (
-              <span key={fw} className="px-2 py-0.5 text-[10px] font-medium bg-console-accent/10 text-console-accent border border-console-accent/20 rounded-full">
+              <span key={fw} className="px-2 py-0.5 text-[10px] font-medium bg-rooms/10 text-rooms border border-rooms/20 rounded-full">
                 {fw}
               </span>
             ))}
@@ -1174,7 +1174,7 @@ function DescribeProjectStep({
       )}
 
       <div>
-        <label className="text-[10px] text-console-muted block mb-1.5">
+        <label className="text-[10px] text-text-secondary block mb-1.5">
           <UsersIcon className="w-3 h-3 inline mr-1 -mt-0.5" />
           Team size
         </label>
@@ -1186,15 +1186,15 @@ function DescribeProjectStep({
               className={cn(
                 "px-3 py-1.5 text-xs rounded border transition-all",
                 teamSize === opt.value
-                  ? "bg-console-accent/15 text-console-accent border-console-accent/30 font-medium"
-                  : "bg-console-bg text-console-muted border-console-border hover:border-console-muted",
+                  ? "bg-rooms/15 text-rooms border-rooms/30 font-medium"
+                  : "bg-bg-base text-text-secondary border-border-default hover:border-text-secondary",
               )}
             >
               {opt.label}
             </button>
           ))}
         </div>
-        <p className="text-[9px] text-console-dim mt-1">
+        <p className="text-[9px] text-text-tertiary mt-1">
           {teamSize === 1
             ? "Solo dev: fewer, broader agents"
             : teamSize && teamSize >= 7
@@ -1235,14 +1235,14 @@ function AgentTeamStep({
   if (aiGen.status === "analyzing" || aiGen.status === "generating") {
     return (
       <div className="flex flex-col items-center text-center pt-10 space-y-4">
-        <div className="w-12 h-12 rounded-xl bg-console-accent/10 border border-console-accent/20 flex items-center justify-center">
-          <SpinnerIcon className="w-6 h-6 text-console-accent animate-spin" />
+        <div className="w-12 h-12 rounded-xl bg-rooms/10 border border-rooms/20 flex items-center justify-center">
+          <SpinnerIcon className="w-6 h-6 text-rooms animate-spin" />
         </div>
         <div>
-          <p className="text-sm font-medium text-console-text">
+          <p className="text-sm font-medium text-text-primary">
             {aiGen.status === "analyzing" ? "Analyzing your project..." : "Generating tailored agents..."}
           </p>
-          <p className="text-[10px] text-console-dim mt-1">
+          <p className="text-[10px] text-text-tertiary mt-1">
             {aiGen.status === "analyzing"
               ? "Reading package.json, file structure, README..."
               : "Claude is creating agent definitions for your tech stack"}
@@ -1258,17 +1258,17 @@ function AgentTeamStep({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-console-text mb-0.5">
-              <SparkleIcon className="w-4 h-4 inline mr-1.5 -mt-0.5 text-console-accent" />
+            <h2 className="text-sm font-semibold text-text-primary mb-0.5">
+              <SparkleIcon className="w-4 h-4 inline mr-1.5 -mt-0.5 text-rooms" />
               AI-Generated Agents
             </h2>
-            <p className="text-[10px] text-console-dim">
+            <p className="text-[10px] text-text-tertiary">
               Tailored to your project. Deselect, edit, or switch to templates.
             </p>
           </div>
           <button
             onClick={() => { setUseAiAgents(false); setEditingAgentId(null); }}
-            className="px-2 py-1 text-[10px] text-console-dim hover:text-console-muted border border-console-border rounded transition-colors"
+            className="px-2 py-1 text-[10px] text-text-tertiary hover:text-text-secondary border border-border-default rounded transition-all"
           >
             Use templates
           </button>
@@ -1281,20 +1281,20 @@ function AgentTeamStep({
                 className={cn(
                   "flex items-center gap-2 px-3 py-2 rounded border cursor-pointer transition-all",
                   selectedAgents.includes(agent.id)
-                    ? "bg-console-accent/10 border-console-accent/30"
-                    : "bg-console-bg border-console-border hover:border-console-muted",
+                    ? "bg-rooms/10 border-rooms/30"
+                    : "bg-bg-base border-border-default hover:border-text-secondary",
                 )}
               >
                 <input
                   type="checkbox"
                   checked={selectedAgents.includes(agent.id)}
                   onChange={() => toggleAgent(agent.id)}
-                  className="accent-console-accent"
+                  className="accent-rooms"
                 />
-                <span className="text-xs font-mono text-console-accent w-24 truncate">
+                <span className="text-xs font-mono text-rooms w-24 truncate">
                   {agent.id}
                 </span>
-                <span className="text-[10px] text-console-muted flex-1 truncate">
+                <span className="text-[10px] text-text-secondary flex-1 truncate">
                   {agent.description}
                 </span>
                 <button
@@ -1302,7 +1302,7 @@ function AgentTeamStep({
                     e.preventDefault();
                     setEditingAgentId(editingAgentId === agent.id ? null : agent.id);
                   }}
-                  className="p-1 text-console-dim hover:text-console-accent transition-colors"
+                  className="p-1 text-text-tertiary hover:text-rooms transition-all"
                   title="Edit agent definition"
                 >
                   <PencilIcon className="w-3 h-3" />
@@ -1322,7 +1322,7 @@ function AgentTeamStep({
                       }));
                     }}
                     rows={8}
-                    className="w-full px-2 py-1.5 text-[10px] font-mono bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none resize-y"
+                    className="w-full px-2 py-1.5 text-[10px] font-mono bg-bg-base border border-border-default rounded text-text-primary focus:border-rooms focus:outline-none resize-y"
                   />
                 </div>
               )}
@@ -1333,18 +1333,18 @@ function AgentTeamStep({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setSelectedAgents(aiGen.agents.map((a) => a.id))}
-            className="px-2.5 py-1 text-[10px] text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
+            className="px-2.5 py-1 text-[10px] text-text-secondary hover:text-rooms border border-border-default rounded transition-all"
           >
             Select All
           </button>
           <button
             onClick={() => void triggerAiGeneration()}
-            className="flex items-center gap-1 px-2.5 py-1 text-[10px] text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-[10px] text-text-secondary hover:text-rooms border border-border-default rounded transition-all"
           >
             <UndoIcon className="w-2.5 h-2.5" />
             Regenerate
           </button>
-          <span className="text-[10px] text-console-dim ml-auto">
+          <span className="text-[10px] text-text-tertiary ml-auto">
             {selectedAgents.length} selected
           </span>
         </div>
@@ -1357,11 +1357,11 @@ function AgentTeamStep({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-console-text mb-1">
+          <h2 className="text-sm font-semibold text-text-primary mb-1">
             <UsersIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
             Which agents do you want in your team?
           </h2>
-          <p className="text-xs text-console-dim">
+          <p className="text-xs text-text-tertiary">
             Each agent gets its own definition file with rules and capabilities.
           </p>
         </div>
@@ -1371,7 +1371,7 @@ function AgentTeamStep({
       {aiGen.cliAvailable && aiGen.status !== "error" && (
         <button
           onClick={() => void triggerAiGeneration()}
-          className="flex items-center gap-2 w-full px-3 py-2.5 text-xs font-medium text-console-accent bg-console-accent/5 hover:bg-console-accent/10 border border-console-accent/20 hover:border-console-accent/40 rounded transition-all"
+          className="flex items-center gap-2 w-full px-3 py-2.5 text-xs font-medium text-rooms bg-rooms/5 hover:bg-rooms/10 border border-rooms/20 hover:border-rooms/40 rounded transition-all"
         >
           <SparkleIcon className="w-4 h-4" />
           <span>Generate agents tailored to your project with AI</span>
@@ -1408,23 +1408,23 @@ function AgentTeamStep({
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded border cursor-pointer transition-all",
                 selectedAgents.includes(agent.id)
-                  ? "bg-console-accent/10 border-console-accent/30"
-                  : "bg-console-bg border-console-border hover:border-console-muted",
+                  ? "bg-rooms/10 border-rooms/30"
+                  : "bg-bg-base border-border-default hover:border-text-secondary",
               )}
             >
               <input
                 type="checkbox"
                 checked={selectedAgents.includes(agent.id)}
                 onChange={() => toggleAgent(agent.id)}
-                className="accent-console-accent"
+                className="accent-rooms"
               />
-              <span className="text-xs font-mono text-console-text w-28">
+              <span className="text-xs font-mono text-text-primary w-28">
                 {agent.label}
               </span>
               <div className="flex-1 min-w-0">
-                <span className="text-[10px] text-console-dim">{agent.desc}</span>
+                <span className="text-[10px] text-text-tertiary">{agent.desc}</span>
                 {reason && (
-                  <span className="text-[9px] text-console-accent ml-1.5">
+                  <span className="text-[9px] text-rooms ml-1.5">
                     — {reason}
                   </span>
                 )}
@@ -1437,17 +1437,17 @@ function AgentTeamStep({
       <div className="flex items-center gap-2">
         <button
           onClick={() => setSelectedAgents(AVAILABLE_AGENTS.map((a) => a.id))}
-          className="px-2.5 py-1 text-[10px] text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
+          className="px-2.5 py-1 text-[10px] text-text-secondary hover:text-rooms border border-border-default rounded transition-all"
         >
           Select All
         </button>
         <button
           onClick={() => setSelectedAgents([])}
-          className="px-2.5 py-1 text-[10px] text-console-muted hover:text-console-accent border border-console-border rounded transition-colors"
+          className="px-2.5 py-1 text-[10px] text-text-secondary hover:text-rooms border border-border-default rounded transition-all"
         >
           Select None
         </button>
-        <span className="text-[10px] text-console-dim ml-auto">
+        <span className="text-[10px] text-text-tertiary ml-auto">
           {selectedAgents.length} selected
         </span>
       </div>
@@ -1486,11 +1486,11 @@ function WorkflowStep({
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-sm font-semibold text-console-text mb-1">
+        <h2 className="text-sm font-semibold text-text-primary mb-1">
           <GitBranchIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           How does your team work?
         </h2>
-        <p className="text-xs text-console-dim">
+        <p className="text-xs text-text-tertiary">
           Choose a workflow pattern for your agents.
         </p>
       </div>
@@ -1502,24 +1502,24 @@ function WorkflowStep({
             className={cn(
               "flex items-start gap-3 px-3 py-3 rounded border cursor-pointer transition-all",
               workflow === opt.id
-                ? "bg-console-accent/10 border-console-accent/30"
-                : "bg-console-bg border-console-border hover:border-console-muted",
+                ? "bg-rooms/10 border-rooms/30"
+                : "bg-bg-base border-border-default hover:border-text-secondary",
             )}
           >
             <input
               type="radio"
               checked={workflow === opt.id}
               onChange={() => setWorkflow(opt.id)}
-              className="accent-console-accent mt-0.5"
+              className="accent-rooms mt-0.5"
             />
             <div>
-              <span className="text-xs font-medium text-console-text">
+              <span className="text-xs font-medium text-text-primary">
                 {opt.label}
               </span>
-              <p className="text-[10px] text-console-muted mt-0.5">
+              <p className="text-[10px] text-text-secondary mt-0.5">
                 {opt.desc}
               </p>
-              <p className="text-[10px] text-console-dim mt-0.5 italic">
+              <p className="text-[10px] text-text-tertiary mt-0.5 italic">
                 {opt.detail}
               </p>
             </div>
@@ -1577,11 +1577,11 @@ function AutomationStep({
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-sm font-semibold text-console-text mb-1">
+        <h2 className="text-sm font-semibold text-text-primary mb-1">
           <BellIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           Notifications & Automation
         </h2>
-        <p className="text-xs text-console-dim">
+        <p className="text-xs text-text-tertiary">
           These are optional. You can enable them later in Settings.
         </p>
       </div>
@@ -1589,11 +1589,11 @@ function AutomationStep({
       {/* Suggested Automations */}
       {(suggestions.length > 0 || suggestionsLoading) && (
         <div className="space-y-2">
-          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-console-accent">
+          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-rooms">
             Recommended automations for your project
           </h3>
           {suggestionsLoading ? (
-            <div className="flex items-center gap-2 px-3 py-4 text-xs text-console-dim">
+            <div className="flex items-center gap-2 px-3 py-4 text-xs text-text-tertiary">
               <SpinnerIcon className="w-3.5 h-3.5 animate-spin" />
               Analyzing project...
             </div>
@@ -1605,26 +1605,26 @@ function AutomationStep({
                   className={cn(
                     "flex items-start gap-3 px-3 py-2.5 rounded border cursor-pointer transition-all",
                     s.enabled
-                      ? "bg-console-accent/10 border-console-accent/30"
-                      : "bg-console-bg border-console-border hover:border-console-muted",
+                      ? "bg-rooms/10 border-rooms/30"
+                      : "bg-bg-base border-border-default hover:border-text-secondary",
                   )}
                 >
                   <input
                     type="checkbox"
                     checked={s.enabled}
                     onChange={() => onToggleSuggestion(s.templateId)}
-                    className="accent-console-accent mt-0.5"
+                    className="accent-rooms mt-0.5"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-console-text">
+                      <span className="text-xs font-medium text-text-primary">
                         {s.name}
                       </span>
-                      <span className="text-[9px] text-console-dim">{s.schedule}</span>
-                      <span className="text-[9px] text-console-dim">{s.model}</span>
+                      <span className="text-[9px] text-text-tertiary">{s.schedule}</span>
+                      <span className="text-[9px] text-text-tertiary">{s.model}</span>
                     </div>
-                    <p className="text-[10px] text-console-muted mt-0.5">{s.description}</p>
-                    <p className="text-[10px] text-console-dim mt-0.5 italic">{s.reason}</p>
+                    <p className="text-[10px] text-text-secondary mt-0.5">{s.description}</p>
+                    <p className="text-[10px] text-text-tertiary mt-0.5 italic">{s.reason}</p>
                   </div>
                 </label>
               ))}
@@ -1639,21 +1639,21 @@ function AutomationStep({
           className={cn(
             "flex items-start gap-3 px-3 py-3 rounded border cursor-pointer transition-all",
             telegramEnabled
-              ? "bg-console-accent/10 border-console-accent/30"
-              : "bg-console-bg border-console-border hover:border-console-muted",
+              ? "bg-rooms/10 border-rooms/30"
+              : "bg-bg-base border-border-default hover:border-text-secondary",
           )}
         >
           <input
             type="checkbox"
             checked={telegramEnabled}
             onChange={(e) => setTelegramEnabled(e.target.checked)}
-            className="accent-console-accent mt-0.5"
+            className="accent-rooms mt-0.5"
           />
           <div>
-            <span className="text-xs font-medium text-console-text">
+            <span className="text-xs font-medium text-text-primary">
               Telegram notifications
             </span>
-            <p className="text-[10px] text-console-muted mt-0.5">
+            <p className="text-[10px] text-text-secondary mt-0.5">
               Get pinged when sprints are ready or gates pass.
               Requires a Telegram bot token (you can set this up later).
             </p>
@@ -1665,21 +1665,21 @@ function AutomationStep({
           className={cn(
             "flex items-start gap-3 px-3 py-3 rounded border cursor-pointer transition-all",
             schedulerEnabled
-              ? "bg-console-accent/10 border-console-accent/30"
-              : "bg-console-bg border-console-border hover:border-console-muted",
+              ? "bg-rooms/10 border-rooms/30"
+              : "bg-bg-base border-border-default hover:border-text-secondary",
           )}
         >
           <input
             type="checkbox"
             checked={schedulerEnabled}
             onChange={(e) => setSchedulerEnabled(e.target.checked)}
-            className="accent-console-accent mt-0.5"
+            className="accent-rooms mt-0.5"
           />
           <div>
-            <span className="text-xs font-medium text-console-text">
+            <span className="text-xs font-medium text-text-primary">
               PMO scheduler
             </span>
-            <p className="text-[10px] text-console-muted mt-0.5">
+            <p className="text-[10px] text-text-secondary mt-0.5">
               Automatically scan for tasks on a schedule.
               Requires launchd (macOS) or cron (Linux).
             </p>
@@ -1688,7 +1688,7 @@ function AutomationStep({
 
         {schedulerEnabled && (
           <div className="pl-9">
-            <label className="text-[10px] text-console-muted block mb-1">
+            <label className="text-[10px] text-text-secondary block mb-1">
               Scan interval (hours)
             </label>
             <input
@@ -1697,7 +1697,7 @@ function AutomationStep({
               max={24}
               value={schedulerInterval}
               onChange={(e) => setSchedulerInterval(parseInt(e.target.value, 10) || 2)}
-              className="w-20 px-2 py-1 text-xs font-mono bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
+              className="w-20 px-2 py-1 text-xs font-mono bg-bg-base border border-border-default rounded text-text-primary focus:border-rooms focus:outline-none"
             />
           </div>
         )}
@@ -1718,20 +1718,20 @@ function ValidationRow({
   return (
     <div className="flex items-center gap-2 text-[10px]">
       {found ? (
-        <CheckIcon className="w-3 h-3 text-console-success" />
+        <CheckIcon className="w-3 h-3 text-sessions" />
       ) : (
-        <CloseIcon className="w-3 h-3 text-console-dim" />
+        <CloseIcon className="w-3 h-3 text-text-tertiary" />
       )}
       <span
         className={cn(
           "font-mono",
-          found ? "text-console-text" : "text-console-dim",
+          found ? "text-text-primary" : "text-text-tertiary",
         )}
       >
         {label}
       </span>
       {detail && (
-        <span className="text-console-muted">({detail})</span>
+        <span className="text-text-secondary">({detail})</span>
       )}
     </div>
   );
@@ -1761,11 +1761,11 @@ function PreferencesStep({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-sm font-semibold text-console-text mb-1">
+        <h2 className="text-sm font-semibold text-text-primary mb-1">
           <SettingsIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           Quick Preferences
         </h2>
-        <p className="text-xs text-console-dim">
+        <p className="text-xs text-text-tertiary">
           You can change everything in Settings later.
         </p>
       </div>
@@ -1782,7 +1782,7 @@ function PreferencesStep({
 
       {/* Model */}
       <div>
-        <label className="text-[10px] text-console-muted block mb-2">
+        <label className="text-[10px] text-text-secondary block mb-2">
           Default Model
         </label>
         <div className="flex items-center gap-2">
@@ -1797,8 +1797,8 @@ function PreferencesStep({
                     ? "bg-purple-500/20 text-purple-400 border-purple-500/30"
                     : m === "haiku"
                       ? "bg-teal-500/20 text-teal-400 border border-teal-500/30"
-                      : "bg-console-accent/20 text-console-accent border-console-accent/30"
-                  : "bg-console-faint text-console-dim hover:text-console-muted border-transparent",
+                      : "bg-rooms/20 text-rooms border-rooms/30"
+                  : "bg-bg-elevated text-text-tertiary hover:text-text-secondary border-transparent",
               )}
             >
               {m}
@@ -1806,8 +1806,8 @@ function PreferencesStep({
           ))}
         </div>
         {showCostGuide && (
-          <div className="mt-2 px-3 py-2 bg-console-bg border border-console-border rounded">
-            <p className="text-[10px] text-console-muted">
+          <div className="mt-2 px-3 py-2 bg-bg-base border border-border-default rounded">
+            <p className="text-[10px] text-text-secondary">
               {modelInfo[model]?.cost} &mdash; {modelInfo[model]?.best}
             </p>
           </div>
@@ -1816,7 +1816,7 @@ function PreferencesStep({
 
       {/* Permissions */}
       <div>
-        <label className="text-[10px] text-console-muted block mb-2">
+        <label className="text-[10px] text-text-secondary block mb-2">
           Default Permissions
         </label>
         <div className="flex items-center gap-2">
@@ -1827,15 +1827,15 @@ function PreferencesStep({
               className={cn(
                 "px-4 py-2 text-xs font-medium rounded border transition-all",
                 permissions === p
-                  ? "bg-console-accent/20 text-console-accent border-console-accent/30"
-                  : "bg-console-faint text-console-dim hover:text-console-muted border-transparent",
+                  ? "bg-rooms/20 text-rooms border-rooms/30"
+                  : "bg-bg-elevated text-text-tertiary hover:text-text-secondary border-transparent",
               )}
             >
               {p}
             </button>
           ))}
         </div>
-        <p className="text-[10px] text-console-dim mt-1.5">
+        <p className="text-[10px] text-text-tertiary mt-1.5">
           {permissions === "bypass"
             ? "Skip all permission prompts (fastest, for experienced users)"
             : permissions === "plan"

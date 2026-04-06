@@ -1,19 +1,31 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { wsClient, type ConnectionState } from "@/lib/ws-client";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
 // Title Bar — Mac-native style with traffic light dots
 // ---------------------------------------------------------------------------
 
+function useConnectionDot(): ConnectionState {
+  const [state, setState] = useState<ConnectionState>(wsClient.getConnectionState());
+  useEffect(() => wsClient.onConnectionChange(setState), []);
+  return state;
+}
+
 interface TitleBarProps {
   /** Name of the focused session, shown after "Agent Studio" */
   sessionName?: string;
   /** Number of active sessions */
   sessionCount?: number;
+  /** Total spend across all sessions */
+  totalCost?: number;
 }
 
-export function TitleBar({ sessionName, sessionCount }: TitleBarProps = {}) {
+export function TitleBar({ sessionName, sessionCount, totalCost }: TitleBarProps = {}) {
+  const connState = useConnectionDot();
+
   return (
     <header
       className={cn(
@@ -65,6 +77,33 @@ export function TitleBar({ sessionName, sessionCount }: TitleBarProps = {}) {
           </>
         )}
       </span>
+
+      {/* Right side: cost + connection status */}
+      <div className="absolute right-4 flex items-center gap-3">
+        {totalCost != null && totalCost > 0 && (
+          <span
+            className="text-[10px] font-mono text-sprints/70"
+            title="Total spend this session"
+          >
+            ${totalCost.toFixed(2)}
+          </span>
+        )}
+        <span
+          className={cn(
+            "w-[6px] h-[6px] rounded-full",
+            connState === "connected" && "bg-sessions",
+            connState === "reconnecting" && "bg-sprints animate-pulse",
+            connState === "disconnected" && "bg-error",
+          )}
+          title={
+            connState === "connected"
+              ? "Connected to server"
+              : connState === "reconnecting"
+                ? "Reconnecting..."
+                : "Disconnected"
+          }
+        />
+      </div>
     </header>
   );
 }

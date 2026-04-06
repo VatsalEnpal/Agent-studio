@@ -106,7 +106,7 @@ export function FlowSidebar({
         </h3>
         <button
           onClick={() => openBuilder()}
-          className="flex items-center gap-1 px-2 py-1 text-label font-medium bg-rooms text-bg-base rounded hover:bg-rooms/90 transition-colors"
+          className="flex items-center gap-1 px-2 py-1 text-label font-medium bg-rooms text-bg-base rounded hover:bg-rooms/90 transition-all active:scale-[0.98]"
         >
           <PlusIcon size={12} />
           Create
@@ -128,7 +128,7 @@ export function FlowSidebar({
                 <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                   <button
                     onClick={(e) => handleRun(flow.id, e)}
-                    className="p-0.5 text-text-ghost hover:text-rooms transition-colors"
+                    className="p-0.5 text-text-ghost hover:text-rooms transition-all"
                     title="Run workflow"
                   >
                     <ChevronRightIcon size={12} />
@@ -140,14 +140,14 @@ export function FlowSidebar({
                           e.stopPropagation();
                           openBuilder(flow.id);
                         }}
-                        className="p-0.5 text-text-ghost hover:text-text-secondary transition-colors"
+                        className="p-0.5 text-text-ghost hover:text-text-secondary transition-all"
                         title="Edit workflow"
                       >
                         <EditIcon size={12} />
                       </button>
                       <button
                         onClick={(e) => handleDelete(flow.id, e)}
-                        className="p-0.5 text-text-ghost hover:text-error transition-colors"
+                        className="p-0.5 text-text-ghost hover:text-error transition-all"
                         title="Delete workflow"
                       >
                         <TrashIcon size={12} />
@@ -179,10 +179,10 @@ export function FlowSidebar({
                       key={run.id}
                       onClick={() => onSelectRun(flow.id, run.id)}
                       className={cn(
-                        "flex flex-col gap-1 w-full px-2.5 py-2 rounded text-left transition-colors",
+                        "flex flex-col gap-1 w-full px-2.5 py-2 rounded text-left transition-all",
                         isSelected
                           ? "bg-bg-elevated border border-border-subtle"
-                          : "hover:bg-bg-elevated/30",
+                          : "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(124,131,247,0.06)]",
                         run.status === "waiting" &&
                           !isSelected &&
                           "border border-sprints/30",
@@ -263,8 +263,11 @@ export function FlowSidebar({
         })}
 
         {flows.length === 0 && (
-          <div className="text-label text-text-ghost text-center py-4">
-            No workflows found
+          <div className="text-center py-6 px-3">
+            <p className="text-[10px] text-text-secondary font-medium">No workflows</p>
+            <p className="text-[10px] text-text-tertiary mt-1">
+              Create a workflow to automate multi-step tasks
+            </p>
           </div>
         )}
       </div>

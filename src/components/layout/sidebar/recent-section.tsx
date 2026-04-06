@@ -117,12 +117,12 @@ function RecentSessionItem({
       className="flex items-center gap-2 px-2 py-1.5 group"
       title={`${session.preview ?? ""}\n${session.agent ? `Agent: ${session.agent}\n` : ""}${session.project}\nSession: ${session.id}`}
     >
-      <HistoryIcon className="w-3 h-3 text-console-dim shrink-0" />
+      <HistoryIcon className="w-3 h-3 text-text-tertiary shrink-0" />
       <div className="flex-1 min-w-0">
-        <span className="text-[10px] text-console-muted truncate block">
+        <span className="text-[10px] text-text-secondary truncate block">
           {displayName}
         </span>
-        <span className="text-[9px] text-console-dim truncate block">
+        <span className="text-[9px] text-text-tertiary truncate block">
           {subtitle}
         </span>
       </div>
@@ -132,8 +132,8 @@ function RecentSessionItem({
         className={cn(
           "flex items-center gap-0.5 px-1.5 py-0.5 text-[8px] font-medium rounded transition-all shrink-0",
           resumingId === session.id
-            ? "text-console-dim bg-console-border cursor-not-allowed opacity-100"
-            : "opacity-0 group-hover:opacity-100 text-console-accent bg-console-accent/10 hover:bg-console-accent/20 active:bg-console-accent/30",
+            ? "text-text-tertiary bg-border-default cursor-not-allowed opacity-100"
+            : "opacity-0 group-hover:opacity-100 text-rooms bg-rooms/10 hover:bg-rooms/20 active:bg-rooms/30",
         )}
         title={`Resume session ${session.id.slice(0, 8)}`}
       >

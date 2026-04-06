@@ -108,7 +108,7 @@ export function TerminalPane({
   const displayName = customName || usage.displayName || name;
   const contextPercent = usage.contextPercent ?? 0;
   const contextDisplay = usage.loading ? "..." : contextPercent > 0 ? `${contextPercent}% ctx` : null;
-  const contextColor = contextPercent >= 90 ? "text-red-400 bg-red-500/15" : contextPercent >= 70 ? "text-yellow-400 bg-yellow-500/15" : "bg-console-border text-console-dim";
+  const contextColor = contextPercent >= 90 ? "text-red-400 bg-red-500/15" : contextPercent >= 70 ? "text-yellow-400 bg-yellow-500/15" : "bg-border-default text-text-tertiary";
   const tokensDisplay = usage.tokens && usage.tokens !== "0"
     ? `${usage.tokens} tokens`
     : usage.loading
@@ -267,8 +267,8 @@ export function TerminalPane({
       className={cn(
         "terminal-pane-border flex flex-col h-full rounded-lg border overflow-hidden",
         focused
-          ? "border-console-success/60 shadow-[0_0_12px_rgba(74,222,128,0.06)]"
-          : "border-console-border",
+          ? "border-sessions/60 shadow-[0_0_12px_rgba(74,222,128,0.06)]"
+          : "border-border-default",
       )}
       onClick={onFocus}
       onDoubleClick={(e) => {
@@ -278,14 +278,14 @@ export function TerminalPane({
       }}
     >
       {/* Header bar */}
-      <div className="flex items-center gap-2 px-3 py-1.5 console-panel-bg border-b border-console-border shrink-0 font-mono">
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-bg-surface border-b border-border-default shrink-0 font-mono">
         <span
           className={cn(
             "w-2 h-2 rounded-full shrink-0",
             statusDotColor(status),
           )}
         />
-        <span className="text-xs font-medium text-console-text truncate">
+        <span className="text-xs font-medium text-text-primary truncate">
           {displayName}
         </span>
 
@@ -310,23 +310,23 @@ export function TerminalPane({
               {contextDisplay}
             </span>
           )}
-          <span className="text-[9px] text-console-dim">
+          <span className="text-[9px] text-text-tertiary">
             {tokensDisplay}
           </span>
 
           {/* Zoom controls */}
-          <span className="flex items-center gap-0 rounded-md border border-console-border/60 overflow-hidden">
+          <span className="flex items-center gap-0 rounded-md border border-border-default overflow-hidden">
             <button
               onClick={(e) => { e.stopPropagation(); zoomOut(sessionId); }}
-              className="p-0.5 text-console-dim hover:text-console-muted hover:bg-console-faint/50 transition-colors"
+              className="p-0.5 text-text-tertiary hover:text-text-secondary hover:bg-bg-elevated/50 transition-all"
               title="Zoom out"
             >
               <ZoomOutIcon className="w-2.5 h-2.5" />
             </button>
-            <span className="text-[7px] text-console-dim px-0.5 font-mono min-w-[16px] text-center">{zoomLevel}</span>
+            <span className="text-[7px] text-text-tertiary px-0.5 font-mono min-w-[16px] text-center">{zoomLevel}</span>
             <button
               onClick={(e) => { e.stopPropagation(); zoomIn(sessionId); }}
-              className="p-0.5 text-console-dim hover:text-console-muted hover:bg-console-faint/50 transition-colors"
+              className="p-0.5 text-text-tertiary hover:text-text-secondary hover:bg-bg-elevated/50 transition-all"
               title="Zoom in"
             >
               <ZoomInIcon className="w-2.5 h-2.5" />
@@ -338,7 +338,7 @@ export function TerminalPane({
               e.stopPropagation();
               onDoubleClick?.();
             }}
-            className="p-0.5 text-console-dim hover:text-console-muted active:text-console-text transition-colors"
+            className="p-0.5 text-text-tertiary hover:text-text-secondary active:text-text-primary transition-all"
             title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
           >
             {isFullscreen ? (
@@ -358,7 +358,7 @@ export function TerminalPane({
                 onKill?.();
                 setTimeout(() => setKilling(false), 3000);
               }}
-              className="px-1.5 py-0.5 text-[9px] font-medium text-console-error bg-console-error/15 hover:bg-console-error/25 rounded transition-colors"
+              className="px-1.5 py-0.5 text-[9px] font-medium text-error bg-error/15 hover:bg-error/25 rounded transition-all"
             >
               Kill?
             </button>
@@ -372,10 +372,10 @@ export function TerminalPane({
               }}
               disabled={killing}
               className={cn(
-                "p-0.5 transition-colors",
+                "p-0.5 transition-all",
                 killing
-                  ? "text-console-error cursor-not-allowed"
-                  : "text-console-dim hover:text-console-error active:text-red-300",
+                  ? "text-error cursor-not-allowed"
+                  : "text-text-tertiary hover:text-error active:text-red-300",
               )}
               title={killing ? "Killing..." : "Kill session"}
             >

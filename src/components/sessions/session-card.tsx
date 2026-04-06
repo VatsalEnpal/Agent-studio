@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { EditIcon, CloseIcon } from "@/components/ui/icons";
+import { EditIcon, CloseIcon, CopyIcon } from "@/components/ui/icons";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 import { contextColor } from "@/lib/design-tokens";
 import { useSessionUsage } from "@/hooks/use-usage";
@@ -159,7 +160,9 @@ export function SessionCard({
   onTogglePin,
 }: SessionCardProps) {
   const [killing, setKilling] = useState(false);
+  const [confirmKill, setConfirmKill] = useState(false);
   const [resuming, setResuming] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
   const [customNameState, setCustomNameState] = useState<string | null>(
@@ -194,12 +197,30 @@ export function SessionCard({
     setEditing(false);
   }, [editValue, session.id, session.name]);
 
+  const isExited = session.status === "exited";
+  const isRunning =
+    session.status === "active" ||
+    session.status === "building" ||
+    session.status === "starting";
+
   const handleKill = useCallback(() => {
     if (killing) return;
+    // Running sessions require confirmation
+    if (isRunning) {
+      setConfirmKill(true);
+      return;
+    }
     setKilling(true);
     onKill();
     setTimeout(() => setKilling(false), 3000);
-  }, [killing, onKill]);
+  }, [killing, isRunning, onKill]);
+
+  const confirmKillAction = useCallback(() => {
+    setConfirmKill(false);
+    setKilling(true);
+    onKill();
+    setTimeout(() => setKilling(false), 3000);
+  }, [onKill]);
 
   const handleResume = useCallback(() => {
     if (resuming || !onResume) return;
@@ -208,27 +229,33 @@ export function SessionCard({
     setTimeout(() => setResuming(false), 5000);
   }, [resuming, onResume]);
 
-  const isExited = session.status === "exited";
-  const isRunning =
-    session.status === "active" ||
-    session.status === "building" ||
-    session.status === "starting";
-
   // UX #3: Live elapsed timer
   const elapsed = useElapsedTimer(session.createdAt, isRunning);
 
   // UX #1: Token count border indicator
   const borderColor = tokenBorderColor(usage.totalTokens);
 
+  // Build a detailed hover tooltip
+  const tooltipParts: string[] = [displayName];
+  tooltipParts.push(`Status: ${session.status}`);
+  if (session.cwd) tooltipParts.push(`Path: ${session.cwd}`);
+  if (effectiveModel) tooltipParts.push(`Model: ${effectiveModel}`);
+  if (usage.totalTokens > 0) tooltipParts.push(`Tokens: ${usage.totalTokens.toLocaleString()}`);
+  if (usage.totalCost > 0) tooltipParts.push(`Cost: $${usage.totalCost.toFixed(2)}`);
+  if (contextPercent > 0) tooltipParts.push(`Context: ${contextPercent}%`);
+  if (session.createdAt > 0)
+    tooltipParts.push(`Created: ${new Date(session.createdAt).toLocaleString()}`);
+
   return (
     <div
       onClick={onSelect}
+      title={tooltipParts.join("\n")}
       className={cn(
         "group relative flex flex-col gap-1 px-3 py-2 rounded-md cursor-pointer overflow-hidden",
-        "transition-colors",
+        "transition-all",
         selected
           ? "bg-bg-elevated border border-border-subtle"
-          : "hover:bg-bg-elevated/50 border border-transparent",
+          : "hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(52,211,153,0.05)] border border-transparent",
       )}
       style={borderColor ? { borderLeftColor: borderColor, borderLeftWidth: 2 } : undefined}
     >
@@ -312,6 +339,26 @@ export function SessionCard({
           </button>
         )}
 
+        {/* Copy session ID */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            void navigator.clipboard.writeText(session.id).then(() => {
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1500);
+            });
+          }}
+          className={cn(
+            "p-0.5 rounded shrink-0 transition-opacity",
+            copied
+              ? "text-sessions opacity-100"
+              : "text-text-ghost hover:text-text-tertiary opacity-0 group-hover:opacity-100",
+          )}
+          title={copied ? "Copied!" : "Copy session ID"}
+        >
+          <CopyIcon size={10} />
+        </button>
+
         {isExited && onResume ? (
           <button
             onClick={(e) => {
@@ -320,13 +367,14 @@ export function SessionCard({
             }}
             disabled={resuming}
             className={cn(
-              "flex items-center gap-0.5 px-1.5 py-0.5 rounded shrink-0",
-              "text-label font-medium",
-              "transition-all",
+              "px-2 py-0.5 rounded-md shrink-0",
+              "text-[9px] font-medium",
+              "border transition-all",
               resuming
-                ? "text-text-ghost cursor-not-allowed"
+                ? "text-text-ghost border-border-default cursor-not-allowed"
                 : cn(
-                    "text-sessions hover:bg-sessions/10",
+                    "text-text-ghost border-border-default",
+                    "hover:text-sessions hover:border-sessions/30",
                     selected
                       ? "opacity-80"
                       : "opacity-0 group-hover:opacity-100",
@@ -380,17 +428,14 @@ export function SessionCard({
         <span className="flex-1" />
 
         {effectiveModel && effectiveModel !== "unknown" && (
-          <span
-            className={cn(
-              "text-label px-1 py-0.5 rounded shrink-0",
-              effectiveModel === "opus"
-                ? "bg-memory/10 text-memory"
-                : effectiveModel === "haiku"
-                  ? "bg-sessions/10 text-sessions"
-                  : "bg-rooms/10 text-rooms",
-            )}
-          >
+          <span className="text-[8px] font-mono font-normal text-text-ghost uppercase tracking-[0.3px] shrink-0">
             {effectiveModel}
+          </span>
+        )}
+
+        {costDisplay && (
+          <span className="text-[8px] font-mono text-sprints/70 shrink-0">
+            {costDisplay}
           </span>
         )}
 
@@ -413,6 +458,18 @@ export function SessionCard({
           />
         </div>
       )}
+
+      {/* Kill confirmation dialog */}
+      <ConfirmDialog
+        open={confirmKill}
+        onOpenChange={setConfirmKill}
+        title="Kill Session"
+        description="This will terminate the running session. Any unsaved work may be lost."
+        detail={displayName}
+        confirmLabel="Kill"
+        variant="danger"
+        onConfirm={confirmKillAction}
+      />
     </div>
   );
 }

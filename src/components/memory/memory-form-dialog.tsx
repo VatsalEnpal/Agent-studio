@@ -155,7 +155,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
               {isCreate ? "Create Memory" : "Edit Memory"}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button className="p-1 rounded-md text-text-ghost hover:text-text-primary hover:bg-bg-input transition-colors">
+              <button className="p-1 rounded-md text-text-ghost hover:text-text-primary hover:bg-bg-input transition-all">
                 <CloseIcon size={14} />
               </button>
             </Dialog.Close>
@@ -170,7 +170,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
                 value={form.title}
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                 placeholder="Brief description of this memory"
-                className="mt-1 w-full px-2 py-1 text-[10px] bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-memory transition-colors"
+                className="mt-1 w-full px-2 py-1 text-[10px] bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-memory transition-all"
               />
             </div>
 
@@ -181,7 +181,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
                 value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
                 disabled={!isCreate}
-                className="mt-1 w-full px-2 py-1 text-[10px] bg-bg-input border border-border-default rounded text-text-primary focus:outline-none focus:border-memory transition-colors disabled:opacity-50"
+                className="mt-1 w-full px-2 py-1 text-[10px] bg-bg-input border border-border-default rounded text-text-primary focus:outline-none focus:border-memory transition-all disabled:opacity-50"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
@@ -206,7 +206,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
                   }
                   rows={2}
                   className={cn(
-                    "mt-1 w-full px-2 py-1 text-[10px] bg-bg-input border rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-memory transition-colors resize-none",
+                    "mt-1 w-full px-2 py-1 text-[10px] bg-bg-input border rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-memory transition-all resize-none",
                     field === "lesson" ? "border-memory/30" : "border-border-default",
                   )}
                 />
@@ -245,7 +245,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
                 />
                 <button
                   onClick={addTag}
-                  className="text-label px-2 py-1 bg-bg-elevated text-text-secondary rounded hover:bg-border-default transition-colors"
+                  className="text-label px-2 py-1 bg-bg-elevated text-text-secondary rounded hover:bg-border-default transition-all"
                 >
                   Add
                 </button>
@@ -257,7 +257,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
           <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-border-default">
             <button
               onClick={close}
-              className="px-3 py-1.5 text-label text-text-secondary hover:text-text-primary bg-bg-elevated rounded transition-colors"
+              className="px-3 py-1.5 text-label text-text-secondary hover:text-text-primary bg-bg-elevated rounded transition-all"
             >
               Cancel
             </button>

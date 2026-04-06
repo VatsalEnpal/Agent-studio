@@ -187,7 +187,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
                   "text-label-xs font-medium",
                   "text-accent bg-accent-subtle",
                   "hover:bg-accent/15",
-                  "transition-colors duration-[var(--duration-instant)] ease-out",
+                  "transition-all duration-[var(--duration-instant)] ease-out",
                 )}
               >
                 {action.label}
@@ -204,7 +204,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
           "shrink-0 flex items-center justify-center",
           "size-5 rounded",
           "text-text-tertiary hover:text-text-primary hover:bg-surface-hover",
-          "transition-colors duration-[var(--duration-instant)] ease-out",
+          "transition-all duration-[var(--duration-instant)] ease-out",
         )}
         aria-label="Dismiss notification"
       >

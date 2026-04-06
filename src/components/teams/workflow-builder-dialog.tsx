@@ -172,14 +172,14 @@ export function WorkflowBuilderDialog() {
     <Dialog.Root open={open} onOpenChange={(v) => { if (!v) close(); }}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[620px] max-h-[85vh] overflow-y-auto bg-console-panel border border-console-border rounded-lg shadow-xl">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[620px] max-h-[85vh] overflow-y-auto bg-bg-surface border border-border-default rounded-lg shadow-xl">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-console-border">
-            <Dialog.Title className="text-xs font-medium text-console-text">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border-default">
+            <Dialog.Title className="text-xs font-medium text-text-primary">
               {isEdit ? "Edit Workflow" : "Create Workflow"}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button className="p-1 text-console-dim hover:text-console-text transition-colors">
+              <button className="p-1 text-text-tertiary hover:text-text-primary transition-all">
                 <CloseIcon className="w-3.5 h-3.5" />
               </button>
             </Dialog.Close>
@@ -187,8 +187,8 @@ export function WorkflowBuilderDialog() {
 
           {/* Templates section (only for create) */}
           {showTemplates && !isEdit && (
-            <div className="px-4 py-3 border-b border-console-border">
-              <p className="text-[9px] font-medium text-console-dim uppercase tracking-wider mb-2">
+            <div className="px-4 py-3 border-b border-border-default">
+              <p className="text-[9px] font-medium text-text-tertiary uppercase tracking-wider mb-2">
                 Start from a template
               </p>
               <div className="grid grid-cols-2 gap-2">
@@ -198,13 +198,13 @@ export function WorkflowBuilderDialog() {
                     <button
                       key={tpl.name}
                       onClick={() => applyTemplate(tpl)}
-                      className="flex items-start gap-2 p-2.5 text-left bg-console-bg border border-console-border rounded hover:border-console-accent/50 transition-colors"
+                      className="flex items-start gap-2 p-2.5 text-left bg-bg-base border border-border-default rounded hover:border-rooms/50 transition-all"
                     >
-                      <TplIcon className="w-3.5 h-3.5 text-console-muted shrink-0 mt-0.5" />
+                      <TplIcon className="w-3.5 h-3.5 text-text-secondary shrink-0 mt-0.5" />
                       <div className="min-w-0">
-                        <p className="text-[10px] font-medium text-console-text">{tpl.name}</p>
-                        <p className="text-[8px] text-console-dim mt-0.5 line-clamp-2">{tpl.description}</p>
-                        <p className="text-[8px] text-console-dim mt-1">{tpl.steps.length} steps</p>
+                        <p className="text-[10px] font-medium text-text-primary">{tpl.name}</p>
+                        <p className="text-[8px] text-text-tertiary mt-0.5 line-clamp-2">{tpl.description}</p>
+                        <p className="text-[8px] text-text-tertiary mt-1">{tpl.steps.length} steps</p>
                       </div>
                     </button>
                   );
@@ -212,7 +212,7 @@ export function WorkflowBuilderDialog() {
               </div>
               <button
                 onClick={() => setShowTemplates(false)}
-                className="mt-2 text-[9px] text-console-accent hover:underline"
+                className="mt-2 text-[9px] text-rooms hover:underline"
               >
                 Or start from scratch
               </button>
@@ -223,17 +223,17 @@ export function WorkflowBuilderDialog() {
             {/* Basic info */}
             <div className="grid grid-cols-[1fr_auto] gap-3">
               <div>
-                <label className="text-[9px] font-medium text-console-dim uppercase tracking-wider">Name</label>
+                <label className="text-[9px] font-medium text-text-tertiary uppercase tracking-wider">Name</label>
                 <input
                   type="text"
                   value={draft.name}
                   onChange={(e) => updateDraftField("name", e.target.value)}
                   placeholder="e.g., Deploy Pipeline"
-                  className="mt-1 w-full px-2.5 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent transition-colors"
+                  className="mt-1 w-full px-2.5 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-rooms transition-all"
                 />
               </div>
               <div>
-                <label className="text-[9px] font-medium text-console-dim uppercase tracking-wider">Icon</label>
+                <label className="text-[9px] font-medium text-text-tertiary uppercase tracking-wider">Icon</label>
                 <div className="mt-1 flex items-center gap-1">
                   {ICON_OPTIONS.map((opt) => {
                     const IconComp = opt.icon;
@@ -242,10 +242,10 @@ export function WorkflowBuilderDialog() {
                         key={opt.value}
                         onClick={() => updateDraftField("icon", opt.value)}
                         className={cn(
-                          "p-1.5 rounded transition-colors",
+                          "p-1.5 rounded transition-all",
                           draft.icon === opt.value
-                            ? "bg-console-accent/20 text-console-accent border border-console-accent/30"
-                            : "text-console-dim hover:text-console-muted bg-console-bg border border-console-border",
+                            ? "bg-rooms/20 text-rooms border border-rooms/30"
+                            : "text-text-tertiary hover:text-text-secondary bg-bg-base border border-border-default",
                         )}
                         title={opt.label}
                       >
@@ -258,25 +258,25 @@ export function WorkflowBuilderDialog() {
             </div>
 
             <div>
-              <label className="text-[9px] font-medium text-console-dim uppercase tracking-wider">Description</label>
+              <label className="text-[9px] font-medium text-text-tertiary uppercase tracking-wider">Description</label>
               <input
                 type="text"
                 value={draft.description}
                 onChange={(e) => updateDraftField("description", e.target.value)}
                 placeholder="What does this workflow do?"
-                className="mt-1 w-full px-2.5 py-1.5 text-xs bg-console-bg border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent transition-colors"
+                className="mt-1 w-full px-2.5 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-rooms transition-all"
               />
             </div>
 
             {/* Steps */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-[9px] font-medium text-console-dim uppercase tracking-wider">
+                <label className="text-[9px] font-medium text-text-tertiary uppercase tracking-wider">
                   Steps ({draft.steps.length})
                 </label>
                 <button
                   onClick={addStep}
-                  className="flex items-center gap-1 px-2 py-0.5 text-[9px] text-console-accent hover:text-console-accent/80 transition-colors"
+                  className="flex items-center gap-1 px-2 py-0.5 text-[9px] text-rooms hover:text-rooms/80 transition-all"
                 >
                   <PlusIcon className="w-3 h-3" />
                   Add Step
@@ -300,8 +300,8 @@ export function WorkflowBuilderDialog() {
               </div>
 
               {draft.steps.length === 0 && (
-                <div className="text-center py-4 text-[10px] text-console-dim">
-                  No steps yet. Add a step or pick a template.
+                <div className="text-center py-6 text-[10px] text-text-tertiary">
+                  No steps defined. Add steps manually or select a template above.
                 </div>
               )}
             </div>
@@ -313,19 +313,19 @@ export function WorkflowBuilderDialog() {
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-console-border">
+          <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-border-default">
             {!isEdit && showTemplates ? null : (
               <>
                 <button
                   onClick={close}
-                  className="px-3 py-1.5 text-[10px] text-console-muted hover:text-console-text bg-console-faint rounded transition-colors"
+                  className="px-3 py-1.5 text-[10px] text-text-secondary hover:text-text-primary bg-bg-elevated rounded transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={saving || !draft.name.trim()}
-                  className="px-3 py-1.5 text-[10px] font-medium text-console-bg bg-console-accent rounded hover:bg-console-accent/90 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                  className="px-3 py-1.5 text-[10px] font-medium text-bg-base bg-rooms rounded hover:bg-rooms/90 transition-all disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {saving && <SpinnerIcon className="w-3 h-3 animate-spin" />}
                   {isEdit ? "Save" : "Create"}
@@ -359,21 +359,21 @@ function StepRow({
   onMoveDown: () => void;
 }) {
   return (
-    <div className="flex items-start gap-2 p-2.5 bg-console-bg border border-console-border rounded">
+    <div className="flex items-start gap-2 p-2.5 bg-bg-base border border-border-default rounded">
       {/* Step number + reorder */}
       <div className="flex flex-col items-center gap-0.5 shrink-0 pt-1">
-        <span className="text-[9px] font-mono text-console-dim w-4 text-center">{index + 1}</span>
+        <span className="text-[9px] font-mono text-text-tertiary w-4 text-center">{index + 1}</span>
         <button
           onClick={onMoveUp}
           disabled={index === 0}
-          className="p-0.5 text-console-dim hover:text-console-muted disabled:opacity-30 transition-colors"
+          className="p-0.5 text-text-tertiary hover:text-text-secondary disabled:opacity-30 transition-all"
         >
           <ChevronUpIcon className="w-3 h-3" />
         </button>
         <button
           onClick={onMoveDown}
           disabled={index === total - 1}
-          className="p-0.5 text-console-dim hover:text-console-muted disabled:opacity-30 transition-colors"
+          className="p-0.5 text-text-tertiary hover:text-text-secondary disabled:opacity-30 transition-all"
         >
           <ChevronDownIcon className="w-3 h-3" />
         </button>
@@ -386,19 +386,19 @@ function StepRow({
           value={step.name}
           onChange={(e) => onUpdate({ name: e.target.value })}
           placeholder="Step name"
-          className="w-full px-2 py-1 text-[10px] bg-console-panel border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent"
+          className="w-full px-2 py-1 text-[10px] bg-bg-surface border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-rooms"
         />
         <input
           type="text"
           value={step.description}
           onChange={(e) => onUpdate({ description: e.target.value })}
           placeholder="Description (optional)"
-          className="w-full px-2 py-1 text-[10px] bg-console-panel border border-console-border rounded text-console-text placeholder:text-console-dim focus:outline-none focus:border-console-accent"
+          className="w-full px-2 py-1 text-[10px] bg-bg-surface border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-rooms"
         />
         <select
           value={step.agent}
           onChange={(e) => onUpdate({ agent: e.target.value })}
-          className="w-full px-2 py-1 text-[10px] bg-console-panel border border-console-border rounded text-console-text focus:outline-none focus:border-console-accent"
+          className="w-full px-2 py-1 text-[10px] bg-bg-surface border border-border-default rounded text-text-primary focus:outline-none focus:border-rooms"
         >
           <option value="">Assign agent...</option>
           {agents.map((a) => (
@@ -411,7 +411,7 @@ function StepRow({
       <button
         onClick={onRemove}
         disabled={total <= 1}
-        className="p-1 text-console-dim hover:text-console-error disabled:opacity-30 transition-colors shrink-0"
+        className="p-1 text-text-tertiary hover:text-error disabled:opacity-30 transition-all shrink-0"
       >
         <TrashIcon className="w-3 h-3" />
       </button>
@@ -422,20 +422,20 @@ function StepRow({
 function StepPreview({ steps }: { steps: Array<{ id: string; name: string; agent: string }> }) {
   return (
     <div>
-      <p className="text-[9px] font-medium text-console-dim uppercase tracking-wider mb-2">Preview</p>
+      <p className="text-[9px] font-medium text-text-tertiary uppercase tracking-wider mb-2">Preview</p>
       <div className="flex items-center gap-1 overflow-x-auto pb-1">
         {steps.map((step, idx) => (
           <div key={step.id} className="flex items-center gap-1 shrink-0">
             {idx > 0 && (
-              <div className="w-4 h-px bg-console-border" />
+              <div className="w-4 h-px bg-border-default" />
             )}
-            <div className="flex items-center gap-1.5 px-2 py-1 bg-console-bg border border-console-border rounded text-[9px]">
-              <span className="w-3.5 h-3.5 flex items-center justify-center rounded-full bg-console-accent/20 text-console-accent text-[8px] font-mono shrink-0">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-bg-base border border-border-default rounded text-[9px]">
+              <span className="w-3.5 h-3.5 flex items-center justify-center rounded-full bg-rooms/20 text-rooms text-[8px] font-mono shrink-0">
                 {idx + 1}
               </span>
-              <span className="text-console-text font-medium whitespace-nowrap">{step.name}</span>
+              <span className="text-text-primary font-medium whitespace-nowrap">{step.name}</span>
               {step.agent && (
-                <span className="text-console-dim text-[8px]">({step.agent})</span>
+                <span className="text-text-tertiary text-[8px]">({step.agent})</span>
               )}
             </div>
           </div>

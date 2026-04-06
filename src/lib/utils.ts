@@ -76,33 +76,33 @@ export function computeGridLayout(count: number): {
 export function statusColor(status: string): string {
   switch (status) {
     case "active":
-      return "bg-console-success";
+      return "bg-sessions";
     case "building":
-      return "bg-console-accent";
+      return "bg-rooms";
     case "idle":
-      return "bg-console-muted";
+      return "bg-text-secondary";
     case "exited":
-      return "bg-console-error";
+      return "bg-error";
     case "starting":
-      return "bg-console-accent";
+      return "bg-rooms";
     default:
-      return "bg-console-dim";
+      return "bg-text-tertiary";
   }
 }
 
 export function statusDotColor(status: string): string {
   switch (status) {
     case "active":
-      return "bg-console-success";
+      return "bg-sessions";
     case "building":
-      return "bg-console-accent animate-pulse";
+      return "bg-rooms animate-pulse";
     case "idle":
-      return "bg-console-muted";
+      return "bg-text-secondary";
     case "exited":
-      return "bg-console-error";
+      return "bg-error";
     case "starting":
-      return "bg-console-accent animate-pulse";
+      return "bg-rooms animate-pulse";
     default:
-      return "bg-console-dim";
+      return "bg-text-tertiary";
   }
 }
