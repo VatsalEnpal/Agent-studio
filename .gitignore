@@ -40,3 +40,6 @@ dist/
 dist-server/
 out/
 *.dmg
+
+# Agent skill temp runs (never commit)
+**/.temp-execution*.js
