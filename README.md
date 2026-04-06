@@ -137,17 +137,6 @@ In-app walkthrough: [HOWTO.md](HOWTO.md) (features, shortcuts, agents, automatio
 
 On first launch, Agent Studio checks prerequisites and runs onboarding if everything passes.
 
-### Docker (browser / server stack)
-
-Use this when you want the **Next.js + Express** app in a Linux container (e.g. remote or headless). It serves the same URL as `npm run dev`.
-
-```bash
-docker compose up --build
-# http://localhost:8080
-```
-
-**Important:** This is **not** the macOS Electron shell. The **native Mac app** (`npm run electron:dev` or a `.dmg` from `npm run build:mac`) only runs on **macOS with a GUI**. Inside Docker you get the web UI; local PTY terminals and OS integrations depend on your mount and host setup (see `docker-compose.yml`).
-
 ### Build a `.dmg` (optional)
 
 ```bash
@@ -246,8 +235,7 @@ npm run dev              # Dev server with hot reload (localhost:8080)
 npm run electron:dev     # Dev server + Electron together (macOS GUI)
 npm run type-check       # TypeScript strict mode check
 npm run test             # Vitest unit tests
-npm run test:smoke       # Endpoint + WebSocket smoke test (needs `npm run dev` in another terminal)
-docker compose up --build   # Same stack in Docker → localhost:8080
+npm run test:smoke       # Endpoint + WebSocket smoke test
 npm run build:mac        # Build macOS .dmg
 ```
 
