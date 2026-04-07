@@ -165,32 +165,6 @@ HOW THIS ROOM WORKS:
 
           // Let the protocol handle chaining to @mentioned agents
           protocol.handleAgentResponse(agentId, text);
-
-          // Orchestrator fallback: if nobody was chained and no queue,
-          // ask orchestrator whether anyone else should respond
-          const room = roomManager.getRoom(roomId);
-          if (
-            room &&
-            protocol.queueLength === 0 &&
-            protocol.activeAgent === null &&
-            agentId !== "orchestrator" &&
-            room.agents.some((a) => a.id === "orchestrator")
-          ) {
-            const orchestratorPrompt = `The last message was from @${agentId}. No agent was @mentioned. Should anyone else respond? Reply with @agentname if yes, or say DONE if the conversation can pause.`;
-            protocol.handleAgentResponse("__fallback__", orchestratorPrompt);
-            // handleAgentResponse won't route "__fallback__" — invoke orchestrator directly
-            if (protocol.activeAgent === null && protocol.queueLength === 0) {
-              // Manually invoke orchestrator for the fallback question
-              const callbacks = makeSdkCallbacks(roomId);
-              sdkManager.sendMessage("orchestrator", orchestratorPrompt, callbacks).catch((err) => {
-                roomManager.addMessage(roomId, {
-                  from: "system",
-                  text: `Orchestrator fallback failed: ${err instanceof Error ? err.message : String(err)}`,
-                  type: "system",
-                });
-              });
-            }
-          }
         }
       },
       onError(agentId: string, err: Error) {
