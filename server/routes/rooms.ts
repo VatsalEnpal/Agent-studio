@@ -74,14 +74,20 @@ export function roomsRoutes(
             .filter((a) => a.id !== agentId)
             .map((a) => `@${a.id} (${a.name})`)
             .join(", ");
-          const contextPrefix = [
-            `You are agent "${agent?.name ?? agentId}" in team room "#${room.name}".`,
-            `Topic: ${room.topic}.`,
-            `Team members: ${otherAgents}.`,
-            `You can @mention other agents to hand off work, or @user to ask the human a question.`,
-            `Do NOT introduce yourself. Just do the work requested.`,
-            `\n---\n`,
-          ].join(" ");
+          const contextPrefix = `You are in a TEAM ROOM called "#${room.name}".
+Topic: ${room.topic}
+Your role: ${agent?.name ?? agentId}
+Other agents in this room: ${otherAgents}
+
+HOW THIS ROOM WORKS:
+- This is a group chat, like Slack. Your response IS your message to the room.
+- To ask another agent to do something, write @agentname in your response (e.g. "@backend-worker can you check the database?"). The system will automatically route your message to them.
+- To ask the human a question or need approval, write @user in your response.
+- Do NOT use SendMessage tool here — just write @mentions in your text.
+- Do NOT introduce yourself or explain your role. Just do the work.
+- Be concise. Give your findings/output directly. No preamble.
+---
+`;
           messageToSend = contextPrefix + prompt;
         }
 
@@ -126,8 +132,11 @@ export function roomsRoutes(
         roomManager.setAgentStatus(roomId, agentId, "working");
         broadcast("room-agent-typing", { roomId, agentId });
       },
-      onTextDelta(agentId: string, delta: string) {
-        broadcast("room-agent-streaming", { roomId, agentId, delta });
+      onTextDelta(_agentId: string, _delta: string) {
+        // Don't stream raw Claude Code output to the room.
+        // Agents do tool calls, read files, query databases — that's internal work.
+        // Only the final result (onResult) gets posted as a room message.
+        // The typing indicator (onTypingStart) shows the agent is working.
       },
       onResult(agentId: string, text: string, usage) {
         const truncated = text.length > 5000 ? text.slice(0, 5000) + "\n...(truncated)" : text;
