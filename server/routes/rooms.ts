@@ -5,6 +5,7 @@ import type { SdkSessionManager, SdkSessionCallbacks } from "../sdk-session.js";
 import { getMainProjectDir } from "../config.js";
 import type { WebSocket } from "ws";
 import type { WebSocketServer } from "ws";
+import { ConversationProtocol, parseMentions } from "../managers/conversation-protocol.js";
 
 export function roomsRoutes(
   roomManager: RoomManager,
@@ -21,6 +22,101 @@ export function roomsRoutes(
         (client as WebSocket).send(msg);
       }
     }
+  }
+
+  // Per-room ConversationProtocol instances for @mention chaining
+  const protocols = new Map<string, ConversationProtocol>();
+
+  /** Lazily create (or return existing) ConversationProtocol for a room. */
+  function getOrCreateProtocol(roomId: string): ConversationProtocol {
+    const existing = protocols.get(roomId);
+    if (existing) return existing;
+
+    const room = roomManager.getRoom(roomId);
+    if (!room) throw new Error(`Room ${roomId} not found`);
+
+    // Track which agents have already received their initial room context
+    const initialized = new Set<string>();
+
+    const protocol = new ConversationProtocol(
+      room.agents.map((a) => ({ id: a.id, name: a.name })),
+
+      // onInvoke — lazy-spawn agent, prepend context on first message, then send
+      (agentId: string, prompt: string) => {
+        // Ensure agent has an SDK session (lazy-spawn)
+        if (!sdkManager.getSession(agentId)) {
+          const agent = room.agents.find((a) => a.id === agentId);
+          if (!agent) {
+            roomManager.addMessage(roomId, {
+              from: "system",
+              text: `Cannot invoke unknown agent "${agentId}".`,
+              type: "system",
+            });
+            return;
+          }
+          const mainDir = getMainProjectDir();
+          sdkManager.createSession({
+            agentId: agent.id,
+            roomId,
+            cwd: mainDir,
+            model: agent.model,
+            agentProfile: agent.id !== "none" ? agent.id : undefined,
+          });
+          roomManager.setAgentStatus(roomId, agent.id, "idle");
+        }
+
+        // First message to a new agent: prepend room context
+        let messageToSend = prompt;
+        if (!initialized.has(agentId)) {
+          initialized.add(agentId);
+          const agent = room.agents.find((a) => a.id === agentId);
+          const otherAgents = room.agents
+            .filter((a) => a.id !== agentId)
+            .map((a) => `@${a.id} (${a.name})`)
+            .join(", ");
+          const contextPrefix = [
+            `You are agent "${agent?.name ?? agentId}" in team room "#${room.name}".`,
+            `Topic: ${room.topic}.`,
+            `Team members: ${otherAgents}.`,
+            `You can @mention other agents to hand off work, or @user to ask the human a question.`,
+            `Do NOT introduce yourself. Just do the work requested.`,
+            `\n---\n`,
+          ].join(" ");
+          messageToSend = contextPrefix + prompt;
+        }
+
+        const callbacks = makeSdkCallbacks(roomId);
+        sdkManager.sendMessage(agentId, messageToSend, callbacks).catch((err) => {
+          roomManager.addMessage(roomId, {
+            from: "system",
+            text: `Failed to deliver to ${agentId}: ${err instanceof Error ? err.message : String(err)}`,
+            type: "system",
+          });
+        });
+      },
+
+      // onDepthLimitReached — notify room that human intervention is needed
+      () => {
+        roomManager.addMessage(roomId, {
+          from: "system",
+          text: "Chain depth limit reached (10 turns). The conversation needs human input to continue.",
+          type: "system",
+        });
+        broadcast("room-needs-user", { roomId, reason: "depth-limit" });
+      },
+
+      // onError
+      (error: Error) => {
+        roomManager.addMessage(roomId, {
+          from: "system",
+          text: `Protocol error: ${error.message}`,
+          type: "system",
+        });
+      },
+    );
+
+    protocols.set(roomId, protocol);
+    return protocol;
   }
 
   // Shared callbacks for SDK session events — broadcasts to all WS clients
@@ -44,6 +140,48 @@ export function roomsRoutes(
 
         if (usage) {
           broadcast("room-agent-usage", { roomId, agentId, ...usage });
+        }
+
+        // --- Protocol chaining: route @mentions to next agent(s) ---
+        const protocol = protocols.get(roomId);
+        if (protocol) {
+          const mentions = parseMentions(text);
+
+          // If agent mentioned the user, pause the chain and notify
+          if (mentions.includes("user") || mentions.includes("vatsal")) {
+            protocol.pause();
+            broadcast("room-needs-user", { roomId, agentId, reason: "mention" });
+            return;
+          }
+
+          // Let the protocol handle chaining to @mentioned agents
+          protocol.handleAgentResponse(agentId, text);
+
+          // Orchestrator fallback: if nobody was chained and no queue,
+          // ask orchestrator whether anyone else should respond
+          const room = roomManager.getRoom(roomId);
+          if (
+            room &&
+            protocol.queueLength === 0 &&
+            protocol.activeAgent === null &&
+            agentId !== "orchestrator" &&
+            room.agents.some((a) => a.id === "orchestrator")
+          ) {
+            const orchestratorPrompt = `The last message was from @${agentId}. No agent was @mentioned. Should anyone else respond? Reply with @agentname if yes, or say DONE if the conversation can pause.`;
+            protocol.handleAgentResponse("__fallback__", orchestratorPrompt);
+            // handleAgentResponse won't route "__fallback__" — invoke orchestrator directly
+            if (protocol.activeAgent === null && protocol.queueLength === 0) {
+              // Manually invoke orchestrator for the fallback question
+              const callbacks = makeSdkCallbacks(roomId);
+              sdkManager.sendMessage("orchestrator", orchestratorPrompt, callbacks).catch((err) => {
+                roomManager.addMessage(roomId, {
+                  from: "system",
+                  text: `Orchestrator fallback failed: ${err instanceof Error ? err.message : String(err)}`,
+                  type: "system",
+                });
+              });
+            }
+          }
         }
       },
       onError(agentId: string, err: Error) {
@@ -134,61 +272,11 @@ export function roomsRoutes(
 
       const room = roomManager.getRoom(roomId);
       if (room && (from === "user" || from === undefined)) {
-        const mentionMatch = text.match(/@(\w+)/);
-        let targetAgentId = "orchestrator";
-        let messageText = text;
-
-        if (mentionMatch) {
-          const mentioned = mentionMatch[1]!;
-          if (mentioned === "all") {
-            // Broadcast to all agents
-            const cleanText = text.replace(/@all\s*/g, "").trim();
-            const callbacks = makeSdkCallbacks(roomId);
-            for (const agent of room.agents) {
-              const session = sdkManager.getSession(agent.id);
-              if (session) {
-                sdkManager.sendMessage(agent.id, cleanText, callbacks).catch((err) => {
-                  roomManager.addMessage(roomId, {
-                    from: "system",
-                    text: `Failed to deliver to ${agent.id}: ${err instanceof Error ? err.message : String(err)}`,
-                    type: "system",
-                  });
-                });
-              }
-            }
-            roomManager.updateContextFile(roomId);
-            res.status(201).json(msg);
-            return;
-          }
-
-          const mentionedAgent = room.agents.find(a => a.id.toLowerCase() === mentioned.toLowerCase());
-          const mentionedId = mentionedAgent?.id ?? mentioned;
-          const hasSession = !!sdkManager.getSession(mentionedId);
-          console.log(`[room-msg] mentioned="${mentioned}", found agent=${!!mentionedAgent}, agentId=${mentionedId}, has session=${hasSession}, target=${hasSession ? mentionedId : targetAgentId}`);
-          if (mentionedAgent && sdkManager.getSession(mentionedId)) {
-            targetAgentId = mentionedId;
-          }
-          messageText = text.replace(/@\w+\s*/, "").trim();
+        const protocol = getOrCreateProtocol(roomId);
+        if (protocol.isPaused) {
+          protocol.resume();
         }
-
-        const session = sdkManager.getSession(targetAgentId);
-        if (session) {
-          const callbacks = makeSdkCallbacks(roomId);
-          sdkManager.sendMessage(targetAgentId, messageText, callbacks).catch((err) => {
-            roomManager.addMessage(roomId, {
-              from: "system",
-              text: `Failed to deliver to ${targetAgentId}: ${err instanceof Error ? err.message : String(err)}`,
-              type: "system",
-            });
-          });
-          roomManager.updateContextFile(roomId);
-        } else {
-          roomManager.addMessage(roomId, {
-            from: "system",
-            text: `Cannot deliver to ${targetAgentId} — agent is offline. Start the room first.`,
-            type: "system",
-          });
-        }
+        protocol.humanMessage(text, "orchestrator");
       }
 
       res.status(201).json(msg);
@@ -295,6 +383,7 @@ export function roomsRoutes(
           sdkManager.destroySession(agent.id);
         }
       }
+      protocols.delete(roomId);
       roomManager.closeRoom(roomId);
       res.json({ ok: true });
     } catch (err) {
