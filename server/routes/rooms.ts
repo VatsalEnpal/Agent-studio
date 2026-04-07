@@ -286,7 +286,7 @@ export function roomsRoutes(
     }
   });
 
-  // --- Spawn: create SDK sessions for all agents ---
+  // --- Spawn: register agents as ready but dormant (no SDK sessions, no init messages) ---
   router.post("/:id/spawn", async (req, res) => {
     try {
       const roomId = req.params["id"]!;
@@ -296,59 +296,22 @@ export function roomsRoutes(
         return;
       }
 
-      const mainDir = getMainProjectDir();
-      const spawned: Array<{ agentId: string }> = [];
-
+      // Mark agents as ready but dormant — no SDK sessions, no init messages.
+      // Sessions are created lazily when an agent is first @mentioned.
       for (const agent of room.agents) {
-        // Skip if already has an SDK session
-        if (sdkManager.getSession(agent.id)) continue;
-
-        sdkManager.createSession({
-          agentId: agent.id,
-          roomId,
-          cwd: mainDir,
-          model: agent.model,
-          agentProfile: agent.id !== "none" ? agent.id : undefined,
-        });
-
         roomManager.setAgentStatus(roomId, agent.id, "idle");
-        spawned.push({ agentId: agent.id });
       }
 
-      // Send init message to ALL agents so they have context about the room
-      const callbacks = makeSdkCallbacks(roomId);
-      for (const agent of room.agents) {
-        const session = sdkManager.getSession(agent.id);
-        if (!session) continue;
-
-        const otherAgents = room.agents.filter(a => a.id !== agent.id).map(a => a.name).join(", ");
-        const initMessage = [
-          `You are agent "${agent.name}" in team room "#${room.name}".`,
-          `Topic: ${room.topic}.`,
-          `Team members: ${otherAgents}.`,
-          `Read ${room.contextFile} for team status.`,
-          `When you finish a task, write a summary to that file.`,
-          `You can message other agents by including @agentname in your response.`,
-          `Acknowledge briefly that you're ready.`,
-        ].join(" ");
-
-        sdkManager.sendMessage(agent.id, initMessage, callbacks).catch((err) => {
-          // Surface errors to the room so the user can see what went wrong
-          roomManager.addMessage(roomId, {
-            from: "system",
-            text: `Failed to initialize ${agent.name}: ${err instanceof Error ? err.message : String(err)}`,
-            type: "system",
-          });
-        });
-      }
+      // Initialize the protocol for this room
+      getOrCreateProtocol(roomId);
 
       roomManager.addMessage(roomId, {
         from: "system",
-        text: `Agents started: ${spawned.map(s => s.agentId).join(", ")}`,
+        text: `Room ready. ${room.agents.length} agents available: ${room.agents.map(a => a.name).join(", ")}. @mention an agent to start.`,
         type: "system",
       });
 
-      res.json({ spawned });
+      res.json({ spawned: room.agents.map(a => ({ agentId: a.id })) });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
