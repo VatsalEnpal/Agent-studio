@@ -116,10 +116,10 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
       {/* Tab nav area */}
       <div className="px-3 pt-3 pb-2">
         <div className="flex rounded-md bg-bg-input p-0.5">
-          <button className="flex-1 px-2 py-1 text-[10px] font-medium rounded-[3px] bg-bg-elevated text-text-primary">
+          <button className="flex-1 px-2 py-1 text-xs font-medium rounded-[3px] bg-bg-elevated text-text-primary">
             Rooms
           </button>
-          <button className="flex-1 px-2 py-1 text-[10px] font-medium rounded-[3px] text-text-ghost hover:text-text-tertiary transition-all">
+          <button className="flex-1 px-2 py-1 text-xs font-medium rounded-[3px] text-text-ghost hover:text-text-tertiary transition-all">
             Agents
           </button>
         </div>
@@ -151,7 +151,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
             {totalUnread > 0 && (
               <button
                 onClick={markAllSeen}
-                className="flex items-center gap-1 text-[9px] text-text-ghost hover:text-rooms transition-all"
+                className="flex items-center gap-1 text-2xs text-text-ghost hover:text-rooms transition-all"
                 title="Mark all as read"
               >
                 <CheckIcon size={10} />
@@ -174,8 +174,8 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
         {activeRooms.length === 0 && (
           <div className="text-center py-6 px-4">
             <HashIcon size={20} className="text-text-ghost mx-auto mb-2" />
-            <p className="text-[10px] text-text-secondary font-medium">No active rooms</p>
-            <p className="text-[10px] text-text-tertiary mt-1">Create a room to start collaborating with agents</p>
+            <p className="text-xs text-text-secondary font-medium">No active rooms</p>
+            <p className="text-xs text-text-tertiary mt-1">Create a room to start collaborating with agents</p>
           </div>
         )}
 
@@ -207,7 +207,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           className={cn(
             "flex items-center justify-center gap-1.5 w-full",
             "px-3 py-1.5 rounded-md",
-            "text-[10px] font-medium",
+            "text-xs font-medium",
             "border border-dashed border-rooms/40 text-rooms",
             "hover:bg-rooms/5 hover:border-rooms/60",
             "active:scale-[0.98] transition-all",
@@ -217,7 +217,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           <PlusIcon size={12} />
           New Room
         </button>
-        <p className="text-center text-[9px] text-text-ghost mt-0.5">
+        <p className="text-center text-2xs text-text-ghost mt-0.5">
           Tip: use {"\u2318"}K to search rooms
         </p>
       </div>
@@ -273,7 +273,7 @@ function RoomItem({
         <div className="flex items-center gap-1.5">
           <span
             className={cn(
-              "text-[10px] truncate",
+              "text-xs truncate",
               selected ? "text-text-primary font-medium" : "text-text-secondary",
             )}
           >
@@ -302,27 +302,27 @@ function RoomItem({
                   </div>
                 ))}
               </div>
-              <span className="text-[10px] text-text-ghost">
+              <span className="text-xs text-text-ghost">
                 {agents.length} agent{agents.length !== 1 ? "s" : ""}
               </span>
               {lastMsgTime && (
                 <>
                   <span className="text-text-ghost/40 text-[8px]">&middot;</span>
-                  <span className="text-[9px] text-text-ghost tabular-nums shrink-0">
+                  <span className="text-2xs text-text-ghost tabular-nums shrink-0">
                     {lastMsgTime}
                   </span>
                 </>
               )}
             </>
           ) : (
-            <span className="text-[10px] text-text-ghost italic">Legacy</span>
+            <span className="text-xs text-text-ghost italic">Legacy</span>
           )}
         </div>
         {/* Last message preview */}
         {lastMsg && room.active && (
-          <p className="text-[9px] text-text-ghost truncate mt-0.5">
+          <p className="text-2xs text-text-ghost truncate mt-0.5">
             <span className="font-medium text-text-tertiary">{lastMsgSender}: </span>
-            {(lastMsg.text ?? "").slice(0, 60).replace(/\n/g, " ")}
+            {(lastMsg.text ?? "").slice(0, 60).replace(/\s+/g, " ")}
           </p>
         )}
       </div>

@@ -471,7 +471,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
             <div
               key={s}
               className={cn(
-                "flex-1 py-2 text-center text-[10px] font-medium transition-all border-b-2",
+                "flex-1 py-2 text-center text-xs font-medium transition-all border-b-2",
                 i <= step
                   ? "text-rooms border-rooms"
                   : "text-text-tertiary border-transparent",
@@ -627,7 +627,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
             Back
           </button>
 
-          <span className="text-[10px] text-text-tertiary">
+          <span className="text-xs text-text-tertiary">
             {step + 1} / {STEPS.length}
           </span>
 
@@ -694,18 +694,18 @@ function WelcomeStep({
       {/* System status badges */}
       <div className="flex flex-wrap justify-center gap-2">
         {claudeVersion && (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-[10px] text-green-400">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-xs text-green-400">
             <CheckIcon className="w-3 h-3" />
             Claude Code {claudeVersion}
           </span>
         )}
         {detecting ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rooms/10 border border-rooms/20 rounded-full text-[10px] text-rooms">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rooms/10 border border-rooms/20 rounded-full text-xs text-rooms">
             <SpinnerIcon className="w-3 h-3 animate-spin" />
             Scanning for projects...
           </span>
         ) : detectedCount > 0 ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rooms/10 border border-rooms/20 rounded-full text-[10px] text-rooms">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rooms/10 border border-rooms/20 rounded-full text-xs text-rooms">
             <FolderIcon className="w-3 h-3" />
             Found {detectedCount} project{detectedCount !== 1 ? "s" : ""} on your machine
           </span>
@@ -843,16 +843,16 @@ function ProjectsStep({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-medium text-text-primary">{dp.name}</span>
-                  <span className="text-[9px] text-text-tertiary">{dp.lastCommit}</span>
+                  <span className="text-2xs text-text-tertiary">{dp.lastCommit}</span>
                   {dp.hasAgentSystem && (
-                    <span className="text-[9px] px-1.5 py-0.5 bg-purple-500/15 text-purple-400 border border-purple-500/25 rounded">
+                    <span className="text-2xs px-1.5 py-0.5 bg-purple-500/15 text-purple-400 border border-purple-500/25 rounded">
                       agents
                     </span>
                   )}
                 </div>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {[...dp.techStack, ...dp.languages].slice(0, 5).map((t) => (
-                    <span key={t} className={cn("text-[9px] px-1.5 py-0.5 rounded border", stackColor(t))}>
+                    <span key={t} className={cn("text-2xs px-1.5 py-0.5 rounded border", stackColor(t))}>
                       {t}
                     </span>
                   ))}
@@ -870,11 +870,11 @@ function ProjectsStep({
           className="flex items-center gap-2 px-3 py-2 bg-rooms/10 border border-rooms/30 rounded text-xs"
         >
           <CheckIcon className="w-3.5 h-3.5 text-rooms shrink-0" />
-          <span className="flex-1 text-text-primary font-mono truncate text-[10px]">{p.path}</span>
+          <span className="flex-1 text-text-primary font-mono truncate text-xs">{p.path}</span>
           <button
             onClick={() => toggleProd(projects.indexOf(p))}
             className={cn(
-              "px-2 py-0.5 text-[9px] font-medium rounded border transition-all",
+              "px-2 py-0.5 text-2xs font-medium rounded border transition-all",
               p.isProd
                 ? "bg-red-500/15 text-red-400 border-red-500/30"
                 : "bg-bg-elevated text-text-tertiary border-transparent hover:border-border-default",
@@ -919,14 +919,14 @@ function ProjectsStep({
       ) : (
         <button
           onClick={() => setShowManualInput(true)}
-          className="text-[10px] text-text-tertiary hover:text-text-secondary transition-all"
+          className="text-xs text-text-tertiary hover:text-text-secondary transition-all"
         >
           + Add a project not listed here
         </button>
       )}
 
       {projects.length > 0 && projects.some((p) => p.isProd) && (
-        <div className="flex items-start gap-2 px-3 py-2 bg-yellow-500/5 border border-yellow-500/20 rounded text-[10px] text-yellow-400">
+        <div className="flex items-start gap-2 px-3 py-2 bg-yellow-500/5 border border-yellow-500/20 rounded text-xs text-yellow-400">
           <WarningIcon className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           Production repos require confirmation for commits and pushes.
         </div>
@@ -967,7 +967,7 @@ function AgentSystemStep({
           />
           <div>
             <span className="text-xs text-text-primary">Skip for now</span>
-            <span className="text-[10px] text-text-tertiary ml-2">
+            <span className="text-xs text-text-tertiary ml-2">
               — Teams and Memory tabs will be hidden
             </span>
           </div>
@@ -1000,7 +1000,7 @@ function AgentSystemStep({
             <span className="text-xs text-rooms font-medium">
               Create a new one
             </span>
-            <span className="text-[10px] text-text-tertiary ml-2">
+            <span className="text-xs text-text-tertiary ml-2">
               — we&apos;ll scaffold it in your project
             </span>
           </div>
@@ -1047,7 +1047,7 @@ function AgentSystemStep({
       {/* Create new — info + project description */}
       {agentSystem.enabled && agentSystem.createNew && (
         <div className="pl-6 space-y-3">
-          <div className="flex items-start gap-2 px-3 py-2 bg-rooms/5 border border-rooms/20 rounded text-[10px] text-text-secondary">
+          <div className="flex items-start gap-2 px-3 py-2 bg-rooms/5 border border-rooms/20 rounded text-xs text-text-secondary">
             <BrainIcon className="w-3.5 h-3.5 shrink-0 mt-0.5 text-rooms" />
             <span>
               We&apos;ll create <code className="text-rooms">ai-agents/</code> and{" "}
@@ -1056,7 +1056,7 @@ function AgentSystemStep({
             </span>
           </div>
           <div>
-            <label className="block text-[10px] text-text-secondary mb-1">
+            <label className="block text-xs text-text-secondary mb-1">
               What kind of project are you building? <span className="text-text-tertiary">(optional)</span>
             </label>
             <input
@@ -1142,30 +1142,30 @@ function DescribeProjectStep({
 
       {scanData && (
         <div className="px-3 py-2.5 bg-bg-base border border-border-default rounded space-y-2">
-          <span className="text-[10px] text-text-secondary font-medium">Detected:</span>
+          <span className="text-xs text-text-secondary font-medium">Detected:</span>
           <div className="flex flex-wrap gap-1.5">
             {scanData.frameworks?.map((fw) => (
-              <span key={fw} className="px-2 py-0.5 text-[10px] font-medium bg-rooms/10 text-rooms border border-rooms/20 rounded-full">
+              <span key={fw} className="px-2 py-0.5 text-xs font-medium bg-rooms/10 text-rooms border border-rooms/20 rounded-full">
                 {fw}
               </span>
             ))}
             {scanData.languages?.map((lang) => (
-              <span key={lang} className="px-2 py-0.5 text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">
+              <span key={lang} className="px-2 py-0.5 text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">
                 {lang}
               </span>
             ))}
             {scanData.database && (
-              <span className="px-2 py-0.5 text-[10px] font-medium bg-green-500/10 text-green-400 border border-green-500/20 rounded-full">
+              <span className="px-2 py-0.5 text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20 rounded-full">
                 {scanData.database}
               </span>
             )}
             {scanData.testFramework && (
-              <span className="px-2 py-0.5 text-[10px] font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded-full">
+              <span className="px-2 py-0.5 text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded-full">
                 {scanData.testFramework}
               </span>
             )}
             {scanData.ciPlatform && (
-              <span className="px-2 py-0.5 text-[10px] font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-full">
+              <span className="px-2 py-0.5 text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-full">
                 {scanData.ciPlatform}
               </span>
             )}
@@ -1174,7 +1174,7 @@ function DescribeProjectStep({
       )}
 
       <div>
-        <label className="text-[10px] text-text-secondary block mb-1.5">
+        <label className="text-xs text-text-secondary block mb-1.5">
           <UsersIcon className="w-3 h-3 inline mr-1 -mt-0.5" />
           Team size
         </label>
@@ -1194,7 +1194,7 @@ function DescribeProjectStep({
             </button>
           ))}
         </div>
-        <p className="text-[9px] text-text-tertiary mt-1">
+        <p className="text-2xs text-text-tertiary mt-1">
           {teamSize === 1
             ? "Solo dev: fewer, broader agents"
             : teamSize && teamSize >= 7
@@ -1242,7 +1242,7 @@ function AgentTeamStep({
           <p className="text-sm font-medium text-text-primary">
             {aiGen.status === "analyzing" ? "Analyzing your project..." : "Generating tailored agents..."}
           </p>
-          <p className="text-[10px] text-text-tertiary mt-1">
+          <p className="text-xs text-text-tertiary mt-1">
             {aiGen.status === "analyzing"
               ? "Reading package.json, file structure, README..."
               : "Claude is creating agent definitions for your tech stack"}
@@ -1262,13 +1262,13 @@ function AgentTeamStep({
               <SparkleIcon className="w-4 h-4 inline mr-1.5 -mt-0.5 text-rooms" />
               AI-Generated Agents
             </h2>
-            <p className="text-[10px] text-text-tertiary">
+            <p className="text-xs text-text-tertiary">
               Tailored to your project. Deselect, edit, or switch to templates.
             </p>
           </div>
           <button
             onClick={() => { setUseAiAgents(false); setEditingAgentId(null); }}
-            className="px-2 py-1 text-[10px] text-text-tertiary hover:text-text-secondary border border-border-default rounded transition-all"
+            className="px-2 py-1 text-xs text-text-tertiary hover:text-text-secondary border border-border-default rounded transition-all"
           >
             Use templates
           </button>
@@ -1294,7 +1294,7 @@ function AgentTeamStep({
                 <span className="text-xs font-mono text-rooms w-24 truncate">
                   {agent.id}
                 </span>
-                <span className="text-[10px] text-text-secondary flex-1 truncate">
+                <span className="text-xs text-text-secondary flex-1 truncate">
                   {agent.description}
                 </span>
                 <button
@@ -1322,7 +1322,7 @@ function AgentTeamStep({
                       }));
                     }}
                     rows={8}
-                    className="w-full px-2 py-1.5 text-[10px] font-mono bg-bg-base border border-border-default rounded text-text-primary focus:border-rooms focus:outline-none resize-y"
+                    className="w-full px-2 py-1.5 text-xs font-mono bg-bg-base border border-border-default rounded text-text-primary focus:border-rooms focus:outline-none resize-y"
                   />
                 </div>
               )}
@@ -1333,18 +1333,18 @@ function AgentTeamStep({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setSelectedAgents(aiGen.agents.map((a) => a.id))}
-            className="px-2.5 py-1 text-[10px] text-text-secondary hover:text-rooms border border-border-default rounded transition-all"
+            className="px-2.5 py-1 text-xs text-text-secondary hover:text-rooms border border-border-default rounded transition-all"
           >
             Select All
           </button>
           <button
             onClick={() => void triggerAiGeneration()}
-            className="flex items-center gap-1 px-2.5 py-1 text-[10px] text-text-secondary hover:text-rooms border border-border-default rounded transition-all"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs text-text-secondary hover:text-rooms border border-border-default rounded transition-all"
           >
             <UndoIcon className="w-2.5 h-2.5" />
             Regenerate
           </button>
-          <span className="text-[10px] text-text-tertiary ml-auto">
+          <span className="text-xs text-text-tertiary ml-auto">
             {selectedAgents.length} selected
           </span>
         </div>
@@ -1381,7 +1381,7 @@ function AgentTeamStep({
 
       {/* AI error message */}
       {aiGen.status === "error" && (
-        <div className="flex items-start gap-2 px-3 py-2 bg-yellow-500/5 border border-yellow-500/20 rounded text-[10px] text-yellow-400">
+        <div className="flex items-start gap-2 px-3 py-2 bg-yellow-500/5 border border-yellow-500/20 rounded text-xs text-yellow-400">
           <WarningIcon className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
             AI generation failed: {aiGen.error}. Using generic templates instead.
@@ -1422,9 +1422,9 @@ function AgentTeamStep({
                 {agent.label}
               </span>
               <div className="flex-1 min-w-0">
-                <span className="text-[10px] text-text-tertiary">{agent.desc}</span>
+                <span className="text-xs text-text-tertiary">{agent.desc}</span>
                 {reason && (
-                  <span className="text-[9px] text-rooms ml-1.5">
+                  <span className="text-2xs text-rooms ml-1.5">
                     — {reason}
                   </span>
                 )}
@@ -1437,17 +1437,17 @@ function AgentTeamStep({
       <div className="flex items-center gap-2">
         <button
           onClick={() => setSelectedAgents(AVAILABLE_AGENTS.map((a) => a.id))}
-          className="px-2.5 py-1 text-[10px] text-text-secondary hover:text-rooms border border-border-default rounded transition-all"
+          className="px-2.5 py-1 text-xs text-text-secondary hover:text-rooms border border-border-default rounded transition-all"
         >
           Select All
         </button>
         <button
           onClick={() => setSelectedAgents([])}
-          className="px-2.5 py-1 text-[10px] text-text-secondary hover:text-rooms border border-border-default rounded transition-all"
+          className="px-2.5 py-1 text-xs text-text-secondary hover:text-rooms border border-border-default rounded transition-all"
         >
           Select None
         </button>
-        <span className="text-[10px] text-text-tertiary ml-auto">
+        <span className="text-xs text-text-tertiary ml-auto">
           {selectedAgents.length} selected
         </span>
       </div>
@@ -1516,10 +1516,10 @@ function WorkflowStep({
               <span className="text-xs font-medium text-text-primary">
                 {opt.label}
               </span>
-              <p className="text-[10px] text-text-secondary mt-0.5">
+              <p className="text-xs text-text-secondary mt-0.5">
                 {opt.desc}
               </p>
-              <p className="text-[10px] text-text-tertiary mt-0.5 italic">
+              <p className="text-xs text-text-tertiary mt-0.5 italic">
                 {opt.detail}
               </p>
             </div>
@@ -1589,7 +1589,7 @@ function AutomationStep({
       {/* Suggested Automations */}
       {(suggestions.length > 0 || suggestionsLoading) && (
         <div className="space-y-2">
-          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-rooms">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-rooms">
             Recommended automations for your project
           </h3>
           {suggestionsLoading ? (
@@ -1620,11 +1620,11 @@ function AutomationStep({
                       <span className="text-xs font-medium text-text-primary">
                         {s.name}
                       </span>
-                      <span className="text-[9px] text-text-tertiary">{s.schedule}</span>
-                      <span className="text-[9px] text-text-tertiary">{s.model}</span>
+                      <span className="text-2xs text-text-tertiary">{s.schedule}</span>
+                      <span className="text-2xs text-text-tertiary">{s.model}</span>
                     </div>
-                    <p className="text-[10px] text-text-secondary mt-0.5">{s.description}</p>
-                    <p className="text-[10px] text-text-tertiary mt-0.5 italic">{s.reason}</p>
+                    <p className="text-xs text-text-secondary mt-0.5">{s.description}</p>
+                    <p className="text-xs text-text-tertiary mt-0.5 italic">{s.reason}</p>
                   </div>
                 </label>
               ))}
@@ -1653,7 +1653,7 @@ function AutomationStep({
             <span className="text-xs font-medium text-text-primary">
               Telegram notifications
             </span>
-            <p className="text-[10px] text-text-secondary mt-0.5">
+            <p className="text-xs text-text-secondary mt-0.5">
               Get pinged when sprints are ready or gates pass.
               Requires a Telegram bot token (you can set this up later).
             </p>
@@ -1679,7 +1679,7 @@ function AutomationStep({
             <span className="text-xs font-medium text-text-primary">
               PMO scheduler
             </span>
-            <p className="text-[10px] text-text-secondary mt-0.5">
+            <p className="text-xs text-text-secondary mt-0.5">
               Automatically scan for tasks on a schedule.
               Requires launchd (macOS) or cron (Linux).
             </p>
@@ -1688,7 +1688,7 @@ function AutomationStep({
 
         {schedulerEnabled && (
           <div className="pl-9">
-            <label className="text-[10px] text-text-secondary block mb-1">
+            <label className="text-xs text-text-secondary block mb-1">
               Scan interval (hours)
             </label>
             <input
@@ -1716,7 +1716,7 @@ function ValidationRow({
   detail?: string;
 }) {
   return (
-    <div className="flex items-center gap-2 text-[10px]">
+    <div className="flex items-center gap-2 text-xs">
       {found ? (
         <CheckIcon className="w-3 h-3 text-sessions" />
       ) : (
@@ -1772,7 +1772,7 @@ function PreferencesStep({
 
       {/* Scaffold summary */}
       {scaffoldResult && scaffoldResult.created.length > 0 && (
-        <div className="flex items-start gap-2 px-3 py-2 bg-green-500/5 border border-green-500/20 rounded text-[10px] text-green-400">
+        <div className="flex items-start gap-2 px-3 py-2 bg-green-500/5 border border-green-500/20 rounded text-xs text-green-400">
           <CheckIcon className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
             Agent system created: {scaffoldResult.created.length} files generated.
@@ -1782,7 +1782,7 @@ function PreferencesStep({
 
       {/* Model */}
       <div>
-        <label className="text-[10px] text-text-secondary block mb-2">
+        <label className="text-xs text-text-secondary block mb-2">
           Default Model
         </label>
         <div className="flex items-center gap-2">
@@ -1807,7 +1807,7 @@ function PreferencesStep({
         </div>
         {showCostGuide && (
           <div className="mt-2 px-3 py-2 bg-bg-base border border-border-default rounded">
-            <p className="text-[10px] text-text-secondary">
+            <p className="text-xs text-text-secondary">
               {modelInfo[model]?.cost} &mdash; {modelInfo[model]?.best}
             </p>
           </div>
@@ -1816,7 +1816,7 @@ function PreferencesStep({
 
       {/* Permissions */}
       <div>
-        <label className="text-[10px] text-text-secondary block mb-2">
+        <label className="text-xs text-text-secondary block mb-2">
           Default Permissions
         </label>
         <div className="flex items-center gap-2">
@@ -1835,7 +1835,7 @@ function PreferencesStep({
             </button>
           ))}
         </div>
-        <p className="text-[10px] text-text-tertiary mt-1.5">
+        <p className="text-xs text-text-tertiary mt-1.5">
           {permissions === "bypass"
             ? "Skip all permission prompts (fastest, for experienced users)"
             : permissions === "plan"

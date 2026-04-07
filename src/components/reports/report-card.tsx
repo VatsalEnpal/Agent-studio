@@ -25,7 +25,7 @@ function StatusBadge({ status }: { status: Report["status"] }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium",
+        "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-2xs font-medium",
         status === "pending" && "bg-amber-500/12 text-amber-400",
         status === "approved" && "bg-emerald-500/12 text-emerald-400",
         status === "dismissed" && "bg-bg-elevated/60 text-text-tertiary",
@@ -65,22 +65,22 @@ export function ReportCard({ report, isSelected, onClick }: ReportCardProps) {
       )}
     >
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px] font-medium text-text-primary truncate">
+        <span className="text-xs font-medium text-text-primary truncate">
           {report.automationName}
         </span>
         <StatusBadge status={report.status} />
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-[10px] text-text-tertiary truncate max-w-[70%]">
+        <span className="text-xs text-text-tertiary truncate max-w-[70%]">
           {preview || "(empty report)"}
         </span>
-        <span className="text-[9px] text-text-tertiary shrink-0">
+        <span className="text-2xs text-text-tertiary shrink-0">
           {formatRelativeTime(report.timestamp)}
         </span>
       </div>
       {report.suggestedActions.length > 0 && (
         <div className="mt-1">
-          <span className="text-[9px] text-text-secondary">
+          <span className="text-2xs text-text-secondary">
             {report.suggestedActions.length} action{report.suggestedActions.length !== 1 ? "s" : ""}
           </span>
         </div>

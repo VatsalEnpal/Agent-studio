@@ -256,7 +256,7 @@ export function CommandPalette({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Type a command..."
-              className="flex-1 bg-transparent text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none"
+              className="flex-1 bg-transparent text-xs text-text-primary placeholder:text-text-ghost focus:outline-none"
             />
             {query && (
               <button
@@ -271,7 +271,7 @@ export function CommandPalette({
           {/* Results */}
           <div ref={listRef} className="overflow-y-auto max-h-[calc(60vh-52px)] py-1 scrollbar-thin">
             {filtered.length === 0 ? (
-              <div className="flex items-center justify-center py-6 text-text-ghost text-[10px]">
+              <div className="flex items-center justify-center py-6 text-text-ghost text-xs">
                 <SearchIcon size={14} className="mr-2" />
                 No matching commands
               </div>
@@ -295,7 +295,7 @@ export function CommandPalette({
                   >
                     <Icon size={14} className={cn("shrink-0", index === selectedIndex && accent ? accent : "text-text-ghost")} />
                     <div className="flex-1 min-w-0">
-                      <span className="text-[10px] font-medium block truncate">
+                      <span className="text-xs font-medium block truncate">
                         {action.label}
                       </span>
                       {action.description && (
@@ -305,7 +305,7 @@ export function CommandPalette({
                       )}
                     </div>
                     {index === selectedIndex && (
-                      <kbd className="text-[9px] px-1.5 py-0.5 rounded bg-bg-input border border-border-subtle text-text-tertiary font-mono shrink-0">
+                      <kbd className="text-2xs px-1.5 py-0.5 rounded bg-bg-input border border-border-subtle text-text-tertiary font-mono shrink-0">
                         Enter
                       </kbd>
                     )}
@@ -316,7 +316,7 @@ export function CommandPalette({
           </div>
 
           {/* Footer hint */}
-          <div className="flex items-center gap-4 px-4 py-2 border-t border-border-default text-[9px] text-text-ghost">
+          <div className="flex items-center gap-4 px-4 py-2 border-t border-border-default text-2xs text-text-ghost">
             <span className="flex items-center gap-1">
               <kbd className="px-1 py-0 rounded bg-bg-input border border-border-subtle font-mono">
                 Up/Down

@@ -50,15 +50,15 @@ export function TerminalFullscreen({ onKillSession }: TerminalFullscreenProps) {
             {session.name}
           </span>
           {session.meta?.model && (
-            <span className="text-[9px] px-1 py-0.5 rounded bg-border-default text-text-tertiary">
+            <span className="text-2xs px-1 py-0.5 rounded bg-border-default text-text-tertiary">
               {session.meta.model}
             </span>
           )}
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[10px] text-text-tertiary">
+          <span className="text-xs text-text-tertiary">
             Press{" "}
-            <kbd className="px-1 py-0.5 rounded bg-border-default text-text-secondary text-[9px] font-mono">
+            <kbd className="px-1 py-0.5 rounded bg-border-default text-text-secondary text-2xs font-mono">
               Esc
             </kbd>{" "}
             to exit

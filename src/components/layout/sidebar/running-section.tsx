@@ -89,20 +89,20 @@ function RunningProcessItem({
     >
       <div className="flex items-center gap-2">
         <CpuIcon className="w-3 h-3 text-text-secondary shrink-0" />
-        <span className="text-[10px] text-text-primary flex-1 truncate">
+        <span className="text-xs text-text-primary flex-1 truncate">
           {roomName
             ? `${roomSession?.meta?.agent ?? "Agent"}`
             : "Claude Session"}
         </span>
         {roomName && (
-          <span className="text-[9px] px-1 py-0.5 rounded bg-rooms/20 text-rooms font-mono shrink-0">
+          <span className="text-2xs px-1 py-0.5 rounded bg-rooms/20 text-rooms font-mono shrink-0">
             #{roomName}
           </span>
         )}
         {proc.modelShort && proc.modelShort !== "unknown" && (
           <span
             className={cn(
-              "text-[9px] px-1 py-0.5 rounded shrink-0 font-medium",
+              "text-2xs px-1 py-0.5 rounded shrink-0 font-medium",
               proc.modelShort === "opus"
                 ? "bg-purple-500/20 text-purple-400"
                 : proc.modelShort === "haiku"
@@ -113,7 +113,7 @@ function RunningProcessItem({
             {proc.modelShort}
           </span>
         )}
-        <span className="flex items-center gap-0.5 text-[9px] text-text-tertiary shrink-0">
+        <span className="flex items-center gap-0.5 text-2xs text-text-tertiary shrink-0">
           <ClockIcon className="w-2.5 h-2.5" />
           {uptime}
         </span>
@@ -151,10 +151,10 @@ function RunningProcessItem({
         )}
       </div>
       <div className="pl-5 flex items-center gap-2">
-        <span className="text-[9px] text-text-secondary truncate flex-1 min-w-0">
+        <span className="text-2xs text-text-secondary truncate flex-1 min-w-0">
           {projectName}
         </span>
-        <span className="text-[9px] text-text-tertiary">running {uptime}</span>
+        <span className="text-2xs text-text-tertiary">running {uptime}</span>
       </div>
     </div>
   );

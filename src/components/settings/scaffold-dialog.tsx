@@ -113,7 +113,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
             <div
               key={s}
               className={cn(
-                "flex-1 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.8px] border-b-2 transition-all",
+                "flex-1 py-2 text-center text-xs font-semibold uppercase tracking-[0.8px] border-b-2 transition-all",
                 i === dialogStep
                   ? "text-[#f59e0b] border-[#f59e0b]"
                   : i < dialogStep
@@ -136,7 +136,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
               <p className="text-xs font-medium text-text-primary">
                 Agent system created
               </p>
-              <p className="text-[10px] text-text-ghost">
+              <p className="text-xs text-text-ghost">
                 {result.created.length} files generated in {projectPath}
               </p>
             </div>
@@ -186,7 +186,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
               {dialogStep === 0 ? "Cancel" : "Back"}
             </button>
 
-            <span className="text-[10px] text-text-ghost font-mono">
+            <span className="text-xs text-text-ghost font-mono">
               {projectPath}
             </span>
 
@@ -237,7 +237,7 @@ function DialogAgentsStep({
         <h3 className="text-xs font-medium text-text-primary mb-0.5">
           Select agents
         </h3>
-        <p className="text-[10px] text-text-ghost">
+        <p className="text-xs text-text-ghost">
           Choose which agents to include in your system.
         </p>
       </div>
@@ -261,7 +261,7 @@ function DialogAgentsStep({
             <span className="text-xs font-mono text-text-primary w-24">
               {agent.label}
             </span>
-            <span className="text-[10px] text-text-ghost flex-1">
+            <span className="text-xs text-text-ghost flex-1">
               {agent.desc}
             </span>
           </label>
@@ -270,17 +270,17 @@ function DialogAgentsStep({
       <div className="flex items-center gap-2">
         <button
           onClick={() => setSelectedAgents(AVAILABLE_AGENTS.map((a) => a.id))}
-          className="px-2 py-1 text-[10px] text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-all"
+          className="px-2 py-1 text-xs text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-all"
         >
           All
         </button>
         <button
           onClick={() => setSelectedAgents([])}
-          className="px-2 py-1 text-[10px] text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-all"
+          className="px-2 py-1 text-xs text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-all"
         >
           None
         </button>
-        <span className="text-[10px] text-text-ghost ml-auto">
+        <span className="text-xs text-text-ghost ml-auto">
           {selectedAgents.length} selected
         </span>
       </div>
@@ -307,7 +307,7 @@ function DialogWorkflowStep({
         <h3 className="text-xs font-medium text-text-primary mb-0.5">
           Workflow
         </h3>
-        <p className="text-[10px] text-text-ghost">
+        <p className="text-xs text-text-ghost">
           How should your agent team work together?
         </p>
       </div>
@@ -330,7 +330,7 @@ function DialogWorkflowStep({
             />
             <div>
               <span className="text-xs font-medium text-text-primary">{opt.label}</span>
-              <p className="text-[10px] text-text-ghost mt-0.5">{opt.desc}</p>
+              <p className="text-xs text-text-ghost mt-0.5">{opt.desc}</p>
             </div>
           </label>
         ))}
@@ -360,7 +360,7 @@ function DialogAutomationStep({
         <h3 className="text-xs font-medium text-text-primary mb-0.5">
           Automation (optional)
         </h3>
-        <p className="text-[10px] text-text-ghost">
+        <p className="text-xs text-text-ghost">
           You can enable these later in Settings.
         </p>
       </div>
@@ -381,7 +381,7 @@ function DialogAutomationStep({
           />
           <div>
             <span className="text-xs font-medium text-text-primary">Telegram notifications</span>
-            <p className="text-[10px] text-text-ghost mt-0.5">
+            <p className="text-xs text-text-ghost mt-0.5">
               Get pinged when sprints are ready or gates pass.
             </p>
           </div>
@@ -402,14 +402,14 @@ function DialogAutomationStep({
           />
           <div>
             <span className="text-xs font-medium text-text-primary">PMO scheduler</span>
-            <p className="text-[10px] text-text-ghost mt-0.5">
+            <p className="text-xs text-text-ghost mt-0.5">
               Automatically scan for tasks every {schedulerInterval} hours.
             </p>
           </div>
         </label>
         {schedulerEnabled && (
           <div className="pl-8">
-            <span className="text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] block mb-1">
+            <span className="text-xs font-semibold uppercase text-text-ghost tracking-[0.8px] block mb-1">
               Interval (hours)
             </span>
             <input

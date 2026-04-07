@@ -264,8 +264,8 @@ export function FlowSidebar({
 
         {flows.length === 0 && (
           <div className="text-center py-6 px-3">
-            <p className="text-[10px] text-text-secondary font-medium">No workflows</p>
-            <p className="text-[10px] text-text-tertiary mt-1">
+            <p className="text-xs text-text-secondary font-medium">No workflows</p>
+            <p className="text-xs text-text-tertiary mt-1">
               Create a workflow to automate multi-step tasks
             </p>
           </div>

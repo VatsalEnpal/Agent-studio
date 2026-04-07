@@ -363,7 +363,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
             placeholder="Type a command or search..."
             className={cn(
               "flex-1 bg-transparent border-none outline-none",
-              "text-[10px] text-text-primary placeholder:text-text-tertiary",
+              "text-xs text-text-primary placeholder:text-text-tertiary",
             )}
             aria-label="Command palette search"
             autoComplete="off"
@@ -388,7 +388,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
           role="listbox"
         >
           {flatItems.length === 0 ? (
-            <div className="px-3 py-6 text-center text-[10px] text-text-tertiary">
+            <div className="px-3 py-6 text-center text-xs text-text-tertiary">
               No matching commands
             </div>
           ) : (
@@ -405,7 +405,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                     <span className={cn("text-label uppercase tracking-wider", group.colorClass)}>
                       {group.label}
                     </span>
-                    <span className="text-[9px] text-text-ghost ml-auto">
+                    <span className="text-2xs text-text-ghost ml-auto">
                       {group.items.length}
                     </span>
                   </div>
@@ -426,7 +426,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                         onMouseEnter={() => setSelectedIndex(idx)}
                         className={cn(
                           "flex items-center gap-2.5 w-full px-3 py-1.5",
-                          "text-left text-[10px]",
+                          "text-left text-xs",
                           "transition-all duration-[var(--duration-instant)] active:scale-[0.99]",
                           isSelected
                             ? "bg-bg-elevated text-text-primary"
@@ -444,7 +444,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                         />
                         <span className="flex-1 truncate">{item.label}</span>
                         {item.shortcut && (
-                          <kbd className="text-[9px] font-mono text-text-ghost bg-bg-base px-1 py-0.5 rounded border border-border-default shrink-0">
+                          <kbd className="text-2xs font-mono text-text-ghost bg-bg-base px-1 py-0.5 rounded border border-border-default shrink-0">
                             {item.shortcut}
                           </kbd>
                         )}

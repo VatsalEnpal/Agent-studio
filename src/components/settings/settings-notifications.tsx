@@ -51,14 +51,14 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
       aria-checked={checked}
       onClick={onChange}
       className={cn(
-        "relative inline-flex h-5 w-9 items-center rounded-full transition-all shrink-0",
+        "relative inline-flex h-4 w-8 items-center rounded-full transition-all shrink-0",
         checked ? "bg-sessions" : "bg-border-default",
       )}
     >
       <span
         className={cn(
-          "inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform",
-          checked ? "translate-x-[18px]" : "translate-x-[3px]",
+          "inline-block h-3 w-3 rounded-full bg-white transition-transform",
+          checked ? "translate-x-[18px]" : "translate-x-[2px]",
         )}
       />
     </button>
@@ -86,7 +86,7 @@ export function SettingsNotifications() {
   return (
     <section className="border border-border-default rounded-lg bg-bg-surface">
       <div className="px-4 py-3 border-b border-border-default flex items-center justify-between">
-        <h3 className="text-[10px] font-medium text-text-primary flex items-center gap-2">
+        <h3 className="text-xs font-medium text-text-primary flex items-center gap-2">
           <BellIcon size={14} className="text-text-secondary" />
           Notifications
         </h3>
@@ -100,13 +100,13 @@ export function SettingsNotifications() {
 
       <div className="px-4 py-3 space-y-4">
         {NOTIFICATION_OPTIONS.map(({ key, label, desc }) => (
-          <div key={key} className="flex items-start gap-3">
+          <div key={key} className="flex items-start gap-2">
             <Toggle checked={prefs[key]} onChange={() => toggle(key)} />
             <div className="flex-1 min-w-0">
-              <span className="text-[10px] text-text-primary block">
+              <span className="text-xs text-text-primary block">
                 {label}
               </span>
-              <p className="text-[9px] text-text-tertiary mt-0.5">{desc}</p>
+              <p className="text-2xs text-text-tertiary mt-0.5">{desc}</p>
             </div>
           </div>
         ))}

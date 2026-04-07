@@ -11,7 +11,7 @@ interface GateStepperProps {
   approvingGate?: string | null;
 }
 
-export function GateStepper({ gates, expandedGateId, onGateClick }: GateStepperProps) {
+export function GateStepper({ gates, expandedGateId, onGateClick, onApprove, approvingGate }: GateStepperProps) {
   return (
     <div className="overflow-x-auto scrollbar-thin">
       <div className="flex items-end gap-[3px] min-w-0">
@@ -31,7 +31,7 @@ export function GateStepper({ gates, expandedGateId, onGateClick }: GateStepperP
               {/* Gate label */}
               <span
                 className={cn(
-                  "text-[9px] leading-none max-w-[72px] truncate",
+                  "text-2xs leading-none max-w-[72px] truncate",
                   isExpanded
                     ? "text-text-primary font-medium"
                     : isPassed

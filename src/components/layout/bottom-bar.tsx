@@ -25,7 +25,7 @@ export function BottomBar() {
   }, [usage.managed]);
 
   return (
-    <footer className="flex items-center justify-between px-4 h-7 border-t border-border-default bg-bg-surface shrink-0 text-[10px] text-text-tertiary">
+    <footer className="flex items-center justify-between px-4 h-7 border-t border-border-default bg-bg-surface shrink-0 text-xs text-text-tertiary">
       {/* Left: session & room counts */}
       <div className="flex items-center gap-3">
         {active > 0 ? (
@@ -88,7 +88,7 @@ function ShortcutHint({
       <kbd className="px-0.5 py-0 rounded bg-border-default text-text-tertiary text-[8px] font-mono">
         {"Shift"}
       </kbd>
-      <kbd className="px-1 py-0 rounded bg-border-default text-text-tertiary text-[9px] font-mono">
+      <kbd className="px-1 py-0 rounded bg-border-default text-text-tertiary text-2xs font-mono">
         {keys}
       </kbd>
       <span className="text-[8px]">{label}</span>

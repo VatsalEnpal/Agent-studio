@@ -333,7 +333,7 @@ export function SessionLauncherV2({
   );
 
   const inputCls =
-    "w-full px-2 py-1 text-[10px] bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all";
+    "w-full px-2 py-1 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all";
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -355,7 +355,7 @@ export function SessionLauncherV2({
           <div className="px-4 py-3 space-y-3">
             {/* Quick Start — clean text buttons in a row */}
             <div>
-              <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1.5">
+              <span className="block text-2xs font-medium uppercase text-text-ghost tracking-[0.5px] mb-1.5">
                 Quick Start
               </span>
               <div className="flex gap-1 flex-wrap">
@@ -365,7 +365,7 @@ export function SessionLauncherV2({
                     onClick={() => applyPreset(preset)}
                     disabled={launching}
                     className={cn(
-                      "px-2 py-1 rounded-md text-[10px] font-medium transition-all",
+                      "px-2 py-1 rounded-md text-xs font-medium transition-all",
                       "border border-border-default",
                       launching
                         ? "opacity-50 cursor-not-allowed"
@@ -381,7 +381,7 @@ export function SessionLauncherV2({
             {/* Resume previous */}
             {recentSessions.length > 0 && (
               <div>
-                <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
+                <span className="block text-2xs font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
                   Resume Previous
                 </span>
                 <div className="relative" ref={dropdownRef}>
@@ -389,7 +389,7 @@ export function SessionLauncherV2({
                     type="button"
                     onClick={() => setResumeDropdownOpen(!resumeDropdownOpen)}
                     className={cn(
-                      "w-full flex items-center gap-2 px-2 py-1 text-[10px] bg-bg-input border rounded-md text-left transition-all",
+                      "w-full flex items-center gap-2 px-2 py-1 text-xs bg-bg-input border rounded-md text-left transition-all",
                       resume
                         ? "border-[#f59e0b]/40 text-text-primary"
                         : "border-border-default text-text-ghost",
@@ -404,7 +404,7 @@ export function SessionLauncherV2({
                               resume,
                           )}
                         </span>
-                        <span className="text-[10px] text-text-ghost font-mono">
+                        <span className="text-xs text-text-ghost font-mono">
                           {resume.slice(0, 8)}
                         </span>
                         <button
@@ -435,14 +435,14 @@ export function SessionLauncherV2({
                             value={resumeSearch}
                             onChange={(e) => setResumeSearch(e.target.value)}
                             placeholder="Search..."
-                            className="w-full pl-6 pr-2 py-1 text-[10px] bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle"
+                            className="w-full pl-6 pr-2 py-1 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle"
                             autoFocus
                           />
                         </div>
                       </div>
                       <div className="overflow-y-auto max-h-36 scrollbar-thin">
                         {filteredSessions.length === 0 ? (
-                          <p className="px-3 py-2 text-[10px] text-text-ghost">
+                          <p className="px-3 py-2 text-xs text-text-ghost">
                             No sessions found
                           </p>
                         ) : (
@@ -460,13 +460,13 @@ export function SessionLauncherV2({
                                 resume === session.id && "bg-[#f59e0b]/10",
                               )}
                             >
-                              <span className="text-[10px] text-text-primary truncate flex-1">
+                              <span className="text-xs text-text-primary truncate flex-1">
                                 {shortProject(session.project)}
                               </span>
-                              <span className="text-[10px] text-text-ghost shrink-0">
+                              <span className="text-xs text-text-ghost shrink-0">
                                 {formatRelativeTime(session.date)}
                               </span>
-                              <span className="text-[10px] text-text-ghost font-mono shrink-0">
+                              <span className="text-xs text-text-ghost font-mono shrink-0">
                                 {session.id.slice(0, 8)}
                               </span>
                             </button>
@@ -482,7 +482,7 @@ export function SessionLauncherV2({
             {/* Divider */}
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-border-default" />
-              <span className="text-[10px] text-text-ghost uppercase tracking-[0.5px]">
+              <span className="text-xs text-text-ghost uppercase tracking-[0.5px]">
                 customize
               </span>
               <div className="flex-1 h-px bg-border-default" />
@@ -490,7 +490,7 @@ export function SessionLauncherV2({
 
             {/* Model — pills */}
             <div>
-              <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
+              <span className="block text-2xs font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
                 Model
               </span>
               <div className="flex gap-1">
@@ -499,7 +499,7 @@ export function SessionLauncherV2({
                     key={m}
                     onClick={() => setModel(m)}
                     className={cn(
-                      "px-2.5 py-1 rounded-md text-[10px] font-medium text-center transition-all",
+                      "px-2.5 py-1 rounded-md text-xs font-medium text-center transition-all",
                       "border",
                       model === m
                         ? "border-[#f59e0b]/50 bg-[#f59e0b]/10 text-[#f59e0b]"
@@ -514,7 +514,7 @@ export function SessionLauncherV2({
 
             {/* Agent */}
             <div>
-              <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
+              <span className="block text-2xs font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
                 Agent
               </span>
               <select
@@ -537,7 +537,7 @@ export function SessionLauncherV2({
 
             {/* Permissions — subtle pills */}
             <div>
-              <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
+              <span className="block text-2xs font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
                 Permissions
               </span>
               <div className="flex gap-1">
@@ -546,7 +546,7 @@ export function SessionLauncherV2({
                     key={p}
                     onClick={() => setPermissions(p)}
                     className={cn(
-                      "px-2 py-0.5 rounded text-[9px] font-medium uppercase tracking-[0.5px] text-center transition-all",
+                      "px-2 py-0.5 rounded text-2xs font-medium uppercase tracking-[0.5px] text-center transition-all",
                       "border",
                       permissions === p
                         ? "border-[#f59e0b]/50 bg-[#f59e0b]/10 text-[#f59e0b]"
@@ -561,7 +561,7 @@ export function SessionLauncherV2({
 
             {/* Working directory */}
             <div>
-              <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
+              <span className="block text-2xs font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
                 Working Directory
               </span>
               <input
@@ -574,7 +574,7 @@ export function SessionLauncherV2({
 
             {/* Session name */}
             <div>
-              <span className="block text-[9px] font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
+              <span className="block text-2xs font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
                 Session Name
               </span>
               <input
@@ -589,14 +589,14 @@ export function SessionLauncherV2({
 
           {/* Error */}
           {error && (
-            <div className="mx-4 mb-2 px-2.5 py-1.5 bg-error/10 border border-error/20 rounded-md text-[10px] text-error">
+            <div className="mx-4 mb-2 px-2.5 py-1.5 bg-error/10 border border-error/20 rounded-md text-xs text-error">
               {error}
             </div>
           )}
 
           {/* Footer */}
           <div className="flex items-center justify-between px-4 py-2.5 border-t border-border-default">
-            <span className="text-[10px] text-text-ghost font-mono">
+            <span className="text-xs text-text-ghost font-mono">
               {resume
                 ? `resume: ${resume.slice(0, 16)}...`
                 : `${model}${agent !== "none" ? ` + ${agent}` : ""}`}
@@ -606,7 +606,7 @@ export function SessionLauncherV2({
                 onClick={() => void handleLaunch()}
                 disabled={launching}
                 className={cn(
-                  "px-3 py-1 rounded-md text-[10px] font-semibold transition-all",
+                  "px-3 py-1 rounded-md text-xs font-semibold transition-all",
                   "bg-[#f59e0b] text-[#0a0a0a]",
                   "hover:bg-[#fbbf24] active:scale-[0.98]",
                   "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
@@ -615,7 +615,7 @@ export function SessionLauncherV2({
                 {launching ? "Launching..." : resume ? "Resume" : "Launch"}
               </button>
               {!launching && (
-                <kbd className="text-[10px] text-text-ghost bg-bg-input border border-border-default rounded px-1.5 py-0.5">
+                <kbd className="text-xs text-text-ghost bg-bg-input border border-border-default rounded px-1.5 py-0.5">
                   {typeof navigator !== "undefined" && navigator.platform?.includes("Mac") ? "Cmd" : "Ctrl"}+Enter
                 </kbd>
               )}

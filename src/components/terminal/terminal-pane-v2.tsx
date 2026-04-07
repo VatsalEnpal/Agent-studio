@@ -186,6 +186,7 @@ export function TerminalPaneV2({
     };
 
     // Attach this terminal to the DOM
+    let cleanupTimers: (() => void) | undefined;
     if (attachedRef.current !== sessionId) {
       // Try immediately, then retry with increasing delays until container is sized
       attachTerminal();
@@ -203,7 +204,7 @@ export function TerminalPaneV2({
         fitAndResize(entry);
       }, 800);
 
-      var cleanupTimers = () => {
+      cleanupTimers = () => {
         cancelAnimationFrame(t0);
         clearTimeout(t1);
         clearTimeout(t2);

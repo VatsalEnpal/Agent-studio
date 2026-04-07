@@ -290,14 +290,14 @@ export function SessionCard({
             }}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "text-[10px] font-medium truncate flex-1 min-w-0",
+              "text-xs font-medium truncate flex-1 min-w-0",
               "bg-bg-base border border-border-subtle rounded px-1 py-0",
               "text-text-primary focus:outline-none focus:border-sessions/40",
             )}
             autoFocus
           />
         ) : (
-          <span className="text-[10px] font-medium text-text-primary truncate flex-1 min-w-0">
+          <span className="text-xs font-medium text-text-primary truncate flex-1 min-w-0">
             {displayName}
           </span>
         )}
@@ -368,7 +368,7 @@ export function SessionCard({
             disabled={resuming}
             className={cn(
               "px-2 py-0.5 rounded-md shrink-0",
-              "text-[9px] font-medium",
+              "text-2xs font-medium",
               "border transition-all",
               resuming
                 ? "text-text-ghost border-border-default cursor-not-allowed"
@@ -413,14 +413,14 @@ export function SessionCard({
       {/* Row 2: cwd + live timer + model + time */}
       <div className="flex items-center gap-2 pl-[13px]">
         {session.cwd && (
-          <span className="text-[10px] text-text-ghost truncate flex-1 min-w-0">
+          <span className="text-xs text-text-ghost truncate flex-1 min-w-0">
             {shortenCwd(session.cwd)}
           </span>
         )}
 
         {/* UX #3: Live elapsed timer */}
         {elapsed && (
-          <span className="text-[10px] text-text-ghost tabular-nums shrink-0">
+          <span className="text-xs text-text-ghost tabular-nums shrink-0">
             {elapsed}
           </span>
         )}

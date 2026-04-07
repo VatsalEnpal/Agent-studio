@@ -47,7 +47,7 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
           Sprints
         </h3>
         {sprints.length > 0 && (
-          <span className="text-[9px] text-text-ghost tabular-nums">
+          <span className="text-2xs text-text-ghost tabular-nums">
             {active.length > 0 ? `${active.length} active` : `${sprints.length} total`}
           </span>
         )}
@@ -73,7 +73,7 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                 >
                   <div className="flex items-center gap-2">
                     <span className="w-[4px] h-[4px] rounded-full bg-sprints animate-pulse-dot shrink-0" />
-                    <span className="text-[10px] font-medium text-text-primary truncate flex-1">
+                    <span className="text-xs font-medium text-text-primary truncate flex-1">
                       {sprint.name}
                     </span>
                     {/* UX #8: Headless run indicator */}
@@ -122,7 +122,7 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
               >
                 <div className="flex items-center gap-2">
                   <CheckIcon size={12} className="text-sessions shrink-0" />
-                  <span className="text-[10px] font-medium text-text-secondary truncate flex-1">
+                  <span className="text-xs font-medium text-text-secondary truncate flex-1">
                     {sprint.name}
                   </span>
                 </div>
@@ -168,7 +168,7 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
               >
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full border border-text-ghost shrink-0" />
-                  <span className="text-[10px] text-text-tertiary truncate">
+                  <span className="text-xs text-text-tertiary truncate">
                     {sprint.name}
                   </span>
                 </div>
@@ -181,8 +181,8 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
         {sprints.length === 0 && (
           <div className="text-center py-6 px-4">
             <CheckIcon size={20} className="text-text-ghost mx-auto mb-2" />
-            <p className="text-[10px] text-text-secondary font-medium">No sprints running</p>
-            <p className="text-[10px] text-text-tertiary mt-1 leading-relaxed">
+            <p className="text-xs text-text-secondary font-medium">No sprints running</p>
+            <p className="text-xs text-text-tertiary mt-1 leading-relaxed">
               Sprints are created automatically by the PMO agent, or you can start one manually from a plan.
             </p>
           </div>

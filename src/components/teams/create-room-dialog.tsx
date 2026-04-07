@@ -121,7 +121,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
       <div className="relative z-10 w-full max-w-md bg-bg-elevated border border-border-subtle rounded-lg shadow-modal animate-slide-up">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-border-default">
-          <h2 className="text-[10px] font-semibold text-text-primary">
+          <h2 className="text-xs font-semibold text-text-primary">
             Create Team Room
           </h2>
           <button
@@ -136,7 +136,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
         <div className="px-4 py-3 space-y-3">
           {/* Room name */}
           <div>
-            <label className="block text-[9px] font-medium text-text-ghost uppercase tracking-[0.5px] mb-1">
+            <label className="block text-2xs font-medium text-text-ghost uppercase tracking-[0.5px] mb-1">
               Room Name
             </label>
             <input
@@ -144,14 +144,14 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="auth-refactor"
-              className="w-full bg-bg-input border border-border-default rounded-md px-2 py-1 text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
+              className="w-full bg-bg-input border border-border-default rounded-md px-2 py-1 text-xs text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
               autoFocus
             />
           </div>
 
           {/* Topic */}
           <div>
-            <label className="block text-[9px] font-medium text-text-ghost uppercase tracking-[0.5px] mb-1">
+            <label className="block text-2xs font-medium text-text-ghost uppercase tracking-[0.5px] mb-1">
               Topic / Goal
             </label>
             <input
@@ -159,13 +159,13 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Refactor auth flow to use server-side sessions"
-              className="w-full bg-bg-input border border-border-default rounded-md px-2 py-1 text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
+              className="w-full bg-bg-input border border-border-default rounded-md px-2 py-1 text-xs text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
             />
           </div>
 
           {/* Agent picker */}
           <div>
-            <label className="block text-[9px] font-medium text-text-ghost uppercase tracking-[0.5px] mb-1">
+            <label className="block text-2xs font-medium text-text-ghost uppercase tracking-[0.5px] mb-1">
               Agents ({enabledCount} selected)
             </label>
             <div className="space-y-1">
@@ -219,7 +219,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                       </div>
                       <span
                         className={cn(
-                          "text-[10px] font-medium truncate",
+                          "text-xs font-medium truncate",
                           agent.enabled ? "text-text-primary" : "text-text-secondary",
                         )}
                       >
@@ -253,14 +253,14 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
         <div className="flex items-center justify-end gap-2 px-4 py-2.5 border-t border-border-default">
           <button
             onClick={() => onOpenChange(false)}
-            className="px-2.5 py-1 text-[10px] font-medium text-text-secondary hover:text-text-primary rounded-md transition-all"
+            className="px-2.5 py-1 text-xs font-medium text-text-secondary hover:text-text-primary rounded-md transition-all"
           >
             Cancel
           </button>
           <button
             onClick={() => void handleCreate()}
             disabled={!name.trim() || !topic.trim() || creating}
-            className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
           >
             <PlusIcon size={12} />
             {creating ? "Creating..." : "Create Room"}

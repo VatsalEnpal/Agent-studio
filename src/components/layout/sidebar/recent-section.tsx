@@ -119,10 +119,10 @@ function RecentSessionItem({
     >
       <HistoryIcon className="w-3 h-3 text-text-tertiary shrink-0" />
       <div className="flex-1 min-w-0">
-        <span className="text-[10px] text-text-secondary truncate block">
+        <span className="text-xs text-text-secondary truncate block">
           {displayName}
         </span>
-        <span className="text-[9px] text-text-tertiary truncate block">
+        <span className="text-2xs text-text-tertiary truncate block">
           {subtitle}
         </span>
       </div>

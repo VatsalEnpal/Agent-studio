@@ -526,10 +526,10 @@ export default function Home() {
     return (
       <div className="h-screen flex items-center justify-center bg-canvas">
         <div className="text-center space-y-3">
-          <p className="text-[10px] font-medium text-text-primary">
+          <p className="text-xs font-medium text-text-primary">
             Agent Studio needs Claude Code
           </p>
-          <p className="text-[10px] text-text-secondary max-w-sm">
+          <p className="text-xs text-text-secondary max-w-sm">
             Please install and authenticate Claude Code to continue.
           </p>
           <button
@@ -537,7 +537,7 @@ export default function Home() {
               setPreflightLoading(true);
               void runPreflight().then(() => setPreflightLoading(false));
             }}
-            className="px-2.5 py-1 bg-accent text-white rounded-md text-[10px] font-medium hover:bg-accent-hover transition-all"
+            className="px-2.5 py-1 bg-accent text-white rounded-md text-xs font-medium hover:bg-accent-hover transition-all"
           >
             Check Again
           </button>
@@ -634,7 +634,7 @@ export default function Home() {
               <h3 className="text-label uppercase tracking-wider text-text-ghost">
                 Reports
               </h3>
-              <p className="text-[9px] text-text-tertiary mt-1 leading-snug">
+              <p className="text-2xs text-text-tertiary mt-1 leading-snug">
                 Automation output and approvals. Configure schedules in Settings.
               </p>
             </div>
@@ -689,12 +689,12 @@ export default function Home() {
               {nonRoomSessions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4">
                   <div className="text-center space-y-2">
-                    <p className="text-[10px] font-medium text-text-secondary">
+                    <p className="text-xs font-medium text-text-secondary">
                       Ready to go.
                     </p>
-                    <p className="text-[10px] text-text-tertiary max-w-sm">
+                    <p className="text-xs text-text-tertiary max-w-sm">
                       Launch a session to start working with Claude. Press{" "}
-                      <kbd className="px-1 py-0.5 rounded-[3px] bg-bg-input text-text-ghost text-[9px] border border-border-default">
+                      <kbd className="px-1 py-0.5 rounded-[3px] bg-bg-input text-text-ghost text-2xs border border-border-default">
                         Cmd+N
                       </kbd>{" "}
                       for the launcher.
@@ -704,7 +704,7 @@ export default function Home() {
                     onClick={() => setLauncherOpen(true)}
                     className={cn(
                       "px-4 py-1.5 rounded-[5px]",
-                      "text-[10px] font-medium",
+                      "text-xs font-medium",
                       "bg-text-primary text-bg-base",
                       "hover:bg-text-secondary",
                       "transition-all duration-150",

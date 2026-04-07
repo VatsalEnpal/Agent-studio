@@ -34,8 +34,8 @@ export function EmptyState({
       <Icon
         className="size-6 text-text-ghost"
       />
-      <h3 className="text-[10px] font-medium text-text-secondary">{title}</h3>
-      <p className="text-[10px] text-text-tertiary max-w-[300px]">
+      <h3 className="text-xs font-medium text-text-secondary">{title}</h3>
+      <p className="text-xs text-text-tertiary max-w-[300px]">
         {description}
       </p>
       {actionLabel && onAction && (
@@ -44,7 +44,7 @@ export function EmptyState({
           className={cn(
             "mt-1 inline-flex items-center justify-center",
             "px-3 py-1.5 rounded-md",
-            "text-[10px] font-medium",
+            "text-xs font-medium",
             "text-bg-base bg-text-primary hover:bg-text-secondary",
             "transition-all",
           )}

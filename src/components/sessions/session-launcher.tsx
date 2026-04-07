@@ -316,7 +316,7 @@ export function SessionLauncher({
             {/* Resume Previous Session */}
             {recentSessions.length > 0 && (
               <div>
-                <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
+                <label className="block text-xs font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                   Resume Previous Session
                 </label>
                 <div className="relative" ref={dropdownRef}>
@@ -403,7 +403,7 @@ export function SessionLauncher({
 
             {/* Quick Actions */}
             <div>
-              <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-2">
+              <label className="block text-xs font-semibold uppercase text-text-ghost tracking-[0.8px] mb-2">
                 Quick Start
               </label>
               <div className="grid grid-cols-5 gap-2">
@@ -458,7 +458,7 @@ export function SessionLauncher({
 
             {/* Session Name */}
             <div>
-              <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
+              <label className="block text-xs font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                 Session Name
               </label>
               <input
@@ -473,7 +473,7 @@ export function SessionLauncher({
             {/* Options grid */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
+                <label className="block text-xs font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                   Model
                 </label>
                 <select
@@ -492,7 +492,7 @@ export function SessionLauncher({
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
+                <label className="block text-xs font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                   Agent
                 </label>
                 <select
@@ -516,7 +516,7 @@ export function SessionLauncher({
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
+                <label className="block text-xs font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                   Permissions
                 </label>
                 <select
@@ -541,7 +541,7 @@ export function SessionLauncher({
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
+                <label className="block text-xs font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                   Channel
                 </label>
                 <select
@@ -562,7 +562,7 @@ export function SessionLauncher({
 
             {/* Working Directory */}
             <div>
-              <label className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
+              <label className="block text-xs font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1.5">
                 Working Directory
               </label>
               <input

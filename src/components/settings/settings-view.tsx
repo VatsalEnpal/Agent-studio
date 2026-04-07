@@ -103,10 +103,10 @@ export function SettingsView() {
                     activeTab === tab.id ? "text-text-primary" : "text-text-ghost",
                   )}
                 />
-                <span className="text-[10px] font-medium">{tab.label}</span>
+                <span className="text-xs font-medium">{tab.label}</span>
               </div>
               <p className={cn(
-                "text-[9px] mt-0.5 pl-5 leading-snug",
+                "text-2xs mt-0.5 pl-5 leading-snug",
                 activeTab === tab.id ? "text-text-tertiary" : "text-text-ghost",
               )}>
                 {tab.desc}
@@ -173,7 +173,7 @@ function SettingsAgentsDiscovery() {
   return (
     <section className="border border-border-default rounded-lg bg-bg-surface">
       <div className="px-4 py-3 border-b border-border-default">
-        <h3 className="text-[10px] font-medium text-text-primary">Agents</h3>
+        <h3 className="text-xs font-medium text-text-primary">Agents</h3>
         <p className="text-label text-text-tertiary mt-0.5">
           Auto-discovered from <code className="text-text-secondary bg-bg-elevated px-1 py-0.5 rounded text-label">.claude/agents/</code>
         </p>
@@ -189,7 +189,7 @@ function SettingsAgentsDiscovery() {
             ))}
           </div>
         ) : agents.length === 0 ? (
-          <p className="text-[10px] text-text-tertiary text-center py-4">
+          <p className="text-xs text-text-tertiary text-center py-4">
             No agents discovered. Create agent definitions in <code className="text-text-secondary">.claude/agents/</code>.
           </p>
         ) : (
@@ -201,7 +201,7 @@ function SettingsAgentsDiscovery() {
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-medium text-text-primary">
+                    <span className="text-xs font-medium text-text-primary">
                       {agent.name}
                     </span>
                     <span className="text-label px-1.5 py-0.5 rounded bg-bg-elevated text-text-tertiary font-mono">

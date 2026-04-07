@@ -196,7 +196,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
                 className="w-6 h-6 rounded-[4px] flex items-center justify-center"
                 style={{ backgroundColor: color + "18", border: `1.5px solid ${color}30` }}
               >
-                <span className="text-[10px] font-semibold leading-none" style={{ color }}>
+                <span className="text-xs font-semibold leading-none" style={{ color }}>
                   Y
                 </span>
               </div>
@@ -230,7 +230,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
               style={{ backgroundColor: color + "18", border: `1.5px solid ${color}30` }}
             >
               <span
-                className="text-[10px] font-semibold leading-none"
+                className="text-xs font-semibold leading-none"
                 style={{ color }}
               >
                 {msg.from.charAt(0).toUpperCase()}
@@ -281,14 +281,14 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
               <div className="flex gap-1.5 mt-2 pt-1.5 border-t border-sprints/15">
                 <button
                   onClick={() => onApprove(msg)}
-                  className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium bg-sessions/15 text-sessions rounded-md hover:bg-sessions/25 active:scale-[0.98] transition-all duration-100"
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-sessions/15 text-sessions rounded-md hover:bg-sessions/25 active:scale-[0.98] transition-all duration-100"
                 >
                   <CheckIcon size={12} />
                   Approve
                 </button>
                 <button
                   onClick={() => onReject(msg)}
-                  className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium bg-error/15 text-error rounded-md hover:bg-error/25 active:scale-[0.98] transition-all duration-100"
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-error/15 text-error rounded-md hover:bg-error/25 active:scale-[0.98] transition-all duration-100"
                 >
                   <CloseIcon size={12} />
                   Reject
@@ -361,7 +361,7 @@ export function StreamingMessage({ agentId, text }: { agentId: string; text: str
             className="w-6 h-6 rounded-[4px] flex items-center justify-center shrink-0 animate-pulse-dot"
             style={{ backgroundColor: color + "18", border: `1.5px solid ${color}30` }}
           >
-            <span className="text-[10px] font-semibold leading-none" style={{ color }}>
+            <span className="text-xs font-semibold leading-none" style={{ color }}>
               {agentId.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -393,7 +393,7 @@ export function StreamingMessage({ agentId, text }: { agentId: string; text: str
           className="w-6 h-6 rounded-[4px] flex items-center justify-center shrink-0"
           style={{ backgroundColor: color + "18", border: `1.5px solid ${color}30` }}
         >
-          <span className="text-[10px] font-semibold leading-none animate-pulse-dot" style={{ color }}>
+          <span className="text-xs font-semibold leading-none animate-pulse-dot" style={{ color }}>
             {agentId.charAt(0).toUpperCase()}
           </span>
         </div>

@@ -37,7 +37,7 @@ export function StepTimeline({ run }: StepTimelineProps) {
                     : "bg-error",
             )}
           />
-          <h2 className="text-[13px] font-medium text-text-primary truncate">
+          <h2 className="text-title-md font-medium text-text-primary truncate">
             {run.name}
           </h2>
           <span
@@ -56,26 +56,26 @@ export function StepTimeline({ run }: StepTimelineProps) {
           </span>
         </div>
         <div className="flex items-center gap-4 mt-1.5">
-          <span className="text-[10px] text-text-tertiary font-mono">
+          <span className="text-xs text-text-tertiary font-mono">
             {formatDate(run.startedAt)}
           </span>
-          <span className="text-[10px] text-text-secondary">
+          <span className="text-xs text-text-secondary">
             {completedSteps}/{totalSteps} steps
           </span>
           {run.stats.agentsUsed.length > 0 && (
-            <span className="text-[10px] text-text-tertiary">
+            <span className="text-xs text-text-tertiary">
               {run.stats.agentsUsed.length} agents
             </span>
           )}
           {run.stats.filesChanged != null && (
-            <span className="text-[10px] text-text-tertiary">
+            <span className="text-xs text-text-tertiary">
               {run.stats.filesChanged} files
             </span>
           )}
           {run.stats.qaHealth != null && (
             <span
               className={cn(
-                "text-[10px] font-medium",
+                "text-xs font-medium",
                 run.stats.qaHealth >= 95
                   ? "text-sessions"
                   : run.stats.qaHealth >= 80

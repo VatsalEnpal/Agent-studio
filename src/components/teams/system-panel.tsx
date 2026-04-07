@@ -210,8 +210,8 @@ export function SystemPanel() {
             </span>
             {categoryEntries.map(([cat, count]) => (
               <div key={cat} className="flex items-center justify-between py-0.5">
-                <span className="text-[9px] text-text-secondary capitalize">{cat}</span>
-                <span className="text-[9px] text-text-ghost font-mono">{count}</span>
+                <span className="text-2xs text-text-secondary capitalize">{cat}</span>
+                <span className="text-2xs text-text-ghost font-mono">{count}</span>
               </div>
             ))}
           </div>
@@ -236,9 +236,9 @@ export function SystemPanel() {
           <span className="text-text-ghost shrink-0">
             <SprintsIconInline />
           </span>
-          <span className="text-[9px] text-text-ghost flex-1">Status</span>
+          <span className="text-2xs text-text-ghost flex-1">Status</span>
           <span className={cn(
-            "flex items-center gap-1 text-[9px] font-mono shrink-0",
+            "flex items-center gap-1 text-2xs font-mono shrink-0",
             pmoFull?.loaded ? "text-sessions" : "text-text-ghost",
           )}>
             <span className={cn(
@@ -253,9 +253,9 @@ export function SystemPanel() {
         {pmoFull?.lastScan && (
           <div className="flex items-center gap-2 px-1 py-0.5">
             <span className="text-text-ghost shrink-0 w-3" />
-            <span className="text-[9px] text-text-ghost flex-1">Last Scan</span>
+            <span className="text-2xs text-text-ghost flex-1">Last Scan</span>
             <span className={cn(
-              "text-[9px] font-mono shrink-0 max-w-[120px] truncate",
+              "text-2xs font-mono shrink-0 max-w-[120px] truncate",
               pmoFull.lastStatus?.includes("NOT READY") ? "text-error" :
               pmoFull.lastStatus?.includes("READY") ? "text-sessions" : "text-text-secondary",
             )}>
@@ -268,8 +268,8 @@ export function SystemPanel() {
         {pmoFull?.loaded && pmoFull?.nextScanIn && (
           <div className="flex items-center gap-2 px-1 py-0.5">
             <span className="w-3 shrink-0" />
-            <span className="text-[9px] text-text-ghost flex-1">Next Scan</span>
-            <span className="text-[9px] text-text-secondary font-mono shrink-0">
+            <span className="text-2xs text-text-ghost flex-1">Next Scan</span>
+            <span className="text-2xs text-text-secondary font-mono shrink-0">
               in {pmoFull.nextScanIn}
             </span>
           </div>
@@ -281,7 +281,7 @@ export function SystemPanel() {
             onClick={() => void handlePmoToggle()}
             disabled={!!pmoAction}
             className={cn(
-              "flex items-center gap-1 px-2 py-1 text-[9px] font-medium rounded transition-all",
+              "flex items-center gap-1 px-2 py-1 text-2xs font-medium rounded transition-all",
               pmoAction
                 ? "bg-bg-input text-text-ghost cursor-not-allowed"
                 : pmoFull?.loaded
@@ -297,7 +297,7 @@ export function SystemPanel() {
             onClick={() => void handlePmoScan()}
             disabled={scanning}
             className={cn(
-              "flex items-center gap-1 px-2 py-1 text-[9px] font-medium rounded transition-all",
+              "flex items-center gap-1 px-2 py-1 text-2xs font-medium rounded transition-all",
               scanning
                 ? "bg-bg-input text-text-ghost cursor-not-allowed"
                 : "bg-rooms/15 text-rooms hover:bg-rooms/25",
@@ -336,10 +336,10 @@ function StatRow({
   return (
     <div className="flex items-center gap-2 px-1 py-0.5">
       <span className="shrink-0">{icon}</span>
-      <span className="text-[9px] text-text-ghost flex-1">{label}</span>
+      <span className="text-2xs text-text-ghost flex-1">{label}</span>
       <span
         className={cn(
-          "text-[9px] font-mono shrink-0 max-w-[120px] truncate",
+          "text-2xs font-mono shrink-0 max-w-[120px] truncate",
           valueColor ?? "text-text-secondary",
         )}
       >

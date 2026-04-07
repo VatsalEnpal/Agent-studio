@@ -246,10 +246,10 @@ export function RoomChat() {
           <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center mx-auto mb-3">
             <HashIcon size={20} className="text-text-ghost" />
           </div>
-          <p className="text-[10px] font-medium text-text-secondary mb-1">
+          <p className="text-xs font-medium text-text-secondary mb-1">
             No room selected
           </p>
-          <p className="text-[10px] text-text-tertiary leading-relaxed">
+          <p className="text-xs text-text-tertiary leading-relaxed">
             Select a room from the sidebar or create a new one to start chatting
             with your agent team.
           </p>
@@ -267,10 +267,10 @@ export function RoomChat() {
         <div className="flex items-center gap-2">
           <HashIcon size={12} className="text-rooms shrink-0" />
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className="text-[10px] font-semibold text-text-primary truncate">
+            <span className="text-xs font-semibold text-text-primary truncate">
               {room.name}
             </span>
-            <span className="text-[10px] text-text-ghost truncate hidden sm:inline">
+            <span className="text-xs text-text-ghost truncate hidden sm:inline">
               {room.topic}
             </span>
           </div>
@@ -295,7 +295,7 @@ export function RoomChat() {
           </div>
 
           {/* Member count */}
-          <span className="text-[10px] text-text-ghost shrink-0">
+          <span className="text-xs text-text-ghost shrink-0">
             {room.agents.length}
           </span>
 
@@ -304,7 +304,7 @@ export function RoomChat() {
             <button
               onClick={handleSpawn}
               disabled={spawning}
-              className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50 shrink-0"
+              className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50 shrink-0"
             >
               {spawning ? "Starting..." : "Spawn Agents"}
             </button>
@@ -314,7 +314,7 @@ export function RoomChat() {
           {room.active && (
             <button
               onClick={handleClose}
-              className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded-md text-error hover:bg-error/10 transition-all active:scale-[0.98] shrink-0"
+              className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md text-error hover:bg-error/10 transition-all active:scale-[0.98] shrink-0"
             >
               Close
             </button>
@@ -324,7 +324,7 @@ export function RoomChat() {
 
       {/* Legacy room banner */}
       {!room.active && (
-        <div className="px-3 py-2 border-b border-sprints/20 bg-sprints/5 text-[10px] text-sprints shrink-0">
+        <div className="px-3 py-2 border-b border-sprints/20 bg-sprints/5 text-xs text-sprints shrink-0">
           This room was created in an older version. Messages may contain terminal artifacts.
         </div>
       )}
@@ -336,16 +336,16 @@ export function RoomChat() {
             <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center mx-auto">
               <HashIcon size={20} className="text-text-ghost" />
             </div>
-            <h3 className="text-[10px] font-medium text-text-secondary">
+            <h3 className="text-xs font-medium text-text-secondary">
               Agents are offline
             </h3>
-            <p className="text-[10px] text-text-tertiary max-w-xs">
+            <p className="text-xs text-text-tertiary max-w-xs">
               Spawn all agents to start chatting in this room
             </p>
             <button
               onClick={handleSpawn}
               disabled={spawning}
-              className="px-2.5 py-1 bg-rooms text-bg-base text-[10px] font-medium rounded-md hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50 shadow-rooms-glow"
+              className="px-2.5 py-1 bg-rooms text-bg-base text-xs font-medium rounded-md hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50 shadow-rooms-glow"
             >
               {spawning ? "Starting..." : "Start Room"}
             </button>
@@ -359,7 +359,7 @@ export function RoomChat() {
             {showScrollDown && (
               <button
                 onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })}
-                className="sticky top-2 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 px-2.5 py-1 text-[9px] font-medium bg-bg-elevated border border-border-default rounded-full text-text-secondary hover:text-text-primary hover:border-rooms/30 shadow-card transition-all"
+                className="sticky top-2 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 px-2.5 py-1 text-2xs font-medium bg-bg-elevated border border-border-default rounded-full text-text-secondary hover:text-text-primary hover:border-rooms/30 shadow-card transition-all"
               >
                 <ChevronDownIcon size={10} />
                 New messages
@@ -367,8 +367,8 @@ export function RoomChat() {
             )}
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full gap-2 text-center px-6">
-                <p className="text-[10px] text-text-secondary font-medium">Start the conversation</p>
-                <p className="text-[10px] text-text-tertiary">Send a message to begin collaborating with agents in this room</p>
+                <p className="text-xs text-text-secondary font-medium">Start the conversation</p>
+                <p className="text-xs text-text-tertiary">Send a message to begin collaborating with agents in this room</p>
               </div>
             ) : (
               <div>
@@ -404,13 +404,13 @@ export function RoomChat() {
           {/* Spawn banner when offline but has messages */}
           {room.active && allOffline && messages.length > 0 && (
             <div className="px-3 py-2 border-t border-border-default bg-bg-elevated flex items-center justify-between">
-              <span className="text-[10px] text-text-tertiary">
+              <span className="text-xs text-text-tertiary">
                 All agents are offline
               </span>
               <button
                 onClick={handleSpawn}
                 disabled={spawning}
-                className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50"
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {spawning ? "Starting..." : "Start Room"}
               </button>
@@ -428,7 +428,7 @@ export function RoomChat() {
                       <button
                         key={a.id}
                         onClick={() => selectMention(a.id)}
-                        className="w-full text-left px-2 py-1.5 rounded-md text-[10px] hover:bg-bg-input flex items-center gap-2 transition-all"
+                        className="w-full text-left px-2 py-1.5 rounded-md text-xs hover:bg-bg-input flex items-center gap-2 transition-all"
                       >
                         <div
                           className="w-4 h-4 rounded-[4px] flex items-center justify-center shrink-0"
@@ -457,7 +457,7 @@ export function RoomChat() {
                     ))}
                     <button
                       onClick={() => selectMention("all")}
-                      className="w-full text-left px-2 py-1.5 rounded-md text-[10px] hover:bg-bg-input flex items-center gap-2 transition-all"
+                      className="w-full text-left px-2 py-1.5 rounded-md text-xs hover:bg-bg-input flex items-center gap-2 transition-all"
                     >
                       <div className="w-4 h-4 rounded-[4px] flex items-center justify-center shrink-0 bg-rooms/20">
                         <span className="text-[7px] font-bold text-rooms">*</span>
@@ -477,7 +477,7 @@ export function RoomChat() {
                   onChange={(e) => handleInputChange(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={`Message #${room.name}...`}
-                  className="flex-1 bg-bg-input border border-border-default rounded-md px-3 py-1.5 text-[10px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
+                  className="flex-1 bg-bg-input border border-border-default rounded-md px-3 py-1.5 text-xs text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
                   disabled={!room.active}
                 />
                 <button

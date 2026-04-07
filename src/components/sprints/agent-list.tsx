@@ -18,7 +18,7 @@ const STATUS_LABEL: Record<string, { text: string; class: string }> = {
 export function AgentList({ agents }: AgentListProps) {
   if (agents.length === 0) {
     return (
-      <div className="text-[10px] text-text-tertiary text-center py-3">
+      <div className="text-xs text-text-tertiary text-center py-3">
         No agents assigned
       </div>
     );
@@ -46,7 +46,7 @@ export function AgentList({ agents }: AgentListProps) {
             {/* Name + task */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1">
-                <span className="text-[10px] font-medium text-text-primary truncate">
+                <span className="text-xs font-medium text-text-primary truncate">
                   {agent.name}
                 </span>
                 {agent.status === "working" && (
@@ -54,14 +54,14 @@ export function AgentList({ agents }: AgentListProps) {
                 )}
               </div>
               {agent.currentTask && (
-                <p className="text-[10px] text-text-ghost truncate">
+                <p className="text-xs text-text-ghost truncate">
                   {agent.currentTask}
                 </p>
               )}
             </div>
 
             {/* Status */}
-            <span className={cn("text-[10px] font-medium shrink-0", statusInfo.class)}>
+            <span className={cn("text-xs font-medium shrink-0", statusInfo.class)}>
               {statusInfo.text}
             </span>
           </div>

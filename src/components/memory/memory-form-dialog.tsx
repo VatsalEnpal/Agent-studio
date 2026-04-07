@@ -151,7 +151,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[480px] max-h-[85vh] overflow-y-auto bg-bg-elevated border border-border-subtle rounded-lg shadow-modal scrollbar-thin">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-2 border-b border-border-default">
-            <Dialog.Title className="text-[10px] font-semibold text-text-primary">
+            <Dialog.Title className="text-xs font-semibold text-text-primary">
               {isCreate ? "Create Memory" : "Edit Memory"}
             </Dialog.Title>
             <Dialog.Close asChild>
@@ -164,24 +164,24 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
           <div className="px-4 py-3 space-y-3">
             {/* Title */}
             <div>
-              <label className="text-[9px] font-medium text-text-ghost uppercase tracking-[0.5px]">Title</label>
+              <label className="text-2xs font-medium text-text-ghost uppercase tracking-[0.5px]">Title</label>
               <input
                 type="text"
                 value={form.title}
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                 placeholder="Brief description of this memory"
-                className="mt-1 w-full px-2 py-1 text-[10px] bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-memory transition-all"
+                className="mt-1 w-full px-2 py-1 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-memory transition-all"
               />
             </div>
 
             {/* Category */}
             <div>
-              <label className="text-[9px] font-medium text-text-ghost uppercase tracking-[0.5px]">Category</label>
+              <label className="text-2xs font-medium text-text-ghost uppercase tracking-[0.5px]">Category</label>
               <select
                 value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
                 disabled={!isCreate}
-                className="mt-1 w-full px-2 py-1 text-[10px] bg-bg-input border border-border-default rounded text-text-primary focus:outline-none focus:border-memory transition-all disabled:opacity-50"
+                className="mt-1 w-full px-2 py-1 text-xs bg-bg-input border border-border-default rounded text-text-primary focus:outline-none focus:border-memory transition-all disabled:opacity-50"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
@@ -192,7 +192,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
             {/* Content fields */}
             {(["observation", "action", "outcome", "lesson"] as const).map((field) => (
               <div key={field}>
-                <label className="text-[9px] font-medium text-text-ghost uppercase tracking-[0.5px]">
+                <label className="text-2xs font-medium text-text-ghost uppercase tracking-[0.5px]">
                   {field.charAt(0).toUpperCase() + field.slice(1)}
                 </label>
                 <p className="text-label text-text-ghost mt-0.5">{FIELD_HINTS[field]}</p>
@@ -206,7 +206,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
                   }
                   rows={2}
                   className={cn(
-                    "mt-1 w-full px-2 py-1 text-[10px] bg-bg-input border rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-memory transition-all resize-none",
+                    "mt-1 w-full px-2 py-1 text-xs bg-bg-input border rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-memory transition-all resize-none",
                     field === "lesson" ? "border-memory/30" : "border-border-default",
                   )}
                 />
@@ -215,7 +215,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
 
             {/* Tags */}
             <div>
-              <label className="text-[9px] font-medium text-text-ghost uppercase tracking-[0.5px]">Tags</label>
+              <label className="text-2xs font-medium text-text-ghost uppercase tracking-[0.5px]">Tags</label>
               <div className="mt-1 flex items-center gap-1.5 flex-wrap">
                 {form.tags.map((tag) => (
                   <span
@@ -266,7 +266,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
               disabled={saving || !form.title.trim()}
               className="px-3 py-1.5 text-label font-medium text-bg-base bg-memory rounded hover:bg-memory/90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100 flex items-center gap-1.5"
             >
-              {saving && <span className="animate-spin text-[10px]">...</span>}
+              {saving && <span className="animate-spin text-xs">...</span>}
               {isCreate ? "Create" : "Save"}
             </button>
           </div>

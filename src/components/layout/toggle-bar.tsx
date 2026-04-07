@@ -61,7 +61,7 @@ function PeakHoursIndicator() {
     <div className="relative group">
       <div
         className={cn(
-          "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-medium transition-all cursor-default",
+          "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-2xs font-medium transition-all cursor-default",
           info.isPeak
             ? "bg-red-500/10 text-red-400/90"
             : "bg-emerald-500/8 text-emerald-400/80",
@@ -80,17 +80,17 @@ function PeakHoursIndicator() {
 
       {/* Tooltip */}
       <div className="absolute right-0 top-full mt-1.5 w-52 p-2.5 rounded-lg border border-border-default bg-bg-surface shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
-        <p className="text-[10px] text-text-primary font-medium mb-1.5">
+        <p className="text-xs text-text-primary font-medium mb-1.5">
           {info.isPeak ? "Peak Hours Active" : "Off-Peak Hours"}
         </p>
-        <p className="text-[9px] text-text-secondary leading-relaxed mb-2">
+        <p className="text-2xs text-text-secondary leading-relaxed mb-2">
           Anthropic throttles during peak (14:00-20:00 Berlin). Expect slower responses.
         </p>
-        <div className="flex items-center justify-between text-[9px]">
+        <div className="flex items-center justify-between text-2xs">
           <span className="text-text-tertiary">Berlin time</span>
           <span className="text-text-primary font-mono">{info.berlinTime}</span>
         </div>
-        <div className="flex items-center justify-between text-[9px] mt-0.5">
+        <div className="flex items-center justify-between text-2xs mt-0.5">
           <span className="text-text-tertiary">Peak window</span>
           <span className="text-text-primary font-mono">{info.peakStart}-{info.peakEnd}</span>
         </div>
@@ -122,7 +122,7 @@ function SystemWidget() {
   return (
     <button
       onClick={() => setActiveMode("settings")}
-      className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-mono text-text-tertiary hover:text-text-secondary transition-all"
+      className="flex items-center gap-1.5 px-2 py-0.5 rounded text-2xs font-mono text-text-tertiary hover:text-text-secondary transition-all"
       title="System monitor"
     >
       <CpuIcon className="w-3 h-3" />
@@ -217,7 +217,7 @@ export function ToggleBar() {
               disabled={tab.disabled}
               title={tab.disabled ? "Coming soon" : undefined}
               className={cn(
-                "relative flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-medium rounded-md transition-all",
+                "relative flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md transition-all",
                 isActive
                   ? "text-text-primary"
                   : tab.disabled
@@ -243,7 +243,7 @@ export function ToggleBar() {
           href="https://claude.ai/settings/usage"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[10px] text-text-tertiary hover:text-text-secondary transition-all flex items-center gap-1"
+          className="text-xs text-text-tertiary hover:text-text-secondary transition-all flex items-center gap-1"
           title="Check your usage limits on claude.ai"
         >
           <GaugeIcon className="w-3 h-3" />
@@ -254,7 +254,7 @@ export function ToggleBar() {
         <ThemeToggle />
         <PeakHoursIndicator />
         <HelpPanel />
-        <span className="text-[9px] text-text-tertiary/70 font-mono tracking-wide">
+        <span className="text-2xs text-text-tertiary/70 font-mono tracking-wide">
           agent-studio
         </span>
       </div>

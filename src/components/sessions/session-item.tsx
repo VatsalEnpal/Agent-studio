@@ -168,12 +168,12 @@ export function SessionItem({
               if (e.key === "Escape") setEditing(false);
             }}
             onClick={(e) => e.stopPropagation()}
-            className="text-[10px] font-medium truncate flex-1 bg-bg-base border border-sessions/30 rounded px-1 py-0 text-text-primary focus:outline-none focus:border-sessions"
+            className="text-xs font-medium truncate flex-1 bg-bg-base border border-sessions/30 rounded px-1 py-0 text-text-primary focus:outline-none focus:border-sessions"
             autoFocus
           />
         ) : (
           <>
-            <span className="text-[10px] font-medium truncate flex-1">
+            <span className="text-xs font-medium truncate flex-1">
               {displayName}
             </span>
             <button
@@ -224,12 +224,12 @@ export function SessionItem({
       {/* Row 2: uptime + cwd + cost */}
       <div className="flex items-center gap-2 pl-[13px]">
         {isRunning && (
-          <span className="flex items-center gap-0.5 text-[10px] text-text-ghost">
+          <span className="flex items-center gap-0.5 text-xs text-text-ghost">
             {liveUptime}
           </span>
         )}
         {session.cwd && (
-          <span className="text-[10px] text-text-ghost truncate flex-1 min-w-0">
+          <span className="text-xs text-text-ghost truncate flex-1 min-w-0">
             {shortenCwd(session.cwd)}
           </span>
         )}
