@@ -345,7 +345,7 @@ async function startServer() {
     nodeBin,
     spawnArgs,
     {
-      env: { ...process.env, PORT: String(port) },
+      env: { ...process.env, PORT: String(port), NODE_ENV: app.isPackaged ? "production" : (process.env.NODE_ENV || "development") },
       cwd,
       stdio: ["ignore", "pipe", "pipe"],
     },

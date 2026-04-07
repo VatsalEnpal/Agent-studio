@@ -1,4 +1,5 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { homedir } from "node:os";
 import { join, sep } from "node:path";
 import os from "node:os";
 
@@ -85,8 +86,16 @@ export interface AgentStudioConfig {
 const CONFIG_FILENAME = ".agent-studio.json";
 const CONFIG_VERSION = "1.0.0";
 
-/** Returns the absolute path to the config file */
+/** Returns the absolute path to the config file.
+ *  In production (packaged Electron), use ~/.agent-studio/ so the config
+ *  survives app updates and doesn't live inside the read-only app bundle.
+ *  In development, use cwd (the project directory). */
 export function getConfigPath(): string {
+  if (process.env["NODE_ENV"] === "production") {
+    const homeDir = join(homedir(), ".agent-studio");
+    if (!existsSync(homeDir)) mkdirSync(homeDir, { recursive: true });
+    return join(homeDir, CONFIG_FILENAME);
+  }
   return join(process.cwd(), CONFIG_FILENAME);
 }
 
