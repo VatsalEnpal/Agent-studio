@@ -282,6 +282,39 @@ function setServerStatus(status) {
 }
 
 // ---------------------------------------------------------------------------
+// WebSocket Notification Listener
+// ---------------------------------------------------------------------------
+
+const WebSocket = require("ws");
+let notifyWs = null;
+
+function connectNotifyWs(port) {
+  try {
+    notifyWs = new WebSocket(`ws://127.0.0.1:${port}`);
+    notifyWs.on("message", (data) => {
+      try {
+        const msg = JSON.parse(data.toString());
+        if (msg.type === "room-needs-user") {
+          if (Notification.isSupported()) {
+            const n = new Notification({
+              title: "Agent Studio",
+              body: msg.payload?.reason === "depth-limit"
+                ? "Agent chain reached depth limit — your input needed"
+                : `Agent ${msg.payload?.agentId ?? "unknown"} needs your input`,
+              silent: false,
+            });
+            n.on("click", () => { if (mainWindow) mainWindow.focus(); });
+            n.show();
+          }
+        }
+      } catch {}
+    });
+    notifyWs.on("close", () => { setTimeout(() => connectNotifyWs(port), 5000); });
+    notifyWs.on("error", () => {});
+  } catch {}
+}
+
+// ---------------------------------------------------------------------------
 // Server Lifecycle
 // ---------------------------------------------------------------------------
 
@@ -384,6 +417,9 @@ async function startServer() {
   consecutiveHealthFailures = 0;
   setServerStatus("running");
   log(`Server is healthy on port ${port}`);
+
+  // Connect WS to listen for agent notification events
+  connectNotifyWs(port);
 }
 
 /**
