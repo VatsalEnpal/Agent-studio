@@ -92,6 +92,7 @@
       "icon": "public/icon.png"
     },
     "asar": false,
+    "npmRebuild": false,
     "files": [
       "dist-server/**/*",
       "server/**/*",

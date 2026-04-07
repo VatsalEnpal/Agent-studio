@@ -197,6 +197,37 @@ export function SessionSidebar({
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "idle">("all");
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => getPinnedIds());
 
+  // Fetch past sessions from API for the History tab
+  const [pastSessions, setPastSessions] = useState<Session[]>([]);
+  useEffect(() => {
+    let active = true;
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch("/api/sessions/history");
+        if (!res.ok || !active) return;
+        const data: { id: string; project: string; projectShort: string; modified: number; date: string; agent: string; preview: string }[] = await res.json();
+        setPastSessions(
+          data.map((d) => ({
+            id: d.id,
+            name: d.agent ? `${d.projectShort} (${d.agent})` : d.projectShort,
+            pid: 0,
+            command: "",
+            args: [],
+            cwd: d.project,
+            status: "exited" as const,
+            createdAt: d.modified,
+            updatedAt: d.modified,
+            meta: d.agent ? { agent: d.agent } : undefined,
+          })),
+        );
+      } catch { /* best effort */ }
+    };
+    void fetchHistory();
+    // Refresh when switching to history tab
+    if (activeTab === "history") void fetchHistory();
+    return () => { active = false; };
+  }, [activeTab]);
+
   const togglePin = useCallback((id: string) => {
     setPinnedIds((prev) => {
       const next = new Set(prev);
@@ -219,9 +250,16 @@ export function SessionSidebar({
         .sort((a, b) => b.createdAt - a.createdAt),
     [sessions],
   );
+  // Merge current-runtime exited sessions with API past sessions (deduped)
+  const allHistorySessions = useMemo(() => {
+    const currentIds = new Set(exitedSessions.map((s) => s.id));
+    const apiOnly = pastSessions.filter((s) => !currentIds.has(s.id));
+    return [...exitedSessions, ...apiOnly].sort((a, b) => b.createdAt - a.createdAt);
+  }, [exitedSessions, pastSessions]);
+
   const historyGroups = useMemo(
-    () => groupSessionsByDate(exitedSessions),
-    [exitedSessions],
+    () => groupSessionsByDate(allHistorySessions),
+    [allHistorySessions],
   );
 
   // Paused sessions (idle status)
