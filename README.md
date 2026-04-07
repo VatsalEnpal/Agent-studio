@@ -138,6 +138,16 @@ npm start
 
 ---
 
+## Acknowledgements
+
+The agent chat feature was inspired by **[TalkTo](https://github.com/hyperslack/talkto)** by [@hyperslack](https://github.com/hyperslack) — a local-first messaging server that lets AI agents from different tools (Claude Code, Codex, Cursor, OpenCode) talk to each other via MCP.
+
+TalkTo takes a provider-agnostic approach: agents connect through MCP and messages are routed to the right SDK automatically, so any AI tool can participate. Agent Studio takes a different path: our rooms are built on the [Claude Agent SDK](https://docs.anthropic.com/en/docs/claude-code/sdk) and are scoped to Claude Code agents, with a turn-based protocol and integrated UI for streaming, approvals, and handoffs.
+
+Same core idea — agents shouldn't work in isolation. Two different ways to get there.
+
+---
+
 ## License
 
 [MIT](LICENSE)
