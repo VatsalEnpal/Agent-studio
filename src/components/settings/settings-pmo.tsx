@@ -46,7 +46,7 @@ export function SettingsPmo() {
   return (
     <section className="border border-border-default rounded-lg bg-bg-surface">
       <div className="px-4 py-3 border-b border-border-default">
-        <h3 className="text-[11px] font-medium text-text-primary">PMO Scheduler</h3>
+        <h3 className="text-body font-medium text-text-primary">PMO Scheduler</h3>
       </div>
       <div className="px-4 py-3 space-y-3">
         {/* Status */}
@@ -58,7 +58,7 @@ export function SettingsPmo() {
                 isRunning ? "bg-sessions animate-pulse" : "bg-text-tertiary",
               )}
             />
-            <span className="text-[11px] text-text-primary font-medium">
+            <span className="text-body text-text-primary font-medium">
               {isRunning ? "Running" : "Paused"}
             </span>
           </div>

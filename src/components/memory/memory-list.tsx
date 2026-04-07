@@ -204,7 +204,7 @@ export function MemoryList({ onSelectEntry }: MemoryListProps) {
             <div className="w-10 h-10 rounded-xl bg-bg-elevated/50 flex items-center justify-center">
               <MemoryIcon size={20} className="text-text-ghost" />
             </div>
-            <span className="text-text-secondary text-[10px] font-medium">
+            <span className="text-text-secondary text-xs font-medium">
               {selectedCategory || showPinnedOnly
                 ? "No memories match this filter"
                 : "No memories stored"}
@@ -325,10 +325,10 @@ function MemoryListItem({
       <div className="flex items-start gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            {entry.pinned && <span className="text-sprints shrink-0 text-[10px] font-bold">*</span>}
+            {entry.pinned && <span className="text-sprints shrink-0 text-xs font-bold">*</span>}
             <p
               className={cn(
-                "text-[10px] font-medium leading-snug truncate",
+                "text-xs font-medium leading-snug truncate",
                 superseded
                   ? "text-text-ghost line-through"
                   : "text-text-primary",
@@ -353,7 +353,7 @@ function MemoryListItem({
             )}
             title={entry.pinned ? "Unpin" : "Pin"}
           >
-            <span className="text-[10px] font-bold">*</span>
+            <span className="text-xs font-bold">*</span>
           </button>
           <button
             onClick={handleEdit}

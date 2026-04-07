@@ -38,7 +38,7 @@ export function SettingsGeneral() {
   return (
     <section className="border border-border-default rounded-lg bg-bg-surface">
       <div className="px-4 py-3 border-b border-border-default">
-        <h3 className="text-[11px] font-medium text-text-primary">General</h3>
+        <h3 className="text-body font-medium text-text-primary">General</h3>
       </div>
       <div className="px-4 py-3 space-y-4">
         {/* Default Model */}
@@ -50,7 +50,7 @@ export function SettingsGeneral() {
                 key={model}
                 onClick={() => updateSetting("defaultModel", model)}
                 className={cn(
-                  "px-2 py-0.5 text-[10px] font-medium rounded-md transition-all active:scale-[0.98]",
+                  "px-1.5 py-0.5 text-label font-medium rounded transition-all active:scale-[0.98]",
                   settings.defaultModel === model
                     ? model === "opus"
                       ? "bg-memory/15 text-memory border border-memory/30"
@@ -87,7 +87,7 @@ export function SettingsGeneral() {
             type="text"
             value={settings.defaultCwd}
             onChange={(e) => updateSetting("defaultCwd", e.target.value)}
-            className="w-full px-2 py-1.5 text-[11px] font-mono bg-bg-base border border-border-default rounded text-text-primary focus:outline-none focus:border-border-subtle"
+            className="w-full px-2 py-1.5 text-body font-mono bg-bg-base border border-border-default rounded text-text-primary focus:outline-none focus:border-border-subtle"
           />
         </div>
 

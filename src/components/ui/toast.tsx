@@ -31,7 +31,7 @@ function ToastItem({ toast }: { toast: Toast }) {
       )}
     >
       <Icon className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-      <span className="text-[10px] text-text-primary flex-1 leading-relaxed">
+      <span className="text-xs text-text-primary flex-1 leading-relaxed">
         {toast.message}
       </span>
       <button

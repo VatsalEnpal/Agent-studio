@@ -209,7 +209,7 @@ export function SettingsWorkspace() {
     <>
       <section className="border border-border-default rounded-xl bg-bg-surface shadow-card">
         <div className="px-5 py-3.5 border-b border-border-default flex items-center justify-between">
-          <h3 className="text-[11px] font-medium text-text-primary">Workspace</h3>
+          <h3 className="text-body font-medium text-text-primary">Workspace</h3>
           <span className="text-label text-text-tertiary font-mono">
             .agent-studio.json v{config.version}
           </span>
@@ -225,7 +225,7 @@ export function SettingsWorkspace() {
               {config.projects.map((p, i) => (
                 <div
                   key={`${p.path}-${i}`}
-                  className="flex items-center gap-2 px-2 py-1.5 bg-bg-base border border-border-default rounded text-[11px]"
+                  className="flex items-center gap-2 px-2 py-1.5 bg-bg-base border border-border-default rounded text-body"
                 >
                   <span className="flex-1 font-mono text-text-primary truncate">
                     {p.path}
@@ -261,7 +261,7 @@ export function SettingsWorkspace() {
                   if (e.key === "Enter") addProject();
                 }}
                 placeholder="/path/to/project"
-                className="flex-1 px-2 py-1 text-[11px] font-mono bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:border-rooms focus:outline-none"
+                className="flex-1 px-2 py-1 text-body font-mono bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:border-rooms focus:outline-none"
               />
               <button
                 onClick={addProject}
@@ -282,7 +282,7 @@ export function SettingsWorkspace() {
             </label>
             {config.agentSystem ? (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 px-2 py-1.5 bg-bg-base border border-border-default rounded text-[11px]">
+                <div className="flex items-center gap-2 px-2 py-1.5 bg-bg-base border border-border-default rounded text-body">
                   <CheckIcon className="w-3 h-3 text-sessions shrink-0" />
                   <span className="flex-1 font-mono text-text-primary truncate">
                     {config.agentSystem.path}
@@ -305,7 +305,7 @@ export function SettingsWorkspace() {
               </div>
             ) : (
               <div className="space-y-2.5">
-                <div className="flex items-start gap-2 px-3 py-2.5 bg-sprints/5 border border-sprints/20 rounded text-[11px]">
+                <div className="flex items-start gap-2 px-3 py-2.5 bg-sprints/5 border border-sprints/20 rounded text-body">
                   <WarningIcon className="w-3.5 h-3.5 text-sprints shrink-0 mt-0.5" />
                   <div className="space-y-1.5">
                     <p className="text-text-primary font-medium">No agent system detected</p>
@@ -335,7 +335,7 @@ export function SettingsWorkspace() {
             <label className="text-label text-text-secondary block mb-1">
               Default Working Directory
             </label>
-            <span className="text-[11px] font-mono text-text-primary">
+            <span className="text-body font-mono text-text-primary">
               {config.defaults.workingDirectory}
             </span>
           </div>

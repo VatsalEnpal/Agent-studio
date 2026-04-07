@@ -67,8 +67,8 @@ export function ReportsView() {
             <FileIcon className="w-5 h-5 text-text-ghost" />
           </div>
           <div>
-            <p className="text-[10px] font-medium text-text-secondary mb-1">No reports generated</p>
-            <p className="text-[10px] text-text-tertiary leading-relaxed">
+            <p className="text-xs font-medium text-text-secondary mb-1">No reports generated</p>
+            <p className="text-xs text-text-tertiary leading-relaxed">
               Configure automations in Settings to generate reports on a schedule.
               Reports will appear here for review.
             </p>
@@ -83,7 +83,7 @@ export function ReportsView() {
       {/* Left panel: report list */}
       <div className="w-80 shrink-0 border-r border-border-default flex flex-col">
         <div className="px-3 py-2.5 border-b border-border-default flex items-center justify-between">
-          <span className="text-[9px] font-semibold uppercase tracking-[0.08em] text-text-tertiary">
+          <span className="text-2xs font-semibold uppercase tracking-[0.08em] text-text-tertiary">
             Reports ({reports.length})
           </span>
           <button
@@ -112,7 +112,7 @@ export function ReportsView() {
           <ReportDetail report={selectedReport} />
         ) : (
           <div className="h-full flex items-center justify-center">
-            <p className="text-[10px] text-text-tertiary">
+            <p className="text-xs text-text-tertiary">
               Select a report to view details
             </p>
           </div>

@@ -63,7 +63,7 @@ function ModelBadge({ model }: { model: string }) {
     haiku: "bg-emerald-500/15 text-emerald-400",
   };
   return (
-    <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-medium", colors[model] ?? "bg-bg-elevated text-text-tertiary")}>
+    <span className={cn("px-1.5 py-0.5 rounded text-2xs font-medium", colors[model] ?? "bg-bg-elevated text-text-tertiary")}>
       {model}
     </span>
   );
@@ -255,7 +255,7 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
         {/* Agents */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Your Agents</span>
+            <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Your Agents</span>
           </div>
           <div className="space-y-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-3">
             {agents.map((agent) => (
@@ -280,7 +280,7 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
         {automations.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">Your Automations</span>
+              <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Your Automations</span>
             </div>
             <div className="space-y-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-3">
               {automations.map((auto) => (
@@ -302,7 +302,7 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
                   <div className="flex-1 min-w-0">
                     <span className="text-sm text-zinc-300">{auto.template.name}</span>
                   </div>
-                  <span className="text-[10px] text-zinc-600 shrink-0">{auto.template.schedule}</span>
+                  <span className="text-xs text-zinc-600 shrink-0">{auto.template.schedule}</span>
                   <ModelBadge model={auto.template.model} />
                 </button>
               ))}

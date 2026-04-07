@@ -36,7 +36,7 @@ export function TypingIndicator({ typingAgents, roomAgents }: TypingIndicatorPro
     <div className="px-4 py-2 border-t border-border-subtle bg-bg-surface/50 space-y-1">
       <div className="flex items-center gap-1 mb-0.5">
         <ThreeDotAnimation />
-        <span className="text-[9px] text-text-ghost uppercase tracking-wider">
+        <span className="text-2xs text-text-ghost uppercase tracking-wider">
           {typingAgents.length === 1
             ? `${typingAgents[0].agentId} is working`
             : `${typingAgents.length} agents working`}

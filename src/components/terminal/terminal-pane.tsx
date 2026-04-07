@@ -294,7 +294,7 @@ export function TerminalPane({
           {effectiveModel && effectiveModel !== "unknown" && (
             <span
               className={cn(
-                "text-[9px] px-1.5 py-0.5 rounded-full font-medium",
+                "text-2xs px-1.5 py-0.5 rounded-full font-medium",
                 effectiveModel === "opus"
                   ? "bg-purple-500/15 text-purple-400"
                   : effectiveModel === "haiku"
@@ -306,11 +306,11 @@ export function TerminalPane({
             </span>
           )}
           {contextDisplay && (
-            <span className={cn("text-[9px] px-1 py-0.5 rounded-full font-medium", contextColor)}>
+            <span className={cn("text-2xs px-1 py-0.5 rounded-full font-medium", contextColor)}>
               {contextDisplay}
             </span>
           )}
-          <span className="text-[9px] text-text-tertiary">
+          <span className="text-2xs text-text-tertiary">
             {tokensDisplay}
           </span>
 
@@ -358,7 +358,7 @@ export function TerminalPane({
                 onKill?.();
                 setTimeout(() => setKilling(false), 3000);
               }}
-              className="px-1.5 py-0.5 text-[9px] font-medium text-error bg-error/15 hover:bg-error/25 rounded transition-all"
+              className="px-1.5 py-0.5 text-2xs font-medium text-error bg-error/15 hover:bg-error/25 rounded transition-all"
             >
               Kill?
             </button>

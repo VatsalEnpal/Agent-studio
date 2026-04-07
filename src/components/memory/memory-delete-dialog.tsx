@@ -78,7 +78,7 @@ export function MemoryDeleteDialog() {
               disabled={saving}
               className="px-3 py-1.5 text-label font-medium text-white bg-error/80 rounded hover:bg-error active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100 flex items-center gap-1.5"
             >
-              {saving && <span className="animate-spin text-[10px]">...</span>}
+              {saving && <span className="animate-spin text-xs">...</span>}
               Delete
             </button>
           </div>

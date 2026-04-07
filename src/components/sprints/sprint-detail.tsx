@@ -73,7 +73,7 @@ function ExpandedGatePanel({ gate, onClose }: { gate: Sprint["gates"][number]; o
   return (
     <div className="px-4 py-3 border-b border-border-default bg-bg-elevated">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] font-semibold text-text-primary">
+        <span className="text-xs font-semibold text-text-primary">
           {gate.name}
         </span>
         <button
@@ -85,14 +85,14 @@ function ExpandedGatePanel({ gate, onClose }: { gate: Sprint["gates"][number]; o
       </div>
 
       {gate.details && (
-        <p className="text-[10px] text-text-secondary mb-2 leading-relaxed">
+        <p className="text-xs text-text-secondary mb-2 leading-relaxed">
           {gate.details}
         </p>
       )}
 
       {gate.requirements.length > 0 && (
         <div className="space-y-1">
-          <span className="text-[9px] font-medium uppercase tracking-[0.5px] text-text-ghost">
+          <span className="text-2xs font-medium uppercase tracking-[0.5px] text-text-ghost">
             Requirements
           </span>
           {gate.requirements.map((req, i) => (
@@ -113,7 +113,7 @@ function ExpandedGatePanel({ gate, onClose }: { gate: Sprint["gates"][number]; o
               </div>
               <span
                 className={cn(
-                  "text-[10px]",
+                  "text-xs",
                   req.met ? "text-text-primary" : "text-text-tertiary",
                 )}
               >
@@ -126,11 +126,11 @@ function ExpandedGatePanel({ gate, onClose }: { gate: Sprint["gates"][number]; o
 
       {gateChecks && gateChecks.length > 0 && (
         <div className="mt-2 space-y-1">
-          <span className="text-[9px] font-medium uppercase tracking-[0.5px] text-text-ghost">
+          <span className="text-2xs font-medium uppercase tracking-[0.5px] text-text-ghost">
             Gate Checks
           </span>
           {gateChecks.map((check, i) => (
-            <div key={i} className="text-[10px] text-text-secondary pl-2 border-l border-border-default">
+            <div key={i} className="text-xs text-text-secondary pl-2 border-l border-border-default">
               {check}
             </div>
           ))}
@@ -139,11 +139,11 @@ function ExpandedGatePanel({ gate, onClose }: { gate: Sprint["gates"][number]; o
 
       {buildSummary && buildSummary.length > 0 && (
         <div className="mt-2 space-y-1">
-          <span className="text-[9px] font-medium uppercase tracking-[0.5px] text-text-ghost">
+          <span className="text-2xs font-medium uppercase tracking-[0.5px] text-text-ghost">
             Build Summary
           </span>
           {buildSummary.map((item, i) => (
-            <div key={i} className="text-[10px] text-text-secondary pl-2 border-l border-border-default">
+            <div key={i} className="text-xs text-text-secondary pl-2 border-l border-border-default">
               {item}
             </div>
           ))}
@@ -244,10 +244,10 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
               <ArrowLeftIcon size={14} />
             </button>
           )}
-          <h2 className="text-[13px] font-semibold text-text-primary tracking-[-0.3px] truncate">
+          <h2 className="text-title-md font-semibold text-text-primary tracking-[-0.3px] truncate">
             {sprint.name}
           </h2>
-          <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded-full", badge.class)}>
+          <span className={cn("text-2xs font-medium px-1.5 py-0.5 rounded-full", badge.class)}>
             {badge.label}
           </span>
           {totalGates > 0 && (
@@ -262,7 +262,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                 />
               </div>
               <span className={cn(
-                "text-[9px] font-medium",
+                "text-2xs font-medium",
                 progressPct === 100 ? "text-sessions" : "text-text-tertiary",
               )}>
                 {progressPct}%
@@ -273,7 +273,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
             <button
               onClick={handleViewSpec}
               className={cn(
-                "flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded active:scale-[0.98] transition-all",
+                "flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded active:scale-[0.98] transition-all",
                 specPanelOpen
                   ? "bg-sprints/15 text-sprints"
                   : "text-text-ghost hover:text-text-secondary hover:bg-bg-elevated",
@@ -282,11 +282,11 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
               <SprintsIcon size={12} />
               View Spec
             </button>
-            <span className="text-[10px] text-text-ghost">
+            <span className="text-xs text-text-ghost">
               {formatElapsed(sprint.startedAt)}
             </span>
             {eta && (
-              <span className="text-[10px] text-text-ghost" title="Estimated time remaining">
+              <span className="text-xs text-text-ghost" title="Estimated time remaining">
                 ETA {eta}
               </span>
             )}
@@ -313,19 +313,19 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
       {readyGate && (
         <div className="px-4 py-2 bg-sprints/5 border-b border-sprints/20 flex items-center gap-2">
           <CheckIcon size={12} className="text-sprints shrink-0" />
-          <span className="text-[10px] font-medium text-sprints flex-1">
+          <span className="text-xs font-medium text-sprints flex-1">
             {readyGate.name} ready for approval
           </span>
           <button
             onClick={() => void handleApproveGate(readyGate.id)}
             disabled={approvingGate === readyGate.id}
-            className="px-3 py-1 text-[10px] font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100"
+            className="px-3 py-1 text-xs font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100"
           >
             {approvingGate === readyGate.id ? "Approving..." : "Approve"}
           </button>
           <button
             onClick={() => setExpandedGate(readyGate.id)}
-            className="px-2 py-1 text-[10px] font-medium text-sprints bg-sprints/10 rounded-md hover:bg-sprints/20 active:scale-[0.98] transition-all"
+            className="px-2 py-1 text-xs font-medium text-sprints bg-sprints/10 rounded-md hover:bg-sprints/20 active:scale-[0.98] transition-all"
           >
             Details
           </button>
@@ -337,11 +337,11 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
         <div key={gate.id} className="px-4 py-2 bg-sprints/5 border-b border-sprints/20 flex items-center gap-2">
           <BoltIcon size={12} className="text-sprints shrink-0" />
           <div className="flex-1 min-w-0">
-            <span className="text-[10px] font-medium text-text-primary block">
+            <span className="text-xs font-medium text-text-primary block">
               {gate.name}
             </span>
             {gate.details && (
-              <span className="text-[10px] text-text-ghost block mt-0.5 truncate">
+              <span className="text-xs text-text-ghost block mt-0.5 truncate">
                 {gate.details}
               </span>
             )}
@@ -349,7 +349,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
           <button
             onClick={() => void handleApproveGate(gate.id)}
             disabled={approvingGate === gate.id}
-            className="px-2.5 py-1 text-[10px] font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 transition-all disabled:opacity-50"
+            className="px-2.5 py-1 text-xs font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 transition-all disabled:opacity-50"
           >
             {approvingGate === gate.id ? "..." : (gate.action?.label ?? "Approve")}
           </button>
@@ -371,7 +371,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              "px-2.5 py-2 text-[10px] font-medium border-b transition-all",
+              "px-2.5 py-2 text-xs font-medium border-b transition-all",
               activeTab === tab
                 ? "border-text-primary text-text-primary"
                 : "border-transparent text-text-tertiary hover:text-text-primary",
@@ -388,7 +388,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
         {specPanelOpen && (
           <div className="w-[360px] border-r border-border-default bg-bg-base flex flex-col shrink-0 overflow-hidden">
             <div className="px-3 py-2 border-b border-border-default flex items-center justify-between shrink-0">
-              <span className="text-[10px] font-semibold text-text-primary">
+              <span className="text-xs font-semibold text-text-primary">
                 Sprint Spec
               </span>
               <button
@@ -408,7 +408,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                   <div className="skeleton h-3 w-3/4" />
                 </div>
               ) : (
-                <pre className="text-[10px] font-mono text-text-secondary whitespace-pre-wrap break-words leading-relaxed">
+                <pre className="text-xs font-mono text-text-secondary whitespace-pre-wrap break-words leading-relaxed">
                   {specContent}
                 </pre>
               )}
@@ -421,7 +421,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
             {/* Agents section */}
             {sprint.agents.length > 0 && (
               <div>
-                <h4 className="text-[10px] font-medium uppercase tracking-[0.5px] text-text-ghost mb-1.5">
+                <h4 className="text-xs font-medium uppercase tracking-[0.5px] text-text-ghost mb-1.5">
                   Agents
                 </h4>
                 <AgentList agents={sprint.agents} />
@@ -430,7 +430,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
 
             {/* Gates timeline */}
             <div>
-              <h4 className="text-[10px] font-medium uppercase tracking-[0.5px] text-text-ghost mb-1.5">
+              <h4 className="text-xs font-medium uppercase tracking-[0.5px] text-text-ghost mb-1.5">
                 Gates
               </h4>
               <div className="relative">
@@ -475,11 +475,11 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                         "group-hover:bg-bg-elevated/50 rounded-md px-2 py-1 -ml-1 transition-all",
                       )}>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-text-primary font-medium flex-1 truncate">
+                          <span className="text-xs text-text-primary font-medium flex-1 truncate">
                             {gate.name}
                           </span>
                           <span className={cn(
-                            "text-[9px] font-medium px-1.5 py-0.5 rounded-full shrink-0",
+                            "text-2xs font-medium px-1.5 py-0.5 rounded-full shrink-0",
                             isPassed && "bg-sessions/10 text-sessions",
                             isCurrent && "bg-sprints/10 text-sprints",
                             isFailed && "bg-error/10 text-error",
@@ -489,7 +489,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                           </span>
                         </div>
                         {gate.details && (
-                          <p className="text-[9px] text-text-ghost mt-0.5 truncate">
+                          <p className="text-2xs text-text-ghost mt-0.5 truncate">
                             {gate.details}
                           </p>
                         )}
@@ -502,10 +502,10 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
 
             {/* Sprint info */}
             <div>
-              <h4 className="text-[10px] font-medium uppercase tracking-[0.5px] text-text-ghost mb-1.5">
+              <h4 className="text-xs font-medium uppercase tracking-[0.5px] text-text-ghost mb-1.5">
                 Info
               </h4>
-              <div className="space-y-1 text-[10px]">
+              <div className="space-y-1 text-xs">
                 {sprint.startedAt && (
                   <div className="flex items-center gap-2">
                     <span className="text-text-ghost w-16">Started</span>
@@ -545,7 +545,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
             {handoffPanelData && (
               <div className="w-64 border-l border-border-default bg-bg-elevated flex flex-col overflow-hidden shrink-0">
                 <div className="px-2.5 py-2 border-b border-border-default flex items-center justify-between shrink-0">
-                  <span className="text-[10px] font-semibold text-text-primary">
+                  <span className="text-xs font-semibold text-text-primary">
                     Handoff Detail
                   </span>
                   <button
@@ -556,7 +556,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                   </button>
                 </div>
                 <div className="flex-1 overflow-y-auto p-2.5 scrollbar-thin">
-                  <pre className="text-[10px] font-mono text-text-secondary whitespace-pre-wrap break-all leading-relaxed">
+                  <pre className="text-xs font-mono text-text-secondary whitespace-pre-wrap break-all leading-relaxed">
                     {JSON.stringify(handoffPanelData, null, 2)}
                   </pre>
                 </div>

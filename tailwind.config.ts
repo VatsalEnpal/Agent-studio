@@ -186,6 +186,8 @@ const config: Config = {
       fontSize: {
         // Override Tailwind's built-in text-xs (12px → 10px) to match our compact body text
         xs: ["10px", { lineHeight: "1.5" }],
+        // Clean 9px without weight/tracking — use for body-level 9px text
+        "2xs": ["9px", { lineHeight: "1.4" }],
         display: [
           "16px",
           { lineHeight: "1.2", letterSpacing: "-0.025em", fontWeight: "600" },

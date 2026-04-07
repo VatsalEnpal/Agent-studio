@@ -28,7 +28,7 @@ export function SessionStatsBar({ sessionId }: SessionStatsBarProps) {
       {/* Model badge */}
       {model && model !== "unknown" && (
         <span className={cn(
-          "text-[9px] font-mono font-medium uppercase tracking-wider px-1.5 py-0.5 rounded",
+          "text-2xs font-mono font-medium uppercase tracking-wider px-1.5 py-0.5 rounded",
           model === "opus" ? "bg-memory/10 text-memory" :
           model === "sonnet" ? "bg-rooms/10 text-rooms" :
           model === "haiku" ? "bg-sessions/10 text-sessions" :
@@ -40,14 +40,14 @@ export function SessionStatsBar({ sessionId }: SessionStatsBarProps) {
 
       {/* Token count */}
       {tokens > 0 && (
-        <span className="text-[9px] text-text-ghost font-mono">
+        <span className="text-2xs text-text-ghost font-mono">
           {formatTokensDisplay(tokens)} tokens
         </span>
       )}
 
       {/* Cost */}
       {cost > 0 && (
-        <span className="text-[9px] text-sprints/80 font-mono">
+        <span className="text-2xs text-sprints/80 font-mono">
           {formatCostDisplay(cost)}
         </span>
       )}
@@ -57,7 +57,7 @@ export function SessionStatsBar({ sessionId }: SessionStatsBarProps) {
       {/* Context window usage bar */}
       {ctxPct > 0 && (
         <div className="flex items-center gap-1.5">
-          <span className="text-[9px] text-text-ghost">
+          <span className="text-2xs text-text-ghost">
             Context
           </span>
           <div className="w-20 h-1 bg-border-default rounded-full overflow-hidden">
@@ -70,7 +70,7 @@ export function SessionStatsBar({ sessionId }: SessionStatsBarProps) {
             />
           </div>
           <span className={cn(
-            "text-[9px] font-mono tabular-nums",
+            "text-2xs font-mono tabular-nums",
             ctxPct >= 80 ? "text-error" : ctxPct >= 60 ? "text-sprints" : "text-text-ghost",
           )}>
             {Math.round(ctxPct)}%
@@ -79,7 +79,7 @@ export function SessionStatsBar({ sessionId }: SessionStatsBarProps) {
       )}
 
       {/* CWD */}
-      <span className="text-[9px] text-text-ghost font-mono truncate max-w-[200px]" title={session.cwd}>
+      <span className="text-2xs text-text-ghost font-mono truncate max-w-[200px]" title={session.cwd}>
         {shortenCwd(session.cwd)}
       </span>
     </div>

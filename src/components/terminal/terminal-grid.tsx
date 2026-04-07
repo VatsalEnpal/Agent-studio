@@ -74,7 +74,7 @@ export function TerminalGrid({
           </p>
           <p className="text-text-tertiary text-xs max-w-sm leading-relaxed">
             Launch a session to start working with Claude. Press{" "}
-            <kbd className="px-1 py-0.5 rounded bg-border-default text-text-secondary text-[10px]">
+            <kbd className="px-1 py-0.5 rounded bg-border-default text-text-secondary text-xs">
               Cmd+N
             </kbd>{" "}
             anytime for the full launcher.
@@ -88,21 +88,21 @@ export function TerminalGrid({
             className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded-xl border border-rooms/30 bg-rooms/5 hover:border-rooms/50 hover:bg-rooms/8 hover:shadow-glow-sm active:scale-[0.98] transition-all"
           >
             <span className="text-sm font-medium text-text-primary">Start a Quick Chat</span>
-            <span className="text-[10px] text-text-tertiary">Ask Claude anything — uses Sonnet, no agent needed.</span>
+            <span className="text-xs text-text-tertiary">Ask Claude anything — uses Sonnet, no agent needed.</span>
           </button>
           <button
             onClick={onStartSprint ?? onCreateSession}
             className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded-xl border border-border-default hover:border-rooms/40 hover:bg-bg-elevated/40 hover:shadow-card active:scale-[0.98] transition-all"
           >
             <span className="text-sm font-medium text-text-primary">Start a Sprint</span>
-            <span className="text-[10px] text-text-tertiary">Launch a full agent team to work on your project.</span>
+            <span className="text-xs text-text-tertiary">Launch a full agent team to work on your project.</span>
           </button>
           <button
             onClick={onContinueLast ?? onCreateSession}
             className="w-full flex flex-col items-center gap-1 px-5 py-3 rounded-xl border border-border-default hover:border-rooms/40 hover:bg-bg-elevated/40 active:scale-[0.98] transition-all"
           >
-            <span className="text-[10px] font-medium text-text-primary">Continue Last Session</span>
-            <span className="text-[9px] text-text-tertiary">Pick up where you left off.</span>
+            <span className="text-xs font-medium text-text-primary">Continue Last Session</span>
+            <span className="text-2xs text-text-tertiary">Pick up where you left off.</span>
           </button>
         </div>
       </div>
@@ -141,14 +141,14 @@ export function TerminalGrid({
                     {session.name}
                   </span>
                   {session.meta?.model && (
-                    <span className="text-[9px] px-1 py-0.5 rounded bg-border-default text-text-tertiary">
+                    <span className="text-2xs px-1 py-0.5 rounded bg-border-default text-text-tertiary">
                       {session.meta.model}
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-[10px] text-text-tertiary">
-                    <kbd className="px-1 py-0.5 rounded bg-border-default text-text-secondary text-[9px] font-mono">
+                  <span className="text-xs text-text-tertiary">
+                    <kbd className="px-1 py-0.5 rounded bg-border-default text-text-secondary text-2xs font-mono">
                       Esc
                     </kbd>{" "}
                     to exit

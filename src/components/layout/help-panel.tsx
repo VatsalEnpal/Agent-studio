@@ -40,7 +40,7 @@ export function HelpPanel() {
           <div className="px-5 py-4 space-y-4">
             {/* Shortcuts */}
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary mb-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-text-secondary mb-2">
                 Shortcuts
               </p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
@@ -57,7 +57,7 @@ export function HelpPanel() {
 
             {/* Features */}
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary mb-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-text-secondary mb-2">
                 Features
               </p>
               <div className="space-y-2">
@@ -105,7 +105,7 @@ export function HelpPanel() {
 
           {/* Version footer */}
           <div className="px-5 py-2 border-t border-border-default">
-            <p className="text-[10px] text-text-secondary/60">
+            <p className="text-xs text-text-secondary/60">
               Agent Studio v0.1.0
             </p>
           </div>
@@ -118,10 +118,10 @@ export function HelpPanel() {
 function ShortcutRow({ keys, label }: { keys: string; label: string }) {
   return (
     <div className="flex items-center gap-2">
-      <kbd className="inline-flex items-center justify-center min-w-[44px] px-1.5 py-0.5 rounded bg-border-default text-text-primary font-mono text-[10px] leading-tight">
+      <kbd className="inline-flex items-center justify-center min-w-[44px] px-1.5 py-0.5 rounded bg-border-default text-text-primary font-mono text-xs leading-tight">
         {keys}
       </kbd>
-      <span className="text-[10px] text-text-secondary">{label}</span>
+      <span className="text-xs text-text-secondary">{label}</span>
     </div>
   );
 }
@@ -141,7 +141,7 @@ function FeatureRow({
       <span className="text-xs text-text-primary font-medium w-16 shrink-0">
         {name}
       </span>
-      <span className="text-[10px] text-text-secondary">{desc}</span>
+      <span className="text-xs text-text-secondary">{desc}</span>
     </div>
   );
 }

@@ -81,7 +81,7 @@ export function ReportDetail({ report }: ReportDetailProps) {
           </h2>
           <span
             className={cn(
-              "px-2 py-0.5 rounded text-[10px] font-medium",
+              "px-2 py-0.5 rounded text-xs font-medium",
               report.status === "pending" && "bg-yellow-500/15 text-yellow-400",
               report.status === "approved" && "bg-emerald-500/15 text-emerald-400",
               report.status === "dismissed" && "bg-bg-elevated text-text-tertiary",
@@ -90,7 +90,7 @@ export function ReportDetail({ report }: ReportDetailProps) {
             {report.status}
           </span>
         </div>
-        <div className="flex items-center gap-2 text-[10px] text-text-tertiary">
+        <div className="flex items-center gap-2 text-xs text-text-tertiary">
           <ClockIcon className="w-3 h-3" />
           {formatTimestamp(report.timestamp)}
         </div>
@@ -100,10 +100,10 @@ export function ReportDetail({ report }: ReportDetailProps) {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {/* Summary */}
         <div>
-          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary mb-2">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-tertiary mb-2">
             Summary
           </h3>
-          <div className="px-3 py-2 bg-bg-base border border-border-default rounded text-[10px] text-text-primary whitespace-pre-wrap font-mono leading-relaxed max-h-[400px] overflow-y-auto">
+          <div className="px-3 py-2 bg-bg-base border border-border-default rounded text-xs text-text-primary whitespace-pre-wrap font-mono leading-relaxed max-h-[400px] overflow-y-auto">
             {report.summary}
           </div>
         </div>
@@ -111,7 +111,7 @@ export function ReportDetail({ report }: ReportDetailProps) {
         {/* Suggested Actions */}
         {report.suggestedActions.length > 0 && (
           <div>
-            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary mb-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-text-tertiary mb-2">
               Suggested Actions ({report.suggestedActions.length})
             </h3>
             <div className="space-y-2">
@@ -127,20 +127,20 @@ export function ReportDetail({ report }: ReportDetailProps) {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-medium text-text-primary mb-0.5">
+                      <p className="text-xs font-medium text-text-primary mb-0.5">
                         {action.title}
                       </p>
-                      <p className="text-[10px] text-text-tertiary">
+                      <p className="text-xs text-text-tertiary">
                         {action.description}
                       </p>
-                      <p className="text-[9px] text-text-secondary mt-1">
+                      <p className="text-2xs text-text-secondary mt-1">
                         <PlayIcon className="w-2.5 h-2.5 inline mr-0.5 -mt-0.5" />
                         Agent: {action.agent}
                       </p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       {action.approved ? (
-                        <span className="flex items-center gap-1 px-2 py-1 text-[10px] text-emerald-400 font-medium">
+                        <span className="flex items-center gap-1 px-2 py-1 text-xs text-emerald-400 font-medium">
                           <CheckIcon className="w-3 h-3" />
                           Approved
                         </span>
@@ -149,13 +149,13 @@ export function ReportDetail({ report }: ReportDetailProps) {
                           <button
                             onClick={() => void handleApproveAction(action.id)}
                             disabled={actionLoading === action.id || report.status !== "pending"}
-                            className="px-2 py-1 text-[10px] font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-2 py-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {actionLoading === action.id ? "..." : "Approve"}
                           </button>
                           <button
                             disabled={report.status !== "pending"}
-                            className="px-2 py-1 text-[10px] font-medium text-text-tertiary hover:text-text-secondary rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-2 py-1 text-xs font-medium text-text-tertiary hover:text-text-secondary rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Skip
                           </button>
@@ -175,7 +175,7 @@ export function ReportDetail({ report }: ReportDetailProps) {
         <div className="px-4 py-3 border-t border-border-default shrink-0 flex items-center justify-end gap-2">
           <button
             onClick={() => setConfirmDismiss(true)}
-            className="px-3 py-1.5 text-[10px] text-text-tertiary hover:text-text-secondary border border-border-default rounded transition-all active:scale-[0.98]"
+            className="px-3 py-1.5 text-xs text-text-tertiary hover:text-text-secondary border border-border-default rounded transition-all active:scale-[0.98]"
           >
             <CloseIcon className="w-3 h-3 inline mr-1 -mt-0.5" />
             Dismiss
@@ -183,7 +183,7 @@ export function ReportDetail({ report }: ReportDetailProps) {
           <button
             onClick={() => void handleApproveAll()}
             disabled={approvingAll}
-            className="px-3 py-1.5 text-[10px] font-medium text-black bg-emerald-500 hover:bg-emerald-400 rounded transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+            className="px-3 py-1.5 text-xs font-medium text-black bg-emerald-500 hover:bg-emerald-400 rounded transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
           >
             <CheckIcon className="w-3 h-3 inline mr-1 -mt-0.5" />
             {approvingAll ? "Approving..." : "Approve All"}

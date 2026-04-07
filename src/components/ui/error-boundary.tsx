@@ -32,17 +32,17 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       return (
         <div className="flex flex-col items-center justify-center h-full gap-3 p-4">
           <WarningIcon className="w-6 h-6 text-error" />
-          <p className="text-[10px] text-text-secondary text-center">
+          <p className="text-xs text-text-secondary text-center">
             {this.props.fallbackLabel ?? "Something went wrong"}
           </p>
           {this.state.errorMessage && (
-            <p className="text-[10px] text-text-tertiary text-center max-w-xs truncate">
+            <p className="text-xs text-text-tertiary text-center max-w-xs truncate">
               {this.state.errorMessage}
             </p>
           )}
           <button
             onClick={this.handleRetry}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium rounded bg-bg-elevated text-text-primary hover:bg-bg-elevated/70 active:scale-[0.98] transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded bg-bg-elevated text-text-primary hover:bg-bg-elevated/70 active:scale-[0.98] transition-all"
           >
             <UndoIcon className="w-3 h-3" />
             Retry

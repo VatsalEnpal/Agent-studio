@@ -71,13 +71,13 @@ export function SprintsView() {
           <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center">
             <SprintsIcon size={20} className="text-text-ghost" />
           </div>
-          <p className="text-[10px] font-medium text-text-secondary">
+          <p className="text-xs font-medium text-text-secondary">
             {sprints.length === 0
               ? "No sprints running"
               : "Select a sprint to view details"}
           </p>
           {sprints.length === 0 && (
-            <p className="text-[10px] text-text-tertiary max-w-[240px] leading-relaxed">
+            <p className="text-xs text-text-tertiary max-w-[240px] leading-relaxed">
               Sprints are created automatically by the PMO agent when it detects pending work in your projects.
             </p>
           )}

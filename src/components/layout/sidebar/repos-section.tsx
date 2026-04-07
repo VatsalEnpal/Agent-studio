@@ -73,7 +73,7 @@ function RepoItem({
     >
       <div className="flex items-center gap-2">
         <FolderIcon className="w-3.5 h-3.5 shrink-0 text-text-secondary" />
-        <span className="text-[10px] text-text-primary font-medium truncate flex-1">
+        <span className="text-xs text-text-primary font-medium truncate flex-1">
           {repo.name}
         </span>
         {isProd && (
@@ -81,7 +81,7 @@ function RepoItem({
             PROD
           </span>
         )}
-        <span className="text-[9px] px-1 py-0.5 rounded bg-rooms/10 text-rooms font-mono shrink-0 max-w-[80px] truncate">
+        <span className="text-2xs px-1 py-0.5 rounded bg-rooms/10 text-rooms font-mono shrink-0 max-w-[80px] truncate">
           {repo.branch}
         </span>
         <span
@@ -105,7 +105,7 @@ function RepoItem({
                 return (
                   <div
                     key={b.name}
-                    className="flex items-center gap-1.5 text-[9px] text-text-tertiary"
+                    className="flex items-center gap-1.5 text-2xs text-text-tertiary"
                     title={b.lastCommit}
                   >
                     <GitBranchIcon className="w-2.5 h-2.5 shrink-0" />

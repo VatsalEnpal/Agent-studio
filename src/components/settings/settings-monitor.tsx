@@ -37,7 +37,7 @@ export function SettingsMonitor() {
     return (
       <section className="border border-border-default rounded-lg bg-bg-surface">
         <div className="px-4 py-3 border-b border-border-default">
-          <h3 className="text-[11px] font-medium text-text-primary">System Monitor</h3>
+          <h3 className="text-body font-medium text-text-primary">System Monitor</h3>
         </div>
         <div className="px-4 py-6 text-center text-text-tertiary text-xs animate-pulse">
           Loading system stats...
@@ -63,7 +63,7 @@ export function SettingsMonitor() {
               CPU
             </span>
             <span className={cn(
-              "text-[11px] font-mono font-medium",
+              "text-body font-mono font-medium",
               stats.cpu.usage > 80 ? "text-error" : stats.cpu.usage > 50 ? "text-rooms" : "text-sessions",
             )}>
               {stats.cpu.usage.toFixed(1)}%
@@ -84,7 +84,7 @@ export function SettingsMonitor() {
               Memory
             </span>
             <span className={cn(
-              "text-[11px] font-mono font-medium",
+              "text-body font-mono font-medium",
               stats.memory.percentage > 80 ? "text-error" : stats.memory.percentage > 60 ? "text-rooms" : "text-sessions",
             )}>
               {stats.memory.percentage.toFixed(0)}%
@@ -107,7 +107,7 @@ export function SettingsMonitor() {
               Disk
             </span>
             <span className={cn(
-              "text-[11px] font-mono font-medium",
+              "text-body font-mono font-medium",
               stats.disk.percentage > 90 ? "text-error" : stats.disk.percentage > 70 ? "text-rooms" : "text-text-primary",
             )}>
               {stats.disk.percentage.toFixed(0)}%
@@ -129,7 +129,7 @@ export function SettingsMonitor() {
               <MonitorIcon className="w-3 h-3" />
               Active Servers
             </span>
-            <span className="text-[10px] font-mono font-medium text-text-primary">
+            <span className="text-xs font-mono font-medium text-text-primary">
               {stats.activeServers}
             </span>
           </div>
@@ -138,7 +138,7 @@ export function SettingsMonitor() {
               <SessionsIcon className="w-3 h-3" />
               Claude Sessions
             </span>
-            <span className="text-[10px] font-mono font-medium text-text-primary">
+            <span className="text-xs font-mono font-medium text-text-primary">
               {stats.activeSessions}
             </span>
           </div>

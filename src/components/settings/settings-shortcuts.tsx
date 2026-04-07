@@ -15,7 +15,7 @@ export function SettingsShortcuts() {
   return (
     <section className="border border-border-default rounded-lg bg-bg-surface">
       <div className="px-4 py-3 border-b border-border-default">
-        <h3 className="text-[11px] font-medium text-text-primary">Keyboard Shortcuts</h3>
+        <h3 className="text-body font-medium text-text-primary">Keyboard Shortcuts</h3>
       </div>
       <div className="px-4 py-2">
         <table className="w-full">

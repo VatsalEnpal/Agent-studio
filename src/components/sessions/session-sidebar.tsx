@@ -139,8 +139,8 @@ function SidebarServerList() {
   if (servers.length === 0) {
     return (
       <div className="px-3 py-6 text-center">
-        <p className="text-[10px] text-text-tertiary">No services detected</p>
-        <p className="text-[10px] text-text-ghost mt-1">Start a dev server to see it here</p>
+        <p className="text-xs text-text-tertiary">No services detected</p>
+        <p className="text-xs text-text-ghost mt-1">Start a dev server to see it here</p>
       </div>
     );
   }
@@ -153,10 +153,10 @@ function SidebarServerList() {
           className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-bg-elevated/50 transition-all"
         >
           <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
-          <span className="text-[10px] font-mono text-sessions font-medium shrink-0">
+          <span className="text-xs font-mono text-sessions font-medium shrink-0">
             :{s.port}
           </span>
-          <span className="text-[10px] text-text-tertiary truncate flex-1 min-w-0">
+          <span className="text-xs text-text-tertiary truncate flex-1 min-w-0">
             {s.command.split("/").pop() ?? s.command}
           </span>
         </div>
@@ -318,7 +318,7 @@ export function SessionSidebar({
                 onDevServers?.(tab === "servers");
               }}
               className={cn(
-                "flex-1 px-2 py-1 text-[10px] font-medium rounded-[3px] transition-all",
+                "flex-1 px-2 py-1 text-xs font-medium rounded-[3px] transition-all",
                 activeTab === tab
                   ? "bg-bg-elevated text-text-primary"
                   : "text-text-ghost hover:text-text-tertiary",
@@ -339,7 +339,7 @@ export function SessionSidebar({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search..."
-            className="w-full pl-7 pr-2 py-1.5 text-[10px] bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
+            className="w-full pl-7 pr-2 py-1.5 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
           />
           {searchQuery && (
             <button
@@ -361,7 +361,7 @@ export function SessionSidebar({
               key={filter}
               onClick={() => setStatusFilter(filter)}
               className={cn(
-                "px-2 py-0.5 text-[9px] font-medium rounded-full transition-all",
+                "px-2 py-0.5 text-2xs font-medium rounded-full transition-all",
                 statusFilter === filter
                   ? "bg-sessions/15 text-sessions"
                   : "text-text-ghost hover:text-text-tertiary hover:bg-bg-elevated/50",
@@ -395,10 +395,10 @@ export function SessionSidebar({
                 ))}
                 {filteredRunning.length === 0 && (
                   <div className="px-3 py-4 text-center">
-                    <p className="text-[10px] text-text-tertiary">
+                    <p className="text-xs text-text-tertiary">
                       No running sessions
                     </p>
-                    <p className="text-[10px] text-text-ghost mt-1">
+                    <p className="text-xs text-text-ghost mt-1">
                       Click &ldquo;New Session&rdquo; below to get started
                     </p>
                   </div>
@@ -452,8 +452,8 @@ export function SessionSidebar({
               ))
             ) : (
               <div className="px-3 py-8 text-center">
-                <p className="text-[10px] text-text-secondary font-medium">No session history</p>
-                <p className="text-[10px] text-text-tertiary mt-1">
+                <p className="text-xs text-text-secondary font-medium">No session history</p>
+                <p className="text-xs text-text-tertiary mt-1">
                   Past sessions will appear here after they end
                 </p>
               </div>
@@ -468,7 +468,7 @@ export function SessionSidebar({
         {onDevServers && (
           <button
             onClick={() => { setActiveTab("servers"); onDevServers(true); }}
-            className="flex items-center gap-1.5 w-full px-2 py-1 text-[10px] text-text-tertiary hover:text-sessions transition-all rounded"
+            className="flex items-center gap-1.5 w-full px-2 py-1 text-xs text-text-tertiary hover:text-sessions transition-all rounded"
           >
             <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
             Dev Servers
@@ -479,7 +479,7 @@ export function SessionSidebar({
           className={cn(
             "flex items-center justify-center gap-1.5 w-full",
             "px-3 py-1.5 rounded-md",
-            "text-[10px] font-medium",
+            "text-xs font-medium",
             "bg-text-primary text-bg-base",
             "hover:bg-text-secondary active:scale-[0.98]",
             "transition-all",
@@ -488,7 +488,7 @@ export function SessionSidebar({
         >
           <PlusIcon size={12} />
           New Session
-          <kbd className="ml-auto text-[9px] font-mono opacity-40">
+          <kbd className="ml-auto text-2xs font-mono opacity-40">
             {"\u21E7\u2318N"}
           </kbd>
         </button>

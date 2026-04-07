@@ -92,7 +92,7 @@ export function ConfirmDialog({
                   : "text-black bg-sprints/80 hover:bg-sprints",
               )}
             >
-              {loading && <span className="animate-spin text-[10px]">...</span>}
+              {loading && <span className="animate-spin text-xs">...</span>}
               {confirmLabel}
             </button>
           </div>

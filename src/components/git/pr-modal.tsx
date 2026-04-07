@@ -140,7 +140,7 @@ export function PRModal() {
                 Create Pull Request
               </Dialog.Title>
               {isProd && (
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-error/20 text-error font-bold uppercase">
+                <span className="text-2xs px-1.5 py-0.5 rounded bg-error/20 text-error font-bold uppercase">
                   PROD
                 </span>
               )}
@@ -156,7 +156,7 @@ export function PRModal() {
             {isProd && (
               <div className="flex items-start gap-2 px-3 py-2 bg-error/10 border border-error/20 rounded-md text-error">
                 <WarningIcon size={14} className="shrink-0 mt-0.5" />
-                <p className="text-[10px] leading-relaxed">
+                <p className="text-xs leading-relaxed">
                   This is the <strong>production repository</strong>. This PR
                   will be reviewed by the team. Changes require explicit approval.
                 </p>
@@ -164,7 +164,7 @@ export function PRModal() {
             )}
 
             {/* Repo */}
-            <div className="text-[10px] text-text-ghost">
+            <div className="text-xs text-text-ghost">
               Repo:{" "}
               <span className="text-text-secondary">
                 {prModalRepo?.name ?? "unknown"}
@@ -173,7 +173,7 @@ export function PRModal() {
 
             {/* Source branch */}
             <div>
-              <span className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1">
+              <span className="block text-xs font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1">
                 Source Branch
               </span>
               <input
@@ -187,7 +187,7 @@ export function PRModal() {
 
             {/* Target branch */}
             <div>
-              <span className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1">
+              <span className="block text-xs font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1">
                 Target Branch
               </span>
               <select
@@ -208,7 +208,7 @@ export function PRModal() {
 
             {/* Title */}
             <div>
-              <span className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1">
+              <span className="block text-xs font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1">
                 Title
               </span>
               <input
@@ -223,7 +223,7 @@ export function PRModal() {
 
             {/* Description */}
             <div>
-              <span className="block text-[10px] font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1">
+              <span className="block text-xs font-semibold uppercase text-text-ghost tracking-[0.8px] mb-1">
                 Description
               </span>
               <textarea
@@ -241,10 +241,10 @@ export function PRModal() {
               <div className="flex items-start gap-2 px-3 py-2 bg-error/15 border border-error/30 rounded-md text-error">
                 <WarningIcon size={14} className="shrink-0 mt-0.5" />
                 <div className="space-y-1.5 flex-1">
-                  <p className="text-[10px] font-bold">
+                  <p className="text-xs font-bold">
                     CONFIRM: Creating a PR on the PRODUCTION repo.
                   </p>
-                  <p className="text-[10px]">
+                  <p className="text-xs">
                     Type{" "}
                     <span className="font-mono font-bold bg-error/20 px-1 rounded">
                       CONFIRM

@@ -65,8 +65,8 @@ export function ActivityLog({ entries, onHandoffClick }: ActivityLogProps) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 text-center px-6">
         <InfoIcon size={20} className="text-text-ghost" />
-        <p className="text-[10px] text-text-secondary font-medium">No activity recorded</p>
-        <p className="text-[10px] text-text-tertiary max-w-[200px]">
+        <p className="text-xs text-text-secondary font-medium">No activity recorded</p>
+        <p className="text-xs text-text-tertiary max-w-[200px]">
           Agent actions, handoffs, and gate transitions will appear here in real time
         </p>
       </div>
@@ -96,7 +96,7 @@ export function ActivityLog({ entries, onHandoffClick }: ActivityLogProps) {
             {showDivider && (
               <div className="flex items-center gap-2 py-1.5 mt-1">
                 <div className="flex-1 h-px bg-border-subtle" />
-                <span className="text-[9px] text-text-ghost uppercase tracking-wider shrink-0">
+                <span className="text-2xs text-text-ghost uppercase tracking-wider shrink-0">
                   {currentDateLabel}
                 </span>
                 <div className="flex-1 h-px bg-border-subtle" />

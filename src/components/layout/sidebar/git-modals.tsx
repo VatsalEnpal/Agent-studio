@@ -56,19 +56,19 @@ export function ChangesPopup({
         </div>
         <div className="px-3 py-2 max-h-72 overflow-auto">
           {changes === "Loading..." ? (
-            <p className="text-[10px] text-text-tertiary animate-pulse py-2">
+            <p className="text-xs text-text-tertiary animate-pulse py-2">
               Loading...
             </p>
           ) : isClean ? (
             <div className="flex items-center gap-2 py-3 justify-center">
               <CheckIcon className="w-4 h-4 text-sessions" />
-              <span className="text-[10px] text-sessions font-medium">
+              <span className="text-xs text-sessions font-medium">
                 Working tree clean
               </span>
             </div>
           ) : (
             <div className="space-y-0.5">
-              <p className="text-[9px] text-text-tertiary mb-1.5">
+              <p className="text-2xs text-text-tertiary mb-1.5">
                 {lines.length} changed file{lines.length !== 1 ? "s" : ""}
               </p>
               {lines.map((line, i) => {
@@ -96,13 +96,13 @@ export function ChangesPopup({
                   <div key={i} className="flex items-center gap-2 py-0.5">
                     <span
                       className={cn(
-                        "text-[10px] font-mono font-bold w-4 text-center shrink-0",
+                        "text-xs font-mono font-bold w-4 text-center shrink-0",
                         statusColor,
                       )}
                     >
                       {statusLabel}
                     </span>
-                    <span className="text-[10px] font-mono text-text-secondary truncate">
+                    <span className="text-xs font-mono text-text-secondary truncate">
                       {file}
                     </span>
                   </div>
@@ -186,12 +186,12 @@ export function CommitModal({
             }}
           />
           {status === "error" && (
-            <div className="text-[10px] text-error bg-error/10 px-2 py-1 rounded">
+            <div className="text-xs text-error bg-error/10 px-2 py-1 rounded">
               {output}
             </div>
           )}
           {status === "success" && (
-            <div className="text-[10px] text-sessions bg-sessions/10 px-2 py-1 rounded">
+            <div className="text-xs text-sessions bg-sessions/10 px-2 py-1 rounded">
               {output}
             </div>
           )}
@@ -199,7 +199,7 @@ export function CommitModal({
         <div className="flex justify-end gap-2 px-3 py-2 border-t border-border-default">
           <button
             onClick={onClose}
-            className="px-2 py-1 text-[10px] text-text-secondary hover:text-text-primary"
+            className="px-2 py-1 text-xs text-text-secondary hover:text-text-primary"
           >
             {status === "success" ? "Close" : "Cancel"}
           </button>
@@ -208,7 +208,7 @@ export function CommitModal({
               onClick={() => void handleCommit()}
               disabled={!message.trim() || status === "committing"}
               className={cn(
-                "px-2 py-1 text-[10px] font-medium rounded transition-all",
+                "px-2 py-1 text-xs font-medium rounded transition-all",
                 !message.trim() || status === "committing"
                   ? "bg-border-default text-text-tertiary cursor-not-allowed"
                   : "bg-rooms text-white hover:bg-rooms/80",
@@ -291,13 +291,13 @@ export function PushModal({
             <div className="flex items-start gap-2 px-2 py-2 bg-red-500/10 border border-red-500/30 rounded text-red-400">
               <WarningIcon className="w-4 h-4 shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="text-[10px] font-bold">
+                <p className="text-xs font-bold">
                   WARNING: PRODUCTION REPO
                 </p>
-                <p className="text-[9px]">
+                <p className="text-2xs">
                   You are pushing to the production repository. Are you absolutely sure?
                 </p>
-                <p className="text-[9px]">
+                <p className="text-2xs">
                   Type{" "}
                   <span className="font-mono font-bold">CONFIRM</span> to
                   proceed:
@@ -313,17 +313,17 @@ export function PushModal({
             </div>
           )}
           {!isProd && (
-            <p className="text-[10px] text-text-secondary">
+            <p className="text-xs text-text-secondary">
               Push current branch to origin?
             </p>
           )}
           {status === "error" && (
-            <div className="text-[10px] text-error bg-error/10 px-2 py-1 rounded">
+            <div className="text-xs text-error bg-error/10 px-2 py-1 rounded">
               {output}
             </div>
           )}
           {status === "success" && (
-            <div className="text-[10px] text-sessions bg-sessions/10 px-2 py-1 rounded">
+            <div className="text-xs text-sessions bg-sessions/10 px-2 py-1 rounded">
               {output}
             </div>
           )}
@@ -331,7 +331,7 @@ export function PushModal({
         <div className="flex justify-end gap-2 px-3 py-2 border-t border-border-default">
           <button
             onClick={onClose}
-            className="px-2 py-1 text-[10px] text-text-secondary hover:text-text-primary"
+            className="px-2 py-1 text-xs text-text-secondary hover:text-text-primary"
           >
             {status === "success" ? "Close" : "Cancel"}
           </button>
@@ -340,7 +340,7 @@ export function PushModal({
               onClick={() => void handlePush()}
               disabled={!canPush || status === "pushing"}
               className={cn(
-                "px-2 py-1 text-[10px] font-medium rounded transition-all",
+                "px-2 py-1 text-xs font-medium rounded transition-all",
                 !canPush || status === "pushing"
                   ? "bg-border-default text-text-tertiary cursor-not-allowed"
                   : isProd

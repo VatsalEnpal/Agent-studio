@@ -79,8 +79,8 @@ export function MemoryDetail() {
         <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center">
           <MemoryIcon size={20} className="text-text-ghost" />
         </div>
-        <p className="text-[10px] text-text-secondary font-medium">No memory selected</p>
-        <p className="text-[10px] text-text-tertiary max-w-[200px]">
+        <p className="text-xs text-text-secondary font-medium">No memory selected</p>
+        <p className="text-xs text-text-tertiary max-w-[200px]">
           Select a memory from the list to view its full details
         </p>
       </div>
@@ -129,10 +129,10 @@ export function MemoryDetail() {
           <ArrowLeftIcon size={14} />
         </button>
         <div className="flex-1 min-w-0">
-          <h2 className="text-[13px] font-semibold text-text-primary tracking-[-0.3px] leading-snug">
+          <h2 className="text-title-md font-semibold text-text-primary tracking-[-0.3px] leading-snug">
             {selectedEntry.title}
           </h2>
-          <p className="text-[10px] text-text-secondary mt-0.5 leading-relaxed">
+          <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">
             {selectedEntry.key_point}
           </p>
         </div>
@@ -284,7 +284,7 @@ function ContentSection({
       <p className={cn("text-label font-medium mb-1", accent ? "text-memory" : "text-text-ghost")}>
         {title}
       </p>
-      <p className="text-[10px] text-text-primary leading-relaxed whitespace-pre-wrap">
+      <p className="text-xs text-text-primary leading-relaxed whitespace-pre-wrap">
         {value}
       </p>
     </div>

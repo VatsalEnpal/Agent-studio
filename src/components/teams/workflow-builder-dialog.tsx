@@ -188,7 +188,7 @@ export function WorkflowBuilderDialog() {
           {/* Templates section (only for create) */}
           {showTemplates && !isEdit && (
             <div className="px-4 py-3 border-b border-border-default">
-              <p className="text-[9px] font-medium text-text-tertiary uppercase tracking-wider mb-2">
+              <p className="text-2xs font-medium text-text-tertiary uppercase tracking-wider mb-2">
                 Start from a template
               </p>
               <div className="grid grid-cols-2 gap-2">
@@ -202,7 +202,7 @@ export function WorkflowBuilderDialog() {
                     >
                       <TplIcon className="w-3.5 h-3.5 text-text-secondary shrink-0 mt-0.5" />
                       <div className="min-w-0">
-                        <p className="text-[10px] font-medium text-text-primary">{tpl.name}</p>
+                        <p className="text-xs font-medium text-text-primary">{tpl.name}</p>
                         <p className="text-[8px] text-text-tertiary mt-0.5 line-clamp-2">{tpl.description}</p>
                         <p className="text-[8px] text-text-tertiary mt-1">{tpl.steps.length} steps</p>
                       </div>
@@ -212,7 +212,7 @@ export function WorkflowBuilderDialog() {
               </div>
               <button
                 onClick={() => setShowTemplates(false)}
-                className="mt-2 text-[9px] text-rooms hover:underline"
+                className="mt-2 text-2xs text-rooms hover:underline"
               >
                 Or start from scratch
               </button>
@@ -223,7 +223,7 @@ export function WorkflowBuilderDialog() {
             {/* Basic info */}
             <div className="grid grid-cols-[1fr_auto] gap-3">
               <div>
-                <label className="text-[9px] font-medium text-text-tertiary uppercase tracking-wider">Name</label>
+                <label className="text-2xs font-medium text-text-tertiary uppercase tracking-wider">Name</label>
                 <input
                   type="text"
                   value={draft.name}
@@ -233,7 +233,7 @@ export function WorkflowBuilderDialog() {
                 />
               </div>
               <div>
-                <label className="text-[9px] font-medium text-text-tertiary uppercase tracking-wider">Icon</label>
+                <label className="text-2xs font-medium text-text-tertiary uppercase tracking-wider">Icon</label>
                 <div className="mt-1 flex items-center gap-1">
                   {ICON_OPTIONS.map((opt) => {
                     const IconComp = opt.icon;
@@ -258,7 +258,7 @@ export function WorkflowBuilderDialog() {
             </div>
 
             <div>
-              <label className="text-[9px] font-medium text-text-tertiary uppercase tracking-wider">Description</label>
+              <label className="text-2xs font-medium text-text-tertiary uppercase tracking-wider">Description</label>
               <input
                 type="text"
                 value={draft.description}
@@ -271,12 +271,12 @@ export function WorkflowBuilderDialog() {
             {/* Steps */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-[9px] font-medium text-text-tertiary uppercase tracking-wider">
+                <label className="text-2xs font-medium text-text-tertiary uppercase tracking-wider">
                   Steps ({draft.steps.length})
                 </label>
                 <button
                   onClick={addStep}
-                  className="flex items-center gap-1 px-2 py-0.5 text-[9px] text-rooms hover:text-rooms/80 transition-all"
+                  className="flex items-center gap-1 px-2 py-0.5 text-2xs text-rooms hover:text-rooms/80 transition-all"
                 >
                   <PlusIcon className="w-3 h-3" />
                   Add Step
@@ -300,7 +300,7 @@ export function WorkflowBuilderDialog() {
               </div>
 
               {draft.steps.length === 0 && (
-                <div className="text-center py-6 text-[10px] text-text-tertiary">
+                <div className="text-center py-6 text-xs text-text-tertiary">
                   No steps defined. Add steps manually or select a template above.
                 </div>
               )}
@@ -318,14 +318,14 @@ export function WorkflowBuilderDialog() {
               <>
                 <button
                   onClick={close}
-                  className="px-3 py-1.5 text-[10px] text-text-secondary hover:text-text-primary bg-bg-elevated rounded transition-all"
+                  className="px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary bg-bg-elevated rounded transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={saving || !draft.name.trim()}
-                  className="px-3 py-1.5 text-[10px] font-medium text-bg-base bg-rooms rounded hover:bg-rooms/90 transition-all disabled:opacity-50 flex items-center gap-1.5"
+                  className="px-3 py-1.5 text-xs font-medium text-bg-base bg-rooms rounded hover:bg-rooms/90 transition-all disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {saving && <SpinnerIcon className="w-3 h-3 animate-spin" />}
                   {isEdit ? "Save" : "Create"}
@@ -362,7 +362,7 @@ function StepRow({
     <div className="flex items-start gap-2 p-2.5 bg-bg-base border border-border-default rounded">
       {/* Step number + reorder */}
       <div className="flex flex-col items-center gap-0.5 shrink-0 pt-1">
-        <span className="text-[9px] font-mono text-text-tertiary w-4 text-center">{index + 1}</span>
+        <span className="text-2xs font-mono text-text-tertiary w-4 text-center">{index + 1}</span>
         <button
           onClick={onMoveUp}
           disabled={index === 0}
@@ -386,19 +386,19 @@ function StepRow({
           value={step.name}
           onChange={(e) => onUpdate({ name: e.target.value })}
           placeholder="Step name"
-          className="w-full px-2 py-1 text-[10px] bg-bg-surface border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-rooms"
+          className="w-full px-2 py-1 text-xs bg-bg-surface border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-rooms"
         />
         <input
           type="text"
           value={step.description}
           onChange={(e) => onUpdate({ description: e.target.value })}
           placeholder="Description (optional)"
-          className="w-full px-2 py-1 text-[10px] bg-bg-surface border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-rooms"
+          className="w-full px-2 py-1 text-xs bg-bg-surface border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-rooms"
         />
         <select
           value={step.agent}
           onChange={(e) => onUpdate({ agent: e.target.value })}
-          className="w-full px-2 py-1 text-[10px] bg-bg-surface border border-border-default rounded text-text-primary focus:outline-none focus:border-rooms"
+          className="w-full px-2 py-1 text-xs bg-bg-surface border border-border-default rounded text-text-primary focus:outline-none focus:border-rooms"
         >
           <option value="">Assign agent...</option>
           {agents.map((a) => (
@@ -422,14 +422,14 @@ function StepRow({
 function StepPreview({ steps }: { steps: Array<{ id: string; name: string; agent: string }> }) {
   return (
     <div>
-      <p className="text-[9px] font-medium text-text-tertiary uppercase tracking-wider mb-2">Preview</p>
+      <p className="text-2xs font-medium text-text-tertiary uppercase tracking-wider mb-2">Preview</p>
       <div className="flex items-center gap-1 overflow-x-auto pb-1">
         {steps.map((step, idx) => (
           <div key={step.id} className="flex items-center gap-1 shrink-0">
             {idx > 0 && (
               <div className="w-4 h-px bg-border-default" />
             )}
-            <div className="flex items-center gap-1.5 px-2 py-1 bg-bg-base border border-border-default rounded text-[9px]">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-bg-base border border-border-default rounded text-2xs">
               <span className="w-3.5 h-3.5 flex items-center justify-center rounded-full bg-rooms/20 text-rooms text-[8px] font-mono shrink-0">
                 {idx + 1}
               </span>
