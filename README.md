@@ -4,93 +4,102 @@
 
 # Agent Studio
 
-A desktop app for running Claude Code sessions, agent teams, and automated workflows — all in one window.
+**A dashboard for managing Claude Code sessions, agent teams, and automated workflows.**
 
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org)
+[![Node 22+](https://img.shields.io/badge/node-22%2B-green.svg)](https://nodejs.org)
 
 </div>
 
+![Agent Studio](public/screenshot-teams.png)
+
+## Why
+
+Claude Code is powerful. You open a terminal, start a session, and it writes real code for you.
+
+But the moment you go beyond a single session, things fall apart:
+
+1. **You're stuck between terminals.** You have a frontend agent in one tab, a backend agent in another, QA in a third. They can't see each other's work. You're the human router, copy-pasting context between them.
+
+2. **Nothing carries over.** Every new session starts from zero. That thing your agent figured out yesterday about your API — gone. You explain the same context over and over.
+
+3. **Complex tasks need coordination, not just prompts.** "Scan the codebase, design the solution, build it, test it, review for security, then ship" — you can't do that in a single terminal session. You need steps, checkpoints, and the ability to approve before things move forward.
+
+Agent Studio is a single app that solves all three. Multiple terminal sessions side by side, agent-to-agent chat rooms, multi-step automated pipelines with human approval gates, and a shared knowledge base that persists across everything.
+
 ---
 
-## What You Get
+## What You Can Do
 
-When you open Agent Studio, you land on **Sessions** — a terminal grid where you run Claude Code.
+### Run multiple sessions at once
 
 ![Sessions](public/screenshot-sessions.png)
 
-Launch a session and you get a real interactive terminal (`node-pty` + xterm.js) with live stats: token count, cost, context %, model name. Run up to 6 sessions side by side. Use presets like Quick Chat, Start Sprint, or Security Audit — or configure everything yourself. Resume any past session with one click.
+Launch up to 6 Claude Code terminals in a grid. Each one is a full interactive session (`node-pty` + xterm.js) with live stats — tokens used, cost, context window %, model name. Use presets like Quick Chat or Security Audit to launch fast, or configure model, agent, and permissions yourself. Resume any past session with one click. `Cmd+Shift+N` to launch, `Cmd+K` to navigate.
 
----
-
-From Sessions, switch to **Teams** — chat rooms where your agents work together.
+### Get agents to work together
 
 ![Teams](public/screenshot-teams.png)
 
-Each room runs agents through the [Claude Agent SDK](https://docs.anthropic.com/en/docs/claude-code/sdk). You @mention an agent, it responds with clean text (no terminal noise). Agents take turns — one at a time, with depth limits so they don't loop. You see streaming responses and typing indicators. Think of it as Slack for your AI team.
+Create a chat room, assign agents (frontend, backend, QA, security, etc.), and give them a task. They collaborate through [@mentions](https://docs.anthropic.com/en/docs/claude-code/sdk) — one agent finds a problem, tags another to fix it, a third writes the test. A turn-based protocol keeps things orderly: one agent at a time, depth limits, no infinite loops. You see streaming responses in clean text, no terminal noise.
 
----
-
-For bigger tasks, there's **Sprints** — multi-step pipelines with gates.
+### Automate multi-step workflows
 
 ![Sprints](public/screenshot-sprints.png)
 
-Define a pipeline: PMO Scan → Readiness → Design → Build → Test → Security → Ship. Each gate shows pass, fail, or in-progress. Some gates need your approval before proceeding. The system estimates ETA from how fast previous gates completed. You can pause, resume, or cancel at any point.
+Define a pipeline with checkpoints: scan the codebase, check readiness, design, build, test, security review, ship. Each checkpoint passes, fails, or waits for your approval before the next one starts. The system tracks progress, estimates completion time, and logs every action. You stay in control — nothing ships without you saying so.
 
----
-
-Everything agents learn goes into **Knowledge** — a shared memory across all sessions.
+### Build shared knowledge
 
 ![Knowledge](public/screenshot-knowledge.png)
 
-When one agent figures out your API needs pagination headers, it writes that to memory. Next session, every agent knows it. You can search, filter by category (Learnings, Corrections, Decisions), pin important entries, or add your own. It's the institutional knowledge your agent team builds over time.
+When an agent learns something — your deploy needs a specific flag, a test is flaky on CI, the API requires pagination — it writes that to the knowledge base. Next session, every agent has it. Search, filter by category, pin important entries, or add your own notes. Over time, your agents get better at your specific codebase because they remember what worked and what didn't.
 
----
-
-Configure everything in **Settings**.
+### Configure everything
 
 ![Settings](public/screenshot-settings.png)
 
-Default model (Opus / Sonnet / Haiku), permissions, working directory. Per-event notifications — gate approvals, dangerous actions, task completion, session exit, context warnings. Multi-project workspace tracking with production repo safeguards. Keyboard shortcuts for everything.
+Default model (Opus / Sonnet / Haiku), permission level, working directory. Notifications for gate approvals, dangerous commands, task completion, session exits, and context warnings. Multi-project workspace with production repo safeguards. Keyboard shortcuts for everything.
 
 ---
 
-## Other Things It Does
+## Also Included
 
-- **Git** — auto-detects repos, shows branch + dirty state + ahead/behind, create PRs via GitHub CLI
-- **Dev Servers** — finds local servers running on your machine
-- **Automations** — scheduled headless Claude runs that produce reviewable reports
-- **Command Palette** — `Cmd+K` to navigate anywhere fast
-- **Onboarding** — first-run wizard analyzes your project and generates agents for it
-- **Mac App** — native Electron shell with system tray, notifications, and crash recovery
+- **Git integration** — auto-detects repos, shows branch + dirty state, create PRs via GitHub CLI
+- **Dev server monitor** — finds local dev servers running on your machine
+- **Automations** — scheduled headless Claude Code runs that produce reviewable reports
+- **Command palette** — `Cmd+K` to jump anywhere
+- **Setup wizard** — first-run onboarding that scans your project and generates agents for it
+- **Mac desktop app** — Electron shell with system tray, native notifications, crash recovery
 - **Docker** — `docker build -t agent-studio . && docker run -p 8080:8080 -v $HOME/.claude:$HOME/.claude agent-studio`
 
 ---
 
-## How It Works
+## Architecture
 
 ```
-┌────────────────────────────────────────────────────┐
-│  Electron (optional)  — mac shell, tray, recovery  │
-├────────────────────────────────────────────────────┤
-│  Next.js 16 + React 19  — UI, state, terminals     │
-├────────────────────────────────────────────────────┤
-│  Express 5  — API, WebSocket, file watchers         │
-├───────────────────────┬────────────────────────────┤
-│  node-pty              │  Claude Agent SDK           │
-│  (terminal sessions)   │  (room agents)              │
-└───────────────────────┴────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│  Electron (optional)  — mac shell, tray, recovery   │
+├─────────────────────────────────────────────────────┤
+│  Next.js 16 + React 19  — UI, state, terminals      │
+├─────────────────────────────────────────────────────┤
+│  Express 5  — API, WebSocket, file watchers          │
+├────────────────────────┬────────────────────────────┤
+│  node-pty               │  Claude Agent SDK           │
+│  (terminal sessions)    │  (agent chat rooms)         │
+└────────────────────────┴────────────────────────────┘
 ```
 
-Terminal sessions spawn Claude Code as a PTY process — you get a real terminal. Room agents use the SDK for structured chat — clean text, no ANSI. Both stream to the UI over WebSocket.
+Terminal sessions spawn Claude Code as a real PTY process — same as your regular terminal. Agent chat uses the [Claude Agent SDK](https://docs.anthropic.com/en/docs/claude-code/sdk) for structured conversations with clean text output. Both stream to the UI over WebSocket.
 
-**Tech:** Next.js 16, React 19, TypeScript (strict), Tailwind CSS, Zustand, Express 5, node-pty, xterm.js, Claude Agent SDK, Electron, chokidar, esbuild, Vitest.
+**Stack:** Next.js 16 · React 19 · TypeScript (strict) · Tailwind CSS · Zustand · Express 5 · node-pty · xterm.js · Claude Agent SDK · Electron · chokidar · esbuild · Vitest
 
 ---
 
-## Getting Started
+## Get Started
 
-**Requirements:** Node.js 22+ and [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) authenticated.
+**You need:** Node.js 22+ and [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated.
 
 ```bash
 git clone https://github.com/VatsalEnpal/Agent-studio.git
@@ -99,7 +108,7 @@ npm install
 npm run dev
 ```
 
-Open [localhost:8080](http://localhost:8080). A setup wizard walks you through first-time config.
+Open [localhost:8080](http://localhost:8080). A setup wizard walks you through first-time configuration — project paths, agent selection, preferences.
 
 **Mac desktop app:**
 ```bash
@@ -111,36 +120,20 @@ npm run electron:dev
 npm start
 ```
 
-**All commands:**
-
 | Command | What it does |
 |---------|-------------|
-| `npm run dev` | Dev server with hot reload → localhost:8080 |
-| `npm run electron:dev` | Dev server + Electron window together |
-| `npm start` | Build and start production server |
+| `npm run dev` | Dev server → localhost:8080 |
+| `npm run electron:dev` | Dev server + Electron together |
+| `npm start` | Build + start production server |
 | `npm run build:mac` | Build macOS `.dmg` |
-| `npm run type-check` | TypeScript strict mode check |
-| `npm run test` | Run Vitest tests |
-
----
-
-## Keyboard Shortcuts
-
-| Action | Shortcut |
-|--------|----------|
-| New session | `Cmd+Shift+N` |
-| Command palette | `Cmd+K` |
-| Toggle sidebar | `Cmd+Shift+\` |
-| Focus session 1–6 | `Cmd+Shift+1–6` |
-| Fullscreen pane | `Cmd+Enter` |
-| Navigate sections | `Cmd+1–4` |
-| Settings | `Cmd+,` |
+| `npm run type-check` | TypeScript strict check |
+| `npm run test` | Vitest tests |
 
 ---
 
 ## Docs
 
-- **[HOWTO.md](HOWTO.md)** — full user guide: features, shortcuts, agents, automations, troubleshooting
+- **[HOWTO.md](HOWTO.md)** — full user guide with features, shortcuts, agents, automations, and troubleshooting
 - **[CLAUDE.md](CLAUDE.md)** — contributor and agent instructions
 
 ---
