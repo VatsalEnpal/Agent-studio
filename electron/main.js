@@ -290,8 +290,8 @@ let notifyWs = null;
 
 function connectNotifyWs(port) {
   try {
-    log(`[notify-ws] Connecting to ws://127.0.0.1:${port}`);
-    notifyWs = new WebSocket(`ws://127.0.0.1:${port}`);
+    log(`[notify-ws] Connecting to ws://127.0.0.1:${port}/ws`);
+    notifyWs = new WebSocket(`ws://127.0.0.1:${port}/ws`);
     notifyWs.on("open", () => {
       log("[notify-ws] Connected");
     });
