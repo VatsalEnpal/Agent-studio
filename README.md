@@ -102,7 +102,7 @@ npm install
 npm run dev
 ```
 
-Open [localhost:8080](http://localhost:8080). A setup wizard walks you through first-time configuration — project paths, agent selection, preferences.
+Open [localhost:8080](http://localhost:8080). On first run, the setup wizard checks your Claude Code authentication and walks you through configuration — project paths, agent selection, preferences.
 
 **Mac desktop app:**
 ```bash
