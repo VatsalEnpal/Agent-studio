@@ -290,28 +290,50 @@ let notifyWs = null;
 
 function connectNotifyWs(port) {
   try {
+    log(`[notify-ws] Connecting to ws://127.0.0.1:${port}`);
     notifyWs = new WebSocket(`ws://127.0.0.1:${port}`);
+    notifyWs.on("open", () => {
+      log("[notify-ws] Connected");
+    });
     notifyWs.on("message", (data) => {
       try {
         const msg = JSON.parse(data.toString());
-        if (msg.type === "room-needs-user") {
+        if (msg.type === "room-needs-user" || msg.type === "room-agent-typing") {
+          // Only notify on needs-user
+          if (msg.type !== "room-needs-user") return;
+          log(`[notify-ws] Agent needs user: ${JSON.stringify(msg.payload)}`);
+          log(`[notify-ws] Notification.isSupported: ${Notification.isSupported()}`);
           if (Notification.isSupported()) {
+            const agentId = msg.payload?.agentId ?? "An agent";
             const n = new Notification({
               title: "Agent Studio",
               body: msg.payload?.reason === "depth-limit"
                 ? "Agent chain reached depth limit — your input needed"
-                : `Agent ${msg.payload?.agentId ?? "unknown"} needs your input`,
+                : `${agentId} mentioned you`,
               silent: false,
             });
             n.on("click", () => { if (mainWindow) mainWindow.focus(); });
+            n.on("show", () => { log("[notify-ws] Notification shown"); });
+            n.on("failed", (e) => { log(`[notify-ws] Notification failed: ${e}`); });
             n.show();
+          } else {
+            log("[notify-ws] Notifications not supported on this system");
           }
         }
-      } catch {}
+      } catch (err) {
+        log(`[notify-ws] Parse error: ${err.message}`);
+      }
     });
-    notifyWs.on("close", () => { setTimeout(() => connectNotifyWs(port), 5000); });
-    notifyWs.on("error", () => {});
-  } catch {}
+    notifyWs.on("close", () => {
+      log("[notify-ws] Disconnected, reconnecting in 5s");
+      setTimeout(() => connectNotifyWs(port), 5000);
+    });
+    notifyWs.on("error", (err) => {
+      log(`[notify-ws] Error: ${err.message}`);
+    });
+  } catch (err) {
+    log(`[notify-ws] Failed to connect: ${err.message}`);
+  }
 }
 
 // ---------------------------------------------------------------------------
