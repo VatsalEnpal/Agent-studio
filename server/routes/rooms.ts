@@ -26,6 +26,9 @@ export function roomsRoutes(
 
   // Per-room ConversationProtocol instances for @mention chaining
   const protocols = new Map<string, ConversationProtocol>();
+  // Track agent turns per room since last human message — for soft stop
+  const agentTurnCounts = new Map<string, number>();
+  const SOFT_STOP_TURNS = 6;
 
   /** Lazily create (or return existing) ConversationProtocol for a room. */
   function getOrCreateProtocol(roomId: string): ConversationProtocol {
@@ -74,18 +77,30 @@ export function roomsRoutes(
             .filter((a) => a.id !== agentId)
             .map((a) => `@${a.id} (${a.name})`)
             .join(", ");
-          const contextPrefix = `You are in a TEAM ROOM called "#${room.name}".
+          const contextPrefix = `You are ${agent?.name ?? agentId} in a group chat called "#${room.name}".
 Topic: ${room.topic}
-Your role: ${agent?.name ?? agentId}
-Other agents in this room: ${otherAgents}
+Teammates: ${otherAgents}
 
-HOW THIS ROOM WORKS:
-- This is a group chat, like Slack. Your response IS your message to the room.
-- To ask another agent to do something, write @agentname in your response (e.g. "@backend-worker can you check the database?"). The system will automatically route your message to them.
-- To ask the human a question or need approval, write @user in your response.
-- Do NOT use SendMessage tool here — just write @mentions in your text.
-- Do NOT introduce yourself or explain your role. Just do the work.
-- Be concise. Give your findings/output directly. No preamble.
+ROOM RULES — read carefully, this is NOT a normal Claude session:
+
+HOW IT WORKS: You can use all your tools (read files, query databases, run commands) — the room only sees your FINAL response. Do your work first, then write a brief message with your findings. You get ONE message per turn. You cannot "come back later."
+
+STYLE:
+- Keep your room message SHORT — a few sentences with key findings, then @mention the next agent.
+- Do NOT write reports, tables, or "comprehensive analyses." Just the headline + @mention.
+- Ask ONE question at a time.
+- ALWAYS @mention who you're talking to. Without @mention, nobody receives your message.
+- To ask the human: @user
+- Do NOT use the SendMessage tool — write @agentname directly in your text.
+- Never introduce yourself. Never say "Let me check" without actually checking and reporting.
+
+EXAMPLE good message:
+"Checked Notion — 5 tickets look stale (Week 1-2 leftovers). @frontend-worker are these 3 features actually shipped? [list]. @backend-worker is the migration ticket still needed?"
+
+EXAMPLE bad message:
+"I'll start by pulling tickets from Notion and loading relevant memory, then coordinate with frontend and backend agents..." (this is useless — do the work, then report)
+
+You are a teammate on Slack, not an assistant writing a report.
 ---
 `;
           messageToSend = contextPrefix + prompt;
@@ -154,9 +169,25 @@ HOW THIS ROOM WORKS:
         // --- Protocol chaining: route @mentions to next agent(s) ---
         const protocol = protocols.get(roomId);
         if (protocol) {
-          // Parse from FULL text, not truncated
+          // Track agent turns for soft stop
+          const turns = (agentTurnCounts.get(roomId) ?? 0) + 1;
+          agentTurnCounts.set(roomId, turns);
+
+          // Soft stop: after N agent turns without human input, pause and ask
+          if (turns >= SOFT_STOP_TURNS) {
+            protocol.pause();
+            agentTurnCounts.set(roomId, 0);
+            roomManager.addMessage(roomId, {
+              from: "system",
+              text: "Agents have been discussing for a while. Send a message to continue, or let them wrap up.",
+              type: "system",
+            });
+            broadcast("room-needs-user", { roomId, agentId, reason: "soft-stop" });
+            return;
+          }
+
           const mentions = parseMentions(text);
-          console.log(`[room-chain] Agent ${agentId} finished. Mentions found: [${mentions.join(", ")}]. Protocol exists: true. Queue: ${protocol.queueLength}. Active: ${protocol.activeAgent}`);
+          console.log(`[room-chain] Agent ${agentId} finished (turn ${turns}/${SOFT_STOP_TURNS}). Mentions: [${mentions.join(", ")}]`);
 
           // If agent mentioned the user, pause the chain and notify
           if (mentions.includes("user") || mentions.includes("vatsal")) {
@@ -264,6 +295,7 @@ HOW THIS ROOM WORKS:
         if (protocol.isPaused) {
           protocol.resume();
         }
+        agentTurnCounts.set(roomId, 0); // Reset turn counter on human input
         protocol.humanMessage(text, "orchestrator");
       }
 
