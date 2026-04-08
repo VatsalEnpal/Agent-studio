@@ -378,7 +378,23 @@ async function startServer() {
     nodeBin,
     spawnArgs,
     {
-      env: { ...process.env, PORT: String(port), NODE_ENV: app.isPackaged ? "production" : (process.env.NODE_ENV || "development") },
+      env: {
+        ...process.env,
+        PORT: String(port),
+        NODE_ENV: app.isPackaged ? "production" : (process.env.NODE_ENV || "development"),
+        // Electron GUI apps on macOS don't inherit terminal PATH.
+        // Ensure common bin dirs are included so the server can find claude, git, etc.
+        PATH: [
+          path.join(os.homedir(), ".local", "bin"),
+          path.join(os.homedir(), ".bun", "bin"),
+          "/opt/homebrew/bin",
+          "/opt/homebrew/sbin",
+          "/usr/local/bin",
+          "/usr/bin",
+          "/bin",
+          process.env.PATH || "",
+        ].join(":"),
+      },
       cwd,
       stdio: ["ignore", "pipe", "pipe"],
     },
