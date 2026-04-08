@@ -414,6 +414,12 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                         <CheckIcon size={12} className="text-sprints shrink-0" />
                         <span className="text-xs text-sprints flex-1">{gate.name} ready for approval</span>
                         <button
+                          onClick={handleViewSpec}
+                          className="px-2 py-1 text-xs font-medium text-sprints bg-sprints/10 rounded-md hover:bg-sprints/20 transition-all"
+                        >
+                          View full spec
+                        </button>
+                        <button
                           onClick={() => void handleApproveGate(gate.id)}
                           disabled={approvingGate === gate.id}
                           className="px-3 py-1 text-xs font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100"

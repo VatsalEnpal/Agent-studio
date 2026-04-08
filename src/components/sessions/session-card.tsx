@@ -410,11 +410,11 @@ export function SessionCard({
         )}
       </div>
 
-      {/* Row 2: cwd + live timer + model + time */}
+      {/* Row 2: preview/cwd + live timer + model + time */}
       <div className="flex items-center gap-2 pl-[13px]">
-        {session.cwd && (
+        {(session.preview || session.cwd) && (
           <span className="text-xs text-text-tertiary truncate flex-1 min-w-0">
-            {shortenCwd(session.cwd)}
+            {session.preview ?? shortenCwd(session.cwd)}
           </span>
         )}
 

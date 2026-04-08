@@ -210,14 +210,15 @@ export function SessionSidebar({
           data.map((d) => {
             // Reconstruct the full absolute path — the API strips the leading /
             const cwd = d.project.startsWith("/") ? d.project : `/${d.project}`;
-            // Use preview (first user message) as display name when available,
-            // otherwise fall back to last path segment + agent
-            const shortProject = cwd.split("/").filter(Boolean).pop() ?? d.projectShort;
-            const displayName = d.preview
-              ? d.preview.length > 50 ? d.preview.slice(0, 47) + "..." : d.preview
-              : d.agent
-                ? `${shortProject} (${d.agent})`
-                : shortProject;
+            // Display name: project name + agent (if any)
+            // e.g. "InPipeline — orchestrator" or just "InPipeline"
+            const displayName = d.agent
+              ? `${d.projectShort} — ${d.agent}`
+              : d.projectShort;
+            // Preview: first 40 chars of the first user message
+            const previewText = d.preview
+              ? d.preview.length > 40 ? d.preview.slice(0, 37) + "..." : d.preview
+              : undefined;
             return {
               id: d.id,
               name: displayName,
@@ -229,6 +230,7 @@ export function SessionSidebar({
               createdAt: d.modified,
               updatedAt: d.modified,
               meta: d.agent ? { agent: d.agent } : undefined,
+              preview: previewText,
             };
           }),
         );
