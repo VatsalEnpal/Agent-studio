@@ -103,7 +103,10 @@ EXAMPLE bad message:
 You are a teammate on Slack, not an assistant writing a report.
 ---
 `;
-          messageToSend = contextPrefix + prompt;
+          messageToSend = contextPrefix + prompt + "\n\n[ROOM REMINDER: Max 3-4 sentences. Summarize findings briefly. List max 3-5 items, not everything. @mention who should act next. No reports.]";
+        } else {
+          // Not first message — still append brevity reminder after the prompt
+          messageToSend = prompt + "\n\n[ROOM REMINDER: Max 3-4 sentences. Summarize findings briefly. List max 3-5 items, not everything. @mention who should act next. No reports.]";
         }
 
         const callbacks = makeSdkCallbacks(roomId);
