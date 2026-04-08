@@ -29,6 +29,9 @@ export function RoomChat() {
 
   const typingAgents = useRoomsStore((s) => s.typingAgents);
   const streamingText = useRoomsStore((s) => s.streamingText);
+  const waitingForUser = useRoomsStore((s) =>
+    room ? (s.waitingForUser[room.id] ?? false) : false,
+  );
   const roomTyping = room ? (typingAgents[room.id] ?? []) : [];
   const typingAgentIds = roomTyping.map((ta) => ta.agentId);
 
@@ -132,6 +135,9 @@ export function RoomChat() {
     if (!text || !selectedRoomId) return;
     setInput("");
     setShowMentions(false);
+
+    // Clear waiting-for-user state — the human has responded
+    useRoomsStore.getState().clearWaitingForUser(selectedRoomId);
 
     const mentionMatch = text.match(/@(\w+)/);
     const to = mentionMatch ? mentionMatch[1] : undefined;
@@ -394,6 +400,16 @@ export function RoomChat() {
               </div>
             )}
           </div>
+
+          {/* Waiting-for-user banner */}
+          {waitingForUser && (
+            <div className="px-3 py-2 border-t border-amber-500/20 bg-amber-500/10 flex items-center gap-2 shrink-0">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+              <span className="text-xs text-amber-200 font-medium">
+                Agents are waiting for your input. Send a message to continue the conversation.
+              </span>
+            </div>
+          )}
 
           {/* Typing indicator bar */}
           <TypingIndicator

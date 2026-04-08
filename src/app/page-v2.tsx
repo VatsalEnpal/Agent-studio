@@ -306,6 +306,16 @@ export default function PageV2() {
       },
     );
 
+    const unsubRoomNeedsUser = wsClient.on(
+      "room-needs-user",
+      (msg: WsMessage) => {
+        const payload = msg.payload as { roomId: string };
+        if (payload?.roomId) {
+          useRoomsStore.getState().setWaitingForUser(payload.roomId);
+        }
+      },
+    );
+
     wsClient.connect(`ws://${window.location.host}/ws`);
 
     return () => {
@@ -316,6 +326,7 @@ export default function PageV2() {
       unsubRoomApproval();
       unsubRoomTyping();
       unsubRoomStreaming();
+      unsubRoomNeedsUser();
     };
   }, [setSessions, setRepos]);
 

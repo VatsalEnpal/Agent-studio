@@ -184,7 +184,7 @@ export function SessionItem({
               className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-bg-elevated shrink-0"
               title="Rename session"
             >
-              <EditIcon size={10} className="text-text-ghost" />
+              <EditIcon size={10} className="text-text-tertiary" />
             </button>
           </>
         )}
@@ -224,18 +224,18 @@ export function SessionItem({
       {/* Row 2: uptime + cwd + cost */}
       <div className="flex items-center gap-2 pl-[13px]">
         {isRunning && (
-          <span className="flex items-center gap-0.5 text-xs text-text-ghost">
+          <span className="flex items-center gap-0.5 text-xs text-text-tertiary">
             {liveUptime}
           </span>
         )}
         {session.cwd && (
-          <span className="text-xs text-text-ghost truncate flex-1 min-w-0">
+          <span className="text-xs text-text-tertiary truncate flex-1 min-w-0">
             {shortenCwd(session.cwd)}
           </span>
         )}
         {hasContext && (
           <span className="flex items-center gap-1 shrink-0">
-            <span className="text-label text-text-ghost">
+            <span className="text-label text-text-tertiary">
               {contextPercent}%
             </span>
             <span className="w-10 h-1 rounded-full bg-border-default overflow-hidden">

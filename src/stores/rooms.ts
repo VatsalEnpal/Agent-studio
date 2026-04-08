@@ -46,6 +46,9 @@ interface RoomsState {
   typingAgents: Record<string, TypingAgent[]>;    // roomId -> agent activity info
   streamingText: Record<string, string>;           // agentId -> accumulated text so far
 
+  // Chain-paused state: true when agents are waiting for human input
+  waitingForUser: Record<string, boolean>;         // roomId -> boolean
+
   setRooms: (rooms: Room[]) => void;
   addRoom: (room: Room) => void;
   selectRoom: (id: string | null) => void;
@@ -55,6 +58,10 @@ interface RoomsState {
   updateApproval: (roomId: string, messageId: string, approved: boolean) => void;
   markRoomSeen: (roomId: string) => void;
   markAllSeen: () => void;
+
+  // Waiting-for-user actions
+  setWaitingForUser: (roomId: string) => void;
+  clearWaitingForUser: (roomId: string) => void;
 
   // Streaming actions
   setAgentTyping: (roomId: string, agentId: string) => void;
@@ -70,6 +77,7 @@ export const useRoomsStore = create<RoomsState>((set) => ({
   lastSeenByRoom: {},
   typingAgents: {},
   streamingText: {},
+  waitingForUser: {},
 
   setRooms: (rooms) => set({ rooms }),
   addRoom: (room) => set((state) => ({ rooms: [...state.rooms, room] })),
@@ -147,6 +155,19 @@ export const useRoomsStore = create<RoomsState>((set) => ({
           : r,
       ),
     })),
+
+  // --- Waiting-for-user actions ---
+  setWaitingForUser: (roomId) =>
+    set((state) => ({
+      waitingForUser: { ...state.waitingForUser, [roomId]: true },
+    })),
+
+  clearWaitingForUser: (roomId) =>
+    set((state) => {
+      const next = { ...state.waitingForUser };
+      delete next[roomId];
+      return { waitingForUser: next };
+    }),
 
   // --- Streaming actions ---
   setAgentTyping: (roomId, agentId) =>

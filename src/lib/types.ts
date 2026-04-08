@@ -24,6 +24,8 @@ export interface Session {
   createdAt: number;
   updatedAt: number;
   meta?: SessionMeta;
+  /** Short preview text (e.g. first user message) shown as secondary line in history */
+  preview?: string;
 }
 
 export interface SessionUsageData {
