@@ -1,12 +1,10 @@
 "use client";
 
 import { useMemo, useState, useCallback } from "react";
-import { CloseIcon, CheckIcon, SprintsIcon, ArrowLeftIcon, BoltIcon } from "@/components/ui/icons";
+import { CloseIcon, CheckIcon, SprintsIcon, ArrowLeftIcon, BoltIcon, ChevronRightIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useSprintsStore, type Sprint } from "@/stores/sprints";
 import { useToastStore } from "@/stores/toast";
-import { GateStepper } from "./gate-stepper";
-import { AgentList } from "./agent-list";
 import { ActivityLog } from "./activity-log";
 
 interface SprintDetailProps {
@@ -65,25 +63,13 @@ function estimateETA(sprint: Sprint): string | null {
   return `~${etaHr}h ${etaMin % 60}m`;
 }
 
-function ExpandedGatePanel({ gate, onClose }: { gate: Sprint["gates"][number]; onClose: () => void }) {
+function ExpandedGatePanel({ gate }: { gate: Sprint["gates"][number] }) {
   const rc = gate.richContent as Record<string, unknown> | null | undefined;
   const gateChecks = rc?.gateChecks as string[] | undefined;
   const buildSummary = rc?.buildSummary as string[] | undefined;
 
   return (
-    <div className="px-4 py-3 border-b border-border-default bg-bg-elevated">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold text-text-primary">
-          {gate.name}
-        </span>
-        <button
-          onClick={onClose}
-          className="p-0.5 text-text-tertiary hover:text-text-secondary transition-all rounded"
-        >
-          <CloseIcon size={12} />
-        </button>
-      </div>
-
+    <div className="px-4 py-3 bg-bg-elevated/50 border-t border-border-subtle">
       {gate.details && (
         <p className="text-xs text-text-secondary mb-2 leading-relaxed">
           {gate.details}
@@ -178,8 +164,6 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
   const totalGates = sprint.gates.length;
   const progressPct = totalGates > 0 ? Math.round((passedGates / totalGates) * 100) : 0;
 
-  const expandedGate = sprint.gates.find((g) => g.id === expandedGateId);
-
   const handleApproveGate = useCallback(async (gateId: string) => {
     setApprovingGate(gateId);
     try {
@@ -192,6 +176,24 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
       addToast("Failed to approve gate", "error");
     } finally {
       setApprovingGate(null);
+    }
+  }, [sprint.id, addToast]);
+
+  const handlePause = useCallback(async () => {
+    try {
+      await fetch(`/api/sprints/${sprint.id}/pause`, { method: "POST" });
+      addToast("Sprint paused", "success");
+    } catch {
+      addToast("Failed to pause sprint", "error");
+    }
+  }, [sprint.id, addToast]);
+
+  const handleResume = useCallback(async () => {
+    try {
+      await fetch(`/api/sprints/${sprint.id}/resume`, { method: "POST" });
+      addToast("Sprint resumed", "success");
+    } catch {
+      addToast("Failed to resume sprint", "error");
     }
   }, [sprint.id, addToast]);
 
@@ -213,28 +215,11 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
     }
   }, [sprint.id, specPanelOpen, setSpecPanel, setSpecContent, setSpecLoading]);
 
-  // Find gates that have an action (approve/go buttons)
-  const actionableGates = useMemo(() => {
-    return sprint.gates.filter(
-      (g) => g.action && (g.status === "in_progress" || g.status === "not_started"),
-    );
-  }, [sprint.gates]);
-
-  // Find gate that's ready for approval (in_progress with all requirements met)
-  const readyGate = useMemo(() => {
-    return sprint.gates.find(
-      (g) =>
-        g.status === "in_progress" &&
-        g.requirements.length > 0 &&
-        g.requirements.every((r) => r.met),
-    );
-  }, [sprint.gates]);
-
   return (
     <div className="flex flex-col h-full font-sans">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-border-default shrink-0 overflow-hidden">
-        <div className="flex items-center gap-2 min-w-0">
+      <div className="px-4 py-3 border-b border-border-default shrink-0">
+        <div className="flex items-center gap-2">
           {onBack && (
             <button
               onClick={onBack}
@@ -251,7 +236,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
             {badge.label}
           </span>
           {totalGates > 0 && (
-            <div className="flex items-center gap-1.5 ml-1">
+            <div className="flex items-center gap-1.5">
               <div className="w-16 h-1.5 bg-border-default rounded-full overflow-hidden">
                 <div
                   className={cn(
@@ -269,7 +254,25 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
               </span>
             </div>
           )}
+
+          {/* Pause/Resume + View Spec + elapsed + ETA */}
           <div className="flex items-center gap-2 ml-auto shrink-0">
+            {sprint.status === "in_progress" && (
+              <button
+                onClick={handlePause}
+                className="px-2 py-0.5 text-xs font-medium text-sprints bg-sprints/10 rounded hover:bg-sprints/20 active:scale-[0.98] transition-all"
+              >
+                Pause
+              </button>
+            )}
+            {sprint.status === "paused" && (
+              <button
+                onClick={handleResume}
+                className="px-2 py-0.5 text-xs font-medium text-sessions bg-sessions/10 rounded hover:bg-sessions/20 active:scale-[0.98] transition-all"
+              >
+                Resume
+              </button>
+            )}
             <button
               onClick={handleViewSpec}
               className={cn(
@@ -280,7 +283,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
               )}
             >
               <SprintsIcon size={12} />
-              View Spec
+              Spec
             </button>
             <span className="text-xs text-text-ghost">
               {formatElapsed(sprint.startedAt)}
@@ -292,77 +295,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
             )}
           </div>
         </div>
-
-        {/* Gate stepper */}
-        {sprint.gates.length > 0 && (
-          <div className="mt-3 overflow-x-auto">
-            <GateStepper
-              gates={sprint.gates}
-              expandedGateId={expandedGateId}
-              onGateClick={(id) =>
-                setExpandedGate(expandedGateId === id ? null : id)
-              }
-              onApprove={handleApproveGate}
-              approvingGate={approvingGate}
-            />
-          </div>
-        )}
       </div>
-
-      {/* Gate approval banner */}
-      {readyGate && (
-        <div className="px-4 py-2 bg-sprints/5 border-b border-sprints/20 flex items-center gap-2">
-          <CheckIcon size={12} className="text-sprints shrink-0" />
-          <span className="text-xs font-medium text-sprints flex-1">
-            {readyGate.name} ready for approval
-          </span>
-          <button
-            onClick={() => void handleApproveGate(readyGate.id)}
-            disabled={approvingGate === readyGate.id}
-            className="px-3 py-1 text-xs font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100"
-          >
-            {approvingGate === readyGate.id ? "Approving..." : "Approve"}
-          </button>
-          <button
-            onClick={() => setExpandedGate(readyGate.id)}
-            className="px-2 py-1 text-xs font-medium text-sprints bg-sprints/10 rounded-md hover:bg-sprints/20 active:scale-[0.98] transition-all"
-          >
-            Details
-          </button>
-        </div>
-      )}
-
-      {/* Action banners for gates with explicit actions */}
-      {actionableGates.filter((g) => g.id !== readyGate?.id).map((gate) => (
-        <div key={gate.id} className="px-4 py-2 bg-sprints/5 border-b border-sprints/20 flex items-center gap-2">
-          <BoltIcon size={12} className="text-sprints shrink-0" />
-          <div className="flex-1 min-w-0">
-            <span className="text-xs font-medium text-text-primary block">
-              {gate.name}
-            </span>
-            {gate.details && (
-              <span className="text-xs text-text-ghost block mt-0.5 truncate">
-                {gate.details}
-              </span>
-            )}
-          </div>
-          <button
-            onClick={() => void handleApproveGate(gate.id)}
-            disabled={approvingGate === gate.id}
-            className="px-2.5 py-1 text-xs font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 transition-all disabled:opacity-50"
-          >
-            {approvingGate === gate.id ? "..." : (gate.action?.label ?? "Approve")}
-          </button>
-        </div>
-      ))}
-
-      {/* Expanded gate details */}
-      {expandedGate && (
-        <ExpandedGatePanel
-          gate={expandedGate}
-          onClose={() => setExpandedGate(null)}
-        />
-      )}
 
       {/* Tabs */}
       <div className="px-4 border-b border-border-default shrink-0 flex gap-1">
@@ -417,118 +350,126 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
         )}
 
         {activeTab === "overview" ? (
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
-            {/* Agents section */}
-            {sprint.agents.length > 0 && (
-              <div>
-                <h4 className="text-xs font-medium uppercase tracking-[0.5px] text-text-ghost mb-1.5">
-                  Agents
-                </h4>
-                <AgentList agents={sprint.agents} />
-              </div>
-            )}
+          <div className="flex-1 overflow-y-auto scrollbar-thin">
+            {/* Vertical gate list — the main content */}
+            <div className="divide-y divide-border-default">
+              {sprint.gates.map((gate) => {
+                const isPassed = gate.status === "passed";
+                const isCurrent = gate.status === "in_progress";
+                const isFailed = gate.status === "failed";
+                const isExpanded = expandedGateId === gate.id;
+                const isReady = isCurrent && gate.requirements.length > 0 && gate.requirements.every((r) => r.met);
+                const hasAction = gate.action && (isCurrent || gate.status === "not_started");
 
-            {/* Gates timeline */}
-            <div>
-              <h4 className="text-xs font-medium uppercase tracking-[0.5px] text-text-ghost mb-1.5">
-                Gates
-              </h4>
-              <div className="relative">
-                {sprint.gates.map((gate, idx) => {
-                  const isLast = idx === sprint.gates.length - 1;
-                  const isPassed = gate.status === "passed";
-                  const isCurrent = gate.status === "in_progress";
-                  const isFailed = gate.status === "failed";
-
-                  return (
+                return (
+                  <div key={gate.id}>
+                    {/* Gate row */}
                     <button
-                      key={gate.id}
-                      onClick={() => setExpandedGate(expandedGateId === gate.id ? null : gate.id)}
-                      className="flex items-start gap-3 w-full text-left group relative"
+                      onClick={() => setExpandedGate(isExpanded ? null : gate.id)}
+                      className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-bg-elevated/50 transition-all"
                     >
-                      {/* Timeline track */}
-                      <div className="flex flex-col items-center shrink-0 pt-0.5">
-                        {/* Node */}
-                        <div
-                          className={cn(
-                            "w-2.5 h-2.5 rounded-full border-[1.5px] shrink-0 z-10",
-                            isPassed && "bg-sessions border-sessions",
-                            isCurrent && "bg-sprints border-sprints animate-pulse-dot",
-                            isFailed && "bg-error border-error",
-                            !isPassed && !isCurrent && !isFailed && "bg-bg-base border-border-default",
-                          )}
-                        />
-                        {/* Connecting line */}
-                        {!isLast && (
-                          <div
-                            className={cn(
-                              "w-[1.5px] flex-1 min-h-[24px]",
-                              isPassed ? "bg-sessions/40" : "bg-border-default",
-                            )}
-                          />
-                        )}
-                      </div>
-
-                      {/* Content */}
+                      {/* Status dot */}
                       <div className={cn(
-                        "flex-1 min-w-0 pb-3 -mt-0.5",
-                        "group-hover:bg-bg-elevated/50 rounded-md px-2 py-1 -ml-1 transition-all",
+                        "w-2.5 h-2.5 rounded-full shrink-0",
+                        isPassed && "bg-sessions",
+                        isCurrent && "bg-sprints animate-pulse-dot",
+                        isFailed && "bg-error",
+                        !isPassed && !isCurrent && !isFailed && "bg-border-default",
+                      )} />
+
+                      {/* Gate name */}
+                      <span className={cn(
+                        "text-xs font-medium flex-1 truncate",
+                        isPassed ? "text-text-primary" : isCurrent ? "text-sprints" : isFailed ? "text-error" : "text-text-tertiary",
                       )}>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-text-primary font-medium flex-1 truncate">
-                            {gate.name}
-                          </span>
-                          <span className={cn(
-                            "text-2xs font-medium px-1.5 py-0.5 rounded-full shrink-0",
-                            isPassed && "bg-sessions/10 text-sessions",
-                            isCurrent && "bg-sprints/10 text-sprints",
-                            isFailed && "bg-error/10 text-error",
-                            !isPassed && !isCurrent && !isFailed && "bg-bg-input text-text-tertiary",
-                          )}>
-                            {isPassed ? "Passed" : isCurrent ? "In Progress" : isFailed ? "Failed" : "Pending"}
-                          </span>
-                        </div>
-                        {gate.details && (
-                          <p className="text-2xs text-text-ghost mt-0.5 truncate">
-                            {gate.details}
-                          </p>
-                        )}
-                      </div>
+                        {gate.name}
+                      </span>
+
+                      {/* Status label */}
+                      <span className={cn(
+                        "text-2xs font-medium px-1.5 py-0.5 rounded-full shrink-0",
+                        isPassed && "bg-sessions/10 text-sessions",
+                        isCurrent && "bg-sprints/10 text-sprints",
+                        isFailed && "bg-error/10 text-error",
+                        !isPassed && !isCurrent && !isFailed && "text-text-ghost",
+                      )}>
+                        {isPassed ? "Passed" : isCurrent ? "In Progress" : isFailed ? "Failed" : "Pending"}
+                      </span>
+
+                      {/* Expand chevron */}
+                      <ChevronRightIcon size={14} className={cn(
+                        "text-text-ghost transition-transform",
+                        isExpanded && "rotate-90",
+                      )} />
                     </button>
-                  );
-                })}
-              </div>
+
+                    {/* Expanded details — inline below the gate */}
+                    {isExpanded && (
+                      <ExpandedGatePanel gate={gate} />
+                    )}
+
+                    {/* Approve button for gates ready for approval */}
+                    {isReady && (
+                      <div className="px-4 py-2 bg-sprints/5 flex items-center gap-2">
+                        <CheckIcon size={12} className="text-sprints shrink-0" />
+                        <span className="text-xs text-sprints flex-1">{gate.name} ready for approval</span>
+                        <button
+                          onClick={() => void handleApproveGate(gate.id)}
+                          disabled={approvingGate === gate.id}
+                          className="px-3 py-1 text-xs font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100"
+                        >
+                          {approvingGate === gate.id ? "Approving..." : "Approve"}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Action button for gates with explicit actions (not already showing approve) */}
+                    {hasAction && !isReady && (
+                      <div className="px-4 py-2 bg-sprints/5 flex items-center gap-2">
+                        <BoltIcon size={12} className="text-sprints shrink-0" />
+                        <span className="text-xs font-medium text-text-primary flex-1">{gate.name}</span>
+                        <button
+                          onClick={() => void handleApproveGate(gate.id)}
+                          disabled={approvingGate === gate.id}
+                          className="px-2.5 py-1 text-xs font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 transition-all disabled:opacity-50"
+                        >
+                          {approvingGate === gate.id ? "..." : (gate.action?.label ?? "Approve")}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
-            {/* Sprint info */}
-            <div>
-              <h4 className="text-xs font-medium uppercase tracking-[0.5px] text-text-ghost mb-1.5">
-                Info
-              </h4>
-              <div className="space-y-1 text-xs">
+            {/* Footer: agents + runtime stats */}
+            <div className="px-4 py-3 border-t border-border-default space-y-2">
+              {/* Agents — single line */}
+              {sprint.agents.length > 0 && (
+                <div className="flex items-center gap-2 text-xs text-text-ghost">
+                  <span className="font-medium text-text-tertiary">Agents:</span>
+                  <span>{sprint.agents.map((a) => a.name).join(" \u00b7 ")}</span>
+                </div>
+              )}
+
+              {/* Runtime stats */}
+              <div className="flex items-center gap-4 text-xs text-text-ghost">
                 {sprint.startedAt && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-text-ghost w-16">Started</span>
-                    <span className="text-text-secondary">
-                      {new Date(sprint.startedAt).toLocaleString()}
-                    </span>
-                  </div>
+                  <span>Started: {new Date(sprint.startedAt).toLocaleString()}</span>
                 )}
                 {sprint.completedAt && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-text-ghost w-16">Completed</span>
-                    <span className="text-text-secondary">
-                      {new Date(sprint.completedAt).toLocaleString()}
-                    </span>
-                  </div>
+                  <span>Completed: {new Date(sprint.completedAt).toLocaleString()}</span>
                 )}
-                <div className="flex items-center gap-2">
-                  <span className="text-text-ghost w-16">Gates</span>
-                  <span className="text-text-secondary">
-                    {sprint.gates.filter((g) => g.status === "passed").length}/{sprint.gates.length} passed
-                  </span>
-                </div>
+                <span>Gates: {sprint.gates.filter((g) => g.status === "passed").length}/{sprint.gates.length} passed</span>
               </div>
+
+              {/* View activity logs link */}
+              <button
+                onClick={() => setActiveTab("activity")}
+                className="text-xs text-sprints hover:underline"
+              >
+                View activity logs
+              </button>
             </div>
           </div>
         ) : (

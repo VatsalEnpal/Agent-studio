@@ -5,6 +5,7 @@ import type { SdkSessionManager, SdkSessionCallbacks } from "../sdk-session.js";
 import { getMainProjectDir } from "../config.js";
 import type { WebSocket } from "ws";
 import type { WebSocketServer } from "ws";
+import { ConversationProtocol, parseMentions } from "../managers/conversation-protocol.js";
 
 export function roomsRoutes(
   roomManager: RoomManager,
@@ -23,6 +24,122 @@ export function roomsRoutes(
     }
   }
 
+  // Per-room ConversationProtocol instances for @mention chaining
+  const protocols = new Map<string, ConversationProtocol>();
+  // Track agent turns per room since last human message — for soft stop
+  const agentTurnCounts = new Map<string, number>();
+  const SOFT_STOP_TURNS = 6;
+
+  /** Lazily create (or return existing) ConversationProtocol for a room. */
+  function getOrCreateProtocol(roomId: string): ConversationProtocol {
+    const existing = protocols.get(roomId);
+    if (existing) return existing;
+
+    const room = roomManager.getRoom(roomId);
+    if (!room) throw new Error(`Room ${roomId} not found`);
+
+    // Track which agents have already received their initial room context
+    const initialized = new Set<string>();
+
+    const protocol = new ConversationProtocol(
+      room.agents.map((a) => ({ id: a.id, name: a.name })),
+
+      // onInvoke — lazy-spawn agent, prepend context on first message, then send
+      (agentId: string, prompt: string) => {
+        // Ensure agent has an SDK session (lazy-spawn)
+        if (!sdkManager.getSession(agentId)) {
+          const agent = room.agents.find((a) => a.id === agentId);
+          if (!agent) {
+            roomManager.addMessage(roomId, {
+              from: "system",
+              text: `Cannot invoke unknown agent "${agentId}".`,
+              type: "system",
+            });
+            return;
+          }
+          const mainDir = getMainProjectDir();
+          sdkManager.createSession({
+            agentId: agent.id,
+            roomId,
+            cwd: mainDir,
+            model: agent.model,
+            agentProfile: agent.id !== "none" ? agent.id : undefined,
+          });
+          roomManager.setAgentStatus(roomId, agent.id, "idle");
+        }
+
+        // First message to a new agent: prepend room context
+        let messageToSend = prompt;
+        if (!initialized.has(agentId)) {
+          initialized.add(agentId);
+          const agent = room.agents.find((a) => a.id === agentId);
+          const otherAgents = room.agents
+            .filter((a) => a.id !== agentId)
+            .map((a) => `@${a.id} (${a.name})`)
+            .join(", ");
+          const contextPrefix = `You are ${agent?.name ?? agentId} in a group chat called "#${room.name}".
+Topic: ${room.topic}
+Teammates: ${otherAgents}
+
+ROOM RULES — read carefully, this is NOT a normal Claude session:
+
+HOW IT WORKS: You can use all your tools (read files, query databases, run commands) — the room only sees your FINAL response. Do your work first, then write a brief message with your findings. You get ONE message per turn. You cannot "come back later."
+
+STYLE:
+- Keep your room message SHORT — a few sentences with key findings, then @mention the next agent.
+- Do NOT write reports, tables, or "comprehensive analyses." Just the headline + @mention.
+- Ask ONE question at a time.
+- ALWAYS @mention who you're talking to. Without @mention, nobody receives your message.
+- To ask the human: @user
+- Do NOT use the SendMessage tool — write @agentname directly in your text.
+- Never introduce yourself. Never say "Let me check" without actually checking and reporting.
+
+EXAMPLE good message:
+"Checked Notion — 5 tickets look stale (Week 1-2 leftovers). @frontend-worker are these 3 features actually shipped? [list]. @backend-worker is the migration ticket still needed?"
+
+EXAMPLE bad message:
+"I'll start by pulling tickets from Notion and loading relevant memory, then coordinate with frontend and backend agents..." (this is useless — do the work, then report)
+
+You are a teammate on Slack, not an assistant writing a report.
+---
+`;
+          messageToSend = contextPrefix + prompt;
+        }
+
+        const callbacks = makeSdkCallbacks(roomId);
+        sdkManager.sendMessage(agentId, messageToSend, callbacks).catch((err) => {
+          roomManager.addMessage(roomId, {
+            from: "system",
+            text: `Failed to deliver to ${agentId}: ${err instanceof Error ? err.message : String(err)}`,
+            type: "system",
+          });
+        });
+      },
+
+      // onDepthLimitReached — notify room that human intervention is needed
+      () => {
+        roomManager.addMessage(roomId, {
+          from: "system",
+          text: "Chain depth limit reached (10 turns). The conversation needs human input to continue.",
+          type: "system",
+        });
+        broadcast("room-needs-user", { roomId, reason: "depth-limit" });
+      },
+
+      // onError
+      (error: Error) => {
+        roomManager.addMessage(roomId, {
+          from: "system",
+          text: `Protocol error: ${error.message}`,
+          type: "system",
+        });
+      },
+    );
+
+    protocols.set(roomId, protocol);
+    return protocol;
+  }
+
   // Shared callbacks for SDK session events — broadcasts to all WS clients
   function makeSdkCallbacks(roomId: string): SdkSessionCallbacks {
     return {
@@ -30,8 +147,11 @@ export function roomsRoutes(
         roomManager.setAgentStatus(roomId, agentId, "working");
         broadcast("room-agent-typing", { roomId, agentId });
       },
-      onTextDelta(agentId: string, delta: string) {
-        broadcast("room-agent-streaming", { roomId, agentId, delta });
+      onTextDelta(_agentId: string, _delta: string) {
+        // Don't stream raw Claude Code output to the room.
+        // Agents do tool calls, read files, query databases — that's internal work.
+        // Only the final result (onResult) gets posted as a room message.
+        // The typing indicator (onTypingStart) shows the agent is working.
       },
       onResult(agentId: string, text: string, usage) {
         const truncated = text.length > 5000 ? text.slice(0, 5000) + "\n...(truncated)" : text;
@@ -44,6 +164,43 @@ export function roomsRoutes(
 
         if (usage) {
           broadcast("room-agent-usage", { roomId, agentId, ...usage });
+        }
+
+        // --- Protocol chaining: route @mentions to next agent(s) ---
+        const protocol = protocols.get(roomId);
+        if (protocol) {
+          // Track agent turns for soft stop
+          const turns = (agentTurnCounts.get(roomId) ?? 0) + 1;
+          agentTurnCounts.set(roomId, turns);
+
+          // Soft stop: after N agent turns without human input, pause and ask
+          if (turns >= SOFT_STOP_TURNS) {
+            protocol.pause();
+            agentTurnCounts.set(roomId, 0);
+            roomManager.addMessage(roomId, {
+              from: "system",
+              text: "Agents have been discussing for a while. Send a message to continue, or let them wrap up.",
+              type: "system",
+            });
+            broadcast("room-needs-user", { roomId, agentId, reason: "soft-stop" });
+            return;
+          }
+
+          const mentions = parseMentions(text);
+          console.log(`[room-chain] Agent ${agentId} finished (turn ${turns}/${SOFT_STOP_TURNS}). Mentions: [${mentions.join(", ")}]`);
+
+          // If agent mentioned the user, pause the chain and notify
+          if (mentions.includes("user") || mentions.includes("vatsal")) {
+            protocol.pause();
+            broadcast("room-needs-user", { roomId, agentId, reason: "mention" });
+            return;
+          }
+
+          // Let the protocol handle chaining to @mentioned agents
+          protocol.handleAgentResponse(agentId, text);
+          console.log(`[room-chain] After handleAgentResponse: queue=${protocol.queueLength}, active=${protocol.activeAgent}`);
+        } else {
+          console.log(`[room-chain] Agent ${agentId} finished but NO protocol for room ${roomId}`);
         }
       },
       onError(agentId: string, err: Error) {
@@ -134,61 +291,12 @@ export function roomsRoutes(
 
       const room = roomManager.getRoom(roomId);
       if (room && (from === "user" || from === undefined)) {
-        const mentionMatch = text.match(/@(\w+)/);
-        let targetAgentId = "orchestrator";
-        let messageText = text;
-
-        if (mentionMatch) {
-          const mentioned = mentionMatch[1]!;
-          if (mentioned === "all") {
-            // Broadcast to all agents
-            const cleanText = text.replace(/@all\s*/g, "").trim();
-            const callbacks = makeSdkCallbacks(roomId);
-            for (const agent of room.agents) {
-              const session = sdkManager.getSession(agent.id);
-              if (session) {
-                sdkManager.sendMessage(agent.id, cleanText, callbacks).catch((err) => {
-                  roomManager.addMessage(roomId, {
-                    from: "system",
-                    text: `Failed to deliver to ${agent.id}: ${err instanceof Error ? err.message : String(err)}`,
-                    type: "system",
-                  });
-                });
-              }
-            }
-            roomManager.updateContextFile(roomId);
-            res.status(201).json(msg);
-            return;
-          }
-
-          const mentionedAgent = room.agents.find(a => a.id.toLowerCase() === mentioned.toLowerCase());
-          const mentionedId = mentionedAgent?.id ?? mentioned;
-          const hasSession = !!sdkManager.getSession(mentionedId);
-          console.log(`[room-msg] mentioned="${mentioned}", found agent=${!!mentionedAgent}, agentId=${mentionedId}, has session=${hasSession}, target=${hasSession ? mentionedId : targetAgentId}`);
-          if (mentionedAgent && sdkManager.getSession(mentionedId)) {
-            targetAgentId = mentionedId;
-          }
-          messageText = text.replace(/@\w+\s*/, "").trim();
+        const protocol = getOrCreateProtocol(roomId);
+        if (protocol.isPaused) {
+          protocol.resume();
         }
-
-        const session = sdkManager.getSession(targetAgentId);
-        if (session) {
-          const callbacks = makeSdkCallbacks(roomId);
-          sdkManager.sendMessage(targetAgentId, messageText, callbacks).catch((err) => {
-            roomManager.addMessage(roomId, {
-              from: "system",
-              text: `Failed to deliver to ${targetAgentId}: ${err instanceof Error ? err.message : String(err)}`,
-              type: "system",
-            });
-          });
-          roomManager.updateContextFile(roomId);
-        } else {
-          roomManager.addMessage(roomId, {
-            from: "system",
-            text: `Cannot deliver to ${targetAgentId} — agent is offline. Start the room first.`,
-            type: "system",
-          });
-        }
+        agentTurnCounts.set(roomId, 0); // Reset turn counter on human input
+        protocol.humanMessage(text, "orchestrator");
       }
 
       res.status(201).json(msg);
@@ -198,7 +306,7 @@ export function roomsRoutes(
     }
   });
 
-  // --- Spawn: create SDK sessions for all agents ---
+  // --- Spawn: register agents as ready but dormant (no SDK sessions, no init messages) ---
   router.post("/:id/spawn", async (req, res) => {
     try {
       const roomId = req.params["id"]!;
@@ -208,59 +316,22 @@ export function roomsRoutes(
         return;
       }
 
-      const mainDir = getMainProjectDir();
-      const spawned: Array<{ agentId: string }> = [];
-
+      // Mark agents as ready but dormant — no SDK sessions, no init messages.
+      // Sessions are created lazily when an agent is first @mentioned.
       for (const agent of room.agents) {
-        // Skip if already has an SDK session
-        if (sdkManager.getSession(agent.id)) continue;
-
-        sdkManager.createSession({
-          agentId: agent.id,
-          roomId,
-          cwd: mainDir,
-          model: agent.model,
-          agentProfile: agent.id !== "none" ? agent.id : undefined,
-        });
-
         roomManager.setAgentStatus(roomId, agent.id, "idle");
-        spawned.push({ agentId: agent.id });
       }
 
-      // Send init message to ALL agents so they have context about the room
-      const callbacks = makeSdkCallbacks(roomId);
-      for (const agent of room.agents) {
-        const session = sdkManager.getSession(agent.id);
-        if (!session) continue;
-
-        const otherAgents = room.agents.filter(a => a.id !== agent.id).map(a => a.name).join(", ");
-        const initMessage = [
-          `You are agent "${agent.name}" in team room "#${room.name}".`,
-          `Topic: ${room.topic}.`,
-          `Team members: ${otherAgents}.`,
-          `Read ${room.contextFile} for team status.`,
-          `When you finish a task, write a summary to that file.`,
-          `You can message other agents by including @agentname in your response.`,
-          `Acknowledge briefly that you're ready.`,
-        ].join(" ");
-
-        sdkManager.sendMessage(agent.id, initMessage, callbacks).catch((err) => {
-          // Surface errors to the room so the user can see what went wrong
-          roomManager.addMessage(roomId, {
-            from: "system",
-            text: `Failed to initialize ${agent.name}: ${err instanceof Error ? err.message : String(err)}`,
-            type: "system",
-          });
-        });
-      }
+      // Initialize the protocol for this room
+      getOrCreateProtocol(roomId);
 
       roomManager.addMessage(roomId, {
         from: "system",
-        text: `Agents started: ${spawned.map(s => s.agentId).join(", ")}`,
+        text: `Room ready. ${room.agents.length} agents available: ${room.agents.map(a => a.name).join(", ")}. @mention an agent to start.`,
         type: "system",
       });
 
-      res.json({ spawned });
+      res.json({ spawned: room.agents.map(a => ({ agentId: a.id })) });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
@@ -295,6 +366,7 @@ export function roomsRoutes(
           sdkManager.destroySession(agent.id);
         }
       }
+      protocols.delete(roomId);
       roomManager.closeRoom(roomId);
       res.json({ ok: true });
     } catch (err) {

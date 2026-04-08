@@ -107,30 +107,30 @@ function MessageContent({ text, isSystem }: { text: string; isSystem: boolean })
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
-  // For short messages without markdown syntax, render as plain text
-  const hasMarkdown = /[*_`#\[\]|>-]/.test(cleanText) && cleanText.length > 40;
-  if (!hasMarkdown) {
-    return <span className="text-xs leading-relaxed">{highlightMentions(cleanText)}</span>;
-  }
-
   const plugins = gfmReady && _remarkGfm ? [_remarkGfm] : [];
 
   return (
     <Suspense fallback={<span className="text-xs leading-relaxed">{cleanText}</span>}>
       <div className="text-xs leading-relaxed prose prose-invert prose-sm max-w-none
-        prose-p:my-1 prose-pre:my-2
+        prose-p:my-1 prose-pre:my-2 prose-pre:p-3
         prose-code:text-rooms prose-code:bg-bg-elevated prose-code:px-1 prose-code:py-0.5 prose-code:rounded-sm prose-code:text-xs prose-code:font-mono
         prose-pre:bg-bg-elevated prose-pre:border prose-pre:border-border-subtle prose-pre:rounded-md
-        prose-headings:text-text-primary prose-headings:mt-3 prose-headings:mb-1
+        prose-headings:text-xs prose-headings:font-semibold prose-headings:text-text-primary prose-headings:mt-3 prose-headings:mb-1
         prose-a:text-rooms prose-a:no-underline hover:prose-a:underline
         prose-strong:text-text-primary
         prose-li:my-0.5
-        prose-blockquote:border-rooms/30 prose-blockquote:text-text-secondary">
+        prose-blockquote:border-rooms/30 prose-blockquote:text-text-secondary
+        prose-table:text-xs prose-table:w-full
+        prose-th:text-left prose-th:text-text-secondary prose-th:font-semibold prose-th:pb-1 prose-th:pr-4 prose-th:border-b prose-th:border-border-subtle
+        prose-td:py-1 prose-td:pr-4 prose-td:text-text-primary prose-td:border-b prose-td:border-border-subtle/50">
         <Markdown
           remarkPlugins={plugins}
           components={{
             pre: ({ children, ...props }) => (
               <CopyableCodeBlock {...props}>{children}</CopyableCodeBlock>
+            ),
+            p: ({ children, ...props }) => (
+              <p {...props}>{typeof children === "string" ? highlightMentions(children) : children}</p>
             ),
           }}
         >
@@ -211,6 +211,8 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
   // Agent messages — left-aligned bubble (Slack style)
   // Approval requests get amber highlight
   // -------------------------------------------------------------------------
+  const mentionsUser = (msg.text ?? "").match(/@user\b|@vatsal\b/i) !== null;
+
   return (
     <div
       className={cn(
@@ -219,6 +221,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
         isApproval && msg.approvalStatus === "pending" && "bg-sprints/[0.04]",
         isApproval && msg.approvalStatus === "approved" && "bg-sessions/[0.04]",
         isApproval && msg.approvalStatus === "rejected" && "bg-error/[0.04]",
+        mentionsUser && "bg-rooms/[0.06] border-l-2 border-l-rooms",
       )}
     >
       <div className="flex gap-3 max-w-[85%]">

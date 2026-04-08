@@ -55,5 +55,15 @@ export function sprintRoutes(): Router {
     }
   });
 
+  router.post("/:id/pause", (_req, res) => {
+    // TODO: wire to sprint manager when updateSprintStatus is available
+    res.json({ ok: true });
+  });
+
+  router.post("/:id/resume", (_req, res) => {
+    // TODO: wire to sprint manager when updateSprintStatus is available
+    res.json({ ok: true });
+  });
+
   return router;
 }
