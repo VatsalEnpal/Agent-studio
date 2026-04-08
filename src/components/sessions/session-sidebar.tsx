@@ -210,15 +210,15 @@ export function SessionSidebar({
           data.map((d) => {
             // Reconstruct the full absolute path — the API strips the leading /
             const cwd = d.project.startsWith("/") ? d.project : `/${d.project}`;
-            // Display name: project name + agent (if any)
-            // e.g. "InPipeline — orchestrator" or just "InPipeline"
+            // Display name: agent name if available, otherwise project name
             const displayName = d.agent
-              ? `${d.projectShort} — ${d.agent}`
+              ? `${d.agent} — ${d.projectShort}`
               : d.projectShort;
-            // Preview: first 40 chars of the first user message
-            const previewText = d.preview
-              ? d.preview.length > 40 ? d.preview.slice(0, 37) + "..." : d.preview
-              : undefined;
+            // Preview: first user message, but filter out internal room prompts
+            let previewText: string | undefined;
+            if (d.preview && !d.preview.startsWith("You are ")) {
+              previewText = d.preview.length > 50 ? d.preview.slice(0, 47) + "..." : d.preview;
+            }
             return {
               id: d.id,
               name: displayName,

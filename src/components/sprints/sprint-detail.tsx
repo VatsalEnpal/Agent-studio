@@ -435,6 +435,12 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                         <BoltIcon size={12} className="text-sprints shrink-0" />
                         <span className="text-xs font-medium text-text-primary flex-1">{gate.name}</span>
                         <button
+                          onClick={handleViewSpec}
+                          className="px-2 py-1 text-xs font-medium text-sprints bg-sprints/10 rounded-md hover:bg-sprints/20 transition-all"
+                        >
+                          View full spec
+                        </button>
+                        <button
                           onClick={() => void handleApproveGate(gate.id)}
                           disabled={approvingGate === gate.id}
                           className="px-2.5 py-1 text-xs font-medium bg-sprints text-bg-base rounded-md hover:opacity-90 transition-all disabled:opacity-50"
