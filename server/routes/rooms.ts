@@ -192,16 +192,27 @@ You are a teammate on Slack, not an assistant writing a report.
           const mentions = parseMentions(text);
           console.log(`[room-chain] Agent ${agentId} finished (turn ${turns}/${SOFT_STOP_TURNS}). Mentions: [${mentions.join(", ")}]`);
 
-          // If agent mentioned the user, pause the chain and notify
-          if (mentions.includes("user") || mentions.includes("vatsal")) {
-            protocol.pause();
-            broadcast("room-needs-user", { roomId, agentId, reason: "mention" });
-            return;
-          }
+          const mentionsUser = mentions.includes("user") || mentions.includes("vatsal");
+          const mentionsAgents = mentions.some((m) => m !== "user" && m !== "vatsal");
 
-          // Let the protocol handle chaining to @mentioned agents
+          // Let the protocol handle chaining to @mentioned agents FIRST
           protocol.handleAgentResponse(agentId, text);
           console.log(`[room-chain] After handleAgentResponse: queue=${protocol.queueLength}, active=${protocol.activeAgent}`);
+
+          // If agent also mentioned the user, notify but only pause if no other agents were chained
+          if (mentionsUser) {
+            broadcast("room-needs-user", { roomId, agentId, reason: "mention" });
+            if (!mentionsAgents || (protocol.queueLength === 0 && !protocol.activeAgent)) {
+              // No other agents to chain to — pause and wait for user
+              protocol.pause();
+              roomManager.addMessage(roomId, {
+                from: "system",
+                text: "Agents are waiting for your input.",
+                type: "system",
+              });
+            }
+            // If other agents ARE chained, let them finish — user was notified
+          }
         } else {
           console.log(`[room-chain] Agent ${agentId} finished but NO protocol for room ${roomId}`);
         }

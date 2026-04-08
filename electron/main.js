@@ -287,6 +287,8 @@ function setServerStatus(status) {
 
 const WebSocket = require("ws");
 let notifyWs = null;
+// Keep notification references alive to prevent GC from killing them
+const activeNotifications = new Set();
 
 function connectNotifyWs(port) {
   try {
@@ -312,10 +314,14 @@ function connectNotifyWs(port) {
                 : `${agentId} mentioned you`,
               silent: false,
             });
-            n.on("click", () => { if (mainWindow) mainWindow.focus(); });
+            // Store reference to prevent GC from killing the notification
+            activeNotifications.add(n);
+            n.on("click", () => { activeNotifications.delete(n); if (mainWindow) mainWindow.focus(); });
+            n.on("close", () => { activeNotifications.delete(n); });
             n.on("show", () => { log("[notify-ws] Notification shown"); });
-            n.on("failed", (e) => { log(`[notify-ws] Notification failed: ${e}`); });
+            n.on("failed", (e) => { log(`[notify-ws] Notification failed: ${e}`); activeNotifications.delete(n); });
             n.show();
+            log(`[notify-ws] Active notifications: ${activeNotifications.size}`);
           } else {
             log("[notify-ws] Notifications not supported on this system");
           }
