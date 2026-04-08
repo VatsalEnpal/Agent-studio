@@ -413,14 +413,14 @@ export function SessionCard({
       {/* Row 2: cwd + live timer + model + time */}
       <div className="flex items-center gap-2 pl-[13px]">
         {session.cwd && (
-          <span className="text-xs text-text-ghost truncate flex-1 min-w-0">
+          <span className="text-xs text-text-tertiary truncate flex-1 min-w-0">
             {shortenCwd(session.cwd)}
           </span>
         )}
 
         {/* UX #3: Live elapsed timer */}
         {elapsed && (
-          <span className="text-xs text-text-ghost tabular-nums shrink-0">
+          <span className="text-xs text-text-tertiary tabular-nums shrink-0">
             {elapsed}
           </span>
         )}
@@ -428,7 +428,7 @@ export function SessionCard({
         <span className="flex-1" />
 
         {effectiveModel && effectiveModel !== "unknown" && (
-          <span className="text-[8px] font-mono font-normal text-text-ghost uppercase tracking-[0.3px] shrink-0">
+          <span className="text-[8px] font-mono font-normal text-text-tertiary uppercase tracking-[0.3px] shrink-0">
             {effectiveModel}
           </span>
         )}
@@ -440,7 +440,7 @@ export function SessionCard({
         )}
 
         {!elapsed && session.updatedAt > 0 && (
-          <span className="text-label text-text-ghost shrink-0">
+          <span className="text-label text-text-tertiary shrink-0">
             {relativeTime(session.updatedAt)}
           </span>
         )}
