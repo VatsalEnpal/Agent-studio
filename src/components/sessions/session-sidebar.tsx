@@ -56,20 +56,20 @@ function SectionHeader({
       onClick={collapsible ? onToggle : undefined}
       className={cn(
         "flex items-center gap-1.5 w-full px-3 py-1.5",
-        "text-label uppercase text-text-ghost",
-        collapsible && "cursor-pointer hover:text-text-tertiary",
+        "text-label uppercase text-text-tertiary",
+        collapsible && "cursor-pointer hover:text-text-secondary",
         !collapsible && "cursor-default",
       )}
     >
       {collapsible &&
         (collapsed ? (
-          <ChevronRightIcon size={10} className="text-text-ghost" />
+          <ChevronRightIcon size={10} className="text-text-tertiary" />
         ) : (
-          <ChevronDownIcon size={10} className="text-text-ghost" />
+          <ChevronDownIcon size={10} className="text-text-tertiary" />
         ))}
       <span>{label}</span>
       {count != null && count > 0 && (
-        <span className="text-label text-text-ghost ml-auto">{count}</span>
+        <span className="text-label text-text-tertiary ml-auto">{count}</span>
       )}
     </button>
   );
@@ -139,8 +139,8 @@ function SidebarServerList() {
   if (servers.length === 0) {
     return (
       <div className="px-3 py-6 text-center">
-        <p className="text-xs text-text-tertiary">No services detected</p>
-        <p className="text-xs text-text-ghost mt-1">Start a dev server to see it here</p>
+        <p className="text-xs text-text-secondary">No services detected</p>
+        <p className="text-xs text-text-tertiary mt-1">Start a dev server to see it here</p>
       </div>
     );
   }
@@ -207,18 +207,30 @@ export function SessionSidebar({
         if (!res.ok || !active) return;
         const data: { id: string; project: string; projectShort: string; modified: number; date: string; agent: string; preview: string }[] = await res.json();
         setPastSessions(
-          data.map((d) => ({
-            id: d.id,
-            name: d.agent ? `${d.projectShort} (${d.agent})` : d.projectShort,
-            pid: 0,
-            command: "",
-            args: [],
-            cwd: d.project,
-            status: "exited" as const,
-            createdAt: d.modified,
-            updatedAt: d.modified,
-            meta: d.agent ? { agent: d.agent } : undefined,
-          })),
+          data.map((d) => {
+            // Reconstruct the full absolute path — the API strips the leading /
+            const cwd = d.project.startsWith("/") ? d.project : `/${d.project}`;
+            // Use preview (first user message) as display name when available,
+            // otherwise fall back to last path segment + agent
+            const shortProject = cwd.split("/").filter(Boolean).pop() ?? d.projectShort;
+            const displayName = d.preview
+              ? d.preview.length > 50 ? d.preview.slice(0, 47) + "..." : d.preview
+              : d.agent
+                ? `${shortProject} (${d.agent})`
+                : shortProject;
+            return {
+              id: d.id,
+              name: displayName,
+              pid: 0,
+              command: "claude",
+              args: ["--resume", d.id, "--dangerously-skip-permissions"],
+              cwd,
+              status: "exited" as const,
+              createdAt: d.modified,
+              updatedAt: d.modified,
+              meta: d.agent ? { agent: d.agent } : undefined,
+            };
+          }),
         );
       } catch { /* best effort */ }
     };
@@ -359,7 +371,7 @@ export function SessionSidebar({
                 "flex-1 px-2 py-1 text-xs font-medium rounded-[3px] transition-all",
                 activeTab === tab
                   ? "bg-bg-elevated text-text-primary"
-                  : "text-text-ghost hover:text-text-tertiary",
+                  : "text-text-tertiary hover:text-text-secondary",
               )}
             >
               {tab === "sessions" ? "Sessions" : tab === "history" ? "History" : "Servers"}
@@ -371,18 +383,18 @@ export function SessionSidebar({
       {/* Search bar */}
       <div className="px-3 pb-2">
         <div className="relative">
-          <SearchIcon size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-ghost" />
+          <SearchIcon size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search..."
-            className="w-full pl-7 pr-2 py-1.5 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
+            className="w-full pl-7 pr-2 py-1.5 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-border-subtle transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-ghost hover:text-text-secondary transition-all"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary transition-all"
               aria-label="Clear search"
             >
               <CloseIcon size={10} />
@@ -402,7 +414,7 @@ export function SessionSidebar({
                 "px-2 py-0.5 text-2xs font-medium rounded-full transition-all",
                 statusFilter === filter
                   ? "bg-sessions/15 text-sessions"
-                  : "text-text-ghost hover:text-text-tertiary hover:bg-bg-elevated/50",
+                  : "text-text-tertiary hover:text-text-secondary hover:bg-bg-elevated/50",
               )}
             >
               {filter === "all" ? "All" : filter === "active" ? "Running" : "Paused"}
@@ -433,10 +445,10 @@ export function SessionSidebar({
                 ))}
                 {filteredRunning.length === 0 && (
                   <div className="px-3 py-4 text-center">
-                    <p className="text-xs text-text-tertiary">
+                    <p className="text-xs text-text-secondary">
                       No running sessions
                     </p>
-                    <p className="text-xs text-text-ghost mt-1">
+                    <p className="text-xs text-text-tertiary mt-1">
                       Click &ldquo;New Session&rdquo; below to get started
                     </p>
                   </div>
@@ -471,7 +483,7 @@ export function SessionSidebar({
             {historyGroups.length > 0 ? (
               historyGroups.map((group) => (
                 <div key={group.label} className="px-1 pb-1">
-                  <span className="block px-3 py-1 text-label uppercase text-text-ghost">
+                  <span className="block px-3 py-1 text-label uppercase text-text-tertiary">
                     {group.label}
                   </span>
                   <div className="space-y-0.5">
@@ -491,7 +503,7 @@ export function SessionSidebar({
             ) : (
               <div className="px-3 py-8 text-center">
                 <p className="text-xs text-text-secondary font-medium">No session history</p>
-                <p className="text-xs text-text-tertiary mt-1">
+                <p className="text-xs text-text-secondary mt-1">
                   Past sessions will appear here after they end
                 </p>
               </div>
@@ -506,7 +518,7 @@ export function SessionSidebar({
         {onDevServers && (
           <button
             onClick={() => { setActiveTab("servers"); onDevServers(true); }}
-            className="flex items-center gap-1.5 w-full px-2 py-1 text-xs text-text-tertiary hover:text-sessions transition-all rounded"
+            className="flex items-center gap-1.5 w-full px-2 py-1 text-xs text-text-secondary hover:text-sessions transition-all rounded"
           >
             <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
             Dev Servers
