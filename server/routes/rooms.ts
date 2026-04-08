@@ -154,7 +154,9 @@ HOW THIS ROOM WORKS:
         // --- Protocol chaining: route @mentions to next agent(s) ---
         const protocol = protocols.get(roomId);
         if (protocol) {
+          // Parse from FULL text, not truncated
           const mentions = parseMentions(text);
+          console.log(`[room-chain] Agent ${agentId} finished. Mentions found: [${mentions.join(", ")}]. Protocol exists: true. Queue: ${protocol.queueLength}. Active: ${protocol.activeAgent}`);
 
           // If agent mentioned the user, pause the chain and notify
           if (mentions.includes("user") || mentions.includes("vatsal")) {
@@ -165,6 +167,9 @@ HOW THIS ROOM WORKS:
 
           // Let the protocol handle chaining to @mentioned agents
           protocol.handleAgentResponse(agentId, text);
+          console.log(`[room-chain] After handleAgentResponse: queue=${protocol.queueLength}, active=${protocol.activeAgent}`);
+        } else {
+          console.log(`[room-chain] Agent ${agentId} finished but NO protocol for room ${roomId}`);
         }
       },
       onError(agentId: string, err: Error) {
