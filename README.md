@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="public/icon.png" width="80" />
-
 # Agent Studio
 
 **A dashboard for managing Claude Code sessions, agent teams, and automated workflows.**
@@ -11,7 +9,6 @@
 [![Node 22+](https://img.shields.io/badge/node-22%2B-green.svg)](https://nodejs.org)
 
 </div>
-
 
 ## Why
 
@@ -33,26 +30,21 @@ Agent Studio is a single app that solves all three. Multiple terminal sessions s
 
 ### Run multiple sessions at once
 
-
 Launch up to 6 Claude Code terminals in a grid. Each one is a full interactive session (`node-pty` + xterm.js) with live stats — tokens used, cost, context window %, model name. Use presets like Quick Chat or Security Audit to launch fast, or configure model, agent, and permissions yourself. Resume any past session with one click. `Cmd+Shift+N` to launch, `Cmd+K` to navigate.
 
 ### Get agents to work together
-
 
 Create a chat room, assign agents (frontend, backend, QA, security, etc.), and give them a task. They collaborate through [@mentions](https://docs.anthropic.com/en/docs/claude-code/sdk) — one agent finds a problem, tags another to fix it, a third writes the test. A turn-based protocol keeps things orderly: one agent at a time, depth limits, no infinite loops. You see streaming responses in clean text, no terminal noise.
 
 ### Automate multi-step workflows
 
-
 Define a pipeline with checkpoints: scan the codebase, check readiness, design, build, test, security review, ship. Each checkpoint passes, fails, or waits for your approval before the next one starts. The system tracks progress, estimates completion time, and logs every action. You stay in control — nothing ships without you saying so.
 
 ### Build shared knowledge
 
-
 When an agent learns something — your deploy needs a specific flag, a test is flaky on CI, the API requires pagination — it writes that to the knowledge base. Next session, every agent has it. Search, filter by category, pin important entries, or add your own notes. Over time, your agents get better at your specific codebase because they remember what worked and what didn't.
 
 ### Configure everything
-
 
 Default model (Opus / Sonnet / Haiku), permission level, working directory. Notifications for gate approvals, dangerous commands, task completion, session exits, and context warnings. Multi-project workspace with production repo safeguards. Keyboard shortcuts for everything.
 
@@ -102,7 +94,7 @@ npm install
 npm run dev
 ```
 
-Open [localhost:8080](http://localhost:8080). On first run, the setup wizard checks your Claude Code authentication and walks you through configuration — project paths, agent selection, preferences.
+Open [localhost:8080](http://localhost:8080). A setup wizard walks you through first-time configuration — project paths, agent selection, preferences.
 
 **Mac desktop app:**
 ```bash
