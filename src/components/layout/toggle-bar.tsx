@@ -12,8 +12,6 @@ import {
   MemoryStick,
   Gauge,
   ExternalLink,
-  Sun,
-  Moon,
   DollarSign,
 } from "lucide-react";
 import { useUIStore } from "@/stores/ui";
@@ -242,24 +240,8 @@ function FullscreenButton() {
   );
 }
 
-function ThemeToggle() {
-  const theme = useUIStore((s) => s.theme);
-  const toggleTheme = useUIStore((s) => s.toggleTheme);
-
-  return (
-    <button
-      onClick={toggleTheme}
-      className="p-1 text-console-dim hover:text-console-muted transition-colors rounded hover:bg-console-faint/50"
-      title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-    >
-      {theme === "dark" ? (
-        <Sun className="w-3.5 h-3.5" />
-      ) : (
-        <Moon className="w-3.5 h-3.5" />
-      )}
-    </button>
-  );
-}
+// Theme toggle removed — IDENTITY.md: "The darkness isn't a CSS variable — it's the identity."
+// The app is dark-only by design.
 
 function TotalCostWidget() {
   const { all } = useUsage();
@@ -349,7 +331,6 @@ export function ToggleBar() {
           <ExternalLink className="w-2.5 h-2.5" />
         </a>
         <FullscreenButton />
-        <ThemeToggle />
         <PeakHoursIndicator />
         <HelpPanel />
         <span className="text-[10px] text-console-dim font-mono">
