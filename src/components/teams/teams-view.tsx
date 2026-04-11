@@ -1,19 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { wsClient } from "@/lib/ws-client";
-import {
-  useWorkflowStore,
-  type WorkflowFlow,
-} from "@/stores/workflows";
+import { useWorkflowStore, type WorkflowFlow } from "@/stores/workflows";
 import type { WsMessage } from "@/lib/types";
 import { FlowSidebar } from "./flow-sidebar";
 import { StepTimeline } from "./step-timeline";
 import { RoomList } from "./room-list";
 import { RoomChat } from "./room-chat";
 import { CreateRoomDialog } from "./create-room-dialog";
+import { CreateSprintDialog } from "./create-sprint-dialog";
 
 async function fetchJson<T>(url: string): Promise<T | null> {
   try {
@@ -28,6 +26,7 @@ async function fetchJson<T>(url: string): Promise<T | null> {
 export function TeamsView() {
   const [mode, setMode] = useState<"rooms" | "sprints">("rooms");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [createSprintOpen, setCreateSprintOpen] = useState(false);
 
   // Workflow state for sprints mode
   const {
@@ -113,12 +112,23 @@ export function TeamsView() {
             <span className="text-[10px]">Loading...</span>
           </div>
         ) : (
-          <FlowSidebar
-            flows={flows}
-            selectedFlowId={selectedFlowId}
-            selectedRunId={selectedRunId}
-            onSelectRun={selectRun}
-          />
+          <>
+            <div className="px-3 py-2 border-b border-console-border shrink-0">
+              <button
+                onClick={() => setCreateSprintOpen(true)}
+                className="flex items-center gap-1.5 w-full px-2 py-1.5 text-xs font-medium rounded bg-console-accent/15 text-console-accent hover:bg-console-accent/25 active:bg-console-accent/35 active:scale-95 transition-all"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                New Sprint
+              </button>
+            </div>
+            <FlowSidebar
+              flows={flows}
+              selectedFlowId={selectedFlowId}
+              selectedRunId={selectedRunId}
+              onSelectRun={selectRun}
+            />
+          </>
         )}
       </div>
 
@@ -129,10 +139,21 @@ export function TeamsView() {
         ) : selectedRun ? (
           <StepTimeline run={selectedRun} />
         ) : (
-          <div className="flex items-center justify-center h-full text-console-dim text-[11px]">
-            {flows.length === 0
-              ? "No workflows configured."
-              : "Select a run to view its timeline"}
+          <div className="flex flex-col items-center justify-center h-full gap-4">
+            <p className="text-console-dim text-[11px]">
+              {flows.length === 0
+                ? "No sprints yet."
+                : "Select a run to view its timeline"}
+            </p>
+            {flows.length === 0 && (
+              <button
+                onClick={() => setCreateSprintOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded bg-console-accent/15 text-console-accent hover:bg-console-accent/25 active:bg-console-accent/35 transition-all"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                New Sprint
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -141,6 +162,13 @@ export function TeamsView() {
       <CreateRoomDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
+      />
+
+      {/* Create sprint dialog */}
+      <CreateSprintDialog
+        open={createSprintOpen}
+        onOpenChange={setCreateSprintOpen}
+        onCreated={() => void loadWorkflows()}
       />
     </div>
   );

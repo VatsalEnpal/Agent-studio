@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Rocket,
-  Check,
-  Loader2,
-  Clock,
-  AlertCircle,
-} from "lucide-react";
+import { Rocket, Check, Loader2, Clock, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { WorkflowFlow, WorkflowRun } from "@/stores/workflows";
 import { SystemPanel } from "./system-panel";
@@ -59,7 +53,7 @@ export function FlowSidebar({
   onSelectRun,
 }: FlowSidebarProps) {
   return (
-    <aside className="w-[260px] shrink-0 border-r border-console-border bg-console-panel flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       {/* Header */}
       <div className="px-3 py-2.5 border-b border-console-border shrink-0">
         <h3 className="text-[10px] font-medium text-console-muted uppercase tracking-wider">
@@ -196,7 +190,7 @@ export function FlowSidebar({
       <div className="px-2 pb-2 shrink-0">
         <SystemPanel />
       </div>
-    </aside>
+    </div>
   );
 }
 
