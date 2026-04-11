@@ -193,6 +193,40 @@ export class TerminalManager {
     return entry?.outputBuffer ?? null;
   }
 
+  /** Kill all sessions whose meta.group matches the given group name. Returns count killed. */
+  killByGroup(group: string): number {
+    let count = 0;
+    for (const [id, entry] of this.sessions.entries()) {
+      if (
+        entry.session.meta?.group === group &&
+        entry.session.status !== "exited"
+      ) {
+        try {
+          entry.pty.kill();
+          count++;
+          setTimeout(() => {
+            if (this.sessions.has(id)) {
+              this.sessions.delete(id);
+              this.emit({
+                type: "sessions-update",
+                payload: this.listSessions(),
+              });
+            }
+          }, 3000);
+        } catch {
+          // Process may already be dead
+        }
+      }
+    }
+    if (count > 0) {
+      this.emit({
+        type: "sessions-update",
+        payload: this.listSessions(),
+      });
+    }
+    return count;
+  }
+
   private emit(message: WsMessage): void {
     for (const listener of this.listeners) {
       listener(message);

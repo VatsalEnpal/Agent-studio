@@ -380,5 +380,33 @@ export function systemRoutes(
     }
   });
 
+  // Sprint controls: pause/resume/cancel
+  // These work by killing or re-spawning sprint-group sessions.
+  router.post("/workflows/:flowId/runs/:runId/pause", (_req, res) => {
+    try {
+      const killed = terminalManager.killByGroup("sprint");
+      res.json({ ok: true, killedCount: killed });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  router.post("/workflows/:flowId/runs/:runId/resume", (_req, res) => {
+    // Resume is a no-op stub — the user should use the step action button
+    // to re-launch the orchestrator for the active step.
+    res.json({ ok: true, message: "Use the step action button to re-launch." });
+  });
+
+  router.post("/workflows/:flowId/runs/:runId/cancel", (_req, res) => {
+    try {
+      const killed = terminalManager.killByGroup("sprint");
+      res.json({ ok: true, killedCount: killed });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
   return router;
 }

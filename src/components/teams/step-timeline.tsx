@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useCallback } from "react";
+import { Pause, Play, XCircle, Loader2 } from "lucide-react";
 import type { WorkflowRun } from "@/stores/workflows";
 import { StepCard } from "./step-card";
 import { cn } from "@/lib/utils";
@@ -17,8 +19,74 @@ const STATUS_LINE_COLORS: Record<string, string> = {
 };
 
 export function StepTimeline({ run }: StepTimelineProps) {
-  const completedSteps = run.steps.filter((s) => s.status === "completed").length;
+  const completedSteps = run.steps.filter(
+    (s) => s.status === "completed",
+  ).length;
   const totalSteps = run.steps.length;
+
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [confirmCancel, setConfirmCancel] = useState(false);
+
+  const isActive = run.status === "running" || run.status === "waiting";
+  const isFailed = run.status === "failed";
+
+  const handlePause = useCallback(async () => {
+    setActionLoading("pause");
+    try {
+      const res = await fetch(
+        `/api/workflows/${run.flowId}/runs/${run.id}/pause`,
+        {
+          method: "POST",
+        },
+      );
+      if (!res.ok) {
+        console.error("Failed to pause sprint:", res.status);
+      }
+    } catch (err) {
+      console.error("Failed to pause sprint:", err);
+    } finally {
+      setActionLoading(null);
+    }
+  }, [run.flowId, run.id]);
+
+  const handleResume = useCallback(async () => {
+    setActionLoading("resume");
+    try {
+      const res = await fetch(
+        `/api/workflows/${run.flowId}/runs/${run.id}/resume`,
+        {
+          method: "POST",
+        },
+      );
+      if (!res.ok) {
+        console.error("Failed to resume sprint:", res.status);
+      }
+    } catch (err) {
+      console.error("Failed to resume sprint:", err);
+    } finally {
+      setActionLoading(null);
+    }
+  }, [run.flowId, run.id]);
+
+  const handleCancel = useCallback(async () => {
+    setActionLoading("cancel");
+    setConfirmCancel(false);
+    try {
+      const res = await fetch(
+        `/api/workflows/${run.flowId}/runs/${run.id}/cancel`,
+        {
+          method: "POST",
+        },
+      );
+      if (!res.ok) {
+        console.error("Failed to cancel sprint:", res.status);
+      }
+    } catch (err) {
+      console.error("Failed to cancel sprint:", err);
+    } finally {
+      setActionLoading(null);
+    }
+  }, [run.flowId, run.id]);
 
   return (
     <div className="flex flex-col h-full">
@@ -54,6 +122,78 @@ export function StepTimeline({ run }: StepTimelineProps) {
           >
             {run.status.charAt(0).toUpperCase() + run.status.slice(1)}
           </span>
+
+          {/* Sprint controls */}
+          <div className="flex items-center gap-1 ml-auto shrink-0">
+            {isActive && (
+              <button
+                onClick={() => void handlePause()}
+                disabled={actionLoading !== null}
+                className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded text-console-muted hover:text-console-text bg-console-faint hover:bg-console-faint/80 transition-colors disabled:opacity-50"
+                title="Pause sprint"
+              >
+                {actionLoading === "pause" ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Pause className="w-3 h-3" />
+                )}
+                Pause
+              </button>
+            )}
+            {isFailed && (
+              <button
+                onClick={() => void handleResume()}
+                disabled={actionLoading !== null}
+                className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded text-console-accent bg-console-accent/10 hover:bg-console-accent/20 transition-colors disabled:opacity-50"
+                title="Resume sprint"
+              >
+                {actionLoading === "resume" ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Play className="w-3 h-3" />
+                )}
+                Resume
+              </button>
+            )}
+            {(isActive || isFailed) && (
+              <>
+                {confirmCancel ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-[9px] text-console-muted">
+                      Cancel sprint?
+                    </span>
+                    <button
+                      onClick={() => void handleCancel()}
+                      disabled={actionLoading !== null}
+                      className="px-1.5 py-0.5 text-[9px] font-medium rounded bg-console-error/15 text-console-error hover:bg-console-error/25 transition-colors disabled:opacity-50"
+                    >
+                      {actionLoading === "cancel" ? (
+                        <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                      ) : (
+                        "Yes"
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setConfirmCancel(false)}
+                      className="px-1.5 py-0.5 text-[9px] font-medium rounded text-console-muted hover:text-console-text transition-colors"
+                    >
+                      No
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmCancel(true)}
+                    disabled={actionLoading !== null}
+                    className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded text-console-error/70 hover:text-console-error bg-console-error/5 hover:bg-console-error/10 transition-colors disabled:opacity-50"
+                    title="Cancel sprint"
+                  >
+                    <XCircle className="w-3 h-3" />
+                    Cancel
+                  </button>
+                )}
+              </>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-4 mt-1.5">
           <span className="text-[10px] text-console-dim font-mono">
