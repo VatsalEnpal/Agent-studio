@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Hash, Plus, Users, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRoomsStore } from "@/stores/rooms";
@@ -41,9 +41,10 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
     void loadRooms();
   }, [loadRooms]);
 
+  const [confirmCloseId, setConfirmCloseId] = useState<string | null>(null);
+
   const handleCloseRoom = useCallback(
-    async (e: React.MouseEvent, roomId: string) => {
-      e.stopPropagation();
+    async (roomId: string) => {
       try {
         await fetch(`/api/rooms/${roomId}`, { method: "DELETE" });
         // Reload rooms
@@ -59,11 +60,20 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
               .selectRoom(firstActive ? firstActive.id : null);
           }
         }
-      } catch {
-        // ignore
+      } catch (err) {
+        console.error("Failed to close room:", err);
       }
+      setConfirmCloseId(null);
     },
     [selectedRoomId],
+  );
+
+  const handleRequestClose = useCallback(
+    (e: React.MouseEvent, roomId: string) => {
+      e.stopPropagation();
+      setConfirmCloseId(roomId);
+    },
+    [],
   );
 
   const activeRooms = rooms.filter((r) => r.active);
@@ -91,7 +101,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
             room={room}
             selected={room.id === selectedRoomId}
             onSelect={() => selectRoom(room.id)}
-            onClose={(e) => void handleCloseRoom(e, room.id)}
+            onClose={(e) => handleRequestClose(e, room.id)}
             lastSeen={lastSeenByRoom[room.id]}
           />
         ))}
@@ -123,6 +133,42 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           </>
         )}
       </div>
+
+      {/* Close room confirmation dialog */}
+      {confirmCloseId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setConfirmCloseId(null)}
+        >
+          <div
+            className="bg-console-panel border border-console-border rounded-lg shadow-2xl w-full max-w-xs p-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-4 py-3 border-b border-console-border">
+              <p className="text-xs font-medium text-console-text">
+                Close room?
+              </p>
+              <p className="text-[10px] text-console-muted mt-1">
+                Active conversations will end.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 px-4 py-2.5">
+              <button
+                onClick={() => setConfirmCloseId(null)}
+                className="px-3 py-1.5 text-[10px] font-medium text-console-muted hover:text-console-text rounded transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => void handleCloseRoom(confirmCloseId)}
+                className="px-3 py-1.5 text-[10px] font-medium rounded bg-console-error/15 text-console-error hover:bg-console-error/25 border border-console-error/30 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

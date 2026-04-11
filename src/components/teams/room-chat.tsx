@@ -141,24 +141,26 @@ export function RoomChat() {
     setSpawning(false);
   }, [selectedRoomId, spawning]);
 
+  const [confirmClose, setConfirmClose] = useState(false);
+
   const handleClose = useCallback(async () => {
     if (!selectedRoomId) return;
-    await fetch(`/api/rooms/${selectedRoomId}`, { method: "DELETE" });
     try {
+      await fetch(`/api/rooms/${selectedRoomId}`, { method: "DELETE" });
       const res = await fetch("/api/rooms");
       if (res.ok) {
         const data = await res.json();
         useRoomsStore.getState().setRooms(data);
-        // Select another active room, or clear selection
         const active = (data as Room[]).filter((r: Room) => r.active);
         const firstActive = active[0];
         useRoomsStore
           .getState()
           .selectRoom(firstActive ? firstActive.id : null);
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      console.error("Failed to close room:", err);
     }
+    setConfirmClose(false);
   }, [selectedRoomId]);
 
   if (!room) {
@@ -186,7 +188,43 @@ export function RoomChat() {
   );
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
+      {/* Close room confirmation dialog */}
+      {confirmClose && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setConfirmClose(false)}
+        >
+          <div
+            className="bg-console-panel border border-console-border rounded-lg shadow-2xl w-full max-w-xs p-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-4 py-3 border-b border-console-border">
+              <p className="text-xs font-medium text-console-text">
+                Close room?
+              </p>
+              <p className="text-[10px] text-console-muted mt-1">
+                Active conversations will end.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 px-4 py-2.5">
+              <button
+                onClick={() => setConfirmClose(false)}
+                className="px-3 py-1.5 text-[10px] font-medium text-console-muted hover:text-console-text rounded transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => void handleClose()}
+                className="px-3 py-1.5 text-[10px] font-medium rounded bg-console-error/15 text-console-error hover:bg-console-error/25 border border-console-error/30 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Room header */}
       <div className="px-4 py-2.5 border-b border-console-border shrink-0">
         <div className="flex items-center gap-2">
@@ -237,7 +275,7 @@ export function RoomChat() {
             {/* Close button — always visible for active rooms */}
             {room.active && (
               <button
-                onClick={handleClose}
+                onClick={() => setConfirmClose(true)}
                 className="flex items-center gap-1 ml-2 px-2 py-1 text-[10px] font-medium rounded bg-console-error/15 text-console-error hover:bg-console-error/25 transition-colors"
               >
                 <PowerOff className="w-3 h-3" />
