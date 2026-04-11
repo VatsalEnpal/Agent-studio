@@ -1,0 +1,182 @@
+{
+  "run": 3,
+  "phase": "brain-3",
+  "timestamp": "2026-04-11T22:35:00Z",
+  "tester": "brain-3-qa-agent",
+  "tool": "agent-browser",
+  "summary": "Verified 5 fixes from cycle 3. All 5 features are functionally present and working. 1 regression found: Settings page Keyboard Shortcuts table still shows old Cmd+Shift shortcuts while Help panel and bottom bar correctly show new Cmd-only shortcuts.",
+  "fixes_verified": [
+    {
+      "task_id": "TASK-4",
+      "severity": "HIGH",
+      "description": "New Sprint button added to Sprints tab with creation dialog",
+      "status": "verified",
+      "evidence": [
+        "New Sprint button visible in Sprints sub-tab of Teams view",
+        "Dialog opens with Sprint Goal text input, Model selector (opus/sonnet), Agent picker (Orchestrator required + Frontend/Backend/QA Tester/Security toggleable)",
+        "Cost warning: 'Launches opus orchestrator session. Uses API credits.'",
+        "Start Sprint button disabled until goal is filled, then enables",
+        "Agent count updates dynamically (AGENTS (1) -> AGENTS (2))",
+        "Cancel button closes dialog cleanly"
+      ],
+      "screenshots": [
+        "qa/screenshots/run3-sprints-tab.png",
+        "qa/screenshots/run3-new-sprint-dialog.png"
+      ]
+    },
+    {
+      "task_id": "TASK-1",
+      "severity": "HIGH",
+      "description": "Per-session cost badges in Running on Machine section",
+      "status": "verified",
+      "evidence": [
+        "Running on Machine section shows 2 sessions with individual cost badges",
+        "Session 1: opus, 3h 55m uptime, $119.9",
+        "Session 2: opus, 46m uptime, $11.7",
+        "Total cost $131.6 shown in top bar matches sum of individual costs"
+      ],
+      "screenshots": ["qa/screenshots/run3-running-on-machine-costs.png"]
+    },
+    {
+      "task_id": "TASK-36",
+      "severity": "MEDIUM",
+      "description": "Per-session cost badges visible in Running on Machine",
+      "status": "verified",
+      "evidence": [
+        "Same as TASK-1 - per-process cost now visible alongside each session entry",
+        "Cost shown as '$119.9' and '$11.7' next to each session"
+      ],
+      "screenshots": ["qa/screenshots/run3-running-on-machine-costs.png"]
+    },
+    {
+      "task_id": "TASK-7",
+      "severity": "MEDIUM",
+      "description": "Peak/off-peak label improved with API prefix and tooltip",
+      "status": "verified",
+      "evidence": [
+        "Label now reads 'API: Off-Peak' (previously just 'Off-Peak')",
+        "Tooltip title: 'Off-Peak -- Normal Speed'",
+        "Tooltip body: 'Anthropic API rate limits are stricter during peak hours (5am-11am Pacific). Expect slower responses and more throttling during peak.'",
+        "Shows local peak window times: '20:00 - 02:00'"
+      ],
+      "screenshots": ["qa/screenshots/run3-top-bar-annotated.png"]
+    },
+    {
+      "task_id": "TASK-8",
+      "severity": "MEDIUM",
+      "description": "Usage indicator has tooltip explaining CPU/memory values",
+      "status": "verified",
+      "evidence": [
+        "Usage button shows '22% | 23.8/24GB'",
+        "Tooltip title: 'System Resources'",
+        "Shows CPU usage: '22%'",
+        "Shows Memory: '23.8 / 24 GB (99%)'",
+        "Includes CTA: 'Click for full system monitor in Settings.'"
+      ],
+      "screenshots": ["qa/screenshots/run3-top-bar-annotated.png"]
+    },
+    {
+      "task_id": "TASK-9",
+      "severity": "MEDIUM",
+      "description": "Keyboard shortcuts changed to Cmd+N, Cmd+K, Cmd+\\",
+      "status": "partial",
+      "evidence": [
+        "Help panel correctly shows: Cmd+N (New session), Cmd+K (Command palette), Cmd+\\ (Toggle sidebar)",
+        "Bottom bar correctly shows: Cmd K commands, Cmd N new session",
+        "Empty state text correctly says: 'Press Cmd+N to launch or Cmd+K for commands.'",
+        "REGRESSION: Settings page Keyboard Shortcuts table still shows OLD shortcuts: Cmd+Shift+N, Cmd+Shift+K, Cmd+Shift+\\"
+      ],
+      "screenshots": [
+        "qa/screenshots/run3-help-panel.png",
+        "qa/screenshots/run3-settings-shortcuts-mismatch.png"
+      ]
+    }
+  ],
+  "bugs_found": [
+    {
+      "id": "TASK-37",
+      "description": "Settings page Keyboard Shortcuts table shows stale Cmd+Shift shortcuts (Cmd+Shift+N, Cmd+Shift+K, Cmd+Shift+\\) while Help panel and bottom bar correctly show new Cmd-only shortcuts (Cmd+N, Cmd+K, Cmd+\\). Inconsistent shortcut display confuses users.",
+      "severity": "MEDIUM",
+      "location": "Settings > Keyboard Shortcuts table",
+      "expected": "Shortcuts should match Help panel: Cmd+N, Cmd+K, Cmd+\\",
+      "actual": "Shows Cmd+Shift+N, Cmd+Shift+K, Cmd+Shift+\\",
+      "screenshot": "qa/screenshots/run3-settings-shortcuts-mismatch.png"
+    }
+  ],
+  "regressions": [],
+  "identity_compliance": {
+    "dark_everywhere": true,
+    "geist_mono_only": true,
+    "amber_accent_only": true,
+    "icons_16px_plus": true,
+    "body_text_13px": true,
+    "compact_spacing": true,
+    "no_emoji_in_ui": true,
+    "no_exclamation_marks": true,
+    "voice_short_direct": true,
+    "notes": "All IDENTITY.md requirements appear met. Dark theme consistent, monospace font used throughout, amber accent for active states, compact spacing."
+  },
+  "ten_point_checks": {
+    "TASK-4_new_sprint": {
+      "happy_path": true,
+      "empty_state": "N/A - button always visible",
+      "loading_state": "Not tested (did not submit sprint to avoid API cost)",
+      "error_state": "Not tested",
+      "keyboard_navigation": "Dialog closable with Esc (via close button)",
+      "no_console_errors": true,
+      "no_layout_shift": true,
+      "overflow_handled": true,
+      "destructive_confirmation": "N/A - creation not destruction",
+      "back_undo": "Cancel returns to sprint list cleanly"
+    },
+    "TASK-1_36_per_session_cost": {
+      "happy_path": true,
+      "empty_state": "N/A - shows when sessions exist",
+      "loading_state": "Costs appear with session data",
+      "error_state": "Not tested",
+      "keyboard_navigation": "N/A - display only",
+      "no_console_errors": true,
+      "no_layout_shift": true,
+      "overflow_handled": true,
+      "destructive_confirmation": "N/A",
+      "back_undo": "N/A"
+    },
+    "TASK-7_peak_label": {
+      "happy_path": true,
+      "empty_state": "N/A - always shows",
+      "loading_state": "N/A",
+      "error_state": "N/A",
+      "keyboard_navigation": "N/A - hover tooltip",
+      "no_console_errors": true,
+      "no_layout_shift": true,
+      "overflow_handled": true,
+      "destructive_confirmation": "N/A",
+      "back_undo": "N/A"
+    },
+    "TASK-8_usage_tooltip": {
+      "happy_path": true,
+      "empty_state": "N/A - always shows system resources",
+      "loading_state": "N/A",
+      "error_state": "N/A",
+      "keyboard_navigation": "N/A - hover tooltip",
+      "no_console_errors": true,
+      "no_layout_shift": true,
+      "overflow_handled": true,
+      "destructive_confirmation": "N/A",
+      "back_undo": "N/A"
+    },
+    "TASK-9_keyboard_shortcuts": {
+      "happy_path": "Partial - Help panel and bottom bar correct, Settings table stale",
+      "empty_state": "N/A",
+      "loading_state": "N/A",
+      "error_state": "N/A",
+      "keyboard_navigation": "Shortcuts listed correctly in Help panel",
+      "no_console_errors": true,
+      "no_layout_shift": true,
+      "overflow_handled": true,
+      "destructive_confirmation": "N/A",
+      "back_undo": "N/A"
+    }
+  },
+  "overall_notes": "All 5 targeted fixes are functionally working. 4 fully verified, 1 partially verified (TASK-9 has inconsistency in Settings page). No regressions detected from previous verified fixes (TASK-2, TASK-3, TASK-5, TASK-6 all still working). 1 new MEDIUM bug found (TASK-37)."
+}

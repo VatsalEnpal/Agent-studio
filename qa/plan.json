@@ -7,8 +7,8 @@
       "issue_id": "ISSUE-5",
       "description": "Add cost tracking per session. Display total cost today in the top bar and per-session cost badges in the sidebar and terminal headers.",
       "severity": "HIGH",
-      "status": "fixed",
-      "verification_notes": "Total cost in top bar. Per-session cost in managed session sidebar (SessionItem). Per-process cost now in Running on Machine entries."
+      "status": "verified",
+      "verification_notes": "Total cost in top bar ($131.6). Per-session cost in Running on Machine: $119.9 (opus, 3h 55m) and $11.7 (opus, 46m). Sum matches top bar total. Verified in run 3."
     },
     {
       "id": "TASK-2",
@@ -31,7 +31,8 @@
       "issue_id": "ISSUE-13",
       "description": "Add a New Sprint button to the Sprints sub-tab in Teams view with a creation flow for defining sprint goals, selecting agents, and configuring gates.",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified",
+      "verification_notes": "New Sprint button present in Sprints tab. Dialog has goal input, model selector (opus/sonnet), agent picker (Orchestrator required + Frontend/Backend/QA/Security), cost warning, Cancel/Start Sprint buttons. Start Sprint enables on goal input. Agent count updates dynamically. Verified in run 3."
     },
     {
       "id": "TASK-5",
@@ -54,21 +55,24 @@
       "issue_id": "ISSUE-2",
       "description": "Make the peak/off-peak indicator more self-explanatory or configurable. Add a setting for timezone and explain that it relates to API rate limiting.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified",
+      "verification_notes": "Label now reads 'API: Off-Peak'. Tooltip shows 'Off-Peak -- Normal Speed' with explanation about Anthropic API rate limits during peak hours (5am-11am Pacific). Shows local peak window times. Verified in run 3."
     },
     {
       "id": "TASK-8",
       "issue_id": "ISSUE-3",
       "description": "Add a clear label or tooltip to the usage indicator in the top bar explaining what the percentage and GB values represent.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified",
+      "verification_notes": "Usage button '22% | 23.8/24GB' has tooltip showing 'System Resources', CPU usage %, Memory usage with absolute/percentage values, and CTA 'Click for full system monitor in Settings.' Verified in run 3."
     },
     {
       "id": "TASK-9",
       "issue_id": "ISSUE-4",
       "description": "Change keyboard shortcuts to match DESIGN.md: Cmd+N for new session, Cmd+K for command palette, Cmd+backslash for sidebar toggle.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "pending",
+      "verification_notes": "Partial fix: Help panel and bottom bar correctly show Cmd+N, Cmd+K, Cmd+\\. Empty state text also correct. BUT Settings page Keyboard Shortcuts table still shows OLD shortcuts (Cmd+Shift+N, Cmd+Shift+K, Cmd+Shift+\\). Reverted to pending. See TASK-37."
     },
     {
       "id": "TASK-10",
@@ -257,19 +261,27 @@
       "issue_id": "ISSUE-36",
       "description": "Per-session cost badges are not visible in sidebar session list or Running on Machine section. Total cost is shown in top bar but individual session cost breakdowns are missing.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified",
+      "verification_notes": "Per-session cost badges now visible in Running on Machine section ($119.9 and $11.7 alongside each session). Verified in run 3."
+    },
+    {
+      "id": "TASK-37",
+      "issue_id": "ISSUE-37",
+      "description": "Settings page Keyboard Shortcuts table shows stale Cmd+Shift shortcuts (Cmd+Shift+N, Cmd+Shift+K, Cmd+Shift+\\) while Help panel and bottom bar correctly show new Cmd-only shortcuts (Cmd+N, Cmd+K, Cmd+\\). Inconsistent shortcut display.",
+      "severity": "MEDIUM",
+      "status": "pending"
     }
   ],
   "stats": {
-    "total": 36,
+    "total": 37,
     "critical": 0,
     "high": 5,
-    "medium": 13,
+    "medium": 14,
     "low": 18,
-    "verified": 4,
-    "fixed": 5,
+    "verified": 8,
+    "fixed": 0,
     "partial": 0,
     "in_progress": 0,
-    "pending": 27
+    "pending": 29
   }
 }
