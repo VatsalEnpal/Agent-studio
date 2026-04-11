@@ -14,6 +14,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSettingsStore } from "@/stores/settings";
 import type { LauncherPreset } from "@/lib/types";
 
 interface PastSession {
@@ -131,8 +132,9 @@ export function SessionLauncher({
   onOpenChange,
   onLaunch,
 }: SessionLauncherProps) {
+  const defaultModel = useSettingsStore((s) => s.settings.defaultModel);
   const [customName, setCustomName] = useState("");
-  const [model, setModel] = useState<"opus" | "sonnet" | "haiku">("sonnet");
+  const [model, setModel] = useState<"opus" | "sonnet" | "haiku">(defaultModel);
   const [agent, setAgent] = useState("none");
   const [permissions, setPermissions] = useState<
     "bypass" | "default" | "plan" | "auto"
@@ -154,7 +156,7 @@ export function SessionLauncher({
   useEffect(() => {
     if (open) {
       setCustomName("");
-      setModel("sonnet");
+      setModel(useSettingsStore.getState().settings.defaultModel);
       setAgent("none");
       setPermissions("default");
       setChannel("none");

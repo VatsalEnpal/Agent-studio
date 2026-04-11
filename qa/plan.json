@@ -130,7 +130,8 @@
       "issue_id": "ISSUE-32",
       "description": "Make the session launcher respect the default model configured in Settings instead of always defaulting to sonnet.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed",
+      "fix_notes": "Session launcher now reads defaultModel from useSettingsStore instead of hardcoding 'sonnet'. Both initial state and dialog-open reset use the configured default."
     },
     {
       "id": "TASK-18",
