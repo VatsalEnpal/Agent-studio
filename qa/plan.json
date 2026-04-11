@@ -279,8 +279,9 @@
       "issue_id": "ISSUE-38",
       "description": "Teams view crashes with React hooks error ('Rendered more hooks than during the previous render') on first navigation from Settings to Teams. ErrorBoundary catches it and shows Retry button. Retry resolves the issue. Subsequent navigations work.",
       "severity": "HIGH",
-      "status": "pending",
-      "steps_to_reproduce": "Navigate to Settings, then click Teams in top nav. Teams view shows error. Click Retry to recover."
+      "status": "fixed",
+      "steps_to_reproduce": "Navigate to Settings, then click Teams in top nav. Teams view shows error. Click Retry to recover.",
+      "fix_notes": "Moved jumpToSession useCallback and filteredAgents computation above the early return in RoomChat. These hooks were only called when room was defined, causing a conditional hooks violation on first render with no room selected."
     }
   ],
   "stats": {

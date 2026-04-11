@@ -165,6 +165,26 @@ export function RoomChat() {
     setConfirmClose(false);
   }, [selectedRoomId]);
 
+  // ALL hooks must be called unconditionally above any early return.
+  // jumpToSession and filteredAgents were previously below the early return,
+  // causing "Rendered more hooks than during the previous render" when
+  // navigating to Teams with no room selected.
+  const jumpToSession = useCallback((agent: RoomAgent) => {
+    if (!agent.sessionId) return;
+    const sessions = useSessionsStore.getState().sessions;
+    const match = sessions.find((s) => s.id === agent.sessionId);
+    if (!match) return;
+    useSessionsStore.getState().swapIn(match.id);
+    useUIStore.getState().setActiveMode("sessions");
+  }, []);
+
+  // Filtered agents for mention dropdown (safe even when room is null)
+  const filteredAgents = (room?.agents ?? []).filter(
+    (a) =>
+      (a.id ?? "").toLowerCase().includes(mentionFilter) ||
+      (a.name ?? "").toLowerCase().includes(mentionFilter),
+  );
+
   if (!room) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -181,22 +201,6 @@ export function RoomChat() {
   }
 
   const allOffline = (room.agents ?? []).every((a) => a.status === "offline");
-
-  const jumpToSession = useCallback((agent: RoomAgent) => {
-    if (!agent.sessionId) return;
-    const sessions = useSessionsStore.getState().sessions;
-    const match = sessions.find((s) => s.id === agent.sessionId);
-    if (!match) return;
-    useSessionsStore.getState().swapIn(match.id);
-    useUIStore.getState().setActiveMode("sessions");
-  }, []);
-
-  // Filtered agents for mention dropdown
-  const filteredAgents = (room.agents ?? []).filter(
-    (a) =>
-      (a.id ?? "").toLowerCase().includes(mentionFilter) ||
-      (a.name ?? "").toLowerCase().includes(mentionFilter),
-  );
 
   return (
     <div className="flex flex-col h-full relative">
