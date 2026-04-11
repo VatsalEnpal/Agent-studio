@@ -139,8 +139,14 @@ function ChangesPopup({
   const lines = isClean ? [] : changes.split("\n").filter(Boolean);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
-      <div className="bg-console-bg border border-console-border rounded-lg shadow-2xl w-full max-w-md p-0" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-console-bg border border-console-border rounded-lg shadow-2xl w-full max-w-md p-0"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between px-3 py-2 border-b border-console-border">
           <span className="text-xs font-medium text-console-text flex items-center gap-1.5">
             <Eye className="w-3.5 h-3.5" />
@@ -155,31 +161,55 @@ function ChangesPopup({
         </div>
         <div className="px-3 py-2 max-h-72 overflow-auto">
           {changes === "Loading..." ? (
-            <p className="text-[10px] text-console-dim animate-pulse py-2">Loading...</p>
+            <p className="text-[10px] text-console-dim animate-pulse py-2">
+              Loading...
+            </p>
           ) : isClean ? (
             <div className="flex items-center gap-2 py-3 justify-center">
               <FileCheck className="w-4 h-4 text-console-success" />
-              <span className="text-[11px] text-console-success font-medium">Working tree clean</span>
+              <span className="text-[11px] text-console-success font-medium">
+                Working tree clean
+              </span>
             </div>
           ) : (
             <div className="space-y-0.5">
-              <p className="text-[9px] text-console-dim mb-1.5">{lines.length} changed file{lines.length !== 1 ? "s" : ""}</p>
+              <p className="text-[9px] text-console-dim mb-1.5">
+                {lines.length} changed file{lines.length !== 1 ? "s" : ""}
+              </p>
               {lines.map((line, i) => {
                 const status = line.slice(0, 2).trim();
                 const file = line.slice(3);
                 let statusColor = "text-console-muted";
                 let statusLabel = status;
-                if (status === "M") { statusColor = "text-console-accent"; statusLabel = "M"; }
-                else if (status === "A") { statusColor = "text-console-success"; statusLabel = "A"; }
-                else if (status === "D") { statusColor = "text-console-error"; statusLabel = "D"; }
-                else if (status === "??") { statusColor = "text-blue-400"; statusLabel = "?"; }
-                else if (status === "R") { statusColor = "text-purple-400"; statusLabel = "R"; }
+                if (status === "M") {
+                  statusColor = "text-console-accent";
+                  statusLabel = "M";
+                } else if (status === "A") {
+                  statusColor = "text-console-success";
+                  statusLabel = "A";
+                } else if (status === "D") {
+                  statusColor = "text-console-error";
+                  statusLabel = "D";
+                } else if (status === "??") {
+                  statusColor = "text-blue-400";
+                  statusLabel = "?";
+                } else if (status === "R") {
+                  statusColor = "text-purple-400";
+                  statusLabel = "R";
+                }
                 return (
                   <div key={i} className="flex items-center gap-2 py-0.5">
-                    <span className={cn("text-[10px] font-mono font-bold w-4 text-center shrink-0", statusColor)}>
+                    <span
+                      className={cn(
+                        "text-[10px] font-mono font-bold w-4 text-center shrink-0",
+                        statusColor,
+                      )}
+                    >
                       {statusLabel}
                     </span>
-                    <span className="text-[10px] font-mono text-console-muted truncate">{file}</span>
+                    <span className="text-[10px] font-mono text-console-muted truncate">
+                      {file}
+                    </span>
                   </div>
                 );
               })}
@@ -474,32 +504,33 @@ function RepoItem({
         />
       </div>
       {/* Other tracked branches */}
-      {repo.branches && repo.branches.filter((b) => !b.isCurrent).length > 0 && (
-        <div className="mt-1 pl-5 space-y-0.5">
-          {repo.branches
-            .filter((b) => !b.isCurrent)
-            .map((b) => {
-              // Extract just the commit message (after the hash)
-              const commitMsg = b.lastCommit.replace(/^[a-f0-9]+ /, "");
-              const commitHash = b.lastCommit.split(" ")[0] ?? "";
-              return (
-                <div
-                  key={b.name}
-                  className="flex items-center gap-1.5 text-[9px] text-console-dim"
-                  title={b.lastCommit}
-                >
-                  <GitBranch className="w-2.5 h-2.5 shrink-0" />
-                  <span className="font-mono text-console-muted shrink-0">
-                    {b.name}
-                  </span>
-                  <span className="truncate opacity-60">
-                    {commitHash.slice(0, 7)} {commitMsg}
-                  </span>
-                </div>
-              );
-            })}
-        </div>
-      )}
+      {repo.branches &&
+        repo.branches.filter((b) => !b.isCurrent).length > 0 && (
+          <div className="mt-1 pl-5 space-y-0.5">
+            {repo.branches
+              .filter((b) => !b.isCurrent)
+              .map((b) => {
+                // Extract just the commit message (after the hash)
+                const commitMsg = b.lastCommit.replace(/^[a-f0-9]+ /, "");
+                const commitHash = b.lastCommit.split(" ")[0] ?? "";
+                return (
+                  <div
+                    key={b.name}
+                    className="flex items-center gap-1.5 text-[9px] text-console-dim"
+                    title={b.lastCommit}
+                  >
+                    <GitBranch className="w-2.5 h-2.5 shrink-0" />
+                    <span className="font-mono text-console-muted shrink-0">
+                      {b.name}
+                    </span>
+                    <span className="truncate opacity-60">
+                      {commitHash.slice(0, 7)} {commitMsg}
+                    </span>
+                  </div>
+                );
+              })}
+          </div>
+        )}
       {/* Action buttons row — show on hover */}
       <div
         className="flex items-center gap-1 mt-1 pl-5 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -744,7 +775,11 @@ function DevServerItem({
   );
 }
 
-function AddServerForm({ onAdd }: { onAdd: (server: { name: string; cwd: string; command: string }) => void }) {
+function AddServerForm({
+  onAdd,
+}: {
+  onAdd: (server: { name: string; cwd: string; command: string }) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [cwd, setCwd] = useState("");
@@ -752,7 +787,11 @@ function AddServerForm({ onAdd }: { onAdd: (server: { name: string; cwd: string;
 
   const handleSubmit = () => {
     if (!name.trim() || !cwd.trim()) return;
-    onAdd({ name: name.trim(), cwd: cwd.trim(), command: command.trim() || "npm run dev" });
+    onAdd({
+      name: name.trim(),
+      cwd: cwd.trim(),
+      command: command.trim() || "npm run dev",
+    });
     setName("");
     setCwd("");
     setCommand("npm run dev");
@@ -835,19 +874,29 @@ function shortenCwd(cwd: string): string {
   return cwd;
 }
 
-function RunningProcessItem({ proc, onKillProcess }: { proc: DiscoveredProcess; onKillProcess: (pid: number) => void }) {
+function RunningProcessItem({
+  proc,
+  onKillProcess,
+}: {
+  proc: DiscoveredProcess;
+  onKillProcess: (pid: number) => void;
+}) {
   const [killing, setKilling] = useState(false);
   const [confirmKill, setConfirmKill] = useState(false);
   const sessions = useSessionsStore((s) => s.sessions);
 
-  // Check if this process belongs to a room session
-  const roomSession = sessions.find(
-    (s) => s.pid === proc.pid && s.meta?.group === "room",
-  );
+  // Check if this process belongs to a managed session
+  const managedSession = sessions.find((s) => s.pid === proc.pid);
+  const roomSession =
+    managedSession?.meta?.group === "room" ? managedSession : undefined;
   const roomName = roomSession?.meta?.roomName;
 
-  // Derive human-readable label from cwd
-  const projectName = proc.cwd !== "unknown" ? proc.cwd.split("/").pop() ?? "Claude" : "Claude";
+  // Derive human-readable label: managed session name > project dir > fallback
+  const projectName =
+    proc.cwd !== "unknown" ? (proc.cwd.split("/").pop() ?? "Claude") : "Claude";
+  const displayLabel = roomName
+    ? (roomSession?.meta?.agent ?? "Agent")
+    : (managedSession?.name ?? projectName);
   const uptime = formatUptime(proc.startTime);
 
   return (
@@ -858,7 +907,7 @@ function RunningProcessItem({ proc, onKillProcess }: { proc: DiscoveredProcess; 
       <div className="flex items-center gap-2">
         <Cpu className="w-3 h-3 text-console-muted shrink-0" />
         <span className="text-[10px] text-console-text flex-1 truncate">
-          {roomName ? `${roomSession?.meta?.agent ?? "Agent"}` : "Claude Session"}
+          {displayLabel}
         </span>
         {roomName && (
           <span className="text-[9px] px-1 py-0.5 rounded bg-console-accent/20 text-console-accent font-mono shrink-0">
@@ -918,19 +967,25 @@ function RunningProcessItem({ proc, onKillProcess }: { proc: DiscoveredProcess; 
       </div>
       <div className="pl-5 flex items-center gap-2">
         <span className="text-[9px] text-console-muted truncate flex-1 min-w-0">
-          {projectName}
+          {managedSession ? shortenCwd(proc.cwd) : projectName}
         </span>
-        <span className="text-[9px] text-console-dim">
-          running {uptime}
-        </span>
-        {/* Context or cost info intentionally removed — context shown in session items */}
+        <span className="text-[9px] text-console-dim">running {uptime}</span>
       </div>
     </div>
   );
 }
 
-function RecentSessionItem({ session, onResume, resumingId }: { session: PastSession; onResume: (session: PastSession) => void; resumingId: string | null }) {
-  const projectShort = session.projectShort ?? session.project.split("/").pop() ?? session.project;
+function RecentSessionItem({
+  session,
+  onResume,
+  resumingId,
+}: {
+  session: PastSession;
+  onResume: (session: PastSession) => void;
+  resumingId: string | null;
+}) {
+  const projectShort =
+    session.projectShort ?? session.project.split("/").pop() ?? session.project;
   const dateStr = formatHistoryDate(session.date);
 
   // Show: preview text (first user message) as the main display
@@ -941,7 +996,9 @@ function RecentSessionItem({ session, onResume, resumingId }: { session: PastSes
     : projectShort;
 
   // Subtitle: agent (if any) + project + time
-  const subtitle = [session.agent, projectShort, dateStr].filter(Boolean).join(" \u00b7 ");
+  const subtitle = [session.agent, projectShort, dateStr]
+    .filter(Boolean)
+    .join(" \u00b7 ");
 
   return (
     <div
@@ -1001,7 +1058,9 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
   const repos = useGitStore((s) => s.repos);
   const openPrModal = useGitStore((s) => s.openPrModal);
 
-  const [runningProcesses, setRunningProcesses] = useState<DiscoveredProcess[]>([]);
+  const [runningProcesses, setRunningProcesses] = useState<DiscoveredProcess[]>(
+    [],
+  );
   const [recentSessions, setRecentSessions] = useState<PastSession[]>([]);
   const [devServers, setDevServers] = useState<DevServer[]>([]);
   const setLauncherOpen = useUIStore((s) => s.setLauncherOpen);
@@ -1026,15 +1085,18 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
     }
   }, []);
 
-  const handleKillProcess = useCallback(async (pid: number) => {
-    try {
-      await fetch(`/api/processes/${pid}/kill`, { method: "POST" });
-      // Refresh process list after a short delay
-      setTimeout(() => void fetchProcesses(), 1000);
-    } catch {
-      // Best effort
-    }
-  }, [fetchProcesses]);
+  const handleKillProcess = useCallback(
+    async (pid: number) => {
+      try {
+        await fetch(`/api/processes/${pid}/kill`, { method: "POST" });
+        // Refresh process list after a short delay
+        setTimeout(() => void fetchProcesses(), 1000);
+      } catch {
+        // Best effort
+      }
+    },
+    [fetchProcesses],
+  );
 
   const fetchDevServers = useCallback(async () => {
     try {
@@ -1048,57 +1110,69 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
     }
   }, []);
 
-  const handleStopServer = useCallback(async (pid: number) => {
-    try {
-      await fetch(`/api/servers/${pid}/stop`, { method: "POST" });
-      setTimeout(() => void fetchDevServers(), 1500);
-    } catch {
-      // Best effort
-    }
-  }, [fetchDevServers]);
-
-  const handleStartServer = useCallback(async (cwd: string, command: string) => {
-    try {
-      const res = await fetch("/api/servers/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cwd, command }),
-      });
-      if (res.ok) {
-        // Server start returns immediately after port detection
-        void fetchDevServers();
-      } else {
-        // Still refresh after delay in case of slow start
-        setTimeout(() => void fetchDevServers(), 3000);
+  const handleStopServer = useCallback(
+    async (pid: number) => {
+      try {
+        await fetch(`/api/servers/${pid}/stop`, { method: "POST" });
+        setTimeout(() => void fetchDevServers(), 1500);
+      } catch {
+        // Best effort
       }
-    } catch {
-      // Best effort
-    }
-  }, [fetchDevServers]);
+    },
+    [fetchDevServers],
+  );
 
-  const handleAddCustomServer = useCallback(async (server: { name: string; cwd: string; command: string }) => {
-    try {
-      await fetch("/api/servers/custom", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(server),
-      });
-      void fetchDevServers();
-    } catch {
-      // Best effort
-    }
-  }, [fetchDevServers]);
+  const handleStartServer = useCallback(
+    async (cwd: string, command: string) => {
+      try {
+        const res = await fetch("/api/servers/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cwd, command }),
+        });
+        if (res.ok) {
+          // Server start returns immediately after port detection
+          void fetchDevServers();
+        } else {
+          // Still refresh after delay in case of slow start
+          setTimeout(() => void fetchDevServers(), 3000);
+        }
+      } catch {
+        // Best effort
+      }
+    },
+    [fetchDevServers],
+  );
 
-  const handleRemoveCustomServer = useCallback(async (name: string) => {
-    try {
-      await fetch(`/api/servers/custom/${encodeURIComponent(name)}`, {
-        method: "DELETE",
-      });
-      void fetchDevServers();
-    } catch {
-      // Best effort
-    }
-  }, [fetchDevServers]);
+  const handleAddCustomServer = useCallback(
+    async (server: { name: string; cwd: string; command: string }) => {
+      try {
+        await fetch("/api/servers/custom", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(server),
+        });
+        void fetchDevServers();
+      } catch {
+        // Best effort
+      }
+    },
+    [fetchDevServers],
+  );
+
+  const handleRemoveCustomServer = useCallback(
+    async (name: string) => {
+      try {
+        await fetch(`/api/servers/custom/${encodeURIComponent(name)}`, {
+          method: "DELETE",
+        });
+        void fetchDevServers();
+      } catch {
+        // Best effort
+      }
+    },
+    [fetchDevServers],
+  );
 
   const fetchRecentSessions = useCallback(async () => {
     try {
@@ -1150,10 +1224,7 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
       {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-thin py-2 px-1 space-y-4">
         {/* SESSIONS */}
-        <SessionGroup
-          title="Sessions"
-          count={managedSessions.length}
-        >
+        <SessionGroup title="Sessions" count={managedSessions.length}>
           {managedSessions.length === 0 ? (
             <p className="text-[10px] text-console-dim px-2 py-2">
               Click + New Session to start
@@ -1198,7 +1269,11 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
             defaultOpen={false}
           >
             {runningProcesses.map((proc) => (
-              <RunningProcessItem key={proc.pid} proc={proc} onKillProcess={handleKillProcess} />
+              <RunningProcessItem
+                key={proc.pid}
+                proc={proc}
+                onKillProcess={handleKillProcess}
+              />
             ))}
           </SessionGroup>
         )}
@@ -1236,7 +1311,11 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
                         body: JSON.stringify({
                           name,
                           command: "claude",
-                          args: ["--resume", s.id, "--dangerously-skip-permissions"],
+                          args: [
+                            "--resume",
+                            s.id,
+                            "--dangerously-skip-permissions",
+                          ],
                           cwd,
                           meta: {
                             model: "sonnet",
@@ -1259,11 +1338,7 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
         )}
 
         {/* REPOS (merged Folders + Git) */}
-        <SessionGroup
-          title="Repos"
-          count={repos.length}
-          defaultOpen={true}
-        >
+        <SessionGroup title="Repos" count={repos.length} defaultOpen={true}>
           {repos.map((repo) => (
             <RepoItem
               key={repo.path + repo.name}
@@ -1279,10 +1354,7 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
 
       {/* Modals */}
       {changesRepo && (
-        <ChangesPopup
-          repo={changesRepo}
-          onClose={() => setChangesRepo(null)}
-        />
+        <ChangesPopup repo={changesRepo} onClose={() => setChangesRepo(null)} />
       )}
       {commitRepo && (
         <CommitModal repo={commitRepo} onClose={() => setCommitRepo(null)} />
