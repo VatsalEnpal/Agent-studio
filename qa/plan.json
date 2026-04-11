@@ -1,0 +1,15 @@
+{
+  "generated_at": null,
+  "generated_from": "qa/audit-results/run-1.json",
+  "tasks": [],
+  "stats": {
+    "total": 0,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "completed": 0,
+    "in_progress": 0,
+    "pending": 0
+  }
+}

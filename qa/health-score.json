@@ -1,0 +1,17 @@
+{
+  "formula": "((total_checks - critical*4 - high*2 - medium*1) / total_checks) * 100",
+  "convergence_target": 95,
+  "circuit_breaker": {
+    "max_runs": 20,
+    "max_no_progress_streak": 3,
+    "max_same_bug_streak": 5,
+    "max_regressions_per_fix": 3
+  },
+  "checklist_evolution": {
+    "initial_items": 173,
+    "auto_added": 0,
+    "pruned": 0,
+    "items_that_caught_bugs": 0
+  },
+  "runs": []
+}

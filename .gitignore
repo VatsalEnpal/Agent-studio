@@ -1,0 +1,62 @@
+# === Dependencies ===
+node_modules/
+.next/
+
+# === Environment ===
+.env
+.env.local
+.env.*.local
+
+# === Build artifacts ===
+dist/
+out/
+tsconfig.tsbuildinfo
+next-env.d.ts
+
+# === Logs ===
+logs/
+*.log
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === IDE ===
+.vscode/
+.idea/
+
+# === LOCAL DEVELOPMENT TOOLING — never pushed to GitHub ===
+# Claude Code quality infrastructure (local to this machine)
+.claude/
+CLAUDE.md
+.claudeignore
+.mcp.json
+
+# User-specific config (generated on first run)
+.agent-studio.json
+.settings.json
+
+# QA test artifacts and screenshots
+qa-screenshots/
+test-screenshots/
+test-results/
+tests/screenshots/
+
+# QA automation scripts (local testing tools)
+qa-*.mjs
+test-*.mjs
+
+# Sprint/planning docs (internal)
+.checkpoint.md
+PLAN.md
+PM_REVIEW.md
+TEAMS-SPEC.md
+
+# AI agents integration (specific to InPipeline office work)
+ai-agents/
+
+# Internal review docs
+ARCHITECTURE_REVIEW.md
+
+# Working context (local state tracking)
+CURRENT_STATE.md

@@ -1,0 +1,308 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   Theme variables
+   ============================================ */
+:root {
+  /* Light theme */
+  --bg-base: #f5f6f8;
+  --bg-panel: #ffffff;
+  --bg-elevated: #ecedf0;
+  --bg-faint: #e5e6ea;
+  --text-bright: #111218;
+  --text-normal: #2c2d33;
+  --text-muted: #6b6c7a;
+  --text-dim: #999aab;
+  --border-color: #d0d1d8;
+  --accent-color: #d97706;
+  --success-color: #16a34a;
+  --error-color: #dc2626;
+  --skeleton-from: #e5e6ea;
+  --skeleton-mid: #d1d2d8;
+  --skeleton-to: #e5e6ea;
+  --scrollbar-thumb: #c5c6ce;
+  --scrollbar-hover: #aaaab5;
+  --panel-gradient-start: #ffffff;
+  --panel-gradient-end: #f9fafb;
+}
+
+.dark {
+  --bg-base: #0a0b0e;
+  --bg-panel: #111218;
+  --bg-elevated: #1e2028;
+  --bg-faint: #191a22;
+  --text-bright: #ededf0;
+  --text-normal: #d4d4dc;
+  --text-muted: #8b8b9e;
+  --text-dim: #555568;
+  --border-color: #1e2028;
+  --accent-color: #f59e0b;
+  --success-color: #22c55e;
+  --error-color: #ef4444;
+  --skeleton-from: #1e2028;
+  --skeleton-mid: #2a2b35;
+  --skeleton-to: #1e2028;
+  --scrollbar-thumb: #2a2b35;
+  --scrollbar-hover: #3a3b48;
+  --panel-gradient-start: #111218;
+  --panel-gradient-end: #0e0f14;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-normal);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   Text hierarchy
+   ============================================ */
+.text-bright { color: var(--text-bright); font-weight: 500; }
+.text-normal { color: var(--text-normal); }
+.text-secondary { color: var(--text-muted); }
+.text-tertiary { color: var(--text-dim); }
+
+/* ============================================
+   Panel backgrounds with subtle gradient
+   ============================================ */
+.console-panel-bg {
+  background: linear-gradient(180deg, var(--panel-gradient-start) 0%, var(--panel-gradient-end) 100%);
+}
+
+/* ============================================
+   xterm.js terminal container — always dark
+   ============================================ */
+.xterm {
+  padding: 2px 4px;
+}
+
+/* ============================================
+   Scrollbar styling
+   ============================================ */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-hover);
+}
+
+/* Thin scrollbar — only visible on hover */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.scrollbar-thin:hover {
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+/* ============================================
+   Keyboard shortcut kbd styling
+   ============================================ */
+kbd {
+  font-family: var(--font-geist-mono), Menlo, Consolas, "Courier New", monospace;
+}
+
+/* ============================================
+   Radix Dialog animations
+   ============================================ */
+[data-state="open"][data-radix-dialog-overlay] {
+  animation: fadeIn 150ms ease-out;
+}
+
+[data-state="closed"][data-radix-dialog-overlay] {
+  animation: fadeOut 100ms ease-in;
+}
+
+[data-state="open"][data-radix-dialog-content] {
+  animation: slideIn 150ms ease-out;
+}
+
+[data-state="closed"][data-radix-dialog-content] {
+  animation: slideOut 100ms ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+
+/* ============================================
+   Toast notifications
+   ============================================ */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+.animate-toast-in {
+  animation: toastIn 250ms ease-out;
+}
+
+/* ============================================
+   Fullscreen overlay fade
+   ============================================ */
+@keyframes fullscreenFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fullscreenFadeIn 200ms ease-out;
+}
+
+/* ============================================
+   Activity feed entry animation
+   ============================================ */
+@keyframes feedEntryIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-feed-in {
+  animation: feedEntryIn 300ms ease-out;
+}
+
+/* ============================================
+   Status dot pulse (for building state)
+   ============================================ */
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-status-pulse {
+  animation: statusPulse 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   Smooth transitions for interactive elements
+   ============================================ */
+
+/* Gate badge color transitions */
+.gate-badge {
+  transition: background-color 400ms ease, color 400ms ease, border-color 400ms ease;
+}
+
+/* Terminal focus border transition */
+.terminal-pane-border {
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+/* Sidebar collapse transition */
+.sidebar-transition {
+  transition: width 200ms ease, opacity 150ms ease;
+}
+
+/* ============================================
+   Micro-interactions
+   ============================================ */
+
+/* Button hover lift */
+.btn-lift {
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.btn-lift:hover {
+  transform: translateY(-1px);
+}
+.btn-lift:active {
+  transform: translateY(0);
+}
+
+/* Sidebar item transitions */
+.sidebar-item {
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+/* Tab content transition */
+@keyframes tabEnter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-tab-enter {
+  animation: tabEnter 150ms ease-out;
+}
+
+/* ============================================
+   Shimmer loading skeleton
+   ============================================ */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-from) 25%,
+    var(--skeleton-mid) 50%,
+    var(--skeleton-to) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
