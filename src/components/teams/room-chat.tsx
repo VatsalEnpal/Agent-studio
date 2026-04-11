@@ -289,13 +289,14 @@ export function RoomChat() {
       {/* Big spawn CTA when all agents are offline */}
       {room.active && allOffline && room.messages.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-4 max-w-xs">
             <Users className="w-10 h-10 text-console-dim mx-auto" />
             <h3 className="text-sm font-semibold text-console-text">
               Agents are offline
             </h3>
-            <p className="text-xs text-console-muted">
-              Spawn all agents to start chatting
+            <p className="text-[11px] text-console-muted leading-relaxed">
+              Launches a Claude session for each agent in this room. This will
+              use API credits.
             </p>
             <button
               onClick={handleSpawn}
@@ -308,7 +309,7 @@ export function RoomChat() {
                   Starting...
                 </span>
               ) : (
-                "▶ Start Room"
+                "Start Room"
               )}
             </button>
           </div>
@@ -340,7 +341,8 @@ export function RoomChat() {
           {room.active && allOffline && room.messages.length > 0 && (
             <div className="px-4 py-3 border-t border-console-border bg-console-faint flex items-center justify-between">
               <span className="text-[11px] text-console-muted">
-                All agents are offline
+                All agents are offline. Start room to launch sessions (uses API
+                credits).
               </span>
               <button
                 onClick={handleSpawn}
@@ -352,7 +354,7 @@ export function RoomChat() {
                 ) : (
                   <Power className="w-3 h-3" />
                 )}
-                {spawning ? "Starting..." : "▶ Start Room"}
+                {spawning ? "Starting..." : "Start Room"}
               </button>
             </div>
           )}
