@@ -35,58 +35,74 @@ const ALL_TABS: TabConfig[] = [
 ];
 
 /**
- * Peak hours: 5am-11am PT = 14:00-20:00 CEST (summer) / 13:00-19:00 CET (winter).
- * We compute in Berlin time to show Berlin-relevant info only.
+ * Anthropic peak hours: 5am-11am PT (Pacific Time).
+ * PT is America/Los_Angeles. We compute the current PT hour and show
+ * the peak window in the user's local timezone so it's self-explanatory.
  */
-function getBerlinPeakInfo(): {
+function getPeakInfo(): {
   isPeak: boolean;
-  berlinTime: string;
-  peakStart: string;
-  peakEnd: string;
+  localStart: string;
+  localEnd: string;
 } {
   const now = new Date();
 
-  // Get Berlin hour
-  const berlinFormatter = new Intl.DateTimeFormat("de-DE", {
-    timeZone: "Europe/Berlin",
+  // Get current PT hour
+  const ptFormatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Los_Angeles",
     hour: "2-digit",
-    minute: "2-digit",
     hour12: false,
   });
-  const berlinTime = berlinFormatter.format(now);
+  const ptHour = parseInt(ptFormatter.format(now), 10);
+  const isPeak = ptHour >= 5 && ptHour < 11;
 
-  // Determine UTC offset for Berlin to derive peak window
-  // Berlin is UTC+1 (CET) or UTC+2 (CEST)
-  // Peak in PT: 5:00-11:00 (PT is UTC-7 summer, UTC-8 winter)
-  // So peak in UTC: 12:00-18:00 (summer) or 13:00-19:00 (winter)
-  // In Berlin: 14:00-20:00 (CEST) or 14:00-20:00 (CET)
-  // Actually: PT+9h = Berlin in summer (PDT+9=CEST), PT+9h in winter (PST+9=CET)
-  // 5 PT + 9 = 14 Berlin, 11 PT + 9 = 20 Berlin (both seasons)
-  const peakStart = "14:00";
-  const peakEnd = "20:00";
+  // Convert peak start/end (5:00 PT and 11:00 PT) to user's local time
+  // Create dates for today's peak window in PT
+  const todayPT = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now); // YYYY-MM-DD
 
-  // Parse Berlin hour for comparison
-  const berlinParts = berlinTime.split(":");
-  const berlinHour = parseInt(berlinParts[0] ?? "0", 10);
-  const isPeak = berlinHour >= 14 && berlinHour < 20;
+  const peakStartUTC = new Date(`${todayPT}T05:00:00`);
+  const peakEndUTC = new Date(`${todayPT}T11:00:00`);
 
-  return { isPeak, berlinTime, peakStart, peakEnd };
+  // Adjust from PT to UTC: find PT offset dynamically
+  const ptOffsetMs =
+    peakStartUTC.getTime() -
+    new Date(
+      peakStartUTC.toLocaleString("en-US", {
+        timeZone: "America/Los_Angeles",
+      }),
+    ).getTime();
+  const startLocal = new Date(peakStartUTC.getTime() - ptOffsetMs);
+  const endLocal = new Date(peakEndUTC.getTime() - ptOffsetMs);
+
+  const fmt = (d: Date) =>
+    d.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+  return { isPeak, localStart: fmt(startLocal), localEnd: fmt(endLocal) };
 }
 
 function PeakHoursIndicator() {
   const [info, setInfo] = useState({
     isPeak: false,
-    berlinTime: "",
-    peakStart: "14:00",
-    peakEnd: "20:00",
+    localStart: "",
+    localEnd: "",
   });
 
   useEffect(() => {
-    const update = () => setInfo(getBerlinPeakInfo());
+    const update = () => setInfo(getPeakInfo());
     update();
     const interval = setInterval(update, 60_000);
     return () => clearInterval(interval);
   }, []);
+
+  if (!info.localStart) return null;
 
   return (
     <div className="relative group">
@@ -104,28 +120,24 @@ function PeakHoursIndicator() {
             info.isPeak ? "bg-red-400 animate-pulse" : "bg-emerald-400",
           )}
         />
-        {info.isPeak
-          ? `Peak until ${info.peakEnd}`
-          : `Off-Peak \u00b7 Peak starts at ${info.peakStart}`}
+        {info.isPeak ? "API: Peak" : "API: Off-Peak"}
       </div>
 
       {/* Tooltip */}
-      <div className="absolute right-0 top-full mt-1.5 w-56 p-2.5 rounded-lg border border-console-border bg-console-panel shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
+      <div className="absolute right-0 top-full mt-1.5 w-60 p-2.5 rounded-lg border border-console-border bg-console-panel shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
         <p className="text-[10px] text-console-text font-medium mb-1.5">
-          {info.isPeak ? "Peak Hours Active" : "Off-Peak Hours"}
+          {info.isPeak
+            ? "Peak Hours — Slower Responses"
+            : "Off-Peak — Normal Speed"}
         </p>
         <p className="text-[9px] text-console-muted leading-relaxed mb-2">
-          Anthropic throttles during peak (14:00-20:00 Berlin). Expect slower
-          responses.
+          Anthropic API rate limits are stricter during peak hours (5am-11am
+          Pacific). Expect slower responses and more throttling during peak.
         </p>
-        <div className="flex items-center justify-between text-[9px]">
-          <span className="text-console-dim">Berlin time</span>
-          <span className="text-console-text font-mono">{info.berlinTime}</span>
-        </div>
         <div className="flex items-center justify-between text-[9px] mt-0.5">
-          <span className="text-console-dim">Peak window</span>
+          <span className="text-console-dim">Peak window (your time)</span>
           <span className="text-console-text font-mono">
-            {info.peakStart}-{info.peakEnd}
+            {info.localStart}-{info.localEnd}
           </span>
         </div>
       </div>
