@@ -1,0 +1,212 @@
+{
+  "run": 2,
+  "phase": "brain-3",
+  "timestamp": "2026-04-11T22:19:00Z",
+  "verifications": [
+    {
+      "task_id": "TASK-5",
+      "issue_id": "ISSUE-29",
+      "description": "Close Room confirmation dialog",
+      "status": "verified",
+      "evidence": [
+        "Clicked Close room button on sidebar room entry. Dialog appeared with text 'Close room?' and 'Active conversations will end.' with Cancel and Close buttons.",
+        "Clicked Close Room button in room detail header. Same confirmation dialog appeared.",
+        "Cancel button dismisses the dialog without closing the room."
+      ],
+      "screenshots": [
+        "qa/screenshots/run2-04-close-room-dialog.png",
+        "qa/screenshots/run2-11-close-room-detail-dialog.png"
+      ],
+      "ten_point_check": {
+        "happy_path": "pass",
+        "empty_state": "n/a",
+        "loading_state": "n/a",
+        "error_state": "not tested - did not actually close a room",
+        "keyboard_nav": "not tested - Esc key not verified",
+        "console_errors": "not checked for this specific action",
+        "layout_shift": "pass - no visible layout shift",
+        "overflow_text": "pass - text fits within dialog",
+        "destructive_confirmation": "pass - confirmation dialog appears before action",
+        "back_undo": "pass - Cancel returns to previous state"
+      }
+    },
+    {
+      "task_id": "TASK-3",
+      "issue_id": "ISSUE-11",
+      "description": "Start Room button explanation text",
+      "status": "verified",
+      "evidence": [
+        "In room detail view, below the chat messages, the text 'All agents are offline. Start room to launch sessions (uses API credits).' is displayed next to the Start Room button.",
+        "The explanation clearly communicates that starting a room launches sessions and uses API credits."
+      ],
+      "screenshots": ["qa/screenshots/run2-05-start-room-explanation.png"],
+      "ten_point_check": {
+        "happy_path": "pass",
+        "empty_state": "pass - text explains what happens",
+        "loading_state": "not tested - did not start a room",
+        "error_state": "not tested",
+        "keyboard_nav": "not tested",
+        "console_errors": "not checked for this specific action",
+        "layout_shift": "pass",
+        "overflow_text": "pass",
+        "destructive_confirmation": "n/a",
+        "back_undo": "n/a"
+      }
+    },
+    {
+      "task_id": "TASK-2",
+      "issue_id": "ISSUE-7",
+      "description": "Running on Machine sessions show distinguishing info",
+      "status": "verified",
+      "evidence": [
+        "Running on Machine entries now show: project directory name (e.g. 'AgentStudio'), model badge ('opus'), running time ('3h 37m', '29m'), and Kill process button.",
+        "When two sessions are in the same directory, they show the same project name but can be distinguished by uptime.",
+        "Recent Sessions also show project context (e.g. 'InPipeline', 'AgentStudio', 'pmo . InPipeline') with time-ago info."
+      ],
+      "screenshots": [
+        "qa/screenshots/run2-02-running-on-machine.png",
+        "qa/screenshots/run2-08-running-sessions-no-cost.png"
+      ],
+      "ten_point_check": {
+        "happy_path": "pass - sessions are more distinguishable",
+        "empty_state": "n/a",
+        "loading_state": "n/a",
+        "error_state": "n/a",
+        "keyboard_nav": "not tested",
+        "console_errors": "not checked",
+        "layout_shift": "pass",
+        "overflow_text": "pass - project names truncate appropriately",
+        "destructive_confirmation": "n/a",
+        "back_undo": "n/a"
+      },
+      "notes": "Improvement from run 1: sessions previously showed only 'Claude Session' which was indistinguishable. Now they show directory name + model + uptime. However, sessions in the same directory still share the same label."
+    },
+    {
+      "task_id": "TASK-1",
+      "issue_id": "ISSUE-5",
+      "description": "Cost tracking per session",
+      "status": "partial",
+      "evidence": [
+        "Total cost '$128.3' is visible in the top bar between the Sessions/Teams/Memory/Settings tabs and the usage indicator.",
+        "The total cost updates dynamically (observed changing from $127.3 to $128.3 during testing).",
+        "Per-session cost badges are NOT visible in the sidebar session list (Recent Sessions shows prompt text, project name, and time-ago but no cost).",
+        "Per-session cost badges are NOT visible in the Running on Machine section (shows model, uptime, but no cost).",
+        "Cannot verify terminal header cost badges because no active sessions are visible in the Sessions tab."
+      ],
+      "screenshots": [
+        "qa/screenshots/run2-01-initial-load.png",
+        "qa/screenshots/run2-07-recent-sessions.png",
+        "qa/screenshots/run2-08-running-sessions-no-cost.png"
+      ],
+      "ten_point_check": {
+        "happy_path": "partial - total cost visible, per-session cost missing from sidebar",
+        "empty_state": "n/a",
+        "loading_state": "n/a",
+        "error_state": "n/a",
+        "keyboard_nav": "n/a",
+        "console_errors": "not checked",
+        "layout_shift": "pass",
+        "overflow_text": "pass - cost displays compact",
+        "destructive_confirmation": "n/a",
+        "back_undo": "n/a"
+      },
+      "new_issues": [
+        {
+          "id": "ISSUE-36",
+          "description": "Per-session cost badges are not visible in the sidebar session list or Running on Machine section. TASK-1 specified per-session cost badges in sidebar and terminal headers, but only the total cost in the top bar is implemented.",
+          "severity": "MEDIUM"
+        }
+      ]
+    },
+    {
+      "task_id": "TASK-6",
+      "issue_id": "ISSUE-1",
+      "description": "Light mode toggle removed",
+      "status": "verified",
+      "evidence": [
+        "No sun/moon toggle button exists in the top bar. The top bar contains: Sessions, Teams, Memory, Settings, $cost, usage indicator, Limits, Fullscreen, Off-Peak indicator, Help & Guide, agent-studio.",
+        "No theme toggle exists in the Settings page.",
+        "The entire app is consistently dark-themed."
+      ],
+      "screenshots": [
+        "qa/screenshots/run2-01-initial-load.png",
+        "qa/screenshots/run2-06-topbar-annotated.png",
+        "qa/screenshots/run2-09-settings.png"
+      ],
+      "ten_point_check": {
+        "happy_path": "pass - no toggle, app is dark-only",
+        "empty_state": "n/a",
+        "loading_state": "n/a",
+        "error_state": "n/a",
+        "keyboard_nav": "n/a",
+        "console_errors": "not checked",
+        "layout_shift": "pass",
+        "overflow_text": "n/a",
+        "destructive_confirmation": "n/a",
+        "back_undo": "n/a"
+      }
+    }
+  ],
+  "regression_checks": [
+    {
+      "area": "Teams tab - Room list",
+      "status": "pass",
+      "notes": "All rooms display correctly with agent counts, message counts, and Close room buttons. Active and Archived sections properly separated."
+    },
+    {
+      "area": "Teams tab - Room detail",
+      "status": "pass",
+      "notes": "Room detail shows agent badges, chat history, Start Room button with explanation text, and message input. Close Room button in detail header also has confirmation dialog."
+    },
+    {
+      "area": "Memory tab",
+      "status": "pass",
+      "notes": "Memory tab loads and displays entries with search, filtering by category, and detail view."
+    },
+    {
+      "area": "Settings tab",
+      "status": "pass",
+      "notes": "Settings page shows Workspace, General, PMO Scheduler, System Monitor, Keyboard Shortcuts, and About sections. All appear functional."
+    },
+    {
+      "area": "Sessions tab - Empty state",
+      "status": "pass",
+      "notes": "Empty state shows 'No active sessions' with helpful text and preset buttons (Quick Chat, Start Sprint, Continue Last)."
+    },
+    {
+      "area": "Sidebar - Recent Sessions",
+      "status": "pass",
+      "notes": "Recent Sessions shows 20 entries with truncated prompts, project names, time-ago info, and Resume buttons."
+    },
+    {
+      "area": "Top bar",
+      "status": "pass",
+      "notes": "Top bar shows all expected elements: tabs, total cost, usage, Limits, Fullscreen, Off-Peak indicator, Help, app name."
+    }
+  ],
+  "new_issues": [
+    {
+      "id": "ISSUE-36",
+      "feature": "sessions",
+      "type": "incomplete-fix",
+      "description": "Per-session cost badges missing from sidebar and Running on Machine section. TASK-1 specified cost badges in sidebar and terminal headers, but only the total cost in the top bar was implemented. Individual session entries (both in Recent Sessions and Running on Machine) show no cost information.",
+      "severity": "MEDIUM",
+      "screenshot": "qa/screenshots/run2-07-recent-sessions.png",
+      "checklist_item": "Can I see the cost of each session?",
+      "status": "open"
+    }
+  ],
+  "identity_compliance": {
+    "dark_everywhere": "pass - no light leaks detected, all surfaces are dark",
+    "geist_mono_only": "pass - all text appears monospace throughout",
+    "amber_accent_only": "pass - amber used for active states, no random accent colors detected",
+    "icons_16px_plus": "pass - icons appear appropriately sized",
+    "text_sizing": "pass - body text appears consistent at 13px, section headers at 14px",
+    "compact_spacing": "pass - information density is high, no excessive padding",
+    "voice_tone": "pass - empty state says 'No active sessions' (matter-of-fact), Start Room text is direct, confirmation dialog says 'Close room? Active conversations will end.' (direct and clear)",
+    "no_emoji_in_ui_chrome": "pass - no emoji in UI chrome elements",
+    "emoji_in_agent_responses": "fail - agent responses still contain emoji (checkmarks, red circles, package icons) which violates IDENTITY.md",
+    "next_js_dev_tools": "fail - Next.js Dev Tools badge with '1 Issue' still visible at bottom left"
+  },
+  "summary": "4 of 5 targeted fixes verified from a user perspective. TASK-5 (Close Room confirmation) fully works with proper dialog. TASK-3 (Start Room explanation) shows clear text about launching sessions and using API credits. TASK-2 (Running on Machine distinguishing info) now shows project directory name + model + uptime instead of generic 'Claude Session'. TASK-6 (Light mode toggle) successfully removed. TASK-1 (Cost tracking) is partially implemented: total cost shows in top bar but per-session cost badges are missing from sidebar and session entries. No regressions detected in any other features."
+}

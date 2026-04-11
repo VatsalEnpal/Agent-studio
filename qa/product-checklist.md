@@ -45,6 +45,8 @@ This checklist should be LARGER at the end of each run than at the start.
 
 ### Navigation
 
+- [ ] Does the Help dialog features list match the actual tabs in the navigation? [AUTO-ADDED, run-1]
+- [ ] Are all top bar indicators (usage, limits, peak hours) labeled or explained? [AUTO-ADDED, run-1]
 - [ ] Can the user tell what each top-level tab does from its label alone?
 - [ ] Is the current tab clearly highlighted/active?
 - [ ] Do all navigation elements respond to clicks? (no dead links)
@@ -77,6 +79,7 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Can I rename a session?
 - [ ] Can I see which model each session is using at a glance? (badge or label)
 - [ ] Can I see the cost of each session?
+- [ ] Is per-session cost visible in the sidebar session list (not just total in top bar)? [AUTO-ADDED, run-2]
 - [ ] Can I see how full the context window is?
 - [ ] Is there a visual status indicator? (active = green, idle = gray, error = red)
 - [ ] Are sessions grouped logically? (sprint team vs standalone)
@@ -350,6 +353,7 @@ Track additions and removals here.
 | --- | ------------- | ------------- | ------------- | ------------ |
 | 0   | 173 (initial) | 0             | N/A           | Baseline     |
 | 1   | 4             | 0             | checklist_gap | 88           |
+| 2   | 1             | 0             | checklist_gap | 91           |
 
 ## Miss Categories (for auto-evolution)
 

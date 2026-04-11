@@ -7,21 +7,24 @@
       "issue_id": "ISSUE-5",
       "description": "Add cost tracking per session. Display total cost today in the top bar and per-session cost badges in the sidebar and terminal headers.",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "partial",
+      "verification_notes": "Total cost visible in top bar ($128.3). Per-session cost badges missing from sidebar and Running on Machine entries."
     },
     {
       "id": "TASK-2",
       "issue_id": "ISSUE-7",
       "description": "Show distinguishing information for sessions in the Running on Machine section - include working directory, session name, or task description instead of generic Claude Session labels.",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified",
+      "verification_notes": "Sessions now show project directory name (AgentStudio), model badge (opus), and uptime (3h 37m). Distinguishable from each other by uptime."
     },
     {
       "id": "TASK-3",
       "issue_id": "ISSUE-11",
       "description": "Add an explanation or tooltip to the Start Room button explaining what happens when a room is started (e.g., Launches Claude sessions for each agent. This will use API credits.).",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified",
+      "verification_notes": "Text 'All agents are offline. Start room to launch sessions (uses API credits).' visible near Start Room button."
     },
     {
       "id": "TASK-4",
@@ -35,14 +38,16 @@
       "issue_id": "ISSUE-29",
       "description": "Add confirmation dialog to Close Room buttons. Should say Close room? Active conversations will end. with Cancel/Close options.",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified",
+      "verification_notes": "Confirmation dialog appears with 'Close room?' / 'Active conversations will end.' / Cancel / Close. Works from both sidebar and detail view Close Room buttons."
     },
     {
       "id": "TASK-6",
       "issue_id": "ISSUE-1",
       "description": "Remove or hide the light mode toggle. The app identity is dark-first per IDENTITY.md. If light mode must stay, at minimum default to dark and make the toggle less prominent.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified",
+      "verification_notes": "No sun/moon toggle exists anywhere in the top bar or settings page. App is consistently dark-themed."
     },
     {
       "id": "TASK-7",
@@ -248,14 +253,23 @@
       "status": "pending"
     }
   ],
+    {
+      "id": "TASK-36",
+      "issue_id": "ISSUE-36",
+      "description": "Per-session cost badges are not visible in sidebar session list or Running on Machine section. Total cost is shown in top bar but individual session cost breakdowns are missing.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    }
+  ],
   "stats": {
-    "total": 35,
+    "total": 36,
     "critical": 0,
     "high": 5,
-    "medium": 12,
+    "medium": 13,
     "low": 18,
-    "completed": 5,
+    "verified": 4,
+    "partial": 1,
     "in_progress": 0,
-    "pending": 30
+    "pending": 31
   }
 }

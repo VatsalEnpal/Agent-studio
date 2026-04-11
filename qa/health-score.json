@@ -9,9 +9,9 @@
   },
   "checklist_evolution": {
     "initial_items": 173,
-    "auto_added": 4,
+    "auto_added": 5,
     "pruned": 0,
-    "items_that_caught_bugs": 0
+    "items_that_caught_bugs": 1
   },
   "runs": [
     {
@@ -26,6 +26,22 @@
       "low": 18,
       "health_score": 88,
       "calculation": "((173 - 0*4 - 5*2 - 12*1) / 173) * 100 = (151/173) * 100 = 87.3 rounded to 88"
+    },
+    {
+      "run": 2,
+      "phase": "brain-3",
+      "timestamp": "2026-04-11T22:19:00Z",
+      "health_score": 91,
+      "total_checks": 173,
+      "bugs_found": 1,
+      "critical": 0,
+      "high": 2,
+      "medium": 12,
+      "low": 18,
+      "checklist_items_added": 1,
+      "convergence_trend": [88, 91],
+      "calculation": "((173 - 0*4 - 2*2 - 12*1) / 173) * 100 = (157/173) * 100 = 90.75 rounded to 91",
+      "notes": "3 HIGH issues verified (TASK-2, TASK-3, TASK-5), 1 MEDIUM verified (TASK-6), 1 HIGH partial (TASK-1 - total cost in top bar but per-session cost missing). 1 new MEDIUM found (TASK-36 - per-session cost badges missing). Net improvement: +3 health points."
     }
   ]
 }
