@@ -14,10 +14,12 @@ import {
   ExternalLink,
   Sun,
   Moon,
+  DollarSign,
 } from "lucide-react";
 import { useUIStore } from "@/stores/ui";
 import { cn } from "@/lib/utils";
 import type { ActiveMode } from "@/lib/types";
+import { useUsage, formatCostDisplay } from "@/hooks/use-usage";
 import { HelpPanel } from "./help-panel";
 
 interface TabConfig {
@@ -259,6 +261,21 @@ function ThemeToggle() {
   );
 }
 
+function TotalCostWidget() {
+  const { all } = useUsage();
+  const totalCost = all.reduce((sum, s) => sum + (s.totalCost ?? 0), 0);
+
+  return (
+    <div
+      className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono text-console-dim border border-console-border/50 cursor-default"
+      title="Total cost across all active sessions today"
+    >
+      <DollarSign className="w-3 h-3" />
+      <span>{formatCostDisplay(totalCost)}</span>
+    </div>
+  );
+}
+
 export function ToggleBar() {
   const activeMode = useUIStore((s) => s.activeMode);
   const setActiveMode = useUIStore((s) => s.setActiveMode);
@@ -318,6 +335,7 @@ export function ToggleBar() {
 
       {/* Right: system + fullscreen + peak indicator + help + branding */}
       <div className="flex items-center gap-2">
+        <TotalCostWidget />
         <SystemWidget />
         <a
           href="https://claude.ai/settings/usage"

@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { X, Clock, Loader2, Pencil } from "lucide-react";
 import { cn, statusDotColor } from "@/lib/utils";
-import { useSessionUsage } from "@/hooks/use-usage";
+import { useSessionUsage, formatCostDisplay } from "@/hooks/use-usage";
 import type { Session } from "@/lib/types";
 
 // Local storage map for user-renamed sessions
@@ -13,7 +13,9 @@ function getCustomNames(): Record<string, string> {
   try {
     const raw = localStorage.getItem(RENAME_KEY);
     if (raw) return JSON.parse(raw) as Record<string, string>;
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return {};
 }
 
@@ -22,7 +24,9 @@ function setCustomName(sessionId: string, name: string): void {
   names[sessionId] = name;
   try {
     localStorage.setItem(RENAME_KEY, JSON.stringify(names));
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 interface SessionItemProps {
@@ -66,7 +70,10 @@ export function SessionItem({
   }, [killing, onKill]);
 
   const isExited = session.status === "exited";
-  const isRunning = session.status === "active" || session.status === "building" || session.status === "starting";
+  const isRunning =
+    session.status === "active" ||
+    session.status === "building" ||
+    session.status === "starting";
 
   // Auto-remove exited sessions after 10 seconds
   useEffect(() => {
@@ -111,7 +118,11 @@ export function SessionItem({
       // Clear custom name — revert to auto-detected or default
       const names = getCustomNames();
       delete names[session.id];
-      try { localStorage.setItem(RENAME_KEY, JSON.stringify(names)); } catch { /* ignore */ }
+      try {
+        localStorage.setItem(RENAME_KEY, JSON.stringify(names));
+      } catch {
+        /* ignore */
+      }
       setCustomNameState(null);
     }
     setEditing(false);
@@ -132,7 +143,10 @@ export function SessionItem({
       {/* Row 1: status dot + name + model + kill */}
       <div className="flex items-center gap-2">
         <span
-          className={cn("w-2 h-2 rounded-full shrink-0", statusDotColor(session.status))}
+          className={cn(
+            "w-2 h-2 rounded-full shrink-0",
+            statusDotColor(session.status),
+          )}
         />
         {editing ? (
           <input
@@ -190,11 +204,18 @@ export function SessionItem({
             killing
               ? "text-console-error opacity-70 cursor-not-allowed"
               : "text-console-dim hover:text-console-error hover:bg-console-error/10 active:bg-console-error/20",
-            !killing && (focused ? "opacity-70 hover:opacity-100" : "opacity-0 group-hover:opacity-100"),
+            !killing &&
+              (focused
+                ? "opacity-70 hover:opacity-100"
+                : "opacity-0 group-hover:opacity-100"),
           )}
           title={killing ? "Killing..." : "Kill session"}
         >
-          {killing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
+          {killing ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <X className="w-3.5 h-3.5" />
+          )}
         </button>
       </div>
 
@@ -220,11 +241,20 @@ export function SessionItem({
               <span
                 className={cn(
                   "h-full rounded-full block transition-all",
-                  contextPercent >= 90 ? "bg-red-400" : contextPercent >= 70 ? "bg-yellow-400" : "bg-emerald-400",
+                  contextPercent >= 90
+                    ? "bg-red-400"
+                    : contextPercent >= 70
+                      ? "bg-yellow-400"
+                      : "bg-emerald-400",
                 )}
                 style={{ width: `${Math.min(100, contextPercent)}%` }}
               />
             </span>
+          </span>
+        )}
+        {usage.totalCost > 0 && (
+          <span className="text-[8px] text-console-dim shrink-0">
+            {formatCostDisplay(usage.totalCost)}
           </span>
         )}
       </div>

@@ -16,7 +16,7 @@ import {
 import { wsClient } from "@/lib/ws-client";
 import { cn, statusDotColor } from "@/lib/utils";
 import { useSessionsStore } from "@/stores/sessions";
-import { useSessionUsage } from "@/hooks/use-usage";
+import { useSessionUsage, formatCostDisplay } from "@/hooks/use-usage";
 import type { WsMessage, SessionMeta } from "@/lib/types";
 
 /** Read custom session names from localStorage */
@@ -334,6 +334,11 @@ export function TerminalPane({
           <span className="text-[9px] px-1 py-0.5 rounded bg-console-border text-console-dim">
             {tokensDisplay}
           </span>
+          {usage.totalCost > 0 && (
+            <span className="text-[9px] px-1 py-0.5 rounded bg-console-accent/10 text-console-accent">
+              {formatCostDisplay(usage.totalCost)}
+            </span>
+          )}
 
           {/* Zoom controls */}
           <span className="flex items-center border border-console-border rounded overflow-hidden">
