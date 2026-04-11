@@ -30,6 +30,7 @@ import { useGitStore } from "@/stores/git";
 import { SessionItem } from "@/components/sessions/session-item";
 import { SessionGroup } from "@/components/sessions/session-group";
 import { cn } from "@/lib/utils";
+import { formatCostDisplay } from "@/hooks/use-usage";
 import type { RepoStatus } from "@/lib/types";
 
 interface DiscoveredProcess {
@@ -969,7 +970,14 @@ function RunningProcessItem({
         <span className="text-[9px] text-console-muted truncate flex-1 min-w-0">
           {managedSession ? shortenCwd(proc.cwd) : projectName}
         </span>
-        <span className="text-[9px] text-console-dim">running {uptime}</span>
+        {proc.totalCost != null && proc.totalCost > 0 && (
+          <span className="text-[9px] text-console-accent font-mono shrink-0">
+            {formatCostDisplay(proc.totalCost)}
+          </span>
+        )}
+        <span className="text-[9px] text-console-dim shrink-0">
+          running {uptime}
+        </span>
       </div>
     </div>
   );
