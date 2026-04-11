@@ -7,8 +7,8 @@
       "issue_id": "ISSUE-5",
       "description": "Add cost tracking per session. Display total cost today in the top bar and per-session cost badges in the sidebar and terminal headers.",
       "severity": "HIGH",
-      "status": "partial",
-      "verification_notes": "Total cost visible in top bar ($128.3). Per-session cost badges missing from sidebar and Running on Machine entries."
+      "status": "fixed",
+      "verification_notes": "Total cost in top bar. Per-session cost in managed session sidebar (SessionItem). Per-process cost now in Running on Machine entries."
     },
     {
       "id": "TASK-2",
@@ -31,7 +31,7 @@
       "issue_id": "ISSUE-13",
       "description": "Add a New Sprint button to the Sprints sub-tab in Teams view with a creation flow for defining sprint goals, selecting agents, and configuring gates.",
       "severity": "HIGH",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-5",
@@ -54,21 +54,21 @@
       "issue_id": "ISSUE-2",
       "description": "Make the peak/off-peak indicator more self-explanatory or configurable. Add a setting for timezone and explain that it relates to API rate limiting.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-8",
       "issue_id": "ISSUE-3",
       "description": "Add a clear label or tooltip to the usage indicator in the top bar explaining what the percentage and GB values represent.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-9",
       "issue_id": "ISSUE-4",
       "description": "Change keyboard shortcuts to match DESIGN.md: Cmd+N for new session, Cmd+K for command palette, Cmd+backslash for sidebar toggle.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-10",
@@ -251,14 +251,13 @@
       "description": "Add a Custom flags text field to the session launcher modal for passing arbitrary CLI arguments.",
       "severity": "LOW",
       "status": "pending"
-    }
-  ],
+    },
     {
       "id": "TASK-36",
       "issue_id": "ISSUE-36",
       "description": "Per-session cost badges are not visible in sidebar session list or Running on Machine section. Total cost is shown in top bar but individual session cost breakdowns are missing.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed"
     }
   ],
   "stats": {
@@ -268,8 +267,9 @@
     "medium": 13,
     "low": 18,
     "verified": 4,
-    "partial": 1,
+    "fixed": 5,
+    "partial": 0,
     "in_progress": 0,
-    "pending": 31
+    "pending": 27
   }
 }
