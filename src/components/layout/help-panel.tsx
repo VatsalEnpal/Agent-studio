@@ -50,9 +50,9 @@ export function HelpPanel() {
                 Shortcuts
               </p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                <ShortcutRow keys="⌘⇧N" label="New session" />
-                <ShortcutRow keys="⌘⇧K" label="Command palette" />
-                <ShortcutRow keys="⌘⇧\" label="Toggle sidebar" />
+                <ShortcutRow keys="⌘N" label="New session" />
+                <ShortcutRow keys="⌘K" label="Command palette" />
+                <ShortcutRow keys="⌘\" label="Toggle sidebar" />
                 <ShortcutRow keys="⌘⇧1-6" label="Focus session" />
                 <ShortcutRow keys="⌘⇧F" label="Fullscreen" />
                 <ShortcutRow keys="Esc" label="Close dialogs" />
@@ -99,7 +99,9 @@ export function HelpPanel() {
 
             {/* Guide link */}
             <p className="text-xs text-console-muted">
-              See <span className="text-console-text font-medium">HOWTO.md</span> in the project folder for the full guide.
+              See{" "}
+              <span className="text-console-text font-medium">HOWTO.md</span> in
+              the project folder for the full guide.
             </p>
           </div>
 

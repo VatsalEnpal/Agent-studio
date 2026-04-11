@@ -6,12 +6,12 @@ import { useSessionsStore } from "@/stores/sessions";
 
 /**
  * Global keyboard shortcuts.
- * - Cmd/Ctrl+Shift+N: open launcher
- * - Cmd/Ctrl+Shift+K: open command palette
+ * - Cmd/Ctrl+N: open launcher
+ * - Cmd/Ctrl+K: open command palette
+ * - Cmd/Ctrl+\: toggle sidebar
  * - Cmd/Ctrl+Shift+1-6: focus session by position
  * - Cmd/Ctrl+Enter: fullscreen focused pane
  * - Escape: exit fullscreen / close launcher / close command palette
- * - Cmd/Ctrl+Shift+\: toggle sidebar
  * - Cmd/Ctrl+Shift+F: toggle fullscreen mode
  * - Tab (when not in terminal): cycle focus
  */
@@ -32,22 +32,22 @@ export function useKeyboardShortcuts() {
     function handleKeyDown(e: KeyboardEvent) {
       const meta = e.metaKey || e.ctrlKey;
 
-      // Cmd+Shift+K: open command palette
-      if (meta && e.shiftKey && e.key.toLowerCase() === "k") {
+      // Cmd+K: open command palette
+      if (meta && !e.shiftKey && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setCommandPaletteOpen(!commandPaletteOpen);
         return;
       }
 
-      // Cmd+Shift+N: open launcher
-      if (meta && e.shiftKey && e.key.toLowerCase() === "n") {
+      // Cmd+N: open launcher
+      if (meta && !e.shiftKey && e.key.toLowerCase() === "n") {
         e.preventDefault();
         setLauncherOpen(true);
         return;
       }
 
-      // Cmd+Shift+\: toggle sidebar
-      if (meta && e.shiftKey && (e.key === "\\" || e.key === "|")) {
+      // Cmd+\: toggle sidebar
+      if (meta && !e.shiftKey && (e.key === "\\" || e.key === "|")) {
         e.preventDefault();
         toggleSidebar();
         return;

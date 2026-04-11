@@ -81,11 +81,11 @@ export function TerminalGrid({
           <p className="text-console-dim text-xs max-w-xs">
             Launch a Claude Code session to get started. Press{" "}
             <kbd className="px-1.5 py-0.5 rounded bg-console-border text-console-muted text-[10px] font-mono">
-              Cmd+Shift+N
+              Cmd+N
             </kbd>{" "}
             to launch or{" "}
             <kbd className="px-1.5 py-0.5 rounded bg-console-border text-console-muted text-[10px] font-mono">
-              Cmd+Shift+K
+              Cmd+K
             </kbd>{" "}
             for commands.
           </p>

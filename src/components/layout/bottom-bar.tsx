@@ -23,8 +23,8 @@ export function BottomBar() {
 
       {/* Right: keyboard hints */}
       <div className="flex items-center gap-3">
-        <ShortcutHint mod shift keys="K" label="commands" />
-        <ShortcutHint mod shift keys="N" label="new session" />
+        <ShortcutHint mod keys="K" label="commands" />
+        <ShortcutHint mod keys="N" label="new session" />
       </div>
     </footer>
   );
