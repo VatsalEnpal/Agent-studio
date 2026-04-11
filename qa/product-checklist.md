@@ -33,6 +33,7 @@ This checklist should be LARGER at the end of each run than at the start.
 ## 0. First 60 Seconds (A Stranger Opens This App)
 
 ### First Impression
+
 - [ ] Does the app explain what it is within 3 seconds of opening? (tagline, welcome, or obvious context)
 - [ ] Is there a setup wizard or getting-started flow for first-time users?
 - [ ] Can a new user get productive (launch their first session) within 2 minutes?
@@ -43,12 +44,14 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Is the app name and branding visible?
 
 ### Navigation
+
 - [ ] Can the user tell what each top-level tab does from its label alone?
 - [ ] Is the current tab clearly highlighted/active?
 - [ ] Do all navigation elements respond to clicks? (no dead links)
 - [ ] Is keyboard navigation possible? (Tab cycles through elements, Enter activates)
 
 ### What If I Have Nothing?
+
 - [ ] If no sessions exist: is there an empty state with a CTA to create one?
 - [ ] If no teams/rooms exist: does it explain what teams are and how to start?
 - [ ] If no memory entries exist: does it say something helpful, not just blank?
@@ -59,6 +62,7 @@ This checklist should be LARGER at the end of each run than at the start.
 ## 1. Sessions Tab
 
 ### Launching Sessions
+
 - [ ] Is the "+ New Session" button immediately visible?
 - [ ] Does the launcher modal explain each option? (model, agent, permissions — not just dropdowns)
 - [ ] Can I launch a session with one click from a preset? (Quick Chat, Sprint, etc.)
@@ -67,6 +71,7 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] If the session fails to start, is there an actionable error message?
 
 ### Session List & Identification
+
 - [ ] Can I tell sessions apart from their names? (not all "energy-business-automation-biz-ops")
 - [ ] Are session names human-readable? (descriptive, not branch names or UUIDs)
 - [ ] Can I rename a session?
@@ -77,12 +82,14 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Are sessions grouped logically? (sprint team vs standalone)
 
 ### Session History
+
 - [ ] Can I see past/completed sessions, not just active ones?
 - [ ] Can I resume a previous session from the UI?
 - [ ] Can I search/filter session history?
 - [ ] Is the history sorted by recency by default?
 
 ### Terminal Grid
+
 - [ ] Do terminals render text correctly? (no garbled characters, no blank canvases)
 - [ ] Is terminal text readable at default zoom? (font size, contrast)
 - [ ] Can I resize terminal panes by dragging borders?
@@ -93,6 +100,7 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Can I scroll up in terminal history?
 
 ### Process Visibility
+
 - [ ] Can I see ALL Claude Code sessions running on my machine? (not just ones started from here)
 - [ ] Can I see all servers/ports currently exposed?
 - [ ] Can I kill a session from the UI with confirmation?
@@ -102,6 +110,7 @@ This checklist should be LARGER at the end of each run than at the start.
 ## 2. Teams Tab
 
 ### Room/Sprint Creation
+
 - [ ] Is there a visible "Create" button for new rooms or sprints?
 - [ ] Can I create a sprint from the UI? (not just view existing ones)
 - [ ] Does the creation flow explain what I'm creating?
@@ -109,6 +118,7 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Can I select which agents to include?
 
 ### Sprint Visualization
+
 - [ ] Can I see multiple sprints at once? (list or horizontal layout)
 - [ ] Is the current step of each sprint clearly highlighted?
 - [ ] Can I distinguish completed vs in-progress vs pending steps?
@@ -117,18 +127,23 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Is the spec readable without horizontal scrolling?
 
 ### Agent Display
+
 - [ ] Are agent avatars/icons large enough to identify at a glance?
 - [ ] Can I see which agent is doing what right now?
 - [ ] Can I click an agent to jump to its terminal session?
 - [ ] Is the agent's status clearly indicated? (working, idle, blocked, error)
 
 ### Room Interaction
+
 - [ ] Can I chat with agents in a room?
 - [ ] Does the chat work reliably? (messages send, responses appear)
 - [ ] Can I close a room? Does it actually clean up? (no zombie processes)
+- [ ] Does closing a room show a confirmation dialog before destroying it? [AUTO-ADDED, run-1]
 - [ ] If I reopen the app, do rooms restore their state?
+- [ ] Is it clear what the message count number next to each room name means? [AUTO-ADDED, run-1]
 
 ### Controls
+
 - [ ] Can I pause a sprint/run?
 - [ ] Can I resume a paused sprint?
 - [ ] Can I cancel a sprint that's going wrong?
@@ -139,6 +154,7 @@ This checklist should be LARGER at the end of each run than at the start.
 ## 3. Memory Tab
 
 ### Browsing
+
 - [ ] Can I see all memory entries?
 - [ ] Can I search memory by keyword?
 - [ ] Can I filter by category? (learnings, corrections, decisions)
@@ -146,6 +162,7 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Can I click an entry to see full details?
 
 ### Usefulness
+
 - [ ] Does the detail view show enough context to understand the memory?
 - [ ] Can I tell which agent created each memory?
 - [ ] Can I tell when each memory was created?
@@ -156,23 +173,27 @@ This checklist should be LARGER at the end of each run than at the start.
 ## 4. Settings Tab
 
 ### Configuration
+
 - [ ] Can I set a default model for new sessions?
 - [ ] Can I set default permissions?
 - [ ] Can I configure keyboard shortcuts?
 - [ ] Can I see and manage workspace/project paths?
 
 ### Notifications
+
 - [ ] Can I turn off Mac notifications entirely?
 - [ ] Can I turn off notifications per-type? (rooms vs sprints vs errors)
 - [ ] Can I configure Telegram notifications separately from Mac?
 - [ ] Is there a way to reduce notification frequency? (batch, digest, etc.)
 
 ### System
+
 - [ ] Can I see CPU/RAM/disk usage?
 - [ ] Can I see all running processes related to Agent Studio?
 - [ ] Is the system monitor accurate and updating?
 
 ### Help & Onboarding
+
 - [ ] Is there a "How To" or getting-started guide accessible from Settings?
 - [ ] Is there a keyboard shortcuts reference?
 - [ ] Is there a link to documentation/README?
@@ -183,6 +204,7 @@ This checklist should be LARGER at the end of each run than at the start.
 ## 5. Sidebar
 
 ### Git Integration
+
 - [ ] Can I see git status for my repos?
 - [ ] Can I see which branch I'm on?
 - [ ] Can I see uncommitted changes?
@@ -192,12 +214,14 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Is the PROD badge clearly visible for production repos?
 
 ### Dev Servers
+
 - [ ] Can I see running dev servers?
 - [ ] Can I start/stop a dev server from here?
 - [ ] Can I add a new port/server?
 - [ ] Can I see which port each server is on?
 
 ### Layout
+
 - [ ] Can I toggle the sidebar open/closed?
 - [ ] Does the sidebar remember its state between sessions?
 - [ ] Is the sidebar content organized with clear section headers?
@@ -207,18 +231,21 @@ This checklist should be LARGER at the end of each run than at the start.
 ## 6. Cross-Cutting Concerns
 
 ### Performance
+
 - [ ] Does the app load in under 3 seconds?
 - [ ] Is there any visible lag when switching tabs?
 - [ ] Do WebSocket connections stay stable for 10+ minutes?
 - [ ] Is CPU usage reasonable when idle? (<10%)
 
 ### Error Handling
+
 - [ ] When the backend is down, does the app show a helpful error? (not blank screen)
 - [ ] When a WebSocket disconnects, does it show "Reconnecting..." and auto-recover?
 - [ ] When a file is missing, does only the affected panel show an error? (not the whole app)
 - [ ] Are there console errors in the browser dev tools during normal usage?
 
 ### Keyboard Shortcuts
+
 - [ ] Does Cmd+N open the session launcher?
 - [ ] Does Cmd+K open the command palette?
 - [ ] Does Cmd+\ toggle the sidebar?
@@ -227,6 +254,7 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Are shortcuts discoverable? (shown in tooltips, help panel, or bottom bar)
 
 ### Responsive
+
 - [ ] Does the app work on a 13" laptop screen? (1280px width)
 - [ ] Does the app work on an external monitor? (1920px+)
 - [ ] Does the layout adjust gracefully when resizing?
@@ -237,6 +265,7 @@ This checklist should be LARGER at the end of each run than at the start.
 ## 7. Design Identity (Does This Look Like Agent Studio?)
 
 ### Brand Consistency
+
 - [ ] Is the background #0a0a0a everywhere? (no white or light gray leaks)
 - [ ] Is Geist Mono the ONLY font? (no Inter, Roboto, Arial, system sans-serif)
 - [ ] Is amber (#f59e0b) the ONLY accent color? (no random blues, purples, or other accents)
@@ -244,6 +273,7 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Is there any decorative element that doesn't convey information? (gradients, illustrations, shadows for style)
 
 ### Visual Sizing & Proportions
+
 - [ ] Are ALL icons at least 16px? (no icons smaller than 16px — they become unreadable)
 - [ ] Are primary action icons 20px? (new session, create room, etc.)
 - [ ] Is body text consistently 13px? (not jumping between 12px and 16px randomly)
@@ -256,6 +286,7 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Is there any element that's hard to see or click because it's too small?
 
 ### Dark Mode Consistency
+
 - [ ] Is the app dark everywhere? (no white or light gray panels/backgrounds leaking through)
 - [ ] Are there any Radix UI default styles showing light backgrounds? (modals, dropdowns, tooltips)
 - [ ] Are scrollbars dark? (not bright white system scrollbars)
@@ -266,6 +297,7 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Does the app look consistent when macOS is in light mode? (the app should still be dark)
 
 ### Terminal-First Feel
+
 - [ ] Do terminals take 80%+ of the Sessions screen? (everything else gets out of the way)
 - [ ] Does the app feel dense? (more info per pixel than a typical web app)
 - [ ] Is spacing compact? (8-12px padding, not 24-32px like a marketing site)
@@ -273,6 +305,7 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Is the overall information density high? (a power user should see a lot without scrolling)
 
 ### Voice & Tone
+
 - [ ] Are empty states matter-of-fact? ("No sessions running. Start one." NOT "Oops! Nothing here yet!")
 - [ ] Are error messages helpful? (include what went wrong AND what to do)
 - [ ] Are success messages short? ("Session started." NOT "Your session has been successfully created!")
@@ -281,6 +314,7 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Is there any exclamation mark in UI text? (there shouldn't be)
 
 ### Animation & Polish
+
 - [ ] Do status dots pulse when active?
 - [ ] Does the favicon change color based on status? (green/yellow/red)
 - [ ] Does the tab title show attention count? ("(3) Agent Studio")
@@ -312,9 +346,10 @@ added to the relevant section above with [AUTO-ADDED, run-N] tag.
 
 Track additions and removals here.
 
-| Run | Items Added | Items Removed | Miss Category | Health Score |
-|-----|-------------|---------------|---------------|-------------|
-| 0   | 173 (initial) | 0 | N/A | Baseline |
+| Run | Items Added   | Items Removed | Miss Category | Health Score |
+| --- | ------------- | ------------- | ------------- | ------------ |
+| 0   | 173 (initial) | 0             | N/A           | Baseline     |
+| 1   | 4             | 0             | checklist_gap | 88           |
 
 ## Miss Categories (for auto-evolution)
 

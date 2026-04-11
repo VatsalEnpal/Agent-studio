@@ -1,0 +1,359 @@
+{
+  "run": 1,
+  "phase": "brain-1",
+  "timestamp": "2026-04-11T22:00:00Z",
+  "issues": [
+    {
+      "id": "ISSUE-1",
+      "feature": "general",
+      "type": "visual",
+      "description": "Light mode toggle exists in the top bar, but IDENTITY.md explicitly says 'The darkness isn't a CSS variable - it's the identity.' A light mode undermines the core brand identity of the app. The app should be dark always.",
+      "severity": "MEDIUM",
+      "screenshot": "qa/screenshots/11-light-mode.png",
+      "checklist_item": "Is the background #0a0a0a everywhere? (no white or light gray leaks)",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-2",
+      "feature": "general",
+      "type": "content",
+      "description": "The top bar shows 'Off-Peak / Peak starts at 14:00' with Berlin timezone information. This is highly specific to one user's context (Anthropic rate limiting in Berlin time). A new user from GitHub would have no idea what this means or why Berlin time is relevant. No explanation is provided without hovering.",
+      "severity": "MEDIUM",
+      "screenshot": "qa/screenshots/02-annotated-initial.png",
+      "checklist_item": "Does the app explain what it is within 3 seconds of opening?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-3",
+      "feature": "general",
+      "type": "ux",
+      "description": "The top bar shows a usage indicator '21% | 23.6/24GB' which seems to be API usage data. No label or tooltip explains what this percentage represents to a new user. Is it API quota? Token usage? Context window?",
+      "severity": "MEDIUM",
+      "screenshot": "qa/screenshots/02-annotated-initial.png",
+      "checklist_item": "Can a new user get productive (launch their first session) within 2 minutes?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-4",
+      "feature": "sessions",
+      "type": "ux",
+      "description": "The keyboard shortcuts shown in the bottom bar and Help modal say 'Cmd+Shift+N' and 'Cmd+Shift+K', but DESIGN.md specifies just 'Cmd+N' and 'Cmd+K'. The shortcuts require an extra modifier key (Shift) that the design spec doesn't call for, making them harder to remember and use.",
+      "severity": "MEDIUM",
+      "screenshot": "qa/screenshots/01-initial-load.png",
+      "checklist_item": "Does Cmd+N open the session launcher?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-5",
+      "feature": "sessions",
+      "type": "missing-feature",
+      "description": "No visible cost tracking for sessions. DESIGN.md says the top toggle bar should show 'total cost today' and per-session cost badges. Neither is visible anywhere - no dollar amounts appear in the session list, header bar, or session cards.",
+      "severity": "HIGH",
+      "screenshot": "qa/screenshots/01-initial-load.png",
+      "checklist_item": "Can I see the cost of each session?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-6",
+      "feature": "sessions",
+      "type": "missing-feature",
+      "description": "No visible context window percentage per session. DESIGN.md specifies per-pane header should show 'context (%)'. While there is a global usage indicator in the top bar, individual sessions do not show their context usage.",
+      "severity": "MEDIUM",
+      "screenshot": "qa/screenshots/01-initial-load.png",
+      "checklist_item": "Can I see how full the context window is?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-7",
+      "feature": "sessions",
+      "type": "ux",
+      "description": "The 'RUNNING ON MACHINE' section shows 3 Claude Sessions all labeled identically as 'Claude Session' with model 'opus'. There is no way to distinguish between them - no session name, no working directory, no task description. A user cannot tell which is which.",
+      "severity": "HIGH",
+      "screenshot": "qa/screenshots/10-running-on-machine.png",
+      "checklist_item": "Can I tell sessions apart from their names?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-8",
+      "feature": "sessions",
+      "type": "missing-feature",
+      "description": "No session renaming capability visible. DESIGN.md mentions the ability to name sessions, and the launcher has an optional name field, but there is no way to rename a running or past session from the sidebar or session list.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/07-new-session-modal.png",
+      "checklist_item": "Can I rename a session?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-9",
+      "feature": "sessions",
+      "type": "ux",
+      "description": "The empty state text says 'Press Cmd+Shift+N to launch or Cmd+Shift+K for commands' but the bottom bar shows these same shortcuts with different formatting. The empty state has good preset buttons (Quick Chat, Start Sprint, Continue Last), which is helpful.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/01-initial-load.png",
+      "checklist_item": "If no sessions exist: is there an empty state with a CTA to create one?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-10",
+      "feature": "teams",
+      "type": "ux",
+      "description": "Room message count badges (numbers next to agent count) have no label or tooltip. The numbers '23', '1', '4', '6', '17', '3', '4' appear next to rooms but it is not obvious what they represent (message count? task count?). Only context clues suggest messages.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/03-teams-tab.png",
+      "checklist_item": "NEW",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-11",
+      "feature": "teams",
+      "type": "ux",
+      "description": "The room chat shows 'All agents are offline' with a 'Start Room' button, but there is no explanation of what 'starting a room' means. Does it spin up new Claude sessions? Does it cost money? A new user would hesitate to click without understanding the implications.",
+      "severity": "HIGH",
+      "screenshot": "qa/screenshots/04-teams-room-detail.png",
+      "checklist_item": "Does the creation flow explain what I'm creating?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-12",
+      "feature": "teams",
+      "type": "visual",
+      "description": "Chat messages in room detail use emoji (checkmarks, red circles, question marks, package icons) in agent responses. IDENTITY.md explicitly says 'No emoji in the UI.' While these are agent-generated responses rather than UI chrome, the rendering should strip or replace emoji with text equivalents.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/04-teams-room-detail.png",
+      "checklist_item": "Is there any emoji in the UI? (there shouldn't be)",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-13",
+      "feature": "teams",
+      "type": "missing-feature",
+      "description": "No way to create a new sprint from the Sprints tab. The Sprints view shows existing workflow runs but there is no 'New Sprint' or 'Create Sprint' button. DESIGN.md says there should be sprint creation UX.",
+      "severity": "HIGH",
+      "screenshot": "qa/screenshots/09-sprints-subtab.png",
+      "checklist_item": "Can I create a sprint from the UI?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-14",
+      "feature": "teams",
+      "type": "missing-feature",
+      "description": "Sprint workflow steps (Gate 1-3, Ship) are shown as disabled buttons with no way to interact with them, advance them, or see details. There are no pause/resume/cancel controls for the active sprint. The sprint feels view-only with no controls.",
+      "severity": "MEDIUM",
+      "screenshot": "qa/screenshots/09-sprints-subtab.png",
+      "checklist_item": "Can I pause a sprint/run?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-15",
+      "feature": "teams",
+      "type": "ux",
+      "description": "Clicking an agent name in the room detail does not navigate to that agent's terminal session. DESIGN.md says 'Click agent -> switches to Sessions mode focused on that agent's terminal.' Agent names are displayed as plain text badges, not clickable links.",
+      "severity": "MEDIUM",
+      "screenshot": "qa/screenshots/04-teams-room-detail.png",
+      "checklist_item": "Can I click an agent to jump to its terminal session?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-16",
+      "feature": "memory",
+      "type": "missing-feature",
+      "description": "No ability to delete or archive memory entries. The memory detail view shows full content but has no action buttons (delete, archive, edit). DESIGN.md implies memory management capabilities.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/13-memory-detail.png",
+      "checklist_item": "Can I delete or archive outdated memories?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-17",
+      "feature": "memory",
+      "type": "ux",
+      "description": "Memory detail panel shows raw JSON for the 'Standards' field in the production deployment memory. Long JSON blobs are displayed as plain text without formatting or collapsible sections, making them hard to read.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/13-memory-detail.png",
+      "checklist_item": "Does the detail view show enough context to understand the memory?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-18",
+      "feature": "settings",
+      "type": "ux",
+      "description": "Settings page has no notification configuration. DESIGN.md mentions Telegram notifications and Mac notifications, but there are no toggles for enabling/disabling or configuring notification preferences.",
+      "severity": "MEDIUM",
+      "screenshot": "qa/screenshots/06-settings-tab.png",
+      "checklist_item": "Can I turn off Mac notifications entirely?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-19",
+      "feature": "settings",
+      "type": "visual",
+      "description": "The Settings page shows 'Branch: AGENTS_SETUP' in the About section, which appears to be a git branch name rather than meaningful version info. An open source user would not know what AGENTS_SETUP means.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/06-settings-tab.png",
+      "checklist_item": "Is there an About section with version number?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-20",
+      "feature": "sidebar",
+      "type": "ux",
+      "description": "The Repos section shows repository-specific information (InPipeline, staging-frontend, enpal-energy-vnb-portal) that is very specific to the developer's personal setup. A new open source user cloning the repo would see completely different repos or none at all. No guidance on how repos get into this list.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/02-annotated-initial.png",
+      "checklist_item": "If no git repos are configured: does it guide the user to set one up?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-21",
+      "feature": "sidebar",
+      "type": "missing-feature",
+      "description": "No visible dev server start/stop functionality from the sidebar. There are 'Start' buttons next to server names, but no 'Stop' buttons for running servers. The ':8080' button for the running server is not clearly labeled as a link or action.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/02-annotated-initial.png",
+      "checklist_item": "Can I start/stop a dev server from here?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-22",
+      "feature": "general",
+      "type": "visual",
+      "description": "The Next.js Dev Tools overlay badge at the bottom left shows '1 Issue' in red. This is a Next.js development indicator that should not appear in the user-facing app. It looks like a bug notification to the user.",
+      "severity": "MEDIUM",
+      "screenshot": "qa/screenshots/01-initial-load.png",
+      "checklist_item": "Does the app look professional?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-23",
+      "feature": "general",
+      "type": "missing-feature",
+      "description": "No command palette visible. Pressing Cmd+Shift+K is mentioned in shortcuts but the command palette functionality could not be verified through the browser testing tool. DESIGN.md specifies Cmd+K should open a 'command palette (search everything)'.",
+      "severity": "MEDIUM",
+      "screenshot": "qa/screenshots/08-help-guide.png",
+      "checklist_item": "Does Cmd+K open the command palette?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-24",
+      "feature": "general",
+      "type": "content",
+      "description": "Help dialog mentions 'Reports' tab under FEATURES ('Review automation results') but there is no Reports tab in the navigation bar. Only Sessions, Teams, Memory, and Settings are visible.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/08-help-guide.png",
+      "checklist_item": "NEW",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-25",
+      "feature": "general",
+      "type": "content",
+      "description": "Help dialog says 'See HOWTO.md in the project folder for the full guide.' This references a file that exists on disk, not in the UI. A browser-only user has no way to access this file. Should be a link or inline content.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/08-help-guide.png",
+      "checklist_item": "Is there a help/docs/how-to link visible without searching?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-26",
+      "feature": "teams",
+      "type": "ux",
+      "description": "The Create Room modal has checkboxes to select agents but the 'Create Room' button is disabled even though room name placeholder text is shown. It is not obvious what fields are required or why the button is disabled. The AGENTS label says '1 SELECTED' but only Orchestrator appears checked (marked as required).",
+      "severity": "MEDIUM",
+      "screenshot": "qa/screenshots/12-new-room-modal.png",
+      "checklist_item": "Does the creation flow explain what I'm creating?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-27",
+      "feature": "sessions",
+      "type": "missing-feature",
+      "description": "No session history search or filter visible. The 'RECENT SESSIONS 20' section in the sidebar is a collapsible section but does not appear to have search or filter capabilities. DESIGN.md mentions session resume with search.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/01-initial-load.png",
+      "checklist_item": "Can I search/filter session history?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-28",
+      "feature": "general",
+      "type": "visual",
+      "description": "The 'Limits' link in the top bar appears to be an external link (likely to Anthropic's usage page). This is not labeled clearly - a new user would not know what 'Limits' refers to or where it goes.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/02-annotated-initial.png",
+      "checklist_item": "NEW",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-29",
+      "feature": "teams",
+      "type": "ux",
+      "description": "Close Room buttons are directly next to room names in the list with no confirmation dialog visible. Accidentally clicking 'Close room' on an active room with ongoing agent conversations could lose work. IDENTITY.md says destructive actions should have confirmation.",
+      "severity": "HIGH",
+      "screenshot": "qa/screenshots/03-teams-tab.png",
+      "checklist_item": "Is destructive confirmation direct? ('Kill session? Can't be undone.' NOT 'Are you sure you want to proceed?')",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-30",
+      "feature": "sidebar",
+      "type": "ux",
+      "description": "Git repo actions (View Changes, Commit, Push, Create Pull Request) are shown for all repos but there is no indication of what changes exist before clicking. The buttons are always visible regardless of whether there are actual changes to commit or push.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/02-annotated-initial.png",
+      "checklist_item": "Can I see uncommitted changes?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-31",
+      "feature": "general",
+      "type": "visual",
+      "description": "The app title 'agent-studio' appears in the top right corner in small text. It is not prominent and could be mistaken for a label rather than the app name. IDENTITY.md says the app should have clear branding.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/01-initial-load.png",
+      "checklist_item": "Is the app name and branding visible?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-32",
+      "feature": "sessions",
+      "type": "ux",
+      "description": "The session launcher modal defaults to 'sonnet' model but the Settings page shows 'opus' as the default model. The launcher should respect the configured default from Settings.",
+      "severity": "MEDIUM",
+      "screenshot": "qa/screenshots/07-new-session-modal.png",
+      "checklist_item": "Can I set a default model for new sessions?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-33",
+      "feature": "general",
+      "type": "missing-feature",
+      "description": "No favicon changes based on status. DESIGN.md specifies the favicon should update: green (good), yellow (building), red (attention). The favicon appears to be the default Next.js icon.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/01-initial-load.png",
+      "checklist_item": "Does the favicon change color based on status?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-34",
+      "feature": "general",
+      "type": "missing-feature",
+      "description": "Tab title does not show attention count. DESIGN.md says tab title should be '(3) Agent Studio' where 3 is items needing attention. The tab title just shows 'Agent Studio'.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/01-initial-load.png",
+      "checklist_item": "Does the tab title show attention count?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-35",
+      "feature": "sessions",
+      "type": "missing-feature",
+      "description": "The session launcher modal has no 'Custom flags' field for passing arbitrary CLI arguments. DESIGN.md specifies a 'Custom flags: free text for any CLI args' option in the launcher.",
+      "severity": "LOW",
+      "screenshot": "qa/screenshots/07-new-session-modal.png",
+      "checklist_item": "NEW",
+      "status": "open"
+    }
+  ],
+  "health_score": 88,
+  "summary": "Agent Studio presents a functional and visually consistent dark-themed interface that successfully implements core features: session management with presets, team rooms with multi-agent chat, memory browsing with search and filtering, sprint workflow visualization, git integration, and system monitoring. The app loads quickly and navigation is generally intuitive. However, several HIGH-severity issues exist: no cost tracking per session (a core feature per DESIGN.md), indistinguishable session names in the 'Running on Machine' list, no sprint creation UI, no explanation of what 'Start Room' does before committing to it, and Close Room buttons lack confirmation dialogs. The app also includes a light mode toggle that contradicts its core dark identity, and keyboard shortcuts require an extra Shift modifier not specified in the design. Multiple planned features are missing (command palette, notification settings, session cost/context tracking, dynamic favicon), and some UI text references internal/developer concepts that would confuse open-source users."
+}

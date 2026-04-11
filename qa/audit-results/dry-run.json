@@ -1,0 +1,8 @@
+{
+  "test": "dry-run",
+  "playwright_available": false,
+  "agent_browser_available": true,
+  "screenshot_saved": true,
+  "page_loaded": true,
+  "notes": "No Playwright MCP tools found. agent-browser CLI at /opt/homebrew/bin/agent-browser worked perfectly. Page at localhost:8080 loaded Agent Studio UI. Screenshot saved to qa/screenshots/dry-run-test.png (77KB)."
+}

@@ -1,15 +1,261 @@
 {
-  "generated_at": null,
+  "generated_at": "2026-04-11T22:00:00Z",
   "generated_from": "qa/audit-results/run-1.json",
-  "tasks": [],
+  "tasks": [
+    {
+      "id": "TASK-1",
+      "issue_id": "ISSUE-5",
+      "description": "Add cost tracking per session. Display total cost today in the top bar and per-session cost badges in the sidebar and terminal headers.",
+      "severity": "HIGH",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-2",
+      "issue_id": "ISSUE-7",
+      "description": "Show distinguishing information for sessions in the Running on Machine section - include working directory, session name, or task description instead of generic Claude Session labels.",
+      "severity": "HIGH",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-3",
+      "issue_id": "ISSUE-11",
+      "description": "Add an explanation or tooltip to the Start Room button explaining what happens when a room is started (e.g., Launches Claude sessions for each agent. This will use API credits.).",
+      "severity": "HIGH",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-4",
+      "issue_id": "ISSUE-13",
+      "description": "Add a New Sprint button to the Sprints sub-tab in Teams view with a creation flow for defining sprint goals, selecting agents, and configuring gates.",
+      "severity": "HIGH",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-5",
+      "issue_id": "ISSUE-29",
+      "description": "Add confirmation dialog to Close Room buttons. Should say Close room? Active conversations will end. with Cancel/Close options.",
+      "severity": "HIGH",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-6",
+      "issue_id": "ISSUE-1",
+      "description": "Remove or hide the light mode toggle. The app identity is dark-first per IDENTITY.md. If light mode must stay, at minimum default to dark and make the toggle less prominent.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-7",
+      "issue_id": "ISSUE-2",
+      "description": "Make the peak/off-peak indicator more self-explanatory or configurable. Add a setting for timezone and explain that it relates to API rate limiting.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-8",
+      "issue_id": "ISSUE-3",
+      "description": "Add a clear label or tooltip to the usage indicator in the top bar explaining what the percentage and GB values represent.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-9",
+      "issue_id": "ISSUE-4",
+      "description": "Change keyboard shortcuts to match DESIGN.md: Cmd+N for new session, Cmd+K for command palette, Cmd+backslash for sidebar toggle.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-10",
+      "issue_id": "ISSUE-6",
+      "description": "Add context window percentage indicator per session in the terminal pane header and sidebar session list.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-11",
+      "issue_id": "ISSUE-14",
+      "description": "Add pause/resume/cancel controls to the sprint detail view. Currently sprint steps are view-only with disabled buttons.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-12",
+      "issue_id": "ISSUE-15",
+      "description": "Make agent name badges in room detail clickable to navigate to that agent terminal session in Sessions mode.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-13",
+      "issue_id": "ISSUE-18",
+      "description": "Add notification settings section to the Settings page with toggles for Mac notifications and Telegram notifications per event type.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-14",
+      "issue_id": "ISSUE-22",
+      "description": "Hide or disable the Next.js Dev Tools overlay badge in production/user-facing mode.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-15",
+      "issue_id": "ISSUE-23",
+      "description": "Implement and verify the command palette (Cmd+K or Cmd+Shift+K) is functional and searchable.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-16",
+      "issue_id": "ISSUE-26",
+      "description": "Improve the Create Room modal UX: show which fields are required, explain why the Create button is disabled, add a brief description of what a room does.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-17",
+      "issue_id": "ISSUE-32",
+      "description": "Make the session launcher respect the default model configured in Settings instead of always defaulting to sonnet.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-18",
+      "issue_id": "ISSUE-8",
+      "description": "Add ability to rename sessions from the sidebar or session list.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-19",
+      "issue_id": "ISSUE-9",
+      "description": "Harmonize shortcut display format between the empty state text and the bottom bar.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-20",
+      "issue_id": "ISSUE-10",
+      "description": "Add a label or tooltip to the message count number next to room names explaining what it represents.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-21",
+      "issue_id": "ISSUE-12",
+      "description": "Consider stripping or replacing emoji in agent chat responses to maintain the no-emoji UI policy from IDENTITY.md.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-22",
+      "issue_id": "ISSUE-16",
+      "description": "Add delete/archive actions to the memory detail panel.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-23",
+      "issue_id": "ISSUE-17",
+      "description": "Format JSON blobs in memory detail views with syntax highlighting and collapsible sections.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-24",
+      "issue_id": "ISSUE-19",
+      "description": "Show a meaningful branch name or remove the branch display from Settings About section for open source users.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-25",
+      "issue_id": "ISSUE-20",
+      "description": "Add guidance for new users on how to add repos to the sidebar when none are configured.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-26",
+      "issue_id": "ISSUE-21",
+      "description": "Add stop buttons for running dev servers and clarify the port badge as a clickable action.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-27",
+      "issue_id": "ISSUE-24",
+      "description": "Remove Reports from the Help dialog features list since there is no Reports tab, or add the Reports tab.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-28",
+      "issue_id": "ISSUE-25",
+      "description": "Replace See HOWTO.md in the project folder with inline help content or a link that works in the browser.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-29",
+      "issue_id": "ISSUE-27",
+      "description": "Add search/filter capability to the Recent Sessions section in the sidebar.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-30",
+      "issue_id": "ISSUE-28",
+      "description": "Add a tooltip or label to the Limits link explaining where it goes and what it shows.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-31",
+      "issue_id": "ISSUE-30",
+      "description": "Show a visual indicator of whether there are actual changes before showing git action buttons.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-32",
+      "issue_id": "ISSUE-31",
+      "description": "Make the app name/branding more prominent - consider adding it to the top-left corner with proper sizing.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-33",
+      "issue_id": "ISSUE-33",
+      "description": "Implement dynamic favicon that changes color based on system status (green/yellow/red).",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-34",
+      "issue_id": "ISSUE-34",
+      "description": "Update tab title to show attention count format: (N) Agent Studio.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-35",
+      "issue_id": "ISSUE-35",
+      "description": "Add a Custom flags text field to the session launcher modal for passing arbitrary CLI arguments.",
+      "severity": "LOW",
+      "status": "pending"
+    }
+  ],
   "stats": {
-    "total": 0,
+    "total": 35,
     "critical": 0,
-    "high": 0,
-    "medium": 0,
-    "low": 0,
+    "high": 5,
+    "medium": 12,
+    "low": 18,
     "completed": 0,
     "in_progress": 0,
-    "pending": 0
+    "pending": 35
   }
 }
