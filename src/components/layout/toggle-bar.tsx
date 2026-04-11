@@ -180,12 +180,14 @@ function SystemWidget() {
 
   if (!stats) return null;
 
+  const memPercent = Math.round((stats.memUsed / stats.memTotal) * 100);
+
   return (
     <div className="relative group">
       <button
         onClick={() => setActiveMode("settings")}
         className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-mono text-console-dim hover:text-console-muted border border-console-border/50 hover:border-console-border transition-colors"
-        title="System monitor — click for details"
+        title="System resources — click for details"
       >
         <Cpu className="w-3 h-3" />
         <span>{stats.cpu.toFixed(0)}%</span>
@@ -195,6 +197,31 @@ function SystemWidget() {
           {stats.memUsed.toFixed(1)}/{stats.memTotal.toFixed(0)}GB
         </span>
       </button>
+
+      {/* Tooltip */}
+      <div className="absolute right-0 top-full mt-1.5 w-52 p-2.5 rounded-lg border border-console-border bg-console-panel shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
+        <p className="text-[10px] text-console-text font-medium mb-1.5">
+          System Resources
+        </p>
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-[9px]">
+            <span className="text-console-dim">CPU usage</span>
+            <span className="text-console-text font-mono">
+              {stats.cpu.toFixed(0)}%
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-[9px]">
+            <span className="text-console-dim">Memory</span>
+            <span className="text-console-text font-mono">
+              {stats.memUsed.toFixed(1)} / {stats.memTotal.toFixed(0)} GB (
+              {memPercent}%)
+            </span>
+          </div>
+        </div>
+        <p className="text-[8px] text-console-dim mt-2">
+          Click for full system monitor in Settings.
+        </p>
+      </div>
     </div>
   );
 }
