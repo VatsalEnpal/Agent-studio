@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Hash, Loader2, Power, PowerOff, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRoomsStore } from "@/stores/rooms";
+import { useUIStore } from "@/stores/ui";
+import { useSessionsStore } from "@/stores/sessions";
 import type { Room, RoomMessage, RoomAgent } from "@/stores/rooms";
 import { ChatMessage } from "./chat-message";
 
@@ -180,6 +182,15 @@ export function RoomChat() {
 
   const allOffline = (room.agents ?? []).every((a) => a.status === "offline");
 
+  const jumpToSession = useCallback((agent: RoomAgent) => {
+    if (!agent.sessionId) return;
+    const sessions = useSessionsStore.getState().sessions;
+    const match = sessions.find((s) => s.id === agent.sessionId);
+    if (!match) return;
+    useSessionsStore.getState().swapIn(match.id);
+    useUIStore.getState().setActiveMode("sessions");
+  }, []);
+
   // Filtered agents for mention dropdown
   const filteredAgents = (room.agents ?? []).filter(
     (a) =>
@@ -246,13 +257,24 @@ export function RoomChat() {
             </span>
           )}
 
-          {/* Agent status dots */}
+          {/* Agent status dots — clickable to jump to session */}
           <div className="ml-auto flex items-center gap-1.5 shrink-0">
             {room.agents.map((a) => (
-              <div
+              <button
                 key={a.id}
-                className="flex items-center gap-1"
-                title={`${a.name}: ${a.status}`}
+                onClick={() => jumpToSession(a)}
+                disabled={!a.sessionId}
+                className={cn(
+                  "flex items-center gap-1 px-1 py-0.5 rounded transition-colors",
+                  a.sessionId
+                    ? "hover:bg-console-faint cursor-pointer"
+                    : "cursor-default opacity-70",
+                )}
+                title={
+                  a.sessionId
+                    ? `${a.name}: ${a.status} -- click to view session`
+                    : `${a.name}: ${a.status}`
+                }
               >
                 <span
                   className={cn(
@@ -266,10 +288,17 @@ export function RoomChat() {
                           : "bg-gray-500",
                   )}
                 />
-                <span className="text-[9px] text-console-dim font-mono">
+                <span
+                  className={cn(
+                    "text-[9px] font-mono",
+                    a.sessionId
+                      ? "text-console-muted hover:text-console-text"
+                      : "text-console-dim",
+                  )}
+                >
                   {a.id}
                 </span>
-              </div>
+              </button>
             ))}
 
             {/* Close button — always visible for active rooms */}

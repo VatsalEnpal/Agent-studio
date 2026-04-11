@@ -9,6 +9,7 @@ interface ChatMessageProps {
   msg: RoomMessage;
   onApprove: (msg: RoomMessage) => void;
   onReject: (msg: RoomMessage) => void;
+  onAgentClick?: (agentId: string) => void;
 }
 
 const AGENT_COLORS: Record<string, string> = {
@@ -24,10 +25,16 @@ const AGENT_COLORS: Record<string, string> = {
   pmo: "text-orange-400",
 };
 
-export function ChatMessage({ msg, onApprove, onReject }: ChatMessageProps) {
+export function ChatMessage({
+  msg,
+  onApprove,
+  onReject,
+  onAgentClick,
+}: ChatMessageProps) {
   const isUser = msg.from === "user";
   const isSystem = msg.from === "system";
   const isApproval = msg.type === "approval-request";
+  const isAgent = !isUser && !isSystem;
 
   const agentColor = AGENT_COLORS[msg.from] ?? "text-console-muted";
 
@@ -36,9 +43,15 @@ export function ChatMessage({ msg, onApprove, onReject }: ChatMessageProps) {
       className={cn(
         "px-4 py-2.5 transition-colors",
         isUser && "bg-console-elevated/20",
-        isApproval && msg.approvalStatus === "pending" && "bg-amber-400/5 border-l-2 border-amber-400/50",
-        isApproval && msg.approvalStatus === "approved" && "bg-green-400/5 border-l-2 border-green-400/30",
-        isApproval && msg.approvalStatus === "rejected" && "bg-red-400/5 border-l-2 border-red-400/30",
+        isApproval &&
+          msg.approvalStatus === "pending" &&
+          "bg-amber-400/5 border-l-2 border-amber-400/50",
+        isApproval &&
+          msg.approvalStatus === "approved" &&
+          "bg-green-400/5 border-l-2 border-green-400/30",
+        isApproval &&
+          msg.approvalStatus === "rejected" &&
+          "bg-red-400/5 border-l-2 border-red-400/30",
       )}
     >
       {/* Header: icon + name + target + timestamp */}
@@ -53,14 +66,31 @@ export function ChatMessage({ msg, onApprove, onReject }: ChatMessageProps) {
           <Bot className="w-3 h-3 text-console-muted shrink-0" />
         )}
 
-        <span
-          className={cn(
-            "text-[11px] font-semibold font-mono",
-            isUser ? "text-console-accent" : isSystem ? "text-console-dim" : agentColor,
-          )}
-        >
-          {isUser ? "You" : msg.from}
-        </span>
+        {isAgent && onAgentClick ? (
+          <button
+            onClick={() => onAgentClick(msg.from)}
+            className={cn(
+              "text-[11px] font-semibold font-mono hover:underline transition-colors",
+              agentColor,
+            )}
+            title={`View ${msg.from} session`}
+          >
+            {msg.from}
+          </button>
+        ) : (
+          <span
+            className={cn(
+              "text-[11px] font-semibold font-mono",
+              isUser
+                ? "text-console-accent"
+                : isSystem
+                  ? "text-console-dim"
+                  : agentColor,
+            )}
+          >
+            {isUser ? "You" : msg.from}
+          </span>
+        )}
 
         {msg.to && (
           <span className="text-[9px] text-console-dim font-mono">
