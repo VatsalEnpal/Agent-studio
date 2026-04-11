@@ -130,8 +130,9 @@
       "issue_id": "ISSUE-32",
       "description": "Make the session launcher respect the default model configured in Settings instead of always defaulting to sonnet.",
       "severity": "MEDIUM",
-      "status": "fixed",
-      "fix_notes": "Session launcher now reads defaultModel from useSettingsStore instead of hardcoding 'sonnet'. Both initial state and dialog-open reset use the configured default."
+      "status": "verified",
+      "fix_notes": "Session launcher now reads defaultModel from useSettingsStore instead of hardcoding 'sonnet'. Both initial state and dialog-open reset use the configured default.",
+      "verification_notes": "Settings shows Default Model = opus. Session launcher (Cmd+N) model dropdown defaults to opus. Dialog footer shows 'opus (default)'. Verified in run 5."
     },
     {
       "id": "TASK-18",
@@ -274,15 +275,16 @@
       "severity": "MEDIUM",
       "status": "verified",
       "verification_notes": "Settings page now shows Cmd+N, Cmd+K, Cmd+\\ matching Help panel and bottom bar exactly. No more stale Cmd+Shift prefixes. Verified in run 4."
-    }
+    },
     {
       "id": "TASK-38",
       "issue_id": "ISSUE-38",
       "description": "Teams view crashes with React hooks error ('Rendered more hooks than during the previous render') on first navigation from Settings to Teams. ErrorBoundary catches it and shows Retry button. Retry resolves the issue. Subsequent navigations work.",
       "severity": "HIGH",
-      "status": "fixed",
+      "status": "verified",
       "steps_to_reproduce": "Navigate to Settings, then click Teams in top nav. Teams view shows error. Click Retry to recover.",
-      "fix_notes": "Moved jumpToSession useCallback and filteredAgents computation above the early return in RoomChat. These hooks were only called when room was defined, causing a conditional hooks violation on first render with no room selected."
+      "fix_notes": "Moved jumpToSession useCallback and filteredAgents computation above the early return in RoomChat. These hooks were only called when room was defined, causing a conditional hooks violation on first render with no room selected.",
+      "verification_notes": "7 navigation cycles to Teams from Settings/Memory/Sessions with zero hooks errors. Console shows no hooks-related errors. ErrorBoundary never triggered. Verified in run 5."
     }
   ],
   "stats": {
@@ -291,10 +293,10 @@
     "high": 6,
     "medium": 14,
     "low": 18,
-    "verified": 12,
+    "verified": 14,
     "fixed": 0,
     "partial": 0,
     "in_progress": 0,
-    "pending": 26
+    "pending": 24
   }
 }
