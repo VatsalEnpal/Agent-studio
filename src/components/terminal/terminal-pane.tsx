@@ -281,7 +281,7 @@ export function TerminalPane({
   return (
     <div
       className={cn(
-        "flex flex-col h-full rounded-lg border overflow-hidden transition-[border-color,box-shadow] duration-200",
+        "flex flex-col h-full rounded border overflow-hidden transition-[border-color,box-shadow] duration-200",
         focused
           ? "border-console-accent/60 shadow-glow-sm"
           : "border-console-border",
@@ -310,7 +310,7 @@ export function TerminalPane({
           {effectiveModel && effectiveModel !== "unknown" && (
             <span
               className={cn(
-                "text-[9px] px-2 py-0.5 rounded-full font-medium",
+                "text-[9px] px-2 py-0.5 rounded font-medium",
                 effectiveModel === "opus"
                   ? "bg-purple-500/20 text-purple-400"
                   : effectiveModel === "haiku"

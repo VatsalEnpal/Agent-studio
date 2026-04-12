@@ -141,7 +141,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           onClick={() => setConfirmCloseId(null)}
         >
           <div
-            className="bg-console-panel border border-console-border rounded-lg shadow-2xl w-full max-w-xs p-0"
+            className="bg-console-panel border border-console-border rounded shadow-2xl w-full max-w-xs p-0"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-4 py-3 border-b border-console-border">
@@ -235,7 +235,7 @@ function RoomItem({
 
       {/* Unread badge */}
       {!selected && unreadCount > 0 && (
-        <span className="bg-console-accent text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
+        <span className="bg-console-accent text-black text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0">
           {unreadCount > 99 ? "99+" : unreadCount}
         </span>
       )}

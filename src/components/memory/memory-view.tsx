@@ -170,7 +170,7 @@ export function MemoryView() {
               key={cat}
               onClick={() => setCategory(cat === "All" ? null : cat)}
               className={cn(
-                "flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-full whitespace-nowrap transition-all",
+                "flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded whitespace-nowrap transition-all",
                 isActive
                   ? "bg-console-accent/20 text-console-accent border border-console-accent/30"
                   : "bg-console-faint text-console-muted hover:text-console-text hover:bg-console-faint/80 border border-transparent",
@@ -260,7 +260,7 @@ function MemoryListItem({
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
         <span
           className={cn(
-            "text-[8px] px-1.5 py-0.5 rounded-full font-medium",
+            "text-[8px] px-1.5 py-0.5 rounded font-medium",
             categoryColor(entry.category),
           )}
         >

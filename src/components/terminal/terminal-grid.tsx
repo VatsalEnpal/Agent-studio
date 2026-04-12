@@ -72,7 +72,7 @@ export function TerminalGrid({
       <div className="flex flex-col items-center justify-center h-full gap-8 animate-tab-enter">
         {/* Icon + heading */}
         <div className="text-center space-y-3">
-          <div className="w-12 h-12 mx-auto rounded-full bg-console-faint flex items-center justify-center">
+          <div className="w-12 h-12 mx-auto rounded bg-console-faint flex items-center justify-center">
             <Monitor className="w-6 h-6 text-console-muted" />
           </div>
           <p className="text-console-text text-sm font-semibold">
@@ -95,7 +95,7 @@ export function TerminalGrid({
         <div className="flex items-center gap-3">
           <button
             onClick={onQuickChat ?? onCreateSession}
-            className="flex flex-col items-center gap-1.5 px-5 py-3 rounded-lg border border-console-border hover:border-console-accent/50 hover:bg-console-faint/50 shadow-card hover:shadow-card-hover active:scale-95 transition-all"
+            className="flex flex-col items-center gap-1.5 px-5 py-3 rounded border border-console-border hover:border-console-accent/50 hover:bg-console-faint/50 shadow-card hover:shadow-card-hover active:scale-95 transition-all"
           >
             <span className="text-[11px] font-medium text-console-text">
               Quick Chat
@@ -106,7 +106,7 @@ export function TerminalGrid({
           </button>
           <button
             onClick={onStartSprint ?? onCreateSession}
-            className="flex flex-col items-center gap-1.5 px-5 py-3 rounded-lg border border-console-accent/30 bg-console-accent/5 hover:border-console-accent/60 hover:bg-console-accent/10 shadow-card hover:shadow-glow-amber active:scale-95 transition-all"
+            className="flex flex-col items-center gap-1.5 px-5 py-3 rounded border border-console-accent/30 bg-console-accent/5 hover:border-console-accent/60 hover:bg-console-accent/10 shadow-card hover:shadow-glow-amber active:scale-95 transition-all"
           >
             <span className="text-[11px] font-medium text-console-text">
               Start Sprint
@@ -117,7 +117,7 @@ export function TerminalGrid({
           </button>
           <button
             onClick={onContinueLast ?? onCreateSession}
-            className="flex flex-col items-center gap-1.5 px-5 py-3 rounded-lg border border-console-border hover:border-console-accent/50 hover:bg-console-faint/50 shadow-card hover:shadow-card-hover active:scale-95 transition-all"
+            className="flex flex-col items-center gap-1.5 px-5 py-3 rounded border border-console-border hover:border-console-accent/50 hover:bg-console-faint/50 shadow-card hover:shadow-card-hover active:scale-95 transition-all"
           >
             <span className="text-[11px] font-medium text-console-text">
               Continue Last

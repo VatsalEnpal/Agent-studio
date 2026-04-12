@@ -145,7 +145,7 @@ function ChangesPopup({
       onClick={onClose}
     >
       <div
-        className="bg-console-bg border border-console-border rounded-lg shadow-2xl w-full max-w-md p-0"
+        className="bg-console-bg border border-console-border rounded shadow-2xl w-full max-w-md p-0"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-3 py-2 border-b border-console-border">
@@ -265,7 +265,7 @@ function CommitModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-console-bg border border-console-border rounded-lg shadow-2xl w-full max-w-sm p-0">
+      <div className="bg-console-bg border border-console-border rounded shadow-2xl w-full max-w-sm p-0">
         <div className="flex items-center justify-between px-3 py-2 border-b border-console-border">
           <span className="text-xs font-medium text-console-text flex items-center gap-1.5">
             <GitCommit className="w-3.5 h-3.5" />
@@ -377,7 +377,7 @@ function PushModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-console-bg border border-console-border rounded-lg shadow-2xl w-full max-w-sm p-0">
+      <div className="bg-console-bg border border-console-border rounded shadow-2xl w-full max-w-sm p-0">
         <div className="flex items-center justify-between px-3 py-2 border-b border-console-border">
           <span className="text-xs font-medium text-console-text flex items-center gap-1.5">
             <Upload className="w-3.5 h-3.5" />

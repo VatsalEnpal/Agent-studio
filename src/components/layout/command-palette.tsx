@@ -230,7 +230,7 @@ export function CommandPalette({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 z-[60]" />
         <Dialog.Content
-          className="fixed top-[20%] left-1/2 -translate-x-1/2 z-[60] w-[480px] max-h-[60vh] bg-console-panel border border-console-border rounded-lg shadow-2xl overflow-hidden"
+          className="fixed top-[20%] left-1/2 -translate-x-1/2 z-[60] w-[480px] max-h-[60vh] bg-console-panel border border-console-border rounded shadow-2xl overflow-hidden"
           onKeyDown={handleKeyDown}
         >
           <Dialog.Title className="sr-only">Command Palette</Dialog.Title>
@@ -260,7 +260,10 @@ export function CommandPalette({
           </div>
 
           {/* Results */}
-          <div ref={listRef} className="overflow-y-auto max-h-[calc(60vh-52px)] py-1">
+          <div
+            ref={listRef}
+            className="overflow-y-auto max-h-[calc(60vh-52px)] py-1"
+          >
             {filtered.length === 0 ? (
               <div className="flex items-center justify-center py-8 text-console-dim text-xs">
                 <SearchIcon className="w-4 h-4 mr-2" />

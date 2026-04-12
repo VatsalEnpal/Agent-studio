@@ -126,7 +126,7 @@ export function CreateSprintDialog({
         onClick={() => onOpenChange(false)}
       />
 
-      <div className="relative z-10 w-full max-w-md bg-console-panel border border-console-border rounded-lg shadow-2xl">
+      <div className="relative z-10 w-full max-w-md bg-console-panel border border-console-border rounded shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-console-border">
           <h2 className="text-[13px] font-medium text-console-text flex items-center gap-2">

@@ -4,7 +4,10 @@ import { X, CheckCircle, AlertTriangle, Info, XCircle } from "lucide-react";
 import { useToastStore, type Toast } from "@/stores/toast";
 import { cn } from "@/lib/utils";
 
-const iconMap: Record<Toast["type"], React.ComponentType<{ className?: string }>> = {
+const iconMap: Record<
+  Toast["type"],
+  React.ComponentType<{ className?: string }>
+> = {
   info: Info,
   success: CheckCircle,
   warning: AlertTriangle,
@@ -25,7 +28,7 @@ function ToastItem({ toast }: { toast: Toast }) {
   return (
     <div
       className={cn(
-        "flex items-start gap-2 px-3 py-2.5 rounded-lg border bg-console-panel shadow-lg",
+        "flex items-start gap-2 px-3 py-2.5 rounded border bg-console-panel shadow-lg",
         "animate-toast-in",
         colorMap[toast.type],
       )}

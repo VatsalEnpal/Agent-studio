@@ -6,12 +6,18 @@ import { cn } from "@/lib/utils";
 
 function categoryColor(cat: string): string {
   switch (cat) {
-    case "learnings": return "bg-blue-500/20 text-blue-400";
-    case "corrections": return "bg-red-500/20 text-red-400";
-    case "decisions": return "bg-purple-500/20 text-purple-400";
-    case "human-inputs": return "bg-amber-500/20 text-amber-400";
-    case "knowledge": return "bg-emerald-500/20 text-emerald-400";
-    default: return "bg-console-border text-console-dim";
+    case "learnings":
+      return "bg-blue-500/20 text-blue-400";
+    case "corrections":
+      return "bg-red-500/20 text-red-400";
+    case "decisions":
+      return "bg-purple-500/20 text-purple-400";
+    case "human-inputs":
+      return "bg-amber-500/20 text-amber-400";
+    case "knowledge":
+      return "bg-emerald-500/20 text-emerald-400";
+    default:
+      return "bg-console-border text-console-dim";
   }
 }
 
@@ -53,7 +59,12 @@ export function MemoryDetail() {
 
       {/* Meta info */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className={cn("text-[9px] px-2 py-0.5 rounded-full font-medium", categoryColor(selectedEntry.category))}>
+        <span
+          className={cn(
+            "text-[9px] px-2 py-0.5 rounded font-medium",
+            categoryColor(selectedEntry.category),
+          )}
+        >
           {selectedEntry.category}
         </span>
         <span className="text-[9px] text-console-dim flex items-center gap-1">
@@ -83,7 +94,10 @@ export function MemoryDetail() {
       <div className="flex items-center gap-1.5 flex-wrap">
         <Tag className="w-3 h-3 text-console-dim shrink-0" />
         {selectedEntry.tags.map((tag) => (
-          <span key={tag} className="text-[9px] px-1.5 py-0.5 bg-console-faint text-console-muted rounded">
+          <span
+            key={tag}
+            className="text-[9px] px-1.5 py-0.5 bg-console-faint text-console-muted rounded"
+          >
             {tag}
           </span>
         ))}
@@ -93,25 +107,47 @@ export function MemoryDetail() {
       {detail?.content && (
         <div className="space-y-3">
           {detail.content.observation && (
-            <ContentSection title="Observation" value={detail.content.observation as string} />
+            <ContentSection
+              title="Observation"
+              value={detail.content.observation as string}
+            />
           )}
           {detail.content.action && (
-            <ContentSection title="Action" value={detail.content.action as string} />
+            <ContentSection
+              title="Action"
+              value={detail.content.action as string}
+            />
           )}
           {detail.content.outcome && (
-            <ContentSection title="Outcome" value={detail.content.outcome as string} />
+            <ContentSection
+              title="Outcome"
+              value={detail.content.outcome as string}
+            />
           )}
           {detail.content.lesson && (
-            <ContentSection title="Lesson" value={detail.content.lesson as string} accent />
+            <ContentSection
+              title="Lesson"
+              value={detail.content.lesson as string}
+              accent
+            />
           )}
           {/* Render any extra fields */}
           {Object.entries(detail.content)
-            .filter(([k]) => !["observation", "action", "outcome", "lesson"].includes(k))
+            .filter(
+              ([k]) =>
+                !["observation", "action", "outcome", "lesson"].includes(k),
+            )
             .map(([key, value]) => (
               <ContentSection
                 key={key}
-                title={key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " ")}
-                value={typeof value === "string" ? value : JSON.stringify(value, null, 2)}
+                title={
+                  key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " ")
+                }
+                value={
+                  typeof value === "string"
+                    ? value
+                    : JSON.stringify(value, null, 2)
+                }
               />
             ))}
         </div>
@@ -152,7 +188,12 @@ function ContentSection({
           : "border-console-border bg-console-bg",
       )}
     >
-      <p className={cn("text-[9px] font-medium mb-1", accent ? "text-console-accent" : "text-console-dim")}>
+      <p
+        className={cn(
+          "text-[9px] font-medium mb-1",
+          accent ? "text-console-accent" : "text-console-dim",
+        )}
+      >
         {title}
       </p>
       <p className="text-[11px] text-console-text leading-relaxed whitespace-pre-wrap">

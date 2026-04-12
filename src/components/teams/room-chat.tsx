@@ -224,7 +224,7 @@ export function RoomChat() {
           onClick={() => setConfirmClose(false)}
         >
           <div
-            className="bg-console-panel border border-console-border rounded-lg shadow-2xl w-full max-w-xs p-0"
+            className="bg-console-panel border border-console-border rounded shadow-2xl w-full max-w-xs p-0"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-4 py-3 border-b border-console-border">
@@ -347,7 +347,7 @@ export function RoomChat() {
             <button
               onClick={handleSpawn}
               disabled={spawning}
-              className="px-5 py-2.5 bg-console-accent text-black text-sm font-semibold rounded-lg hover:bg-console-accent/90 transition-colors disabled:opacity-50"
+              className="px-5 py-2.5 bg-console-accent text-black text-sm font-semibold rounded hover:bg-console-accent/90 transition-colors disabled:opacity-50"
             >
               {spawning ? (
                 <span className="flex items-center gap-2">
@@ -412,7 +412,7 @@ export function RoomChat() {
               <div className="relative flex items-center gap-2">
                 {/* @mention dropdown */}
                 {showMentions && (
-                  <div className="absolute bottom-full left-0 mb-1 w-64 bg-console-panel border border-console-border rounded-lg shadow-lg p-1 z-10">
+                  <div className="absolute bottom-full left-0 mb-1 w-64 bg-console-panel border border-console-border rounded shadow-lg p-1 z-10">
                     {filteredAgents.map((a) => (
                       <button
                         key={a.id}

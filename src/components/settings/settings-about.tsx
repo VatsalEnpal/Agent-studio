@@ -4,7 +4,7 @@ import { Info } from "lucide-react";
 
 export function SettingsAbout() {
   return (
-    <section className="border border-console-border rounded-lg bg-console-panel">
+    <section className="border border-console-border rounded bg-console-panel">
       <div className="px-4 py-3 border-b border-console-border">
         <h3 className="text-xs font-medium text-console-text flex items-center gap-1.5">
           <Info className="w-3.5 h-3.5" />

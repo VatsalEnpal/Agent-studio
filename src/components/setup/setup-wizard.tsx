@@ -361,7 +361,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
 
   return (
     <div className="h-screen flex items-center justify-center bg-console-bg">
-      <div className="w-[560px] bg-console-panel border border-console-border rounded-xl shadow-2xl overflow-hidden">
+      <div className="w-[560px] bg-console-panel border border-console-border rounded shadow-2xl overflow-hidden">
         {/* Progress bar */}
         <div className="flex border-b border-console-border">
           {STEPS.map((s, i) => (
@@ -493,7 +493,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
 function WelcomeStep() {
   return (
     <div className="flex flex-col items-center text-center pt-6 space-y-5">
-      <div className="w-16 h-16 rounded-2xl bg-console-accent/10 border border-console-accent/20 flex items-center justify-center">
+      <div className="w-16 h-16 rounded bg-console-accent/10 border border-console-accent/20 flex items-center justify-center">
         <Rocket className="w-8 h-8 text-console-accent" />
       </div>
       <div>

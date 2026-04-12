@@ -124,7 +124,7 @@ function PeakHoursIndicator() {
       </div>
 
       {/* Tooltip */}
-      <div className="absolute right-0 top-full mt-1.5 w-60 p-2.5 rounded-lg border border-console-border bg-console-panel shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
+      <div className="absolute right-0 top-full mt-1.5 w-60 p-2.5 rounded border border-console-border bg-console-panel shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
         <p className="text-[10px] text-console-text font-medium mb-1.5">
           {info.isPeak
             ? "Peak Hours — Slower Responses"
@@ -199,7 +199,7 @@ function SystemWidget() {
       </button>
 
       {/* Tooltip */}
-      <div className="absolute right-0 top-full mt-1.5 w-52 p-2.5 rounded-lg border border-console-border bg-console-panel shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
+      <div className="absolute right-0 top-full mt-1.5 w-52 p-2.5 rounded border border-console-border bg-console-panel shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
         <p className="text-[10px] text-console-text font-medium mb-1.5">
           System Resources
         </p>
@@ -300,33 +300,19 @@ function TotalCostWidget() {
 export function ToggleBar() {
   const activeMode = useUIStore((s) => s.activeMode);
   const setActiveMode = useUIStore((s) => s.setActiveMode);
-  const [hasAgentSystem, setHasAgentSystem] = useState(true); // default true so tabs don't flash
-
-  useEffect(() => {
-    void (async () => {
-      try {
-        const res = await fetch("/api/config");
-        if (res.ok) {
-          const data = (await res.json()) as {
-            config: { agentSystem?: unknown };
-          };
-          setHasAgentSystem(!!data.config?.agentSystem);
-        }
-      } catch {
-        /* default to showing all tabs */
-      }
-    })();
-  }, []);
-
-  const tabs = hasAgentSystem
-    ? ALL_TABS
-    : ALL_TABS.filter((t) => t.id !== "teams" && t.id !== "memory");
+  const isElectron =
+    typeof window !== "undefined" &&
+    !!(window as unknown as { electronAPI?: { isElectron: boolean } })
+      .electronAPI?.isElectron;
 
   return (
     <header className="flex items-center justify-between px-4 h-10 border-b border-console-border console-panel-bg shrink-0">
-      {/* Left: tabs */}
-      <div className="flex items-center gap-0.5">
-        {tabs.map((tab) => {
+      {/* Left: tabs — extra left padding for Electron traffic lights */}
+      <div
+        className="flex items-center gap-0.5"
+        style={isElectron ? { paddingLeft: 68 } : undefined}
+      >
+        {ALL_TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeMode === tab.id;
           return (

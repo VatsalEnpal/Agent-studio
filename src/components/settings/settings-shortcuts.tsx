@@ -13,7 +13,7 @@ const SHORTCUTS = [
 
 export function SettingsShortcuts() {
   return (
-    <section className="border border-console-border rounded-lg bg-console-panel">
+    <section className="border border-console-border rounded bg-console-panel">
       <div className="px-4 py-3 border-b border-console-border">
         <h3 className="text-xs font-medium text-console-text">
           Keyboard Shortcuts

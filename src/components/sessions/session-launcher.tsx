@@ -315,7 +315,7 @@ export function SessionLauncher({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[520px] max-h-[85vh] overflow-y-auto console-panel-bg border border-console-border rounded-xl shadow-2xl">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[520px] max-h-[85vh] overflow-y-auto console-panel-bg border border-console-border rounded shadow-2xl">
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-console-border">
             <Dialog.Description className="sr-only">
@@ -446,7 +446,7 @@ export function SessionLauncher({
                   onClick={handleContinueLast}
                   disabled={launching}
                   className={cn(
-                    "flex flex-col items-center gap-1.5 p-2.5 rounded-lg border transition-all shadow-card hover:shadow-card-hover",
+                    "flex flex-col items-center gap-1.5 p-2.5 rounded border transition-all shadow-card hover:shadow-card-hover",
                     launching
                       ? "border-console-border bg-console-faint/30 opacity-50 cursor-not-allowed"
                       : "border-console-accent/30 bg-console-accent/5 hover:border-console-accent/60 hover:bg-console-accent/10 active:bg-console-accent/20",
@@ -474,7 +474,7 @@ export function SessionLauncher({
                       onClick={() => applyPreset(preset)}
                       disabled={launching}
                       className={cn(
-                        "flex flex-col items-center gap-1.5 p-2.5 rounded-lg border transition-all shadow-card hover:shadow-card-hover",
+                        "flex flex-col items-center gap-1.5 p-2.5 rounded border transition-all shadow-card hover:shadow-card-hover",
                         launching
                           ? "border-console-border opacity-50 cursor-not-allowed"
                           : isActive
@@ -647,7 +647,7 @@ export function SessionLauncher({
               onClick={handleLaunch}
               disabled={launching}
               className={cn(
-                "px-5 py-2 text-sm font-semibold rounded-lg transition-all shadow-glow-sm hover:shadow-glow-amber",
+                "px-5 py-2 text-sm font-semibold rounded transition-all shadow-glow-sm hover:shadow-glow-amber",
                 "bg-console-accent text-black hover:bg-console-accent/90 active:scale-95",
                 "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:shadow-none",
               )}

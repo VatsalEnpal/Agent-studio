@@ -15,14 +15,49 @@ import {
 } from "lucide-react";
 
 const AVAILABLE_AGENTS = [
-  { id: "orchestrator", label: "orchestrator", desc: "Coordinates the team, delegates work", defaultOn: true },
-  { id: "frontend", label: "frontend", desc: "Builds UI and frontend code", defaultOn: true },
-  { id: "backend", label: "backend", desc: "Builds APIs, database, server code", defaultOn: true },
+  {
+    id: "orchestrator",
+    label: "orchestrator",
+    desc: "Coordinates the team, delegates work",
+    defaultOn: true,
+  },
+  {
+    id: "frontend",
+    label: "frontend",
+    desc: "Builds UI and frontend code",
+    defaultOn: true,
+  },
+  {
+    id: "backend",
+    label: "backend",
+    desc: "Builds APIs, database, server code",
+    defaultOn: true,
+  },
   { id: "qa", label: "qa", desc: "Tests the application", defaultOn: true },
-  { id: "security", label: "security", desc: "Reviews code for vulnerabilities", defaultOn: false },
-  { id: "pmo", label: "pmo", desc: "Scans for tasks automatically", defaultOn: false },
-  { id: "documentation", label: "documentation", desc: "Maintains docs", defaultOn: false },
-  { id: "clearing", label: "clearing", desc: "Domain-specific (energy clearing)", defaultOn: false },
+  {
+    id: "security",
+    label: "security",
+    desc: "Reviews code for vulnerabilities",
+    defaultOn: false,
+  },
+  {
+    id: "pmo",
+    label: "pmo",
+    desc: "Scans for tasks automatically",
+    defaultOn: false,
+  },
+  {
+    id: "documentation",
+    label: "documentation",
+    desc: "Maintains docs",
+    defaultOn: false,
+  },
+  {
+    id: "clearing",
+    label: "clearing",
+    desc: "Domain-specific (energy clearing)",
+    defaultOn: false,
+  },
 ] as const;
 
 type WorkflowType = "sprint" | "simple" | "custom";
@@ -33,7 +68,11 @@ interface ScaffoldDialogProps {
   onCancel: () => void;
 }
 
-export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDialogProps) {
+export function ScaffoldDialog({
+  projectPath,
+  onComplete,
+  onCancel,
+}: ScaffoldDialogProps) {
   const [dialogStep, setDialogStep] = useState(0);
   const [selectedAgents, setSelectedAgents] = useState<string[]>(
     AVAILABLE_AGENTS.filter((a) => a.defaultOn).map((a) => a.id),
@@ -66,16 +105,19 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
           agents: selectedAgents,
           workflow,
           notifications: { telegram: telegramEnabled },
-          scheduler: { enabled: schedulerEnabled, intervalHours: schedulerInterval },
+          scheduler: {
+            enabled: schedulerEnabled,
+            intervalHours: schedulerInterval,
+          },
         }),
       });
 
       if (res.ok) {
-        const data = await res.json() as { created: string[] };
+        const data = (await res.json()) as { created: string[] };
         setResult(data);
         onComplete(`${projectPath}/ai-agents`);
       } else {
-        const errData = await res.json() as { error: string };
+        const errData = (await res.json()) as { error: string };
         setError(errData.error ?? "Failed to create agent system");
       }
     } catch {
@@ -83,11 +125,19 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
     } finally {
       setCreating(false);
     }
-  }, [projectPath, selectedAgents, workflow, telegramEnabled, schedulerEnabled, schedulerInterval, onComplete]);
+  }, [
+    projectPath,
+    selectedAgents,
+    workflow,
+    telegramEnabled,
+    schedulerEnabled,
+    schedulerInterval,
+    onComplete,
+  ]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="w-[520px] bg-console-panel border border-console-border rounded-xl shadow-2xl overflow-hidden">
+      <div className="w-[520px] bg-console-panel border border-console-border rounded shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-console-border">
           <div className="flex items-center gap-2">
@@ -126,7 +176,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
         <div className="px-5 py-4 min-h-[280px]">
           {result ? (
             <div className="flex flex-col items-center text-center pt-4 space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+              <div className="w-12 h-12 rounded bg-green-500/10 border border-green-500/20 flex items-center justify-center">
                 <Check className="w-6 h-6 text-green-400" />
               </div>
               <p className="text-sm font-medium text-console-text">
@@ -156,7 +206,10 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
                 />
               )}
               {dialogStep === 1 && (
-                <DialogWorkflowStep workflow={workflow} setWorkflow={setWorkflow} />
+                <DialogWorkflowStep
+                  workflow={workflow}
+                  setWorkflow={setWorkflow}
+                />
               )}
               {dialogStep === 2 && (
                 <DialogAutomationStep
@@ -176,7 +229,9 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
         {!result && !error && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-console-border">
             <button
-              onClick={() => dialogStep === 0 ? onCancel() : setDialogStep((s) => s - 1)}
+              onClick={() =>
+                dialogStep === 0 ? onCancel() : setDialogStep((s) => s - 1)
+              }
               className="flex items-center gap-1 px-2 py-1 text-[10px] text-console-muted hover:text-console-text transition-colors"
             >
               <ChevronLeft className="w-3 h-3" />
@@ -299,8 +354,16 @@ function DialogWorkflowStep({
   setWorkflow: (w: WorkflowType) => void;
 }) {
   const options: { id: WorkflowType; label: string; desc: string }[] = [
-    { id: "sprint", label: "Sprint Planning", desc: "Scan, spec, approve, build (phases + gates), test, ship" },
-    { id: "simple", label: "Simple Pipeline", desc: "Plan, build, test, deploy" },
+    {
+      id: "sprint",
+      label: "Sprint Planning",
+      desc: "Scan, spec, approve, build (phases + gates), test, ship",
+    },
+    {
+      id: "simple",
+      label: "Simple Pipeline",
+      desc: "Plan, build, test, deploy",
+    },
     { id: "custom", label: "Custom", desc: "Define your own steps later" },
   ];
 
@@ -333,7 +396,9 @@ function DialogWorkflowStep({
               className="accent-console-accent mt-0.5"
             />
             <div>
-              <span className="text-[10px] font-medium text-console-text">{opt.label}</span>
+              <span className="text-[10px] font-medium text-console-text">
+                {opt.label}
+              </span>
               <p className="text-[9px] text-console-dim mt-0.5">{opt.desc}</p>
             </div>
           </label>
@@ -385,7 +450,9 @@ function DialogAutomationStep({
             className="accent-console-accent mt-0.5"
           />
           <div>
-            <span className="text-[10px] font-medium text-console-text">Telegram notifications</span>
+            <span className="text-[10px] font-medium text-console-text">
+              Telegram notifications
+            </span>
             <p className="text-[9px] text-console-dim mt-0.5">
               Get pinged when sprints are ready or gates pass.
             </p>
@@ -406,7 +473,9 @@ function DialogAutomationStep({
             className="accent-console-accent mt-0.5"
           />
           <div>
-            <span className="text-[10px] font-medium text-console-text">PMO scheduler</span>
+            <span className="text-[10px] font-medium text-console-text">
+              PMO scheduler
+            </span>
             <p className="text-[9px] text-console-dim mt-0.5">
               Automatically scan for tasks every {schedulerInterval} hours.
             </p>
@@ -414,13 +483,17 @@ function DialogAutomationStep({
         </label>
         {schedulerEnabled && (
           <div className="pl-8">
-            <label className="text-[9px] text-console-muted block mb-1">Interval (hours)</label>
+            <label className="text-[9px] text-console-muted block mb-1">
+              Interval (hours)
+            </label>
             <input
               type="number"
               min={1}
               max={24}
               value={schedulerInterval}
-              onChange={(e) => setSchedulerInterval(parseInt(e.target.value, 10) || 2)}
+              onChange={(e) =>
+                setSchedulerInterval(parseInt(e.target.value, 10) || 2)
+              }
               className="w-16 px-2 py-0.5 text-[10px] font-mono bg-console-bg border border-console-border rounded text-console-text focus:border-console-accent focus:outline-none"
             />
           </div>

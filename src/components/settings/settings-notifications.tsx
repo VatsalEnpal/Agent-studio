@@ -87,7 +87,7 @@ export function SettingsNotifications() {
   }, []);
 
   return (
-    <section className="border border-console-border rounded-lg bg-console-panel">
+    <section className="border border-console-border rounded bg-console-panel">
       <div className="px-4 py-3 border-b border-console-border">
         <h3 className="text-xs font-medium text-console-text">Notifications</h3>
         <p className="text-[10px] text-console-dim mt-0.5">

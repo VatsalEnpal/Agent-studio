@@ -36,14 +36,16 @@ export function SettingsGeneral() {
   };
 
   return (
-    <section className="border border-console-border rounded-lg bg-console-panel">
+    <section className="border border-console-border rounded bg-console-panel">
       <div className="px-4 py-3 border-b border-console-border">
         <h3 className="text-xs font-medium text-console-text">General</h3>
       </div>
       <div className="px-4 py-3 space-y-4">
         {/* Default Model */}
         <div>
-          <label className="text-[10px] text-console-muted block mb-1.5">Default Model</label>
+          <label className="text-[10px] text-console-muted block mb-1.5">
+            Default Model
+          </label>
           <div className="flex items-center gap-2">
             {(["opus", "sonnet", "haiku"] as const).map((model) => (
               <button
@@ -68,10 +70,17 @@ export function SettingsGeneral() {
 
         {/* Default Permissions */}
         <div>
-          <label className="text-[10px] text-console-muted block mb-1.5">Default Permissions</label>
+          <label className="text-[10px] text-console-muted block mb-1.5">
+            Default Permissions
+          </label>
           <select
             value={settings.defaultPermissions}
-            onChange={(e) => updateSetting("defaultPermissions", e.target.value as "bypass" | "default" | "plan")}
+            onChange={(e) =>
+              updateSetting(
+                "defaultPermissions",
+                e.target.value as "bypass" | "default" | "plan",
+              )
+            }
             className="px-2 py-1.5 text-[10px] bg-console-bg border border-console-border rounded text-console-text focus:outline-none focus:border-console-accent"
           >
             <option value="bypass">Bypass (skip permissions)</option>
@@ -82,7 +91,9 @@ export function SettingsGeneral() {
 
         {/* Default Working Directory */}
         <div>
-          <label className="text-[10px] text-console-muted block mb-1.5">Default Working Directory</label>
+          <label className="text-[10px] text-console-muted block mb-1.5">
+            Default Working Directory
+          </label>
           <input
             type="text"
             value={settings.defaultCwd}
@@ -103,7 +114,11 @@ export function SettingsGeneral() {
                 : "bg-console-accent/20 text-console-accent hover:bg-console-accent/30",
             )}
           >
-            {saved ? <Check className="w-3 h-3" /> : <Save className="w-3 h-3" />}
+            {saved ? (
+              <Check className="w-3 h-3" />
+            ) : (
+              <Save className="w-3 h-3" />
+            )}
             {saving ? "Saving..." : saved ? "Saved" : "Save Settings"}
           </button>
         </div>
