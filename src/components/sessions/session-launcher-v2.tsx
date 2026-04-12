@@ -375,22 +375,43 @@ export function SessionLauncherV2({
                 Quick Start
               </span>
               <div className="flex gap-1 flex-wrap">
-                {PRESETS.map((preset) => (
-                  <button
-                    key={preset.name}
-                    onClick={() => applyPreset(preset)}
-                    disabled={launching}
-                    className={cn(
-                      "px-2 py-1 rounded-md text-xs font-medium transition-all",
-                      "border border-border-default",
-                      launching
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:border-[#f59e0b]/40 hover:bg-[#f59e0b]/5 active:bg-[#f59e0b]/10 active:scale-[0.98]",
-                    )}
-                  >
-                    <span className="text-text-primary">{preset.name}</span>
-                  </button>
-                ))}
+                {PRESETS.map((preset) => {
+                  // For the Continue preset, show which session will be resumed
+                  const isContinue = preset.name === "Continue";
+                  const lastSession = isContinue && recentSessions.length > 0 ? recentSessions[0] : null;
+                  const continueLabel = lastSession
+                    ? `Continue ${shortProject(lastSession.project)}`
+                    : preset.name;
+                  const continueHint = lastSession
+                    ? formatRelativeTime(lastSession.date)
+                    : undefined;
+
+                  return (
+                    <button
+                      key={preset.name}
+                      onClick={() => applyPreset(preset)}
+                      disabled={launching || (isContinue && recentSessions.length === 0)}
+                      title={isContinue && lastSession
+                        ? `Resume last session in ${lastSession.project} (${formatRelativeTime(lastSession.date)})`
+                        : preset.description}
+                      className={cn(
+                        "px-2 py-1 rounded-md text-xs font-medium transition-all",
+                        "border",
+                        isContinue && lastSession
+                          ? "border-[#f59e0b]/30 bg-[#f59e0b]/5"
+                          : "border-border-default",
+                        launching || (isContinue && recentSessions.length === 0)
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:border-[#f59e0b]/40 hover:bg-[#f59e0b]/5 active:bg-[#f59e0b]/10 active:scale-[0.98]",
+                      )}
+                    >
+                      <span className="text-text-primary">{continueLabel}</span>
+                      {continueHint && (
+                        <span className="text-text-ghost ml-1">{continueHint}</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
