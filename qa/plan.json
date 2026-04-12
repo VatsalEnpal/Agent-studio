@@ -7,28 +7,28 @@
       "issue_id": "ISSUE-8",
       "description": "Fix Default Working Directory to use the actual project directory instead of the Electron app bundle path (/Applications/Agent Studio.app/Contents/Resources). Auto-detect from cwd or first tracked project.",
       "severity": "CRITICAL",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-2",
       "issue_id": "ISSUE-1",
       "description": "Show Teams, Memory, and Reports tabs in the top navigation. If agent system is not configured, show tabs but display an explanatory empty state with a CTA to configure instead of hiding them entirely.",
       "severity": "HIGH",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-3",
       "issue_id": "ISSUE-2",
       "description": "Add a label or tooltip to the cost display in the top bar explaining what the dollar amount represents (e.g., 'Total cost today' or 'API spend').",
       "severity": "HIGH",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-4",
       "issue_id": "ISSUE-5",
       "description": "Show meaningful session identifiers in the Running on Machine section - include project name, agent type, or task description instead of just the model name.",
       "severity": "HIGH",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-5",
@@ -42,21 +42,21 @@
       "issue_id": "ISSUE-7",
       "description": "Make the default model setting in General actually propagate to the New Session launcher modal. The model dropdown should reflect whatever is configured in settings.",
       "severity": "HIGH",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-7",
       "issue_id": "ISSUE-10",
       "description": "Add a close/dismiss button (X) to the setup wizard and prevent it from persisting across page reloads when triggered from Re-run Setup Wizard. The wizard should be dismissable at any step.",
       "severity": "HIGH",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-8",
       "issue_id": "ISSUE-14",
       "description": "Add Teams tab to the main top navigation bar so users can discover rooms and sprints without using the command palette.",
       "severity": "HIGH",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-9",
@@ -70,14 +70,14 @@
       "issue_id": "ISSUE-30",
       "description": "Add a close/X button to the setup wizard that allows users to exit at any step without completing it. Also add Escape key support to dismiss.",
       "severity": "HIGH",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-11",
       "issue_id": "ISSUE-3",
       "description": "Make the Limits link open in a new tab (target=_blank) and add an external link icon to indicate it navigates away from the app.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-12",
@@ -266,13 +266,13 @@
       "issue_id": "ISSUE-38",
       "description": "Remove duplicate duration display in Running on Machine entries - show duration in one place only.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     }
   ],
   "stats": {
     "total": 38,
-    "pending": 38,
-    "fixed": 0,
+    "pending": 28,
+    "fixed": 10,
     "verified": 0
   }
 }
