@@ -43,3 +43,12 @@ out/
 
 # Agent skill temp runs (never commit)
 **/.temp-execution*.js
+.gstack/
+
+# QA loop artifacts (development only)
+.ralph/
+qa/
+CURRENT_STATE.md
+DESIGN.md
+IDENTITY.md
+.claude/scheduled_tasks.lock

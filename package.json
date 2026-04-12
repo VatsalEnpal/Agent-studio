@@ -28,6 +28,7 @@
     "electron": "electron electron/main.js",
     "electron:dev": "concurrently \"npm run dev\" \"sleep 8 && EXTERNAL_SERVER_PORT=8080 electron electron/main.js\"",
     "build:mac": "npm run build:all && electron-builder --mac",
+    "install:mac": "npm run build:mac && rm -rf '/Applications/Agent Studio.app' && cp -R 'dist/mac-arm64/Agent Studio.app' /Applications/ && echo '✅ Agent Studio installed to /Applications'",
     "build:win": "npm run build:all && electron-builder --win",
     "build:linux": "npm run build:all && electron-builder --linux",
     "postbuild:mac": "npm rebuild node-pty",
