@@ -112,7 +112,7 @@
       "issue_id": "ISSUE-16",
       "description": "Elevate Sprints to be more discoverable - either as a top-level tab or prominently linked from the Teams view.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-17",
@@ -168,21 +168,21 @@
       "issue_id": "ISSUE-32",
       "description": "Group sessions in the sidebar into categories (Sprint Team vs Standalone) as specified in the design doc.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-25",
       "issue_id": "ISSUE-33",
       "description": "Add Reports tab to the navigation with the ability to view automation/sprint results.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-26",
       "issue_id": "ISSUE-36",
       "description": "Surface agent system configuration in the Teams/Memory empty states, not just in Settings. Guide users to set it up from the feature they're trying to use.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-27",
@@ -294,7 +294,7 @@
       "issue_id": "ISSUE-42",
       "description": "Add text labels to the left icon sidebar navigation or ensure tooltips appear on hover for discoverability.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-43",
@@ -327,8 +327,8 @@
   ],
   "stats": {
     "total": 46,
-    "pending": 18,
-    "fixed": 8,
+    "pending": 13,
+    "fixed": 13,
     "verified": 21,
     "failed_verification": 0
   }
