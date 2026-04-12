@@ -24,14 +24,18 @@ function getPinnedIds(): Set<string> {
   try {
     const raw = localStorage.getItem(PIN_KEY);
     if (raw) return new Set(JSON.parse(raw) as string[]);
-  } catch { /* ignore */ }
+  } catch (e) {
+    console.error("Failed to parse pinned session IDs from localStorage:", e);
+  }
   return new Set();
 }
 
 function savePinnedIds(ids: Set<string>): void {
   try {
     localStorage.setItem(PIN_KEY, JSON.stringify([...ids]));
-  } catch { /* ignore */ }
+  } catch (e) {
+    console.error("Failed to save pinned session IDs to localStorage:", e);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -84,7 +88,11 @@ function groupSessionsByDate(sessions: Session[]): {
   sessions: Session[];
 }[] {
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const todayStart = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  ).getTime();
   const yesterdayStart = todayStart - 86400000;
   const weekStart = todayStart - 6 * 86400000;
 
@@ -119,7 +127,9 @@ type SidebarTab = "sessions" | "history" | "servers";
 // ---------------------------------------------------------------------------
 
 function SidebarServerList() {
-  const [servers, setServers] = useState<{ pid: number; port: number; command: string; running: boolean }[]>([]);
+  const [servers, setServers] = useState<
+    { pid: number; port: number; command: string; running: boolean }[]
+  >([]);
 
   useEffect(() => {
     let active = true;
@@ -129,18 +139,25 @@ function SidebarServerList() {
         if (res.ok && active) {
           setServers(await res.json());
         }
-      } catch { /* best effort */ }
+      } catch {
+        /* best effort */
+      }
     };
     void fetchServers();
     const interval = setInterval(() => void fetchServers(), 5000);
-    return () => { active = false; clearInterval(interval); };
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, []);
 
   if (servers.length === 0) {
     return (
       <div className="px-3 py-6 text-center">
         <p className="text-xs text-text-secondary">No services detected</p>
-        <p className="text-xs text-text-tertiary mt-1">Start a dev server to see it here</p>
+        <p className="text-xs text-text-tertiary mt-1">
+          Start a dev server to see it here
+        </p>
       </div>
     );
   }
@@ -194,7 +211,9 @@ export function SessionSidebar({
 
   const [activeTab, setActiveTab] = useState<SidebarTab>("sessions");
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "idle">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "idle">(
+    "all",
+  );
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => getPinnedIds());
 
   // Fetch past sessions from API for the History tab
@@ -205,7 +224,16 @@ export function SessionSidebar({
       try {
         const res = await fetch("/api/sessions/history");
         if (!res.ok || !active) return;
-        const data: { id: string; project: string; projectShort: string; modified: number; date: string; agent: string; preview: string; cost: string | null }[] = await res.json();
+        const data: {
+          id: string;
+          project: string;
+          projectShort: string;
+          modified: number;
+          date: string;
+          agent: string;
+          preview: string;
+          cost: string | null;
+        }[] = await res.json();
         setPastSessions(
           data.map((d) => {
             // Reconstruct the full absolute path — the API strips the leading /
@@ -217,7 +245,10 @@ export function SessionSidebar({
             // Preview: first user message, but filter out internal room prompts
             let previewText: string | undefined;
             if (d.preview && !d.preview.startsWith("You are ")) {
-              previewText = d.preview.length > 50 ? d.preview.slice(0, 47) + "..." : d.preview;
+              previewText =
+                d.preview.length > 50
+                  ? d.preview.slice(0, 47) + "..."
+                  : d.preview;
             }
             return {
               id: d.id,
@@ -229,17 +260,24 @@ export function SessionSidebar({
               status: "exited" as const,
               createdAt: d.modified,
               updatedAt: d.modified,
-              meta: (d.agent || d.cost) ? { agent: d.agent || undefined, cost: d.cost ?? undefined } : undefined,
+              meta:
+                d.agent || d.cost
+                  ? { agent: d.agent || undefined, cost: d.cost ?? undefined }
+                  : undefined,
               preview: previewText,
             };
           }),
         );
-      } catch { /* best effort */ }
+      } catch (e) {
+        console.error("Failed to fetch session history:", e);
+      }
     };
     void fetchHistory();
     // Refresh when switching to history tab
     if (activeTab === "history") void fetchHistory();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [activeTab]);
 
   const togglePin = useCallback((id: string) => {
@@ -254,7 +292,8 @@ export function SessionSidebar({
 
   // Separate active vs exited sessions
   const activeSessions = useMemo(
-    () => sessions.filter((s) => s.status !== "exited" && s.meta?.group !== "room"),
+    () =>
+      sessions.filter((s) => s.status !== "exited" && s.meta?.group !== "room"),
     [sessions],
   );
   const exitedSessions = useMemo(
@@ -268,7 +307,9 @@ export function SessionSidebar({
   const allHistorySessions = useMemo(() => {
     const currentIds = new Set(exitedSessions.map((s) => s.id));
     const apiOnly = pastSessions.filter((s) => !currentIds.has(s.id));
-    return [...exitedSessions, ...apiOnly].sort((a, b) => b.createdAt - a.createdAt);
+    return [...exitedSessions, ...apiOnly].sort(
+      (a, b) => b.createdAt - a.createdAt,
+    );
   }, [exitedSessions, pastSessions]);
 
   const filteredHistory = useMemo(() => {
@@ -290,7 +331,8 @@ export function SessionSidebar({
 
   // Paused sessions (idle status)
   const pausedSessions = useMemo(
-    () => sessions.filter((s) => s.status === "idle" && s.meta?.group !== "room"),
+    () =>
+      sessions.filter((s) => s.status === "idle" && s.meta?.group !== "room"),
     [sessions],
   );
 
@@ -298,7 +340,10 @@ export function SessionSidebar({
   const runningSessions = useMemo(
     () =>
       activeSessions.filter(
-        (s) => s.status === "active" || s.status === "building" || s.status === "starting",
+        (s) =>
+          s.status === "active" ||
+          s.status === "building" ||
+          s.status === "starting",
       ),
     [activeSessions],
   );
@@ -309,7 +354,8 @@ export function SessionSidebar({
         onResumeSession(session);
         return;
       }
-      const basename = session.cwd.split("/").filter(Boolean).pop() ?? session.name;
+      const basename =
+        session.cwd.split("/").filter(Boolean).pop() ?? session.name;
       try {
         await fetch("/api/sessions", {
           method: "POST",
@@ -328,8 +374,8 @@ export function SessionSidebar({
             },
           }),
         });
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Failed to resume session:", e);
       }
     },
     [onResumeSession],
@@ -342,7 +388,8 @@ export function SessionSidebar({
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(
-        (s) => s.name.toLowerCase().includes(q) || s.cwd.toLowerCase().includes(q),
+        (s) =>
+          s.name.toLowerCase().includes(q) || s.cwd.toLowerCase().includes(q),
       );
     }
     return [...list].sort((a, b) => {
@@ -358,7 +405,8 @@ export function SessionSidebar({
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(
-        (s) => s.name.toLowerCase().includes(q) || s.cwd.toLowerCase().includes(q),
+        (s) =>
+          s.name.toLowerCase().includes(q) || s.cwd.toLowerCase().includes(q),
       );
     }
     return [...list].sort((a, b) => {
@@ -398,7 +446,11 @@ export function SessionSidebar({
                   : "text-text-tertiary hover:text-text-secondary",
               )}
             >
-              {tab === "sessions" ? "Sessions" : tab === "history" ? "History" : "Servers"}
+              {tab === "sessions"
+                ? "Sessions"
+                : tab === "history"
+                  ? "History"
+                  : "Servers"}
             </button>
           ))}
         </div>
@@ -407,7 +459,10 @@ export function SessionSidebar({
       {/* Search bar */}
       <div className="px-3 pb-2">
         <div className="relative">
-          <SearchIcon size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary" />
+          <SearchIcon
+            size={12}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary"
+          />
           <input
             type="text"
             value={searchQuery}
@@ -428,24 +483,30 @@ export function SessionSidebar({
       </div>
 
       {/* Status filter chips — only show when there are both running and paused sessions */}
-      {activeTab === "sessions" && (runningSessions.length > 0 && pausedSessions.length > 0) && (
-        <div className="px-3 pb-2 flex items-center gap-1">
-          {(["all", "active", "idle"] as const).map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setStatusFilter(filter)}
-              className={cn(
-                "px-2 py-0.5 text-2xs font-medium rounded transition-all",
-                statusFilter === filter
-                  ? "bg-sessions/15 text-sessions"
-                  : "text-text-tertiary hover:text-text-secondary hover:bg-bg-elevated/50",
-              )}
-            >
-              {filter === "all" ? "All" : filter === "active" ? "Running" : "Paused"}
-            </button>
-          ))}
-        </div>
-      )}
+      {activeTab === "sessions" &&
+        runningSessions.length > 0 &&
+        pausedSessions.length > 0 && (
+          <div className="px-3 pb-2 flex items-center gap-1">
+            {(["all", "active", "idle"] as const).map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setStatusFilter(filter)}
+                className={cn(
+                  "px-2 py-0.5 text-2xs font-medium rounded transition-all",
+                  statusFilter === filter
+                    ? "bg-sessions/15 text-sessions"
+                    : "text-text-tertiary hover:text-text-secondary hover:bg-bg-elevated/50",
+                )}
+              >
+                {filter === "all"
+                  ? "All"
+                  : filter === "active"
+                    ? "Running"
+                    : "Paused"}
+              </button>
+            ))}
+          </div>
+        )}
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {activeTab === "sessions" && (
@@ -455,7 +516,10 @@ export function SessionSidebar({
                 {/* SPRINT TEAM — shown when any sprint-group sessions exist */}
                 {sprintRunning.length > 0 && (
                   <>
-                    <SectionHeader label="Sprint Team" count={sprintRunning.length} />
+                    <SectionHeader
+                      label="Sprint Team"
+                      count={sprintRunning.length}
+                    />
                     <div className="px-1 pb-2 space-y-0.5">
                       {sprintRunning.map((session) => (
                         <SessionCard
@@ -549,11 +613,15 @@ export function SessionSidebar({
               ))
             ) : searchQuery.trim() ? (
               <div className="px-3 py-8 text-center">
-                <p className="text-xs text-text-secondary">No matching sessions</p>
+                <p className="text-xs text-text-secondary">
+                  No matching sessions
+                </p>
               </div>
             ) : (
               <div className="px-3 py-8 text-center">
-                <p className="text-xs text-text-secondary font-medium">No session history</p>
+                <p className="text-xs text-text-secondary font-medium">
+                  No session history
+                </p>
                 <p className="text-xs text-text-secondary mt-1">
                   Past sessions will appear here after they end
                 </p>
@@ -568,7 +636,10 @@ export function SessionSidebar({
       <div className="px-3 py-2 border-t border-border-default space-y-1.5">
         {onDevServers && (
           <button
-            onClick={() => { setActiveTab("servers"); onDevServers(true); }}
+            onClick={() => {
+              setActiveTab("servers");
+              onDevServers(true);
+            }}
             className="flex items-center gap-1.5 w-full px-2 py-1 text-xs text-text-secondary hover:text-sessions transition-all rounded"
           >
             <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />

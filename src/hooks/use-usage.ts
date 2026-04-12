@@ -37,8 +37,8 @@ export function useUsage(): UsageState {
           setState((prev) => ({ ...prev, all }));
         }
       }
-    } catch {
-      // Best effort
+    } catch (e) {
+      console.error("Failed to fetch usage data:", e);
     }
   }, []);
 
@@ -144,7 +144,8 @@ export function useSessionUsage(sessionId: string | null): {
             loading: false,
           });
         }
-      } catch {
+      } catch (e) {
+        console.error("Failed to fetch session usage data:", e);
         if (!cancelled) {
           setData((prev) => ({ ...prev, loading: false }));
         }

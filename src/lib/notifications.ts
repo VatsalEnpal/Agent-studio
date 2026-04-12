@@ -11,15 +11,22 @@ interface NotifyOptions {
   targetId?: string;
 }
 
-export function notify({ title, body, targetPage, targetId }: NotifyOptions): void {
+export function notify({
+  title,
+  body,
+  targetPage,
+  targetId,
+}: NotifyOptions): void {
   if (typeof window === "undefined") return;
 
   // Electron path — uses the preload bridge at window.electronAPI
   if (window.electronAPI) {
-    const action =
-      targetPage
-        ? { type: "navigate", path: `/${targetPage}${targetId ? `/${targetId}` : ""}` }
-        : undefined;
+    const action = targetPage
+      ? {
+          type: "navigate",
+          path: `/${targetPage}${targetId ? `/${targetId}` : ""}`,
+        }
+      : undefined;
     window.electronAPI.sendNotification(title, body, action);
     return;
   }
@@ -38,7 +45,11 @@ export function notify({ title, body, targetPage, targetId }: NotifyOptions): vo
 
 // --- Convenience functions ---
 
-export function notifyMention(agent: string, snippet: string, roomId?: string): void {
+export function notifyMention(
+  agent: string,
+  snippet: string,
+  roomId?: string,
+): void {
   notify({
     title: `${agent} mentioned you`,
     body: snippet,
@@ -47,7 +58,11 @@ export function notifyMention(agent: string, snippet: string, roomId?: string): 
   });
 }
 
-export function notifyApproval(agent: string, action: string, sprintId?: string): void {
+export function notifyApproval(
+  agent: string,
+  action: string,
+  sprintId?: string,
+): void {
   notify({
     title: "Approval needed",
     body: `${agent} wants to: ${action}`,
@@ -64,7 +79,11 @@ export function notifyCompletion(agent: string, summary: string): void {
   });
 }
 
-export function notifySessionExit(name: string, code: number, sessionId?: string): void {
+export function notifySessionExit(
+  name: string,
+  code: number,
+  sessionId?: string,
+): void {
   notify({
     title: code === 0 ? "Session done" : "Session exited",
     body: `${name} (exit ${code})`,
@@ -73,7 +92,11 @@ export function notifySessionExit(name: string, code: number, sessionId?: string
   });
 }
 
-export function notifyGate(gate: string, passed: boolean, sprintId?: string): void {
+export function notifyGate(
+  gate: string,
+  passed: boolean,
+  sprintId?: string,
+): void {
   notify({
     title: passed ? `${gate} passed` : `${gate} failed`,
     body: passed ? "Proceeding to next phase" : "Check the dashboard",
@@ -82,7 +105,11 @@ export function notifyGate(gate: string, passed: boolean, sprintId?: string): vo
   });
 }
 
-export function notifyContextWarning(sessionName: string, percent: number, sessionId?: string): void {
+export function notifyContextWarning(
+  sessionName: string,
+  percent: number,
+  sessionId?: string,
+): void {
   notify({
     title: "Context window warning",
     body: `${sessionName} is at ${percent}% context`,
@@ -114,13 +141,19 @@ export function getNotificationPrefs(): NotificationPrefs {
   try {
     const saved = localStorage.getItem("agent-studio-notification-prefs");
     if (saved) return JSON.parse(saved) as NotificationPrefs;
-  } catch {
-    // Corrupted — use defaults
+  } catch (e) {
+    console.error(
+      "Failed to parse notification preferences from localStorage:",
+      e,
+    );
   }
   return DEFAULT_PREFS;
 }
 
 export function saveNotificationPrefs(prefs: NotificationPrefs): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem("agent-studio-notification-prefs", JSON.stringify(prefs));
+  localStorage.setItem(
+    "agent-studio-notification-prefs",
+    JSON.stringify(prefs),
+  );
 }

@@ -12,7 +12,7 @@ export function ThemeScript() {
         } else {
           document.documentElement.classList.add('dark');
         }
-      } catch(e) {}
+      } catch(e) { console.error('Failed to apply saved theme:', e); }
     })();
   `;
   return <script dangerouslySetInnerHTML={{ __html: script }} />;

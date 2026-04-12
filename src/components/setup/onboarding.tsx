@@ -2,7 +2,15 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { BoltIcon, FolderIcon, ChevronRightIcon, SpinnerIcon, CheckIcon, PencilIcon, RefreshIcon } from "@/components/ui/icons";
+import {
+  BoltIcon,
+  FolderIcon,
+  ChevronRightIcon,
+  SpinnerIcon,
+  CheckIcon,
+  PencilIcon,
+  RefreshIcon,
+} from "@/components/ui/icons";
 
 // ---------- Types ----------
 
@@ -15,7 +23,13 @@ interface GeneratedAgent {
 }
 
 interface AutomationSuggestion {
-  template: { id: string; name: string; description: string; schedule: string; model: string };
+  template: {
+    id: string;
+    name: string;
+    description: string;
+    schedule: string;
+    model: string;
+  };
   reason: string;
   customizedPrompt: string;
   priority: "recommended" | "optional";
@@ -63,7 +77,12 @@ function ModelBadge({ model }: { model: string }) {
     haiku: "bg-emerald-500/15 text-emerald-400",
   };
   return (
-    <span className={cn("px-1.5 py-0.5 rounded text-2xs font-medium", colors[model] ?? "bg-bg-elevated text-text-tertiary")}>
+    <span
+      className={cn(
+        "px-1.5 py-0.5 rounded text-2xs font-medium",
+        colors[model] ?? "bg-bg-elevated text-text-tertiary",
+      )}
+    >
       {model}
     </span>
   );
@@ -110,7 +129,10 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
 
   const handleSubmit = () => {
     if (!description.trim()) return;
-    onSubmit(description.trim(), showProject && projectPath.trim() ? projectPath.trim() : null);
+    onSubmit(
+      description.trim(),
+      showProject && projectPath.trim() ? projectPath.trim() : null,
+    );
   };
 
   return (
@@ -120,11 +142,15 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
         <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
             <BoltIcon className="w-6 h-6 text-amber-400" />
-            <h1 className="text-2xl font-semibold text-white tracking-tight">Agent Studio</h1>
+            <h1 className="text-2xl font-semibold text-white tracking-tight">
+              Agent Studio
+            </h1>
           </div>
           <p className="text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
-            Your AI-powered command center.<br />
-            Tell me what you&apos;re working on &mdash; I&apos;ll build your perfect setup.
+            Your AI-powered command center.
+            <br />
+            Tell me what you&apos;re working on &mdash; I&apos;ll build your
+            perfect setup.
           </p>
         </div>
 
@@ -162,11 +188,15 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
             onClick={() => setShowProject(!showProject)}
             className="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-400 transition-all"
           >
-            <span className={cn(
-              "w-3.5 h-3.5 rounded-full border border-zinc-600 flex items-center justify-center transition-all",
-              showProject && "bg-amber-500/20 border-amber-500/50",
-            )}>
-              {showProject && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+            <span
+              className={cn(
+                "w-3.5 h-3.5 rounded-full border border-zinc-600 flex items-center justify-center transition-all",
+                showProject && "bg-amber-500/20 border-amber-500/50",
+              )}
+            >
+              {showProject && (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              )}
             </span>
             I also have a code project
           </button>
@@ -222,14 +252,23 @@ interface ResultScreenProps {
   refining: boolean;
 }
 
-function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refining }: ResultScreenProps) {
-  const [enabledAutomations, setEnabledAutomations] = useState<Set<string>>(() => {
-    const initial = new Set<string>();
-    automations.forEach((a) => {
-      if (a.priority === "recommended") initial.add(a.template.id);
-    });
-    return initial;
-  });
+function ResultScreen({
+  agents,
+  automations,
+  onConfirm,
+  onRefine,
+  applying,
+  refining,
+}: ResultScreenProps) {
+  const [enabledAutomations, setEnabledAutomations] = useState<Set<string>>(
+    () => {
+      const initial = new Set<string>();
+      automations.forEach((a) => {
+        if (a.priority === "recommended") initial.add(a.template.id);
+      });
+      return initial;
+    },
+  );
   const [refinementInput, setRefinementInput] = useState("");
 
   const toggleAutomation = (id: string) => {
@@ -250,28 +289,43 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
   return (
     <div className="h-screen flex items-center justify-center bg-canvas">
       <div className="w-full max-w-2xl px-6 py-8 max-h-screen overflow-y-auto">
-        <h2 className="text-lg font-semibold text-white mb-6">Here&apos;s your setup:</h2>
+        <h2 className="text-lg font-semibold text-white mb-6">
+          Here&apos;s your setup:
+        </h2>
 
         {/* Agents */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Your Agents</span>
+            <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+              Your Agents
+            </span>
           </div>
           <div className="space-y-1.5 rounded border border-zinc-800/80 bg-zinc-900/40 p-3">
             {agents.map((agent) => (
-              <div key={agent.id} className="flex items-start gap-3 py-2 px-2 rounded hover:bg-zinc-800/40 transition-all">
-                <span className="text-base mt-0.5">{agentIcon(agent.name)}</span>
+              <div
+                key={agent.id}
+                className="flex items-start gap-3 py-2 px-2 rounded hover:bg-zinc-800/40 transition-all"
+              >
+                <span className="text-base mt-0.5">
+                  {agentIcon(agent.name)}
+                </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-zinc-200">{agent.name}</span>
+                    <span className="text-sm font-medium text-zinc-200">
+                      {agent.name}
+                    </span>
                     <ModelBadge model={agent.model} />
                   </div>
-                  <p className="text-xs text-zinc-500 mt-0.5">{agent.description}</p>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    {agent.description}
+                  </p>
                 </div>
               </div>
             ))}
             {agents.length === 0 && (
-              <p className="text-xs text-zinc-600 py-2 text-center">No agents generated.</p>
+              <p className="text-xs text-zinc-600 py-2 text-center">
+                No agents generated.
+              </p>
             )}
           </div>
         </div>
@@ -280,7 +334,9 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
         {automations.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Your Automations</span>
+              <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+                Your Automations
+              </span>
             </div>
             <div className="space-y-1.5 rounded border border-zinc-800/80 bg-zinc-900/40 p-3">
               {automations.map((auto) => (
@@ -289,20 +345,26 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
                   onClick={() => toggleAutomation(auto.template.id)}
                   className="flex items-center gap-3 w-full py-2 px-2 rounded hover:bg-zinc-800/40 transition-all text-left"
                 >
-                  <span className={cn(
-                    "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all",
-                    enabledAutomations.has(auto.template.id)
-                      ? "bg-amber-500/20 border-amber-500/50"
-                      : "border-zinc-600",
-                  )}>
+                  <span
+                    className={cn(
+                      "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all",
+                      enabledAutomations.has(auto.template.id)
+                        ? "bg-amber-500/20 border-amber-500/50"
+                        : "border-zinc-600",
+                    )}
+                  >
                     {enabledAutomations.has(auto.template.id) && (
                       <CheckIcon className="w-2.5 h-2.5 text-amber-400" />
                     )}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <span className="text-sm text-zinc-300">{auto.template.name}</span>
+                    <span className="text-sm text-zinc-300">
+                      {auto.template.name}
+                    </span>
                   </div>
-                  <span className="text-xs text-zinc-600 shrink-0">{auto.template.schedule}</span>
+                  <span className="text-xs text-zinc-600 shrink-0">
+                    {auto.template.schedule}
+                  </span>
                   <ModelBadge model={auto.template.model} />
                 </button>
               ))}
@@ -337,7 +399,9 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
 
           {/* Refinement input */}
           <div className="w-full max-w-md">
-            <p className="text-xs text-zinc-600 text-center mb-2">Want to change something? Just tell me:</p>
+            <p className="text-xs text-zinc-600 text-center mb-2">
+              Want to change something? Just tell me:
+            </p>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -362,7 +426,11 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
                     : "bg-zinc-800 text-zinc-600 cursor-not-allowed",
                 )}
               >
-                {refining ? <SpinnerIcon className="w-3 h-3 animate-spin" /> : "Update"}
+                {refining ? (
+                  <SpinnerIcon className="w-3 h-3 animate-spin" />
+                ) : (
+                  "Update"
+                )}
               </button>
             </div>
           </div>
@@ -380,8 +448,12 @@ function LoadingScreen() {
       <div className="text-center space-y-4">
         <SpinnerIcon className="w-8 h-8 text-amber-400 animate-spin mx-auto" />
         <div>
-          <p className="text-sm text-zinc-300 font-medium">Building your setup...</p>
-          <p className="text-xs text-zinc-600 mt-1">Analyzing your needs and generating agents</p>
+          <p className="text-sm text-zinc-300 font-medium">
+            Building your setup...
+          </p>
+          <p className="text-xs text-zinc-600 mt-1">
+            Analyzing your needs and generating agents
+          </p>
         </div>
       </div>
     </div>
@@ -405,78 +477,89 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
   const [applying, setApplying] = useState(false);
   const [refining, setRefining] = useState(false);
 
-  const handleSubmit = useCallback(async (description: string, path: string | null) => {
-    setScreen("loading");
-    setUserDescription(description);
-    setProjectPath(path);
+  const handleSubmit = useCallback(
+    async (description: string, path: string | null) => {
+      setScreen("loading");
+      setUserDescription(description);
+      setProjectPath(path);
 
-    try {
-      // If a project path is given, use the preview endpoint which analyzes + generates
-      if (path) {
-        const res = await fetch("/api/generate-agents/preview", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ projectPath: path, userDescription: description }),
-        });
-        if (res.ok) {
-          const data = (await res.json()) as PreviewResult;
-          setAgents(data.agents ?? []);
-          setClaudeMd(data.claudeMd ?? null);
+      try {
+        // If a project path is given, use the preview endpoint which analyzes + generates
+        if (path) {
+          const res = await fetch("/api/generate-agents/preview", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              projectPath: path,
+              userDescription: description,
+            }),
+          });
+          if (res.ok) {
+            const data = (await res.json()) as PreviewResult;
+            setAgents(data.agents ?? []);
+            setClaudeMd(data.claudeMd ?? null);
 
-          // Also fetch automation suggestions
-          try {
-            const autoRes = await fetch("/api/automations/suggest", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ projectPath: path }),
-            });
-            if (autoRes.ok) {
-              const autoData = (await autoRes.json()) as AutomationSuggestion[];
-              setAutomations(autoData);
+            // Also fetch automation suggestions
+            try {
+              const autoRes = await fetch("/api/automations/suggest", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ projectPath: path }),
+              });
+              if (autoRes.ok) {
+                const autoData =
+                  (await autoRes.json()) as AutomationSuggestion[];
+                setAutomations(autoData);
+              }
+            } catch (e) {
+              console.error("Failed to fetch automation suggestions:", e);
             }
-          } catch {
-            // Non-critical
+
+            setScreen("result");
+            return;
           }
-
-          setScreen("result");
-          return;
         }
-      }
 
-      // No project path or preview failed — use generate with a generic analysis
-      const analyzeRes = await fetch("/api/analyze-project", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: path ?? "." }),
-      });
-      let profile = null;
-      if (analyzeRes.ok) {
-        profile = await analyzeRes.json();
-      }
-
-      if (profile) {
-        const genRes = await fetch("/api/agents/generate", {
+        // No project path or preview failed — use generate with a generic analysis
+        const analyzeRes = await fetch("/api/analyze-project", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            analysis: profile,
-            projectPath: path ?? ".",
-            userDescription: description,
-          }),
+          body: JSON.stringify({ path: path ?? "." }),
         });
-        if (genRes.ok) {
-          const genData = (await genRes.json()) as { agents: GeneratedAgent[]; claudeMd?: string };
-          setAgents(genData.agents ?? []);
-          setClaudeMd(genData.claudeMd ?? null);
+        let profile = null;
+        if (analyzeRes.ok) {
+          profile = await analyzeRes.json();
         }
-      }
 
-      setScreen("result");
-    } catch {
-      // If generation fails entirely, still show result (empty)
-      setScreen("result");
-    }
-  }, []);
+        if (profile) {
+          const genRes = await fetch("/api/agents/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              analysis: profile,
+              projectPath: path ?? ".",
+              userDescription: description,
+            }),
+          });
+          if (genRes.ok) {
+            const genData = (await genRes.json()) as {
+              agents: GeneratedAgent[];
+              claudeMd?: string;
+            };
+            setAgents(genData.agents ?? []);
+            setClaudeMd(genData.claudeMd ?? null);
+          }
+        }
+
+        setScreen("result");
+      } catch (e) {
+        console.error("Failed to generate agent setup:", e);
+        // If generation fails entirely, still show result (empty)
+        setScreen("result");
+      }
+    },
+    [],
+  );
 
   const handleSkip = useCallback(async () => {
     try {
@@ -490,8 +573,8 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
           body: JSON.stringify({ ...config, setupComplete: true }),
         });
       }
-    } catch {
-      // Best effort
+    } catch (e) {
+      console.error("Failed to mark setup as complete on skip:", e);
     }
     onComplete();
   }, [onComplete]);
@@ -526,7 +609,9 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
       // Mark setup as complete
       const cfgRes = await fetch("/api/config");
       if (cfgRes.ok) {
-        const data = (await cfgRes.json()) as { config: Record<string, unknown> };
+        const data = (await cfgRes.json()) as {
+          config: Record<string, unknown>;
+        };
         const config = data.config;
 
         // Add projects and agents to config
@@ -538,7 +623,11 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
         if (projectPath) {
           updatedConfig.projects = [
             ...((config.projects as Array<Record<string, unknown>>) ?? []),
-            { name: projectPath.split("/").pop() ?? "project", path: projectPath, isProd: false },
+            {
+              name: projectPath.split("/").pop() ?? "project",
+              path: projectPath,
+              isProd: false,
+            },
           ];
           updatedConfig.defaults = {
             ...((config.defaults as Record<string, unknown>) ?? {}),
@@ -561,36 +650,42 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
           body: JSON.stringify(updatedConfig),
         });
       }
-    } catch {
-      // Best effort
+    } catch (e) {
+      console.error("Failed to apply onboarding configuration:", e);
     }
     setApplying(false);
     onComplete();
   }, [agents, projectPath, claudeMd, onComplete]);
 
-  const handleRefine = useCallback(async (message: string) => {
-    setRefining(true);
-    try {
-      const combinedDescription = `${userDescription}\n\nUser refinement: ${message}`;
+  const handleRefine = useCallback(
+    async (message: string) => {
+      setRefining(true);
+      try {
+        const combinedDescription = `${userDescription}\n\nUser refinement: ${message}`;
 
-      if (projectPath) {
-        const res = await fetch("/api/generate-agents/preview", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ projectPath, userDescription: combinedDescription }),
-        });
-        if (res.ok) {
-          const data = (await res.json()) as PreviewResult;
-          setAgents(data.agents ?? []);
-          setClaudeMd(data.claudeMd ?? null);
-          setUserDescription(combinedDescription);
+        if (projectPath) {
+          const res = await fetch("/api/generate-agents/preview", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              projectPath,
+              userDescription: combinedDescription,
+            }),
+          });
+          if (res.ok) {
+            const data = (await res.json()) as PreviewResult;
+            setAgents(data.agents ?? []);
+            setClaudeMd(data.claudeMd ?? null);
+            setUserDescription(combinedDescription);
+          }
         }
+      } catch (e) {
+        console.error("Failed to refine agent setup:", e);
       }
-    } catch {
-      // Non-critical
-    }
-    setRefining(false);
-  }, [userDescription, projectPath]);
+      setRefining(false);
+    },
+    [userDescription, projectPath],
+  );
 
   const dismissButton = (
     <button
@@ -598,18 +693,36 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
       className="fixed top-4 right-4 z-50 w-8 h-8 flex items-center justify-center rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-all"
       title="Close setup (Esc)"
     >
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      >
         <path d="M4 4l8 8M12 4l-8 8" />
       </svg>
     </button>
   );
 
   if (screen === "ask") {
-    return <>{dismissButton}<AskScreen onSubmit={handleSubmit} onSkip={handleSkip} /></>;
+    return (
+      <>
+        {dismissButton}
+        <AskScreen onSubmit={handleSubmit} onSkip={handleSkip} />
+      </>
+    );
   }
 
   if (screen === "loading") {
-    return <>{dismissButton}<LoadingScreen /></>;
+    return (
+      <>
+        {dismissButton}
+        <LoadingScreen />
+      </>
+    );
   }
 
   return (

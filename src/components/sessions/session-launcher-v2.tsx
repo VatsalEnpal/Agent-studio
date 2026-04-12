@@ -93,11 +93,23 @@ const PRESETS: (LauncherPreset & { description: string })[] = [
 
 const DEFAULT_AGENTS: AgentOption[] = [
   { id: "none", name: "No Agent", description: "Plain Claude session" },
-  { id: "orchestrator", name: "orchestrator", description: "Coordinates agent teams" },
+  {
+    id: "orchestrator",
+    name: "orchestrator",
+    description: "Coordinates agent teams",
+  },
   { id: "frontend", name: "frontend", description: "Builds UI code" },
-  { id: "backend", name: "backend", description: "Builds APIs and server logic" },
+  {
+    id: "backend",
+    name: "backend",
+    description: "Builds APIs and server logic",
+  },
   { id: "qa", name: "qa", description: "Tests the application" },
-  { id: "security", name: "security", description: "Reviews code for vulnerabilities" },
+  {
+    id: "security",
+    name: "security",
+    description: "Reviews code for vulnerabilities",
+  },
   { id: "pmo", name: "pmo", description: "Scans for tasks" },
   { id: "documentation", name: "documentation", description: "Maintains docs" },
 ];
@@ -147,8 +159,9 @@ export function SessionLauncherV2({
   const [customName, setCustomName] = useState("");
   const [model, setModel] = useState<"opus" | "sonnet" | "haiku">("sonnet");
   const [agent, setAgent] = useState("none");
-  const [permissions, setPermissions] =
-    useState<"bypass" | "default" | "plan" | "auto">("default");
+  const [permissions, setPermissions] = useState<
+    "bypass" | "default" | "plan" | "auto"
+  >("default");
   const [channel, setChannel] = useState<"none" | "telegram">("none");
   const [defaultCwd, setDefaultCwd] = useState("~");
   const [cwd, setCwd] = useState("~");
@@ -294,7 +307,18 @@ export function SessionLauncherV2({
     } finally {
       setLaunching(false);
     }
-  }, [launching, customName, model, agent, permissions, channel, cwd, resume, onLaunch, onOpenChange]);
+  }, [
+    launching,
+    customName,
+    model,
+    agent,
+    permissions,
+    channel,
+    cwd,
+    resume,
+    onLaunch,
+    onOpenChange,
+  ]);
 
   const handleLaunchContinue = useCallback(async () => {
     if (launching) return;
@@ -348,6 +372,37 @@ export function SessionLauncherV2({
     [handleLaunchContinue],
   );
 
+  const handlePresetLaunch = useCallback(
+    async (preset: (typeof PRESETS)[number]) => {
+      if (launching) return;
+      if (preset.name === "Continue") {
+        void handleLaunchContinue();
+        return;
+      }
+      setLaunching(true);
+      setError(null);
+      applyPreset(preset);
+      try {
+        const sessionName =
+          preset.agent !== "none" ? preset.agent : `claude-${preset.model}`;
+        await onLaunch({
+          name: sessionName,
+          model: preset.model,
+          agent: preset.agent,
+          permissions: preset.permissions,
+          channel: preset.channel,
+          cwd,
+        });
+        onOpenChange(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Launch failed");
+      } finally {
+        setLaunching(false);
+      }
+    },
+    [launching, cwd, applyPreset, handleLaunchContinue, onLaunch, onOpenChange],
+  );
+
   const inputCls =
     "w-full px-2 py-1 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all";
 
@@ -356,7 +411,9 @@ export function SessionLauncherV2({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50" />
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] max-h-[85vh] overflow-y-auto bg-bg-elevated border border-border-subtle rounded shadow-modal scrollbar-thin outline-none">
-          <Dialog.Description className="sr-only">Launch a new Claude Code session</Dialog.Description>
+          <Dialog.Description className="sr-only">
+            Launch a new Claude Code session
+          </Dialog.Description>
 
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-2 border-b border-border-default">
@@ -378,7 +435,10 @@ export function SessionLauncherV2({
                 {PRESETS.map((preset) => {
                   // For the Continue preset, show which session will be resumed
                   const isContinue = preset.name === "Continue";
-                  const lastSession = isContinue && recentSessions.length > 0 ? recentSessions[0] : null;
+                  const lastSession =
+                    isContinue && recentSessions.length > 0
+                      ? recentSessions[0]
+                      : null;
                   const continueLabel = lastSession
                     ? `Continue ${shortProject(lastSession.project)}`
                     : preset.name;
@@ -389,11 +449,15 @@ export function SessionLauncherV2({
                   return (
                     <button
                       key={preset.name}
-                      onClick={() => applyPreset(preset)}
-                      disabled={launching || (isContinue && recentSessions.length === 0)}
-                      title={isContinue && lastSession
-                        ? `Resume last session in ${lastSession.project} (${formatRelativeTime(lastSession.date)})`
-                        : preset.description}
+                      onClick={() => handlePresetLaunch(preset)}
+                      disabled={
+                        launching || (isContinue && recentSessions.length === 0)
+                      }
+                      title={
+                        isContinue && lastSession
+                          ? `Resume last session in ${lastSession.project} (${formatRelativeTime(lastSession.date)})`
+                          : preset.description
+                      }
                       className={cn(
                         "px-2 py-1 rounded text-xs font-medium transition-all",
                         "border",
@@ -407,7 +471,9 @@ export function SessionLauncherV2({
                     >
                       <span className="text-text-primary">{continueLabel}</span>
                       {continueHint && (
-                        <span className="text-text-ghost ml-1">{continueHint}</span>
+                        <span className="text-text-ghost ml-1">
+                          {continueHint}
+                        </span>
                       )}
                     </button>
                   );
@@ -437,8 +503,8 @@ export function SessionLauncherV2({
                       <>
                         <span className="truncate flex-1">
                           {shortProject(
-                            recentSessions.find((s) => s.id === resume)?.project ??
-                              resume,
+                            recentSessions.find((s) => s.id === resume)
+                              ?.project ?? resume,
                           )}
                         </span>
                         <span className="text-xs text-text-ghost font-mono">
@@ -456,8 +522,13 @@ export function SessionLauncherV2({
                       </>
                     ) : (
                       <>
-                        <span className="flex-1">Select a previous session...</span>
-                        <ChevronDownIcon size={12} className="text-text-ghost" />
+                        <span className="flex-1">
+                          Select a previous session...
+                        </span>
+                        <ChevronDownIcon
+                          size={12}
+                          className="text-text-ghost"
+                        />
                       </>
                     )}
                   </button>
@@ -466,7 +537,10 @@ export function SessionLauncherV2({
                     <div className="absolute top-full left-0 right-0 mt-1 bg-bg-elevated border border-border-subtle rounded shadow-modal z-10 max-h-48 overflow-hidden flex flex-col">
                       <div className="p-1.5 border-b border-border-default">
                         <div className="relative">
-                          <SearchIcon size={10} className="absolute left-2 top-1/2 -translate-y-1/2 text-text-ghost" />
+                          <SearchIcon
+                            size={10}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 text-text-ghost"
+                          />
                           <input
                             type="text"
                             value={resumeSearch}
@@ -653,7 +727,11 @@ export function SessionLauncherV2({
               </button>
               {!launching && (
                 <kbd className="text-xs text-text-ghost bg-bg-input border border-border-default rounded px-1.5 py-0.5">
-                  {typeof navigator !== "undefined" && navigator.platform?.includes("Mac") ? "Cmd" : "Ctrl"}+Enter
+                  {typeof navigator !== "undefined" &&
+                  navigator.platform?.includes("Mac")
+                    ? "Cmd"
+                    : "Ctrl"}
+                  +Enter
                 </kbd>
               )}
             </div>

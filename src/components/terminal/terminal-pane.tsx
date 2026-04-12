@@ -5,7 +5,14 @@ import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 
 import "@xterm/xterm/css/xterm.css";
-import { CloseIcon, ExpandIcon, CollapseIcon, SpinnerIcon, ZoomInIcon, ZoomOutIcon } from "@/components/ui/icons";
+import {
+  CloseIcon,
+  ExpandIcon,
+  CollapseIcon,
+  SpinnerIcon,
+  ZoomInIcon,
+  ZoomOutIcon,
+} from "@/components/ui/icons";
 import { wsClient } from "@/lib/ws-client";
 import { cn, statusDotColor } from "@/lib/utils";
 import { useSessionsStore } from "@/stores/sessions";
@@ -20,7 +27,9 @@ function getCustomName(sessionId: string): string | null {
       const names = JSON.parse(raw) as Record<string, string>;
       return names[sessionId] ?? null;
     }
-  } catch { /* ignore */ }
+  } catch (e) {
+    console.error("Failed to read custom session name from localStorage:", e);
+  }
   return null;
 }
 
@@ -76,8 +85,8 @@ export function TerminalPane({
           cols: term.cols,
           rows: term.rows,
         });
-      } catch {
-        // Ignore fit errors
+      } catch (e) {
+        console.error("Failed to fit terminal on visibility change:", e);
       }
     });
   }, [visible, sessionId]);
@@ -96,8 +105,8 @@ export function TerminalPane({
         cols: term.cols,
         rows: term.rows,
       });
-    } catch {
-      // Ignore fit errors
+    } catch (e) {
+      console.error("Failed to fit terminal after zoom change:", e);
     }
   }, [zoomLevel, sessionId]);
 
@@ -107,13 +116,23 @@ export function TerminalPane({
   const customName = getCustomName(sessionId);
   const displayName = customName || usage.displayName || name;
   const contextPercent = usage.contextPercent ?? 0;
-  const contextDisplay = usage.loading ? "..." : contextPercent > 0 ? `${contextPercent}% ctx` : null;
-  const contextColor = contextPercent >= 90 ? "text-red-400 bg-red-500/15" : contextPercent >= 70 ? "text-yellow-400 bg-yellow-500/15" : "bg-border-default text-text-tertiary";
-  const tokensDisplay = usage.tokens && usage.tokens !== "0"
-    ? `${usage.tokens} tokens`
-    : usage.loading
-      ? "..."
-      : "\u2014";
+  const contextDisplay = usage.loading
+    ? "..."
+    : contextPercent > 0
+      ? `${contextPercent}% ctx`
+      : null;
+  const contextColor =
+    contextPercent >= 90
+      ? "text-red-400 bg-red-500/15"
+      : contextPercent >= 70
+        ? "text-yellow-400 bg-yellow-500/15"
+        : "bg-border-default text-text-tertiary";
+  const tokensDisplay =
+    usage.tokens && usage.tokens !== "0"
+      ? `${usage.tokens} tokens`
+      : usage.loading
+        ? "..."
+        : "\u2014";
 
   const handleFit = useCallback(() => {
     const fitAddon = fitAddonRef.current;
@@ -128,8 +147,8 @@ export function TerminalPane({
         cols: term.cols,
         rows: term.rows,
       });
-    } catch {
-      // Ignore fit errors during teardown
+    } catch (e) {
+      console.error("Failed to fit terminal during resize:", e);
     }
   }, [sessionId]);
 
@@ -174,8 +193,8 @@ export function TerminalPane({
           cols: term.cols,
           rows: term.rows,
         });
-      } catch {
-        // Ignore fit errors during initial layout
+      } catch (e) {
+        console.error("Failed to fit terminal during initial layout:", e);
       }
     };
 
@@ -192,8 +211,8 @@ export function TerminalPane({
           term.write(data.buffer);
         }
       })
-      .catch(() => {
-        // Best effort — if buffer fetch fails, just show live output
+      .catch((e: unknown) => {
+        console.error("Failed to fetch terminal buffer:", e);
       });
 
     const inputDisposable = term.onData((data: string) => {
@@ -204,14 +223,11 @@ export function TerminalPane({
       });
     });
 
-    const unsubscribe = wsClient.on(
-      "terminal-data",
-      (msg: WsMessage) => {
-        if (msg.sessionId === sessionId && msg.data) {
-          term.write(msg.data);
-        }
-      },
-    );
+    const unsubscribe = wsClient.on("terminal-data", (msg: WsMessage) => {
+      if (msg.sessionId === sessionId && msg.data) {
+        term.write(msg.data);
+      }
+    });
 
     // Debounced resize observer — prevents rapid-fire fits that cause overlapping lines
     let fitTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -226,8 +242,8 @@ export function TerminalPane({
             cols: term.cols,
             rows: term.rows,
           });
-        } catch {
-          // Ignore fit errors during layout transitions
+        } catch (e) {
+          console.error("Failed to fit terminal during layout transition:", e);
         }
       }, 100);
     });
@@ -243,8 +259,8 @@ export function TerminalPane({
           cols: term.cols,
           rows: term.rows,
         });
-      } catch {
-        // Ignore fit errors
+      } catch (e) {
+        console.error("Failed to fit terminal on refit event:", e);
       }
     };
     window.addEventListener("terminal-refit", refitHandler);
@@ -306,26 +322,37 @@ export function TerminalPane({
             </span>
           )}
           {contextDisplay && (
-            <span className={cn("text-2xs px-1 py-0.5 rounded-full font-medium", contextColor)}>
+            <span
+              className={cn(
+                "text-2xs px-1 py-0.5 rounded-full font-medium",
+                contextColor,
+              )}
+            >
               {contextDisplay}
             </span>
           )}
-          <span className="text-2xs text-text-tertiary">
-            {tokensDisplay}
-          </span>
+          <span className="text-2xs text-text-tertiary">{tokensDisplay}</span>
 
           {/* Zoom controls */}
           <span className="flex items-center gap-0 rounded border border-border-default overflow-hidden">
             <button
-              onClick={(e) => { e.stopPropagation(); zoomOut(sessionId); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                zoomOut(sessionId);
+              }}
               className="p-0.5 text-text-tertiary hover:text-text-secondary hover:bg-bg-elevated/50 transition-all"
               title="Zoom out"
             >
               <ZoomOutIcon className="w-2.5 h-2.5" />
             </button>
-            <span className="text-[7px] text-text-tertiary px-0.5 font-mono min-w-[16px] text-center">{zoomLevel}</span>
+            <span className="text-[7px] text-text-tertiary px-0.5 font-mono min-w-[16px] text-center">
+              {zoomLevel}
+            </span>
             <button
-              onClick={(e) => { e.stopPropagation(); zoomIn(sessionId); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                zoomIn(sessionId);
+              }}
               className="p-0.5 text-text-tertiary hover:text-text-secondary hover:bg-bg-elevated/50 transition-all"
               title="Zoom in"
             >
@@ -354,7 +381,8 @@ export function TerminalPane({
                 if (killing) return;
                 setKilling(true);
                 setConfirmKill(false);
-                if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+                if (confirmTimerRef.current)
+                  clearTimeout(confirmTimerRef.current);
                 onKill?.();
                 setTimeout(() => setKilling(false), 3000);
               }}
@@ -368,7 +396,10 @@ export function TerminalPane({
                 e.stopPropagation();
                 if (killing) return;
                 setConfirmKill(true);
-                confirmTimerRef.current = setTimeout(() => setConfirmKill(false), 2000);
+                confirmTimerRef.current = setTimeout(
+                  () => setConfirmKill(false),
+                  2000,
+                );
               }}
               disabled={killing}
               className={cn(
@@ -379,7 +410,11 @@ export function TerminalPane({
               )}
               title={killing ? "Killing..." : "Kill session"}
             >
-              {killing ? <SpinnerIcon className="w-3 h-3 animate-spin" /> : <CloseIcon className="w-3 h-3" />}
+              {killing ? (
+                <SpinnerIcon className="w-3 h-3 animate-spin" />
+              ) : (
+                <CloseIcon className="w-3 h-3" />
+              )}
             </button>
           )}
         </div>

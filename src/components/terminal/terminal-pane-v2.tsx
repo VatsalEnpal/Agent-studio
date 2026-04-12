@@ -32,7 +32,8 @@ function getOrCreateTerminal(sessionId: string): TerminalEntry {
   const term = new Terminal({
     cursorBlink: true,
     fontSize: 13,
-    fontFamily: "'Geist Mono', 'SF Mono', SFMono-Regular, ui-monospace, Menlo, monospace",
+    fontFamily:
+      "'Geist Mono', 'SF Mono', SFMono-Regular, ui-monospace, Menlo, monospace",
     theme: {
       background: "#050505",
       foreground: "#d4d4d4",
@@ -92,8 +93,8 @@ function loadBufferOnce(sessionId: string, entry: TerminalEntry): void {
         entry.term.write(data.buffer);
       }
     })
-    .catch(() => {
-      // Best effort
+    .catch((e: unknown) => {
+      console.error("Failed to load terminal buffer:", e);
     });
 }
 
@@ -136,8 +137,8 @@ export function TerminalPaneV2({
           cols: entry.term.cols,
           rows: entry.term.rows,
         });
-      } catch {
-        // Ignore fit errors
+      } catch (e) {
+        console.error("Failed to fit and resize terminal:", e);
       }
     },
     [sessionId],
@@ -267,8 +268,8 @@ export function TerminalPaneV2({
           cols: entry.term.cols,
           rows: entry.term.rows,
         });
-      } catch {
-        // Ignore
+      } catch (e) {
+        console.error("Failed to fit terminal after font size change:", e);
       }
     });
   }, [fontSize, sessionId]);
