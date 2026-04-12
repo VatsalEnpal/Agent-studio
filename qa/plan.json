@@ -367,14 +367,18 @@
       "id": "ISSUE-52",
       "severity": "LOW",
       "description": "Memory filter pills and tag chips use rounded-full instead of 4px max border radius per IDENTITY.md.",
-      "category": "identity"
+      "category": "identity",
+      "status": "resolved",
+      "notes": "Changed rounded-full to rounded (4px) on category pills, pinned filter, tag chips in memory-view, memory-list, memory-detail, and session-sidebar status filter pills."
     },
     {
       "id": "ISSUE-53",
       "severity": "LOW",
       "description": "Per-session cost not visible in History sidebar entries. Only name, prompt preview, and time shown.",
       "category": "ux",
-      "related_task": "TASK-19"
+      "related_task": "TASK-19",
+      "status": "resolved",
+      "notes": "History API now extracts cost from JSONL files via getUsageBySessionId and returns it. Frontend maps cost into session.meta.cost which SessionCard renders."
     }
   ],
   "stats": {
