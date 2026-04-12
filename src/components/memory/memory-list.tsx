@@ -161,7 +161,7 @@ export function MemoryList({ onSelectEntry }: MemoryListProps) {
               key={cat}
               onClick={() => setCategory(cat === "All" ? null : cat)}
               className={cn(
-                "flex items-center gap-0.5 px-2 py-0.5 text-label font-medium rounded-full whitespace-nowrap transition-all",
+                "flex items-center gap-0.5 px-2 py-0.5 text-label font-medium rounded whitespace-nowrap transition-all",
                 isActive
                   ? "bg-memory/20 text-memory border border-memory/30"
                   : "bg-bg-elevated text-text-secondary hover:text-text-primary border border-transparent",
@@ -178,7 +178,7 @@ export function MemoryList({ onSelectEntry }: MemoryListProps) {
         <button
           onClick={() => setShowPinnedOnly(!showPinnedOnly)}
           className={cn(
-            "flex items-center gap-0.5 px-2 py-0.5 text-label font-medium rounded-full whitespace-nowrap transition-all",
+            "flex items-center gap-0.5 px-2 py-0.5 text-label font-medium rounded whitespace-nowrap transition-all",
             showPinnedOnly
               ? "bg-sprints/20 text-sprints border border-sprints/30"
               : "bg-bg-elevated text-text-secondary hover:text-text-primary border border-transparent",
@@ -201,7 +201,7 @@ export function MemoryList({ onSelectEntry }: MemoryListProps) {
           </div>
         ) : filtered.length === 0 && superseded.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 gap-3 px-6 text-center">
-            <div className="w-10 h-10 rounded-xl bg-bg-elevated/50 flex items-center justify-center">
+            <div className="w-10 h-10 rounded bg-bg-elevated/50 flex items-center justify-center">
               <MemoryIcon size={20} className="text-text-ghost" />
             </div>
             <span className="text-text-secondary text-xs font-medium">
@@ -372,11 +372,11 @@ function MemoryListItem({
         </div>
       </div>
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-        <span className={cn("text-label px-1.5 py-0.5 rounded-full font-medium", categoryColor(entry.category))}>
+        <span className={cn("text-label px-1.5 py-0.5 rounded font-medium", categoryColor(entry.category))}>
           {categoryLabel(entry.category)}
         </span>
         {superseded && (
-          <span className="text-label px-1.5 py-0.5 rounded-full font-medium bg-border-default text-text-ghost">
+          <span className="text-label px-1.5 py-0.5 rounded font-medium bg-border-default text-text-ghost">
             Superseded
           </span>
         )}

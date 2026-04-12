@@ -33,7 +33,7 @@ export function AgentList({ agents }: AgentListProps) {
         return (
           <div
             key={agent.name}
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-bg-base border border-border-subtle"
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded bg-bg-base border border-border-subtle"
           >
             {/* Avatar — 18px rounded-[4px] */}
             <div

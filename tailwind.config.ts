@@ -6,21 +6,24 @@ const config: Config = {
   theme: {
     extend: {
       // -----------------------------------------------------------------
-      // Fonts — system font stack (no Geist)
+      // Fonts — Geist Mono everywhere (IDENTITY.md: monospace DNA)
       // -----------------------------------------------------------------
       fontFamily: {
         sans: [
-          "-apple-system",
-          "BlinkMacSystemFont",
-          '"Segoe UI"',
-          "Helvetica",
-          "Arial",
-          "sans-serif",
-        ],
-        mono: [
+          "var(--font-geist-mono)",
+          '"Geist Mono"',
+          "ui-monospace",
           '"SF Mono"',
           "SFMono-Regular",
+          "Menlo",
+          "monospace",
+        ],
+        mono: [
+          "var(--font-geist-mono)",
+          '"Geist Mono"',
           "ui-monospace",
+          '"SF Mono"',
+          "SFMono-Regular",
           "Menlo",
           "monospace",
         ],

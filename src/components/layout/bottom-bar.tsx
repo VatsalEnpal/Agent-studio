@@ -58,8 +58,8 @@ export function BottomBar() {
           </span>
         )}
         {totalCost > 0 && (
-          <span className="text-sprints/70 tabular-nums">
-            {formatCostDisplay(totalCost)}
+          <span className="text-sprints/70 tabular-nums" title="Total API spend across all active sessions">
+            Spend {formatCostDisplay(totalCost)}
           </span>
         )}
       </div>

@@ -136,7 +136,7 @@ export function SessionItem({
       onClick={onFocus}
       title={`${displayName}\nPath: ${session.cwd}\nID: ${session.id}\nModel: ${effectiveModel ?? "unknown"}\nStatus: ${session.status}${hasContext ? `\nContext: ${contextPercent}%` : ""}`}
       className={cn(
-        "sidebar-item flex flex-col gap-0.5 px-2 py-2 rounded-md cursor-pointer group",
+        "sidebar-item flex flex-col gap-0.5 px-2 py-2 rounded cursor-pointer group",
         focused
           ? "bg-bg-elevated text-text-primary border-l-2 border-l-sessions"
           : "text-text-secondary hover:bg-bg-elevated/40 hover:text-text-primary border-l-2 border-l-transparent",
@@ -221,7 +221,7 @@ export function SessionItem({
         </button>
       </div>
 
-      {/* Row 2: uptime + cwd + cost */}
+      {/* Row 2: uptime + cwd + cost + context */}
       <div className="flex items-center gap-2 pl-[13px]">
         {isRunning && (
           <span className="flex items-center gap-0.5 text-xs text-text-tertiary">
@@ -231,6 +231,11 @@ export function SessionItem({
         {session.cwd && (
           <span className="text-xs text-text-tertiary truncate flex-1 min-w-0">
             {shortenCwd(session.cwd)}
+          </span>
+        )}
+        {usage.totalCost > 0 && (
+          <span className="text-label text-text-ghost tabular-nums shrink-0" title="Session cost">
+            ${usage.totalCost < 0.01 ? "<0.01" : usage.totalCost.toFixed(2)}
           </span>
         )}
         {hasContext && (

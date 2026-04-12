@@ -19,7 +19,7 @@ const ALL_TABS: TabConfig[] = [
   { id: "teams", label: "Teams", icon: UsersIcon },
   { id: "memory", label: "Memory", icon: BrainIcon },
   { id: "reports", label: "Reports", icon: FileIcon },
-  { id: "settings", label: "Gear", icon: SettingsIcon },
+  { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
 
 /**
@@ -73,18 +73,20 @@ function PeakHoursIndicator() {
             info.isPeak ? "bg-red-400 animate-pulse" : "bg-emerald-400",
           )}
         />
-        {info.isPeak
-          ? `Peak until ${info.peakEnd}`
-          : `Off-Peak`}
+        <span className="whitespace-nowrap">
+          {info.isPeak
+            ? `API: Peak until ${info.peakEnd}`
+            : `API: Off-Peak`}
+        </span>
       </div>
 
       {/* Tooltip */}
-      <div className="absolute right-0 top-full mt-1.5 w-52 p-2.5 rounded-lg border border-border-default bg-bg-surface shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
+      <div className="absolute right-0 top-full mt-1.5 w-52 p-2.5 rounded border border-border-default bg-bg-surface shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
         <p className="text-xs text-text-primary font-medium mb-1.5">
           {info.isPeak ? "Peak Hours Active" : "Off-Peak Hours"}
         </p>
         <p className="text-2xs text-text-secondary leading-relaxed mb-2">
-          Anthropic throttles during peak (14:00-20:00 Berlin). Expect slower responses.
+          Anthropic API has rate limits that vary by time of day. During peak hours (14:00-20:00 Berlin / 5am-11am PT), expect slower responses and tighter throttling.
         </p>
         <div className="flex items-center justify-between text-2xs">
           <span className="text-text-tertiary">Berlin time</span>
@@ -100,15 +102,28 @@ function PeakHoursIndicator() {
 }
 
 function SystemWidget() {
-  const [stats, setStats] = useState<{ cpu: number; memUsed: number; memTotal: number } | null>(null);
+  const [stats, setStats] = useState<{
+    cpu: number;
+    memUsed: number;
+    memTotal: number;
+    memPressure: "normal" | "warn" | "critical";
+  } | null>(null);
   const setActiveMode = useUIStore((s) => s.setActiveMode);
 
   useEffect(() => {
     const fetchStats = () => {
       fetch("/api/system/stats")
         .then((r) => r.json())
-        .then((data: { cpu: { usage: number }; memory: { used: number; total: number } }) => {
-          setStats({ cpu: data.cpu.usage, memUsed: data.memory.used, memTotal: data.memory.total });
+        .then((data: {
+          cpu: { usage: number };
+          memory: { used: number; total: number; pressure?: "normal" | "warn" | "critical" };
+        }) => {
+          setStats({
+            cpu: data.cpu.usage,
+            memUsed: data.memory.used,
+            memTotal: data.memory.total,
+            memPressure: data.memory.pressure ?? "normal",
+          });
         })
         .catch(() => { /* ignore */ });
     };
@@ -119,17 +134,24 @@ function SystemWidget() {
 
   if (!stats) return null;
 
+  const memColor =
+    stats.memPressure === "critical"
+      ? "text-error"
+      : stats.memPressure === "warn"
+        ? "text-sprints"
+        : "text-text-tertiary";
+
   return (
     <button
       onClick={() => setActiveMode("settings")}
       className="flex items-center gap-1.5 px-2 py-0.5 rounded text-2xs font-mono text-text-tertiary hover:text-text-secondary transition-all"
-      title="System monitor"
+      title={`CPU ${stats.cpu.toFixed(0)}% / Memory ${stats.memUsed.toFixed(1)}G of ${stats.memTotal.toFixed(0)}G (app memory, excludes OS cache)`}
     >
       <CpuIcon className="w-3 h-3" />
       <span>{stats.cpu.toFixed(0)}%</span>
       <span className="text-border-default">/</span>
-      <MemoryChipIcon className="w-3 h-3" />
-      <span>{stats.memUsed.toFixed(1)}G</span>
+      <MemoryChipIcon className={cn("w-3 h-3", memColor)} />
+      <span className={memColor}>{stats.memUsed.toFixed(1)}G</span>
     </button>
   );
 }
@@ -199,9 +221,8 @@ export function ToggleBar() {
     })();
   }, []);
 
-  const tabs = hasAgentSystem
-    ? ALL_TABS
-    : ALL_TABS.filter((t) => t.id !== "teams" && t.id !== "memory");
+  // Always show all tabs — empty states guide users to configure what's needed
+  const tabs = ALL_TABS;
 
   return (
     <header className="flex items-center justify-between px-3 h-10 border-b border-border-default bg-bg-surface shrink-0">
@@ -217,7 +238,7 @@ export function ToggleBar() {
               disabled={tab.disabled}
               title={tab.disabled ? "Coming soon" : undefined}
               className={cn(
-                "relative flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md transition-all",
+                "relative flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded transition-all",
                 isActive
                   ? "text-text-primary"
                   : tab.disabled

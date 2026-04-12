@@ -1,0 +1,176 @@
+{
+  "run": 2,
+  "phase": "brain-3-qa-validation",
+  "timestamp": "2026-04-12T18:30:00Z",
+  "purpose": "Verify 10 fixed tasks from Brain 2, check for regressions, discover new issues",
+  "verified_fixes": [
+    {
+      "task_id": "TASK-1",
+      "description": "Default working directory uses real project path",
+      "status": "verified",
+      "evidence": "Settings shows /Users/vatsalbhatt230813/Code/InPipeline instead of Electron app bundle path. New Session modal also shows the correct path.",
+      "screenshot": "qa/screenshots/qa-run2-06-settings.png"
+    },
+    {
+      "task_id": "TASK-6",
+      "description": "Default model propagates to New Session launcher",
+      "status": "verified",
+      "evidence": "Settings shows opus selected. New Session modal also shows opus selected with amber border. Previously defaulted to sonnet.",
+      "screenshot": "qa/screenshots/qa-run2-07-newsession.png"
+    },
+    {
+      "task_id": "TASK-8",
+      "description": "Navigation tabs now show Sessions, Teams, Sprints, Knowledge, Settings",
+      "status": "verified",
+      "evidence": "Left icon sidebar shows all 5 navigation items. Teams, Sprints, Knowledge are now accessible from main navigation.",
+      "screenshot": "qa/screenshots/qa-run2-02-landing-full.png"
+    },
+    {
+      "task_id": "TASK-2",
+      "description": "Previously hidden tabs now visible with content",
+      "status": "verified",
+      "evidence": "Teams shows rooms list, Sprints shows sprint list with detail view, Knowledge shows memory entries with filters. All previously hidden tabs are now accessible.",
+      "screenshot": "qa/screenshots/qa-run2-03-teams.png"
+    },
+    {
+      "task_id": "TASK-7",
+      "description": "Setup wizard dismiss/close behavior",
+      "status": "unable-to-verify",
+      "evidence": "The Re-run Setup Wizard button was not found in Settings. The About section no longer shows it. Cannot trigger wizard to test dismiss behavior.",
+      "notes": "Marking as conditionally verified -- if the button was removed entirely, the dismiss issue is moot."
+    },
+    {
+      "task_id": "TASK-10",
+      "description": "Setup wizard close/X button and Escape key support",
+      "status": "unable-to-verify",
+      "evidence": "Same as TASK-7 -- cannot trigger the setup wizard from the UI.",
+      "notes": "Marking as conditionally verified."
+    },
+    {
+      "task_id": "TASK-11",
+      "description": "Limits link opens in new tab",
+      "status": "unable-to-verify",
+      "evidence": "No Limits link found on the page. The cost display, Limits link, and API Peak/Off-Peak badge are not visible with no active sessions.",
+      "notes": "These elements may only appear when sessions are running and API usage is tracked."
+    },
+    {
+      "task_id": "TASK-3",
+      "description": "Cost display label/tooltip",
+      "status": "unable-to-verify",
+      "evidence": "No cost display found on the page. No dollar amounts present. Cost display may only appear when sessions are running.",
+      "notes": "Cannot verify without active sessions."
+    },
+    {
+      "task_id": "TASK-4",
+      "description": "Process display shows meaningful identifiers",
+      "status": "unable-to-verify",
+      "evidence": "Running on Machine section shows 'No running sessions'. Cannot verify process display without active processes.",
+      "notes": "Cannot verify without running Claude processes."
+    },
+    {
+      "task_id": "TASK-38",
+      "description": "Remove duplicate duration in Running on Machine",
+      "status": "unable-to-verify",
+      "evidence": "No running processes to check for duplicate duration display.",
+      "notes": "Cannot verify without running Claude processes."
+    }
+  ],
+  "regressions": [
+    {
+      "id": "REG-1",
+      "type": "regression",
+      "severity": "HIGH",
+      "introduced_by": "TASK-8 (nav tabs fix)",
+      "description": "Floating 'New Session' button from Sessions empty state is visible on ALL other tabs (Teams, Sprints, Knowledge, Settings). The button appears at a fixed position (x:716, y:392) overlapping content on every non-Sessions tab. On Sprints it overlaps the gate list. On Knowledge it overlaps the memory entries. On Teams it overlaps the chat area.",
+      "evidence": "Verified via DOM query: button with text 'New Session' has offsetParent !== null on all tabs. Visible in screenshots of Knowledge and Sprints views.",
+      "screenshot": "qa/screenshots/qa-run2-14-sprints-detail.png"
+    }
+  ],
+  "new_issues": [
+    {
+      "id": "ISSUE-39",
+      "feature": "navigation",
+      "type": "regression",
+      "severity": "HIGH",
+      "description": "The Sessions empty state 'New Session' button (centered in main content area) is rendered on top of ALL non-Sessions tabs. It floats over Teams rooms, Sprint gates, Knowledge entries, and Settings controls. This is a z-index or visibility issue where the Sessions view is not properly hidden when other tabs are active.",
+      "checklist_item": "Does the empty state from one tab bleed into other tabs?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-40",
+      "feature": "navigation",
+      "type": "ux",
+      "severity": "MEDIUM",
+      "description": "The tab labeled 'Knowledge' should probably be 'Memory' to match the original design and the IDENTITY.md voice guidelines. The checklist and task descriptions all reference 'Memory tab'. Renaming to 'Knowledge' without updating all references creates confusion.",
+      "checklist_item": "Is the naming consistent across the app?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-41",
+      "feature": "settings",
+      "type": "visual",
+      "severity": "LOW",
+      "description": "Notification toggle switches use green (rgb(63, 207, 109)) instead of amber (#f59e0b). Per IDENTITY.md, amber is the only accent color. Green should be reserved for success/running states, not generic toggles. This creates visual inconsistency.",
+      "checklist_item": "Is amber (#f59e0b) the ONLY accent color?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-42",
+      "feature": "sidebar",
+      "type": "ux",
+      "severity": "LOW",
+      "description": "The left icon sidebar shows navigation icons without text labels. The icons are small and not immediately recognizable to a first-time user. While tooltips may appear on hover, the icons alone do not communicate their purpose as clearly as text labels would.",
+      "checklist_item": "Can the user tell what each top-level tab does from its label alone?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-43",
+      "feature": "settings",
+      "type": "ux",
+      "severity": "LOW",
+      "description": "The About section no longer shows Branch, Re-run Setup Wizard, or system resource information that was present in Run 1. While removing stale branch info (TASK-28) was a concern, the fix removed the entire field rather than making it dynamic. The About section is now minimal with only 5 items.",
+      "checklist_item": "Is there an About section with version number?",
+      "status": "open"
+    },
+    {
+      "id": "ISSUE-44",
+      "feature": "sessions",
+      "type": "ux",
+      "severity": "LOW",
+      "description": "Session names in the History sidebar are truncated with ellipsis (e.g., 'pmo -- I...', 'AgentSt...') due to narrow sidebar width. The sidebar is about 200px wide which truncates most meaningful names. Session identification from the sidebar is still difficult.",
+      "checklist_item": "Can I tell sessions apart from their names?",
+      "status": "open"
+    }
+  ],
+  "checks_performed": {
+    "total": 185,
+    "sections_tested": [
+      "Sessions (landing, empty state, new session modal, history)",
+      "Teams (room list, chat view, agent display)",
+      "Sprints (sprint list, detail view, gates, controls)",
+      "Knowledge (filter tabs, tag filters, entry list, detail panel, search)",
+      "Settings (General, Projects, About, Notifications, Shortcuts)",
+      "Sidebar (Sessions, History, Servers, Dev Servers)",
+      "Navigation (icon sidebar, tab switching)",
+      "Design Identity (dark theme, colors, typography, spacing)"
+    ],
+    "fix_verification": {
+      "total_fixes_claimed": 10,
+      "verified_working": 4,
+      "unable_to_verify": 6,
+      "regression_found": 1
+    }
+  },
+  "design_identity_compliance": {
+    "dark_theme": "PASS - App is consistently dark with #0a0a0a-like background everywhere",
+    "amber_accent": "PARTIAL - Amber used for active tab, selected model, buttons. But notification toggles are green, not amber.",
+    "monospace_font": "PASS - Geist Mono appears to be used throughout",
+    "compact_spacing": "PASS - Dense layout, 8-12px padding, terminal-first feel",
+    "no_emoji": "PASS - No emoji observed in UI text",
+    "no_exclamation": "PASS - No exclamation marks in UI text",
+    "empty_states": "PASS - Matter-of-fact tone: 'Ready to go. Launch a session to start working with Claude.'",
+    "border_radius": "PASS - Max 4px border radius observed",
+    "icons_min_16px": "PASS - Icons appear to be at least 16px"
+  },
+  "summary": "Of the 10 fixes claimed by Brain 2, 4 were definitively verified (TASK-1 default cwd, TASK-6 model propagation, TASK-8 nav tabs, TASK-2 hidden tabs). 6 could not be verified due to no running sessions (cost display, process names, limits link) or the feature being removed (setup wizard button). One HIGH severity regression was found: the Sessions empty state 'New Session' button bleeds through to all other tabs, floating over Teams, Sprints, Knowledge, and Settings content. 5 new low-to-medium issues were also found. The app's core navigation is significantly improved but the floating button regression needs immediate attention."
+}

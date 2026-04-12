@@ -35,7 +35,7 @@ const TABS: { id: SettingsTab; label: string; icon: React.ComponentType<{ size?:
   { id: "projects", label: "Projects", icon: FolderIcon, desc: "Tracked repos and agent system" },
   { id: "agents", label: "Agents", icon: UserIcon, desc: "Discovered agent definitions" },
   { id: "dev-servers", label: "Dev Servers", icon: MonitorIcon, desc: "Server monitoring and ports" },
-  { id: "sprint-protocol", label: "Sprint Protocol", icon: SprintsIcon, desc: "PMO rules and automations" },
+  { id: "sprint-protocol", label: "Automations", icon: SprintsIcon, desc: "Sprint protocol, PMO scans, scheduled tasks" },
   { id: "shortcuts", label: "Shortcuts", icon: BoltIcon, desc: "Keyboard shortcuts reference" },
   { id: "about", label: "About", icon: InfoIcon, desc: "Version and system info" },
 ];
@@ -89,7 +89,7 @@ export function SettingsView() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "w-full text-left px-3 py-2 rounded-md transition-all group",
+                "w-full text-left px-3 py-2 rounded transition-all group",
                 activeTab === tab.id
                   ? "bg-bg-elevated text-text-primary"
                   : "text-text-secondary hover:text-text-primary hover:bg-bg-elevated/50",
@@ -171,7 +171,7 @@ function SettingsAgentsDiscovery() {
   }, []);
 
   return (
-    <section className="border border-border-default rounded-lg bg-bg-surface">
+    <section className="border border-border-default rounded bg-bg-surface">
       <div className="px-4 py-3 border-b border-border-default">
         <h3 className="text-xs font-medium text-text-primary">Agents</h3>
         <p className="text-label text-text-tertiary mt-0.5">
@@ -197,7 +197,7 @@ function SettingsAgentsDiscovery() {
             {agents.map((agent) => (
               <div
                 key={agent.id}
-                className="flex items-center gap-3 px-3 py-2 bg-bg-base border border-border-default rounded-md"
+                className="flex items-center gap-3 px-3 py-2 bg-bg-base border border-border-default rounded"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">

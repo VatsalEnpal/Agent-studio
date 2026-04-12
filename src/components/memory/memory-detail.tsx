@@ -76,7 +76,7 @@ export function MemoryDetail() {
   if (!selectedEntry) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
-        <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center">
+        <div className="w-12 h-12 rounded bg-bg-elevated flex items-center justify-center">
           <MemoryIcon size={20} className="text-text-ghost" />
         </div>
         <p className="text-xs text-text-secondary font-medium">No memory selected</p>
@@ -98,7 +98,7 @@ export function MemoryDetail() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="skeleton h-5 w-16 rounded-full" />
+          <div className="skeleton h-5 w-16 rounded" />
           <div className="skeleton h-3 w-20" />
         </div>
         <div className="flex items-center gap-1.5">
@@ -107,8 +107,8 @@ export function MemoryDetail() {
           <div className="skeleton h-5 w-10 rounded" />
         </div>
         <div className="space-y-2 pt-1">
-          <div className="skeleton h-20 w-full rounded-md" />
-          <div className="skeleton h-16 w-full rounded-md" />
+          <div className="skeleton h-20 w-full rounded" />
+          <div className="skeleton h-16 w-full rounded" />
         </div>
       </div>
     );
@@ -176,7 +176,7 @@ export function MemoryDetail() {
 
       {/* Meta info */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className={cn("text-label px-2 py-0.5 rounded-full font-medium", categoryColor(selectedEntry.category))}>
+        <span className={cn("text-label px-2 py-0.5 rounded font-medium", categoryColor(selectedEntry.category))}>
           {selectedEntry.category}
         </span>
         <span className="text-label text-text-ghost flex items-center gap-1">
@@ -275,7 +275,7 @@ function ContentSection({
   return (
     <div
       className={cn(
-        "rounded-md border px-3 py-2.5",
+        "rounded border px-3 py-2.5",
         accent
           ? "border-memory/30 bg-memory/5"
           : "border-border-default bg-bg-base",

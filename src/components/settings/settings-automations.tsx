@@ -283,7 +283,7 @@ export function SettingsAutomations() {
 
   if (loading) {
     return (
-      <section className="border border-border-default rounded-lg bg-bg-surface">
+      <section className="border border-border-default rounded bg-bg-surface">
         <div className="px-4 py-3 border-b border-border-default">
           <h3 className="text-xs font-medium text-text-primary">Automations</h3>
         </div>
@@ -295,7 +295,7 @@ export function SettingsAutomations() {
   }
 
   return (
-    <section className="border border-border-default rounded-lg bg-bg-surface">
+    <section className="border border-border-default rounded bg-bg-surface">
       <div className="px-4 py-3 border-b border-border-default flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <BoltIcon className="w-3.5 h-3.5 text-rooms" />
@@ -401,7 +401,7 @@ export function SettingsAutomations() {
 
         {/* Suggestions */}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="border border-rooms/20 rounded-lg bg-rooms/5 overflow-hidden">
+          <div className="border border-rooms/20 rounded bg-rooms/5 overflow-hidden">
             <div className="px-3 py-2 border-b border-rooms/20 flex items-center justify-between">
               <span className="text-label font-semibold uppercase tracking-wider text-rooms">
                 Suggested for your project
@@ -535,7 +535,7 @@ function AutomationCreator({
   }, [name, description, schedule, model, prompt, onCreate]);
 
   return (
-    <div className="border border-rooms/30 rounded-lg bg-rooms/5 overflow-hidden">
+    <div className="border border-rooms/30 rounded bg-rooms/5 overflow-hidden">
       <div className="px-3 py-2 border-b border-rooms/20 flex items-center justify-between">
         <span className="text-label font-semibold uppercase tracking-wider text-rooms">
           New Automation

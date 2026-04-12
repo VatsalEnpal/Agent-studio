@@ -1391,112 +1391,117 @@ Choose the schedule and model based on the task:
   const workflowManager = new WorkflowManager();
 
   // --- /api/sprints — maps workflow runs to Sprint objects for the Sprints page ---
-  app.get("/api/sprints", async (_req, res) => {
-    try {
-      const flows = await workflowManager.getFlows();
-      const sprints: Array<Record<string, unknown>> = [];
+  /** Map raw WorkflowFlow[] into Sprint[] for the frontend. */
+  function flowsToSprints(flows: Awaited<ReturnType<typeof workflowManager.getFlows>>): Array<Record<string, unknown>> {
+    const sprints: Array<Record<string, unknown>> = [];
 
-      for (const flow of flows) {
-        for (const run of (flow as any).runs ?? []) {
-          const gates = ((run as any).steps ?? []).map((step: any, i: number) => ({
-            id: step.id ?? `gate-${i}`,
-            name: step.name ?? `Step ${i + 1}`,
-            status: step.status === "completed" ? "passed"
-              : step.status === "running" || step.status === "active" ? "in_progress"
-              : step.status === "failed" ? "failed"
-              : step.status === "waiting" ? "in_progress"
-              : "not_started",
-            requirements: ((step as any).agents ?? []).map((a: string) => ({
-              label: `${a} complete`,
-              met: step.status === "completed",
-            })),
-            action: (step as any).action ?? null,
-            details: (step as any).details ?? null,
-            richContent: (step as any).richContent ?? null,
-          }));
+    for (const flow of flows) {
+      for (const run of (flow as any).runs ?? []) {
+        const gates = ((run as any).steps ?? []).map((step: any, i: number) => ({
+          id: step.id ?? `gate-${i}`,
+          name: step.name ?? `Step ${i + 1}`,
+          status: step.status === "completed" ? "passed"
+            : step.status === "running" || step.status === "active" ? "in_progress"
+            : step.status === "failed" ? "failed"
+            : step.status === "waiting" ? "in_progress"
+            : "not_started",
+          requirements: ((step as any).agents ?? []).map((a: string) => ({
+            label: `${a} complete`,
+            met: step.status === "completed",
+          })),
+          action: (step as any).action ?? null,
+          details: (step as any).details ?? null,
+          richContent: (step as any).richContent ?? null,
+        }));
 
-          // Build activity entries from step details and richContent
-          const activity: Array<Record<string, unknown>> = [];
-          let actIdx = 0;
-          for (const step of ((run as any).steps ?? []) as any[]) {
-            if (step.details) {
+        // Build activity entries from step details and richContent
+        const activity: Array<Record<string, unknown>> = [];
+        let actIdx = 0;
+        for (const step of ((run as any).steps ?? []) as any[]) {
+          if (step.details) {
+            activity.push({
+              id: `activity-${actIdx++}`,
+              timestamp: step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
+              agent: (step.agents?.[0]) ?? "system",
+              action: step.details,
+              type: step.id?.includes("qa") ? "qa" : step.id?.includes("gate") || step.id?.includes("build") ? "gate" : "info",
+            });
+          }
+          // Add scan entries from richContent
+          const rc = step.richContent;
+          if (rc?.scanEntries) {
+            for (const entry of rc.scanEntries) {
+              activity.push({
+                id: `activity-${actIdx++}`,
+                timestamp: entry.timestamp,
+                agent: "pmo",
+                action: `[${entry.status}] ${entry.detail}`,
+                type: "info",
+              });
+            }
+          }
+          // Add handoff entries
+          if (rc?.handoffs) {
+            for (const h of rc.handoffs) {
               activity.push({
                 id: `activity-${actIdx++}`,
                 timestamp: step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
-                agent: (step.agents?.[0]) ?? "system",
-                action: step.details,
-                type: step.id?.includes("qa") ? "qa" : step.id?.includes("gate") || step.id?.includes("build") ? "gate" : "info",
+                agent: h.from ?? "system",
+                action: `Handoff to ${h.to}: ${h.detail ?? h.file}`,
+                type: "handoff",
+                handoffData: h.content ?? { from: h.from, to: h.to, file: h.file },
               });
             }
-            // Add scan entries from richContent
-            const rc = step.richContent;
-            if (rc?.scanEntries) {
-              for (const entry of rc.scanEntries) {
-                activity.push({
-                  id: `activity-${actIdx++}`,
-                  timestamp: entry.timestamp,
-                  agent: "pmo",
-                  action: `[${entry.status}] ${entry.detail}`,
-                  type: "info",
-                });
-              }
-            }
-            // Add handoff entries
-            if (rc?.handoffs) {
-              for (const h of rc.handoffs) {
-                activity.push({
-                  id: `activity-${actIdx++}`,
-                  timestamp: step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
-                  agent: h.from ?? "system",
-                  action: `Handoff to ${h.to}: ${h.detail ?? h.file}`,
-                  type: "handoff",
-                  handoffData: h.content ?? { from: h.from, to: h.to, file: h.file },
-                });
-              }
-            }
-            // Add gate check results
-            if (rc?.gateResults) {
-              for (const r of rc.gateResults) {
-                activity.push({
-                  id: `activity-${actIdx++}`,
-                  timestamp: step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
-                  agent: step.agents?.[0] ?? "system",
-                  action: r,
-                  type: step.id?.includes("qa") ? "qa" : "gate",
-                  ...(rc.qaHealth != null ? { qaScore: rc.qaHealth } : {}),
-                });
-              }
+          }
+          // Add gate check results
+          if (rc?.gateResults) {
+            for (const r of rc.gateResults) {
+              activity.push({
+                id: `activity-${actIdx++}`,
+                timestamp: step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
+                agent: step.agents?.[0] ?? "system",
+                action: r,
+                type: step.id?.includes("qa") ? "qa" : "gate",
+                ...(rc.qaHealth != null ? { qaScore: rc.qaHealth } : {}),
+              });
             }
           }
-
-          const statusMap: Record<string, string> = {
-            running: "in_progress",
-            waiting: "paused",
-            completed: "completed",
-            failed: "failed",
-            cancelled: "cancelled",
-          };
-
-          sprints.push({
-            id: `${(flow as any).id}-${run.id}`,
-            flowId: (flow as any).id,
-            runId: run.id,
-            name: run.name ?? (flow as any).name,
-            status: statusMap[run.status] ?? "planned",
-            startedAt: run.startedAt,
-            completedAt: run.completedAt,
-            gates,
-            agents: (run.stats?.agentsUsed ?? []).map((a: string) => ({
-              name: a,
-              color: "",
-              status: "idle",
-            })),
-            activity,
-          });
         }
-      }
 
-      res.json(sprints);
+        const statusMap: Record<string, string> = {
+          running: "in_progress",
+          waiting: "paused",
+          completed: "completed",
+          failed: "failed",
+          cancelled: "cancelled",
+        };
+
+        sprints.push({
+          id: `${(flow as any).id}-${run.id}`,
+          flowId: (flow as any).id,
+          runId: run.id,
+          name: run.name ?? (flow as any).name,
+          status: statusMap[run.status] ?? "planned",
+          startedAt: run.startedAt,
+          completedAt: run.completedAt,
+          gates,
+          agents: (run.stats?.agentsUsed ?? []).map((a: string) => ({
+            name: a,
+            color: "",
+            status: "idle",
+          })),
+          activity,
+        });
+      }
+    }
+
+    return sprints;
+  }
+
+  app.get("/api/sprints", async (_req, res) => {
+    try {
+      const flows = await workflowManager.getFlows();
+      res.json(flowsToSprints(flows));
     } catch {
       res.json([]);
     }
@@ -1536,9 +1541,114 @@ Choose the schedule and model based on the task:
 
       // Broadcast workflow update
       const flows = await workflowManager.getFlows();
-      broadcast(wss, { type: "workflow-update", payload: flows } satisfies WsMessage);
+      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
 
       res.json({ ok: true, gateId });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- Sprint pause/resume/cancel endpoints ---
+  app.post("/api/sprints/:sprintId/pause", async (req, res) => {
+    try {
+      const { sprintId } = req.params as { sprintId: string };
+      const { getAgentSystemPath } = await import("./config.js");
+      const { readFile, writeFile } = await import("node:fs/promises");
+      const statePath = getAgentSystemPath("sprints/state.json");
+      const currentPath = getAgentSystemPath("sprints/current.md");
+
+      if (statePath) {
+        try {
+          const raw = await readFile(statePath, "utf-8");
+          const state = JSON.parse(raw);
+          if (state.status === "running" || state.status === "RUNNING") {
+            state.status = "PAUSED";
+            await writeFile(statePath, JSON.stringify(state, null, 2) + "\n", "utf-8");
+          }
+        } catch { /* state.json may not exist */ }
+      }
+      if (currentPath) {
+        try {
+          let md = await readFile(currentPath, "utf-8");
+          md = md.replace(/Status:\s*\*\*[^*]+\*\*/, "Status: **PAUSED**");
+          await writeFile(currentPath, md, "utf-8");
+        } catch { /* current.md may not exist */ }
+      }
+
+      const flows = await workflowManager.getFlows();
+      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
+      res.json({ ok: true, sprintId, action: "paused" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/sprints/:sprintId/resume", async (req, res) => {
+    try {
+      const { sprintId } = req.params as { sprintId: string };
+      const { getAgentSystemPath } = await import("./config.js");
+      const { readFile, writeFile } = await import("node:fs/promises");
+      const statePath = getAgentSystemPath("sprints/state.json");
+      const currentPath = getAgentSystemPath("sprints/current.md");
+
+      if (statePath) {
+        try {
+          const raw = await readFile(statePath, "utf-8");
+          const state = JSON.parse(raw);
+          if (state.status === "PAUSED" || state.status === "paused") {
+            state.status = "RUNNING";
+            await writeFile(statePath, JSON.stringify(state, null, 2) + "\n", "utf-8");
+          }
+        } catch { /* state.json may not exist */ }
+      }
+      if (currentPath) {
+        try {
+          let md = await readFile(currentPath, "utf-8");
+          md = md.replace(/Status:\s*\*\*[^*]+\*\*/, "Status: **RUNNING**");
+          await writeFile(currentPath, md, "utf-8");
+        } catch { /* current.md may not exist */ }
+      }
+
+      const flows = await workflowManager.getFlows();
+      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
+      res.json({ ok: true, sprintId, action: "resumed" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/sprints/:sprintId/cancel", async (req, res) => {
+    try {
+      const { sprintId } = req.params as { sprintId: string };
+      const { getAgentSystemPath } = await import("./config.js");
+      const { readFile, writeFile } = await import("node:fs/promises");
+      const statePath = getAgentSystemPath("sprints/state.json");
+      const currentPath = getAgentSystemPath("sprints/current.md");
+
+      if (statePath) {
+        try {
+          const raw = await readFile(statePath, "utf-8");
+          const state = JSON.parse(raw);
+          state.status = "CANCELLED";
+          state.cancelledAt = new Date().toISOString();
+          await writeFile(statePath, JSON.stringify(state, null, 2) + "\n", "utf-8");
+        } catch { /* state.json may not exist */ }
+      }
+      if (currentPath) {
+        try {
+          let md = await readFile(currentPath, "utf-8");
+          md = md.replace(/Status:\s*\*\*[^*]+\*\*/, "Status: **CANCELLED**");
+          await writeFile(currentPath, md, "utf-8");
+        } catch { /* current.md may not exist */ }
+      }
+
+      const flows = await workflowManager.getFlows();
+      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
+      res.json({ ok: true, sprintId, action: "cancelled" });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
@@ -1647,7 +1757,7 @@ Choose the schedule and model based on the task:
       workflowManager.reload();
 
       const flows = await workflowManager.getFlows();
-      broadcast(wss, { type: "workflow-update", payload: flows } satisfies WsMessage);
+      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
 
       res.json({ ok: true, id, workflow: newWorkflow });
     } catch (err) {
@@ -1691,7 +1801,7 @@ Choose the schedule and model based on the task:
       workflowManager.reload();
 
       const flows = await workflowManager.getFlows();
-      broadcast(wss, { type: "workflow-update", payload: flows } satisfies WsMessage);
+      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
 
       res.json({ ok: true });
     } catch (err) {
@@ -1718,7 +1828,7 @@ Choose the schedule and model based on the task:
       workflowManager.reload();
 
       const flows = await workflowManager.getFlows();
-      broadcast(wss, { type: "workflow-update", payload: flows } satisfies WsMessage);
+      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
 
       res.json({ ok: true });
     } catch (err) {
@@ -1767,7 +1877,7 @@ Choose the schedule and model based on the task:
         targetFlow.runs.unshift(run);
       }
 
-      broadcast(wss, { type: "workflow-update", payload: flows } satisfies WsMessage);
+      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
 
       res.json({ ok: true, runId, run });
     } catch (err) {
@@ -1779,7 +1889,7 @@ Choose the schedule and model based on the task:
   // Broadcast workflow updates on sprint file changes
   fileWatcher.onUpdate(() => {
     void workflowManager.getFlows().then((flows) => {
-      broadcast(wss, { type: "workflow-update", payload: flows } satisfies WsMessage);
+      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
     });
   });
 
@@ -2132,6 +2242,17 @@ Choose the schedule and model based on the task:
         // Derive short project name from directory path
         const projectShort = s.project.split("/").pop() ?? s.project;
 
+        // Extract cost from JSONL usage data
+        let cost: string | null = null;
+        try {
+          const usage = getUsageBySessionId(s.id);
+          if (usage && usage.totalCost > 0) {
+            cost = formatCost(usage.totalCost);
+          }
+        } catch {
+          // Best effort — skip if usage parsing fails
+        }
+
         return {
           id: s.id,
           project: s.project,
@@ -2140,6 +2261,7 @@ Choose the schedule and model based on the task:
           date: new Date(s.modified).toISOString(),
           agent,
           preview,
+          cost,
         };
       });
 
@@ -2408,7 +2530,7 @@ Choose the schedule and model based on the task:
   });
 
   // --- System Stats API ---
-  app.get("/api/system/stats", (_req, res) => {
+  app.get("/api/system/stats", async (_req, res) => {
     try {
       // CPU usage: calculate from os.cpus()
       const cpus = os.cpus();
@@ -2420,10 +2542,46 @@ Choose the schedule and model based on the task:
       }
       const cpuUsage = totalTick > 0 ? ((1 - totalIdle / totalTick) * 100) : 0;
 
-      // Memory
+      // Memory — on macOS, show memory pressure (active + wired + compressed)
+      // instead of raw usage, which always appears ~99% due to disk cache.
       const totalMem = os.totalmem();
       const freeMem = os.freemem();
       const usedMem = totalMem - freeMem;
+
+      let pressureUsedGB = Math.round((usedMem / (1024 * 1024 * 1024)) * 100) / 100;
+      let pressurePercent = Math.round((usedMem / totalMem) * 1000) / 10;
+      let pressureLevel: "normal" | "warn" | "critical" = "normal";
+
+      if (IS_MAC) {
+        try {
+          const { promisify } = await import("node:util");
+          const execPromise = promisify(exec);
+          const { stdout: vmOutput } = await execPromise("vm_stat", { encoding: "utf-8", timeout: 3000 });
+          const pageSizeMatch = vmOutput.match(/page size of (\d+) bytes/);
+          const ps = pageSizeMatch ? parseInt(pageSizeMatch[1]!, 10) : 16384;
+
+          const getPages = (label: string): number => {
+            const m = vmOutput.match(new RegExp(`${label}:\\s+(\\d+)`));
+            return m ? parseInt(m[1]!, 10) : 0;
+          };
+
+          const activePages = getPages("Pages active");
+          const wiredPages = getPages("Pages wired down");
+          const compressedPages = getPages("Pages occupied by compressor");
+
+          const appMemBytes = (activePages + wiredPages + compressedPages) * ps;
+          pressureUsedGB = Math.round((appMemBytes / (1024 * 1024 * 1024)) * 100) / 100;
+          pressurePercent = Math.round((appMemBytes / totalMem) * 1000) / 10;
+
+          if (pressurePercent > 80) pressureLevel = "critical";
+          else if (pressurePercent > 60) pressureLevel = "warn";
+        } catch {
+          // Fall back to raw os.freemem values
+        }
+      } else {
+        if (pressurePercent > 90) pressureLevel = "critical";
+        else if (pressurePercent > 75) pressureLevel = "warn";
+      }
 
       // Disk
       let diskUsed = 0;
@@ -2451,9 +2609,10 @@ Choose the schedule and model based on the task:
       res.json({
         cpu: { usage: Math.round(cpuUsage * 10) / 10, cores: cpus.length },
         memory: {
-          used: Math.round((usedMem / (1024 * 1024 * 1024)) * 100) / 100,
+          used: pressureUsedGB,
           total: Math.round((totalMem / (1024 * 1024 * 1024)) * 100) / 100,
-          percentage: Math.round((usedMem / totalMem) * 1000) / 10,
+          percentage: pressurePercent,
+          pressure: pressureLevel,
         },
         disk: {
           used: Math.round(diskUsed * 100) / 100,
@@ -2464,6 +2623,41 @@ Choose the schedule and model based on the task:
         activeSessions,
         uptime: Math.round(process.uptime()),
         wsConnections: wss.clients.size,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- System Info API (git branch, node version, etc.) ---
+  app.get("/api/system/info", (_req, res) => {
+    try {
+      let branch = "unknown";
+      let commitHash = "unknown";
+      try {
+        branch = execSync("git rev-parse --abbrev-ref HEAD", {
+          encoding: "utf-8",
+          timeout: 3000,
+          cwd: process.cwd(),
+        }).trim();
+        commitHash = execSync("git rev-parse --short HEAD", {
+          encoding: "utf-8",
+          timeout: 3000,
+          cwd: process.cwd(),
+        }).trim();
+      } catch {
+        // Not a git repo or git not available
+      }
+
+      res.json({
+        branch,
+        commitHash,
+        nodeVersion: process.version,
+        platform: process.platform,
+        arch: process.arch,
+        pid: process.pid,
+        uptime: Math.round(process.uptime()),
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";

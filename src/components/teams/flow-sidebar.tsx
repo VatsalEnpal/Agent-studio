@@ -268,6 +268,13 @@ export function FlowSidebar({
             <p className="text-xs text-text-tertiary mt-1">
               Create a workflow to automate multi-step tasks
             </p>
+            <button
+              onClick={() => openBuilder()}
+              className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-bg-elevated text-text-secondary border border-border-default hover:border-text-tertiary rounded-[4px] transition-all"
+            >
+              <PlusIcon size={12} />
+              Create Workflow
+            </button>
           </div>
         )}
       </div>

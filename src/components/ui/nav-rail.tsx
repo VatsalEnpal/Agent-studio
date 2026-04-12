@@ -6,6 +6,7 @@ import {
   RoomsIcon,
   SprintsIcon,
   MemoryIcon,
+  FileIcon,
   SettingsIcon,
 } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ export type NavPage =
   | "teams"
   | "sprints"
   | "knowledge"
+  | "reports"
   | "settings";
 
 interface NavItem {
@@ -45,6 +47,7 @@ const pillarAccent: Record<string, string> = {
   teams: "text-rooms",
   sprints: "text-sprints",
   knowledge: "text-memory",
+  reports: "text-text-secondary",
 };
 
 /** Accent-colored dot backgrounds for unread indicators */
@@ -53,6 +56,7 @@ const accentDot: Record<string, string> = {
   teams: "bg-rooms",
   sprints: "bg-sprints",
   knowledge: "bg-memory",
+  reports: "bg-text-secondary",
 };
 
 // ---------------------------------------------------------------------------
@@ -63,7 +67,8 @@ const sectionItems: Omit<NavItem, "badge">[] = [
   { id: "sessions", label: "Sessions", icon: SessionsIcon, accent: "sessions" },
   { id: "teams", label: "Teams", icon: RoomsIcon, accent: "teams" },
   { id: "sprints", label: "Sprints", icon: SprintsIcon, accent: "sprints" },
-  { id: "knowledge", label: "Knowledge", icon: MemoryIcon, accent: "knowledge" },
+  { id: "knowledge", label: "Memory", icon: MemoryIcon, accent: "knowledge" },
+  { id: "reports", label: "Reports", icon: FileIcon, accent: "reports" },
 ];
 
 /** Keyboard shortcut hints for nav tooltips */
@@ -72,6 +77,7 @@ const navShortcuts: Record<NavPage, string> = {
   teams: "\u2318 2",
   sprints: "\u2318 3",
   knowledge: "\u2318 4",
+  reports: "\u2318 5",
   settings: "\u2318 ,",
 };
 
@@ -94,7 +100,7 @@ export function NavRail({ activePage, onNavigate, badges }: NavRailProps) {
       <div
         className={cn(
           "flex items-center justify-center",
-          "w-8 h-8 rounded-[7px]",
+          "w-8 h-8 rounded",
           "bg-bg-elevated",
           "text-text-primary font-bold text-xs",
           "mb-3.5 select-none",
@@ -151,52 +157,73 @@ function NavRailItem({
 }) {
   const Icon = item.icon;
   const accentClass = item.accent ? pillarAccent[item.accent] : undefined;
+  const shortcut = navShortcuts[item.id];
 
   const handleClick = useCallback(() => {
     onNavigate(item.id);
   }, [onNavigate, item.id]);
 
   return (
-    <button
-      onClick={handleClick}
-      aria-label={item.label}
-      aria-current={isActive ? "page" : undefined}
-      title={`${item.label} ${navShortcuts[item.id] ? `(${navShortcuts[item.id]})` : ""}`.trim()}
-      className={cn(
-        "relative flex items-center justify-center",
-        "w-8 h-8 rounded-[6px]",
-        "transition-all duration-150 ease-out active:scale-[0.92]",
-        isActive
-          ? cn("bg-bg-elevated", accentClass ?? "text-text-primary")
-          : "text-text-ghost hover:text-text-secondary hover:bg-bg-elevated/50",
-      )}
-    >
-      {/* Active indicator — 2px accent bar on left edge */}
-      {isActive && (
-        <span
-          className={cn(
-            "absolute left-[-7px] top-1/2 -translate-y-1/2",
-            "w-[2px] h-4 rounded-r-full",
-            "bg-text-primary transition-all duration-[var(--duration-smooth)]",
-          )}
-        />
-      )}
+    <div className="relative group">
+      <button
+        onClick={handleClick}
+        aria-label={item.label}
+        aria-current={isActive ? "page" : undefined}
+        className={cn(
+          "relative flex items-center justify-center",
+          "w-8 h-8 rounded",
+          "transition-all duration-150 ease-out active:scale-[0.92]",
+          isActive
+            ? cn("bg-bg-elevated", accentClass ?? "text-text-primary")
+            : "text-text-ghost hover:text-text-secondary hover:bg-bg-elevated/50",
+        )}
+      >
+        {/* Active indicator — 2px accent bar on left edge */}
+        {isActive && (
+          <span
+            className={cn(
+              "absolute left-[-7px] top-1/2 -translate-y-1/2",
+              "w-[2px] h-4 rounded-r-full",
+              "bg-text-primary transition-all duration-[var(--duration-smooth)]",
+            )}
+          />
+        )}
 
-      <Icon size={16} />
+        <Icon size={16} />
 
-      {/* Unread / notification dot — 5px, accent-colored, top-right */}
-      {badge != null && badge > 0 && (
-        <span
-          data-unread
-          className={cn(
-            "absolute top-0 right-0",
-            "w-[5px] h-[5px] rounded-full",
-            accentClass ? accentDot[item.accent ?? ""] ?? "bg-error" : "bg-error",
-            "ring-[1.5px] ring-bg-base",
-          )}
-          aria-label={`${badge} unread`}
-        />
-      )}
-    </button>
+        {/* Unread / notification dot — 5px, accent-colored, top-right */}
+        {badge != null && badge > 0 && (
+          <span
+            data-unread
+            className={cn(
+              "absolute top-0 right-0",
+              "w-[5px] h-[5px] rounded-full",
+              accentClass ? accentDot[item.accent ?? ""] ?? "bg-error" : "bg-error",
+              "ring-[1.5px] ring-bg-base",
+            )}
+            aria-label={`${badge} unread`}
+          />
+        )}
+      </button>
+
+      {/* Styled tooltip — appears to the right on hover */}
+      <div
+        className={cn(
+          "absolute left-full top-1/2 -translate-y-1/2 ml-2",
+          "flex items-center gap-2 px-2 py-1",
+          "bg-bg-elevated border border-border-default rounded-[4px]",
+          "text-xs font-medium text-text-primary whitespace-nowrap",
+          "opacity-0 pointer-events-none",
+          "group-hover:opacity-100",
+          "transition-opacity duration-150",
+          "z-50",
+        )}
+      >
+        {item.label}
+        {shortcut && (
+          <kbd className="text-2xs font-mono text-text-ghost">{shortcut}</kbd>
+        )}
+      </div>
+    </div>
   );
 }

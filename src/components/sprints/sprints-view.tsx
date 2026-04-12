@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { SprintsIcon } from "@/components/ui/icons";
+import { SprintsIcon, SettingsIcon } from "@/components/ui/icons";
 import { useSprintsStore, type Sprint } from "@/stores/sprints";
+import { useHasAgentSystem } from "@/hooks/use-config";
+import { useUIStore } from "@/stores/ui";
 import { wsClient } from "@/lib/ws-client";
 import type { WsMessage } from "@/lib/types";
 import { SprintList } from "./sprint-list";
@@ -59,7 +61,23 @@ export function SprintsView() {
     return unsub;
   }, [setSprints]);
 
+  // Auto-select when selection is stale (sprint deleted, back button, WebSocket update)
+  useEffect(() => {
+    if (sprints.length === 0) return;
+    const stillExists = selectedSprintId && sprints.some((s) => s.id === selectedSprintId);
+    if (!stillExists) {
+      const active = sprints.find(
+        (s) =>
+          s.status === "in_progress" ||
+          s.status === "launching" ||
+          s.status === "paused",
+      );
+      selectSprint(active?.id ?? sprints[0]!.id);
+    }
+  }, [sprints, selectedSprintId, selectSprint]);
+
   const selectedSprint = sprints.find((s) => s.id === selectedSprintId);
+  const hasAgentSystem = useHasAgentSystem();
 
   // Sidebar is already provided by page.tsx SidebarShell — only render main content
   return (
@@ -68,7 +86,7 @@ export function SprintsView() {
         <SprintDetail sprint={selectedSprint} onBack={() => selectSprint(null)} />
       ) : (
         <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
-          <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center">
+          <div className="w-12 h-12 rounded bg-bg-elevated flex items-center justify-center">
             <SprintsIcon size={20} className="text-text-ghost" />
           </div>
           <p className="text-xs font-medium text-text-secondary">
@@ -77,9 +95,22 @@ export function SprintsView() {
               : "Select a sprint to view details"}
           </p>
           {sprints.length === 0 && (
-            <p className="text-xs text-text-tertiary max-w-[240px] leading-relaxed">
-              Sprints are created automatically by the PMO agent when it detects pending work in your projects.
-            </p>
+            <>
+              <p className="text-xs text-text-tertiary max-w-[240px] leading-relaxed">
+                {hasAgentSystem
+                  ? "Sprints are created automatically by the PMO agent when it detects pending work in your projects."
+                  : "Sprints require an agent system. Set one up to enable the PMO agent and automated workflows."}
+              </p>
+              {!hasAgentSystem && (
+                <button
+                  onClick={() => useUIStore.getState().setActiveMode("settings")}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded border border-border-default hover:border-text-secondary transition-all"
+                >
+                  <SettingsIcon size={12} />
+                  Create Agent System
+                </button>
+              )}
+            </>
           )}
         </div>
       )}

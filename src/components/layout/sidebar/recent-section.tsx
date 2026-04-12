@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { HistoryIcon, PlayIcon } from "@/components/ui/icons";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { HistoryIcon, PlayIcon, SearchIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { SessionGroup } from "@/components/sessions/session-group";
 import type { PastSession } from "./types";
@@ -10,6 +10,7 @@ import { formatHistoryDate } from "./utils";
 export function RecentSection() {
   const [sessions, setSessions] = useState<PastSession[]>([]);
   const [resumingId, setResumingId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchRecentSessions = useCallback(async () => {
     try {
@@ -25,6 +26,18 @@ export function RecentSection() {
   useEffect(() => {
     void fetchRecentSessions();
   }, [fetchRecentSessions]);
+
+  const filteredSessions = useMemo(() => {
+    if (!searchQuery.trim()) return sessions;
+    const q = searchQuery.toLowerCase();
+    return sessions.filter((s) => {
+      const project = s.project.toLowerCase();
+      const projectShort = (s.projectShort ?? s.project.split("/").pop() ?? "").toLowerCase();
+      const preview = (s.preview ?? "").toLowerCase();
+      const agent = (s.agent ?? "").toLowerCase();
+      return project.includes(q) || projectShort.includes(q) || preview.includes(q) || agent.includes(q);
+    });
+  }, [sessions, searchQuery]);
 
   const handleResume = useCallback(
     (s: PastSession) => {
@@ -73,14 +86,32 @@ export function RecentSection() {
       count={sessions.length}
       defaultOpen={false}
     >
-      {sessions.slice(0, 10).map((session) => (
-        <RecentSessionItem
-          key={session.id}
-          session={session}
-          resumingId={resumingId}
-          onResume={handleResume}
-        />
-      ))}
+      {sessions.length > 3 && (
+        <div className="px-2 pb-1.5">
+          <div className="relative">
+            <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-text-ghost" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Filter sessions..."
+              className="w-full pl-6 pr-2 py-1 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
+            />
+          </div>
+        </div>
+      )}
+      {filteredSessions.length === 0 && searchQuery.trim() ? (
+        <p className="text-xs text-text-ghost px-2 py-2">No matching sessions</p>
+      ) : (
+        filteredSessions.slice(0, 10).map((session) => (
+          <RecentSessionItem
+            key={session.id}
+            session={session}
+            resumingId={resumingId}
+            onResume={handleResume}
+          />
+        ))
+      )}
     </SessionGroup>
   );
 }

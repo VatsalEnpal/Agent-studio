@@ -135,7 +135,7 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={5}
-            className="w-full px-4 py-3.5 rounded-lg bg-zinc-900/80 border border-zinc-700/60 text-sm text-zinc-200 placeholder:text-transparent resize-none focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all"
+            className="w-full px-4 py-3.5 rounded bg-zinc-900/80 border border-zinc-700/60 text-sm text-zinc-200 placeholder:text-transparent resize-none focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all"
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
@@ -178,7 +178,7 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
                 value={projectPath}
                 onChange={(e) => setProjectPath(e.target.value)}
                 placeholder="/path/to/project"
-                className="flex-1 px-3 py-2 text-xs bg-zinc-900/80 border border-zinc-700/60 rounded-md text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 transition-all font-mono"
+                className="flex-1 px-3 py-2 text-xs bg-zinc-900/80 border border-zinc-700/60 rounded text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 transition-all font-mono"
               />
             </div>
           )}
@@ -190,7 +190,7 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
             onClick={handleSubmit}
             disabled={!description.trim()}
             className={cn(
-              "flex items-center gap-2 px-8 py-2.5 rounded-lg text-sm font-medium transition-all",
+              "flex items-center gap-2 px-8 py-2.5 rounded text-sm font-medium transition-all",
               description.trim()
                 ? "bg-amber-500 text-black hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/10 active:scale-[0.98]"
                 : "bg-zinc-800 text-zinc-500 cursor-not-allowed",
@@ -257,9 +257,9 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Your Agents</span>
           </div>
-          <div className="space-y-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-3">
+          <div className="space-y-1.5 rounded border border-zinc-800/80 bg-zinc-900/40 p-3">
             {agents.map((agent) => (
-              <div key={agent.id} className="flex items-start gap-3 py-2 px-2 rounded-md hover:bg-zinc-800/40 transition-all">
+              <div key={agent.id} className="flex items-start gap-3 py-2 px-2 rounded hover:bg-zinc-800/40 transition-all">
                 <span className="text-base mt-0.5">{agentIcon(agent.name)}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -282,12 +282,12 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Your Automations</span>
             </div>
-            <div className="space-y-1.5 rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-3">
+            <div className="space-y-1.5 rounded border border-zinc-800/80 bg-zinc-900/40 p-3">
               {automations.map((auto) => (
                 <button
                   key={auto.template.id}
                   onClick={() => toggleAutomation(auto.template.id)}
-                  className="flex items-center gap-3 w-full py-2 px-2 rounded-md hover:bg-zinc-800/40 transition-all text-left"
+                  className="flex items-center gap-3 w-full py-2 px-2 rounded hover:bg-zinc-800/40 transition-all text-left"
                 >
                   <span className={cn(
                     "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all",
@@ -316,7 +316,7 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
             onClick={onConfirm}
             disabled={applying}
             className={cn(
-              "flex items-center gap-2 px-8 py-2.5 rounded-lg text-sm font-medium transition-all",
+              "flex items-center gap-2 px-8 py-2.5 rounded text-sm font-medium transition-all",
               applying
                 ? "bg-zinc-700 text-zinc-400 cursor-wait"
                 : "bg-amber-500 text-black hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/10 active:scale-[0.98]",
@@ -344,7 +344,7 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
                 value={refinementInput}
                 onChange={(e) => setRefinementInput(e.target.value)}
                 placeholder="Remove the inventory one, add a social media agent..."
-                className="flex-1 px-3 py-2 text-xs bg-zinc-900/80 border border-zinc-700/60 rounded-md text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 transition-all"
+                className="flex-1 px-3 py-2 text-xs bg-zinc-900/80 border border-zinc-700/60 rounded text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 transition-all"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -356,7 +356,7 @@ function ResultScreen({ agents, automations, onConfirm, onRefine, applying, refi
                 onClick={handleRefine}
                 disabled={!refinementInput.trim() || refining}
                 className={cn(
-                  "px-3 py-2 rounded-md text-xs font-medium transition-all",
+                  "px-3 py-2 rounded text-xs font-medium transition-all",
                   refinementInput.trim() && !refining
                     ? "bg-zinc-700 text-zinc-200 hover:bg-zinc-600"
                     : "bg-zinc-800 text-zinc-600 cursor-not-allowed",
@@ -392,9 +392,10 @@ function LoadingScreen() {
 
 interface OnboardingProps {
   onComplete: () => void;
+  onDismiss?: () => void;
 }
 
-export function Onboarding({ onComplete }: OnboardingProps) {
+export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
   const [screen, setScreen] = useState<"ask" | "loading" | "result">("ask");
   const [agents, setAgents] = useState<GeneratedAgent[]>([]);
   const [automations, setAutomations] = useState<AutomationSuggestion[]>([]);
@@ -495,6 +496,17 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     onComplete();
   }, [onComplete]);
 
+  // Escape key dismisses the wizard at any point
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        void handleSkip();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [handleSkip]);
+
   const handleConfirm = useCallback(async () => {
     setApplying(true);
     try {
@@ -580,22 +592,37 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     setRefining(false);
   }, [userDescription, projectPath]);
 
+  const dismissButton = (
+    <button
+      onClick={() => void handleSkip()}
+      className="fixed top-4 right-4 z-50 w-8 h-8 flex items-center justify-center rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-all"
+      title="Close setup (Esc)"
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+        <path d="M4 4l8 8M12 4l-8 8" />
+      </svg>
+    </button>
+  );
+
   if (screen === "ask") {
-    return <AskScreen onSubmit={handleSubmit} onSkip={handleSkip} />;
+    return <>{dismissButton}<AskScreen onSubmit={handleSubmit} onSkip={handleSkip} /></>;
   }
 
   if (screen === "loading") {
-    return <LoadingScreen />;
+    return <>{dismissButton}<LoadingScreen /></>;
   }
 
   return (
-    <ResultScreen
-      agents={agents}
-      automations={automations}
-      onConfirm={handleConfirm}
-      onRefine={handleRefine}
-      applying={applying}
-      refining={refining}
-    />
+    <>
+      {dismissButton}
+      <ResultScreen
+        agents={agents}
+        automations={automations}
+        onConfirm={handleConfirm}
+        onRefine={handleRefine}
+        applying={applying}
+        refining={refining}
+      />
+    </>
   );
 }

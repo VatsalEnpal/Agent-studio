@@ -42,7 +42,7 @@ export function ConfirmDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50 animate-fade-in" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[380px] bg-bg-elevated border border-border-subtle rounded-lg shadow-modal animate-slide-up">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[380px] bg-bg-elevated border border-border-subtle rounded shadow-modal animate-slide-up">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border-default">
             <Dialog.Title
@@ -55,7 +55,7 @@ export function ConfirmDialog({
               {title}
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button className="p-1 rounded-md text-text-ghost hover:text-text-primary hover:bg-bg-input transition-all">
+              <button className="p-1 rounded text-text-ghost hover:text-text-primary hover:bg-bg-input transition-all">
                 <CloseIcon size={14} />
               </button>
             </Dialog.Close>

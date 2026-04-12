@@ -161,22 +161,28 @@ export function SessionLauncherV2({
   const [resumeSearch, setResumeSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Reset form on open — use defaultCwd so user always sees their configured dir
+  // Defaults loaded from server config
+  const [configDefaults, setConfigDefaults] = useState<{
+    model: "opus" | "sonnet" | "haiku";
+    permissions: "bypass" | "default" | "plan" | "auto";
+  } | null>(null);
+
+  // Reset form on open — use defaults from config so user sees their configured values
   useEffect(() => {
     if (open) {
       setCustomName("");
-      setModel("sonnet");
+      setModel(configDefaults?.model ?? "sonnet");
       setAgent("none");
-      setPermissions("default");
+      setPermissions(configDefaults?.permissions ?? "default");
       setChannel("none");
       setCwd(defaultCwd);
       setResume("");
       setError(null);
       setLaunching(false);
     }
-  }, [open, defaultCwd]);
+  }, [open, defaultCwd, configDefaults]);
 
-  // Fetch default cwd once
+  // Fetch default cwd + model + permissions once
   const [defaultCwdLoaded, setDefaultCwdLoaded] = useState(false);
   useEffect(() => {
     if (defaultCwdLoaded) return;
@@ -185,13 +191,23 @@ export function SessionLauncherV2({
         const res = await fetch("/api/config");
         if (res.ok) {
           const data = (await res.json()) as {
-            config: { defaults: { workingDirectory: string } };
+            config: {
+              defaults: {
+                workingDirectory: string;
+                model?: "opus" | "sonnet" | "haiku";
+                permissions?: "bypass" | "default" | "plan" | "auto";
+              };
+            };
           };
-          const configCwd = data.config?.defaults?.workingDirectory;
-          if (configCwd) {
-            setDefaultCwd(configCwd);
-            setCwd(configCwd);
+          const defaults = data.config?.defaults;
+          if (defaults?.workingDirectory) {
+            setDefaultCwd(defaults.workingDirectory);
+            setCwd(defaults.workingDirectory);
           }
+          setConfigDefaults({
+            model: defaults?.model ?? "sonnet",
+            permissions: defaults?.permissions ?? "default",
+          });
           setDefaultCwdLoaded(true);
         }
       } catch {
@@ -333,13 +349,13 @@ export function SessionLauncherV2({
   );
 
   const inputCls =
-    "w-full px-2 py-1 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all";
+    "w-full px-2 py-1 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all";
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] max-h-[85vh] overflow-y-auto bg-bg-elevated border border-border-subtle rounded-[8px] shadow-modal scrollbar-thin outline-none">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] max-h-[85vh] overflow-y-auto bg-bg-elevated border border-border-subtle rounded shadow-modal scrollbar-thin outline-none">
           <Dialog.Description className="sr-only">Launch a new Claude Code session</Dialog.Description>
 
           {/* Header */}
@@ -359,22 +375,43 @@ export function SessionLauncherV2({
                 Quick Start
               </span>
               <div className="flex gap-1 flex-wrap">
-                {PRESETS.map((preset) => (
-                  <button
-                    key={preset.name}
-                    onClick={() => applyPreset(preset)}
-                    disabled={launching}
-                    className={cn(
-                      "px-2 py-1 rounded-md text-xs font-medium transition-all",
-                      "border border-border-default",
-                      launching
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:border-[#f59e0b]/40 hover:bg-[#f59e0b]/5 active:bg-[#f59e0b]/10 active:scale-[0.98]",
-                    )}
-                  >
-                    <span className="text-text-primary">{preset.name}</span>
-                  </button>
-                ))}
+                {PRESETS.map((preset) => {
+                  // For the Continue preset, show which session will be resumed
+                  const isContinue = preset.name === "Continue";
+                  const lastSession = isContinue && recentSessions.length > 0 ? recentSessions[0] : null;
+                  const continueLabel = lastSession
+                    ? `Continue ${shortProject(lastSession.project)}`
+                    : preset.name;
+                  const continueHint = lastSession
+                    ? formatRelativeTime(lastSession.date)
+                    : undefined;
+
+                  return (
+                    <button
+                      key={preset.name}
+                      onClick={() => applyPreset(preset)}
+                      disabled={launching || (isContinue && recentSessions.length === 0)}
+                      title={isContinue && lastSession
+                        ? `Resume last session in ${lastSession.project} (${formatRelativeTime(lastSession.date)})`
+                        : preset.description}
+                      className={cn(
+                        "px-2 py-1 rounded text-xs font-medium transition-all",
+                        "border",
+                        isContinue && lastSession
+                          ? "border-[#f59e0b]/30 bg-[#f59e0b]/5"
+                          : "border-border-default",
+                        launching || (isContinue && recentSessions.length === 0)
+                          ? "opacity-50 cursor-not-allowed"
+                          : "hover:border-[#f59e0b]/40 hover:bg-[#f59e0b]/5 active:bg-[#f59e0b]/10 active:scale-[0.98]",
+                      )}
+                    >
+                      <span className="text-text-primary">{continueLabel}</span>
+                      {continueHint && (
+                        <span className="text-text-ghost ml-1">{continueHint}</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -389,7 +426,7 @@ export function SessionLauncherV2({
                     type="button"
                     onClick={() => setResumeDropdownOpen(!resumeDropdownOpen)}
                     className={cn(
-                      "w-full flex items-center gap-2 px-2 py-1 text-xs bg-bg-input border rounded-md text-left transition-all",
+                      "w-full flex items-center gap-2 px-2 py-1 text-xs bg-bg-input border rounded text-left transition-all",
                       resume
                         ? "border-[#f59e0b]/40 text-text-primary"
                         : "border-border-default text-text-ghost",
@@ -426,7 +463,7 @@ export function SessionLauncherV2({
                   </button>
 
                   {resumeDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-bg-elevated border border-border-subtle rounded-[6px] shadow-modal z-10 max-h-48 overflow-hidden flex flex-col">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-bg-elevated border border-border-subtle rounded shadow-modal z-10 max-h-48 overflow-hidden flex flex-col">
                       <div className="p-1.5 border-b border-border-default">
                         <div className="relative">
                           <SearchIcon size={10} className="absolute left-2 top-1/2 -translate-y-1/2 text-text-ghost" />
@@ -499,7 +536,7 @@ export function SessionLauncherV2({
                     key={m}
                     onClick={() => setModel(m)}
                     className={cn(
-                      "px-2.5 py-1 rounded-md text-xs font-medium text-center transition-all",
+                      "px-2.5 py-1 rounded text-xs font-medium text-center transition-all",
                       "border",
                       model === m
                         ? "border-[#f59e0b]/50 bg-[#f59e0b]/10 text-[#f59e0b]"
@@ -589,7 +626,7 @@ export function SessionLauncherV2({
 
           {/* Error */}
           {error && (
-            <div className="mx-4 mb-2 px-2.5 py-1.5 bg-error/10 border border-error/20 rounded-md text-xs text-error">
+            <div className="mx-4 mb-2 px-2.5 py-1.5 bg-error/10 border border-error/20 rounded text-xs text-error">
               {error}
             </div>
           )}
@@ -606,7 +643,7 @@ export function SessionLauncherV2({
                 onClick={() => void handleLaunch()}
                 disabled={launching}
                 className={cn(
-                  "px-3 py-1 rounded-md text-xs font-semibold transition-all",
+                  "px-3 py-1 rounded text-xs font-semibold transition-all",
                   "bg-[#f59e0b] text-[#0a0a0a]",
                   "hover:bg-[#fbbf24] active:scale-[0.98]",
                   "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",

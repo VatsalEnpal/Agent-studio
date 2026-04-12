@@ -72,14 +72,48 @@ function relativeTime(ts: number): string {
 
 function readableName(session: Session): string {
   const name = session.name;
+  const agent = session.meta?.agent;
+  const model = session.meta?.model;
+  const basename = session.cwd.split("/").filter(Boolean).pop() ?? "";
+
+  // If the name is a generic model/tool name, build a better one
   const genericNames = new Set([
     "claude", "claude-opus", "claude-sonnet", "claude-haiku",
-    "opus", "sonnet", "haiku",
+    "opus", "sonnet", "haiku", "session", "new-session",
+    "continue-last",
   ]);
-  if (genericNames.has(name.toLowerCase())) {
-    const basename = session.cwd.split("/").filter(Boolean).pop();
+
+  const isGeneric = genericNames.has(name.toLowerCase());
+
+  if (isGeneric) {
+    // Best: agent + project
+    if (agent && agent !== "none" && basename) {
+      return `${agent} \u00b7 ${basename}`;
+    }
+    // Good: just the project directory
     if (basename) return basename;
   }
+
+  // If name equals the agent name exactly and we have a project, enrich it
+  if (agent && name === agent && basename) {
+    return `${agent} \u00b7 ${basename}`;
+  }
+
+  // If name matches a resume pattern, make it clearer
+  const resumeMatch = name.match(/^resume-([a-f0-9]{8})$/);
+  if (resumeMatch) {
+    if (agent && agent !== "none" && agent !== "resumed") {
+      return `${agent} (resumed)`;
+    }
+    if (basename) return `${basename} (resumed)`;
+    return `session ${resumeMatch[1]}`;
+  }
+
+  // If the name is just a model name, try to build something better
+  if (model && name.toLowerCase() === model.toLowerCase()) {
+    if (basename) return basename;
+  }
+
   return name;
 }
 
@@ -251,7 +285,7 @@ export function SessionCard({
       onClick={onSelect}
       title={tooltipParts.join("\n")}
       className={cn(
-        "group relative flex flex-col gap-1 px-3 py-2 rounded-md cursor-pointer overflow-hidden",
+        "group relative flex flex-col gap-1 px-3 py-2 rounded cursor-pointer overflow-hidden",
         "transition-all",
         selected
           ? "bg-bg-elevated border border-border-subtle"
@@ -297,7 +331,7 @@ export function SessionCard({
             autoFocus
           />
         ) : (
-          <span className="text-xs font-medium text-text-primary truncate flex-1 min-w-0">
+          <span className="text-xs font-medium text-text-primary truncate group-hover:whitespace-normal group-hover:line-clamp-2 flex-1 min-w-0">
             {displayName}
           </span>
         )}
@@ -367,7 +401,7 @@ export function SessionCard({
             }}
             disabled={resuming}
             className={cn(
-              "px-2 py-0.5 rounded-md shrink-0",
+              "px-2 py-0.5 rounded shrink-0",
               "text-2xs font-medium",
               "border transition-all",
               resuming

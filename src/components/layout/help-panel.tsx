@@ -14,7 +14,7 @@ export function HelpPanel() {
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
         <button
-          className="flex items-center justify-center w-7 h-7 rounded-md text-text-secondary hover:text-text-primary hover:bg-white/10 transition-all"
+          className="flex items-center justify-center w-7 h-7 rounded text-text-secondary hover:text-text-primary hover:bg-white/10 transition-all"
           title="Help & Guide"
         >
           <HelpIcon className="w-4 h-4" />
@@ -22,7 +22,7 @@ export function HelpPanel() {
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] bg-bg-elevated border border-border-subtle rounded-lg shadow-modal focus:outline-none animate-cmd-palette-in">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] bg-bg-elevated border border-border-subtle rounded shadow-modal focus:outline-none animate-cmd-palette-in">
           <div className="flex items-center justify-between px-5 py-3 border-b border-border-default">
             <Dialog.Title className="text-sm font-semibold text-text-primary">
               Help & Guide

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GeistMono } from "geist/font/mono";
 import "@/styles/globals.css";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { ThemeScript } from "@/components/ui/theme-script";
@@ -18,11 +19,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className={`dark ${GeistMono.variable}`} suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>
-      <body className="bg-canvas text-text-primary min-h-screen font-sans antialiased">
+      <body className="bg-canvas text-text-primary min-h-screen font-mono antialiased">
         <ErrorBoundary fallbackLabel="Agent Studio encountered an error">
           {children}
         </ErrorBoundary>

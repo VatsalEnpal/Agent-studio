@@ -141,18 +141,23 @@ export function SessionLauncher({
   const [resumeSearch, setResumeSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const [defaultsFromConfig, setDefaultsFromConfig] = useState<{
+    model: "opus" | "sonnet" | "haiku";
+    permissions: "bypass" | "default" | "plan" | "auto";
+  } | null>(null);
+
   useEffect(() => {
     if (open) {
       setCustomName("");
-      setModel("sonnet");
+      setModel(defaultsFromConfig?.model ?? "sonnet");
       setAgent("none");
-      setPermissions("default");
+      setPermissions(defaultsFromConfig?.permissions ?? "default");
       setChannel("none");
       setResume("");
       setError(null);
       setLaunching(false);
     }
-  }, [open]);
+  }, [open, defaultsFromConfig]);
 
   const [defaultCwdLoaded, setDefaultCwdLoaded] = useState(false);
   useEffect(() => {
@@ -161,12 +166,24 @@ export function SessionLauncher({
       try {
         const res = await fetch("/api/config");
         if (res.ok) {
-          const data = await res.json() as { config: { defaults: { workingDirectory: string } } };
-          const configCwd = data.config?.defaults?.workingDirectory;
-          if (configCwd) {
-            setCwd(configCwd);
-            for (const p of PRESETS) { p.cwd = configCwd; }
+          const data = await res.json() as {
+            config: {
+              defaults: {
+                workingDirectory: string;
+                model?: "opus" | "sonnet" | "haiku";
+                permissions?: "bypass" | "default" | "plan" | "auto";
+              };
+            };
+          };
+          const defaults = data.config?.defaults;
+          if (defaults?.workingDirectory) {
+            setCwd(defaults.workingDirectory);
+            for (const p of PRESETS) { p.cwd = defaults.workingDirectory; }
           }
+          setDefaultsFromConfig({
+            model: defaults?.model ?? "sonnet",
+            permissions: defaults?.permissions ?? "default",
+          });
           setDefaultCwdLoaded(true);
         }
       } catch { /* use default */ }
@@ -294,13 +311,13 @@ export function SessionLauncher({
   }, [launching, model, cwd, onLaunch, onOpenChange]);
 
   // Helper for input/select styling
-  const inputCls = "w-full px-2.5 py-1.5 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:border-border-subtle focus:outline-none transition-all";
+  const inputCls = "w-full px-2.5 py-1.5 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:border-border-subtle focus:outline-none transition-all";
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[480px] max-h-[85vh] overflow-y-auto bg-bg-elevated border border-border-subtle rounded-[8px] shadow-modal scrollbar-thin outline-none">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[480px] max-h-[85vh] overflow-y-auto bg-bg-elevated border border-border-subtle rounded shadow-modal scrollbar-thin outline-none">
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-border-default">
             <Dialog.Description className="sr-only">Launch a new Claude Code session</Dialog.Description>
@@ -324,7 +341,7 @@ export function SessionLauncher({
                     type="button"
                     onClick={() => setResumeDropdownOpen(!resumeDropdownOpen)}
                     className={cn(
-                      "w-full flex items-center gap-2 px-2.5 py-1.5 text-xs bg-bg-input border rounded-md text-left transition-all",
+                      "w-full flex items-center gap-2 px-2.5 py-1.5 text-xs bg-bg-input border rounded text-left transition-all",
                       resume
                         ? "border-[#f59e0b]/40 text-text-primary"
                         : "border-border-default text-text-ghost",
@@ -354,7 +371,7 @@ export function SessionLauncher({
                   </button>
 
                   {resumeDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-bg-elevated border border-border-subtle rounded-md shadow-modal z-10 max-h-48 overflow-hidden flex flex-col">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-bg-elevated border border-border-subtle rounded shadow-modal z-10 max-h-48 overflow-hidden flex flex-col">
                       <div className="p-1.5 border-b border-border-default">
                         <input
                           type="text"
@@ -411,7 +428,7 @@ export function SessionLauncher({
                   onClick={handleContinueLast}
                   disabled={launching}
                   className={cn(
-                    "flex flex-col items-center gap-1.5 p-2.5 rounded-md border transition-all",
+                    "flex flex-col items-center gap-1.5 p-2.5 rounded border transition-all",
                     launching
                       ? "border-border-default bg-bg-input opacity-50 cursor-not-allowed"
                       : "border-[#f59e0b]/30 bg-[#f59e0b]/5 hover:border-[#f59e0b]/60 hover:bg-[#f59e0b]/10 active:bg-[#f59e0b]/20",
@@ -431,7 +448,7 @@ export function SessionLauncher({
                     onClick={() => applyPreset(preset)}
                     disabled={launching}
                     className={cn(
-                      "flex flex-col items-center gap-1.5 p-2.5 rounded-md border transition-all",
+                      "flex flex-col items-center gap-1.5 p-2.5 rounded border transition-all",
                       launching
                         ? "border-border-default opacity-50 cursor-not-allowed"
                         : "border-border-default hover:border-border-subtle hover:bg-bg-input active:bg-bg-elevated active:scale-[0.98]",
@@ -595,7 +612,7 @@ export function SessionLauncher({
               onClick={handleLaunch}
               disabled={launching}
               className={cn(
-                "px-5 py-2 text-xs font-medium rounded-md transition-all",
+                "px-5 py-2 text-xs font-medium rounded transition-all",
                 "bg-[#f59e0b] text-[#0a0a0a] hover:bg-[#fbbf24] active:scale-[0.98]",
                 "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
               )}

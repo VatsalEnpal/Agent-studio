@@ -44,9 +44,12 @@ export function SettingsPmo() {
   const isRunning = status?.loaded ?? false;
 
   return (
-    <section className="border border-border-default rounded-lg bg-bg-surface">
+    <section className="border border-border-default rounded bg-bg-surface">
       <div className="px-4 py-3 border-b border-border-default">
         <h3 className="text-body font-medium text-text-primary">PMO Scheduler</h3>
+        <p className="text-label text-text-tertiary mt-0.5">
+          Periodic project health scans. The PMO agent reviews code quality, test coverage, and open issues on a schedule.
+        </p>
       </div>
       <div className="px-4 py-3 space-y-3">
         {/* Status */}

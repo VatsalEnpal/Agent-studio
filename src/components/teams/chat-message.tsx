@@ -114,7 +114,7 @@ function MessageContent({ text, isSystem }: { text: string; isSystem: boolean })
       <div className="text-xs leading-relaxed prose prose-invert prose-sm max-w-none
         prose-p:my-1 prose-pre:my-2 prose-pre:p-3
         prose-code:text-rooms prose-code:bg-bg-elevated prose-code:px-1 prose-code:py-0.5 prose-code:rounded-sm prose-code:text-xs prose-code:font-mono
-        prose-pre:bg-bg-elevated prose-pre:border prose-pre:border-border-subtle prose-pre:rounded-md
+        prose-pre:bg-bg-elevated prose-pre:border prose-pre:border-border-subtle prose-pre:rounded
         prose-headings:text-xs prose-headings:font-semibold prose-headings:text-text-primary prose-headings:mt-3 prose-headings:mb-1
         prose-a:text-rooms prose-a:no-underline hover:prose-a:underline
         prose-strong:text-text-primary
@@ -185,7 +185,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
               </div>
             )}
             {/* Message bubble */}
-            <div className="rounded-xl rounded-tr-sm bg-rooms/15 border border-rooms/20 px-3.5 py-2 text-text-primary">
+            <div className="rounded rounded-tr-sm bg-rooms/15 border border-rooms/20 px-3.5 py-2 text-text-primary">
               <MessageContent text={msg.text ?? ""} isSystem={false} />
             </div>
           </div>
@@ -271,7 +271,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
           {/* Message bubble */}
           <div
             className={cn(
-              "rounded-xl rounded-tl-sm px-3.5 py-2",
+              "rounded rounded-tl-sm px-3.5 py-2",
               isApproval && msg.approvalStatus === "pending"
                 ? "bg-sprints/10 border border-sprints/20"
                 : "bg-bg-elevated border border-border-subtle",
@@ -284,14 +284,14 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
               <div className="flex gap-1.5 mt-2 pt-1.5 border-t border-sprints/15">
                 <button
                   onClick={() => onApprove(msg)}
-                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-sessions/15 text-sessions rounded-md hover:bg-sessions/25 active:scale-[0.98] transition-all duration-100"
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-sessions/15 text-sessions rounded hover:bg-sessions/25 active:scale-[0.98] transition-all duration-100"
                 >
                   <CheckIcon size={12} />
                   Approve
                 </button>
                 <button
                   onClick={() => onReject(msg)}
-                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-error/15 text-error rounded-md hover:bg-error/25 active:scale-[0.98] transition-all duration-100"
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-error/15 text-error rounded hover:bg-error/25 active:scale-[0.98] transition-all duration-100"
                 >
                   <CloseIcon size={12} />
                   Reject
@@ -328,7 +328,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
           )}
 
           {detailsOpen && (
-            <div className="mt-1.5 p-2.5 rounded-lg bg-bg-elevated border border-border-subtle text-label text-text-secondary space-y-1.5 animate-slide-up">
+            <div className="mt-1.5 p-2.5 rounded bg-bg-elevated border border-border-subtle text-label text-text-secondary space-y-1.5 animate-slide-up">
               <div className="flex items-center gap-1.5">
                 <span className="text-text-tertiary">Time:</span>
                 <span>{formatTimestamp(msg.timestamp)}</span>
@@ -407,7 +407,7 @@ export function StreamingMessage({ agentId, text }: { agentId: string; text: str
             </span>
             <span className="text-label text-text-tertiary italic">typing...</span>
           </div>
-          <div className="rounded-xl rounded-tl-sm bg-bg-elevated border border-border-subtle px-3.5 py-2">
+          <div className="rounded rounded-tl-sm bg-bg-elevated border border-border-subtle px-3.5 py-2">
             <MessageContent text={text} isSystem={false} />
             <span className="inline-block w-1.5 h-4 bg-rooms/70 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
           </div>

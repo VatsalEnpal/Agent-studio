@@ -3,6 +3,22 @@
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
+// AmberLoadingBar — thin animated bar for async actions (IDENTITY.md spec)
+// ---------------------------------------------------------------------------
+
+interface AmberLoadingBarProps {
+  className?: string;
+}
+
+/**
+ * Thin amber line that animates left-to-right, like YouTube's loading bar.
+ * Used for async actions (View Changes, server start/stop, commit, push).
+ */
+export function AmberLoadingBar({ className }: AmberLoadingBarProps) {
+  return <div className={cn("amber-loading-bar", className)} aria-hidden="true" />;
+}
+
+// ---------------------------------------------------------------------------
 // Base Skeleton — shimmer rectangle
 // ---------------------------------------------------------------------------
 
@@ -32,7 +48,7 @@ export function SkeletonCard({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 p-3 rounded-lg border border-border-subtle bg-surface",
+        "flex flex-col gap-2 p-3 rounded border border-border-subtle bg-surface",
         className,
       )}
       aria-hidden="true"

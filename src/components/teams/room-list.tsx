@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useCallback, useRef } from "react";
-import { HashIcon, PlusIcon, CloseIcon, CheckIcon } from "@/components/ui/icons";
+import { useEffect, useCallback, useRef, useState } from "react";
+import { HashIcon, PlusIcon, CloseIcon, CheckIcon, SettingsIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import { useRoomsStore } from "@/stores/rooms";
+import { useHasAgentSystem } from "@/hooks/use-config";
+import { useUIStore } from "@/stores/ui";
 import type { Room } from "@/stores/rooms";
 
 function relativeMessageTime(iso: string): string {
@@ -32,6 +34,10 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
   const loading = useRoomsStore((s) => s.loading);
   const lastSeenByRoom = useRoomsStore((s) => s.lastSeenByRoom);
   const markAllSeen = useRoomsStore((s) => s.markAllSeen);
+  const hasAgentSystem = useHasAgentSystem();
+
+  const [closingRoomId, setClosingRoomId] = useState<string | null>(null);
+  const closingRoom = closingRoomId ? rooms.find((r) => r.id === closingRoomId) : null;
 
   // Compute total unread across all rooms
   const totalUnread = rooms.reduce((acc, room) => {
@@ -65,28 +71,34 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
     void loadRooms();
   }, [loadRooms]);
 
-  const handleCloseRoom = useCallback(
-    async (e: React.MouseEvent, roomId: string) => {
+  const handleRequestClose = useCallback(
+    (e: React.MouseEvent, roomId: string) => {
       e.stopPropagation();
-      try {
-        await fetch(`/api/rooms/${roomId}`, { method: "DELETE" });
-        const res = await fetch("/api/rooms");
-        if (res.ok) {
-          const data = (await res.json()) as Room[];
-          useRoomsStore.getState().setRooms(data);
-          if (selectedRoomId === roomId) {
-            const active = data.filter((r) => r.active);
-            useRoomsStore
-              .getState()
-              .selectRoom(active.length > 0 ? active[0].id : null);
-          }
-        }
-      } catch {
-        // ignore
-      }
+      setClosingRoomId(roomId);
     },
-    [selectedRoomId],
+    [],
   );
+
+  const handleConfirmClose = useCallback(async () => {
+    if (!closingRoomId) return;
+    try {
+      await fetch(`/api/rooms/${closingRoomId}`, { method: "DELETE" });
+      const res = await fetch("/api/rooms");
+      if (res.ok) {
+        const data = (await res.json()) as Room[];
+        useRoomsStore.getState().setRooms(data);
+        if (selectedRoomId === closingRoomId) {
+          const active = data.filter((r) => r.active);
+          useRoomsStore
+            .getState()
+            .selectRoom(active.length > 0 ? active[0].id : null);
+        }
+      }
+    } catch {
+      // ignore
+    }
+    setClosingRoomId(null);
+  }, [closingRoomId, selectedRoomId]);
 
   const activeRooms = rooms.filter((r) => r.active);
   const archivedRooms = rooms.filter((r) => !r.active);
@@ -112,10 +124,10 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
   );
 
   return (
-    <div className="flex flex-col h-full overflow-hidden" onKeyDown={handleKeyDown} tabIndex={-1} ref={listRef}>
+    <div className="flex flex-col h-full overflow-hidden relative" onKeyDown={handleKeyDown} tabIndex={-1} ref={listRef}>
       {/* Tab nav area */}
       <div className="px-3 pt-3 pb-2">
-        <div className="flex rounded-md bg-bg-input p-0.5">
+        <div className="flex rounded bg-bg-input p-0.5">
           <button className="flex-1 px-2 py-1 text-xs font-medium rounded-[3px] bg-bg-elevated text-text-primary">
             Rooms
           </button>
@@ -166,7 +178,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
             room={room}
             selected={room.id === selectedRoomId}
             onSelect={() => selectRoom(room.id)}
-            onClose={(e) => void handleCloseRoom(e, room.id)}
+            onClose={(e) => handleRequestClose(e, room.id)}
             lastSeen={lastSeenByRoom[room.id]}
           />
         ))}
@@ -175,7 +187,20 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           <div className="text-center py-6 px-4">
             <HashIcon size={20} className="text-text-ghost mx-auto mb-2" />
             <p className="text-xs text-text-secondary font-medium">No active rooms</p>
-            <p className="text-xs text-text-tertiary mt-1">Create a room to start collaborating with agents</p>
+            <p className="text-xs text-text-tertiary mt-1">
+              {hasAgentSystem
+                ? "Create a room to start collaborating with agents"
+                : "Rooms require an agent system to define your agents"}
+            </p>
+            {!hasAgentSystem && (
+              <button
+                onClick={() => useUIStore.getState().setActiveMode("settings")}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded border border-border-default hover:border-text-secondary transition-all mt-3 mx-auto"
+              >
+                <SettingsIcon size={12} />
+                Create Agent System
+              </button>
+            )}
           </div>
         )}
 
@@ -206,7 +231,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           onClick={onCreateRoom}
           className={cn(
             "flex items-center justify-center gap-1.5 w-full",
-            "px-3 py-1.5 rounded-md",
+            "px-3 py-1.5 rounded",
             "text-xs font-medium",
             "border border-dashed border-rooms/40 text-rooms",
             "hover:bg-rooms/5 hover:border-rooms/60",
@@ -221,6 +246,34 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           Tip: use {"\u2318"}K to search rooms
         </p>
       </div>
+
+      {/* Close room confirmation overlay */}
+      {closingRoom && (
+        <div className="absolute inset-0 z-20 bg-bg-base/90 flex items-center justify-center px-4">
+          <div className="bg-bg-elevated border border-border-subtle rounded-[4px] p-4 w-full max-w-[280px] space-y-3">
+            <p className="text-xs font-medium text-text-primary">
+              Close room?
+            </p>
+            <p className="text-xs text-text-secondary leading-relaxed">
+              This will close <span className="font-medium text-text-primary">{closingRoom.name}</span> and its agent sessions. Chat history is preserved.
+            </p>
+            <div className="flex items-center gap-2 justify-end">
+              <button
+                onClick={() => setClosingRoomId(null)}
+                className="px-2.5 py-1 text-xs font-medium text-text-secondary border border-border-default rounded-[4px] hover:bg-bg-input transition-all"
+              >
+                Keep open
+              </button>
+              <button
+                onClick={() => void handleConfirmClose()}
+                className="px-2.5 py-1 text-xs font-medium text-error border border-error/30 rounded-[4px] hover:bg-error/10 transition-all"
+              >
+                Close room
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -260,7 +313,7 @@ function RoomItem({
       onClick={onSelect}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(); }}
       className={cn(
-        "group flex items-center gap-2.5 w-full px-2.5 py-2 rounded-md text-left transition-all cursor-pointer",
+        "group flex items-center gap-2.5 w-full px-2.5 py-2 rounded text-left transition-all cursor-pointer",
         selected
           ? "bg-rooms-subtle border border-rooms/20 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.06)]"
           : "hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(99,102,241,0.06)] border border-transparent",

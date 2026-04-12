@@ -336,7 +336,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
         className={cn(
           "w-[480px] max-w-[calc(100vw-32px)]",
           "max-h-[360px] flex flex-col",
-          "rounded-xl border border-border-subtle",
+          "rounded border border-border-subtle",
           "bg-bg-elevated shadow-modal backdrop-blur-xl",
           "animate-cmd-palette-in",
         )}

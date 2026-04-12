@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { GitCommitIcon, EyeIcon, UploadIcon, WarningIcon, CheckIcon, CloseIcon } from "@/components/ui/icons";
+import { AmberLoadingBar } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { RepoStatus } from "@/lib/types";
 
@@ -39,7 +40,7 @@ export function ChangesPopup({
       onClick={onClose}
     >
       <div
-        className="bg-bg-base border border-border-default rounded-lg shadow-2xl w-full max-w-md p-0"
+        className="bg-bg-base border border-border-default rounded shadow-2xl w-full max-w-md p-0"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-3 py-2 border-b border-border-default">
@@ -54,10 +55,11 @@ export function ChangesPopup({
             <CloseIcon className="w-3.5 h-3.5" />
           </button>
         </div>
+        {changes === "Loading..." && <AmberLoadingBar />}
         <div className="px-3 py-2 max-h-72 overflow-auto">
           {changes === "Loading..." ? (
-            <p className="text-xs text-text-tertiary animate-pulse py-2">
-              Loading...
+            <p className="text-xs text-text-tertiary py-2">
+              Loading changes...
             </p>
           ) : isClean ? (
             <div className="flex items-center gap-2 py-3 justify-center">
@@ -160,7 +162,7 @@ export function CommitModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-bg-base border border-border-default rounded-lg shadow-2xl w-full max-w-sm p-0">
+      <div className="bg-bg-base border border-border-default rounded shadow-2xl w-full max-w-sm p-0">
         <div className="flex items-center justify-between px-3 py-2 border-b border-border-default">
           <span className="text-xs font-medium text-text-primary flex items-center gap-1.5">
             <GitCommitIcon className="w-3.5 h-3.5" />
@@ -173,6 +175,7 @@ export function CommitModal({
             <CloseIcon className="w-3.5 h-3.5" />
           </button>
         </div>
+        {status === "committing" && <AmberLoadingBar />}
         <div className="px-3 py-2 space-y-2">
           <input
             type="text"
@@ -273,7 +276,7 @@ export function PushModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-bg-base border border-border-default rounded-lg shadow-2xl w-full max-w-sm p-0">
+      <div className="bg-bg-base border border-border-default rounded shadow-2xl w-full max-w-sm p-0">
         <div className="flex items-center justify-between px-3 py-2 border-b border-border-default">
           <span className="text-xs font-medium text-text-primary flex items-center gap-1.5">
             <UploadIcon className="w-3.5 h-3.5" />
@@ -286,6 +289,7 @@ export function PushModal({
             <CloseIcon className="w-3.5 h-3.5" />
           </button>
         </div>
+        {status === "pushing" && <AmberLoadingBar />}
         <div className="px-3 py-2 space-y-2">
           {isProd && (
             <div className="flex items-start gap-2 px-2 py-2 bg-red-500/10 border border-red-500/30 rounded text-red-400">

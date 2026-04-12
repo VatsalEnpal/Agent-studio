@@ -149,7 +149,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
     <div
       role="alert"
       className={cn(
-        "relative flex gap-3 p-3 rounded-lg",
+        "relative flex gap-3 p-3 rounded",
         "w-[360px] max-w-[calc(100vw-32px)]",
         "glass border",
         "shadow-toast",
@@ -183,7 +183,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
                 onClick={action.onClick}
                 className={cn(
                   "inline-flex items-center justify-center",
-                  "px-2.5 py-1 rounded-md",
+                  "px-2.5 py-1 rounded",
                   "text-label-xs font-medium",
                   "text-accent bg-accent-subtle",
                   "hover:bg-accent/15",

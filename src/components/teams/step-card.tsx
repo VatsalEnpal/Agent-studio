@@ -62,7 +62,7 @@ export function StepCard({ step }: { step: WorkflowStep }) {
   return (
     <div
       className={cn(
-        "rounded-md border border-l-[3px] transition-all",
+        "rounded border border-l-[3px] transition-all",
         // Status-specific card styling
         step.status === "waiting"
           ? "border-amber-400/40 border-l-amber-400 bg-amber-400/[0.04] shadow-sm shadow-amber-400/10"

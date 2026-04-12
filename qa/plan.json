@@ -1,0 +1,392 @@
+{
+  "generated_at": "2026-04-12T12:00:00Z",
+  "generated_from": "qa/audit-results/run-1.json",
+  "tasks": [
+    {
+      "id": "TASK-1",
+      "issue_id": "ISSUE-8",
+      "description": "Fix Default Working Directory to use the actual project directory instead of the Electron app bundle path (/Applications/Agent Studio.app/Contents/Resources). Auto-detect from cwd or first tracked project.",
+      "severity": "CRITICAL",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-2",
+      "issue_id": "ISSUE-1",
+      "description": "Show Teams, Memory, and Reports tabs in the top navigation. If agent system is not configured, show tabs but display an explanatory empty state with a CTA to configure instead of hiding them entirely.",
+      "severity": "HIGH",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-3",
+      "issue_id": "ISSUE-2",
+      "description": "Add a label or tooltip to the cost display in the top bar explaining what the dollar amount represents (e.g., 'Total cost today' or 'API spend').",
+      "severity": "HIGH",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-4",
+      "issue_id": "ISSUE-5",
+      "description": "Show meaningful session identifiers in the Running on Machine section - include project name, agent type, or task description instead of just the model name.",
+      "severity": "HIGH",
+      "status": "fixed"
+    },
+    {
+      "id": "TASK-5",
+      "issue_id": "ISSUE-6",
+      "description": "Generate human-readable session names for recent sessions instead of showing truncated prompt text. Use the session name field, first prompt summary, or agent + project combination.",
+      "severity": "HIGH",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-6",
+      "issue_id": "ISSUE-7",
+      "description": "Make the default model setting in General actually propagate to the New Session launcher modal. The model dropdown should reflect whatever is configured in settings.",
+      "severity": "HIGH",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-7",
+      "issue_id": "ISSUE-10",
+      "description": "Add a close/dismiss button (X) to the setup wizard and prevent it from persisting across page reloads when triggered from Re-run Setup Wizard. The wizard should be dismissable at any step.",
+      "severity": "HIGH",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-8",
+      "issue_id": "ISSUE-14",
+      "description": "Add Teams tab to the main top navigation bar so users can discover rooms and sprints without using the command palette.",
+      "severity": "HIGH",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-9",
+      "issue_id": "ISSUE-17",
+      "description": "Add Memory tab to the main navigation with browse, search, filter, and detail view capabilities. Show empty state with explanation when no memories exist.",
+      "severity": "HIGH",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-10",
+      "issue_id": "ISSUE-30",
+      "description": "Add a close/X button to the setup wizard that allows users to exit at any step without completing it. Also add Escape key support to dismiss.",
+      "severity": "HIGH",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-11",
+      "issue_id": "ISSUE-3",
+      "description": "Make the Limits link open in a new tab (target=_blank) and add an external link icon to indicate it navigates away from the app.",
+      "severity": "MEDIUM",
+      "status": "fixed"
+    },
+    {
+      "id": "TASK-12",
+      "issue_id": "ISSUE-11",
+      "description": "Allow users to rename sessions from the sidebar context menu or inline editing.",
+      "severity": "MEDIUM",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-13",
+      "issue_id": "ISSUE-12",
+      "description": "Add search/filter input to the Recent Sessions section in the sidebar. NOTE: Search input exists but does NOT filter results -- filter logic is broken or missing.",
+      "severity": "HIGH",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-14",
+      "issue_id": "ISSUE-13",
+      "description": "Add confirmation dialog before killing processes. Show process details and warn that the action cannot be undone.",
+      "severity": "MEDIUM",
+      "status": "fixed"
+    },
+    {
+      "id": "TASK-15",
+      "issue_id": "ISSUE-15",
+      "description": "Add confirmation dialog before closing/destroying rooms to prevent accidental data loss.",
+      "severity": "MEDIUM",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-16",
+      "issue_id": "ISSUE-16",
+      "description": "Elevate Sprints to be more discoverable - either as a top-level tab or prominently linked from the Teams view.",
+      "severity": "MEDIUM",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-17",
+      "issue_id": "ISSUE-19",
+      "description": "Persist notification settings server-side instead of browser-only, or make the 'local only' warning more prominent.",
+      "severity": "MEDIUM",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-18",
+      "issue_id": "ISSUE-23",
+      "description": "Show which session will be resumed in the 'Continue Last' button (e.g., name, time, agent used).",
+      "severity": "MEDIUM",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-19",
+      "issue_id": "ISSUE-24",
+      "description": "Show per-session cost in the sidebar session list entries.",
+      "severity": "MEDIUM",
+      "status": "fixed"
+    },
+    {
+      "id": "TASK-20",
+      "issue_id": "ISSUE-25",
+      "description": "Add explanatory text or tooltip for PMO Scheduler explaining what PMO means and what scans do.",
+      "severity": "MEDIUM",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-21",
+      "issue_id": "ISSUE-26",
+      "description": "Add Automations section to Settings or clarify that automation is handled through Sprints/PMO.",
+      "severity": "MEDIUM",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-22",
+      "issue_id": "ISSUE-28",
+      "description": "Clarify the relationship between Running on Machine processes and Sessions. Explain that Running on Machine shows all system-wide Claude processes, not just ones started from Agent Studio.",
+      "severity": "MEDIUM",
+      "status": "fixed"
+    },
+    {
+      "id": "TASK-23",
+      "issue_id": "ISSUE-29",
+      "description": "Either implement the workflow builder or remove the empty WORKFLOWS section that shows 'No workflows found' with no way to create one.",
+      "severity": "MEDIUM",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-24",
+      "issue_id": "ISSUE-32",
+      "description": "Group sessions in the sidebar into categories (Sprint Team vs Standalone) as specified in the design doc.",
+      "severity": "MEDIUM",
+      "status": "fixed"
+    },
+    {
+      "id": "TASK-25",
+      "issue_id": "ISSUE-33",
+      "description": "Add Reports tab to the navigation with the ability to view automation/sprint results.",
+      "severity": "MEDIUM",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-26",
+      "issue_id": "ISSUE-36",
+      "description": "Surface agent system configuration in the Teams/Memory empty states, not just in Settings. Guide users to set it up from the feature they're trying to use.",
+      "severity": "MEDIUM",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-27",
+      "issue_id": "ISSUE-4",
+      "description": "Add a brief explanation or tooltip for the API peak/off-peak indicator for new users.",
+      "severity": "LOW",
+      "status": "fixed"
+    },
+    {
+      "id": "TASK-28",
+      "issue_id": "ISSUE-9",
+      "description": "Dynamically read the git branch name for the About section instead of using a hardcoded/stale value.",
+      "severity": "LOW",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-29",
+      "issue_id": "ISSUE-18",
+      "description": "Add text labels or improved visual distinction to notification toggle buttons beyond just color.",
+      "severity": "LOW",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-30",
+      "issue_id": "ISSUE-20",
+      "description": "Add an 'Add Repo' button to the Repos section in the sidebar for quick repo addition.",
+      "severity": "LOW",
+      "status": "fixed"
+    },
+    {
+      "id": "TASK-31",
+      "issue_id": "ISSUE-21",
+      "description": "Make the :8080 port button open the URL in the browser or show a confirmation toast.",
+      "severity": "LOW",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-32",
+      "issue_id": "ISSUE-22",
+      "description": "Fix the API: Off-Peak badge to not wrap awkwardly at narrow viewport widths.",
+      "severity": "LOW",
+      "status": "fixed"
+    },
+    {
+      "id": "TASK-33",
+      "issue_id": "ISSUE-27",
+      "description": "Ensure consistent labeling of nav tabs (both should show icons + text or just text).",
+      "severity": "LOW",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-34",
+      "issue_id": "ISSUE-31",
+      "description": "Show memory pressure instead of raw usage in system monitor to avoid false alarms on macOS.",
+      "severity": "LOW",
+      "status": "fixed"
+    },
+    {
+      "id": "TASK-35",
+      "issue_id": "ISSUE-34",
+      "description": "Add loading indicators (amber line or skeleton) for async actions like View Changes, server start/stop.",
+      "severity": "LOW",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-36",
+      "issue_id": "ISSUE-35",
+      "description": "Verify Geist Mono is loaded and used as the primary font throughout the app.",
+      "severity": "LOW",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-37",
+      "issue_id": "ISSUE-37",
+      "description": "Clarify the SERVERS count in the sidebar header - show running/total (e.g., '1/3') instead of just running count.",
+      "severity": "LOW",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-38",
+      "issue_id": "ISSUE-38",
+      "description": "Remove duplicate duration display in Running on Machine entries - show duration in one place only.",
+      "severity": "LOW",
+      "status": "fixed"
+    },
+    {
+      "id": "TASK-39",
+      "issue_id": "ISSUE-39",
+      "description": "Fix the Sessions empty state 'New Session' button bleeding through to ALL other tabs (Teams, Sprints, Knowledge, Settings). The button floats at a fixed position overlapping content. This is a z-index or visibility regression introduced by the tab navigation fix.",
+      "severity": "HIGH",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-40",
+      "issue_id": "ISSUE-40",
+      "description": "Rename 'Knowledge' tab to 'Memory' for consistency with the design spec, IDENTITY.md, and all task/checklist references.",
+      "severity": "MEDIUM",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-41",
+      "issue_id": "ISSUE-41",
+      "description": "Change notification toggle switches from green to amber to comply with IDENTITY.md color scheme (amber is the only accent color).",
+      "severity": "LOW",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-42",
+      "issue_id": "ISSUE-42",
+      "description": "Add text labels to the left icon sidebar navigation or ensure tooltips appear on hover for discoverability.",
+      "severity": "LOW",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-43",
+      "issue_id": "ISSUE-43",
+      "description": "Add dynamic git branch info back to the About section, or include more system information to make the section useful.",
+      "severity": "LOW",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-44",
+      "issue_id": "ISSUE-44",
+      "description": "Improve session name display in History sidebar -- names are heavily truncated at 200px sidebar width. Show more context or use full-width tooltips on hover.",
+      "severity": "LOW",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-45",
+      "issue_id": "ISSUE-45",
+      "description": "Sessions empty state text and New Session button appear below Dev Servers table in the Servers sub-tab. The session empty state should be hidden when the Servers view is active.",
+      "severity": "LOW",
+      "status": "verified"
+    },
+    {
+      "id": "TASK-46",
+      "issue_id": "ISSUE-46",
+      "description": "Sprint detail view has Resume button but no Cancel button. Users cannot abandon a sprint that is going wrong from the UI.",
+      "severity": "MEDIUM",
+      "status": "verified"
+    }
+  ],
+  "new_issues_run6": [
+    {
+      "id": "ISSUE-47",
+      "severity": "HIGH",
+      "description": "Reports view crashes with React hooks error. The entire Reports tab is non-functional.",
+      "related_task": "TASK-25",
+      "status": "resolved_run7"
+    },
+    {
+      "id": "ISSUE-48",
+      "severity": "MEDIUM",
+      "description": "About section shows '...' placeholders for most system info fields (Branch, Commit, Node, Platform, PID, Uptime).",
+      "related_task": "TASK-28,TASK-43",
+      "status": "resolved_run7"
+    },
+    {
+      "id": "ISSUE-49",
+      "severity": "LOW",
+      "description": "Border radius exceeds 4px max on 17+ elements (sidebar icons 6-7px, search inputs 6px, tab pills 6px).",
+      "status": "resolved_run7",
+      "notes": "Major UI elements fixed to 4px. Only pill-shaped filter chips remain rounded-full (intentional design pattern)."
+    },
+    {
+      "id": "ISSUE-50",
+      "severity": "LOW",
+      "description": "Session names in History sidebar still heavily truncated at 200px sidebar width.",
+      "status": "accepted",
+      "notes": "Layout constraint at 200px sidebar width. Names are human-readable (project names) and hover shows full text."
+    },
+    {
+      "id": "ISSUE-51",
+      "severity": "LOW",
+      "description": "Settings > Projects (Workspace) section appears nearly empty with no visible content.",
+      "status": "resolved_run7",
+      "notes": "Section now shows tracked projects, agent system path, add input, and setup wizard button."
+    }
+  ],
+  "new_issues_run7": [
+    {
+      "id": "ISSUE-52",
+      "severity": "LOW",
+      "description": "Memory filter pills and tag chips use rounded-full instead of 4px max border radius per IDENTITY.md.",
+      "category": "identity",
+      "status": "verified",
+      "notes": "Changed rounded-full to rounded (4px) on category pills, pinned filter, tag chips in memory-view, memory-list, memory-detail, and session-sidebar status filter pills. VERIFIED run 8: all 7 filter pills confirmed at borderRadius: 4px."
+    },
+    {
+      "id": "ISSUE-53",
+      "severity": "LOW",
+      "description": "Per-session cost not visible in History sidebar entries. Only name, prompt preview, and time shown.",
+      "category": "ux",
+      "related_task": "TASK-19",
+      "status": "verified",
+      "notes": "History API now extracts cost from JSONL files via getUsageBySessionId and returns it. Frontend maps cost into session.meta.cost which SessionCard renders. VERIFIED run 8: dollar amounts visible on every session entry ($44.4, $4.36, $323.3, etc.)."
+    }
+  ],
+  "stats": {
+    "total": 46,
+    "pending": 0,
+    "fixed": 11,
+    "verified": 35,
+    "failed_verification": 0,
+    "notes": "11 tasks remain as 'fixed' but unable to verify (require active running sessions/processes). All verifiable tasks now confirmed working."
+  }
+}

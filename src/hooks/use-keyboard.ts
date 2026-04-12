@@ -6,7 +6,7 @@ import { useSessionsStore } from "@/stores/sessions";
 import type { ActiveMode } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
-// Section order for ⌘1-4 shortcuts
+// Section order for ⌘1-5 shortcuts
 // ---------------------------------------------------------------------------
 
 const sectionByIndex: ActiveMode[] = [
@@ -14,13 +14,14 @@ const sectionByIndex: ActiveMode[] = [
   "teams",
   "sprints",
   "memory",
+  "reports",
 ];
 
 /**
  * Global keyboard shortcuts.
  *
  * Section navigation:
- * - ⌘1-4: switch between Sessions / Teams / Sprints / Memory
+ * - ⌘1-5: switch between Sessions / Teams / Sprints / Memory / Reports
  * - ⌘[: previous sidebar item, ⌘]: next sidebar item
  *
  * Session management (Cmd+Shift to avoid browser/OS conflicts):
@@ -94,7 +95,7 @@ export function useKeyboardShortcuts() {
       }
 
       // ⌘1-4: switch sections (without shift — only when not typing)
-      if (mod && !shift && !isTyping && e.key >= "1" && e.key <= "4") {
+      if (mod && !shift && !isTyping && e.key >= "1" && e.key <= "5") {
         e.preventDefault();
         const index = parseInt(e.key) - 1;
         setActiveMode(sectionByIndex[index]);

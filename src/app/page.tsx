@@ -82,7 +82,7 @@ const modeToNav: Record<ActiveMode, NavPage | null> = {
   sessions: "sessions",
   teams: "teams",
   sprints: "sprints",
-  reports: null,
+  reports: "reports",
   memory: "knowledge",
   settings: "settings",
 };
@@ -92,6 +92,7 @@ const navToMode: Record<NavPage, ActiveMode> = {
   teams: "teams",
   sprints: "sprints",
   knowledge: "memory",
+  reports: "reports",
   settings: "settings",
 };
 
@@ -425,11 +426,16 @@ export default function Home() {
         args.push("--agent", config.agent);
       }
 
-      // Auto-name: use directory basename instead of generic "claude-opus"
+      // Auto-name: combine agent + project directory for distinguishable names
       const cwdBasename = resolvedCwd.split("/").filter(Boolean).pop() ?? "session";
-      const autoName = config.agent !== "none"
-        ? config.agent
-        : config.name || cwdBasename;
+      let autoName: string;
+      if (config.name) {
+        autoName = config.name;
+      } else if (config.agent !== "none") {
+        autoName = `${config.agent} \u00b7 ${cwdBasename}`;
+      } else {
+        autoName = cwdBasename;
+      }
 
       const res = await fetch("/api/sessions", {
         method: "POST",
@@ -548,7 +554,7 @@ export default function Home() {
               setPreflightLoading(true);
               void runPreflight().then(() => setPreflightLoading(false));
             }}
-            className="px-2.5 py-1 bg-accent text-white rounded-md text-xs font-medium hover:bg-accent-hover transition-all"
+            className="px-2.5 py-1 bg-accent text-white rounded text-xs font-medium hover:bg-accent-hover transition-all"
           >
             Check Again
           </button>
@@ -636,7 +642,7 @@ export default function Home() {
           {activeMode === "memory" && (
             <div className="px-3 py-2.5">
               <h3 className="text-label uppercase tracking-wider text-text-ghost">
-                Knowledge
+                Memory
               </h3>
             </div>
           )}
@@ -696,34 +702,42 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Terminal or empty state — always mounted so terminal doesn't lose state */}
+              {/* Terminal or empty state.
+                  The empty state only renders when sessions mode is active —
+                  it has no xterm container that needs to stay mounted, so
+                  hiding it via conditional render prevents it from bleeding
+                  through to other tabs (the wrapper uses visibility:hidden
+                  instead of display:none to keep xterm measurable, but the
+                  empty state has no such requirement). */}
               {nonRoomSessions.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full gap-4">
-                  <div className="text-center space-y-2">
-                    <p className="text-xs font-medium text-text-secondary">
-                      Ready to go.
-                    </p>
-                    <p className="text-xs text-text-tertiary max-w-sm">
-                      Launch a session to start working with Claude. Press{" "}
-                      <kbd className="px-1 py-0.5 rounded-[3px] bg-bg-input text-text-ghost text-2xs border border-border-default">
-                        Cmd+N
-                      </kbd>{" "}
-                      for the launcher.
-                    </p>
+                activeMode === "sessions" && !showDevServers && !showGitView ? (
+                  <div className="flex flex-col items-center justify-center h-full gap-4">
+                    <div className="text-center space-y-2">
+                      <p className="text-xs font-medium text-text-secondary">
+                        Ready to go.
+                      </p>
+                      <p className="text-xs text-text-tertiary max-w-sm">
+                        Launch a session to start working with Claude. Press{" "}
+                        <kbd className="px-1 py-0.5 rounded-[3px] bg-bg-input text-text-ghost text-2xs border border-border-default">
+                          Cmd+N
+                        </kbd>{" "}
+                        for the launcher.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setLauncherOpen(true)}
+                      className={cn(
+                        "px-4 py-1.5 rounded-[4px]",
+                        "text-xs font-medium",
+                        "bg-text-primary text-bg-base",
+                        "hover:bg-text-secondary",
+                        "transition-all duration-150",
+                      )}
+                    >
+                      New Session
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setLauncherOpen(true)}
-                    className={cn(
-                      "px-4 py-1.5 rounded-[5px]",
-                      "text-xs font-medium",
-                      "bg-text-primary text-bg-base",
-                      "hover:bg-text-secondary",
-                      "transition-all duration-150",
-                    )}
-                  >
-                    New Session
-                  </button>
-                </div>
+                ) : null
               ) : (
                 <ErrorBoundary fallbackLabel="Terminal error">
                   <div className="flex flex-col h-full">
@@ -754,7 +768,7 @@ export default function Home() {
               </ErrorBoundary>
             </div>
 
-            {/* Memory / Knowledge */}
+            {/* Memory */}
             <div className={activeMode === "memory" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"}>
               <ErrorBoundary fallbackLabel="Memory view error">
                 <MemoryView />

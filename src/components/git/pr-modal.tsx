@@ -121,7 +121,7 @@ export function PRModal() {
     (!isProd || !showProdConfirm || confirmText === "CONFIRM");
 
   const inputCls =
-    "w-full px-2.5 py-1.5 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all";
+    "w-full px-2.5 py-1.5 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all";
 
   return (
     <Dialog.Root
@@ -132,7 +132,7 @@ export function PRModal() {
     >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-bg-elevated border border-border-subtle rounded-[8px] shadow-modal z-50 outline-none">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-bg-elevated border border-border-subtle rounded shadow-modal z-50 outline-none">
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-border-default">
             <div className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export function PRModal() {
           <div className="px-5 py-4 space-y-3">
             {/* Prod warning banner */}
             {isProd && (
-              <div className="flex items-start gap-2 px-3 py-2 bg-error/10 border border-error/20 rounded-md text-error">
+              <div className="flex items-start gap-2 px-3 py-2 bg-error/10 border border-error/20 rounded text-error">
                 <WarningIcon size={14} className="shrink-0 mt-0.5" />
                 <p className="text-xs leading-relaxed">
                   This is the <strong>production repository</strong>. This PR
@@ -238,7 +238,7 @@ export function PRModal() {
 
             {/* Prod confirmation step */}
             {isProd && showProdConfirm && prStatus !== "success" && (
-              <div className="flex items-start gap-2 px-3 py-2 bg-error/15 border border-error/30 rounded-md text-error">
+              <div className="flex items-start gap-2 px-3 py-2 bg-error/15 border border-error/30 rounded text-error">
                 <WarningIcon size={14} className="shrink-0 mt-0.5" />
                 <div className="space-y-1.5 flex-1">
                   <p className="text-xs font-bold">
@@ -265,14 +265,14 @@ export function PRModal() {
 
             {/* Error */}
             {prStatus === "error" && prError && (
-              <div className="px-3 py-2 text-xs bg-error/10 border border-error/20 rounded-md text-error">
+              <div className="px-3 py-2 text-xs bg-error/10 border border-error/20 rounded text-error">
                 {prError}
               </div>
             )}
 
             {/* Success */}
             {prStatus === "success" && prResult && (
-              <div className="px-3 py-2 bg-sessions/10 border border-sessions/20 rounded-md text-sessions space-y-1.5">
+              <div className="px-3 py-2 bg-sessions/10 border border-sessions/20 rounded text-sessions space-y-1.5">
                 <div className="flex items-center gap-1.5 text-xs font-medium">
                   <CheckIcon size={14} />
                   <span>PR #{prResult.id} created</span>
@@ -293,7 +293,7 @@ export function PRModal() {
           <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border-default">
             <button
               onClick={closePrModal}
-              className="px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary transition-all rounded-md"
+              className="px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary transition-all rounded"
             >
               {prStatus === "success" ? "Close" : "Cancel"}
             </button>
@@ -302,7 +302,7 @@ export function PRModal() {
                 onClick={handleSubmit}
                 disabled={!canSubmit}
                 className={cn(
-                  "px-4 py-1.5 text-xs font-semibold rounded-md transition-all",
+                  "px-4 py-1.5 text-xs font-semibold rounded transition-all",
                   !canSubmit
                     ? "bg-border-default text-text-ghost cursor-not-allowed"
                     : isProd

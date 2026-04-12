@@ -150,7 +150,7 @@ function SidebarServerList() {
       {servers.map((s) => (
         <div
           key={`${s.pid}-${s.port}`}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-bg-elevated/50 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-bg-elevated/50 transition-all"
         >
           <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
           <span className="text-xs font-mono text-sessions font-medium shrink-0">
@@ -205,7 +205,7 @@ export function SessionSidebar({
       try {
         const res = await fetch("/api/sessions/history");
         if (!res.ok || !active) return;
-        const data: { id: string; project: string; projectShort: string; modified: number; date: string; agent: string; preview: string }[] = await res.json();
+        const data: { id: string; project: string; projectShort: string; modified: number; date: string; agent: string; preview: string; cost: string | null }[] = await res.json();
         setPastSessions(
           data.map((d) => {
             // Reconstruct the full absolute path — the API strips the leading /
@@ -229,7 +229,7 @@ export function SessionSidebar({
               status: "exited" as const,
               createdAt: d.modified,
               updatedAt: d.modified,
-              meta: d.agent ? { agent: d.agent } : undefined,
+              meta: (d.agent || d.cost) ? { agent: d.agent || undefined, cost: d.cost ?? undefined } : undefined,
               preview: previewText,
             };
           }),
@@ -271,9 +271,21 @@ export function SessionSidebar({
     return [...exitedSessions, ...apiOnly].sort((a, b) => b.createdAt - a.createdAt);
   }, [exitedSessions, pastSessions]);
 
+  const filteredHistory = useMemo(() => {
+    if (!searchQuery.trim()) return allHistorySessions;
+    const q = searchQuery.toLowerCase();
+    return allHistorySessions.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.cwd.toLowerCase().includes(q) ||
+        (s.preview ?? "").toLowerCase().includes(q) ||
+        (s.meta?.agent ?? "").toLowerCase().includes(q),
+    );
+  }, [allHistorySessions, searchQuery]);
+
   const historyGroups = useMemo(
-    () => groupSessionsByDate(allHistorySessions),
-    [allHistorySessions],
+    () => groupSessionsByDate(filteredHistory),
+    [filteredHistory],
   );
 
   // Paused sessions (idle status)
@@ -356,11 +368,21 @@ export function SessionSidebar({
     });
   }, [pausedSessions, searchQuery, pinnedIds, statusFilter]);
 
+  // Group running sessions by sprint team vs standalone
+  const sprintRunning = useMemo(
+    () => filteredRunning.filter((s) => s.meta?.group === "sprint"),
+    [filteredRunning],
+  );
+  const standaloneRunning = useMemo(
+    () => filteredRunning.filter((s) => s.meta?.group !== "sprint"),
+    [filteredRunning],
+  );
+
   return (
     <div className="flex flex-col h-full">
       {/* Segmented tab nav */}
       <div className="px-3 pt-3 pb-2">
-        <div className="flex rounded-md bg-bg-input p-0.5">
+        <div className="flex rounded bg-bg-input p-0.5">
           {(["sessions", "history", "servers"] as const).map((tab) => (
             <button
               key={tab}
@@ -391,7 +413,7 @@ export function SessionSidebar({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search..."
-            className="w-full pl-7 pr-2 py-1.5 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-border-subtle transition-all"
+            className="w-full pl-7 pr-2 py-1.5 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-border-subtle transition-all"
           />
           {searchQuery && (
             <button
@@ -413,7 +435,7 @@ export function SessionSidebar({
               key={filter}
               onClick={() => setStatusFilter(filter)}
               className={cn(
-                "px-2 py-0.5 text-2xs font-medium rounded-full transition-all",
+                "px-2 py-0.5 text-2xs font-medium rounded transition-all",
                 statusFilter === filter
                   ? "bg-sessions/15 text-sessions"
                   : "text-text-tertiary hover:text-text-secondary hover:bg-bg-elevated/50",
@@ -428,34 +450,57 @@ export function SessionSidebar({
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {activeTab === "sessions" && (
           <>
-            {/* RUNNING */}
-            {(statusFilter === "all" || statusFilter === "active") && (
-              <SectionHeader label="Running" count={filteredRunning.length} />
-            )}
             {statusFilter !== "idle" && (
-              <div className="px-1 pb-2 space-y-0.5">
-                {filteredRunning.map((session) => (
-                  <SessionCard
-                    key={session.id}
-                    session={session}
-                    selected={session.id === focusedId}
-                    onSelect={() => setFocused(session.id)}
-                    onKill={() => onKillSession(session.id)}
-                    pinned={pinnedIds.has(session.id)}
-                    onTogglePin={() => togglePin(session.id)}
-                  />
-                ))}
-                {filteredRunning.length === 0 && (
-                  <div className="px-3 py-4 text-center">
-                    <p className="text-xs text-text-secondary">
-                      No running sessions
-                    </p>
-                    <p className="text-xs text-text-tertiary mt-1">
-                      Click &ldquo;New Session&rdquo; below to get started
-                    </p>
-                  </div>
+              <>
+                {/* SPRINT TEAM — shown when any sprint-group sessions exist */}
+                {sprintRunning.length > 0 && (
+                  <>
+                    <SectionHeader label="Sprint Team" count={sprintRunning.length} />
+                    <div className="px-1 pb-2 space-y-0.5">
+                      {sprintRunning.map((session) => (
+                        <SessionCard
+                          key={session.id}
+                          session={session}
+                          selected={session.id === focusedId}
+                          onSelect={() => setFocused(session.id)}
+                          onKill={() => onKillSession(session.id)}
+                          pinned={pinnedIds.has(session.id)}
+                          onTogglePin={() => togglePin(session.id)}
+                        />
+                      ))}
+                    </div>
+                  </>
                 )}
-              </div>
+
+                {/* STANDALONE — shown when there are sessions, or as the default empty state */}
+                <SectionHeader
+                  label={sprintRunning.length > 0 ? "Standalone" : "Running"}
+                  count={standaloneRunning.length}
+                />
+                <div className="px-1 pb-2 space-y-0.5">
+                  {standaloneRunning.map((session) => (
+                    <SessionCard
+                      key={session.id}
+                      session={session}
+                      selected={session.id === focusedId}
+                      onSelect={() => setFocused(session.id)}
+                      onKill={() => onKillSession(session.id)}
+                      pinned={pinnedIds.has(session.id)}
+                      onTogglePin={() => togglePin(session.id)}
+                    />
+                  ))}
+                  {filteredRunning.length === 0 && (
+                    <div className="px-3 py-4 text-center">
+                      <p className="text-xs text-text-secondary">
+                        No running sessions
+                      </p>
+                      <p className="text-xs text-text-tertiary mt-1">
+                        Click &ldquo;New Session&rdquo; below to get started
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
             {/* PAUSED */}
@@ -502,6 +547,10 @@ export function SessionSidebar({
                   </div>
                 </div>
               ))
+            ) : searchQuery.trim() ? (
+              <div className="px-3 py-8 text-center">
+                <p className="text-xs text-text-secondary">No matching sessions</p>
+              </div>
             ) : (
               <div className="px-3 py-8 text-center">
                 <p className="text-xs text-text-secondary font-medium">No session history</p>
@@ -530,7 +579,7 @@ export function SessionSidebar({
           onClick={onNewSession}
           className={cn(
             "flex items-center justify-center gap-1.5 w-full",
-            "px-3 py-1.5 rounded-md",
+            "px-3 py-1.5 rounded",
             "text-xs font-medium",
             "bg-text-primary text-bg-base",
             "hover:bg-text-secondary active:scale-[0.98]",

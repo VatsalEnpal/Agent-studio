@@ -1,0 +1,162 @@
+{
+  "run": 4,
+  "phase": "brain-3-qa-validation",
+  "timestamp": "2026-04-12T23:30:00Z",
+  "purpose": "Verify 10 fixed tasks from Brain 2 batch 3, check for regressions, discover new issues",
+  "verified_fixes": [
+    {
+      "task_id": "TASK-15",
+      "description": "Room close confirmation dialog",
+      "status": "verified",
+      "evidence": "Clicking 'Close room' button on an active room shows confirmation dialog: 'Close room? This will close [room name] and its agent sessions. Chat history is preserved.' with 'Keep open' and 'Close room' buttons.",
+      "screenshot": "qa/audit-results/screenshots/run4-room-close-confirm.png"
+    },
+    {
+      "task_id": "TASK-18",
+      "description": "Continue button shows session context",
+      "status": "verified",
+      "evidence": "New Session modal QUICK START section shows 'Continue InPipeline 0m ago' button with session name and recency. User can tell which session will be resumed.",
+      "screenshot": "qa/audit-results/screenshots/run4-new-session-modal.png"
+    },
+    {
+      "task_id": "TASK-46",
+      "description": "Sprint cancel button with confirmation",
+      "status": "verified",
+      "evidence": "Sprint detail view shows both 'Resume' and 'Cancel' buttons for paused sprint. Clicking Cancel shows inline confirmation 'Cancel sprint?' with 'Confirm' and 'No' buttons. Users can now abandon a problematic sprint.",
+      "screenshot": "qa/audit-results/screenshots/run4-sprint-detail.png"
+    }
+  ],
+  "unable_to_verify": [
+    {
+      "task_id": "TASK-3",
+      "description": "Cost display label/tooltip in top bar",
+      "reason": "No cost display visible. Dollar amount and Limits link only appear with active sessions generating API spend.",
+      "recommendation": "Mark as conditionally verified -- requires active sessions"
+    },
+    {
+      "task_id": "TASK-4",
+      "description": "Process display shows meaningful identifiers",
+      "reason": "No running processes in Running section. Shows 'No running sessions'.",
+      "recommendation": "Mark as conditionally verified -- requires running Claude processes"
+    },
+    {
+      "task_id": "TASK-11",
+      "description": "Limits link opens in new tab with external icon",
+      "reason": "No Limits link visible. Only appears alongside cost display when sessions are running.",
+      "recommendation": "Mark as conditionally verified -- requires active sessions"
+    },
+    {
+      "task_id": "TASK-14",
+      "description": "Kill confirmation dialog",
+      "reason": "No running processes to kill. Cannot test confirmation dialog.",
+      "recommendation": "Mark as conditionally verified -- requires running processes"
+    },
+    {
+      "task_id": "TASK-19",
+      "description": "Per-session cost in sidebar session list",
+      "reason": "No cost values displayed in sidebar History session list. Each entry shows: name, truncated description, time ago, action buttons (Rename, Copy ID, Resume). No dollar amount visible. Possible that cost is only shown for sessions that tracked spend, but none of the 20+ visible sessions show any cost.",
+      "recommendation": "Needs investigation -- may be that cost data is not persisted for historical sessions or the feature is not rendering"
+    },
+    {
+      "task_id": "TASK-38",
+      "description": "No duplicate duration in Running on Machine",
+      "reason": "No running processes displayed.",
+      "recommendation": "Mark as conditionally verified -- requires running processes"
+    }
+  ],
+  "failed_verifications": [
+    {
+      "task_id": "TASK-13",
+      "description": "Session search/filter in sidebar",
+      "status": "FAILED",
+      "severity": "HIGH",
+      "evidence": "Search input exists in the sidebar History tab with clear button appearing when text is entered. However, typing 'drift' into the search field does NOT filter the session list. All 20+ sessions remain visible including sessions named 'InPipeline', 'studio', 'ShipLoop', 'pmo', 'AgentStudio' that should not match 'drift'. The search field is purely cosmetic -- it does not filter results.",
+      "screenshot": "qa/audit-results/screenshots/run4-search-broken.png"
+    }
+  ],
+  "re_verified_previous_fixes": [
+    {
+      "task_id": "TASK-7",
+      "description": "Setup wizard close/dismiss button",
+      "status": "still verified",
+      "evidence": "Re-run Setup Wizard in Settings > Projects opens wizard with X close button ('Close setup (Esc)'). Escape key closes wizard. Skip setup link present."
+    },
+    {
+      "task_id": "TASK-39",
+      "description": "No session button bleed-through",
+      "status": "still verified",
+      "evidence": "Checked Teams, Sprints, Memory, Settings tabs. No 'New Session' button or 'Ready to go' text appears on non-Sessions tabs."
+    },
+    {
+      "task_id": "TASK-40",
+      "description": "Knowledge renamed to Memory",
+      "status": "still verified",
+      "evidence": "Tab labeled 'Memory', sidebar heading 'MEMORY'."
+    },
+    {
+      "task_id": "TASK-41",
+      "description": "Notification toggles amber",
+      "status": "still verified",
+      "evidence": "Toggle switches in Settings > General > Notifications appear amber/orange."
+    }
+  ],
+  "regressions": [],
+  "new_issues": [
+    {
+      "id": "ISSUE-47",
+      "feature": "sessions",
+      "type": "functionality",
+      "severity": "HIGH",
+      "description": "Session search filter in sidebar History tab does not actually filter results. Search input is present with clear button, but typing search text does not hide non-matching sessions. All sessions remain visible regardless of search input. This was marked as fixed (TASK-13) but the filtering logic is broken or missing.",
+      "checklist_item": "Can I search/filter session history?",
+      "status": "open"
+    }
+  ],
+  "existing_issues_still_present": [
+    {
+      "task_id": "TASK-45",
+      "description": "Sessions empty state appears below Dev Servers table in Servers sub-tab",
+      "severity": "LOW",
+      "evidence": "The 'Ready to go.' text and 'New Session' button still appear below the Dev Servers table when viewing the Servers sub-tab."
+    }
+  ],
+  "checks_performed": {
+    "total": 195,
+    "sections_tested": [
+      "Sessions (landing, empty state, new session modal, history, sidebar search, servers, process visibility)",
+      "Teams (room list, room chat, agents sub-tab, close room confirmation, create room dialog)",
+      "Sprints (active sprint, completed sprint, cancel button, confirmation dialog, activity log, overview, gates)",
+      "Memory (category filters, tag filters, search, detail view, action buttons)",
+      "Settings (General, Projects/Workspace, Agents, Dev Servers, Sprint Protocol/Automations, Shortcuts, About)",
+      "Sidebar (Sessions, History, Servers, Dev Servers, search)",
+      "Setup Wizard (open, close with X, close with Escape, skip link)",
+      "New Session Modal (continue button, model selection, agent dropdown, permissions, working directory, session name)",
+      "Design Identity (dark theme, amber accent, font check, border radius, emoji/exclamation, voice/tone, light leaks)",
+      "Cross-cutting (console errors, resource loading, tab navigation, keyboard shortcuts)"
+    ],
+    "fix_verification": {
+      "total_fixes_to_verify": 10,
+      "verified_working": 3,
+      "unable_to_verify": 6,
+      "failed_verification": 1,
+      "regression_found": 0
+    }
+  },
+  "design_identity_compliance": {
+    "dark_theme": "PASS - App consistently dark across all sections. No white or light gray panels/backgrounds.",
+    "amber_accent": "PASS - Amber used for active tab, model selection border, toggle switches, sprint progress, buttons. No inappropriate colors.",
+    "green_semantic": "PASS - Green used only for success/running states (passed gates, active servers, completed sprints).",
+    "monospace_font": "PARTIAL - Geist Mono fonts are loaded via @font-face but CSS body/buttons use system sans-serif fallback (-apple-system). The --font-mono CSS variable is SF Mono/system monospace, not Geist Mono. Visually the app appears monospace due to SF Mono, but not Geist Mono as specified.",
+    "compact_spacing": "PASS - Dense layout with 8-12px padding throughout.",
+    "no_emoji": "PASS - No emoji in UI text (verified via DOM traversal).",
+    "no_exclamation": "PASS - No exclamation marks in UI text (verified via DOM traversal).",
+    "empty_states": "PASS - Matter-of-fact tone: 'Ready to go.', 'No running sessions', 'No memory selected'.",
+    "border_radius": "MINOR - Status dots use rounded-full (expected for circles). Navigation buttons use 6-7px radius instead of max 4px per spec.",
+    "icons_min_16px": "PASS - All interactive icons appear at least 16px.",
+    "section_headers": "PASS - Uppercase headers: RUNNING, ACTIVE, COMPLETED, SETTINGS, MEMORY, SPRINTS.",
+    "voice_consistency": "PASS - Tab labels consistent: Sessions, Teams, Sprints, Memory, Settings.",
+    "no_console_errors": "PASS - No console errors detected during normal tab navigation.",
+    "no_failed_resources": "PASS - All resources loaded successfully."
+  },
+  "summary": "Of the 10 fixes to verify, 3 were verified (TASK-15 room close confirm, TASK-18 continue button context, TASK-46 sprint cancel button). 6 could not be verified due to no running sessions/processes (TASK-3 cost tooltip, TASK-4 process display, TASK-11 limits link, TASK-14 kill confirmation, TASK-19 per-session cost, TASK-38 duration duplicate). 1 fix FAILED verification: TASK-13 session search does not actually filter results -- the search input is cosmetic only. 1 new HIGH issue found (ISSUE-47: search filter broken). No regressions in previously verified fixes. TASK-45 (session empty state below servers) still present (LOW). Design identity is mostly compliant -- all dark, amber accents, no emoji, no exclamation marks -- but Geist Mono font is not actually being applied (system monospace is used instead)."
+}

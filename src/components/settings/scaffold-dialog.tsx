@@ -90,7 +90,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
         className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
         onClick={onCancel}
       />
-      <div className="relative z-10 w-[480px] bg-bg-elevated border border-border-subtle rounded-[8px] shadow-modal overflow-hidden">
+      <div className="relative z-10 w-[480px] bg-bg-elevated border border-border-subtle rounded shadow-modal overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-border-default">
           <div className="flex items-center gap-2">
@@ -130,7 +130,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
         <div className="px-5 py-4 min-h-[280px]">
           {result ? (
             <div className="flex flex-col items-center text-center pt-4 space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-sessions/10 border border-sessions/20 flex items-center justify-center">
+              <div className="w-12 h-12 rounded bg-sessions/10 border border-sessions/20 flex items-center justify-center">
                 <CheckIcon size={24} className="text-sessions" />
               </div>
               <p className="text-xs font-medium text-text-primary">
@@ -145,7 +145,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
               <p className="text-xs text-error">{error}</p>
               <button
                 onClick={() => setError(null)}
-                className="px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-all"
+                className="px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary border border-border-default rounded transition-all"
               >
                 Try Again
               </button>
@@ -181,7 +181,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
           <div className="flex items-center justify-between px-5 py-3 border-t border-border-default">
             <button
               onClick={() => dialogStep === 0 ? onCancel() : setDialogStep((s) => s - 1)}
-              className="flex items-center gap-1 px-2 py-1.5 text-xs text-text-secondary hover:text-text-primary transition-all rounded-md"
+              className="flex items-center gap-1 px-2 py-1.5 text-xs text-text-secondary hover:text-text-primary transition-all rounded"
             >
               {dialogStep === 0 ? "Cancel" : "Back"}
             </button>
@@ -195,7 +195,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
                 onClick={() => setDialogStep((s) => s + 1)}
                 disabled={dialogStep === 0 && selectedAgents.length === 0}
                 className={cn(
-                  "flex items-center gap-1 px-4 py-1.5 text-xs font-semibold rounded-md transition-all",
+                  "flex items-center gap-1 px-4 py-1.5 text-xs font-semibold rounded transition-all",
                   selectedAgents.length > 0 || dialogStep > 0
                     ? "bg-[#f59e0b] text-[#0a0a0a] hover:bg-[#fbbf24] active:scale-[0.98]"
                     : "bg-border-default text-text-ghost cursor-not-allowed",
@@ -208,7 +208,7 @@ export function ScaffoldDialog({ projectPath, onComplete, onCancel }: ScaffoldDi
               <button
                 onClick={() => void handleCreate()}
                 disabled={creating}
-                className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-md bg-sessions text-bg-base hover:bg-sessions/90 transition-all disabled:opacity-50"
+                className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded bg-sessions text-bg-base hover:bg-sessions/90 transition-all disabled:opacity-50"
               >
                 {creating ? "Creating..." : "Create"}
               </button>
@@ -246,7 +246,7 @@ function DialogAgentsStep({
           <label
             key={agent.id}
             className={cn(
-              "flex items-center gap-2.5 px-3 py-2 rounded-md border cursor-pointer transition-all",
+              "flex items-center gap-2.5 px-3 py-2 rounded border cursor-pointer transition-all",
               selectedAgents.includes(agent.id)
                 ? "bg-[#f59e0b]/5 border-[#f59e0b]/30"
                 : "bg-transparent border-border-default hover:border-border-subtle",
@@ -270,13 +270,13 @@ function DialogAgentsStep({
       <div className="flex items-center gap-2">
         <button
           onClick={() => setSelectedAgents(AVAILABLE_AGENTS.map((a) => a.id))}
-          className="px-2 py-1 text-xs text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-all"
+          className="px-2 py-1 text-xs text-text-secondary hover:text-text-primary border border-border-default rounded transition-all"
         >
           All
         </button>
         <button
           onClick={() => setSelectedAgents([])}
-          className="px-2 py-1 text-xs text-text-secondary hover:text-text-primary border border-border-default rounded-md transition-all"
+          className="px-2 py-1 text-xs text-text-secondary hover:text-text-primary border border-border-default rounded transition-all"
         >
           None
         </button>
@@ -316,7 +316,7 @@ function DialogWorkflowStep({
           <label
             key={opt.id}
             className={cn(
-              "flex items-start gap-2.5 px-3 py-2.5 rounded-md border cursor-pointer transition-all",
+              "flex items-start gap-2.5 px-3 py-2.5 rounded border cursor-pointer transition-all",
               workflow === opt.id
                 ? "bg-[#f59e0b]/5 border-[#f59e0b]/30"
                 : "bg-transparent border-border-default hover:border-border-subtle",
@@ -367,7 +367,7 @@ function DialogAutomationStep({
       <div className="space-y-2">
         <label
           className={cn(
-            "flex items-start gap-2.5 px-3 py-2.5 rounded-md border cursor-pointer transition-all",
+            "flex items-start gap-2.5 px-3 py-2.5 rounded border cursor-pointer transition-all",
             telegramEnabled
               ? "bg-[#f59e0b]/5 border-[#f59e0b]/30"
               : "bg-transparent border-border-default hover:border-border-subtle",
@@ -388,7 +388,7 @@ function DialogAutomationStep({
         </label>
         <label
           className={cn(
-            "flex items-start gap-2.5 px-3 py-2.5 rounded-md border cursor-pointer transition-all",
+            "flex items-start gap-2.5 px-3 py-2.5 rounded border cursor-pointer transition-all",
             schedulerEnabled
               ? "bg-[#f59e0b]/5 border-[#f59e0b]/30"
               : "bg-transparent border-border-default hover:border-border-subtle",
@@ -418,7 +418,7 @@ function DialogAutomationStep({
               max={24}
               value={schedulerInterval}
               onChange={(e) => setSchedulerInterval(parseInt(e.target.value, 10) || 2)}
-              className="w-16 px-2 py-1 text-xs font-mono bg-bg-input border border-border-default rounded-md text-text-primary focus:border-[#f59e0b]/40 focus:outline-none"
+              className="w-16 px-2 py-1 text-xs font-mono bg-bg-input border border-border-default rounded text-text-primary focus:border-[#f59e0b]/40 focus:outline-none"
             />
           </div>
         )}

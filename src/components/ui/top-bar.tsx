@@ -82,9 +82,10 @@ export function TitleBar({ sessionName, sessionCount, totalCost }: TitleBarProps
       <div className="absolute right-4 flex items-center gap-3">
         {totalCost != null && totalCost > 0 && (
           <span
-            className="text-xs font-mono text-sprints/70"
-            title="Total spend this session"
+            className="text-xs font-mono text-sprints/70 flex items-center gap-1"
+            title="Total API spend across all active sessions"
           >
+            <span className="text-text-ghost/50 text-2xs">Spend</span>
             ${totalCost.toFixed(2)}
           </span>
         )}
