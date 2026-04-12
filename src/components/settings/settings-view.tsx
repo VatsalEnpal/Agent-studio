@@ -35,7 +35,7 @@ const TABS: { id: SettingsTab; label: string; icon: React.ComponentType<{ size?:
   { id: "projects", label: "Projects", icon: FolderIcon, desc: "Tracked repos and agent system" },
   { id: "agents", label: "Agents", icon: UserIcon, desc: "Discovered agent definitions" },
   { id: "dev-servers", label: "Dev Servers", icon: MonitorIcon, desc: "Server monitoring and ports" },
-  { id: "sprint-protocol", label: "Sprint Protocol", icon: SprintsIcon, desc: "PMO rules and automations" },
+  { id: "sprint-protocol", label: "Automations", icon: SprintsIcon, desc: "Sprint protocol, PMO scans, scheduled tasks" },
   { id: "shortcuts", label: "Shortcuts", icon: BoltIcon, desc: "Keyboard shortcuts reference" },
   { id: "about", label: "About", icon: InfoIcon, desc: "Version and system info" },
 ];
