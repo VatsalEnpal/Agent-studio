@@ -271,9 +271,21 @@ export function SessionSidebar({
     return [...exitedSessions, ...apiOnly].sort((a, b) => b.createdAt - a.createdAt);
   }, [exitedSessions, pastSessions]);
 
+  const filteredHistory = useMemo(() => {
+    if (!searchQuery.trim()) return allHistorySessions;
+    const q = searchQuery.toLowerCase();
+    return allHistorySessions.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.cwd.toLowerCase().includes(q) ||
+        (s.preview ?? "").toLowerCase().includes(q) ||
+        (s.meta?.agent ?? "").toLowerCase().includes(q),
+    );
+  }, [allHistorySessions, searchQuery]);
+
   const historyGroups = useMemo(
-    () => groupSessionsByDate(allHistorySessions),
-    [allHistorySessions],
+    () => groupSessionsByDate(filteredHistory),
+    [filteredHistory],
   );
 
   // Paused sessions (idle status)
@@ -502,6 +514,10 @@ export function SessionSidebar({
                   </div>
                 </div>
               ))
+            ) : searchQuery.trim() ? (
+              <div className="px-3 py-8 text-center">
+                <p className="text-xs text-text-secondary">No matching sessions</p>
+              </div>
             ) : (
               <div className="px-3 py-8 text-center">
                 <p className="text-xs text-text-secondary font-medium">No session history</p>
