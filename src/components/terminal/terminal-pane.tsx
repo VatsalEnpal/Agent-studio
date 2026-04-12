@@ -140,7 +140,7 @@ export function TerminalPane({
     const term = new Terminal({
       cursorBlink: true,
       fontSize: 13,
-      fontFamily: "Menlo, Consolas, 'Courier New', monospace",
+      fontFamily: "'Geist Mono', Menlo, Consolas, 'Courier New', monospace",
       theme: {
         background: "#0a0a0a",
         foreground: "#cccccc",

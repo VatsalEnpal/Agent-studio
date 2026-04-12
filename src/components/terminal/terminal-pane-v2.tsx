@@ -32,7 +32,7 @@ function getOrCreateTerminal(sessionId: string): TerminalEntry {
   const term = new Terminal({
     cursorBlink: true,
     fontSize: 13,
-    fontFamily: "'SF Mono', SFMono-Regular, ui-monospace, Menlo, monospace",
+    fontFamily: "'Geist Mono', 'SF Mono', SFMono-Regular, ui-monospace, Menlo, monospace",
     theme: {
       background: "#050505",
       foreground: "#d4d4d4",
