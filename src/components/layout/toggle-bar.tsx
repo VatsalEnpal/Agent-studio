@@ -73,9 +73,11 @@ function PeakHoursIndicator() {
             info.isPeak ? "bg-red-400 animate-pulse" : "bg-emerald-400",
           )}
         />
-        {info.isPeak
-          ? `Peak until ${info.peakEnd}`
-          : `Off-Peak`}
+        <span className="whitespace-nowrap">
+          {info.isPeak
+            ? `API: Peak until ${info.peakEnd}`
+            : `API: Off-Peak`}
+        </span>
       </div>
 
       {/* Tooltip */}
@@ -84,7 +86,7 @@ function PeakHoursIndicator() {
           {info.isPeak ? "Peak Hours Active" : "Off-Peak Hours"}
         </p>
         <p className="text-2xs text-text-secondary leading-relaxed mb-2">
-          Anthropic throttles during peak (14:00-20:00 Berlin). Expect slower responses.
+          Anthropic API has rate limits that vary by time of day. During peak hours (14:00-20:00 Berlin / 5am-11am PT), expect slower responses and tighter throttling.
         </p>
         <div className="flex items-center justify-between text-2xs">
           <span className="text-text-tertiary">Berlin time</span>
