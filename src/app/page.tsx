@@ -696,34 +696,42 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Terminal or empty state — always mounted so terminal doesn't lose state */}
+              {/* Terminal or empty state.
+                  The empty state only renders when sessions mode is active —
+                  it has no xterm container that needs to stay mounted, so
+                  hiding it via conditional render prevents it from bleeding
+                  through to other tabs (the wrapper uses visibility:hidden
+                  instead of display:none to keep xterm measurable, but the
+                  empty state has no such requirement). */}
               {nonRoomSessions.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full gap-4">
-                  <div className="text-center space-y-2">
-                    <p className="text-xs font-medium text-text-secondary">
-                      Ready to go.
-                    </p>
-                    <p className="text-xs text-text-tertiary max-w-sm">
-                      Launch a session to start working with Claude. Press{" "}
-                      <kbd className="px-1 py-0.5 rounded-[3px] bg-bg-input text-text-ghost text-2xs border border-border-default">
-                        Cmd+N
-                      </kbd>{" "}
-                      for the launcher.
-                    </p>
+                activeMode === "sessions" ? (
+                  <div className="flex flex-col items-center justify-center h-full gap-4">
+                    <div className="text-center space-y-2">
+                      <p className="text-xs font-medium text-text-secondary">
+                        Ready to go.
+                      </p>
+                      <p className="text-xs text-text-tertiary max-w-sm">
+                        Launch a session to start working with Claude. Press{" "}
+                        <kbd className="px-1 py-0.5 rounded-[3px] bg-bg-input text-text-ghost text-2xs border border-border-default">
+                          Cmd+N
+                        </kbd>{" "}
+                        for the launcher.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setLauncherOpen(true)}
+                      className={cn(
+                        "px-4 py-1.5 rounded-[4px]",
+                        "text-xs font-medium",
+                        "bg-text-primary text-bg-base",
+                        "hover:bg-text-secondary",
+                        "transition-all duration-150",
+                      )}
+                    >
+                      New Session
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setLauncherOpen(true)}
-                    className={cn(
-                      "px-4 py-1.5 rounded-[5px]",
-                      "text-xs font-medium",
-                      "bg-text-primary text-bg-base",
-                      "hover:bg-text-secondary",
-                      "transition-all duration-150",
-                    )}
-                  >
-                    New Session
-                  </button>
-                </div>
+                ) : null
               ) : (
                 <ErrorBoundary fallbackLabel="Terminal error">
                   <div className="flex flex-col h-full">
