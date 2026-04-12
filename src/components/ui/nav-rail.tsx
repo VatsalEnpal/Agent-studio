@@ -6,6 +6,7 @@ import {
   RoomsIcon,
   SprintsIcon,
   MemoryIcon,
+  FileIcon,
   SettingsIcon,
 } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ export type NavPage =
   | "teams"
   | "sprints"
   | "knowledge"
+  | "reports"
   | "settings";
 
 interface NavItem {
@@ -45,6 +47,7 @@ const pillarAccent: Record<string, string> = {
   teams: "text-rooms",
   sprints: "text-sprints",
   knowledge: "text-memory",
+  reports: "text-text-secondary",
 };
 
 /** Accent-colored dot backgrounds for unread indicators */
@@ -53,6 +56,7 @@ const accentDot: Record<string, string> = {
   teams: "bg-rooms",
   sprints: "bg-sprints",
   knowledge: "bg-memory",
+  reports: "bg-text-secondary",
 };
 
 // ---------------------------------------------------------------------------
@@ -64,6 +68,7 @@ const sectionItems: Omit<NavItem, "badge">[] = [
   { id: "teams", label: "Teams", icon: RoomsIcon, accent: "teams" },
   { id: "sprints", label: "Sprints", icon: SprintsIcon, accent: "sprints" },
   { id: "knowledge", label: "Memory", icon: MemoryIcon, accent: "knowledge" },
+  { id: "reports", label: "Reports", icon: FileIcon, accent: "reports" },
 ];
 
 /** Keyboard shortcut hints for nav tooltips */
@@ -72,6 +77,7 @@ const navShortcuts: Record<NavPage, string> = {
   teams: "\u2318 2",
   sprints: "\u2318 3",
   knowledge: "\u2318 4",
+  reports: "\u2318 5",
   settings: "\u2318 ,",
 };
 

@@ -458,6 +458,7 @@ export default function PageV2() {
         teams: "teams",
         sprints: "sprints",
         knowledge: "memory",
+        reports: "reports",
         settings: "settings",
       };
       setActiveMode(

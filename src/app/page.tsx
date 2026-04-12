@@ -82,7 +82,7 @@ const modeToNav: Record<ActiveMode, NavPage | null> = {
   sessions: "sessions",
   teams: "teams",
   sprints: "sprints",
-  reports: null,
+  reports: "reports",
   memory: "knowledge",
   settings: "settings",
 };
@@ -92,6 +92,7 @@ const navToMode: Record<NavPage, ActiveMode> = {
   teams: "teams",
   sprints: "sprints",
   knowledge: "memory",
+  reports: "reports",
   settings: "settings",
 };
 
