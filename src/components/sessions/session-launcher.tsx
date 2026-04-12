@@ -249,6 +249,33 @@ export function SessionLauncher({
     [],
   );
 
+  const handlePresetLaunch = useCallback(
+    async (preset: LauncherPreset & { name: string }) => {
+      if (launching) return;
+      setLaunching(true);
+      setError(null);
+      applyPreset(preset);
+      try {
+        const sessionName =
+          preset.agent !== "none" ? preset.agent : `claude-${preset.model}`;
+        await onLaunch({
+          name: sessionName,
+          model: preset.model,
+          agent: preset.agent,
+          permissions: preset.permissions,
+          channel: preset.channel,
+          cwd: preset.cwd,
+        });
+        onOpenChange(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Launch failed");
+      } finally {
+        setLaunching(false);
+      }
+    },
+    [launching, applyPreset, onLaunch, onOpenChange],
+  );
+
   const handleLaunch = useCallback(async () => {
     if (launching) return;
     setLaunching(true);
@@ -471,7 +498,7 @@ export function SessionLauncher({
                   return (
                     <button
                       key={preset.name}
-                      onClick={() => applyPreset(preset)}
+                      onClick={() => handlePresetLaunch(preset)}
                       disabled={launching}
                       className={cn(
                         "flex flex-col items-center gap-1.5 p-2.5 rounded border transition-all shadow-card hover:shadow-card-hover",
