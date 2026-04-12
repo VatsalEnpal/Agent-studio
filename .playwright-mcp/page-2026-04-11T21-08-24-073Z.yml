@@ -1,0 +1,361 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - button "Sessions" [ref=e6] [cursor=pointer]:
+          - img [ref=e7]
+          - text: Sessions
+        - button "Teams" [ref=e10] [cursor=pointer]:
+          - img [ref=e11]
+          - text: Teams
+        - button "Memory" [ref=e16] [cursor=pointer]:
+          - img [ref=e17]
+          - text: Memory
+        - button "Settings" [ref=e25] [cursor=pointer]:
+          - img [ref=e26]
+          - text: Settings
+      - generic [ref=e29]:
+        - generic "Total cost across all active sessions today" [ref=e30]:
+          - img [ref=e31]
+          - generic [ref=e33]: $137.3
+        - generic [ref=e123]:
+          - button "22% | 23.6/24GB" [ref=e2861] [cursor=pointer]:
+            - img [ref=e125]
+            - generic [ref=e128]: 22%
+            - generic [ref=e129]: "|"
+            - img [ref=e130]
+            - generic [ref=e132]: 23.6/24GB
+          - generic:
+            - paragraph: System Resources
+            - generic:
+              - generic:
+                - generic: CPU usage
+                - generic: 22%
+              - generic:
+                - generic: Memory
+                - generic: 23.6 / 24 GB (98%)
+            - paragraph: Click for full system monitor in Settings.
+        - link "Limits" [ref=e34] [cursor=pointer]:
+          - /url: https://claude.ai/settings/usage
+          - img [ref=e35]
+          - generic [ref=e38]: Limits
+          - img [ref=e39]
+        - button "Fullscreen (Cmd+Shift+F)" [ref=e43] [cursor=pointer]:
+          - img [ref=e44]
+        - generic [ref=e49]:
+          - generic [ref=e50]: "API: Off-Peak"
+          - generic:
+            - paragraph: Off-Peak — Normal Speed
+            - paragraph: Anthropic API rate limits are stricter during peak hours (5am-11am Pacific). Expect slower responses and more throttling during peak.
+            - generic:
+              - generic: Peak window (your time)
+              - generic: 20:00-02:00
+        - button "Help & Guide" [ref=e52] [cursor=pointer]:
+          - img [ref=e53]
+        - generic [ref=e56]: agent-studio
+    - generic [ref=e57]:
+      - complementary [ref=e58]:
+        - generic [ref=e59]:
+          - button "New Session" [ref=e60] [cursor=pointer]:
+            - img [ref=e61]
+            - text: New Session
+          - button "Collapse sidebar" [ref=e62] [cursor=pointer]:
+            - img [ref=e63]
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - button "Sessions 0" [ref=e68] [cursor=pointer]:
+              - img [ref=e69]
+              - generic [ref=e71]: Sessions
+              - generic [ref=e72]: "0"
+            - paragraph [ref=e74]: Click + New Session to start
+          - generic [ref=e75]:
+            - button "Servers 1" [ref=e133] [cursor=pointer]:
+              - img [ref=e77]
+              - generic [ref=e79]: Servers
+              - generic [ref=e80]: "1"
+            - generic [ref=e81]:
+              - 'generic "/Users/vatsalbhatt230813/Code/AgentStudio Port: 8080 PID: 31394" [ref=e134]':
+                - generic [ref=e136]: agent-studiothis app
+                - button ":8080" [ref=e137] [cursor=pointer]:
+                  - text: :8080
+                  - img [ref=e138]
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/agent-console" [ref=e142]:
+                - generic [ref=e144]: agent-studio
+                - button "Start" [ref=e145] [cursor=pointer]:
+                  - img [ref=e146]
+                  - text: Start
+              - generic "/Users/vatsalbhatt230813/Code/staging-frontend" [ref=e148]:
+                - generic [ref=e150]: staging-frontend
+                - button "Start" [ref=e151] [cursor=pointer]:
+                  - img [ref=e152]
+                  - text: Start
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/enpal-energy-vnb-portal" [ref=e154]:
+                - generic [ref=e156]: enpal-energy-vnb-portal
+                - button "Start" [ref=e157] [cursor=pointer]:
+                  - img [ref=e158]
+                  - text: Start
+              - button "Add Server" [ref=e82] [cursor=pointer]:
+                - img [ref=e83]
+                - text: Add Server
+          - generic [ref=e160]:
+            - button "Running on Machine 2" [active] [ref=e161] [cursor=pointer]:
+              - img [ref=e162]
+              - generic [ref=e164]: Running on Machine
+              - generic [ref=e165]: "2"
+            - generic [ref=e2862]:
+              - 'generic "PID 17478 Command: claude --dangerously-skip-permissions Cwd: / Started: Sat Apr 11 18:41:45 2026" [ref=e2863]':
+                - generic [ref=e2864]:
+                  - img [ref=e2865]
+                  - generic [ref=e2868]: opus
+                  - generic [ref=e2869]:
+                    - img [ref=e2870]
+                    - text: 4h 26m
+                  - button "Kill process 17478" [ref=e2873] [cursor=pointer]:
+                    - img [ref=e2874]
+                - generic [ref=e2877]:
+                  - generic [ref=e2878]: $119.9
+                  - generic [ref=e2879]: running 4h 26m
+              - 'generic "PID 84369 Command: claude --dangerously-skip-permissions Cwd: / Started: Sat Apr 11 21:50:58 2026" [ref=e2880]':
+                - generic [ref=e2881]:
+                  - img [ref=e2882]
+                  - generic [ref=e2885]: opus
+                  - generic [ref=e2886]:
+                    - img [ref=e2887]
+                    - text: 1h 17m
+                  - button "Kill process 84369" [ref=e2890] [cursor=pointer]:
+                    - img [ref=e2891]
+                - generic [ref=e2894]:
+                  - generic [ref=e2895]: $17.4
+                  - generic [ref=e2896]: running 1h 17m
+          - button "Recent Sessions 20" [ref=e167] [cursor=pointer]:
+            - img [ref=e168]
+            - generic [ref=e170]: Recent Sessions
+            - generic [ref=e171]: "20"
+          - generic [ref=e85]:
+            - button "Repos 2" [ref=e172] [cursor=pointer]:
+              - img [ref=e87]
+              - generic [ref=e89]: Repos
+              - generic [ref=e90]: "2"
+            - generic [ref=e173]:
+              - generic "/Users/vatsalbhatt230813/Code/staging-frontend" [ref=e174] [cursor=pointer]:
+                - generic [ref=e175]:
+                  - img [ref=e176]
+                  - generic [ref=e178]: staging-frontend
+                  - generic [ref=e179]: staging/frontend
+                  - generic "Clean" [ref=e180]
+                - generic [ref=e181]:
+                  - button "View Changes" [ref=e182]:
+                    - img [ref=e183]
+                  - button "Commit" [ref=e186]:
+                    - img [ref=e187]
+                  - button "Push" [ref=e189]:
+                    - img [ref=e190]
+                  - button "Create Pull Request" [ref=e193]:
+                    - img [ref=e194]
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/enpal-energy-vnb-portal" [ref=e198] [cursor=pointer]:
+                - generic [ref=e199]:
+                  - img [ref=e200]
+                  - generic [ref=e202]: enpal-energy-vnb-portal (PROD)
+                  - generic [ref=e203]: PROD
+                  - generic [ref=e204]: main
+                  - generic "1 changed files" [ref=e205]
+                - generic [ref=e206]:
+                  - button "View Changes" [ref=e207]:
+                    - img [ref=e208]
+                  - button "Push (PROD - requires confirmation)" [ref=e211]:
+                    - img [ref=e212]
+                  - button "Create Pull Request" [ref=e215]:
+                    - img [ref=e216]
+      - main [ref=e91]:
+        - generic [ref=e455]:
+          - generic [ref=e456]:
+            - generic [ref=e457]:
+              - button "Rooms" [ref=e458] [cursor=pointer]
+              - button "Sprints" [ref=e459] [cursor=pointer]
+            - button "New Sprint" [ref=e2520] [cursor=pointer]:
+              - img [ref=e2521]
+              - text: New Sprint
+            - generic [ref=e2522]:
+              - heading "Workflows" [level=3] [ref=e2524]
+              - generic [ref=e2526]:
+                - generic [ref=e2527]:
+                  - img [ref=e2528]
+                  - generic [ref=e2533]: Sprint Planning
+                  - generic [ref=e2534]: 6 runs
+                - generic [ref=e2535]:
+                  - button "Code Quality + Security Cleanup 11 Apr Waiting 3/8 steps 6 agents" [ref=e2536] [cursor=pointer]:
+                    - generic [ref=e2537]:
+                      - img [ref=e2538]
+                      - generic [ref=e2541]: Code Quality + Security Cleanup
+                      - generic [ref=e2542]: 11 Apr
+                    - generic [ref=e2543]:
+                      - generic [ref=e2544]: Waiting
+                      - generic [ref=e2545]: 3/8 steps
+                      - generic [ref=e2546]: 6 agents
+                  - button "Portal V3 Otp Pagination Csv 18 Mar Completed 8/8 steps 6 agents" [ref=e2549] [cursor=pointer]:
+                    - generic [ref=e2550]:
+                      - img [ref=e2551]
+                      - generic [ref=e2553]: Portal V3 Otp Pagination Csv
+                      - generic [ref=e2554]: 18 Mar
+                    - generic [ref=e2555]:
+                      - generic [ref=e2556]: Completed
+                      - generic [ref=e2557]: 8/8 steps
+                      - generic [ref=e2558]: 6 agents
+                  - button "Portal V2 Dynamic Config 18 Mar Completed 8/8 steps 6 agents" [ref=e2561] [cursor=pointer]:
+                    - generic [ref=e2562]:
+                      - img [ref=e2563]
+                      - generic [ref=e2565]: Portal V2 Dynamic Config
+                      - generic [ref=e2566]: 18 Mar
+                    - generic [ref=e2567]:
+                      - generic [ref=e2568]: Completed
+                      - generic [ref=e2569]: 8/8 steps
+                      - generic [ref=e2570]: 6 agents
+                  - button "Auth Flow Redesign 16 Mar Completed 8/8 steps 6 agents" [ref=e2573] [cursor=pointer]:
+                    - generic [ref=e2574]:
+                      - img [ref=e2575]
+                      - generic [ref=e2577]: Auth Flow Redesign
+                      - generic [ref=e2578]: 16 Mar
+                    - generic [ref=e2579]:
+                      - generic [ref=e2580]: Completed
+                      - generic [ref=e2581]: 8/8 steps
+                      - generic [ref=e2582]: 6 agents
+                  - button "Table Design Overhaul 15 Mar Completed 8/8 steps 5 agents" [ref=e2585] [cursor=pointer]:
+                    - generic [ref=e2586]:
+                      - img [ref=e2587]
+                      - generic [ref=e2589]: Table Design Overhaul
+                      - generic [ref=e2590]: 15 Mar
+                    - generic [ref=e2591]:
+                      - generic [ref=e2592]: Completed
+                      - generic [ref=e2593]: 8/8 steps
+                      - generic [ref=e2594]: 5 agents
+                  - button "Column Header Tooltips 15 Mar Completed 8/8 steps 4 agents" [ref=e2597] [cursor=pointer]:
+                    - generic [ref=e2598]:
+                      - img [ref=e2599]
+                      - generic [ref=e2601]: Column Header Tooltips
+                      - generic [ref=e2602]: 15 Mar
+                    - generic [ref=e2603]:
+                      - generic [ref=e2604]: Completed
+                      - generic [ref=e2605]: 8/8 steps
+                      - generic [ref=e2606]: 4 agents
+              - generic [ref=e2610]:
+                - heading "System" [level=4] [ref=e2611]
+                - generic [ref=e2612]:
+                  - img [ref=e2614]
+                  - generic [ref=e2616]: Avg Context
+                  - generic [ref=e2617]: 18%
+                - generic [ref=e2618]:
+                  - img [ref=e2620]
+                  - generic [ref=e2623]: Tokens
+                  - generic [ref=e2624]: 65.80M
+                - generic [ref=e2626]:
+                  - img [ref=e2628]
+                  - generic [ref=e2636]: Memory
+                  - generic [ref=e2637]: 109 entries
+                - generic [ref=e2638]:
+                  - img [ref=e2640]
+                  - generic [ref=e2642]: Sessions
+                  - generic [ref=e2643]: 0 active
+                - generic [ref=e2644]:
+                  - heading "PMO Scheduler" [level=4] [ref=e2645]
+                  - generic [ref=e2646]:
+                    - img [ref=e2648]
+                    - generic [ref=e2650]: Status
+                    - generic [ref=e2651]: Running (every 2h)
+                  - generic [ref=e2653]:
+                    - img [ref=e2655]
+                    - generic [ref=e2658]: Last Scan
+                    - generic [ref=e2659]: 6m ago — INFO
+                  - generic [ref=e2660]:
+                    - generic [ref=e2661]: Next Scan
+                    - generic [ref=e2662]: in 1h 54m
+                  - generic [ref=e2663]:
+                    - button "Pause" [ref=e2664] [cursor=pointer]:
+                      - img [ref=e2665]
+                      - text: Pause
+                    - button "Scan Now" [ref=e2668] [cursor=pointer]:
+                      - img [ref=e2669]
+                      - text: Scan Now
+          - generic [ref=e2674]:
+            - generic [ref=e2675]:
+              - generic [ref=e2676]:
+                - heading "Code Quality + Security Cleanup" [level=2] [ref=e2678]
+                - generic [ref=e2679]: Waiting
+                - generic [ref=e2680]:
+                  - button "Pause" [ref=e2681] [cursor=pointer]:
+                    - img [ref=e2682]
+                    - text: Pause
+                  - button "Cancel" [ref=e2685] [cursor=pointer]:
+                    - img [ref=e2686]
+                    - text: Cancel
+              - generic [ref=e2690]:
+                - generic [ref=e2691]: 11 Apr 2026
+                - generic [ref=e2692]: 3/8 steps
+                - generic [ref=e2693]: 6 agents
+            - generic [ref=e2699]:
+              - button "PMO Scan pmo" [ref=e2704] [cursor=pointer]:
+                - img [ref=e2706]
+                - generic [ref=e2708]: PMO Scan
+                - generic [ref=e2710]: pmo
+                - img [ref=e2711]
+              - button "Readiness Report pmo" [ref=e2717] [cursor=pointer]:
+                - img [ref=e2719]
+                - generic [ref=e2721]: Readiness Report
+                - generic [ref=e2723]: pmo
+                - img [ref=e2724]
+              - button "Sprint Approval" [ref=e2730] [cursor=pointer]:
+                - img [ref=e2732]
+                - generic [ref=e2735]: Sprint Approval
+                - img [ref=e2736]
+              - 'button "Phase 0: Design & Spec orchestrator backend frontend qa security" [ref=e2742] [cursor=pointer]':
+                - img [ref=e2744]
+                - generic [ref=e2746]: "Phase 0: Design & Spec"
+                - generic [ref=e2747]:
+                  - generic [ref=e2748]: orchestrator
+                  - generic [ref=e2749]: backend
+                  - generic [ref=e2750]: frontend
+                  - generic [ref=e2751]: qa
+                  - generic [ref=e2752]: security
+                - img [ref=e2753]
+              - 'button "Gate 1: Backend Build backend security" [disabled] [ref=e2758]':
+                - img [ref=e2760]
+                - generic [ref=e2762]: "Gate 1: Backend Build"
+                - generic [ref=e2763]:
+                  - generic [ref=e2764]: backend
+                  - generic [ref=e2765]: security
+              - 'button "Gate 2: Frontend Build frontend security" [disabled] [ref=e2769]':
+                - img [ref=e2771]
+                - generic [ref=e2773]: "Gate 2: Frontend Build"
+                - generic [ref=e2774]:
+                  - generic [ref=e2775]: frontend
+                  - generic [ref=e2776]: security
+              - 'button "Gate 3: QA Testing qa" [disabled] [ref=e2780]':
+                - img [ref=e2782]
+                - generic [ref=e2784]: "Gate 3: QA Testing"
+                - generic [ref=e2786]: qa
+              - 'button "Ship: Deploy & Archive orchestrator" [disabled] [ref=e2790]':
+                - img [ref=e2792]
+                - generic [ref=e2794]: "Ship: Deploy & Archive"
+                - generic [ref=e2796]: orchestrator
+    - contentinfo [ref=e110]:
+      - generic [ref=e112]: No sessions
+      - generic [ref=e113]:
+        - generic [ref=e114]:
+          - generic [ref=e115]: Cmd
+          - generic [ref=e116]: K
+          - generic [ref=e117]: commands
+        - generic [ref=e118]:
+          - generic [ref=e119]: Cmd
+          - generic [ref=e120]: "N"
+          - generic [ref=e121]: new session
+  - generic [ref=e224] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e225]:
+      - img [ref=e226]
+    - generic [ref=e229]:
+      - button "Open issues overlay" [ref=e230]:
+        - generic [ref=e231]:
+          - generic [ref=e232]: "0"
+          - generic [ref=e233]: "1"
+        - generic [ref=e234]: Issue
+      - button "Collapse issues badge" [ref=e235]:
+        - img [ref=e236]
+  - alert [ref=e122]

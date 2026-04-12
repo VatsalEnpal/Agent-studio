@@ -1,0 +1,421 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - button "Sessions" [ref=e6] [cursor=pointer]:
+          - img [ref=e7]
+          - text: Sessions
+        - button "Teams" [active] [ref=e10] [cursor=pointer]:
+          - img [ref=e11]
+          - text: Teams
+        - button "Memory" [ref=e16] [cursor=pointer]:
+          - img [ref=e17]
+          - text: Memory
+        - button "Settings" [ref=e25] [cursor=pointer]:
+          - img [ref=e26]
+          - text: Settings
+      - generic [ref=e29]:
+        - generic "Total cost across all active sessions today" [ref=e30]:
+          - img [ref=e31]
+          - generic [ref=e33]: $137.3
+        - generic [ref=e123]:
+          - button "22% | 23.8/24GB" [ref=e239] [cursor=pointer]:
+            - img [ref=e125]
+            - generic [ref=e128]: 22%
+            - generic [ref=e129]: "|"
+            - img [ref=e130]
+            - generic [ref=e132]: 23.8/24GB
+          - generic:
+            - paragraph: System Resources
+            - generic:
+              - generic:
+                - generic: CPU usage
+                - generic: 22%
+              - generic:
+                - generic: Memory
+                - generic: 23.8 / 24 GB (99%)
+            - paragraph: Click for full system monitor in Settings.
+        - link "Limits" [ref=e34] [cursor=pointer]:
+          - /url: https://claude.ai/settings/usage
+          - img [ref=e35]
+          - generic [ref=e38]: Limits
+          - img [ref=e39]
+        - button "Fullscreen (Cmd+Shift+F)" [ref=e43] [cursor=pointer]:
+          - img [ref=e44]
+        - generic [ref=e49]:
+          - generic [ref=e50]: "API: Off-Peak"
+          - generic:
+            - paragraph: Off-Peak — Normal Speed
+            - paragraph: Anthropic API rate limits are stricter during peak hours (5am-11am Pacific). Expect slower responses and more throttling during peak.
+            - generic:
+              - generic: Peak window (your time)
+              - generic: 20:00-02:00
+        - button "Help & Guide" [ref=e52] [cursor=pointer]:
+          - img [ref=e53]
+        - generic [ref=e56]: agent-studio
+    - generic [ref=e57]:
+      - complementary [ref=e58]:
+        - generic [ref=e59]:
+          - button "New Session" [ref=e60] [cursor=pointer]:
+            - img [ref=e61]
+            - text: New Session
+          - button "Collapse sidebar" [ref=e62] [cursor=pointer]:
+            - img [ref=e63]
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - button "Sessions 0" [ref=e68] [cursor=pointer]:
+              - img [ref=e69]
+              - generic [ref=e71]: Sessions
+              - generic [ref=e72]: "0"
+            - paragraph [ref=e74]: Click + New Session to start
+          - generic [ref=e75]:
+            - button "Servers 1" [ref=e133] [cursor=pointer]:
+              - img [ref=e77]
+              - generic [ref=e79]: Servers
+              - generic [ref=e80]: "1"
+            - generic [ref=e81]:
+              - 'generic "/Users/vatsalbhatt230813/Code/AgentStudio Port: 8080 PID: 31394" [ref=e134]':
+                - generic [ref=e136]: agent-studiothis app
+                - button ":8080" [ref=e137] [cursor=pointer]:
+                  - text: :8080
+                  - img [ref=e138]
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/agent-console" [ref=e142]:
+                - generic [ref=e144]: agent-studio
+                - button "Start" [ref=e145] [cursor=pointer]:
+                  - img [ref=e146]
+                  - text: Start
+              - generic "/Users/vatsalbhatt230813/Code/staging-frontend" [ref=e148]:
+                - generic [ref=e150]: staging-frontend
+                - button "Start" [ref=e151] [cursor=pointer]:
+                  - img [ref=e152]
+                  - text: Start
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/enpal-energy-vnb-portal" [ref=e154]:
+                - generic [ref=e156]: enpal-energy-vnb-portal
+                - button "Start" [ref=e157] [cursor=pointer]:
+                  - img [ref=e158]
+                  - text: Start
+              - button "Add Server" [ref=e82] [cursor=pointer]:
+                - img [ref=e83]
+                - text: Add Server
+          - button "Running on Machine 2" [ref=e161] [cursor=pointer]:
+            - img [ref=e162]
+            - generic [ref=e164]: Running on Machine
+            - generic [ref=e165]: "2"
+          - button "Recent Sessions 20" [ref=e167] [cursor=pointer]:
+            - img [ref=e168]
+            - generic [ref=e170]: Recent Sessions
+            - generic [ref=e171]: "20"
+          - generic [ref=e85]:
+            - button "Repos 2" [ref=e172] [cursor=pointer]:
+              - img [ref=e87]
+              - generic [ref=e89]: Repos
+              - generic [ref=e90]: "2"
+            - generic [ref=e173]:
+              - generic "/Users/vatsalbhatt230813/Code/staging-frontend" [ref=e174] [cursor=pointer]:
+                - generic [ref=e175]:
+                  - img [ref=e176]
+                  - generic [ref=e178]: staging-frontend
+                  - generic [ref=e179]: staging/frontend
+                  - generic "Clean" [ref=e180]
+                - generic [ref=e181]:
+                  - button "View Changes" [ref=e182]:
+                    - img [ref=e183]
+                  - button "Commit" [ref=e186]:
+                    - img [ref=e187]
+                  - button "Push" [ref=e189]:
+                    - img [ref=e190]
+                  - button "Create Pull Request" [ref=e193]:
+                    - img [ref=e194]
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/enpal-energy-vnb-portal" [ref=e198] [cursor=pointer]:
+                - generic [ref=e199]:
+                  - img [ref=e200]
+                  - generic [ref=e202]: enpal-energy-vnb-portal (PROD)
+                  - generic [ref=e203]: PROD
+                  - generic [ref=e204]: main
+                  - generic "1 changed files" [ref=e205]
+                - generic [ref=e206]:
+                  - button "View Changes" [ref=e207]:
+                    - img [ref=e208]
+                  - button "Push (PROD - requires confirmation)" [ref=e211]:
+                    - img [ref=e212]
+                  - button "Create Pull Request" [ref=e215]:
+                    - img [ref=e216]
+      - main [ref=e91]:
+        - generic [ref=e455]:
+          - generic [ref=e456]:
+            - generic [ref=e457]:
+              - button "Rooms" [ref=e458] [cursor=pointer]
+              - button "Sprints" [ref=e459] [cursor=pointer]
+            - generic [ref=e460]:
+              - generic [ref=e461]:
+                - heading "Rooms" [level=3] [ref=e462]
+                - button "New room" [ref=e463] [cursor=pointer]:
+                  - img [ref=e464]
+              - generic [ref=e465]:
+                - button "Checkin the live PMO tickets 4 agents 23" [ref=e466] [cursor=pointer]:
+                  - img [ref=e467]
+                  - generic [ref=e470]:
+                    - generic [ref=e472]: Checkin the live PMO tickets
+                    - generic [ref=e473]:
+                      - img [ref=e474]
+                      - generic [ref=e479]: 4 agents
+                  - generic [ref=e480]: "23"
+                  - button "Close room" [ref=e481]:
+                    - img [ref=e482]
+                - button "pmo-old-ticket-check 1 agents 1" [ref=e485] [cursor=pointer]:
+                  - img [ref=e486]
+                  - generic [ref=e489]:
+                    - generic [ref=e491]: pmo-old-ticket-check
+                    - generic [ref=e492]:
+                      - img [ref=e493]
+                      - generic [ref=e498]: 1 agents
+                  - generic [ref=e499]: "1"
+                  - button "Close room" [ref=e500]:
+                    - img [ref=e501]
+                - button "QA final 2 agents 4" [ref=e504] [cursor=pointer]:
+                  - img [ref=e505]
+                  - generic [ref=e508]:
+                    - generic [ref=e510]: QA final
+                    - generic [ref=e511]:
+                      - img [ref=e512]
+                      - generic [ref=e517]: 2 agents
+                  - generic [ref=e518]: "4"
+                  - button "Close room" [ref=e519]:
+                    - img [ref=e520]
+                - button "Sonnet test 3 agents 6" [ref=e523] [cursor=pointer]:
+                  - img [ref=e524]
+                  - generic [ref=e527]:
+                    - generic [ref=e529]: Sonnet test
+                    - generic [ref=e530]:
+                      - img [ref=e531]
+                      - generic [ref=e536]: 3 agents
+                  - generic [ref=e537]: "6"
+                  - button "Close room" [ref=e538]:
+                    - img [ref=e539]
+                - button "Sprint planning 4 agents 17" [ref=e542] [cursor=pointer]:
+                  - img [ref=e543]
+                  - generic [ref=e546]:
+                    - generic [ref=e548]: Sprint planning
+                    - generic [ref=e549]:
+                      - img [ref=e550]
+                      - generic [ref=e555]: 4 agents
+                  - generic [ref=e556]: "17"
+                  - button "Close room" [ref=e557]:
+                    - img [ref=e558]
+                - button "Testing the pmo tickets 4 agents 3" [ref=e561] [cursor=pointer]:
+                  - img [ref=e562]
+                  - generic [ref=e565]:
+                    - generic [ref=e567]: Testing the pmo tickets
+                    - generic [ref=e568]:
+                      - img [ref=e569]
+                      - generic [ref=e574]: 4 agents
+                  - generic [ref=e575]: "3"
+                  - button "Close room" [ref=e576]:
+                    - img [ref=e577]
+                - button "Ticket triage 3 agents 4" [ref=e580] [cursor=pointer]:
+                  - img [ref=e581]
+                  - generic [ref=e584]:
+                    - generic [ref=e586]: Ticket triage
+                    - generic [ref=e587]:
+                      - img [ref=e588]
+                      - generic [ref=e593]: 3 agents
+                  - generic [ref=e594]: "4"
+                  - button "Close room" [ref=e595]:
+                    - img [ref=e596]
+                - generic [ref=e599]: Archived
+                - button "Chain fix test 3 agents" [ref=e600] [cursor=pointer]:
+                  - img [ref=e601]
+                  - generic [ref=e604]:
+                    - generic [ref=e606]: Chain fix test
+                    - generic [ref=e607]:
+                      - img [ref=e608]
+                      - generic [ref=e613]: 3 agents
+                - button "Chain test 2 agents 8" [ref=e614] [cursor=pointer]:
+                  - img [ref=e615]
+                  - generic [ref=e618]:
+                    - generic [ref=e620]: Chain test
+                    - generic [ref=e621]:
+                      - img [ref=e622]
+                      - generic [ref=e627]: 2 agents
+                  - generic [ref=e628]: "8"
+                - button "Debug chain 3 agents 7" [ref=e629] [cursor=pointer]:
+                  - img [ref=e630]
+                  - generic [ref=e633]:
+                    - generic [ref=e635]: Debug chain
+                    - generic [ref=e636]:
+                      - img [ref=e637]
+                      - generic [ref=e642]: 3 agents
+                  - generic [ref=e643]: "7"
+                - button "PMO ticket checker 4 agents 4" [ref=e644] [cursor=pointer]:
+                  - img [ref=e645]
+                  - generic [ref=e648]:
+                    - generic [ref=e650]: PMO ticket checker
+                    - generic [ref=e651]:
+                      - img [ref=e652]
+                      - generic [ref=e657]: 4 agents
+                  - generic [ref=e658]: "4"
+                - button "PMO ticket mapping 4 agents 11" [ref=e659] [cursor=pointer]:
+                  - img [ref=e660]
+                  - generic [ref=e663]:
+                    - generic [ref=e665]: PMO ticket mapping
+                    - generic [ref=e666]:
+                      - img [ref=e667]
+                      - generic [ref=e672]: 4 agents
+                  - generic [ref=e673]: "11"
+                - button "PMO tickets monitoring 4 agents 7" [ref=e674] [cursor=pointer]:
+                  - img [ref=e675]
+                  - generic [ref=e678]:
+                    - generic [ref=e680]: PMO tickets monitoring
+                    - generic [ref=e681]:
+                      - img [ref=e682]
+                      - generic [ref=e687]: 4 agents
+                  - generic [ref=e688]: "7"
+                - button "PMO tickets test 4 agents 9" [ref=e689] [cursor=pointer]:
+                  - img [ref=e690]
+                  - generic [ref=e693]:
+                    - generic [ref=e695]: PMO tickets test
+                    - generic [ref=e696]:
+                      - img [ref=e697]
+                      - generic [ref=e702]: 4 agents
+                  - generic [ref=e703]: "9"
+                - button "Slack test 3 agents 5" [ref=e704] [cursor=pointer]:
+                  - img [ref=e705]
+                  - generic [ref=e708]:
+                    - generic [ref=e710]: Slack test
+                    - generic [ref=e711]:
+                      - img [ref=e712]
+                      - generic [ref=e717]: 3 agents
+                  - generic [ref=e718]: "5"
+                - button "Slack v2 3 agents 4" [ref=e719] [cursor=pointer]:
+                  - img [ref=e720]
+                  - generic [ref=e723]:
+                    - generic [ref=e725]: Slack v2
+                    - generic [ref=e726]:
+                      - img [ref=e727]
+                      - generic [ref=e732]: 3 agents
+                  - generic [ref=e733]: "4"
+                - button "Slack v3 3 agents 10" [ref=e734] [cursor=pointer]:
+                  - img [ref=e735]
+                  - generic [ref=e738]:
+                    - generic [ref=e740]: Slack v3
+                    - generic [ref=e741]:
+                      - img [ref=e742]
+                      - generic [ref=e747]: 3 agents
+                  - generic [ref=e748]: "10"
+                - button "Test pmo 3 agents 7" [ref=e749] [cursor=pointer]:
+                  - img [ref=e750]
+                  - generic [ref=e753]:
+                    - generic [ref=e755]: Test pmo
+                    - generic [ref=e756]:
+                      - img [ref=e757]
+                      - generic [ref=e762]: 3 agents
+                  - generic [ref=e763]: "7"
+                - button "Test room 2 agents 12" [ref=e764] [cursor=pointer]:
+                  - img [ref=e765]
+                  - generic [ref=e768]:
+                    - generic [ref=e770]: Test room
+                    - generic [ref=e771]:
+                      - img [ref=e772]
+                      - generic [ref=e777]: 2 agents
+                  - generic [ref=e778]: "12"
+                - button "Ticket audit 4 agents 7" [ref=e779] [cursor=pointer]:
+                  - img [ref=e780]
+                  - generic [ref=e783]:
+                    - generic [ref=e785]: Ticket audit
+                    - generic [ref=e786]:
+                      - img [ref=e787]
+                      - generic [ref=e792]: 4 agents
+                  - generic [ref=e793]: "7"
+                - button "Visual QA room 3 agents 7" [ref=e794] [cursor=pointer]:
+                  - img [ref=e795]
+                  - generic [ref=e798]:
+                    - generic [ref=e800]: Visual QA room
+                    - generic [ref=e801]:
+                      - img [ref=e802]
+                      - generic [ref=e807]: 3 agents
+                  - generic [ref=e808]: "7"
+          - generic [ref=e810]:
+            - generic [ref=e812]:
+              - img [ref=e813]
+              - generic [ref=e816]: Chain fix test
+              - generic [ref=e817]: — Test that @user doesnt block chain
+              - generic [ref=e818]: Closed
+              - generic [ref=e819]:
+                - button "orchestrator" [disabled] [ref=e820]:
+                  - generic [ref=e822]: orchestrator
+                - button "frontend" [disabled] [ref=e823]:
+                  - generic [ref=e825]: frontend
+                - button "pmo" [disabled] [ref=e826]:
+                  - generic [ref=e828]: pmo
+            - generic [ref=e830]:
+              - generic [ref=e831]:
+                - generic [ref=e832]:
+                  - img [ref=e833]
+                  - generic [ref=e835]: system
+                  - generic [ref=e836]: 13:31
+                - paragraph [ref=e837]: "Room \"Chain fix test\" created. Topic: Test that @user doesnt block chain. Agents: Orchestrator, Frontend, PMO"
+              - generic [ref=e838]:
+                - generic [ref=e839]:
+                  - img [ref=e840]
+                  - generic [ref=e842]: system
+                  - generic [ref=e843]: 13:31
+                - paragraph [ref=e844]: "Room ready. 3 agents available: Orchestrator, Frontend, PMO. @mention an agent to start."
+              - generic [ref=e845]:
+                - generic [ref=e846]:
+                  - img [ref=e847]
+                  - generic [ref=e850]: You
+                  - generic [ref=e851]: 13:31
+                - paragraph [ref=e852]: "@orchestrator check priorities, ask @frontend and @pmo, then tell @user the summary"
+              - generic [ref=e853]:
+                - generic [ref=e854]:
+                  - img [ref=e855]
+                  - generic [ref=e858]: orchestrator
+                  - generic [ref=e859]: 13:31
+                - paragraph [ref=e860]: "@frontend, @pmo — what's blocking us right now? Any stuck tickets or PRs? @user I'm checking with the team on current blockers to make sure communication flows properly through the chain."
+              - generic [ref=e861]:
+                - generic [ref=e862]:
+                  - img [ref=e863]
+                  - generic [ref=e866]: frontend
+                  - generic [ref=e867]: 13:31
+                - paragraph [ref=e868]: Memory shows V1 prod deployment was pending as of March 13, and Sprint V3 (pagination, CSV, OTP) hit an API 529 block. Nothing actively blocking today. @user — is V1 still staging-only, or did prod deployment land? Need to know before planning V3 work.
+              - generic [ref=e869]:
+                - generic [ref=e870]:
+                  - img [ref=e871]
+                  - generic [ref=e873]: system
+                  - generic [ref=e874]: 13:31
+                - paragraph [ref=e875]: Agents are waiting for your input.
+              - generic [ref=e876]:
+                - generic [ref=e877]:
+                  - img [ref=e878]
+                  - generic [ref=e881]: pmo
+                  - generic [ref=e882]: 13:32
+                - paragraph [ref=e883]: Checked Notion task board — no stale blockers currently. @frontend are the V3 features (pagination, CSV) still on track post-API stabilization from 3/18? Any PR reviews stuck waiting? @user is this test confirming chain flow through PMO→Frontend→Orchestrator works with your mention?
+              - generic [ref=e884]:
+                - generic [ref=e885]:
+                  - img [ref=e886]
+                  - generic [ref=e888]: system
+                  - generic [ref=e889]: 14:15
+                - paragraph [ref=e890]: Room closed.
+    - contentinfo [ref=e110]:
+      - generic [ref=e112]: No sessions
+      - generic [ref=e113]:
+        - generic [ref=e114]:
+          - generic [ref=e115]: Cmd
+          - generic [ref=e116]: K
+          - generic [ref=e117]: commands
+        - generic [ref=e118]:
+          - generic [ref=e119]: Cmd
+          - generic [ref=e120]: "N"
+          - generic [ref=e121]: new session
+  - generic [ref=e224] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e225]:
+      - img [ref=e226]
+    - generic [ref=e229]:
+      - button "Open issues overlay" [ref=e230]:
+        - generic [ref=e231]:
+          - generic [ref=e232]: "0"
+          - generic [ref=e233]: "1"
+        - generic [ref=e234]: Issue
+      - button "Collapse issues badge" [ref=e235]:
+        - img [ref=e236]
+  - alert [ref=e122]

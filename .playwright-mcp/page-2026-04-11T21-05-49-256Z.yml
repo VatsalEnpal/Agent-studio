@@ -1,0 +1,1428 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - button "Sessions" [ref=e6] [cursor=pointer]:
+          - img [ref=e7]
+          - text: Sessions
+        - button "Teams" [ref=e10] [cursor=pointer]:
+          - img [ref=e11]
+          - text: Teams
+        - button "Memory" [active] [ref=e16] [cursor=pointer]:
+          - img [ref=e17]
+          - text: Memory
+        - button "Settings" [ref=e25] [cursor=pointer]:
+          - img [ref=e26]
+          - text: Settings
+      - generic [ref=e29]:
+        - generic "Total cost across all active sessions today" [ref=e30]:
+          - img [ref=e31]
+          - generic [ref=e33]: $137.3
+        - generic [ref=e123]:
+          - button "22% | 23.9/24GB" [ref=e893] [cursor=pointer]:
+            - img [ref=e125]
+            - generic [ref=e128]: 22%
+            - generic [ref=e129]: "|"
+            - img [ref=e130]
+            - generic [ref=e132]: 23.9/24GB
+          - generic:
+            - paragraph: System Resources
+            - generic:
+              - generic:
+                - generic: CPU usage
+                - generic: 22%
+              - generic:
+                - generic: Memory
+                - generic: 23.9 / 24 GB (99%)
+            - paragraph: Click for full system monitor in Settings.
+        - link "Limits" [ref=e34] [cursor=pointer]:
+          - /url: https://claude.ai/settings/usage
+          - img [ref=e35]
+          - generic [ref=e38]: Limits
+          - img [ref=e39]
+        - button "Fullscreen (Cmd+Shift+F)" [ref=e43] [cursor=pointer]:
+          - img [ref=e44]
+        - generic [ref=e49]:
+          - generic [ref=e50]: "API: Off-Peak"
+          - generic:
+            - paragraph: Off-Peak — Normal Speed
+            - paragraph: Anthropic API rate limits are stricter during peak hours (5am-11am Pacific). Expect slower responses and more throttling during peak.
+            - generic:
+              - generic: Peak window (your time)
+              - generic: 20:00-02:00
+        - button "Help & Guide" [ref=e52] [cursor=pointer]:
+          - img [ref=e53]
+        - generic [ref=e56]: agent-studio
+    - generic [ref=e57]:
+      - complementary [ref=e58]:
+        - generic [ref=e59]:
+          - button "New Session" [ref=e60] [cursor=pointer]:
+            - img [ref=e61]
+            - text: New Session
+          - button "Collapse sidebar" [ref=e62] [cursor=pointer]:
+            - img [ref=e63]
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - button "Sessions 0" [ref=e68] [cursor=pointer]:
+              - img [ref=e69]
+              - generic [ref=e71]: Sessions
+              - generic [ref=e72]: "0"
+            - paragraph [ref=e74]: Click + New Session to start
+          - generic [ref=e75]:
+            - button "Servers 1" [ref=e133] [cursor=pointer]:
+              - img [ref=e77]
+              - generic [ref=e79]: Servers
+              - generic [ref=e80]: "1"
+            - generic [ref=e81]:
+              - 'generic "/Users/vatsalbhatt230813/Code/AgentStudio Port: 8080 PID: 31394" [ref=e134]':
+                - generic [ref=e136]: agent-studiothis app
+                - button ":8080" [ref=e137] [cursor=pointer]:
+                  - text: :8080
+                  - img [ref=e138]
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/agent-console" [ref=e142]:
+                - generic [ref=e144]: agent-studio
+                - button "Start" [ref=e145] [cursor=pointer]:
+                  - img [ref=e146]
+                  - text: Start
+              - generic "/Users/vatsalbhatt230813/Code/staging-frontend" [ref=e148]:
+                - generic [ref=e150]: staging-frontend
+                - button "Start" [ref=e151] [cursor=pointer]:
+                  - img [ref=e152]
+                  - text: Start
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/enpal-energy-vnb-portal" [ref=e154]:
+                - generic [ref=e156]: enpal-energy-vnb-portal
+                - button "Start" [ref=e157] [cursor=pointer]:
+                  - img [ref=e158]
+                  - text: Start
+              - button "Add Server" [ref=e82] [cursor=pointer]:
+                - img [ref=e83]
+                - text: Add Server
+          - button "Running on Machine 2" [ref=e161] [cursor=pointer]:
+            - img [ref=e162]
+            - generic [ref=e164]: Running on Machine
+            - generic [ref=e165]: "2"
+          - button "Recent Sessions 20" [ref=e167] [cursor=pointer]:
+            - img [ref=e168]
+            - generic [ref=e170]: Recent Sessions
+            - generic [ref=e171]: "20"
+          - generic [ref=e85]:
+            - button "Repos 2" [ref=e172] [cursor=pointer]:
+              - img [ref=e87]
+              - generic [ref=e89]: Repos
+              - generic [ref=e90]: "2"
+            - generic [ref=e173]:
+              - generic "/Users/vatsalbhatt230813/Code/staging-frontend" [ref=e174] [cursor=pointer]:
+                - generic [ref=e175]:
+                  - img [ref=e176]
+                  - generic [ref=e178]: staging-frontend
+                  - generic [ref=e179]: staging/frontend
+                  - generic "Clean" [ref=e180]
+                - generic [ref=e181]:
+                  - button "View Changes" [ref=e182]:
+                    - img [ref=e183]
+                  - button "Commit" [ref=e186]:
+                    - img [ref=e187]
+                  - button "Push" [ref=e189]:
+                    - img [ref=e190]
+                  - button "Create Pull Request" [ref=e193]:
+                    - img [ref=e194]
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/enpal-energy-vnb-portal" [ref=e198] [cursor=pointer]:
+                - generic [ref=e199]:
+                  - img [ref=e200]
+                  - generic [ref=e202]: enpal-energy-vnb-portal (PROD)
+                  - generic [ref=e203]: PROD
+                  - generic [ref=e204]: main
+                  - generic "1 changed files" [ref=e205]
+                - generic [ref=e206]:
+                  - button "View Changes" [ref=e207]:
+                    - img [ref=e208]
+                  - button "Push (PROD - requires confirmation)" [ref=e211]:
+                    - img [ref=e212]
+                  - button "Create Pull Request" [ref=e215]:
+                    - img [ref=e216]
+      - main [ref=e91]:
+        - generic [ref=e895]:
+          - generic [ref=e897]:
+            - img [ref=e898]
+            - textbox "Search memories by title, content, or tags..." [ref=e901]
+          - generic [ref=e902]:
+            - button "All 95" [ref=e903] [cursor=pointer]:
+              - text: All
+              - generic [ref=e904]: "95"
+            - button "Learnings 47" [ref=e905] [cursor=pointer]:
+              - text: Learnings
+              - generic [ref=e906]: "47"
+            - button "Corrections 23" [ref=e907] [cursor=pointer]:
+              - text: Corrections
+              - generic [ref=e908]: "23"
+            - button "Decisions 20" [ref=e909] [cursor=pointer]:
+              - text: Decisions
+              - generic [ref=e910]: "20"
+            - button "Human Inputs 2" [ref=e911] [cursor=pointer]:
+              - text: Human Inputs
+              - generic [ref=e912]: "2"
+            - button "Knowledge 3" [ref=e913] [cursor=pointer]:
+              - text: Knowledge
+              - generic [ref=e914]: "3"
+          - generic [ref=e915]:
+            - generic [ref=e916]:
+              - 'button "Production deployment standards learned from Sharukhan''s prod repo setup When preparing code for production deployment, ensure standards are met: Prettier, ESLint 9, Husky, Docker multi-stage, observability, Terraform, ArgoCD, Azure Pipelines. Learnings 23.03.2026 production deployment docker +8" [ref=e917] [cursor=pointer]':
+                - generic [ref=e919]:
+                  - paragraph [ref=e920]: Production deployment standards learned from Sharukhan's prod repo setup
+                  - paragraph [ref=e921]: "When preparing code for production deployment, ensure standards are met: Prettier, ESLint 9, Husky, Docker multi-stage, observability, Terraform, ArgoCD, Azure Pipelines."
+                - generic [ref=e922]:
+                  - generic [ref=e923]: Learnings
+                  - generic [ref=e924]:
+                    - img [ref=e925]
+                    - text: 23.03.2026
+                  - generic [ref=e927]: production
+                  - generic [ref=e928]: deployment
+                  - generic [ref=e929]: docker
+                  - generic [ref=e930]: "+8"
+              - 'button "Security audit: admin.createUser({ email_confirm: true }) in dso-otp-auth edge function admin.createUser with email_confirm:true is safe when gated behind proper authorization. Handle race condition for duplicate createUser calls. Learnings 19.03.2026 security security-audit auth +5" [ref=e931] [cursor=pointer]':
+                - generic [ref=e933]:
+                  - paragraph [ref=e934]: "Security audit: admin.createUser({ email_confirm: true }) in dso-otp-auth edge function"
+                  - paragraph [ref=e935]: admin.createUser with email_confirm:true is safe when gated behind proper authorization. Handle race condition for duplicate createUser calls.
+                - generic [ref=e936]:
+                  - generic [ref=e937]: Learnings
+                  - generic [ref=e938]:
+                    - img [ref=e939]
+                    - text: 19.03.2026
+                  - generic [ref=e941]: security
+                  - generic [ref=e942]: security-audit
+                  - generic [ref=e943]: auth
+                  - generic [ref=e944]: "+5"
+              - 'button "OTP auth architecture — complete reference for future sessions Key files: dso-otp-auth/index.ts, api/auth routes, auth/login/page.tsx. Key tables: dsos.portal_domains, portal_internal_users. Learnings 18.03.2026 orchestrator auth otp +3" [ref=e945] [cursor=pointer]':
+                - generic [ref=e947]:
+                  - paragraph [ref=e948]: OTP auth architecture — complete reference for future sessions
+                  - paragraph [ref=e949]: "Key files: dso-otp-auth/index.ts, api/auth routes, auth/login/page.tsx. Key tables: dsos.portal_domains, portal_internal_users."
+                - generic [ref=e950]:
+                  - generic [ref=e951]: Learnings
+                  - generic [ref=e952]:
+                    - img [ref=e953]
+                    - text: 18.03.2026
+                  - generic [ref=e955]: orchestrator
+                  - generic [ref=e956]: auth
+                  - generic [ref=e957]: otp
+                  - generic [ref=e958]: "+3"
+              - button "Domain-based auth security audit — 2 P0 blockers (public email domains + old auth), 2 P1 requirements Domain-based auth is only as secure as the domain data. Public email provider domains are equivalent to no authentication. Learnings 18.03.2026 security security-audit security-issue +9" [ref=e959] [cursor=pointer]:
+                - generic [ref=e961]:
+                  - paragraph [ref=e962]: Domain-based auth security audit — 2 P0 blockers (public email domains + old auth), 2 P1 requirements
+                  - paragraph [ref=e963]: Domain-based auth is only as secure as the domain data. Public email provider domains are equivalent to no authentication.
+                - generic [ref=e964]:
+                  - generic [ref=e965]: Learnings
+                  - generic [ref=e966]:
+                    - img [ref=e967]
+                    - text: 18.03.2026
+                  - generic [ref=e969]: security
+                  - generic [ref=e970]: security-audit
+                  - generic [ref=e971]: security-issue
+                  - generic [ref=e972]: "+9"
+              - button "Security audit of dso-otp-auth edge function — P0 cross-DSO bypass found Always re-validate authorization at every step that sets claims, not just at the request step. Learnings 18.03.2026 security security-audit security-issue +8" [ref=e973] [cursor=pointer]:
+                - generic [ref=e975]:
+                  - paragraph [ref=e976]: Security audit of dso-otp-auth edge function — P0 cross-DSO bypass found
+                  - paragraph [ref=e977]: Always re-validate authorization at every step that sets claims, not just at the request step.
+                - generic [ref=e978]:
+                  - generic [ref=e979]: Learnings
+                  - generic [ref=e980]:
+                    - img [ref=e981]
+                    - text: 18.03.2026
+                  - generic [ref=e983]: security
+                  - generic [ref=e984]: security-audit
+                  - generic [ref=e985]: security-issue
+                  - generic [ref=e986]: "+8"
+              - button "QA full regression — Tasks 4+5 (pagination+CSV) + all existing features Health score 94/100. Pagination and CSV export fully functional. Dev server runs from InPipeline-v1 worktree. Learnings 18.03.2026 qa qa-pass test-run +4" [ref=e987] [cursor=pointer]:
+                - generic [ref=e989]:
+                  - paragraph [ref=e990]: QA full regression — Tasks 4+5 (pagination+CSV) + all existing features
+                  - paragraph [ref=e991]: Health score 94/100. Pagination and CSV export fully functional. Dev server runs from InPipeline-v1 worktree.
+                - generic [ref=e992]:
+                  - generic [ref=e993]: Learnings
+                  - generic [ref=e994]:
+                    - img [ref=e995]
+                    - text: 18.03.2026
+                  - generic [ref=e997]: qa
+                  - generic [ref=e998]: qa-pass
+                  - generic [ref=e999]: test-run
+                  - generic [ref=e1000]: "+4"
+              - button "QA baseline — Sprint V3 regression (pagination + CSV export + all features) Health score 95. 0 P0, 0 P1, 2 P2. Pagination and CSV export fully functional. Learnings 18.03.2026 qa qa-pass baseline +3" [ref=e1001] [cursor=pointer]:
+                - generic [ref=e1003]:
+                  - paragraph [ref=e1004]: QA baseline — Sprint V3 regression (pagination + CSV export + all features)
+                  - paragraph [ref=e1005]: Health score 95. 0 P0, 0 P1, 2 P2. Pagination and CSV export fully functional.
+                - generic [ref=e1006]:
+                  - generic [ref=e1007]: Learnings
+                  - generic [ref=e1008]:
+                    - img [ref=e1009]
+                    - text: 18.03.2026
+                  - generic [ref=e1011]: qa
+                  - generic [ref=e1012]: qa-pass
+                  - generic [ref=e1013]: baseline
+                  - generic [ref=e1014]: "+3"
+              - button "Full OTP auth security audit — 1 P0 blocker (old auth still deployed), 12 other findings Never deploy a new auth system while the old one is still accessible. Both existing = weaker one is effective security boundary. Learnings 18.03.2026 security security-audit security-issue +7" [ref=e1015] [cursor=pointer]:
+                - generic [ref=e1017]:
+                  - paragraph [ref=e1018]: Full OTP auth security audit — 1 P0 blocker (old auth still deployed), 12 other findings
+                  - paragraph [ref=e1019]: Never deploy a new auth system while the old one is still accessible. Both existing = weaker one is effective security boundary.
+                - generic [ref=e1020]:
+                  - generic [ref=e1021]: Learnings
+                  - generic [ref=e1022]:
+                    - img [ref=e1023]
+                    - text: 18.03.2026
+                  - generic [ref=e1025]: security
+                  - generic [ref=e1026]: security-audit
+                  - generic [ref=e1027]: security-issue
+                  - generic [ref=e1028]: "+7"
+              - button "Sprint V2 (Portal Dynamic Config + Polish) completed — OTP deferred to V3 7 of 8 tasks completed. Tailwind v3/v4 syntax differences are recurring regression source. Always run QA after each frontend change. Learnings 18.03.2026 orchestrator sprint-v2 sprint-complete +10" [ref=e1029] [cursor=pointer]:
+                - generic [ref=e1031]:
+                  - paragraph [ref=e1032]: Sprint V2 (Portal Dynamic Config + Polish) completed — OTP deferred to V3
+                  - paragraph [ref=e1033]: 7 of 8 tasks completed. Tailwind v3/v4 syntax differences are recurring regression source. Always run QA after each frontend change.
+                - generic [ref=e1034]:
+                  - generic [ref=e1035]: Learnings
+                  - generic [ref=e1036]:
+                    - img [ref=e1037]
+                    - text: 18.03.2026
+                  - generic [ref=e1039]: orchestrator
+                  - generic [ref=e1040]: sprint-v2
+                  - generic [ref=e1041]: sprint-complete
+                  - generic [ref=e1042]: "+10"
+              - button "Dynamic BI columns wired to clearing grid via get_clearing_bi_data RPC biData JSONB keys are lowercase from RPC, but clearing_fields_data.field_name is UPPERCASE — always lowercase when doing lookups. Learnings 18.03.2026 frontend dso-portal v1 +4" [ref=e1043] [cursor=pointer]:
+                - generic [ref=e1045]:
+                  - paragraph [ref=e1046]: Dynamic BI columns wired to clearing grid via get_clearing_bi_data RPC
+                  - paragraph [ref=e1047]: biData JSONB keys are lowercase from RPC, but clearing_fields_data.field_name is UPPERCASE — always lowercase when doing lookups.
+                - generic [ref=e1048]:
+                  - generic [ref=e1049]: Learnings
+                  - generic [ref=e1050]:
+                    - img [ref=e1051]
+                    - text: 18.03.2026
+                  - generic [ref=e1053]: frontend
+                  - generic [ref=e1054]: dso-portal
+                  - generic [ref=e1055]: v1
+                  - generic [ref=e1056]: "+4"
+              - button "Full day session summary 2026-03-17 — security audit, sandbox migration, auth redesign Always be the orchestrator. Backend agent can't access prod. Don't use documentation agent for code-aware tasks. Learnings 17.03.2026 orchestrator session-summary 2026-03-17 +5" [ref=e1057] [cursor=pointer]:
+                - generic [ref=e1059]:
+                  - paragraph [ref=e1060]: Full day session summary 2026-03-17 — security audit, sandbox migration, auth redesign
+                  - paragraph [ref=e1061]: Always be the orchestrator. Backend agent can't access prod. Don't use documentation agent for code-aware tasks.
+                - generic [ref=e1062]:
+                  - generic [ref=e1063]: Learnings
+                  - generic [ref=e1064]:
+                    - img [ref=e1065]
+                    - text: 17.03.2026
+                  - generic [ref=e1067]: orchestrator
+                  - generic [ref=e1068]: session-summary
+                  - generic [ref=e1069]: 2026-03-17
+                  - generic [ref=e1070]: "+5"
+              - button "Sprint V2 research findings — prod state verified via MCP Never trust agent research that says 'does not exist' without direct MCP verification. dsos column is dso_number, NOT bdew_code. Learnings 17.03.2026 orchestrator sprint research +6" [ref=e1071] [cursor=pointer]:
+                - generic [ref=e1073]:
+                  - paragraph [ref=e1074]: Sprint V2 research findings — prod state verified via MCP
+                  - paragraph [ref=e1075]: Never trust agent research that says 'does not exist' without direct MCP verification. dsos column is dso_number, NOT bdew_code.
+                - generic [ref=e1076]:
+                  - generic [ref=e1077]: Learnings
+                  - generic [ref=e1078]:
+                    - img [ref=e1079]
+                    - text: 17.03.2026
+                  - generic [ref=e1081]: orchestrator
+                  - generic [ref=e1082]: sprint
+                  - generic [ref=e1083]: research
+                  - generic [ref=e1084]: "+6"
+              - button "OTP auth design decisions — final architecture approved by Vatsal portal_emails column on dsos table (comma-separated). PostgREST .select() only fetches requested columns even from 607-column views. Learnings 17.03.2026 orchestrator auth otp +7" [ref=e1085] [cursor=pointer]:
+                - generic [ref=e1087]:
+                  - paragraph [ref=e1088]: OTP auth design decisions — final architecture approved by Vatsal
+                  - paragraph [ref=e1089]: portal_emails column on dsos table (comma-separated). PostgREST .select() only fetches requested columns even from 607-column views.
+                - generic [ref=e1090]:
+                  - generic [ref=e1091]: Learnings
+                  - generic [ref=e1092]:
+                    - img [ref=e1093]
+                    - text: 17.03.2026
+                  - generic [ref=e1095]: orchestrator
+                  - generic [ref=e1096]: auth
+                  - generic [ref=e1097]: otp
+                  - generic [ref=e1098]: "+7"
+              - button "Added Frontend Data Sources section to backend README Migration docs and runtime docs serve different audiences. Both belong in the same README but clearly separated. Learnings 17.03.2026 documentation backend readme +4" [ref=e1099] [cursor=pointer]:
+                - generic [ref=e1101]:
+                  - paragraph [ref=e1102]: Added Frontend Data Sources section to backend README
+                  - paragraph [ref=e1103]: Migration docs and runtime docs serve different audiences. Both belong in the same README but clearly separated.
+                - generic [ref=e1104]:
+                  - generic [ref=e1105]: Learnings
+                  - generic [ref=e1106]:
+                    - img [ref=e1107]
+                    - text: 17.03.2026
+                  - generic [ref=e1109]: documentation
+                  - generic [ref=e1110]: backend
+                  - generic [ref=e1111]: readme
+                  - generic [ref=e1112]: "+4"
+              - button "Security review of synthetic Supabase auth user pattern — deterministic password vulnerability found Never use deterministic/guessable credentials for synthetic auth users. Always use random secrets stored server-side. Learnings 17.03.2026 security security-issue auth +7" [ref=e1113] [cursor=pointer]:
+                - generic [ref=e1115]:
+                  - paragraph [ref=e1116]: Security review of synthetic Supabase auth user pattern — deterministic password vulnerability found
+                  - paragraph [ref=e1117]: Never use deterministic/guessable credentials for synthetic auth users. Always use random secrets stored server-side.
+                - generic [ref=e1118]:
+                  - generic [ref=e1119]: Learnings
+                  - generic [ref=e1120]:
+                    - img [ref=e1121]
+                    - text: 17.03.2026
+                  - generic [ref=e1123]: security
+                  - generic [ref=e1124]: security-issue
+                  - generic [ref=e1125]: auth
+                  - generic [ref=e1126]: "+7"
+              - button "OTP auth design security review — 4 blocking issues found When switching from secret-based auth to identity-based auth (email+OTP), the public-facing surface area increases dramatically. Learnings 17.03.2026 security security-audit security-issue +6" [ref=e1127] [cursor=pointer]:
+                - generic [ref=e1129]:
+                  - paragraph [ref=e1130]: OTP auth design security review — 4 blocking issues found
+                  - paragraph [ref=e1131]: When switching from secret-based auth to identity-based auth (email+OTP), the public-facing surface area increases dramatically.
+                - generic [ref=e1132]:
+                  - generic [ref=e1133]: Learnings
+                  - generic [ref=e1134]:
+                    - img [ref=e1135]
+                    - text: 17.03.2026
+                  - generic [ref=e1137]: security
+                  - generic [ref=e1138]: security-audit
+                  - generic [ref=e1139]: security-issue
+                  - generic [ref=e1140]: "+6"
+              - button "Security audit update — post-fix reassessment, grade B- to B+ Targeted security fixes (headers, logout, error messages) moved grade from B- to B+. SEC-002 downgraded after PostgREST schema isolation analysis. Learnings 17.03.2026 security audit production +9" [ref=e1141] [cursor=pointer]:
+                - generic [ref=e1143]:
+                  - paragraph [ref=e1144]: Security audit update — post-fix reassessment, grade B- to B+
+                  - paragraph [ref=e1145]: Targeted security fixes (headers, logout, error messages) moved grade from B- to B+. SEC-002 downgraded after PostgREST schema isolation analysis.
+                - generic [ref=e1146]:
+                  - generic [ref=e1147]: Learnings
+                  - generic [ref=e1148]:
+                    - img [ref=e1149]
+                    - text: 17.03.2026
+                  - generic [ref=e1151]: security
+                  - generic [ref=e1152]: audit
+                  - generic [ref=e1153]: production
+                  - generic [ref=e1154]: "+9"
+              - 'button "Security review: GRANT SELECT on sandbox_energy table + dso_portal_view migration When reviewing GRANT + RLS combinations, always verify the QUAL, PostgREST exposure, and security_invoker scoping. Learnings 17.03.2026 security security-issue rls +6" [ref=e1155] [cursor=pointer]':
+                - generic [ref=e1157]:
+                  - paragraph [ref=e1158]: "Security review: GRANT SELECT on sandbox_energy table + dso_portal_view migration"
+                  - paragraph [ref=e1159]: When reviewing GRANT + RLS combinations, always verify the QUAL, PostgREST exposure, and security_invoker scoping.
+                - generic [ref=e1160]:
+                  - generic [ref=e1161]: Learnings
+                  - generic [ref=e1162]:
+                    - img [ref=e1163]
+                    - text: 17.03.2026
+                  - generic [ref=e1165]: security
+                  - generic [ref=e1166]: security-issue
+                  - generic [ref=e1167]: rls
+                  - generic [ref=e1168]: "+6"
+              - 'button "QA test run — 2026-03-17 — security headers, logout, error messages, regression Health 80/100. Security headers pass, logout works, error messages generic. P1: clearing detail fails to load data. Learnings 17.03.2026 qa test-run dso-portal +4" [ref=e1169] [cursor=pointer]':
+                - generic [ref=e1171]:
+                  - paragraph [ref=e1172]: QA test run — 2026-03-17 — security headers, logout, error messages, regression
+                  - paragraph [ref=e1173]: "Health 80/100. Security headers pass, logout works, error messages generic. P1: clearing detail fails to load data."
+                - generic [ref=e1174]:
+                  - generic [ref=e1175]: Learnings
+                  - generic [ref=e1176]:
+                    - img [ref=e1177]
+                    - text: 17.03.2026
+                  - generic [ref=e1179]: qa
+                  - generic [ref=e1180]: test-run
+                  - generic [ref=e1181]: dso-portal
+                  - generic [ref=e1182]: "+4"
+              - 'button "Full production security audit — V1 DSO Portal pre-launch Grade B-. Auth flow excellent. 4 items must be fixed before launch: verify RLS, add security headers, update Next.js, verify sandbox_energy access. Learnings 16.03.2026 security audit production +7" [ref=e1183] [cursor=pointer]':
+                - generic [ref=e1185]:
+                  - paragraph [ref=e1186]: Full production security audit — V1 DSO Portal pre-launch
+                  - paragraph [ref=e1187]: "Grade B-. Auth flow excellent. 4 items must be fixed before launch: verify RLS, add security headers, update Next.js, verify sandbox_energy access."
+                - generic [ref=e1188]:
+                  - generic [ref=e1189]: Learnings
+                  - generic [ref=e1190]:
+                    - img [ref=e1191]
+                    - text: 16.03.2026
+                  - generic [ref=e1193]: security
+                  - generic [ref=e1194]: audit
+                  - generic [ref=e1195]: production
+                  - generic [ref=e1196]: "+7"
+              - button "QA auth retest — all 8 tasks PASS, auth redesign verified 26/26 checks PASS. Auth flow redesign (token-in-form POST) is fully working. Ready for security review. Learnings 16.03.2026 qa qa-pass auth +4" [ref=e1197] [cursor=pointer]:
+                - generic [ref=e1199]:
+                  - paragraph [ref=e1200]: QA auth retest — all 8 tasks PASS, auth redesign verified
+                  - paragraph [ref=e1201]: 26/26 checks PASS. Auth flow redesign (token-in-form POST) is fully working. Ready for security review.
+                - generic [ref=e1202]:
+                  - generic [ref=e1203]: Learnings
+                  - generic [ref=e1204]:
+                    - img [ref=e1205]
+                    - text: 16.03.2026
+                  - generic [ref=e1207]: qa
+                  - generic [ref=e1208]: qa-pass
+                  - generic [ref=e1209]: auth
+                  - generic [ref=e1210]: "+4"
+              - button "QA test run summary — 2026-03-16 Auth Redesign Sprint Health 0/100. Login page 500 from cookies.set() in Server Component blocks all auth. Learnings 16.03.2026 qa test-run dso-portal +2" [ref=e1211] [cursor=pointer]:
+                - generic [ref=e1213]:
+                  - paragraph [ref=e1214]: QA test run summary — 2026-03-16 Auth Redesign Sprint
+                  - paragraph [ref=e1215]: Health 0/100. Login page 500 from cookies.set() in Server Component blocks all auth.
+                - generic [ref=e1216]:
+                  - generic [ref=e1217]: Learnings
+                  - generic [ref=e1218]:
+                    - img [ref=e1219]
+                    - text: 16.03.2026
+                  - generic [ref=e1221]: qa
+                  - generic [ref=e1222]: test-run
+                  - generic [ref=e1223]: dso-portal
+                  - generic [ref=e1224]: "+2"
+              - 'button "QA Sprint Test: Column Header Tooltips — ALL PASS, Health 100/100 8/8 tooltip descriptions match sprint spec exactly. base-ui Tooltip uses data-popup-open attribute. Learnings 15.03.2026 qa qa-pass tooltips +3" [ref=e1225] [cursor=pointer]':
+                - generic [ref=e1227]:
+                  - paragraph [ref=e1228]: "QA Sprint Test: Column Header Tooltips — ALL PASS, Health 100/100"
+                  - paragraph [ref=e1229]: 8/8 tooltip descriptions match sprint spec exactly. base-ui Tooltip uses data-popup-open attribute.
+                - generic [ref=e1230]:
+                  - generic [ref=e1231]: Learnings
+                  - generic [ref=e1232]:
+                    - img [ref=e1233]
+                    - text: 15.03.2026
+                  - generic [ref=e1235]: qa
+                  - generic [ref=e1236]: qa-pass
+                  - generic [ref=e1237]: tooltips
+                  - generic [ref=e1238]: "+3"
+              - 'button "QA Focused Fix Verification: Column resize, row height, table width — ALL PASS Column resize functional with drag interaction. Health 98/100. Learnings 15.03.2026 qa qa-pass focused-test +3" [ref=e1239] [cursor=pointer]':
+                - generic [ref=e1241]:
+                  - paragraph [ref=e1242]: "QA Focused Fix Verification: Column resize, row height, table width — ALL PASS"
+                  - paragraph [ref=e1243]: Column resize functional with drag interaction. Health 98/100.
+                - generic [ref=e1244]:
+                  - generic [ref=e1245]: Learnings
+                  - generic [ref=e1246]:
+                    - img [ref=e1247]
+                    - text: 15.03.2026
+                  - generic [ref=e1249]: qa
+                  - generic [ref=e1250]: qa-pass
+                  - generic [ref=e1251]: focused-test
+                  - generic [ref=e1252]: "+3"
+              - 'button "QA Visual Regression: Sprint table overhaul + clearing filter — ALL PASS at both viewports Health 99/100. All change manifest items verified. Zero P0/P1/P2 findings. Learnings 15.03.2026 qa qa-pass visual-regression +3" [ref=e1253] [cursor=pointer]':
+                - generic [ref=e1255]:
+                  - paragraph [ref=e1256]: "QA Visual Regression: Sprint table overhaul + clearing filter — ALL PASS at both viewports"
+                  - paragraph [ref=e1257]: Health 99/100. All change manifest items verified. Zero P0/P1/P2 findings.
+                - generic [ref=e1258]:
+                  - generic [ref=e1259]: Learnings
+                  - generic [ref=e1260]:
+                    - img [ref=e1261]
+                    - text: 15.03.2026
+                  - generic [ref=e1263]: qa
+                  - generic [ref=e1264]: qa-pass
+                  - generic [ref=e1265]: visual-regression
+                  - generic [ref=e1266]: "+3"
+              - button "QA full test run summary — 2026-03-15 (Stadtwerke Herne AG) Health 89/100. Portal is functionally solid for V1. Only real bug is process diagram placeholder (P1). Learnings 15.03.2026 qa qa-pass test-run +2" [ref=e1267] [cursor=pointer]:
+                - generic [ref=e1269]:
+                  - paragraph [ref=e1270]: QA full test run summary — 2026-03-15 (Stadtwerke Herne AG)
+                  - paragraph [ref=e1271]: Health 89/100. Portal is functionally solid for V1. Only real bug is process diagram placeholder (P1).
+                - generic [ref=e1272]:
+                  - generic [ref=e1273]: Learnings
+                  - generic [ref=e1274]:
+                    - img [ref=e1275]
+                    - text: 15.03.2026
+                  - generic [ref=e1277]: qa
+                  - generic [ref=e1278]: qa-pass
+                  - generic [ref=e1279]: test-run
+                  - generic [ref=e1280]: "+2"
+              - 'button "QA Sprint Test: Table Design Overhaul + Clearing Filter — BLOCKED by build cache corruption Full sprint QA blocked by .next build cache corruption. Fix: delete .next directory and restart dev server. Learnings 15.03.2026 qa qa-failure frontend-bug +4" [ref=e1281] [cursor=pointer]':
+                - generic [ref=e1283]:
+                  - paragraph [ref=e1284]: "QA Sprint Test: Table Design Overhaul + Clearing Filter — BLOCKED by build cache corruption"
+                  - paragraph [ref=e1285]: "Full sprint QA blocked by .next build cache corruption. Fix: delete .next directory and restart dev server."
+                - generic [ref=e1286]:
+                  - generic [ref=e1287]: Learnings
+                  - generic [ref=e1288]:
+                    - img [ref=e1289]
+                    - text: 15.03.2026
+                  - generic [ref=e1291]: qa
+                  - generic [ref=e1292]: qa-failure
+                  - generic [ref=e1293]: frontend-bug
+                  - generic [ref=e1294]: "+4"
+              - button "QA test run — 2026-03-12 — DSO Portal with Next.js API middleware layer Next.js API middleware layer successfully eliminates all client-side Supabase exposure. 3 remaining P2 issues. Learnings 12.03.2026 qa qa-pass test-run +3" [ref=e1295] [cursor=pointer]:
+                - generic [ref=e1297]:
+                  - paragraph [ref=e1298]: QA test run — 2026-03-12 — DSO Portal with Next.js API middleware layer
+                  - paragraph [ref=e1299]: Next.js API middleware layer successfully eliminates all client-side Supabase exposure. 3 remaining P2 issues.
+                - generic [ref=e1300]:
+                  - generic [ref=e1301]: Learnings
+                  - generic [ref=e1302]:
+                    - img [ref=e1303]
+                    - text: 12.03.2026
+                  - generic [ref=e1305]: qa
+                  - generic [ref=e1306]: qa-pass
+                  - generic [ref=e1307]: test-run
+                  - generic [ref=e1308]: "+3"
+              - 'button "DSO Portal V1 frontend build complete — all pages, components, and features implemented shadcn/ui with @base-ui/react does NOT support asChild. Select onValueChange is (value: T|null, eventDetails). Learnings 12.03.2026 frontend dso-portal v1 +4" [ref=e1309] [cursor=pointer]':
+                - generic [ref=e1311]:
+                  - paragraph [ref=e1312]: DSO Portal V1 frontend build complete — all pages, components, and features implemented
+                  - paragraph [ref=e1313]: "shadcn/ui with @base-ui/react does NOT support asChild. Select onValueChange is (value: T|null, eventDetails)."
+                - generic [ref=e1314]:
+                  - generic [ref=e1315]: Learnings
+                  - generic [ref=e1316]:
+                    - img [ref=e1317]
+                    - text: 12.03.2026
+                  - generic [ref=e1319]: frontend
+                  - generic [ref=e1320]: dso-portal
+                  - generic [ref=e1321]: v1
+                  - generic [ref=e1322]: "+4"
+              - button "Traffic light field contains German text + color, not just bare color names traffic_light is NOT just a color enum — it contains descriptive German text prefixed with the color. Learnings 12.03.2026 frontend traffic-light data-model +3" [ref=e1323] [cursor=pointer]:
+                - generic [ref=e1325]:
+                  - paragraph [ref=e1326]: Traffic light field contains German text + color, not just bare color names
+                  - paragraph [ref=e1327]: traffic_light is NOT just a color enum — it contains descriptive German text prefixed with the color.
+                - generic [ref=e1328]:
+                  - generic [ref=e1329]: Learnings
+                  - generic [ref=e1330]:
+                    - img [ref=e1331]
+                    - text: 12.03.2026
+                  - generic [ref=e1333]: frontend
+                  - generic [ref=e1334]: traffic-light
+                  - generic [ref=e1335]: data-model
+                  - generic [ref=e1336]: "+3"
+              - button "PMO learnings — V1 scope, UX decisions, investigation methodology for DSO Portal Always investigate data model questions by querying the actual database before recommending changes. Learnings 12.03.2026 pmo scope ux-decisions +4" [ref=e1337] [cursor=pointer]:
+                - generic [ref=e1339]:
+                  - paragraph [ref=e1340]: PMO learnings — V1 scope, UX decisions, investigation methodology for DSO Portal
+                  - paragraph [ref=e1341]: Always investigate data model questions by querying the actual database before recommending changes.
+                - generic [ref=e1342]:
+                  - generic [ref=e1343]: Learnings
+                  - generic [ref=e1344]:
+                    - img [ref=e1345]
+                    - text: 12.03.2026
+                  - generic [ref=e1347]: pmo
+                  - generic [ref=e1348]: scope
+                  - generic [ref=e1349]: ux-decisions
+                  - generic [ref=e1350]: "+4"
+              - button "Team coordination learnings — delegation, parallel routing, investigation-first pattern Investigation-first -> parallel-fix -> regression is the most effective workflow. Strict delegation produces higher quality. Learnings 12.03.2026 orchestrator team-coordination delegation +5" [ref=e1351] [cursor=pointer]:
+                - generic [ref=e1353]:
+                  - paragraph [ref=e1354]: Team coordination learnings — delegation, parallel routing, investigation-first pattern
+                  - paragraph [ref=e1355]: Investigation-first -> parallel-fix -> regression is the most effective workflow. Strict delegation produces higher quality.
+                - generic [ref=e1356]:
+                  - generic [ref=e1357]: Learnings
+                  - generic [ref=e1358]:
+                    - img [ref=e1359]
+                    - text: 12.03.2026
+                  - generic [ref=e1361]: orchestrator
+                  - generic [ref=e1362]: team-coordination
+                  - generic [ref=e1363]: delegation
+                  - generic [ref=e1364]: "+5"
+              - button "DSO Portal V1 QA learnings — thorough testing methodology, what first QA missed Quality QA means clicking every button, checking every network call, and reading every console message. Learnings 12.03.2026 qa testing methodology +4" [ref=e1365] [cursor=pointer]:
+                - generic [ref=e1367]:
+                  - paragraph [ref=e1368]: DSO Portal V1 QA learnings — thorough testing methodology, what first QA missed
+                  - paragraph [ref=e1369]: Quality QA means clicking every button, checking every network call, and reading every console message.
+                - generic [ref=e1370]:
+                  - generic [ref=e1371]: Learnings
+                  - generic [ref=e1372]:
+                    - img [ref=e1373]
+                    - text: 12.03.2026
+                  - generic [ref=e1375]: qa
+                  - generic [ref=e1376]: testing
+                  - generic [ref=e1377]: methodology
+                  - generic [ref=e1378]: "+4"
+              - button "DSO Portal V1 backend learnings — edge functions, views, RLS, seed data Always make API fields independently optional. Always use LEFT JOINs in summary views. Always test actual HTTP responses. Learnings 12.03.2026 backend supabase edge-functions +6" [ref=e1379] [cursor=pointer]:
+                - generic [ref=e1381]:
+                  - paragraph [ref=e1382]: DSO Portal V1 backend learnings — edge functions, views, RLS, seed data
+                  - paragraph [ref=e1383]: Always make API fields independently optional. Always use LEFT JOINs in summary views. Always test actual HTTP responses.
+                - generic [ref=e1384]:
+                  - generic [ref=e1385]: Learnings
+                  - generic [ref=e1386]:
+                    - img [ref=e1387]
+                    - text: 12.03.2026
+                  - generic [ref=e1389]: backend
+                  - generic [ref=e1390]: supabase
+                  - generic [ref=e1391]: edge-functions
+                  - generic [ref=e1392]: "+6"
+              - button "DSO Portal V1 frontend learnings — shadcn/base-ui, comment UX, toolbar patterns Always check if shadcn components use base-ui or radix-ui before using props like asChild. Learnings 12.03.2026 frontend nextjs shadcn +5" [ref=e1393] [cursor=pointer]:
+                - generic [ref=e1395]:
+                  - paragraph [ref=e1396]: DSO Portal V1 frontend learnings — shadcn/base-ui, comment UX, toolbar patterns
+                  - paragraph [ref=e1397]: Always check if shadcn components use base-ui or radix-ui before using props like asChild.
+                - generic [ref=e1398]:
+                  - generic [ref=e1399]: Learnings
+                  - generic [ref=e1400]:
+                    - img [ref=e1401]
+                    - text: 12.03.2026
+                  - generic [ref=e1403]: frontend
+                  - generic [ref=e1404]: nextjs
+                  - generic [ref=e1405]: shadcn
+                  - generic [ref=e1406]: "+5"
+              - button "Backend agent implementation gaps fixed — edge functions, auth spec, seed data, RLS policies Agent rule files should contain complete, copy-pasteable code — not just patterns. Learnings 11.03.2026 backend edge-functions auth +4" [ref=e1407] [cursor=pointer]:
+                - generic [ref=e1409]:
+                  - paragraph [ref=e1410]: Backend agent implementation gaps fixed — edge functions, auth spec, seed data, RLS policies
+                  - paragraph [ref=e1411]: Agent rule files should contain complete, copy-pasteable code — not just patterns.
+                - generic [ref=e1412]:
+                  - generic [ref=e1413]: Learnings
+                  - generic [ref=e1414]:
+                    - img [ref=e1415]
+                    - text: 11.03.2026
+                  - generic [ref=e1417]: backend
+                  - generic [ref=e1418]: edge-functions
+                  - generic [ref=e1419]: auth
+                  - generic [ref=e1420]: "+4"
+              - 'button "V1 Backend Build Complete — migrations, seed, edge functions, RLS verified Supabase CLI v2.75.0 uses ES256 JWT keys. Workaround: use auth.signUp + SECURITY DEFINER function to set app_metadata. Learnings 11.03.2026 backend supabase edge-function +5" [ref=e1421] [cursor=pointer]':
+                - generic [ref=e1423]:
+                  - paragraph [ref=e1424]: V1 Backend Build Complete — migrations, seed, edge functions, RLS verified
+                  - paragraph [ref=e1425]: "Supabase CLI v2.75.0 uses ES256 JWT keys. Workaround: use auth.signUp + SECURITY DEFINER function to set app_metadata."
+                - generic [ref=e1426]:
+                  - generic [ref=e1427]: Learnings
+                  - generic [ref=e1428]:
+                    - img [ref=e1429]
+                    - text: 11.03.2026
+                  - generic [ref=e1431]: backend
+                  - generic [ref=e1432]: supabase
+                  - generic [ref=e1433]: edge-function
+                  - generic [ref=e1434]: "+5"
+              - 'button "PMO Agent Improvement Research — 8 Innovation Areas Key innovations: pmo_events table, PMO as orchestrator, memory compaction + search index, Notion Custom Agents, Airtable FDW. Learnings 10.03.2026 pmo improvement research +8" [ref=e1435] [cursor=pointer]':
+                - generic [ref=e1437]:
+                  - paragraph [ref=e1438]: PMO Agent Improvement Research — 8 Innovation Areas
+                  - paragraph [ref=e1439]: "Key innovations: pmo_events table, PMO as orchestrator, memory compaction + search index, Notion Custom Agents, Airtable FDW."
+                - generic [ref=e1440]:
+                  - generic [ref=e1441]: Learnings
+                  - generic [ref=e1442]:
+                    - img [ref=e1443]
+                    - text: 10.03.2026
+                  - generic [ref=e1445]: pmo
+                  - generic [ref=e1446]: improvement
+                  - generic [ref=e1447]: research
+                  - generic [ref=e1448]: "+8"
+              - 'button "Partnerships team owns DSO data in Airtable — needs scheduled sync to Supabase When planning data pipelines, always ask: who owns the source data and where do they enter it? Learnings 10.03.2026 dso airtable-sync partnerships +3" [ref=e1449] [cursor=pointer]':
+                - generic [ref=e1451]:
+                  - paragraph [ref=e1452]: Partnerships team owns DSO data in Airtable — needs scheduled sync to Supabase
+                  - paragraph [ref=e1453]: "When planning data pipelines, always ask: who owns the source data and where do they enter it?"
+                - generic [ref=e1454]:
+                  - generic [ref=e1455]: Learnings
+                  - generic [ref=e1456]:
+                    - img [ref=e1457]
+                    - text: 10.03.2026
+                  - generic [ref=e1459]: dso
+                  - generic [ref=e1460]: airtable-sync
+                  - generic [ref=e1461]: partnerships
+                  - generic [ref=e1462]: "+3"
+              - button "Supabase audit March 10 — what Altan built vs what was planned Always check the supabase branch schema SQL files before concluding tables are missing. Learnings 10.03.2026 supabase audit altan +6" [ref=e1463] [cursor=pointer]:
+                - generic [ref=e1465]:
+                  - paragraph [ref=e1466]: Supabase audit March 10 — what Altan built vs what was planned
+                  - paragraph [ref=e1467]: Always check the supabase branch schema SQL files before concluding tables are missing.
+                - generic [ref=e1468]:
+                  - generic [ref=e1469]: Learnings
+                  - generic [ref=e1470]:
+                    - img [ref=e1471]
+                    - text: 10.03.2026
+                  - generic [ref=e1473]: supabase
+                  - generic [ref=e1474]: audit
+                  - generic [ref=e1475]: altan
+                  - generic [ref=e1476]: "+6"
+              - button "Notion MCP tool patterns — what works for Tasks DB and Backlog DB Always fetch the data source schema first before updating. Don't guess property formats. Learnings 09.03.2026 notion mcp api +3" [ref=e1477] [cursor=pointer]:
+                - generic [ref=e1479]:
+                  - paragraph [ref=e1480]: Notion MCP tool patterns — what works for Tasks DB and Backlog DB
+                  - paragraph [ref=e1481]: Always fetch the data source schema first before updating. Don't guess property formats.
+                - generic [ref=e1482]:
+                  - generic [ref=e1483]: Learnings
+                  - generic [ref=e1484]:
+                    - img [ref=e1485]
+                    - text: 09.03.2026
+                  - generic [ref=e1487]: notion
+                  - generic [ref=e1488]: mcp
+                  - generic [ref=e1489]: api
+                  - generic [ref=e1490]: "+3"
+              - button "Sakshi handoff requirements — what backend must deliver before WeWeb wiring If Altan has not signed off on all deliverables by end of Week 1, Sakshi cannot wire real data in Week 2. Learnings 09.03.2026 sakshi handoff frontend +5" [ref=e1491] [cursor=pointer]:
+                - generic [ref=e1493]:
+                  - paragraph [ref=e1494]: Sakshi handoff requirements — what backend must deliver before WeWeb wiring
+                  - paragraph [ref=e1495]: If Altan has not signed off on all deliverables by end of Week 1, Sakshi cannot wire real data in Week 2.
+                - generic [ref=e1496]:
+                  - generic [ref=e1497]: Learnings
+                  - generic [ref=e1498]:
+                    - img [ref=e1499]
+                    - text: 09.03.2026
+                  - generic [ref=e1501]: sakshi
+                  - generic [ref=e1502]: handoff
+                  - generic [ref=e1503]: frontend
+                  - generic [ref=e1504]: "+5"
+              - button "Supabase actual state as of March 9, 2026 — what exists vs what is missing Before any PMO session, check actual Supabase state via OpenAPI spec or MCP. Architecture docs may be ahead of reality. Learnings 09.03.2026 supabase schema migration +3" [ref=e1505] [cursor=pointer]:
+                - generic [ref=e1507]:
+                  - paragraph [ref=e1508]: Supabase actual state as of March 9, 2026 — what exists vs what is missing
+                  - paragraph [ref=e1509]: Before any PMO session, check actual Supabase state via OpenAPI spec or MCP. Architecture docs may be ahead of reality.
+                - generic [ref=e1510]:
+                  - generic [ref=e1511]: Learnings
+                  - generic [ref=e1512]:
+                    - img [ref=e1513]
+                    - text: 09.03.2026
+                  - generic [ref=e1515]: supabase
+                  - generic [ref=e1516]: schema
+                  - generic [ref=e1517]: migration
+                  - generic [ref=e1518]: "+3"
+              - button "Full system understanding from PMO planning session Always check the supabase branch for sync scripts. Always check process_config for clearing definitions. Never assume Airtable is deprecated. Learnings 09.03.2026 system architecture onboarding +1" [ref=e1519] [cursor=pointer]:
+                - generic [ref=e1521]:
+                  - paragraph [ref=e1522]: Full system understanding from PMO planning session
+                  - paragraph [ref=e1523]: Always check the supabase branch for sync scripts. Always check process_config for clearing definitions. Never assume Airtable is deprecated.
+                - generic [ref=e1524]:
+                  - generic [ref=e1525]: Learnings
+                  - generic [ref=e1526]:
+                    - img [ref=e1527]
+                    - text: 09.03.2026
+                  - generic [ref=e1529]: system
+                  - generic [ref=e1530]: architecture
+                  - generic [ref=e1531]: onboarding
+                  - generic [ref=e1532]: "+1"
+              - 'button "Owner history log uses specific format: ''Name | Action | Date'' Always APPEND to history log, never replace. Read existing value first. Learnings 17.02.2026 owner_history logging format +1" [ref=e1533] [cursor=pointer]':
+                - generic [ref=e1535]:
+                  - paragraph [ref=e1536]: "Owner history log uses specific format: 'Name | Action | Date'"
+                  - paragraph [ref=e1537]: Always APPEND to history log, never replace. Read existing value first.
+                - generic [ref=e1538]:
+                  - generic [ref=e1539]: Learnings
+                  - generic [ref=e1540]:
+                    - img [ref=e1541]
+                    - text: 17.02.2026
+                  - generic [ref=e1543]: owner_history
+                  - generic [ref=e1544]: logging
+                  - generic [ref=e1545]: format
+                  - generic [ref=e1546]: "+1"
+              - button "source_status 'Completed' always overrides clearing_status to 'Completed' Never add conditions before the Completed check. It must always be evaluated first. Learnings 17.02.2026 completed override status_assignment +1" [ref=e1547] [cursor=pointer]:
+                - generic [ref=e1549]:
+                  - paragraph [ref=e1550]: source_status 'Completed' always overrides clearing_status to 'Completed'
+                  - paragraph [ref=e1551]: Never add conditions before the Completed check. It must always be evaluated first.
+                - generic [ref=e1552]:
+                  - generic [ref=e1553]: Learnings
+                  - generic [ref=e1554]:
+                    - img [ref=e1555]
+                    - text: 17.02.2026
+                  - generic [ref=e1557]: completed
+                  - generic [ref=e1558]: override
+                  - generic [ref=e1559]: status_assignment
+                  - generic [ref=e1560]: "+1"
+              - 'button "Rebalancing processes use REBALANCING_{ID}_ prefix in ALL fields When process_type starts with REBALANCING_, use the full string including REBALANCING_ as the field prefix. Do NOT strip it. Learnings 17.02.2026 rebalancing naming prefix +1" [ref=e1561] [cursor=pointer]':
+                - generic [ref=e1563]:
+                  - paragraph [ref=e1564]: "Rebalancing processes use REBALANCING_{ID}_ prefix in ALL fields"
+                  - paragraph [ref=e1565]: When process_type starts with REBALANCING_, use the full string including REBALANCING_ as the field prefix. Do NOT strip it.
+                - generic [ref=e1566]:
+                  - generic [ref=e1567]: Learnings
+                  - generic [ref=e1568]:
+                    - img [ref=e1569]
+                    - text: 17.02.2026
+                  - generic [ref=e1571]: rebalancing
+                  - generic [ref=e1572]: naming
+                  - generic [ref=e1573]: prefix
+                  - generic [ref=e1574]: "+1"
+              - button "Bugs are tracked in Reaper Hub > Builders > Backlog DB (Bugs view), not Master PMO Portal bugs are always in the Backlog DB (collection://01af2b8f-f99d-4788-895c-a8b5082cf965) filtered by Type = Bug, inside Reaper Hub > Builders. Never look in Master PMO. Knowledge 26.03.2026 bugs notion reaper-hub +3" [ref=e1575] [cursor=pointer]:
+                - generic [ref=e1577]:
+                  - paragraph [ref=e1578]: Bugs are tracked in Reaper Hub > Builders > Backlog DB (Bugs view), not Master PMO
+                  - paragraph [ref=e1579]: Portal bugs are always in the Backlog DB (collection://01af2b8f-f99d-4788-895c-a8b5082cf965) filtered by Type = Bug, inside Reaper Hub > Builders. Never look in Master PMO.
+                - generic [ref=e1580]:
+                  - generic [ref=e1581]: Knowledge
+                  - generic [ref=e1582]:
+                    - img [ref=e1583]
+                    - text: 26.03.2026
+                  - generic [ref=e1585]: bugs
+                  - generic [ref=e1586]: notion
+                  - generic [ref=e1587]: reaper-hub
+                  - generic [ref=e1588]: "+3"
+              - 'button "Prod schema column name mapping — what agents assume vs reality Multiple agent docs used wrong column names. Ground truth: dsos.dso_number (not bdew_code), customer_comments table does NOT exist. Knowledge 13.03.2026 schema production column-mapping +3" [ref=e1589] [cursor=pointer]':
+                - generic [ref=e1591]:
+                  - paragraph [ref=e1592]: Prod schema column name mapping — what agents assume vs reality
+                  - paragraph [ref=e1593]: "Multiple agent docs used wrong column names. Ground truth: dsos.dso_number (not bdew_code), customer_comments table does NOT exist."
+                - generic [ref=e1594]:
+                  - generic [ref=e1595]: Knowledge
+                  - generic [ref=e1596]:
+                    - img [ref=e1597]
+                    - text: 13.03.2026
+                  - generic [ref=e1599]: schema
+                  - generic [ref=e1600]: production
+                  - generic [ref=e1601]: column-mapping
+                  - generic [ref=e1602]: "+3"
+              - button "Production Supabase schema — complete table reference with purposes Complete reference for all 14 production tables. customer_clearing_workflow already has comment columns. main_table_md2 is DEPRECATED. Knowledge 12.03.2026 schema supabase production +6" [ref=e1603] [cursor=pointer]:
+                - generic [ref=e1605]:
+                  - paragraph [ref=e1606]: Production Supabase schema — complete table reference with purposes
+                  - paragraph [ref=e1607]: Complete reference for all 14 production tables. customer_clearing_workflow already has comment columns. main_table_md2 is DEPRECATED.
+                - generic [ref=e1608]:
+                  - generic [ref=e1609]: Knowledge
+                  - generic [ref=e1610]:
+                    - img [ref=e1611]
+                    - text: 12.03.2026
+                  - generic [ref=e1613]: schema
+                  - generic [ref=e1614]: supabase
+                  - generic [ref=e1615]: production
+                  - generic [ref=e1616]: "+6"
+              - button "ALWAYS verify business logic with Vatsal before building views — don't assume what to show Built dso_portal_view showing 1.3M rows including Not Eligible and Completed. Correct filter is is_transferred = true. Human Inputs 12.03.2026 feedback critical-thinking portal +5" [ref=e1617] [cursor=pointer]:
+                - generic [ref=e1619]:
+                  - paragraph [ref=e1620]: ALWAYS verify business logic with Vatsal before building views — don't assume what to show
+                  - paragraph [ref=e1621]: Built dso_portal_view showing 1.3M rows including Not Eligible and Completed. Correct filter is is_transferred = true.
+                - generic [ref=e1622]:
+                  - generic [ref=e1623]: Human Inputs
+                  - generic [ref=e1624]:
+                    - img [ref=e1625]
+                    - text: 12.03.2026
+                  - generic [ref=e1627]: feedback
+                  - generic [ref=e1628]: critical-thinking
+                  - generic [ref=e1629]: portal
+                  - generic [ref=e1630]: "+5"
+              - button "Always wait for user confirmation before shutting down agent teams NEVER shut down agent teams without explicit user approval. Report results, ask, wait for confirmation. Human Inputs 12.03.2026 orchestrator team-coordination shutdown +3" [ref=e1631] [cursor=pointer]:
+                - generic [ref=e1633]:
+                  - paragraph [ref=e1634]: Always wait for user confirmation before shutting down agent teams
+                  - paragraph [ref=e1635]: NEVER shut down agent teams without explicit user approval. Report results, ask, wait for confirmation.
+                - generic [ref=e1636]:
+                  - generic [ref=e1637]: Human Inputs
+                  - generic [ref=e1638]:
+                    - img [ref=e1639]
+                    - text: 12.03.2026
+                  - generic [ref=e1641]: orchestrator
+                  - generic [ref=e1642]: team-coordination
+                  - generic [ref=e1643]: shutdown
+                  - generic [ref=e1644]: "+3"
+              - button "Security agent files rewritten for MCP-era environment Rewrote environment_management.md (Docker->MCP), trimmed security.md from 390->181 lines, extracted offensive_testing.md as new rule file, deleted obsolete backend local_dev.md. Decisions 30.03.2026 security documentation agent-files +3" [ref=e1645] [cursor=pointer]:
+                - generic [ref=e1647]:
+                  - paragraph [ref=e1648]: Security agent files rewritten for MCP-era environment
+                  - paragraph [ref=e1649]: Rewrote environment_management.md (Docker->MCP), trimmed security.md from 390->181 lines, extracted offensive_testing.md as new rule file, deleted obsolete backend local_dev.md.
+                - generic [ref=e1650]:
+                  - generic [ref=e1651]: Decisions
+                  - generic [ref=e1652]:
+                    - img [ref=e1653]
+                    - text: 30.03.2026
+                  - generic [ref=e1655]: security
+                  - generic [ref=e1656]: documentation
+                  - generic [ref=e1657]: agent-files
+                  - generic [ref=e1658]: "+3"
+              - button "Sprint V2+V3 completed 2026-03-17 to 2026-03-18 — full portal overhaul Portal is production-ready with OTP auth. Always run QA before committing. Backend agent can't access prod — use MCP directly. Decisions 18.03.2026 orchestrator sprint-v2 sprint-v3 +6" [ref=e1659] [cursor=pointer]:
+                - generic [ref=e1661]:
+                  - paragraph [ref=e1662]: Sprint V2+V3 completed 2026-03-17 to 2026-03-18 — full portal overhaul
+                  - paragraph [ref=e1663]: Portal is production-ready with OTP auth. Always run QA before committing. Backend agent can't access prod — use MCP directly.
+                - generic [ref=e1664]:
+                  - generic [ref=e1665]: Decisions
+                  - generic [ref=e1666]:
+                    - img [ref=e1667]
+                    - text: 18.03.2026
+                  - generic [ref=e1669]: orchestrator
+                  - generic [ref=e1670]: sprint-v2
+                  - generic [ref=e1671]: sprint-v3
+                  - generic [ref=e1672]: "+6"
+              - 'button "dso-otp-auth edge function: session refresh strategy and security design When updateUserById sets app_metadata after verifyOtp, the returned session JWT is stale. Caller must refresh the session. Decisions 18.03.2026 backend edge-function auth +4" [ref=e1673] [cursor=pointer]':
+                - generic [ref=e1675]:
+                  - paragraph [ref=e1676]: "dso-otp-auth edge function: session refresh strategy and security design"
+                  - paragraph [ref=e1677]: When updateUserById sets app_metadata after verifyOtp, the returned session JWT is stale. Caller must refresh the session.
+                - generic [ref=e1678]:
+                  - generic [ref=e1679]: Decisions
+                  - generic [ref=e1680]:
+                    - img [ref=e1681]
+                    - text: 18.03.2026
+                  - generic [ref=e1683]: backend
+                  - generic [ref=e1684]: edge-function
+                  - generic [ref=e1685]: auth
+                  - generic [ref=e1686]: "+4"
+              - button "Updated 4 docs to reflect sandbox_energy BI migration for portal When the BI source changes, update backend patterns, frontend data layer, migration SQL, and backend README. Decisions 17.03.2026 documentation sandbox_energy main_table_md2 +5" [ref=e1687] [cursor=pointer]:
+                - generic [ref=e1689]:
+                  - paragraph [ref=e1690]: Updated 4 docs to reflect sandbox_energy BI migration for portal
+                  - paragraph [ref=e1691]: When the BI source changes, update backend patterns, frontend data layer, migration SQL, and backend README.
+                - generic [ref=e1692]:
+                  - generic [ref=e1693]: Decisions
+                  - generic [ref=e1694]:
+                    - img [ref=e1695]
+                    - text: 17.03.2026
+                  - generic [ref=e1697]: documentation
+                  - generic [ref=e1698]: sandbox_energy
+                  - generic [ref=e1699]: main_table_md2
+                  - generic [ref=e1700]: "+5"
+              - button "Auth redesign completed — Notion tickets and backlog updated After major implementation changes, always check that BOTH the Tasks DB AND the Backlog DB are updated. Decisions 16.03.2026 auth notion backlog +4" [ref=e1701] [cursor=pointer]:
+                - generic [ref=e1703]:
+                  - paragraph [ref=e1704]: Auth redesign completed — Notion tickets and backlog updated
+                  - paragraph [ref=e1705]: After major implementation changes, always check that BOTH the Tasks DB AND the Backlog DB are updated.
+                - generic [ref=e1706]:
+                  - generic [ref=e1707]: Decisions
+                  - generic [ref=e1708]:
+                    - img [ref=e1709]
+                    - text: 16.03.2026
+                  - generic [ref=e1711]: auth
+                  - generic [ref=e1712]: notion
+                  - generic [ref=e1713]: backlog
+                  - generic [ref=e1714]: "+4"
+              - button "Rewrite validate-token to POST with CSRF + rate limiting, update middleware to whitelist approach Rate limit check after CSRF but before token format check. sb-* cookies cleared before setSession to prevent session fixation. Decisions 16.03.2026 backend auth csrf +4" [ref=e1715] [cursor=pointer]:
+                - generic [ref=e1717]:
+                  - paragraph [ref=e1718]: Rewrite validate-token to POST with CSRF + rate limiting, update middleware to whitelist approach
+                  - paragraph [ref=e1719]: Rate limit check after CSRF but before token format check. sb-* cookies cleared before setSession to prevent session fixation.
+                - generic [ref=e1720]:
+                  - generic [ref=e1721]: Decisions
+                  - generic [ref=e1722]:
+                    - img [ref=e1723]
+                    - text: 16.03.2026
+                  - generic [ref=e1725]: backend
+                  - generic [ref=e1726]: auth
+                  - generic [ref=e1727]: csrf
+                  - generic [ref=e1728]: "+4"
+              - button "Security review of auth flow redesign spec — APPROVE WITH CONDITIONS Double-submit cookie CSRF is correct for unauthenticated login forms. __Host- prefix breaks local HTTP dev. Decisions 16.03.2026 security auth csrf +5" [ref=e1729] [cursor=pointer]:
+                - generic [ref=e1731]:
+                  - paragraph [ref=e1732]: Security review of auth flow redesign spec — APPROVE WITH CONDITIONS
+                  - paragraph [ref=e1733]: Double-submit cookie CSRF is correct for unauthenticated login forms. __Host- prefix breaks local HTTP dev.
+                - generic [ref=e1734]:
+                  - generic [ref=e1735]: Decisions
+                  - generic [ref=e1736]:
+                    - img [ref=e1737]
+                    - text: 16.03.2026
+                  - generic [ref=e1739]: security
+                  - generic [ref=e1740]: auth
+                  - generic [ref=e1741]: csrf
+                  - generic [ref=e1742]: "+5"
+              - button "Auth flow redesign planned — token-in-form POST replaces URL-based GET Token must travel only via POST body, never URL. CSRF uses double-submit cookie pattern. Decisions 16.03.2026 auth architecture sprint-spec +5" [ref=e1743] [cursor=pointer]:
+                - generic [ref=e1745]:
+                  - paragraph [ref=e1746]: Auth flow redesign planned — token-in-form POST replaces URL-based GET
+                  - paragraph [ref=e1747]: Token must travel only via POST body, never URL. CSRF uses double-submit cookie pattern.
+                - generic [ref=e1748]:
+                  - generic [ref=e1749]: Decisions
+                  - generic [ref=e1750]:
+                    - img [ref=e1751]
+                    - text: 16.03.2026
+                  - generic [ref=e1753]: auth
+                  - generic [ref=e1754]: architecture
+                  - generic [ref=e1755]: sprint-spec
+                  - generic [ref=e1756]: "+5"
+              - button "Updated dso-portal README to document new access-code auth flow, flagged stale backend auth_spec Always check actual implementation files rather than trusting spec documents when documenting auth flows. Decisions 16.03.2026 frontend auth readme +4" [ref=e1757] [cursor=pointer]:
+                - generic [ref=e1759]:
+                  - paragraph [ref=e1760]: Updated dso-portal README to document new access-code auth flow, flagged stale backend auth_spec
+                  - paragraph [ref=e1761]: Always check actual implementation files rather than trusting spec documents when documenting auth flows.
+                - generic [ref=e1762]:
+                  - generic [ref=e1763]: Decisions
+                  - generic [ref=e1764]:
+                    - img [ref=e1765]
+                    - text: 16.03.2026
+                  - generic [ref=e1767]: frontend
+                  - generic [ref=e1768]: auth
+                  - generic [ref=e1769]: readme
+                  - generic [ref=e1770]: "+4"
+              - button "Full agent infrastructure overhaul — SOTA patterns applied to all 9 agents Agent profiles should teach HOW to think, not just WHAT to do. Two-tier architecture (profile -> deep rules) is sound but profiles must not contradict deep files. Decisions 12.03.2026 orchestrator agent-infrastructure sota +2" [ref=e1771] [cursor=pointer]:
+                - generic [ref=e1773]:
+                  - paragraph [ref=e1774]: Full agent infrastructure overhaul — SOTA patterns applied to all 9 agents
+                  - paragraph [ref=e1775]: Agent profiles should teach HOW to think, not just WHAT to do. Two-tier architecture (profile -> deep rules) is sound but profiles must not contradict deep files.
+                - generic [ref=e1776]:
+                  - generic [ref=e1777]: Decisions
+                  - generic [ref=e1778]:
+                    - img [ref=e1779]
+                    - text: 12.03.2026
+                  - generic [ref=e1781]: orchestrator
+                  - generic [ref=e1782]: agent-infrastructure
+                  - generic [ref=e1783]: sota
+                  - generic [ref=e1784]: "+2"
+              - button "V1 DSO Portal production deployment checklist — full go-live plan Minimal migrations are safer. Regular views (not materialized) required for security_invoker RLS pass-through. Decisions 12.03.2026 portal deployment checklist +8" [ref=e1785] [cursor=pointer]:
+                - generic [ref=e1787]:
+                  - paragraph [ref=e1788]: V1 DSO Portal production deployment checklist — full go-live plan
+                  - paragraph [ref=e1789]: Minimal migrations are safer. Regular views (not materialized) required for security_invoker RLS pass-through.
+                - generic [ref=e1790]:
+                  - generic [ref=e1791]: Decisions
+                  - generic [ref=e1792]:
+                    - img [ref=e1793]
+                    - text: 12.03.2026
+                  - generic [ref=e1795]: portal
+                  - generic [ref=e1796]: deployment
+                  - generic [ref=e1797]: checklist
+                  - generic [ref=e1798]: "+8"
+              - 'button "Portal migration: minimal changes only — no extra tables or denormalized columns Always check what exists in prod before creating new tables. Portal enpal_comment maps to existing comment column. Decisions 12.03.2026 portal migration decision +5" [ref=e1799] [cursor=pointer]':
+                - generic [ref=e1801]:
+                  - paragraph [ref=e1802]: "Portal migration: minimal changes only — no extra tables or denormalized columns"
+                  - paragraph [ref=e1803]: Always check what exists in prod before creating new tables. Portal enpal_comment maps to existing comment column.
+                - generic [ref=e1804]:
+                  - generic [ref=e1805]: Decisions
+                  - generic [ref=e1806]:
+                    - img [ref=e1807]
+                    - text: 12.03.2026
+                  - generic [ref=e1809]: portal
+                  - generic [ref=e1810]: migration
+                  - generic [ref=e1811]: decision
+                  - generic [ref=e1812]: "+5"
+              - button "V1 Portal Spec created as single source of truth for all agents A detailed spec prevents back-and-forth guessing between agents. Include past bug learnings directly in spec. Decisions 12.03.2026 pmo spec v1 +4" [ref=e1813] [cursor=pointer]:
+                - generic [ref=e1815]:
+                  - paragraph [ref=e1816]: V1 Portal Spec created as single source of truth for all agents
+                  - paragraph [ref=e1817]: A detailed spec prevents back-and-forth guessing between agents. Include past bug learnings directly in spec.
+                - generic [ref=e1818]:
+                  - generic [ref=e1819]: Decisions
+                  - generic [ref=e1820]:
+                    - img [ref=e1821]
+                    - text: 12.03.2026
+                  - generic [ref=e1823]: pmo
+                  - generic [ref=e1824]: spec
+                  - generic [ref=e1825]: v1
+                  - generic [ref=e1826]: "+4"
+              - button "Agent autonomy, TalkTo communication, and implementation authority established Agents need both specs AND autonomy. Critical RLS JWT path bug fixed (was auth.jwt()->>dso_name, now auth.jwt()->app_metadata->>dso_name). Decisions 11.03.2026 agent-autonomy talkto cross-agent +4" [ref=e1827] [cursor=pointer]:
+                - generic [ref=e1829]:
+                  - paragraph [ref=e1830]: Agent autonomy, TalkTo communication, and implementation authority established
+                  - paragraph [ref=e1831]: Agents need both specs AND autonomy. Critical RLS JWT path bug fixed (was auth.jwt()->>dso_name, now auth.jwt()->app_metadata->>dso_name).
+                - generic [ref=e1832]:
+                  - generic [ref=e1833]: Decisions
+                  - generic [ref=e1834]:
+                    - img [ref=e1835]
+                    - text: 11.03.2026
+                  - generic [ref=e1837]: agent-autonomy
+                  - generic [ref=e1838]: talkto
+                  - generic [ref=e1839]: cross-agent
+                  - generic [ref=e1840]: "+4"
+              - button "Wireframe v4 review — finalized V1 frontend/backend scope for DSO Portal Landing page = table not cards, Kommentar VNB shows previous comment, Antwort/Kommentar for ALL customers, faq_document_url not faq_url. Decisions 11.03.2026 wireframe v4 scope +7" [ref=e1841] [cursor=pointer]:
+                - generic [ref=e1843]:
+                  - paragraph [ref=e1844]: Wireframe v4 review — finalized V1 frontend/backend scope for DSO Portal
+                  - paragraph [ref=e1845]: Landing page = table not cards, Kommentar VNB shows previous comment, Antwort/Kommentar for ALL customers, faq_document_url not faq_url.
+                - generic [ref=e1846]:
+                  - generic [ref=e1847]: Decisions
+                  - generic [ref=e1848]:
+                    - img [ref=e1849]
+                    - text: 11.03.2026
+                  - generic [ref=e1851]: wireframe
+                  - generic [ref=e1852]: v4
+                  - generic [ref=e1853]: scope
+                  - generic [ref=e1854]: "+7"
+              - button "Backend Worker agent created — Supabase views, Edge Functions, RLS, local Docker dev Backend agent works exclusively on local Docker Supabase, produces migration files for human review. Decisions 11.03.2026 backend supabase agent-creation +5" [ref=e1855] [cursor=pointer]:
+                - generic [ref=e1857]:
+                  - paragraph [ref=e1858]: Backend Worker agent created — Supabase views, Edge Functions, RLS, local Docker dev
+                  - paragraph [ref=e1859]: Backend agent works exclusively on local Docker Supabase, produces migration files for human review.
+                - generic [ref=e1860]:
+                  - generic [ref=e1861]: Decisions
+                  - generic [ref=e1862]:
+                    - img [ref=e1863]
+                    - text: 11.03.2026
+                  - generic [ref=e1865]: backend
+                  - generic [ref=e1866]: supabase
+                  - generic [ref=e1867]: agent-creation
+                  - generic [ref=e1868]: "+5"
+              - button "Security Guardian agent created — production isolation and code security Agent has VETO POWER. MCP is the highest risk vector because execute_sql bypasses all application-level controls. Decisions 11.03.2026 security prod-isolation agent-creation +5" [ref=e1869] [cursor=pointer]:
+                - generic [ref=e1871]:
+                  - paragraph [ref=e1872]: Security Guardian agent created — production isolation and code security
+                  - paragraph [ref=e1873]: Agent has VETO POWER. MCP is the highest risk vector because execute_sql bypasses all application-level controls.
+                - generic [ref=e1874]:
+                  - generic [ref=e1875]: Decisions
+                  - generic [ref=e1876]:
+                    - img [ref=e1877]
+                    - text: 11.03.2026
+                  - generic [ref=e1879]: security
+                  - generic [ref=e1880]: prod-isolation
+                  - generic [ref=e1881]: agent-creation
+                  - generic [ref=e1882]: "+5"
+              - button "Frontend Worker agent created — Next.js replaces WeWeb for V1 DSO Portal When a no-code tool is blocked, a well-specced code agent with strict scope can replace it. Decisions 11.03.2026 frontend dso-portal v1 +3" [ref=e1883] [cursor=pointer]:
+                - generic [ref=e1885]:
+                  - paragraph [ref=e1886]: Frontend Worker agent created — Next.js replaces WeWeb for V1 DSO Portal
+                  - paragraph [ref=e1887]: When a no-code tool is blocked, a well-specced code agent with strict scope can replace it.
+                - generic [ref=e1888]:
+                  - generic [ref=e1889]: Decisions
+                  - generic [ref=e1890]:
+                    - img [ref=e1891]
+                    - text: 11.03.2026
+                  - generic [ref=e1893]: frontend
+                  - generic [ref=e1894]: dso-portal
+                  - generic [ref=e1895]: v1
+                  - generic [ref=e1896]: "+3"
+              - button "Notion PMO fully structured — Prio column, Week 3, Backlog links Prio system is P1-Blocker/P2-Important/P3-Nice to have. Unplanned replaced by Week 3. Decisions 09.03.2026 notion pmo backlog +4" [ref=e1897] [cursor=pointer]:
+                - generic [ref=e1899]:
+                  - paragraph [ref=e1900]: Notion PMO fully structured — Prio column, Week 3, Backlog links
+                  - paragraph [ref=e1901]: Prio system is P1-Blocker/P2-Important/P3-Nice to have. Unplanned replaced by Week 3.
+                - generic [ref=e1902]:
+                  - generic [ref=e1903]: Decisions
+                  - generic [ref=e1904]:
+                    - img [ref=e1905]
+                    - text: 09.03.2026
+                  - generic [ref=e1907]: notion
+                  - generic [ref=e1908]: pmo
+                  - generic [ref=e1909]: backlog
+                  - generic [ref=e1910]: "+4"
+              - button "Hackathon PMO plan finalized — 2-week sprint for DSO Portal V1 Team of 4, 10 working days. Week 1 backend-heavy, Week 2 frontend-heavy. 36 V1 tickets. Decisions 09.03.2026 hackathon planning team +2" [ref=e1911] [cursor=pointer]:
+                - generic [ref=e1913]:
+                  - paragraph [ref=e1914]: Hackathon PMO plan finalized — 2-week sprint for DSO Portal V1
+                  - paragraph [ref=e1915]: Team of 4, 10 working days. Week 1 backend-heavy, Week 2 frontend-heavy. 36 V1 tickets.
+                - generic [ref=e1916]:
+                  - generic [ref=e1917]: Decisions
+                  - generic [ref=e1918]:
+                    - img [ref=e1919]
+                    - text: 09.03.2026
+                  - generic [ref=e1921]: hackathon
+                  - generic [ref=e1922]: planning
+                  - generic [ref=e1923]: team
+                  - generic [ref=e1924]: "+2"
+              - button "Full session learnings 2026-04-01/02 — 55126 linking, email sendout, verification, backfill 23 corrections covering SQL (is_deleted_in_bi, dso join, pagination), Airtable fields, VPP linker, DSO aliases, email sending, and verification scripts for 55126 Corrections 02.04.2026 55126 linking email-sendout +6" [ref=e1925] [cursor=pointer]:
+                - generic [ref=e1927]:
+                  - paragraph [ref=e1928]: Full session learnings 2026-04-01/02 — 55126 linking, email sendout, verification, backfill
+                  - paragraph [ref=e1929]: 23 corrections covering SQL (is_deleted_in_bi, dso join, pagination), Airtable fields, VPP linker, DSO aliases, email sending, and verification scripts for 55126
+                - generic [ref=e1930]:
+                  - generic [ref=e1931]: Corrections
+                  - generic [ref=e1932]:
+                    - img [ref=e1933]
+                    - text: 02.04.2026
+                  - generic [ref=e1935]: "55126"
+                  - generic [ref=e1936]: linking
+                  - generic [ref=e1937]: email-sendout
+                  - generic [ref=e1938]: "+6"
+              - button "Do not use pyairtable — use Utils/airtable_client.py Always use Utils/airtable_client.py (AirtableClient) for Airtable access — never import pyairtable directly Corrections 01.04.2026 airtable python utils +1" [ref=e1939] [cursor=pointer]:
+                - generic [ref=e1941]:
+                  - paragraph [ref=e1942]: Do not use pyairtable — use Utils/airtable_client.py
+                  - paragraph [ref=e1943]: Always use Utils/airtable_client.py (AirtableClient) for Airtable access — never import pyairtable directly
+                - generic [ref=e1944]:
+                  - generic [ref=e1945]: Corrections
+                  - generic [ref=e1946]:
+                    - img [ref=e1947]
+                    - text: 01.04.2026
+                  - generic [ref=e1949]: airtable
+                  - generic [ref=e1950]: python
+                  - generic [ref=e1951]: utils
+                  - generic [ref=e1952]: "+1"
+              - button "DSO name join via correlated ANY(SELECT unnest()) is slow — use pre-unnested CTE Pre-unnest all_names_for_dso into a CTE once, then join on plain equality — never use = ANY(SELECT unnest(...)) Corrections 01.04.2026 sql dso linking +3" [ref=e1953] [cursor=pointer]:
+                - generic [ref=e1955]:
+                  - paragraph [ref=e1956]: DSO name join via correlated ANY(SELECT unnest()) is slow — use pre-unnested CTE
+                  - paragraph [ref=e1957]: Pre-unnest all_names_for_dso into a CTE once, then join on plain equality — never use = ANY(SELECT unnest(...))
+                - generic [ref=e1958]:
+                  - generic [ref=e1959]: Corrections
+                  - generic [ref=e1960]:
+                    - img [ref=e1961]
+                    - text: 01.04.2026
+                  - generic [ref=e1963]: sql
+                  - generic [ref=e1964]: dso
+                  - generic [ref=e1965]: linking
+                  - generic [ref=e1966]: "+3"
+              - button "is_deleted_in_bi and block_55126_sendout do not exist in Supabase is_deleted_in_bi column and block_55126_sendout table don't exist — verify via MCP before using in SQL Corrections 01.04.2026 55126 linking bi-view +4" [ref=e1967] [cursor=pointer]:
+                - generic [ref=e1969]:
+                  - paragraph [ref=e1970]: is_deleted_in_bi and block_55126_sendout do not exist in Supabase
+                  - paragraph [ref=e1971]: is_deleted_in_bi column and block_55126_sendout table don't exist — verify via MCP before using in SQL
+                - generic [ref=e1972]:
+                  - generic [ref=e1973]: Corrections
+                  - generic [ref=e1974]:
+                    - img [ref=e1975]
+                    - text: 01.04.2026
+                  - generic [ref=e1977]: "55126"
+                  - generic [ref=e1978]: linking
+                  - generic [ref=e1979]: bi-view
+                  - generic [ref=e1980]: "+4"
+              - button "Correct Airtable field names for 55126_Cons_RLM workflow fields Use rlm_cons_to_supabase.py PROCESS_CONFIGS for 55126 field names — ReasonCode=55126_Clearing_ReasonCode_Enpal, comment_ct=55126_Clearing_Team_Comment Corrections 01.04.2026 55126 airtable field-names +2" [ref=e1981] [cursor=pointer]:
+                - generic [ref=e1983]:
+                  - paragraph [ref=e1984]: Correct Airtable field names for 55126_Cons_RLM workflow fields
+                  - paragraph [ref=e1985]: Use rlm_cons_to_supabase.py PROCESS_CONFIGS for 55126 field names — ReasonCode=55126_Clearing_ReasonCode_Enpal, comment_ct=55126_Clearing_Team_Comment
+                - generic [ref=e1986]:
+                  - generic [ref=e1987]: Corrections
+                  - generic [ref=e1988]:
+                    - img [ref=e1989]
+                    - text: 01.04.2026
+                  - generic [ref=e1991]: "55126"
+                  - generic [ref=e1992]: airtable
+                  - generic [ref=e1993]: field-names
+                  - generic [ref=e1994]: "+2"
+              - button "Supabase pagination requires ORDER BY to avoid duplicate/missing rows Always add .order() when paginating Supabase views — without it, PostgREST returns duplicate rows at page boundaries Corrections 01.04.2026 supabase pagination order-by +2" [ref=e1995] [cursor=pointer]:
+                - generic [ref=e1997]:
+                  - paragraph [ref=e1998]: Supabase pagination requires ORDER BY to avoid duplicate/missing rows
+                  - paragraph [ref=e1999]: Always add .order() when paginating Supabase views — without it, PostgREST returns duplicate rows at page boundaries
+                - generic [ref=e2000]:
+                  - generic [ref=e2001]: Corrections
+                  - generic [ref=e2002]:
+                    - img [ref=e2003]
+                    - text: 01.04.2026
+                  - generic [ref=e2005]: supabase
+                  - generic [ref=e2006]: pagination
+                  - generic [ref=e2007]: order-by
+                  - generic [ref=e2008]: "+2"
+              - button "FAQ signed URLs break if SQL insert adds newlines — always check for whitespace in long tokens When inserting long strings (JWT tokens, signed URLs) via SQL, always verify no whitespace/newlines were introduced. Corrections 18.03.2026 correction faq signed-url +3" [ref=e2009] [cursor=pointer]:
+                - generic [ref=e2011]:
+                  - paragraph [ref=e2012]: FAQ signed URLs break if SQL insert adds newlines — always check for whitespace in long tokens
+                  - paragraph [ref=e2013]: When inserting long strings (JWT tokens, signed URLs) via SQL, always verify no whitespace/newlines were introduced.
+                - generic [ref=e2014]:
+                  - generic [ref=e2015]: Corrections
+                  - generic [ref=e2016]:
+                    - img [ref=e2017]
+                    - text: 18.03.2026
+                  - generic [ref=e2019]: correction
+                  - generic [ref=e2020]: faq
+                  - generic [ref=e2021]: signed-url
+                  - generic [ref=e2022]: "+3"
+              - 'button "dso-otp-auth: cross-DSO check in verify + ILIKE replaced with exact match Never use ILIKE for matching within comma-separated fields. Always split in application code and do exact comparison. Corrections 18.03.2026 security edge-function otp +4" [ref=e2023] [cursor=pointer]':
+                - generic [ref=e2025]:
+                  - paragraph [ref=e2026]: "dso-otp-auth: cross-DSO check in verify + ILIKE replaced with exact match"
+                  - paragraph [ref=e2027]: Never use ILIKE for matching within comma-separated fields. Always split in application code and do exact comparison.
+                - generic [ref=e2028]:
+                  - generic [ref=e2029]: Corrections
+                  - generic [ref=e2030]:
+                    - img [ref=e2031]
+                    - text: 18.03.2026
+                  - generic [ref=e2033]: security
+                  - generic [ref=e2034]: edge-function
+                  - generic [ref=e2035]: otp
+                  - generic [ref=e2036]: "+4"
+              - button "Task 2 dynamic columns rewrite caused multiple regressions — must test ALL existing features after any rewrite Frontend agent uses Tailwind v4 syntax but project uses Tailwind v3. Silent CSS failure. Always test ALL features after component rewrites. Corrections 18.03.2026 orchestrator correction regression +5" [ref=e2037] [cursor=pointer]:
+                - generic [ref=e2039]:
+                  - paragraph [ref=e2040]: Task 2 dynamic columns rewrite caused multiple regressions — must test ALL existing features after any rewrite
+                  - paragraph [ref=e2041]: Frontend agent uses Tailwind v4 syntax but project uses Tailwind v3. Silent CSS failure. Always test ALL features after component rewrites.
+                - generic [ref=e2042]:
+                  - generic [ref=e2043]: Corrections
+                  - generic [ref=e2044]:
+                    - img [ref=e2045]
+                    - text: 18.03.2026
+                  - generic [ref=e2047]: orchestrator
+                  - generic [ref=e2048]: correction
+                  - generic [ref=e2049]: regression
+                  - generic [ref=e2050]: "+5"
+              - button "Melo/Malo BI columns showing empty in portal — must investigate and fix BI columns should NEVER be empty if customers exist. Check RPC, frontend join, actual data, and prop passing chain. Corrections 18.03.2026 orchestrator correction bi-columns +5" [ref=e2051] [cursor=pointer]:
+                - generic [ref=e2053]:
+                  - paragraph [ref=e2054]: Melo/Malo BI columns showing empty in portal — must investigate and fix
+                  - paragraph [ref=e2055]: BI columns should NEVER be empty if customers exist. Check RPC, frontend join, actual data, and prop passing chain.
+                - generic [ref=e2056]:
+                  - generic [ref=e2057]: Corrections
+                  - generic [ref=e2058]:
+                    - img [ref=e2059]
+                    - text: 18.03.2026
+                  - generic [ref=e2061]: orchestrator
+                  - generic [ref=e2062]: correction
+                  - generic [ref=e2063]: bi-columns
+                  - generic [ref=e2064]: "+5"
+              - button "Never use documentation agent for spec edits or code-aware tasks — it doesn't know the codebase Documentation agent is only for README/doc updates. For code-aware tasks use orchestrator, backend, or frontend agents. Corrections 17.03.2026 orchestrator correction documentation-agent +2" [ref=e2065] [cursor=pointer]:
+                - generic [ref=e2067]:
+                  - paragraph [ref=e2068]: Never use documentation agent for spec edits or code-aware tasks — it doesn't know the codebase
+                  - paragraph [ref=e2069]: Documentation agent is only for README/doc updates. For code-aware tasks use orchestrator, backend, or frontend agents.
+                - generic [ref=e2070]:
+                  - generic [ref=e2071]: Corrections
+                  - generic [ref=e2072]:
+                    - img [ref=e2073]
+                    - text: 17.03.2026
+                  - generic [ref=e2075]: orchestrator
+                  - generic [ref=e2076]: correction
+                  - generic [ref=e2077]: documentation-agent
+                  - generic [ref=e2078]: "+2"
+              - button "Login page crashes with 500 — cookies.set() called in Server Component cookieStore.set() called in Server Component causes 500. CSRF token generation must move to middleware.ts. Corrections 16.03.2026 qa-failure frontend-bug auth-bug +3" [ref=e2079] [cursor=pointer]:
+                - generic [ref=e2081]:
+                  - paragraph [ref=e2082]: Login page crashes with 500 — cookies.set() called in Server Component
+                  - paragraph [ref=e2083]: cookieStore.set() called in Server Component causes 500. CSRF token generation must move to middleware.ts.
+                - generic [ref=e2084]:
+                  - generic [ref=e2085]: Corrections
+                  - generic [ref=e2086]:
+                    - img [ref=e2087]
+                    - text: 16.03.2026
+                  - generic [ref=e2089]: qa-failure
+                  - generic [ref=e2090]: frontend-bug
+                  - generic [ref=e2091]: auth-bug
+                  - generic [ref=e2092]: "+3"
+              - button "Next.js 'missing required error components' fix — add global-error.tsx, error.tsx, portal/error.tsx Every Next.js App Router project MUST have global-error.tsx and error.tsx. Without them, dev mode enters a refresh loop. Corrections 16.03.2026 frontend nextjs error-boundary +5" [ref=e2093] [cursor=pointer]:
+                - generic [ref=e2095]:
+                  - paragraph [ref=e2096]: Next.js 'missing required error components' fix — add global-error.tsx, error.tsx, portal/error.tsx
+                  - paragraph [ref=e2097]: Every Next.js App Router project MUST have global-error.tsx and error.tsx. Without them, dev mode enters a refresh loop.
+                - generic [ref=e2098]:
+                  - generic [ref=e2099]: Corrections
+                  - generic [ref=e2100]:
+                    - img [ref=e2101]
+                    - text: 16.03.2026
+                  - generic [ref=e2103]: frontend
+                  - generic [ref=e2104]: nextjs
+                  - generic [ref=e2105]: error-boundary
+                  - generic [ref=e2106]: "+5"
+              - button "Fix login 500 (cookies.set in Server Component) and old /auth/portal/* returning 307 In Next.js App Router, Server Components can only READ cookies, not SET them. Cookie writes must happen in middleware. Corrections 16.03.2026 frontend auth csrf +6" [ref=e2107] [cursor=pointer]:
+                - generic [ref=e2109]:
+                  - paragraph [ref=e2110]: Fix login 500 (cookies.set in Server Component) and old /auth/portal/* returning 307
+                  - paragraph [ref=e2111]: In Next.js App Router, Server Components can only READ cookies, not SET them. Cookie writes must happen in middleware.
+                - generic [ref=e2112]:
+                  - generic [ref=e2113]: Corrections
+                  - generic [ref=e2114]:
+                    - img [ref=e2115]
+                    - text: 16.03.2026
+                  - generic [ref=e2117]: frontend
+                  - generic [ref=e2118]: auth
+                  - generic [ref=e2119]: csrf
+                  - generic [ref=e2120]: "+6"
+              - 'button "Welcome page crashes: missing NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local Browser client uses NEXT_PUBLIC_ env vars which are not defined. Fix: add them to .env.local. Corrections 13.03.2026 qa-failure frontend-bug auth-bug +2" [ref=e2121] [cursor=pointer]':
+                - generic [ref=e2123]:
+                  - paragraph [ref=e2124]: "Welcome page crashes: missing NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local"
+                  - paragraph [ref=e2125]: "Browser client uses NEXT_PUBLIC_ env vars which are not defined. Fix: add them to .env.local."
+                - generic [ref=e2126]:
+                  - generic [ref=e2127]: Corrections
+                  - generic [ref=e2128]:
+                    - img [ref=e2129]
+                    - text: 13.03.2026
+                  - generic [ref=e2131]: qa-failure
+                  - generic [ref=e2132]: frontend-bug
+                  - generic [ref=e2133]: auth-bug
+                  - generic [ref=e2134]: "+2"
+              - 'button "CRITICAL: 4 bugs found by prod schema audit before V1 deployment Agent docs had wrong column names (bdew_code vs dso_number), non-existent tables (customer_comments), wrong nullable assumptions. Corrections 13.03.2026 critical prod-schema audit +4" [ref=e2135] [cursor=pointer]':
+                - generic [ref=e2137]:
+                  - paragraph [ref=e2138]: "CRITICAL: 4 bugs found by prod schema audit before V1 deployment"
+                  - paragraph [ref=e2139]: Agent docs had wrong column names (bdew_code vs dso_number), non-existent tables (customer_comments), wrong nullable assumptions.
+                - generic [ref=e2140]:
+                  - generic [ref=e2141]: Corrections
+                  - generic [ref=e2142]:
+                    - img [ref=e2143]
+                    - text: 13.03.2026
+                  - generic [ref=e2145]: critical
+                  - generic [ref=e2146]: prod-schema
+                  - generic [ref=e2147]: audit
+                  - generic [ref=e2148]: "+4"
+              - 'button "P2: Landing page missing section headers (BEZUGSSEITE, EINSPEISESEITE, DIREKTVERMARKTUNG) process_config.process_category is empty in seed data. Frontend does not group by category. Corrections 12.03.2026 qa-failure frontend-bug backend-bug +1" [ref=e2149] [cursor=pointer]':
+                - generic [ref=e2151]:
+                  - paragraph [ref=e2152]: "P2: Landing page missing section headers (BEZUGSSEITE, EINSPEISESEITE, DIREKTVERMARKTUNG)"
+                  - paragraph [ref=e2153]: process_config.process_category is empty in seed data. Frontend does not group by category.
+                - generic [ref=e2154]:
+                  - generic [ref=e2155]: Corrections
+                  - generic [ref=e2156]:
+                    - img [ref=e2157]
+                    - text: 12.03.2026
+                  - generic [ref=e2159]: qa-failure
+                  - generic [ref=e2160]: frontend-bug
+                  - generic [ref=e2161]: backend-bug
+                  - generic [ref=e2162]: "+1"
+              - 'button "P2: Process diagram always shows placeholder, never renders actual image Frontend never uses processConfig.diagram_url. Storage URLs return 400 — buckets not provisioned. Corrections 12.03.2026 qa-failure frontend-bug dso-portal" [ref=e2163] [cursor=pointer]':
+                - generic [ref=e2165]:
+                  - paragraph [ref=e2166]: "P2: Process diagram always shows placeholder, never renders actual image"
+                  - paragraph [ref=e2167]: Frontend never uses processConfig.diagram_url. Storage URLs return 400 — buckets not provisioned.
+                - generic [ref=e2168]:
+                  - generic [ref=e2169]: Corrections
+                  - generic [ref=e2170]:
+                    - img [ref=e2171]
+                    - text: 12.03.2026
+                  - generic [ref=e2173]: qa-failure
+                  - generic [ref=e2174]: frontend-bug
+                  - generic [ref=e2175]: dso-portal
+              - 'button "DSO Portal broken: test tokens deactivated after single use, Edge Function env detection wrong Inside Docker, SUPABASE_URL is http://kong:8000 not localhost. Test tokens get consumed on first use. Corrupted .next cache causes vendor-chunks errors. Corrections 12.03.2026 portal auth token +4" [ref=e2176] [cursor=pointer]':
+                - generic [ref=e2178]:
+                  - paragraph [ref=e2179]: "DSO Portal broken: test tokens deactivated after single use, Edge Function env detection wrong"
+                  - paragraph [ref=e2180]: Inside Docker, SUPABASE_URL is http://kong:8000 not localhost. Test tokens get consumed on first use. Corrupted .next cache causes vendor-chunks errors.
+                - generic [ref=e2181]:
+                  - generic [ref=e2182]: Corrections
+                  - generic [ref=e2183]:
+                    - img [ref=e2184]
+                    - text: 12.03.2026
+                  - generic [ref=e2186]: portal
+                  - generic [ref=e2187]: auth
+                  - generic [ref=e2188]: token
+                  - generic [ref=e2189]: "+4"
+              - button "QA false positive — first round claimed 49/49 pass but missed 5 real bugs including 2 CRITICAL QA tested rendering but not interaction. Every interactive element must be CLICKED and result verified. Corrections 12.03.2026 qa false-positive testing +3" [ref=e2190] [cursor=pointer]:
+                - generic [ref=e2192]:
+                  - paragraph [ref=e2193]: QA false positive — first round claimed 49/49 pass but missed 5 real bugs including 2 CRITICAL
+                  - paragraph [ref=e2194]: QA tested rendering but not interaction. Every interactive element must be CLICKED and result verified.
+                - generic [ref=e2195]:
+                  - generic [ref=e2196]: Corrections
+                  - generic [ref=e2197]:
+                    - img [ref=e2198]
+                    - text: 12.03.2026
+                  - generic [ref=e2200]: qa
+                  - generic [ref=e2201]: false-positive
+                  - generic [ref=e2202]: testing
+                  - generic [ref=e2203]: "+3"
+              - button "Never mark tickets Done just because they are duplicates — Done means work is finished Done = work is finished, deployed, verified. Never use Done to signal duplicate or covered elsewhere. Corrections 10.03.2026 notion ticket-hygiene done-status +2" [ref=e2204] [cursor=pointer]:
+                - generic [ref=e2206]:
+                  - paragraph [ref=e2207]: Never mark tickets Done just because they are duplicates — Done means work is finished
+                  - paragraph [ref=e2208]: Done = work is finished, deployed, verified. Never use Done to signal duplicate or covered elsewhere.
+                - generic [ref=e2209]:
+                  - generic [ref=e2210]: Corrections
+                  - generic [ref=e2211]:
+                    - img [ref=e2212]
+                    - text: 10.03.2026
+                  - generic [ref=e2214]: notion
+                  - generic [ref=e2215]: ticket-hygiene
+                  - generic [ref=e2216]: done-status
+                  - generic [ref=e2217]: "+2"
+              - button "Corrections from PMO session 2 — planning cleanup and duplicates Duplicate tasks created, Unplanned should be Week 3, no SendGrid needed for V1, Vatsal doesn't own tasks. Corrections 09.03.2026 duplicates sendgrid unplanned +4" [ref=e2218] [cursor=pointer]:
+                - generic [ref=e2220]:
+                  - paragraph [ref=e2221]: Corrections from PMO session 2 — planning cleanup and duplicates
+                  - paragraph [ref=e2222]: Duplicate tasks created, Unplanned should be Week 3, no SendGrid needed for V1, Vatsal doesn't own tasks.
+                - generic [ref=e2223]:
+                  - generic [ref=e2224]: Corrections
+                  - generic [ref=e2225]:
+                    - img [ref=e2226]
+                    - text: 09.03.2026
+                  - generic [ref=e2228]: duplicates
+                  - generic [ref=e2229]: sendgrid
+                  - generic [ref=e2230]: unplanned
+                  - generic [ref=e2231]: "+4"
+              - 'button "Critical corrections from initial PMO planning session 5 critical corrections: sync scripts exist, Kundenubersicht is V2, WeWeb needs real building, no day-specific scheduling, Airtable is NOT deprecated. Corrections 09.03.2026 planning scope architecture +2" [ref=e2232] [cursor=pointer]':
+                - generic [ref=e2234]:
+                  - paragraph [ref=e2235]: Critical corrections from initial PMO planning session
+                  - paragraph [ref=e2236]: "5 critical corrections: sync scripts exist, Kundenubersicht is V2, WeWeb needs real building, no day-specific scheduling, Airtable is NOT deprecated."
+                - generic [ref=e2237]:
+                  - generic [ref=e2238]: Corrections
+                  - generic [ref=e2239]:
+                    - img [ref=e2240]
+                    - text: 09.03.2026
+                  - generic [ref=e2242]: planning
+                  - generic [ref=e2243]: scope
+                  - generic [ref=e2244]: architecture
+                  - generic [ref=e2245]: "+2"
+            - generic [ref=e2247]:
+              - img [ref=e2248]
+              - paragraph [ref=e2256]: Select a memory to view details
+    - contentinfo [ref=e110]:
+      - generic [ref=e112]: No sessions
+      - generic [ref=e113]:
+        - generic [ref=e114]:
+          - generic [ref=e115]: Cmd
+          - generic [ref=e116]: K
+          - generic [ref=e117]: commands
+        - generic [ref=e118]:
+          - generic [ref=e119]: Cmd
+          - generic [ref=e120]: "N"
+          - generic [ref=e121]: new session
+  - generic [ref=e224] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e225]:
+      - img [ref=e226]
+    - generic [ref=e229]:
+      - button "Open issues overlay" [ref=e230]:
+        - generic [ref=e231]:
+          - generic [ref=e232]: "0"
+          - generic [ref=e233]: "1"
+        - generic [ref=e234]: Issue
+      - button "Collapse issues badge" [ref=e235]:
+        - img [ref=e236]
+  - alert [ref=e122]

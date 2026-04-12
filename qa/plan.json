@@ -95,40 +95,45 @@
       "issue_id": "ISSUE-15",
       "description": "Make agent name badges in room detail clickable to navigate to that agent terminal session in Sessions mode.",
       "severity": "MEDIUM",
-      "status": "fixed",
-      "fix_notes": "Wired up onAgentClick prop in RoomChat -> ChatMessage. Clicking an agent name in chat now finds the agent's session and switches to Sessions view with that session focused."
+      "status": "verified",
+      "fix_notes": "Wired up onAgentClick prop in RoomChat -> ChatMessage. Clicking an agent name in chat now finds the agent's session and switches to Sessions view with that session focused.",
+      "verification_notes": "Agent names in chat messages rendered as clickable <button> elements in Chain fix test and Sprint planning rooms. Buttons interactive (not disabled). Navigation handler wired up. With 0 active sessions, no terminal to focus is expected. Verified in run 6."
     },
     {
       "id": "TASK-13",
       "issue_id": "ISSUE-18",
       "description": "Add notification settings section to the Settings page with toggles for Mac notifications and Telegram notifications per event type.",
       "severity": "MEDIUM",
-      "status": "fixed",
-      "fix_notes": "SettingsNotifications component already exists with Mac and Telegram toggle columns for 5 event types (session exit, sprint complete, approval needed, cost threshold, error). Rendered in SettingsView."
+      "status": "verified",
+      "fix_notes": "SettingsNotifications component already exists with Mac and Telegram toggle columns for 5 event types (session exit, sprint complete, approval needed, cost threshold, error). Rendered in SettingsView.",
+      "verification_notes": "Settings page Notifications section has MAC and TG columns, 5 event types with toggle buttons, descriptions per event, and footer note about local persistence. Verified in run 6."
     },
     {
       "id": "TASK-14",
       "issue_id": "ISSUE-22",
       "description": "Hide or disable the Next.js Dev Tools overlay badge in production/user-facing mode.",
       "severity": "MEDIUM",
-      "status": "fixed",
-      "fix_notes": "next.config.mjs already has devIndicators: false, which hides all Next.js dev overlays including the floating badge."
+      "status": "verified",
+      "fix_notes": "next.config.mjs already has devIndicators: false, which hides all Next.js dev overlays including the floating badge.",
+      "verification_notes": "Full page screenshot confirms no Next.js dev tools floating badge anywhere on the page. Only bottom-left element is the app's own issue badge. Verified in run 6."
     },
     {
       "id": "TASK-15",
       "issue_id": "ISSUE-23",
       "description": "Implement and verify the command palette (Cmd+K or Cmd+Shift+K) is functional and searchable.",
       "severity": "MEDIUM",
-      "status": "fixed",
-      "fix_notes": "Command palette fully implemented: CommandPalette component uses Radix Dialog, supports search/filter, keyboard navigation (arrow keys + Enter), and includes actions for new session, kill session, view switching, memory stats, PMO scan, and per-session focus. Cmd+K shortcut in use-keyboard.ts toggles it. Rendered in page.tsx."
+      "status": "verified",
+      "fix_notes": "Command palette fully implemented: CommandPalette component uses Radix Dialog, supports search/filter, keyboard navigation (arrow keys + Enter), and includes actions for new session, kill session, view switching, memory stats, PMO scan, and per-session focus. Cmd+K shortcut in use-keyboard.ts toggles it. Rendered in page.tsx.",
+      "verification_notes": "Cmd+K opens Command Palette dialog with search input, 6 actions (New Session, Kill Focused Session, Sessions View, Teams/Sprint View, Memory Stats, Trigger PMO Scan), keyboard nav instructions. Search filtering works (typing 'mem' filters to Memory Stats only). Closes with Escape. Verified in run 6."
     },
     {
       "id": "TASK-16",
       "issue_id": "ISSUE-26",
       "description": "Improve the Create Room modal UX: show which fields are required, explain why the Create button is disabled, add a brief description of what a room does.",
       "severity": "MEDIUM",
-      "status": "fixed",
-      "fix_notes": "CreateRoomDialog already has: subtitle ('A room is a shared chat where your AI agents collaborate on a task.'), amber asterisks on required fields (Room Name, Topic/Goal), and dynamic footer text explaining disabled state ('Enter a room name and topic to continue.' / 'Enter a room name to continue.' / 'Enter a topic to continue.')."
+      "status": "verified",
+      "fix_notes": "CreateRoomDialog already has: subtitle ('A room is a shared chat where your AI agents collaborate on a task.'), amber asterisks on required fields (Room Name, Topic/Goal), and dynamic footer text explaining disabled state ('Enter a room name and topic to continue.' / 'Enter a room name to continue.' / 'Enter a topic to continue.').",
+      "verification_notes": "Create Room modal shows: subtitle explaining rooms, asterisks on ROOM NAME and TOPIC/GOAL, dynamic footer ('Enter a room name and topic to continue.' -> 'Enter a topic to continue.' after name filled), disabled Create Room button, Orchestrator marked as required. Verified in run 6."
     },
     {
       "id": "TASK-17",
@@ -298,10 +303,10 @@
     "high": 6,
     "medium": 14,
     "low": 18,
-    "verified": 14,
-    "fixed": 5,
+    "verified": 20,
+    "fixed": 0,
     "partial": 0,
     "in_progress": 0,
-    "pending": 19
+    "pending": 18
   }
 }

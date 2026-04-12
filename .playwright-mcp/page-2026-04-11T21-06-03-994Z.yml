@@ -1,0 +1,342 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - button "Sessions" [ref=e6] [cursor=pointer]:
+          - img [ref=e7]
+          - text: Sessions
+        - button "Teams" [ref=e10] [cursor=pointer]:
+          - img [ref=e11]
+          - text: Teams
+        - button "Memory" [ref=e16] [cursor=pointer]:
+          - img [ref=e17]
+          - text: Memory
+        - button "Settings" [active] [ref=e25] [cursor=pointer]:
+          - img [ref=e26]
+          - text: Settings
+      - generic [ref=e29]:
+        - generic "Total cost across all active sessions today" [ref=e30]:
+          - img [ref=e31]
+          - generic [ref=e33]: $137.3
+        - generic [ref=e123]:
+          - button "22% | 23.8/24GB" [ref=e2258] [cursor=pointer]:
+            - img [ref=e125]
+            - generic [ref=e128]: 22%
+            - generic [ref=e129]: "|"
+            - img [ref=e130]
+            - generic [ref=e132]: 23.8/24GB
+          - generic:
+            - paragraph: System Resources
+            - generic:
+              - generic:
+                - generic: CPU usage
+                - generic: 22%
+              - generic:
+                - generic: Memory
+                - generic: 23.8 / 24 GB (99%)
+            - paragraph: Click for full system monitor in Settings.
+        - link "Limits" [ref=e34] [cursor=pointer]:
+          - /url: https://claude.ai/settings/usage
+          - img [ref=e35]
+          - generic [ref=e38]: Limits
+          - img [ref=e39]
+        - button "Fullscreen (Cmd+Shift+F)" [ref=e43] [cursor=pointer]:
+          - img [ref=e44]
+        - generic [ref=e49]:
+          - generic [ref=e50]: "API: Off-Peak"
+          - generic:
+            - paragraph: Off-Peak — Normal Speed
+            - paragraph: Anthropic API rate limits are stricter during peak hours (5am-11am Pacific). Expect slower responses and more throttling during peak.
+            - generic:
+              - generic: Peak window (your time)
+              - generic: 20:00-02:00
+        - button "Help & Guide" [ref=e52] [cursor=pointer]:
+          - img [ref=e53]
+        - generic [ref=e56]: agent-studio
+    - generic [ref=e57]:
+      - complementary [ref=e58]:
+        - generic [ref=e59]:
+          - button "New Session" [ref=e60] [cursor=pointer]:
+            - img [ref=e61]
+            - text: New Session
+          - button "Collapse sidebar" [ref=e62] [cursor=pointer]:
+            - img [ref=e63]
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - button "Sessions 0" [ref=e68] [cursor=pointer]:
+              - img [ref=e69]
+              - generic [ref=e71]: Sessions
+              - generic [ref=e72]: "0"
+            - paragraph [ref=e74]: Click + New Session to start
+          - generic [ref=e75]:
+            - button "Servers 1" [ref=e133] [cursor=pointer]:
+              - img [ref=e77]
+              - generic [ref=e79]: Servers
+              - generic [ref=e80]: "1"
+            - generic [ref=e81]:
+              - 'generic "/Users/vatsalbhatt230813/Code/AgentStudio Port: 8080 PID: 31394" [ref=e134]':
+                - generic [ref=e136]: agent-studiothis app
+                - button ":8080" [ref=e137] [cursor=pointer]:
+                  - text: :8080
+                  - img [ref=e138]
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/agent-console" [ref=e142]:
+                - generic [ref=e144]: agent-studio
+                - button "Start" [ref=e145] [cursor=pointer]:
+                  - img [ref=e146]
+                  - text: Start
+              - generic "/Users/vatsalbhatt230813/Code/staging-frontend" [ref=e148]:
+                - generic [ref=e150]: staging-frontend
+                - button "Start" [ref=e151] [cursor=pointer]:
+                  - img [ref=e152]
+                  - text: Start
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/enpal-energy-vnb-portal" [ref=e154]:
+                - generic [ref=e156]: enpal-energy-vnb-portal
+                - button "Start" [ref=e157] [cursor=pointer]:
+                  - img [ref=e158]
+                  - text: Start
+              - button "Add Server" [ref=e82] [cursor=pointer]:
+                - img [ref=e83]
+                - text: Add Server
+          - button "Running on Machine 2" [ref=e161] [cursor=pointer]:
+            - img [ref=e162]
+            - generic [ref=e164]: Running on Machine
+            - generic [ref=e165]: "2"
+          - button "Recent Sessions 20" [ref=e167] [cursor=pointer]:
+            - img [ref=e168]
+            - generic [ref=e170]: Recent Sessions
+            - generic [ref=e171]: "20"
+          - generic [ref=e85]:
+            - button "Repos 2" [ref=e172] [cursor=pointer]:
+              - img [ref=e87]
+              - generic [ref=e89]: Repos
+              - generic [ref=e90]: "2"
+            - generic [ref=e173]:
+              - generic "/Users/vatsalbhatt230813/Code/staging-frontend" [ref=e174] [cursor=pointer]:
+                - generic [ref=e175]:
+                  - img [ref=e176]
+                  - generic [ref=e178]: staging-frontend
+                  - generic [ref=e179]: staging/frontend
+                  - generic "Clean" [ref=e180]
+                - generic [ref=e181]:
+                  - button "View Changes" [ref=e182]:
+                    - img [ref=e183]
+                  - button "Commit" [ref=e186]:
+                    - img [ref=e187]
+                  - button "Push" [ref=e189]:
+                    - img [ref=e190]
+                  - button "Create Pull Request" [ref=e193]:
+                    - img [ref=e194]
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/enpal-energy-vnb-portal" [ref=e198] [cursor=pointer]:
+                - generic [ref=e199]:
+                  - img [ref=e200]
+                  - generic [ref=e202]: enpal-energy-vnb-portal (PROD)
+                  - generic [ref=e203]: PROD
+                  - generic [ref=e204]: main
+                  - generic "1 changed files" [ref=e205]
+                - generic [ref=e206]:
+                  - button "View Changes" [ref=e207]:
+                    - img [ref=e208]
+                  - button "Push (PROD - requires confirmation)" [ref=e211]:
+                    - img [ref=e212]
+                  - button "Create Pull Request" [ref=e215]:
+                    - img [ref=e216]
+      - main [ref=e91]:
+        - generic [ref=e242]:
+          - generic [ref=e243]:
+            - generic [ref=e244]:
+              - heading "Workspace" [level=3] [ref=e245]
+              - generic [ref=e246]: .agent-studio.json v1.0.0
+            - generic [ref=e247]:
+              - generic [ref=e248]:
+                - generic [ref=e249]:
+                  - img [ref=e250]
+                  - text: Tracked Projects
+                - generic [ref=e252]:
+                  - generic [ref=e253]:
+                    - generic [ref=e254]: /Users/vatsalbhatt230813/Code/staging-frontend
+                    - button "dev" [ref=e255] [cursor=pointer]
+                    - button [ref=e256] [cursor=pointer]:
+                      - img [ref=e257]
+                  - generic [ref=e260]:
+                    - generic [ref=e261]: /Users/vatsalbhatt230813/Code/InPipeline/enpal-energy-vnb-portal
+                    - button "PROD" [ref=e262] [cursor=pointer]
+                    - button [ref=e263] [cursor=pointer]:
+                      - img [ref=e264]
+                - generic [ref=e267]:
+                  - textbox "/path/to/project" [ref=e268]
+                  - button "Add" [disabled] [ref=e269]:
+                    - img [ref=e270]
+                    - text: Add
+              - generic [ref=e271]:
+                - generic [ref=e272]:
+                  - img [ref=e273]
+                  - text: Agent System
+                - generic [ref=e281]:
+                  - img [ref=e282]
+                  - generic [ref=e284]: /Users/vatsalbhatt230813/Code/InPipeline/ai-agents
+              - generic [ref=e285]:
+                - generic [ref=e286]: Default Working Directory
+                - text: ~/Code/InPipeline
+              - button "Re-run Setup Wizard" [ref=e288] [cursor=pointer]:
+                - img [ref=e289]
+                - text: Re-run Setup Wizard
+          - generic [ref=e294]:
+            - heading "General" [level=3] [ref=e296]
+            - generic [ref=e297]:
+              - generic [ref=e298]:
+                - generic [ref=e299]: Default Model
+                - generic [ref=e300]:
+                  - button "opus" [ref=e301] [cursor=pointer]
+                  - button "sonnet" [ref=e302] [cursor=pointer]
+                  - button "haiku" [ref=e303] [cursor=pointer]
+              - generic [ref=e304]:
+                - generic [ref=e305]: Default Permissions
+                - combobox [ref=e306]:
+                  - option "Bypass (skip permissions)" [selected]
+                  - option "Default"
+                  - option "Plan mode"
+              - generic [ref=e307]:
+                - generic [ref=e308]: Default Working Directory
+                - textbox [ref=e309]: ~/Code/InPipeline
+              - button "Save Settings" [ref=e311] [cursor=pointer]:
+                - img [ref=e312]
+                - text: Save Settings
+          - generic [ref=e316]:
+            - heading "PMO Scheduler" [level=3] [ref=e318]
+            - generic [ref=e319]:
+              - generic [ref=e320]:
+                - generic [ref=e323]: Running
+                - generic [ref=e324]:
+                  - img [ref=e325]
+                  - text: Next scan in 1h 56m
+              - generic [ref=e328]:
+                - generic [ref=e329]:
+                  - generic [ref=e330]: Last scan
+                  - generic [ref=e331]: 11.04., 23:01
+                - generic [ref=e332]:
+                  - generic [ref=e333]: Status
+                  - generic [ref=e334]: INFO
+                - paragraph [ref=e335]: PMO scan complete
+              - generic [ref=e336]:
+                - button "Stop" [ref=e337] [cursor=pointer]:
+                  - img [ref=e338]
+                  - text: Stop
+                - button "Run Scan Now" [ref=e341] [cursor=pointer]:
+                  - img [ref=e342]
+                  - text: Run Scan Now
+          - generic [ref=e347]:
+            - generic [ref=e348]:
+              - heading "System Monitor" [level=3] [ref=e349]
+              - generic [ref=e350]: Updates every 5s
+            - generic [ref=e351]:
+              - generic [ref=e352]:
+                - generic [ref=e353]:
+                  - generic [ref=e354]:
+                    - img [ref=e355]
+                    - text: CPU
+                  - generic [ref=e358]: 21.7%
+                - generic [ref=e361]: 10 cores
+              - generic [ref=e362]:
+                - generic [ref=e363]:
+                  - generic [ref=e364]:
+                    - img [ref=e365]
+                    - text: Memory
+                  - generic [ref=e367]: 99%
+                - generic [ref=e370]: 23.8 GB / 24.0 GB
+              - generic [ref=e371]:
+                - generic [ref=e372]:
+                  - generic [ref=e373]:
+                    - img [ref=e374]
+                    - text: Disk
+                  - generic [ref=e376]: 2%
+                - generic [ref=e379]: 17.1 GB / 926.4 GB
+              - generic [ref=e380]:
+                - generic [ref=e381]:
+                  - generic [ref=e382]:
+                    - img [ref=e383]
+                    - text: Active Servers
+                  - generic [ref=e386]: "1"
+                - generic [ref=e387]:
+                  - generic [ref=e388]:
+                    - img [ref=e389]
+                    - text: Claude Sessions
+                  - generic [ref=e391]: "0"
+              - generic [ref=e394]:
+                - generic [ref=e395]:
+                  - img [ref=e396]
+                  - text: "Uptime:"
+                  - generic [ref=e399]: 1m 41s
+                - generic [ref=e400]:
+                  - text: "WebSocket:"
+                  - generic [ref=e401]: 0 connected
+          - generic [ref=e402]:
+            - heading "Keyboard Shortcuts" [level=3] [ref=e404]
+            - table [ref=e406]:
+              - rowgroup [ref=e407]:
+                - row "Cmd + N Open session launcher" [ref=e408]:
+                  - cell "Cmd + N" [ref=e409]
+                  - cell "Open session launcher" [ref=e410]
+                - row "Cmd + K Open command palette" [ref=e411]:
+                  - cell "Cmd + K" [ref=e412]
+                  - cell "Open command palette" [ref=e413]
+                - row "Cmd + \\ Toggle sidebar" [ref=e414]:
+                  - cell "Cmd + \\" [ref=e415]
+                  - cell "Toggle sidebar" [ref=e416]
+                - row "Cmd + Enter Fullscreen focused pane" [ref=e417]:
+                  - cell "Cmd + Enter" [ref=e418]
+                  - cell "Fullscreen focused pane" [ref=e419]
+                - row "Cmd + Shift + 1-6 Focus session by position" [ref=e420]:
+                  - cell "Cmd + Shift + 1-6" [ref=e421]
+                  - cell "Focus session by position" [ref=e422]
+                - row "Tab Cycle focus between sessions" [ref=e423]:
+                  - cell "Tab" [ref=e424]
+                  - cell "Cycle focus between sessions" [ref=e425]
+                - row "Escape Exit fullscreen / close modals" [ref=e426]:
+                  - cell "Escape" [ref=e427]
+                  - cell "Exit fullscreen / close modals" [ref=e428]
+                - row "Cmd + Shift + F Toggle fullscreen mode" [ref=e429]:
+                  - cell "Cmd + Shift + F" [ref=e430]
+                  - cell "Toggle fullscreen mode" [ref=e431]
+          - generic [ref=e432]:
+            - heading "About" [level=3] [ref=e434]:
+              - img [ref=e435]
+              - text: About
+            - generic [ref=e437]:
+              - generic [ref=e438]:
+                - generic [ref=e439]: Version
+                - generic [ref=e440]: 0.1.0
+              - generic [ref=e441]:
+                - generic [ref=e442]: Branch
+                - generic [ref=e443]: AGENTS_SETUP
+              - generic [ref=e444]:
+                - generic [ref=e445]: Server Port
+                - generic [ref=e446]: "8080"
+              - generic [ref=e447]:
+                - generic [ref=e448]: Runtime
+                - generic [ref=e449]: Next.js + Express + WebSocket
+              - generic [ref=e450]:
+                - generic [ref=e451]: UI
+                - generic [ref=e452]: Tailwind CSS + Zustand + xterm.js
+    - contentinfo [ref=e110]:
+      - generic [ref=e112]: No sessions
+      - generic [ref=e113]:
+        - generic [ref=e114]:
+          - generic [ref=e115]: Cmd
+          - generic [ref=e116]: K
+          - generic [ref=e117]: commands
+        - generic [ref=e118]:
+          - generic [ref=e119]: Cmd
+          - generic [ref=e120]: "N"
+          - generic [ref=e121]: new session
+  - generic [ref=e224] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e225]:
+      - img [ref=e226]
+    - generic [ref=e229]:
+      - button "Open issues overlay" [ref=e230]:
+        - generic [ref=e231]:
+          - generic [ref=e232]: "0"
+          - generic [ref=e233]: "1"
+        - generic [ref=e234]: Issue
+      - button "Collapse issues badge" [ref=e235]:
+        - img [ref=e236]
+  - alert [ref=e122]

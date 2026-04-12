@@ -1,0 +1,181 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - button "Sessions" [active] [ref=e6] [cursor=pointer]:
+          - img [ref=e7]
+          - text: Sessions
+        - button "Teams" [ref=e10] [cursor=pointer]:
+          - img [ref=e11]
+          - text: Teams
+        - button "Memory" [ref=e16] [cursor=pointer]:
+          - img [ref=e17]
+          - text: Memory
+        - button "Settings" [ref=e25] [cursor=pointer]:
+          - img [ref=e26]
+          - text: Settings
+      - generic [ref=e29]:
+        - generic "Total cost across all active sessions today" [ref=e30]:
+          - img [ref=e31]
+          - generic [ref=e33]: $137.3
+        - generic [ref=e123]:
+          - button "22% | 23.8/24GB" [ref=e2258] [cursor=pointer]:
+            - img [ref=e125]
+            - generic [ref=e128]: 22%
+            - generic [ref=e129]: "|"
+            - img [ref=e130]
+            - generic [ref=e132]: 23.8/24GB
+          - generic:
+            - paragraph: System Resources
+            - generic:
+              - generic:
+                - generic: CPU usage
+                - generic: 22%
+              - generic:
+                - generic: Memory
+                - generic: 23.8 / 24 GB (99%)
+            - paragraph: Click for full system monitor in Settings.
+        - link "Limits" [ref=e34] [cursor=pointer]:
+          - /url: https://claude.ai/settings/usage
+          - img [ref=e35]
+          - generic [ref=e38]: Limits
+          - img [ref=e39]
+        - button "Fullscreen (Cmd+Shift+F)" [ref=e43] [cursor=pointer]:
+          - img [ref=e44]
+        - generic [ref=e49]:
+          - generic [ref=e50]: "API: Off-Peak"
+          - generic:
+            - paragraph: Off-Peak — Normal Speed
+            - paragraph: Anthropic API rate limits are stricter during peak hours (5am-11am Pacific). Expect slower responses and more throttling during peak.
+            - generic:
+              - generic: Peak window (your time)
+              - generic: 20:00-02:00
+        - button "Help & Guide" [ref=e52] [cursor=pointer]:
+          - img [ref=e53]
+        - generic [ref=e56]: agent-studio
+    - generic [ref=e57]:
+      - complementary [ref=e58]:
+        - generic [ref=e59]:
+          - button "New Session" [ref=e60] [cursor=pointer]:
+            - img [ref=e61]
+            - text: New Session
+          - button "Collapse sidebar" [ref=e62] [cursor=pointer]:
+            - img [ref=e63]
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - button "Sessions 0" [ref=e68] [cursor=pointer]:
+              - img [ref=e69]
+              - generic [ref=e71]: Sessions
+              - generic [ref=e72]: "0"
+            - paragraph [ref=e74]: Click + New Session to start
+          - generic [ref=e75]:
+            - button "Servers 1" [ref=e133] [cursor=pointer]:
+              - img [ref=e77]
+              - generic [ref=e79]: Servers
+              - generic [ref=e80]: "1"
+            - generic [ref=e81]:
+              - 'generic "/Users/vatsalbhatt230813/Code/AgentStudio Port: 8080 PID: 31394" [ref=e134]':
+                - generic [ref=e136]: agent-studiothis app
+                - button ":8080" [ref=e137] [cursor=pointer]:
+                  - text: :8080
+                  - img [ref=e138]
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/agent-console" [ref=e142]:
+                - generic [ref=e144]: agent-studio
+                - button "Start" [ref=e145] [cursor=pointer]:
+                  - img [ref=e146]
+                  - text: Start
+              - generic "/Users/vatsalbhatt230813/Code/staging-frontend" [ref=e148]:
+                - generic [ref=e150]: staging-frontend
+                - button "Start" [ref=e151] [cursor=pointer]:
+                  - img [ref=e152]
+                  - text: Start
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/enpal-energy-vnb-portal" [ref=e154]:
+                - generic [ref=e156]: enpal-energy-vnb-portal
+                - button "Start" [ref=e157] [cursor=pointer]:
+                  - img [ref=e158]
+                  - text: Start
+              - button "Add Server" [ref=e82] [cursor=pointer]:
+                - img [ref=e83]
+                - text: Add Server
+          - button "Running on Machine 2" [ref=e161] [cursor=pointer]:
+            - img [ref=e162]
+            - generic [ref=e164]: Running on Machine
+            - generic [ref=e165]: "2"
+          - button "Recent Sessions 20" [ref=e167] [cursor=pointer]:
+            - img [ref=e168]
+            - generic [ref=e170]: Recent Sessions
+            - generic [ref=e171]: "20"
+          - generic [ref=e85]:
+            - button "Repos 2" [ref=e172] [cursor=pointer]:
+              - img [ref=e87]
+              - generic [ref=e89]: Repos
+              - generic [ref=e90]: "2"
+            - generic [ref=e173]:
+              - generic "/Users/vatsalbhatt230813/Code/staging-frontend" [ref=e174] [cursor=pointer]:
+                - generic [ref=e175]:
+                  - img [ref=e176]
+                  - generic [ref=e178]: staging-frontend
+                  - generic [ref=e179]: staging/frontend
+                  - generic "Clean" [ref=e180]
+                - generic [ref=e181]:
+                  - button "View Changes" [ref=e182]:
+                    - img [ref=e183]
+                  - button "Commit" [ref=e186]:
+                    - img [ref=e187]
+                  - button "Push" [ref=e189]:
+                    - img [ref=e190]
+                  - button "Create Pull Request" [ref=e193]:
+                    - img [ref=e194]
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/enpal-energy-vnb-portal" [ref=e198] [cursor=pointer]:
+                - generic [ref=e199]:
+                  - img [ref=e200]
+                  - generic [ref=e202]: enpal-energy-vnb-portal (PROD)
+                  - generic [ref=e203]: PROD
+                  - generic [ref=e204]: main
+                  - generic "1 changed files" [ref=e205]
+                - generic [ref=e206]:
+                  - button "View Changes" [ref=e207]:
+                    - img [ref=e208]
+                  - button "Push (PROD - requires confirmation)" [ref=e211]:
+                    - img [ref=e212]
+                  - button "Create Pull Request" [ref=e215]:
+                    - img [ref=e216]
+      - main [ref=e91]:
+        - generic [ref=e93]:
+          - generic [ref=e94]:
+            - img [ref=e96]
+            - paragraph [ref=e98]: No active sessions
+            - paragraph [ref=e99]: Launch a Claude Code session to get started. Press Cmd+N to launch or Cmd+K for commands.
+          - generic [ref=e100]:
+            - button "Quick Chat Sonnet, no agent" [ref=e101] [cursor=pointer]:
+              - generic [ref=e102]: Quick Chat
+              - generic [ref=e103]: Sonnet, no agent
+            - button "Start Sprint Opus + orchestrator" [ref=e104] [cursor=pointer]:
+              - generic [ref=e105]: Start Sprint
+              - generic [ref=e106]: Opus + orchestrator
+            - button "Continue Last Resume previous" [ref=e107] [cursor=pointer]:
+              - generic [ref=e108]: Continue Last
+              - generic [ref=e109]: Resume previous
+    - contentinfo [ref=e110]:
+      - generic [ref=e112]: No sessions
+      - generic [ref=e113]:
+        - generic [ref=e114]:
+          - generic [ref=e115]: Cmd
+          - generic [ref=e116]: K
+          - generic [ref=e117]: commands
+        - generic [ref=e118]:
+          - generic [ref=e119]: Cmd
+          - generic [ref=e120]: "N"
+          - generic [ref=e121]: new session
+  - generic [ref=e224] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e225]:
+      - img [ref=e226]
+    - generic [ref=e229]:
+      - button "Open issues overlay" [ref=e230]:
+        - generic [ref=e231]:
+          - generic [ref=e232]: "0"
+          - generic [ref=e233]: "1"
+        - generic [ref=e234]: Issue
+      - button "Collapse issues badge" [ref=e235]:
+        - img [ref=e236]
+  - alert [ref=e122]

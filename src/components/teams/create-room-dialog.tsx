@@ -20,18 +20,34 @@ interface AgentConfig {
 }
 
 const DEFAULT_AGENTS: AgentConfig[] = [
-  { id: "orchestrator", name: "Orchestrator", model: "opus", enabled: true, locked: true },
+  {
+    id: "orchestrator",
+    name: "Orchestrator",
+    model: "opus",
+    enabled: true,
+    locked: true,
+  },
   { id: "frontend-worker", name: "Frontend", model: "sonnet", enabled: false },
   { id: "backend-worker", name: "Backend", model: "sonnet", enabled: false },
   { id: "qa-tester", name: "QA Tester", model: "sonnet", enabled: false },
-  { id: "security-reviewer", name: "Security", model: "sonnet", enabled: false },
+  {
+    id: "security-reviewer",
+    name: "Security",
+    model: "sonnet",
+    enabled: false,
+  },
   { id: "pmo", name: "PMO", model: "haiku", enabled: false },
 ];
 
-export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) {
+export function CreateRoomDialog({
+  open,
+  onOpenChange,
+}: CreateRoomDialogProps) {
   const [name, setName] = useState("");
   const [topic, setTopic] = useState("");
-  const [agents, setAgents] = useState<AgentConfig[]>(DEFAULT_AGENTS.map((a) => ({ ...a })));
+  const [agents, setAgents] = useState<AgentConfig[]>(
+    DEFAULT_AGENTS.map((a) => ({ ...a })),
+  );
   const [creating, setCreating] = useState(false);
   const addRoom = useRoomsStore((s) => s.addRoom);
   const selectRoom = useRoomsStore((s) => s.selectRoom);
@@ -48,15 +64,18 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
 
   const toggleAgent = useCallback((id: string) => {
     setAgents((prev) =>
-      prev.map((a) => (a.id === id && !a.locked ? { ...a, enabled: !a.enabled } : a)),
+      prev.map((a) =>
+        a.id === id && !a.locked ? { ...a, enabled: !a.enabled } : a,
+      ),
     );
   }, []);
 
-  const setAgentModel = useCallback((id: string, model: "opus" | "sonnet" | "haiku") => {
-    setAgents((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, model } : a)),
-    );
-  }, []);
+  const setAgentModel = useCallback(
+    (id: string, model: "opus" | "sonnet" | "haiku") => {
+      setAgents((prev) => prev.map((a) => (a.id === id ? { ...a, model } : a)));
+    },
+    [],
+  );
 
   const handleCreate = useCallback(async () => {
     if (!name.trim() || !topic.trim() || creating) return;
@@ -110,12 +129,18 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
       <div className="relative z-10 w-full max-w-lg bg-console-panel border border-console-border rounded-lg shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-console-border">
-          <h2 className="text-[13px] font-medium text-console-text">
-            Create Team Room
-          </h2>
+          <div>
+            <h2 className="text-[13px] font-medium text-console-text">
+              Create Team Room
+            </h2>
+            <p className="text-[10px] text-console-dim mt-0.5">
+              A room is a shared chat where your AI agents collaborate on a
+              task.
+            </p>
+          </div>
           <button
             onClick={() => onOpenChange(false)}
-            className="p-1 rounded text-console-dim hover:text-console-text transition-colors"
+            className="p-1 rounded text-console-dim hover:text-console-text transition-colors shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
@@ -126,7 +151,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
           {/* Room name */}
           <div>
             <label className="block text-[10px] font-medium text-console-muted uppercase tracking-wider mb-1.5">
-              Room Name
+              Room Name <span className="text-console-accent">*</span>
             </label>
             <input
               type="text"
@@ -141,7 +166,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
           {/* Topic */}
           <div>
             <label className="block text-[10px] font-medium text-console-muted uppercase tracking-wider mb-1.5">
-              Topic / Goal
+              Topic / Goal <span className="text-console-accent">*</span>
             </label>
             <input
               type="text"
@@ -203,7 +228,9 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                   >
                     {agent.name}
                     {agent.locked && (
-                      <span className="text-[8px] text-console-dim ml-1">(required)</span>
+                      <span className="text-[8px] text-console-dim ml-1">
+                        (required)
+                      </span>
                     )}
                   </span>
 
@@ -211,7 +238,10 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                   <select
                     value={agent.model}
                     onChange={(e) =>
-                      setAgentModel(agent.id, e.target.value as "opus" | "sonnet" | "haiku")
+                      setAgentModel(
+                        agent.id,
+                        e.target.value as "opus" | "sonnet" | "haiku",
+                      )
                     }
                     className="bg-console-bg border border-console-border rounded px-2 py-0.5 text-[10px] font-mono text-console-muted focus:outline-none"
                   >
@@ -226,25 +256,37 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-console-border">
-          <button
-            onClick={() => onOpenChange(false)}
-            className="px-4 py-1.5 text-[11px] font-medium text-console-muted hover:text-console-text rounded transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => void handleCreate()}
-            disabled={!name.trim() || !topic.trim() || creating}
-            className="flex items-center gap-1.5 px-4 py-1.5 text-[11px] font-medium rounded bg-console-accent text-black hover:bg-console-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {creating ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
-            ) : (
-              <Plus className="w-3 h-3" />
-            )}
-            Create Room
-          </button>
+        <div className="flex items-center justify-between px-5 py-3 border-t border-console-border">
+          {/* Disabled explanation */}
+          <span className="text-[10px] text-console-dim">
+            {!name.trim() && !topic.trim()
+              ? "Enter a room name and topic to continue."
+              : !name.trim()
+                ? "Enter a room name to continue."
+                : !topic.trim()
+                  ? "Enter a topic to continue."
+                  : `${enabledCount} agent${enabledCount !== 1 ? "s" : ""} selected`}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onOpenChange(false)}
+              className="px-4 py-1.5 text-[11px] font-medium text-console-muted hover:text-console-text rounded transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => void handleCreate()}
+              disabled={!name.trim() || !topic.trim() || creating}
+              className="flex items-center gap-1.5 px-4 py-1.5 text-[11px] font-medium rounded bg-console-accent text-black hover:bg-console-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {creating ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Plus className="w-3 h-3" />
+              )}
+              Create Room
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ import { SettingsGeneral } from "./settings-general";
 import { SettingsPmo } from "./settings-pmo";
 import { SettingsMonitor } from "./settings-monitor";
 import { SettingsShortcuts } from "./settings-shortcuts";
+import { SettingsNotifications } from "./settings-notifications";
 import { SettingsAbout } from "./settings-about";
 
 export function SettingsView() {
@@ -24,14 +25,21 @@ export function SettingsView() {
         .then((data) => {
           if (active) setSystemStats(data);
         })
-        .catch(() => { /* ignore */ })
-        .finally(() => { if (active) setStatsLoading(false); });
+        .catch(() => {
+          /* ignore */
+        })
+        .finally(() => {
+          if (active) setStatsLoading(false);
+        });
     };
 
     setStatsLoading(true);
     fetchStats();
     const interval = setInterval(fetchStats, 5000);
-    return () => { active = false; clearInterval(interval); };
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, [setSystemStats, setStatsLoading]);
 
   // Load saved settings on mount
@@ -43,7 +51,9 @@ export function SettingsView() {
           setSettings(data);
         }
       })
-      .catch(() => { /* use defaults */ });
+      .catch(() => {
+        /* use defaults */
+      });
   }, [setSettings]);
 
   return (
@@ -53,6 +63,7 @@ export function SettingsView() {
         <SettingsGeneral />
         <SettingsPmo />
         <SettingsMonitor />
+        <SettingsNotifications />
         <SettingsShortcuts />
         <SettingsAbout />
       </div>
