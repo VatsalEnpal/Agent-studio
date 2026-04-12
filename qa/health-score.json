@@ -1,0 +1,27 @@
+{
+  "formula": "((total_checks - critical*4 - high*2 - medium*1) / total_checks) * 100",
+  "convergence_target": 95,
+  "circuit_breaker": {
+    "max_runs": 20,
+    "max_no_progress_streak": 3
+  },
+  "checklist_evolution": {
+    "initial_items": 173,
+    "auto_added": 9,
+    "pruned": 0
+  },
+  "runs": [
+    {
+      "run": 1,
+      "timestamp": "2026-04-12T12:00:00Z",
+      "total_checks": 182,
+      "critical": 1,
+      "high": 9,
+      "medium": 16,
+      "low": 12,
+      "total_issues": 38,
+      "health_score": 78,
+      "notes": "First audit as new user. Major discoverability issues with hidden tabs (Teams, Memory, Reports). Session naming is broken. Default working directory points to Electron app bundle."
+    }
+  ]
+}
