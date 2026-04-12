@@ -100,6 +100,9 @@ export function SettingsNotifications() {
       </div>
 
       <div className="px-4 py-3 space-y-4">
+        <p className="text-2xs text-text-ghost border-l-2 border-border-default pl-2 leading-snug">
+          Stored in this browser only. Settings will not sync across devices or browsers.
+        </p>
         {NOTIFICATION_OPTIONS.map(({ key, label, desc }) => (
           <div key={key} className="flex items-start gap-2">
             <Toggle checked={prefs[key]} onChange={() => toggle(key)} label={label} />
