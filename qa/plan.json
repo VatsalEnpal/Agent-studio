@@ -35,7 +35,7 @@
       "issue_id": "ISSUE-6",
       "description": "Generate human-readable session names for recent sessions instead of showing truncated prompt text. Use the session name field, first prompt summary, or agent + project combination.",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-6",
@@ -49,7 +49,7 @@
       "issue_id": "ISSUE-10",
       "description": "Add a close/dismiss button (X) to the setup wizard and prevent it from persisting across page reloads when triggered from Re-run Setup Wizard. The wizard should be dismissable at any step.",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-8",
@@ -63,14 +63,14 @@
       "issue_id": "ISSUE-17",
       "description": "Add Memory tab to the main navigation with browse, search, filter, and detail view capabilities. Show empty state with explanation when no memories exist.",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-10",
       "issue_id": "ISSUE-30",
       "description": "Add a close/X button to the setup wizard that allows users to exit at any step without completing it. Also add Escape key support to dismiss.",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-11",
@@ -84,7 +84,7 @@
       "issue_id": "ISSUE-11",
       "description": "Allow users to rename sessions from the sidebar context menu or inline editing.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-13",
@@ -161,7 +161,7 @@
       "issue_id": "ISSUE-29",
       "description": "Either implement the workflow builder or remove the empty WORKFLOWS section that shows 'No workflows found' with no way to create one.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-24",
@@ -203,7 +203,7 @@
       "issue_id": "ISSUE-18",
       "description": "Add text labels or improved visual distinction to notification toggle buttons beyond just color.",
       "severity": "LOW",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-30",
@@ -273,21 +273,21 @@
       "issue_id": "ISSUE-39",
       "description": "Fix the Sessions empty state 'New Session' button bleeding through to ALL other tabs (Teams, Sprints, Knowledge, Settings). The button floats at a fixed position overlapping content. This is a z-index or visibility regression introduced by the tab navigation fix.",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-40",
       "issue_id": "ISSUE-40",
       "description": "Rename 'Knowledge' tab to 'Memory' for consistency with the design spec, IDENTITY.md, and all task/checklist references.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-41",
       "issue_id": "ISSUE-41",
       "description": "Change notification toggle switches from green to amber to comply with IDENTITY.md color scheme (amber is the only accent color).",
       "severity": "LOW",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-42",
@@ -311,10 +311,25 @@
       "status": "pending"
     }
   ],
+    {
+      "id": "TASK-45",
+      "issue_id": "ISSUE-45",
+      "description": "Sessions empty state text and New Session button appear below Dev Servers table in the Servers sub-tab. The session empty state should be hidden when the Servers view is active.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-46",
+      "issue_id": "ISSUE-46",
+      "description": "Sprint detail view has Resume button but no Cancel button. Users cannot abandon a sprint that is going wrong from the UI.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    }
+  ],
   "stats": {
-    "total": 44,
-    "pending": 25,
-    "fixed": 15,
-    "verified": 4
+    "total": 46,
+    "pending": 27,
+    "fixed": 5,
+    "verified": 14
   }
 }

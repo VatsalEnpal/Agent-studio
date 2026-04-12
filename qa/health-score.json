@@ -36,6 +36,20 @@
       "checklist_items_added": 5,
       "convergence_trend": [78, 88.1],
       "notes": "QA validation of Brain 2 fixes. 4 of 10 fixes verified (default cwd, model propagation, nav tabs, hidden tabs). 6 fixes could not be verified (no running sessions). 1 HIGH regression: Sessions empty state New Session button bleeds through to all tabs. 5 new low-to-medium issues found."
+    },
+    {
+      "run": 3,
+      "timestamp": "2026-04-12T21:00:00Z",
+      "health_score": 92.6,
+      "total_checks": 190,
+      "bugs_found": 2,
+      "critical": 0,
+      "high": 0,
+      "medium": 1,
+      "low": 1,
+      "checklist_items_added": 2,
+      "convergence_trend": [78, 88.1, 92.6],
+      "notes": "Full QA validation of Brain 2 batch 1+2 fixes. 10 of 15 fixes verified (session names, wizard close, Memory tab, session rename, workflows removed, toggle labels, button bleed-through, Memory rename, amber toggles). 5 fixes unable to verify (require running sessions). 0 regressions. 2 new issues: session empty state below Servers table (LOW), no sprint Cancel button (MEDIUM). All HIGH severity items now resolved."
     }
   ]
 }
