@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { HashIcon, PlusIcon, CloseIcon, CheckIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
@@ -32,6 +32,9 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
   const loading = useRoomsStore((s) => s.loading);
   const lastSeenByRoom = useRoomsStore((s) => s.lastSeenByRoom);
   const markAllSeen = useRoomsStore((s) => s.markAllSeen);
+
+  const [closingRoomId, setClosingRoomId] = useState<string | null>(null);
+  const closingRoom = closingRoomId ? rooms.find((r) => r.id === closingRoomId) : null;
 
   // Compute total unread across all rooms
   const totalUnread = rooms.reduce((acc, room) => {
@@ -65,28 +68,34 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
     void loadRooms();
   }, [loadRooms]);
 
-  const handleCloseRoom = useCallback(
-    async (e: React.MouseEvent, roomId: string) => {
+  const handleRequestClose = useCallback(
+    (e: React.MouseEvent, roomId: string) => {
       e.stopPropagation();
-      try {
-        await fetch(`/api/rooms/${roomId}`, { method: "DELETE" });
-        const res = await fetch("/api/rooms");
-        if (res.ok) {
-          const data = (await res.json()) as Room[];
-          useRoomsStore.getState().setRooms(data);
-          if (selectedRoomId === roomId) {
-            const active = data.filter((r) => r.active);
-            useRoomsStore
-              .getState()
-              .selectRoom(active.length > 0 ? active[0].id : null);
-          }
-        }
-      } catch {
-        // ignore
-      }
+      setClosingRoomId(roomId);
     },
-    [selectedRoomId],
+    [],
   );
+
+  const handleConfirmClose = useCallback(async () => {
+    if (!closingRoomId) return;
+    try {
+      await fetch(`/api/rooms/${closingRoomId}`, { method: "DELETE" });
+      const res = await fetch("/api/rooms");
+      if (res.ok) {
+        const data = (await res.json()) as Room[];
+        useRoomsStore.getState().setRooms(data);
+        if (selectedRoomId === closingRoomId) {
+          const active = data.filter((r) => r.active);
+          useRoomsStore
+            .getState()
+            .selectRoom(active.length > 0 ? active[0].id : null);
+        }
+      }
+    } catch {
+      // ignore
+    }
+    setClosingRoomId(null);
+  }, [closingRoomId, selectedRoomId]);
 
   const activeRooms = rooms.filter((r) => r.active);
   const archivedRooms = rooms.filter((r) => !r.active);
@@ -112,7 +121,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
   );
 
   return (
-    <div className="flex flex-col h-full overflow-hidden" onKeyDown={handleKeyDown} tabIndex={-1} ref={listRef}>
+    <div className="flex flex-col h-full overflow-hidden relative" onKeyDown={handleKeyDown} tabIndex={-1} ref={listRef}>
       {/* Tab nav area */}
       <div className="px-3 pt-3 pb-2">
         <div className="flex rounded-md bg-bg-input p-0.5">
@@ -166,7 +175,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
             room={room}
             selected={room.id === selectedRoomId}
             onSelect={() => selectRoom(room.id)}
-            onClose={(e) => void handleCloseRoom(e, room.id)}
+            onClose={(e) => handleRequestClose(e, room.id)}
             lastSeen={lastSeenByRoom[room.id]}
           />
         ))}
@@ -221,6 +230,34 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           Tip: use {"\u2318"}K to search rooms
         </p>
       </div>
+
+      {/* Close room confirmation overlay */}
+      {closingRoom && (
+        <div className="absolute inset-0 z-20 bg-bg-base/90 flex items-center justify-center px-4">
+          <div className="bg-bg-elevated border border-border-subtle rounded-[4px] p-4 w-full max-w-[280px] space-y-3">
+            <p className="text-xs font-medium text-text-primary">
+              Close room?
+            </p>
+            <p className="text-xs text-text-secondary leading-relaxed">
+              This will close <span className="font-medium text-text-primary">{closingRoom.name}</span> and its agent sessions. Chat history is preserved.
+            </p>
+            <div className="flex items-center gap-2 justify-end">
+              <button
+                onClick={() => setClosingRoomId(null)}
+                className="px-2.5 py-1 text-xs font-medium text-text-secondary border border-border-default rounded-[4px] hover:bg-bg-input transition-all"
+              >
+                Keep open
+              </button>
+              <button
+                onClick={() => void handleConfirmClose()}
+                className="px-2.5 py-1 text-xs font-medium text-error border border-error/30 rounded-[4px] hover:bg-error/10 transition-all"
+              >
+                Close room
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
