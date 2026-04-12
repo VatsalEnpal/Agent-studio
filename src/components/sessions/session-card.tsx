@@ -331,7 +331,7 @@ export function SessionCard({
             autoFocus
           />
         ) : (
-          <span className="text-xs font-medium text-text-primary truncate flex-1 min-w-0">
+          <span className="text-xs font-medium text-text-primary truncate group-hover:whitespace-normal group-hover:line-clamp-2 flex-1 min-w-0">
             {displayName}
           </span>
         )}

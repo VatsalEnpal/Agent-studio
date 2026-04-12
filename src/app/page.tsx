@@ -710,7 +710,7 @@ export default function Home() {
                   instead of display:none to keep xterm measurable, but the
                   empty state has no such requirement). */}
               {nonRoomSessions.length === 0 ? (
-                activeMode === "sessions" ? (
+                activeMode === "sessions" && !showDevServers && !showGitView ? (
                   <div className="flex flex-col items-center justify-center h-full gap-4">
                     <div className="text-center space-y-2">
                       <p className="text-xs font-medium text-text-secondary">

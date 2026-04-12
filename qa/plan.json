@@ -231,14 +231,14 @@
       "issue_id": "ISSUE-27",
       "description": "Ensure consistent labeling of nav tabs (both should show icons + text or just text).",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-34",
       "issue_id": "ISSUE-31",
       "description": "Show memory pressure instead of raw usage in system monitor to avoid false alarms on macOS.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-35",
@@ -252,14 +252,14 @@
       "issue_id": "ISSUE-35",
       "description": "Verify Geist Mono is loaded and used as the primary font throughout the app.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-37",
       "issue_id": "ISSUE-37",
       "description": "Clarify the SERVERS count in the sidebar header - show running/total (e.g., '1/3') instead of just running count.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-38",
@@ -308,14 +308,14 @@
       "issue_id": "ISSUE-44",
       "description": "Improve session name display in History sidebar -- names are heavily truncated at 200px sidebar width. Show more context or use full-width tooltips on hover.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-45",
       "issue_id": "ISSUE-45",
       "description": "Sessions empty state text and New Session button appear below Dev Servers table in the Servers sub-tab. The session empty state should be hidden when the Servers view is active.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-46",
@@ -327,8 +327,8 @@
   ],
   "stats": {
     "total": 46,
-    "pending": 7,
-    "fixed": 19,
+    "pending": 1,
+    "fixed": 25,
     "verified": 21,
     "failed_verification": 0
   }
