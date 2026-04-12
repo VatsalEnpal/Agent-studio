@@ -205,7 +205,7 @@ export function SessionSidebar({
       try {
         const res = await fetch("/api/sessions/history");
         if (!res.ok || !active) return;
-        const data: { id: string; project: string; projectShort: string; modified: number; date: string; agent: string; preview: string }[] = await res.json();
+        const data: { id: string; project: string; projectShort: string; modified: number; date: string; agent: string; preview: string; cost: string | null }[] = await res.json();
         setPastSessions(
           data.map((d) => {
             // Reconstruct the full absolute path — the API strips the leading /
@@ -229,7 +229,7 @@ export function SessionSidebar({
               status: "exited" as const,
               createdAt: d.modified,
               updatedAt: d.modified,
-              meta: d.agent ? { agent: d.agent } : undefined,
+              meta: (d.agent || d.cost) ? { agent: d.agent || undefined, cost: d.cost ?? undefined } : undefined,
               preview: previewText,
             };
           }),
@@ -435,7 +435,7 @@ export function SessionSidebar({
               key={filter}
               onClick={() => setStatusFilter(filter)}
               className={cn(
-                "px-2 py-0.5 text-2xs font-medium rounded-full transition-all",
+                "px-2 py-0.5 text-2xs font-medium rounded transition-all",
                 statusFilter === filter
                   ? "bg-sessions/15 text-sessions"
                   : "text-text-tertiary hover:text-text-secondary hover:bg-bg-elevated/50",

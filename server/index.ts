@@ -2242,6 +2242,17 @@ Choose the schedule and model based on the task:
         // Derive short project name from directory path
         const projectShort = s.project.split("/").pop() ?? s.project;
 
+        // Extract cost from JSONL usage data
+        let cost: string | null = null;
+        try {
+          const usage = getUsageBySessionId(s.id);
+          if (usage && usage.totalCost > 0) {
+            cost = formatCost(usage.totalCost);
+          }
+        } catch {
+          // Best effort — skip if usage parsing fails
+        }
+
         return {
           id: s.id,
           project: s.project,
@@ -2250,6 +2261,7 @@ Choose the schedule and model based on the task:
           date: new Date(s.modified).toISOString(),
           agent,
           preview,
+          cost,
         };
       });
 
