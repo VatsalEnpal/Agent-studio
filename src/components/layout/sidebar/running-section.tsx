@@ -92,7 +92,7 @@ function RunningProcessItem({
         <span className="text-xs text-text-primary flex-1 truncate">
           {roomName
             ? `${roomSession?.meta?.agent ?? "Agent"}`
-            : "Claude Session"}
+            : projectName}
         </span>
         {roomName && (
           <span className="text-2xs px-1 py-0.5 rounded bg-rooms/20 text-rooms font-mono shrink-0">
@@ -151,10 +151,9 @@ function RunningProcessItem({
         )}
       </div>
       <div className="pl-5 flex items-center gap-2">
-        <span className="text-2xs text-text-secondary truncate flex-1 min-w-0">
-          {projectName}
+        <span className="text-2xs text-text-tertiary truncate flex-1 min-w-0">
+          {proc.cwd !== "unknown" ? proc.cwd.replace(/^\/Users\/[^/]+/, "~") : ""}
         </span>
-        <span className="text-2xs text-text-tertiary">running {uptime}</span>
       </div>
     </div>
   );
