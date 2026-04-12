@@ -35,7 +35,7 @@
       "issue_id": "ISSUE-6",
       "description": "Generate human-readable session names for recent sessions instead of showing truncated prompt text. Use the session name field, first prompt summary, or agent + project combination.",
       "severity": "HIGH",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-6",
@@ -63,7 +63,7 @@
       "issue_id": "ISSUE-17",
       "description": "Add Memory tab to the main navigation with browse, search, filter, and detail view capabilities. Show empty state with explanation when no memories exist.",
       "severity": "HIGH",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-10",
@@ -84,7 +84,7 @@
       "issue_id": "ISSUE-11",
       "description": "Allow users to rename sessions from the sidebar context menu or inline editing.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-13",
@@ -98,7 +98,7 @@
       "issue_id": "ISSUE-13",
       "description": "Add confirmation dialog before killing processes. Show process details and warn that the action cannot be undone.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-15",
@@ -161,7 +161,7 @@
       "issue_id": "ISSUE-29",
       "description": "Either implement the workflow builder or remove the empty WORKFLOWS section that shows 'No workflows found' with no way to create one.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-24",
@@ -203,7 +203,7 @@
       "issue_id": "ISSUE-18",
       "description": "Add text labels or improved visual distinction to notification toggle buttons beyond just color.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-30",
@@ -267,28 +267,27 @@
       "description": "Remove duplicate duration display in Running on Machine entries - show duration in one place only.",
       "severity": "LOW",
       "status": "fixed"
-    }
-  ],
+    },
     {
       "id": "TASK-39",
       "issue_id": "ISSUE-39",
       "description": "Fix the Sessions empty state 'New Session' button bleeding through to ALL other tabs (Teams, Sprints, Knowledge, Settings). The button floats at a fixed position overlapping content. This is a z-index or visibility regression introduced by the tab navigation fix.",
       "severity": "HIGH",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-40",
       "issue_id": "ISSUE-40",
       "description": "Rename 'Knowledge' tab to 'Memory' for consistency with the design spec, IDENTITY.md, and all task/checklist references.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-41",
       "issue_id": "ISSUE-41",
       "description": "Change notification toggle switches from green to amber to comply with IDENTITY.md color scheme (amber is the only accent color).",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-42",
@@ -314,8 +313,8 @@
   ],
   "stats": {
     "total": 44,
-    "pending": 34,
-    "fixed": 6,
+    "pending": 25,
+    "fixed": 15,
     "verified": 4
   }
 }
