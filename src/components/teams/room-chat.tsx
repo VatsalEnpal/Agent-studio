@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { SendIcon, HashIcon, ChevronDownIcon } from "@/components/ui/icons";
+import { SendIcon, HashIcon, ChevronDownIcon, SettingsIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import { useRoomsStore } from "@/stores/rooms";
 import { useUIStore } from "@/stores/ui";
 import { useToastStore } from "@/components/ui/notification-toast";
+import { useHasAgentSystem } from "@/hooks/use-config";
 import { notifyMention, getNotificationPrefs } from "@/lib/notifications";
 import type { Room, RoomMessage } from "@/stores/rooms";
 import { ChatMessage, StreamingMessage } from "./chat-message";
@@ -245,6 +246,8 @@ export function RoomChat() {
         a.name.toLowerCase().includes(mentionFilter),
     );
 
+  const hasAgentSystem = useHasAgentSystem();
+
   if (!room) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -259,6 +262,21 @@ export function RoomChat() {
             Select a room from the sidebar or create a new one to start chatting
             with your agent team.
           </p>
+          {!hasAgentSystem && (
+            <>
+              <p className="text-xs text-text-tertiary leading-relaxed mt-3">
+                Rooms require an agent system. Set one up in Settings to define
+                your agents and start collaborating.
+              </p>
+              <button
+                onClick={() => useUIStore.getState().setActiveMode("settings")}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded border border-border-default hover:border-text-secondary transition-all mt-3 mx-auto"
+              >
+                <SettingsIcon size={12} />
+                Create Agent System
+              </button>
+            </>
+          )}
         </div>
       </div>
     );

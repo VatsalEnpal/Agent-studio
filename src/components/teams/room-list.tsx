@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useCallback, useRef, useState } from "react";
-import { HashIcon, PlusIcon, CloseIcon, CheckIcon } from "@/components/ui/icons";
+import { HashIcon, PlusIcon, CloseIcon, CheckIcon, SettingsIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import { useRoomsStore } from "@/stores/rooms";
+import { useHasAgentSystem } from "@/hooks/use-config";
+import { useUIStore } from "@/stores/ui";
 import type { Room } from "@/stores/rooms";
 
 function relativeMessageTime(iso: string): string {
@@ -32,6 +34,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
   const loading = useRoomsStore((s) => s.loading);
   const lastSeenByRoom = useRoomsStore((s) => s.lastSeenByRoom);
   const markAllSeen = useRoomsStore((s) => s.markAllSeen);
+  const hasAgentSystem = useHasAgentSystem();
 
   const [closingRoomId, setClosingRoomId] = useState<string | null>(null);
   const closingRoom = closingRoomId ? rooms.find((r) => r.id === closingRoomId) : null;
@@ -184,7 +187,20 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           <div className="text-center py-6 px-4">
             <HashIcon size={20} className="text-text-ghost mx-auto mb-2" />
             <p className="text-xs text-text-secondary font-medium">No active rooms</p>
-            <p className="text-xs text-text-tertiary mt-1">Create a room to start collaborating with agents</p>
+            <p className="text-xs text-text-tertiary mt-1">
+              {hasAgentSystem
+                ? "Create a room to start collaborating with agents"
+                : "Rooms require an agent system to define your agents"}
+            </p>
+            {!hasAgentSystem && (
+              <button
+                onClick={() => useUIStore.getState().setActiveMode("settings")}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-label font-medium text-text-secondary bg-bg-elevated hover:bg-bg-elevated/80 rounded border border-border-default hover:border-text-secondary transition-all mt-3 mx-auto"
+              >
+                <SettingsIcon size={12} />
+                Create Agent System
+              </button>
+            )}
           </div>
         )}
 
