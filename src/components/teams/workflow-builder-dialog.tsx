@@ -172,7 +172,7 @@ export function WorkflowBuilderDialog() {
     <Dialog.Root open={open} onOpenChange={(v) => { if (!v) close(); }}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[620px] max-h-[85vh] overflow-y-auto bg-bg-surface border border-border-default rounded-lg shadow-xl">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[620px] max-h-[85vh] overflow-y-auto bg-bg-surface border border-border-default rounded shadow-xl">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border-default">
             <Dialog.Title className="text-xs font-medium text-text-primary">

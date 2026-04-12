@@ -25,7 +25,7 @@ function ToastItem({ toast }: { toast: Toast }) {
   return (
     <div
       className={cn(
-        "flex items-start gap-2 px-3 py-2.5 rounded-lg border bg-bg-surface shadow-lg",
+        "flex items-start gap-2 px-3 py-2.5 rounded border bg-bg-surface shadow-lg",
         "animate-toast-in",
         colorMap[toast.type],
       )}

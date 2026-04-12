@@ -201,7 +201,7 @@ export function MemoryList({ onSelectEntry }: MemoryListProps) {
           </div>
         ) : filtered.length === 0 && superseded.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 gap-3 px-6 text-center">
-            <div className="w-10 h-10 rounded-xl bg-bg-elevated/50 flex items-center justify-center">
+            <div className="w-10 h-10 rounded bg-bg-elevated/50 flex items-center justify-center">
               <MemoryIcon size={20} className="text-text-ghost" />
             </div>
             <span className="text-text-secondary text-xs font-medium">

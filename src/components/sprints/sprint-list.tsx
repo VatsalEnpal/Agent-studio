@@ -65,7 +65,7 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                   key={sprint.id}
                   onClick={() => onSelect(sprint.id)}
                   className={cn(
-                    "w-full text-left px-2.5 py-2 rounded-md transition-all",
+                    "w-full text-left px-2.5 py-2 rounded transition-all",
                     sprint.id === selectedSprintId
                       ? "bg-bg-elevated border-l-2 border-l-sprints shadow-[inset_0_0_0_1px_var(--accent-sprints-glow,rgba(251,191,36,0.08))]"
                       : "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(251,191,36,0.06)] border-l-2 border-transparent",
@@ -114,7 +114,7 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                 key={sprint.id}
                 onClick={() => onSelect(sprint.id)}
                 className={cn(
-                  "w-full text-left px-2.5 py-2 rounded-md transition-all",
+                  "w-full text-left px-2.5 py-2 rounded transition-all",
                   sprint.id === selectedSprintId
                     ? "bg-bg-elevated border-l-2 border-l-sprints"
                     : "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(251,191,36,0.06)] border-l-2 border-transparent",
@@ -160,7 +160,7 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                 key={sprint.id}
                 onClick={() => onSelect(sprint.id)}
                 className={cn(
-                  "w-full text-left px-2.5 py-2 rounded-md transition-all",
+                  "w-full text-left px-2.5 py-2 rounded transition-all",
                   sprint.id === selectedSprintId
                     ? "bg-bg-elevated border-l-2 border-l-sprints"
                     : "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(251,191,36,0.06)] border-l-2 border-transparent",

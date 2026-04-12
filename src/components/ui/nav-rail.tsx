@@ -100,7 +100,7 @@ export function NavRail({ activePage, onNavigate, badges }: NavRailProps) {
       <div
         className={cn(
           "flex items-center justify-center",
-          "w-8 h-8 rounded-[7px]",
+          "w-8 h-8 rounded",
           "bg-bg-elevated",
           "text-text-primary font-bold text-xs",
           "mb-3.5 select-none",
@@ -171,7 +171,7 @@ function NavRailItem({
         aria-current={isActive ? "page" : undefined}
         className={cn(
           "relative flex items-center justify-center",
-          "w-8 h-8 rounded-[6px]",
+          "w-8 h-8 rounded",
           "transition-all duration-150 ease-out active:scale-[0.92]",
           isActive
             ? cn("bg-bg-elevated", accentClass ?? "text-text-primary")

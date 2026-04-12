@@ -285,7 +285,7 @@ export function SessionCard({
       onClick={onSelect}
       title={tooltipParts.join("\n")}
       className={cn(
-        "group relative flex flex-col gap-1 px-3 py-2 rounded-md cursor-pointer overflow-hidden",
+        "group relative flex flex-col gap-1 px-3 py-2 rounded cursor-pointer overflow-hidden",
         "transition-all",
         selected
           ? "bg-bg-elevated border border-border-subtle"
@@ -401,7 +401,7 @@ export function SessionCard({
             }}
             disabled={resuming}
             className={cn(
-              "px-2 py-0.5 rounded-md shrink-0",
+              "px-2 py-0.5 rounded shrink-0",
               "text-2xs font-medium",
               "border transition-all",
               resuming

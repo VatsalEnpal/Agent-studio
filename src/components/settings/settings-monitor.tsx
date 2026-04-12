@@ -35,7 +35,7 @@ export function SettingsMonitor() {
 
   if (loading && !stats) {
     return (
-      <section className="border border-border-default rounded-lg bg-bg-surface">
+      <section className="border border-border-default rounded bg-bg-surface">
         <div className="px-4 py-3 border-b border-border-default">
           <h3 className="text-body font-medium text-text-primary">System Monitor</h3>
         </div>
@@ -49,14 +49,14 @@ export function SettingsMonitor() {
   if (!stats) return null;
 
   return (
-    <section className="border border-border-default rounded-lg bg-bg-surface">
+    <section className="border border-border-default rounded bg-bg-surface">
       <div className="px-4 py-3 border-b border-border-default flex items-center justify-between">
         <h3 className="text-xs font-medium text-text-primary">System Monitor</h3>
         <span className="text-label text-text-tertiary">Updates every 5s</span>
       </div>
       <div className="px-4 py-3 grid grid-cols-2 gap-3">
         {/* CPU */}
-        <div className="bg-bg-base rounded-md px-3 py-2.5 space-y-1.5">
+        <div className="bg-bg-base rounded px-3 py-2.5 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-label text-text-tertiary flex items-center gap-1">
               <CpuIcon className="w-3 h-3" />
@@ -77,7 +77,7 @@ export function SettingsMonitor() {
         </div>
 
         {/* Memory */}
-        <div className="bg-bg-base rounded-md px-3 py-2.5 space-y-1.5">
+        <div className="bg-bg-base rounded px-3 py-2.5 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-label text-text-tertiary flex items-center gap-1">
               <MemoryChipIcon className="w-3 h-3" />
@@ -100,7 +100,7 @@ export function SettingsMonitor() {
         </div>
 
         {/* Disk */}
-        <div className="bg-bg-base rounded-md px-3 py-2.5 space-y-1.5">
+        <div className="bg-bg-base rounded px-3 py-2.5 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-label text-text-tertiary flex items-center gap-1">
               <DiskIcon className="w-3 h-3" />
@@ -123,7 +123,7 @@ export function SettingsMonitor() {
         </div>
 
         {/* Active Counts */}
-        <div className="bg-bg-base rounded-md px-3 py-2.5 space-y-2">
+        <div className="bg-bg-base rounded px-3 py-2.5 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-label text-text-tertiary flex items-center gap-1">
               <MonitorIcon className="w-3 h-3" />
@@ -145,7 +145,7 @@ export function SettingsMonitor() {
         </div>
 
         {/* Uptime & WS */}
-        <div className="bg-bg-base rounded-md px-3 py-2.5 col-span-2">
+        <div className="bg-bg-base rounded px-3 py-2.5 col-span-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <span className="text-label text-text-tertiary flex items-center gap-1">

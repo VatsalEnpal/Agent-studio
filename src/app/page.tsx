@@ -554,7 +554,7 @@ export default function Home() {
               setPreflightLoading(true);
               void runPreflight().then(() => setPreflightLoading(false));
             }}
-            className="px-2.5 py-1 bg-accent text-white rounded-md text-xs font-medium hover:bg-accent-hover transition-all"
+            className="px-2.5 py-1 bg-accent text-white rounded text-xs font-medium hover:bg-accent-hover transition-all"
           >
             Check Again
           </button>

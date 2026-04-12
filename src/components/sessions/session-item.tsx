@@ -136,7 +136,7 @@ export function SessionItem({
       onClick={onFocus}
       title={`${displayName}\nPath: ${session.cwd}\nID: ${session.id}\nModel: ${effectiveModel ?? "unknown"}\nStatus: ${session.status}${hasContext ? `\nContext: ${contextPercent}%` : ""}`}
       className={cn(
-        "sidebar-item flex flex-col gap-0.5 px-2 py-2 rounded-md cursor-pointer group",
+        "sidebar-item flex flex-col gap-0.5 px-2 py-2 rounded cursor-pointer group",
         focused
           ? "bg-bg-elevated text-text-primary border-l-2 border-l-sessions"
           : "text-text-secondary hover:bg-bg-elevated/40 hover:text-text-primary border-l-2 border-l-transparent",

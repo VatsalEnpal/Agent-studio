@@ -85,7 +85,7 @@ export function SettingsNotifications() {
   };
 
   return (
-    <section className="border border-border-default rounded-lg bg-bg-surface">
+    <section className="border border-border-default rounded bg-bg-surface">
       <div className="px-4 py-3 border-b border-border-default flex items-center justify-between">
         <h3 className="text-xs font-medium text-text-primary flex items-center gap-2">
           <BellIcon size={14} className="text-text-secondary" />

@@ -33,7 +33,7 @@ export function ErrorBanner({
     <div
       role="alert"
       className={cn(
-        "flex items-center gap-2.5 px-3 py-2 rounded-lg",
+        "flex items-center gap-2.5 px-3 py-2 rounded",
         "bg-error-subtle border border-error/20",
         "animate-fade-in",
         className,
@@ -53,7 +53,7 @@ export function ErrorBanner({
           onClick={handleRetry}
           className={cn(
             "inline-flex items-center gap-1.5",
-            "px-2.5 py-1 rounded-md",
+            "px-2.5 py-1 rounded",
             "text-label-xs font-medium",
             "text-error bg-error/10 hover:bg-error/15",
             "transition-all duration-[var(--duration-instant)] ease-out",

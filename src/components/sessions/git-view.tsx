@@ -149,7 +149,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border-subtle shrink-0">
         <button
           onClick={onBack}
-          className="p-1 rounded-md text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-all"
+          className="p-1 rounded text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-all"
           title="Back to terminal"
         >
           <ArrowLeftIcon className="size-4" />
@@ -162,7 +162,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
           <button
             onClick={() => setBranchDropdownOpen((v) => !v)}
             className={cn(
-              "inline-flex items-center gap-1.5 px-2 py-1 rounded-md",
+              "inline-flex items-center gap-1.5 px-2 py-1 rounded",
               "text-body-sm text-accent border border-accent/20 bg-accent-subtle",
               "hover:bg-accent/10 transition-all",
             )}
@@ -172,7 +172,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
             <ChevronDownIcon className="size-3" />
           </button>
           {branchDropdownOpen && branches.length > 0 && (
-            <div className="absolute right-0 top-full mt-1 w-56 bg-surface border border-border rounded-md shadow-modal z-dropdown max-h-48 overflow-y-auto">
+            <div className="absolute right-0 top-full mt-1 w-56 bg-surface border border-border rounded shadow-modal z-dropdown max-h-48 overflow-y-auto">
               {branches.map((b) => (
                 <button
                   key={b.name}
@@ -204,7 +204,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
             onClick={handlePush}
             disabled={pushing}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md",
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded",
               "text-body-sm font-medium",
               "border border-border hover:border-accent/30 hover:bg-surface-hover",
               "transition-all disabled:opacity-50",
@@ -216,7 +216,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
           <button
             onClick={() => openPrModal(repo)}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md",
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded",
               "text-body-sm font-medium",
               "border border-border hover:border-accent/30 hover:bg-surface-hover",
               "transition-all",
@@ -227,7 +227,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
           </button>
           <button
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md",
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded",
               "text-body-sm font-medium text-text-secondary",
               "border border-border hover:border-accent/30 hover:bg-surface-hover",
               "transition-all",
@@ -248,7 +248,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
               {changedFiles.map((file) => (
                 <div
                   key={file.path}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-surface-hover transition-all"
+                  className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-surface-hover transition-all"
                 >
                   <FileStatusBadge status={file.status} />
                   <span className="text-body-sm text-text-primary truncate font-mono">
@@ -272,7 +272,7 @@ export function GitView({ repo, onBack }: GitViewProps) {
               {commits.map((commit) => (
                 <div
                   key={commit.hash}
-                  className="flex items-start gap-2 px-2 py-2 rounded-md hover:bg-surface-hover transition-all"
+                  className="flex items-start gap-2 px-2 py-2 rounded hover:bg-surface-hover transition-all"
                 >
                   <GitCommitIcon className="size-3.5 text-text-tertiary mt-0.5 shrink-0" />
                   <div className="flex-1 min-w-0">

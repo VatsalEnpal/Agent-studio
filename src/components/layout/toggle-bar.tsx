@@ -81,7 +81,7 @@ function PeakHoursIndicator() {
       </div>
 
       {/* Tooltip */}
-      <div className="absolute right-0 top-full mt-1.5 w-52 p-2.5 rounded-lg border border-border-default bg-bg-surface shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
+      <div className="absolute right-0 top-full mt-1.5 w-52 p-2.5 rounded border border-border-default bg-bg-surface shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
         <p className="text-xs text-text-primary font-medium mb-1.5">
           {info.isPeak ? "Peak Hours Active" : "Off-Peak Hours"}
         </p>
@@ -238,7 +238,7 @@ export function ToggleBar() {
               disabled={tab.disabled}
               title={tab.disabled ? "Coming soon" : undefined}
               className={cn(
-                "relative flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md transition-all",
+                "relative flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded transition-all",
                 isActive
                   ? "text-text-primary"
                   : tab.disabled

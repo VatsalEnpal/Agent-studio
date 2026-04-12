@@ -39,14 +39,14 @@ export function MemoryDeleteDialog() {
     <Dialog.Root open={open} onOpenChange={(v) => { if (!v) close(); }}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[400px] bg-bg-elevated border border-border-subtle rounded-lg shadow-modal">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[400px] bg-bg-elevated border border-border-subtle rounded shadow-modal">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border-default">
             <Dialog.Title className="text-xs font-medium text-error flex items-center gap-1.5">
               <TrashIcon size={14} />
               Delete Memory
             </Dialog.Title>
             <Dialog.Close asChild>
-              <button className="p-1 rounded-md text-text-ghost hover:text-text-primary hover:bg-bg-input transition-all">
+              <button className="p-1 rounded text-text-ghost hover:text-text-primary hover:bg-bg-input transition-all">
                 <CloseIcon size={14} />
               </button>
             </Dialog.Close>

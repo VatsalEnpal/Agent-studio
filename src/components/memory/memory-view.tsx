@@ -188,12 +188,12 @@ export function MemoryView() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search memories..."
-            className="w-full pl-7 pr-2 py-1 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
+            className="w-full pl-7 pr-2 py-1 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
           />
         </div>
         <button
           onClick={openCreateDialog}
-          className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-memory text-bg-base rounded-md hover:bg-memory/90 transition-all shrink-0"
+          className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-memory text-bg-base rounded hover:bg-memory/90 transition-all shrink-0"
         >
           <PlusIcon size={10} />
           New
@@ -287,7 +287,7 @@ export function MemoryView() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 gap-3 px-6 text-center">
-              <div className="w-10 h-10 rounded-xl bg-bg-elevated/50 flex items-center justify-center">
+              <div className="w-10 h-10 rounded bg-bg-elevated/50 flex items-center justify-center">
                 <MemoryIcon size={20} className="text-text-ghost" />
               </div>
               <span className="text-text-secondary text-xs font-medium">

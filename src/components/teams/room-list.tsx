@@ -127,7 +127,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
     <div className="flex flex-col h-full overflow-hidden relative" onKeyDown={handleKeyDown} tabIndex={-1} ref={listRef}>
       {/* Tab nav area */}
       <div className="px-3 pt-3 pb-2">
-        <div className="flex rounded-md bg-bg-input p-0.5">
+        <div className="flex rounded bg-bg-input p-0.5">
           <button className="flex-1 px-2 py-1 text-xs font-medium rounded-[3px] bg-bg-elevated text-text-primary">
             Rooms
           </button>
@@ -231,7 +231,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           onClick={onCreateRoom}
           className={cn(
             "flex items-center justify-center gap-1.5 w-full",
-            "px-3 py-1.5 rounded-md",
+            "px-3 py-1.5 rounded",
             "text-xs font-medium",
             "border border-dashed border-rooms/40 text-rooms",
             "hover:bg-rooms/5 hover:border-rooms/60",
@@ -313,7 +313,7 @@ function RoomItem({
       onClick={onSelect}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(); }}
       className={cn(
-        "group flex items-center gap-2.5 w-full px-2.5 py-2 rounded-md text-left transition-all cursor-pointer",
+        "group flex items-center gap-2.5 w-full px-2.5 py-2 rounded text-left transition-all cursor-pointer",
         selected
           ? "bg-rooms-subtle border border-rooms/20 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.06)]"
           : "hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(99,102,241,0.06)] border border-transparent",

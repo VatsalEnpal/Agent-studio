@@ -44,7 +44,7 @@ export function SettingsPmo() {
   const isRunning = status?.loaded ?? false;
 
   return (
-    <section className="border border-border-default rounded-lg bg-bg-surface">
+    <section className="border border-border-default rounded bg-bg-surface">
       <div className="px-4 py-3 border-b border-border-default">
         <h3 className="text-body font-medium text-text-primary">PMO Scheduler</h3>
         <p className="text-label text-text-tertiary mt-0.5">

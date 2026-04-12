@@ -86,7 +86,7 @@ export function SprintsView() {
         <SprintDetail sprint={selectedSprint} onBack={() => selectSprint(null)} />
       ) : (
         <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-6">
-          <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center">
+          <div className="w-12 h-12 rounded bg-bg-elevated flex items-center justify-center">
             <SprintsIcon size={20} className="text-text-ghost" />
           </div>
           <p className="text-xs font-medium text-text-secondary">

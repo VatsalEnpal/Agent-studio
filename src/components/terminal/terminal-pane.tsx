@@ -265,7 +265,7 @@ export function TerminalPane({
   return (
     <div
       className={cn(
-        "terminal-pane-border flex flex-col h-full rounded-lg border overflow-hidden",
+        "terminal-pane-border flex flex-col h-full rounded border overflow-hidden",
         focused
           ? "border-sessions/60 shadow-[0_0_12px_rgba(74,222,128,0.06)]"
           : "border-border-default",
@@ -315,7 +315,7 @@ export function TerminalPane({
           </span>
 
           {/* Zoom controls */}
-          <span className="flex items-center gap-0 rounded-md border border-border-default overflow-hidden">
+          <span className="flex items-center gap-0 rounded border border-border-default overflow-hidden">
             <button
               onClick={(e) => { e.stopPropagation(); zoomOut(sessionId); }}
               className="p-0.5 text-text-tertiary hover:text-text-secondary hover:bg-bg-elevated/50 transition-all"

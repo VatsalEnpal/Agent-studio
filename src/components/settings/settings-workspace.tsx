@@ -47,8 +47,8 @@ export function SettingsWorkspace() {
           const data = await res.json() as { config: WorkspaceConfig };
           setConfig(data.config);
         }
-      } catch {
-        // ignore
+      } catch (err) {
+        console.error("[workspace] Failed to load config:", err);
       } finally {
         setLoading(false);
       }
@@ -69,7 +69,8 @@ export function SettingsWorkspace() {
         } else {
           addToast("Failed to save config", "error");
         }
-      } catch {
+      } catch (err) {
+        console.error("[workspace] Failed to save config:", err);
         addToast("Failed to save config", "error");
       }
     },
@@ -189,7 +190,7 @@ export function SettingsWorkspace() {
 
   if (loading) {
     return (
-      <section className="border border-border-default rounded-xl bg-bg-surface shadow-card">
+      <section className="border border-border-default rounded bg-bg-surface shadow-card">
         <div className="px-5 py-3.5 border-b border-border-default">
           <h3 className="text-xs font-medium text-text-primary">Workspace</h3>
         </div>
@@ -207,7 +208,7 @@ export function SettingsWorkspace() {
 
   return (
     <>
-      <section className="border border-border-default rounded-xl bg-bg-surface shadow-card">
+      <section className="border border-border-default rounded bg-bg-surface shadow-card">
         <div className="px-5 py-3.5 border-b border-border-default flex items-center justify-between">
           <h3 className="text-body font-medium text-text-primary">Workspace</h3>
           <span className="text-label text-text-tertiary font-mono">
@@ -222,33 +223,44 @@ export function SettingsWorkspace() {
               Tracked Projects
             </label>
             <div className="space-y-1.5">
-              {config.projects.map((p, i) => (
-                <div
-                  key={`${p.path}-${i}`}
-                  className="flex items-center gap-2 px-2 py-1.5 bg-bg-base border border-border-default rounded text-body"
-                >
-                  <span className="flex-1 font-mono text-text-primary truncate">
-                    {p.path}
-                  </span>
-                  <button
-                    onClick={() => toggleProd(i)}
-                    className={cn(
-                      "px-1.5 py-0.5 text-label font-medium rounded border transition-all",
-                      p.isProd
-                        ? "bg-error/15 text-error border-error/30"
-                        : "bg-bg-elevated text-text-tertiary border-transparent hover:border-border-default",
-                    )}
-                  >
-                    {p.isProd ? "PROD" : "dev"}
-                  </button>
-                  <button
-                    onClick={() => removeProject(i)}
-                    className="p-0.5 text-text-tertiary hover:text-error transition-all"
-                  >
-                    <CloseIcon className="w-3 h-3" />
-                  </button>
+              {config.projects.length === 0 ? (
+                <div className="px-3 py-3 bg-bg-base border border-border-default rounded text-center">
+                  <p className="text-body text-text-tertiary">
+                    No projects tracked. Add a project path below to get started.
+                  </p>
+                  <p className="text-label text-text-ghost mt-1">
+                    Projects let Agent Studio discover agents, sprints, and memory for your codebase.
+                  </p>
                 </div>
-              ))}
+              ) : (
+                config.projects.map((p, i) => (
+                  <div
+                    key={`${p.path}-${i}`}
+                    className="flex items-center gap-2 px-2 py-1.5 bg-bg-base border border-border-default rounded text-body"
+                  >
+                    <span className="flex-1 font-mono text-text-primary truncate">
+                      {p.path}
+                    </span>
+                    <button
+                      onClick={() => toggleProd(i)}
+                      className={cn(
+                        "px-1.5 py-0.5 text-label font-medium rounded border transition-all",
+                        p.isProd
+                          ? "bg-error/15 text-error border-error/30"
+                          : "bg-bg-elevated text-text-tertiary border-transparent hover:border-border-default",
+                      )}
+                    >
+                      {p.isProd ? "PROD" : "dev"}
+                    </button>
+                    <button
+                      onClick={() => removeProject(i)}
+                      className="p-0.5 text-text-tertiary hover:text-error transition-all"
+                    >
+                      <CloseIcon className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Add project */}

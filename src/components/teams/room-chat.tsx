@@ -252,7 +252,7 @@ export function RoomChat() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center max-w-sm px-6">
-          <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center mx-auto mb-3">
+          <div className="w-12 h-12 rounded bg-bg-elevated flex items-center justify-center mx-auto mb-3">
             <HashIcon size={20} className="text-text-ghost" />
           </div>
           <p className="text-xs font-medium text-text-secondary mb-1">
@@ -328,7 +328,7 @@ export function RoomChat() {
             <button
               onClick={handleSpawn}
               disabled={spawning}
-              className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50 shrink-0"
+              className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded bg-rooms text-bg-base hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50 shrink-0"
             >
               {spawning ? "Starting..." : "Spawn Agents"}
             </button>
@@ -338,7 +338,7 @@ export function RoomChat() {
           {room.active && (
             <button
               onClick={handleClose}
-              className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md text-error hover:bg-error/10 transition-all active:scale-[0.98] shrink-0"
+              className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded text-error hover:bg-error/10 transition-all active:scale-[0.98] shrink-0"
             >
               Close
             </button>
@@ -357,7 +357,7 @@ export function RoomChat() {
       {room.active && allOffline && room.messages.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded bg-bg-elevated flex items-center justify-center mx-auto">
               <HashIcon size={20} className="text-text-ghost" />
             </div>
             <h3 className="text-xs font-medium text-text-secondary">
@@ -369,7 +369,7 @@ export function RoomChat() {
             <button
               onClick={handleSpawn}
               disabled={spawning}
-              className="px-2.5 py-1 bg-rooms text-bg-base text-xs font-medium rounded-md hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50 shadow-rooms-glow"
+              className="px-2.5 py-1 bg-rooms text-bg-base text-xs font-medium rounded hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50 shadow-rooms-glow"
             >
               {spawning ? "Starting..." : "Start Room"}
             </button>
@@ -444,7 +444,7 @@ export function RoomChat() {
               <button
                 onClick={handleSpawn}
                 disabled={spawning}
-                className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50"
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded bg-rooms text-bg-base hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {spawning ? "Starting..." : "Start Room"}
               </button>
@@ -457,12 +457,12 @@ export function RoomChat() {
               <div className="relative flex items-center gap-2">
                 {/* @mention dropdown */}
                 {showMentions && (
-                  <div className="absolute bottom-full left-0 mb-2 w-56 bg-bg-elevated border border-border-subtle rounded-lg shadow-modal p-1 z-40 animate-slide-up">
+                  <div className="absolute bottom-full left-0 mb-2 w-56 bg-bg-elevated border border-border-subtle rounded shadow-modal p-1 z-40 animate-slide-up">
                     {filteredAgents.map((a) => (
                       <button
                         key={a.id}
                         onClick={() => selectMention(a.id)}
-                        className="w-full text-left px-2 py-1.5 rounded-md text-xs hover:bg-bg-input flex items-center gap-2 transition-all"
+                        className="w-full text-left px-2 py-1.5 rounded text-xs hover:bg-bg-input flex items-center gap-2 transition-all"
                       >
                         <div
                           className="w-4 h-4 rounded-[4px] flex items-center justify-center shrink-0"
@@ -491,7 +491,7 @@ export function RoomChat() {
                     ))}
                     <button
                       onClick={() => selectMention("all")}
-                      className="w-full text-left px-2 py-1.5 rounded-md text-xs hover:bg-bg-input flex items-center gap-2 transition-all"
+                      className="w-full text-left px-2 py-1.5 rounded text-xs hover:bg-bg-input flex items-center gap-2 transition-all"
                     >
                       <div className="w-4 h-4 rounded-[4px] flex items-center justify-center shrink-0 bg-rooms/20">
                         <span className="text-[7px] font-bold text-rooms">*</span>
@@ -511,13 +511,13 @@ export function RoomChat() {
                   onChange={(e) => handleInputChange(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={`Message #${room.name}...`}
-                  className="flex-1 bg-bg-input border border-border-default rounded-md px-3 py-1.5 text-xs text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
+                  className="flex-1 bg-bg-input border border-border-default rounded px-3 py-1.5 text-xs text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
                   disabled={!room.active}
                 />
                 <button
                   onClick={() => void handleSend()}
                   disabled={!input.trim()}
-                  className="p-2 rounded-md bg-rooms text-bg-base hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-2 rounded bg-rooms text-bg-base hover:bg-rooms/90 transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <SendIcon size={14} />
                 </button>

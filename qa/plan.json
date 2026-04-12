@@ -175,8 +175,7 @@
       "issue_id": "ISSUE-33",
       "description": "Add Reports tab to the navigation with the ability to view automation/sprint results.",
       "severity": "MEDIUM",
-      "status": "failed",
-      "failure_reason": "Reports tab crashes with React hooks error: 'Rendered fewer hooks than expected.' The entire view is non-functional."
+      "status": "fixed"
     },
     {
       "id": "TASK-26",
@@ -197,8 +196,7 @@
       "issue_id": "ISSUE-9",
       "description": "Dynamically read the git branch name for the About section instead of using a hardcoded/stale value.",
       "severity": "LOW",
-      "status": "failed",
-      "failure_reason": "About section shows Branch as '...' placeholder instead of dynamic git branch name. API endpoint may not be returning data."
+      "status": "fixed"
     },
     {
       "id": "TASK-29",
@@ -303,8 +301,7 @@
       "issue_id": "ISSUE-43",
       "description": "Add dynamic git branch info back to the About section, or include more system information to make the section useful.",
       "severity": "LOW",
-      "status": "failed",
-      "failure_reason": "About section shows Branch, Commit, Node, Platform, Server PID, Uptime all as '...' placeholders. System info not populated."
+      "status": "fixed"
     },
     {
       "id": "TASK-44",
@@ -360,8 +357,8 @@
   "stats": {
     "total": 46,
     "pending": 0,
-    "fixed": 12,
+    "fixed": 15,
     "verified": 31,
-    "failed_verification": 3
+    "failed_verification": 0
   }
 }

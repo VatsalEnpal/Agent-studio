@@ -150,7 +150,7 @@ function SidebarServerList() {
       {servers.map((s) => (
         <div
           key={`${s.pid}-${s.port}`}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-bg-elevated/50 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-bg-elevated/50 transition-all"
         >
           <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
           <span className="text-xs font-mono text-sessions font-medium shrink-0">
@@ -382,7 +382,7 @@ export function SessionSidebar({
     <div className="flex flex-col h-full">
       {/* Segmented tab nav */}
       <div className="px-3 pt-3 pb-2">
-        <div className="flex rounded-md bg-bg-input p-0.5">
+        <div className="flex rounded bg-bg-input p-0.5">
           {(["sessions", "history", "servers"] as const).map((tab) => (
             <button
               key={tab}
@@ -413,7 +413,7 @@ export function SessionSidebar({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search..."
-            className="w-full pl-7 pr-2 py-1.5 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-border-subtle transition-all"
+            className="w-full pl-7 pr-2 py-1.5 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-border-subtle transition-all"
           />
           {searchQuery && (
             <button
@@ -579,7 +579,7 @@ export function SessionSidebar({
           onClick={onNewSession}
           className={cn(
             "flex items-center justify-center gap-1.5 w-full",
-            "px-3 py-1.5 rounded-md",
+            "px-3 py-1.5 rounded",
             "text-xs font-medium",
             "bg-text-primary text-bg-base",
             "hover:bg-text-secondary active:scale-[0.98]",

@@ -349,13 +349,13 @@ export function SessionLauncherV2({
   );
 
   const inputCls =
-    "w-full px-2 py-1 text-xs bg-bg-input border border-border-default rounded-md text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all";
+    "w-full px-2 py-1 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all";
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] max-h-[85vh] overflow-y-auto bg-bg-elevated border border-border-subtle rounded-[8px] shadow-modal scrollbar-thin outline-none">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] max-h-[85vh] overflow-y-auto bg-bg-elevated border border-border-subtle rounded shadow-modal scrollbar-thin outline-none">
           <Dialog.Description className="sr-only">Launch a new Claude Code session</Dialog.Description>
 
           {/* Header */}
@@ -395,7 +395,7 @@ export function SessionLauncherV2({
                         ? `Resume last session in ${lastSession.project} (${formatRelativeTime(lastSession.date)})`
                         : preset.description}
                       className={cn(
-                        "px-2 py-1 rounded-md text-xs font-medium transition-all",
+                        "px-2 py-1 rounded text-xs font-medium transition-all",
                         "border",
                         isContinue && lastSession
                           ? "border-[#f59e0b]/30 bg-[#f59e0b]/5"
@@ -426,7 +426,7 @@ export function SessionLauncherV2({
                     type="button"
                     onClick={() => setResumeDropdownOpen(!resumeDropdownOpen)}
                     className={cn(
-                      "w-full flex items-center gap-2 px-2 py-1 text-xs bg-bg-input border rounded-md text-left transition-all",
+                      "w-full flex items-center gap-2 px-2 py-1 text-xs bg-bg-input border rounded text-left transition-all",
                       resume
                         ? "border-[#f59e0b]/40 text-text-primary"
                         : "border-border-default text-text-ghost",
@@ -463,7 +463,7 @@ export function SessionLauncherV2({
                   </button>
 
                   {resumeDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-bg-elevated border border-border-subtle rounded-[6px] shadow-modal z-10 max-h-48 overflow-hidden flex flex-col">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-bg-elevated border border-border-subtle rounded shadow-modal z-10 max-h-48 overflow-hidden flex flex-col">
                       <div className="p-1.5 border-b border-border-default">
                         <div className="relative">
                           <SearchIcon size={10} className="absolute left-2 top-1/2 -translate-y-1/2 text-text-ghost" />
@@ -536,7 +536,7 @@ export function SessionLauncherV2({
                     key={m}
                     onClick={() => setModel(m)}
                     className={cn(
-                      "px-2.5 py-1 rounded-md text-xs font-medium text-center transition-all",
+                      "px-2.5 py-1 rounded text-xs font-medium text-center transition-all",
                       "border",
                       model === m
                         ? "border-[#f59e0b]/50 bg-[#f59e0b]/10 text-[#f59e0b]"
@@ -626,7 +626,7 @@ export function SessionLauncherV2({
 
           {/* Error */}
           {error && (
-            <div className="mx-4 mb-2 px-2.5 py-1.5 bg-error/10 border border-error/20 rounded-md text-xs text-error">
+            <div className="mx-4 mb-2 px-2.5 py-1.5 bg-error/10 border border-error/20 rounded text-xs text-error">
               {error}
             </div>
           )}
@@ -643,7 +643,7 @@ export function SessionLauncherV2({
                 onClick={() => void handleLaunch()}
                 disabled={launching}
                 className={cn(
-                  "px-3 py-1 rounded-md text-xs font-semibold transition-all",
+                  "px-3 py-1 rounded text-xs font-semibold transition-all",
                   "bg-[#f59e0b] text-[#0a0a0a]",
                   "hover:bg-[#fbbf24] active:scale-[0.98]",
                   "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",

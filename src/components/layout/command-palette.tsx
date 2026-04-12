@@ -239,7 +239,7 @@ export function CommandPalette({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-[60]" />
         <Dialog.Content
-          className="fixed top-[20%] left-1/2 -translate-x-1/2 z-[60] w-[480px] max-h-[60vh] bg-bg-elevated border border-border-subtle rounded-lg shadow-modal overflow-hidden"
+          className="fixed top-[20%] left-1/2 -translate-x-1/2 z-[60] w-[480px] max-h-[60vh] bg-bg-elevated border border-border-subtle rounded shadow-modal overflow-hidden"
           onKeyDown={handleKeyDown}
         >
           <Dialog.Title className="sr-only">Command Palette</Dialog.Title>

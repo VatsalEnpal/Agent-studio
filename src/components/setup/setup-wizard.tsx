@@ -464,7 +464,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
 
   return (
     <div className="h-screen flex items-center justify-center bg-bg-base">
-      <div className="w-[560px] bg-bg-surface border border-border-default rounded-xl shadow-2xl overflow-hidden">
+      <div className="w-[560px] bg-bg-surface border border-border-default rounded shadow-2xl overflow-hidden">
         {/* Progress bar */}
         <div className="flex border-b border-border-default">
           {STEPS.map((s, i) => (
@@ -678,7 +678,7 @@ function WelcomeStep({
 }) {
   return (
     <div className="flex flex-col items-center text-center pt-6 space-y-5">
-      <div className="w-16 h-16 rounded-2xl bg-rooms/10 border border-rooms/20 flex items-center justify-center">
+      <div className="w-16 h-16 rounded bg-rooms/10 border border-rooms/20 flex items-center justify-center">
         <RocketIcon className="w-8 h-8 text-rooms" />
       </div>
       <div>
@@ -1235,7 +1235,7 @@ function AgentTeamStep({
   if (aiGen.status === "analyzing" || aiGen.status === "generating") {
     return (
       <div className="flex flex-col items-center text-center pt-10 space-y-4">
-        <div className="w-12 h-12 rounded-xl bg-rooms/10 border border-rooms/20 flex items-center justify-center">
+        <div className="w-12 h-12 rounded bg-rooms/10 border border-rooms/20 flex items-center justify-center">
           <SpinnerIcon className="w-6 h-6 text-rooms animate-spin" />
         </div>
         <div>

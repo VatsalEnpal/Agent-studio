@@ -18,6 +18,7 @@ export function ReportsView() {
   const selectReport = useReportsStore((s) => s.selectReport);
   const loading = useReportsStore((s) => s.loading);
   const setLoading = useReportsStore((s) => s.setLoading);
+  const hasAgentSystem = useHasAgentSystem();
 
   // Fetch reports on mount
   const fetchReports = useCallback(async () => {
@@ -28,8 +29,8 @@ export function ReportsView() {
         const data = (await res.json()) as Report[];
         setReports(data);
       }
-    } catch {
-      // Best effort
+    } catch (err) {
+      console.error("[reports] Failed to fetch reports:", err);
     } finally {
       setLoading(false);
     }
@@ -61,13 +62,11 @@ export function ReportsView() {
     );
   }
 
-  const hasAgentSystem = useHasAgentSystem();
-
   if (reports.length === 0) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-center space-y-4 max-w-sm">
-          <div className="w-10 h-10 rounded-xl bg-bg-elevated/60 flex items-center justify-center mx-auto">
+          <div className="w-10 h-10 rounded bg-bg-elevated/60 flex items-center justify-center mx-auto">
             <FileIcon className="w-5 h-5 text-text-ghost" />
           </div>
           <div>

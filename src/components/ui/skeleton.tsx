@@ -48,7 +48,7 @@ export function SkeletonCard({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 p-3 rounded-lg border border-border-subtle bg-surface",
+        "flex flex-col gap-2 p-3 rounded border border-border-subtle bg-surface",
         className,
       )}
       aria-hidden="true"

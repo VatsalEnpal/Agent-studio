@@ -66,7 +66,7 @@ export function TerminalGrid({
     return (
       <div className="flex flex-col items-center justify-center h-full gap-8 animate-tab-enter">
         <div className="text-center space-y-3">
-          <div className="w-14 h-14 rounded-2xl bg-bg-elevated/50 flex items-center justify-center mx-auto mb-2">
+          <div className="w-14 h-14 rounded bg-bg-elevated/50 flex items-center justify-center mx-auto mb-2">
             <span className="text-2xl">&#9889;</span>
           </div>
           <p className="text-text-primary text-sm font-medium tracking-tight">
@@ -85,21 +85,21 @@ export function TerminalGrid({
         <div className="flex flex-col items-center gap-3 w-full max-w-xs">
           <button
             onClick={onQuickChat ?? onCreateSession}
-            className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded-xl border border-rooms/30 bg-rooms/5 hover:border-rooms/50 hover:bg-rooms/8 hover:shadow-glow-sm active:scale-[0.98] transition-all"
+            className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded border border-rooms/30 bg-rooms/5 hover:border-rooms/50 hover:bg-rooms/8 hover:shadow-glow-sm active:scale-[0.98] transition-all"
           >
             <span className="text-sm font-medium text-text-primary">Start a Quick Chat</span>
             <span className="text-xs text-text-tertiary">Ask Claude anything — uses Sonnet, no agent needed.</span>
           </button>
           <button
             onClick={onStartSprint ?? onCreateSession}
-            className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded-xl border border-border-default hover:border-rooms/40 hover:bg-bg-elevated/40 hover:shadow-card active:scale-[0.98] transition-all"
+            className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded border border-border-default hover:border-rooms/40 hover:bg-bg-elevated/40 hover:shadow-card active:scale-[0.98] transition-all"
           >
             <span className="text-sm font-medium text-text-primary">Start a Sprint</span>
             <span className="text-xs text-text-tertiary">Launch a full agent team to work on your project.</span>
           </button>
           <button
             onClick={onContinueLast ?? onCreateSession}
-            className="w-full flex flex-col items-center gap-1 px-5 py-3 rounded-xl border border-border-default hover:border-rooms/40 hover:bg-bg-elevated/40 active:scale-[0.98] transition-all"
+            className="w-full flex flex-col items-center gap-1 px-5 py-3 rounded border border-border-default hover:border-rooms/40 hover:bg-bg-elevated/40 active:scale-[0.98] transition-all"
           >
             <span className="text-xs font-medium text-text-primary">Continue Last Session</span>
             <span className="text-2xs text-text-tertiary">Pick up where you left off.</span>
