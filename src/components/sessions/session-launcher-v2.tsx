@@ -161,22 +161,28 @@ export function SessionLauncherV2({
   const [resumeSearch, setResumeSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Reset form on open — use defaultCwd so user always sees their configured dir
+  // Defaults loaded from server config
+  const [configDefaults, setConfigDefaults] = useState<{
+    model: "opus" | "sonnet" | "haiku";
+    permissions: "bypass" | "default" | "plan" | "auto";
+  } | null>(null);
+
+  // Reset form on open — use defaults from config so user sees their configured values
   useEffect(() => {
     if (open) {
       setCustomName("");
-      setModel("sonnet");
+      setModel(configDefaults?.model ?? "sonnet");
       setAgent("none");
-      setPermissions("default");
+      setPermissions(configDefaults?.permissions ?? "default");
       setChannel("none");
       setCwd(defaultCwd);
       setResume("");
       setError(null);
       setLaunching(false);
     }
-  }, [open, defaultCwd]);
+  }, [open, defaultCwd, configDefaults]);
 
-  // Fetch default cwd once
+  // Fetch default cwd + model + permissions once
   const [defaultCwdLoaded, setDefaultCwdLoaded] = useState(false);
   useEffect(() => {
     if (defaultCwdLoaded) return;
@@ -185,13 +191,23 @@ export function SessionLauncherV2({
         const res = await fetch("/api/config");
         if (res.ok) {
           const data = (await res.json()) as {
-            config: { defaults: { workingDirectory: string } };
+            config: {
+              defaults: {
+                workingDirectory: string;
+                model?: "opus" | "sonnet" | "haiku";
+                permissions?: "bypass" | "default" | "plan" | "auto";
+              };
+            };
           };
-          const configCwd = data.config?.defaults?.workingDirectory;
-          if (configCwd) {
-            setDefaultCwd(configCwd);
-            setCwd(configCwd);
+          const defaults = data.config?.defaults;
+          if (defaults?.workingDirectory) {
+            setDefaultCwd(defaults.workingDirectory);
+            setCwd(defaults.workingDirectory);
           }
+          setConfigDefaults({
+            model: defaults?.model ?? "sonnet",
+            permissions: defaults?.permissions ?? "default",
+          });
           setDefaultCwdLoaded(true);
         }
       } catch {

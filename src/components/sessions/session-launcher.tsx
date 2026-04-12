@@ -141,18 +141,23 @@ export function SessionLauncher({
   const [resumeSearch, setResumeSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const [defaultsFromConfig, setDefaultsFromConfig] = useState<{
+    model: "opus" | "sonnet" | "haiku";
+    permissions: "bypass" | "default" | "plan" | "auto";
+  } | null>(null);
+
   useEffect(() => {
     if (open) {
       setCustomName("");
-      setModel("sonnet");
+      setModel(defaultsFromConfig?.model ?? "sonnet");
       setAgent("none");
-      setPermissions("default");
+      setPermissions(defaultsFromConfig?.permissions ?? "default");
       setChannel("none");
       setResume("");
       setError(null);
       setLaunching(false);
     }
-  }, [open]);
+  }, [open, defaultsFromConfig]);
 
   const [defaultCwdLoaded, setDefaultCwdLoaded] = useState(false);
   useEffect(() => {
@@ -161,12 +166,24 @@ export function SessionLauncher({
       try {
         const res = await fetch("/api/config");
         if (res.ok) {
-          const data = await res.json() as { config: { defaults: { workingDirectory: string } } };
-          const configCwd = data.config?.defaults?.workingDirectory;
-          if (configCwd) {
-            setCwd(configCwd);
-            for (const p of PRESETS) { p.cwd = configCwd; }
+          const data = await res.json() as {
+            config: {
+              defaults: {
+                workingDirectory: string;
+                model?: "opus" | "sonnet" | "haiku";
+                permissions?: "bypass" | "default" | "plan" | "auto";
+              };
+            };
+          };
+          const defaults = data.config?.defaults;
+          if (defaults?.workingDirectory) {
+            setCwd(defaults.workingDirectory);
+            for (const p of PRESETS) { p.cwd = defaults.workingDirectory; }
           }
+          setDefaultsFromConfig({
+            model: defaults?.model ?? "sonnet",
+            permissions: defaults?.permissions ?? "default",
+          });
           setDefaultCwdLoaded(true);
         }
       } catch { /* use default */ }
