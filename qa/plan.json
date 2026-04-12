@@ -91,7 +91,7 @@
       "issue_id": "ISSUE-12",
       "description": "Add search/filter input to the Recent Sessions section in the sidebar. NOTE: Search input exists but does NOT filter results -- filter logic is broken or missing.",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-14",
@@ -119,7 +119,7 @@
       "issue_id": "ISSUE-19",
       "description": "Persist notification settings server-side instead of browser-only, or make the 'local only' warning more prominent.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-18",
@@ -140,14 +140,14 @@
       "issue_id": "ISSUE-25",
       "description": "Add explanatory text or tooltip for PMO Scheduler explaining what PMO means and what scans do.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-21",
       "issue_id": "ISSUE-26",
       "description": "Add Automations section to Settings or clarify that automation is handled through Sprints/PMO.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-22",
@@ -328,8 +328,8 @@
   "stats": {
     "total": 46,
     "pending": 18,
-    "fixed": 12,
-    "verified": 17,
+    "fixed": 8,
+    "verified": 21,
     "failed_verification": 0
   }
 }
