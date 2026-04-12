@@ -2581,6 +2581,41 @@ Choose the schedule and model based on the task:
     }
   });
 
+  // --- System Info API (git branch, node version, etc.) ---
+  app.get("/api/system/info", (_req, res) => {
+    try {
+      let branch = "unknown";
+      let commitHash = "unknown";
+      try {
+        branch = execSync("git rev-parse --abbrev-ref HEAD", {
+          encoding: "utf-8",
+          timeout: 3000,
+          cwd: process.cwd(),
+        }).trim();
+        commitHash = execSync("git rev-parse --short HEAD", {
+          encoding: "utf-8",
+          timeout: 3000,
+          cwd: process.cwd(),
+        }).trim();
+      } catch {
+        // Not a git repo or git not available
+      }
+
+      res.json({
+        branch,
+        commitHash,
+        nodeVersion: process.version,
+        platform: process.platform,
+        arch: process.arch,
+        pid: process.pid,
+        uptime: Math.round(process.uptime()),
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
   // --- Dev Servers API ---
   app.get("/api/dev-servers", (_req, res) => {
     try {
