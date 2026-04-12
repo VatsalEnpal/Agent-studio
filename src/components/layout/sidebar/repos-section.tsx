@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { FolderIcon, GitBranchIcon, GitPRIcon, GitCommitIcon, EyeIcon, UploadIcon } from "@/components/ui/icons";
+import { FolderIcon, GitBranchIcon, GitPRIcon, GitCommitIcon, EyeIcon, UploadIcon, PlusIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useGitStore } from "@/stores/git";
+import { useUIStore } from "@/stores/ui";
 import { SessionGroup } from "@/components/sessions/session-group";
 import type { RepoStatus } from "@/lib/types";
 import { openFolder } from "./utils";
@@ -12,6 +13,7 @@ import { ChangesPopup, CommitModal, PushModal } from "./git-modals";
 export function ReposSection() {
   const repos = useGitStore((s) => s.repos);
   const openPrModal = useGitStore((s) => s.openPrModal);
+  const setActiveMode = useUIStore((s) => s.setActiveMode);
 
   const [changesRepo, setChangesRepo] = useState<RepoStatus | null>(null);
   const [commitRepo, setCommitRepo] = useState<RepoStatus | null>(null);
@@ -30,6 +32,14 @@ export function ReposSection() {
             onPush={setPushRepo}
           />
         ))}
+        <button
+          onClick={() => setActiveMode("settings")}
+          className="flex items-center gap-1 px-2 py-1 text-2xs text-text-tertiary hover:text-text-primary transition-all w-full"
+          title="Add a tracked project in Settings > Workspace"
+        >
+          <PlusIcon className="w-3 h-3" />
+          Add Repo
+        </button>
       </SessionGroup>
 
       {changesRepo && (
