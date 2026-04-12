@@ -139,8 +139,8 @@ function SidebarServerList() {
         if (res.ok && active) {
           setServers(await res.json());
         }
-      } catch {
-        /* best effort */
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     };
     void fetchServers();

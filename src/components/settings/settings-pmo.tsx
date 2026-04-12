@@ -34,8 +34,8 @@ export function SettingsPmo() {
     try {
       await fetch(`/api/pmo/${action}`, { method: "POST" });
       setTimeout(fetchStatus, 1000);
-    } catch {
-      // ignore
+    } catch (e) {
+      console.error("Caught error:", e);
     } finally {
       setActionLoading(null);
     }

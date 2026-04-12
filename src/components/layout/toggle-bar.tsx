@@ -1,7 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MonitorIcon, UsersIcon, BrainIcon, FileIcon, SettingsIcon, ExpandIcon, CollapseIcon, CpuIcon, MemoryChipIcon, GaugeIcon, ExternalLinkIcon, SunIcon, MoonIcon } from "@/components/ui/icons";
+import {
+  MonitorIcon,
+  UsersIcon,
+  BrainIcon,
+  FileIcon,
+  SettingsIcon,
+  ExpandIcon,
+  CollapseIcon,
+  CpuIcon,
+  MemoryChipIcon,
+  GaugeIcon,
+  ExternalLinkIcon,
+  SunIcon,
+  MoonIcon,
+} from "@/components/ui/icons";
 import { useUIStore } from "@/stores/ui";
 import { cn } from "@/lib/utils";
 import type { ActiveMode } from "@/lib/types";
@@ -26,7 +40,12 @@ const ALL_TABS: TabConfig[] = [
  * Peak hours: 5am-11am PT = 14:00-20:00 CEST (summer) / 13:00-19:00 CET (winter).
  * We compute in Berlin time to show Berlin-relevant info only.
  */
-function getBerlinPeakInfo(): { isPeak: boolean; berlinTime: string; peakStart: string; peakEnd: string } {
+function getBerlinPeakInfo(): {
+  isPeak: boolean;
+  berlinTime: string;
+  peakStart: string;
+  peakEnd: string;
+} {
   const now = new Date();
 
   const berlinFormatter = new Intl.DateTimeFormat("de-DE", {
@@ -48,7 +67,12 @@ function getBerlinPeakInfo(): { isPeak: boolean; berlinTime: string; peakStart: 
 }
 
 function PeakHoursIndicator() {
-  const [info, setInfo] = useState({ isPeak: false, berlinTime: "", peakStart: "14:00", peakEnd: "20:00" });
+  const [info, setInfo] = useState({
+    isPeak: false,
+    berlinTime: "",
+    peakStart: "14:00",
+    peakEnd: "20:00",
+  });
 
   useEffect(() => {
     const update = () => setInfo(getBerlinPeakInfo());
@@ -74,9 +98,7 @@ function PeakHoursIndicator() {
           )}
         />
         <span className="whitespace-nowrap">
-          {info.isPeak
-            ? `API: Peak until ${info.peakEnd}`
-            : `API: Off-Peak`}
+          {info.isPeak ? `API: Peak until ${info.peakEnd}` : `API: Off-Peak`}
         </span>
       </div>
 
@@ -86,7 +108,9 @@ function PeakHoursIndicator() {
           {info.isPeak ? "Peak Hours Active" : "Off-Peak Hours"}
         </p>
         <p className="text-2xs text-text-secondary leading-relaxed mb-2">
-          Anthropic API has rate limits that vary by time of day. During peak hours (14:00-20:00 Berlin / 5am-11am PT), expect slower responses and tighter throttling.
+          Anthropic API has rate limits that vary by time of day. During peak
+          hours (14:00-20:00 Berlin / 5am-11am PT), expect slower responses and
+          tighter throttling.
         </p>
         <div className="flex items-center justify-between text-2xs">
           <span className="text-text-tertiary">Berlin time</span>
@@ -94,7 +118,9 @@ function PeakHoursIndicator() {
         </div>
         <div className="flex items-center justify-between text-2xs mt-0.5">
           <span className="text-text-tertiary">Peak window</span>
-          <span className="text-text-primary font-mono">{info.peakStart}-{info.peakEnd}</span>
+          <span className="text-text-primary font-mono">
+            {info.peakStart}-{info.peakEnd}
+          </span>
         </div>
       </div>
     </div>
@@ -114,18 +140,26 @@ function SystemWidget() {
     const fetchStats = () => {
       fetch("/api/system/stats")
         .then((r) => r.json())
-        .then((data: {
-          cpu: { usage: number };
-          memory: { used: number; total: number; pressure?: "normal" | "warn" | "critical" };
-        }) => {
-          setStats({
-            cpu: data.cpu.usage,
-            memUsed: data.memory.used,
-            memTotal: data.memory.total,
-            memPressure: data.memory.pressure ?? "normal",
-          });
-        })
-        .catch(() => { /* ignore */ });
+        .then(
+          (data: {
+            cpu: { usage: number };
+            memory: {
+              used: number;
+              total: number;
+              pressure?: "normal" | "warn" | "critical";
+            };
+          }) => {
+            setStats({
+              cpu: data.cpu.usage,
+              memUsed: data.memory.used,
+              memTotal: data.memory.total,
+              memPressure: data.memory.pressure ?? "normal",
+            });
+          },
+        )
+        .catch(() => {
+          /* ignore */
+        });
     };
     fetchStats();
     const interval = setInterval(fetchStats, 5000);
@@ -180,7 +214,11 @@ function FullscreenButton() {
       className="p-1 text-text-tertiary hover:text-text-secondary transition-all rounded hover:bg-bg-elevated/50"
       title={isFs ? "Exit fullscreen" : "Fullscreen"}
     >
-      {isFs ? <CollapseIcon className="w-3.5 h-3.5" /> : <ExpandIcon className="w-3.5 h-3.5" />}
+      {isFs ? (
+        <CollapseIcon className="w-3.5 h-3.5" />
+      ) : (
+        <ExpandIcon className="w-3.5 h-3.5" />
+      )}
     </button>
   );
 }
@@ -214,10 +252,14 @@ export function ToggleBar() {
       try {
         const res = await fetch("/api/config");
         if (res.ok) {
-          const data = await res.json() as { config: { agentSystem?: unknown } };
+          const data = (await res.json()) as {
+            config: { agentSystem?: unknown };
+          };
           setHasAgentSystem(!!data.config?.agentSystem);
         }
-      } catch { /* default to showing all tabs */ }
+      } catch (e) {
+        console.error("Failed to fetch config:", e);
+      }
     })();
   }, []);
 

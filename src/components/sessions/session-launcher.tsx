@@ -206,8 +206,8 @@ export function SessionLauncher({
           });
           setDefaultCwdLoaded(true);
         }
-      } catch {
-        /* use default */
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     })();
   }, [defaultCwdLoaded]);
@@ -222,8 +222,8 @@ export function SessionLauncher({
             setAgents(data);
           }
         }
-      } catch {
-        // Use defaults
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     })();
   }, []);
@@ -237,8 +237,8 @@ export function SessionLauncher({
           const sessions = (await res.json()) as PastSession[];
           setRecentSessions(sessions);
         }
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     })();
   }, [open]);

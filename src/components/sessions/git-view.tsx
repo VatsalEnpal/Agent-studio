@@ -97,8 +97,8 @@ export function GitView({ repo, onBack }: GitViewProps) {
         if (data.branches?.length) setBranches(data.branches);
         if (data.currentBranch) setCurrentBranch(data.currentBranch);
       }
-    } catch {
-      // Best effort
+    } catch (e) {
+      console.error("Caught error:", e);
     }
   }, [repo.path]);
 
@@ -116,8 +116,8 @@ export function GitView({ repo, onBack }: GitViewProps) {
       });
       if (!res.ok) throw new Error("Push failed");
       void fetchDetails();
-    } catch {
-      // Could show toast here
+    } catch (e) {
+      console.error("Caught error:", e);
     } finally {
       setPushing(false);
     }
@@ -136,8 +136,8 @@ export function GitView({ repo, onBack }: GitViewProps) {
           setCurrentBranch(branchName);
           void fetchDetails();
         }
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     },
     [repo.path, fetchDetails],

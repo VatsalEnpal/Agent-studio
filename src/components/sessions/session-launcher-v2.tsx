@@ -223,8 +223,8 @@ export function SessionLauncherV2({
           });
           setDefaultCwdLoaded(true);
         }
-      } catch {
-        /* use default */
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     })();
   }, [defaultCwdLoaded]);
@@ -238,8 +238,8 @@ export function SessionLauncherV2({
           const data = (await res.json()) as AgentOption[];
           if (Array.isArray(data) && data.length > 0) setAgents(data);
         }
-      } catch {
-        /* use defaults */
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     })();
   }, []);
@@ -254,8 +254,8 @@ export function SessionLauncherV2({
           const sessions = (await res.json()) as PastSession[];
           setRecentSessions(sessions);
         }
-      } catch {
-        /* best effort */
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     })();
   }, [open]);

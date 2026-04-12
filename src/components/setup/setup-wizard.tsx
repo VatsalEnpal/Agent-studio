@@ -195,8 +195,8 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
             setModel(d.model);
           }
         }
-      } catch {
-        // Server not ready yet
+      } catch (e) {
+        console.error("Caught error:", e);
       }
 
       // Run project detection
@@ -207,7 +207,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
           const data = await detectRes.json() as { projects: DetectedProject[] };
           setDetectedProjects(data.projects ?? []);
         }
-      } catch { /* detection failed */ }
+      } catch (e) { console.error("Caught error:", e); }
       setDetecting(false);
       setDetectionDone(true);
 
@@ -218,7 +218,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
           const preData = await preRes.json() as { checks: { claudeCode: { version?: string } } };
           setClaudeVersion(preData.checks?.claudeCode?.version ?? "");
         }
-      } catch { /* ignore */ }
+      } catch (e) { console.error("Caught error:", e); }
     })();
   }, []);
 
@@ -251,8 +251,8 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
         const data = await res.json() as Record<string, unknown>;
         setScanResult(data);
       }
-    } catch {
-      // Scan failed silently
+    } catch (e) {
+      console.error("Caught error:", e);
     }
     setScanning(false);
   }, [projects]);
@@ -334,8 +334,8 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
           };
           setAgentSystem((prev) => ({ ...prev, found: data }));
         }
-      } catch {
-        // Leave found as false
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     })();
   }, [agentSystem.enabled, agentSystem.path, agentSystem.createNew]);
@@ -446,8 +446,8 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
       if (res.ok) {
         onComplete();
       }
-    } catch {
-      // Show error state if needed
+    } catch (e) {
+      console.error("Caught error:", e);
     } finally {
       setSaving(false);
     }
@@ -591,8 +591,8 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
                       })),
                     );
                   }
-                } catch {
-                  // Best effort
+                } catch (e) {
+                  console.error("Caught error:", e);
                 } finally {
                   setAutoSuggestionsLoading(false);
                 }
@@ -1856,8 +1856,8 @@ async function getHomeDir(): Promise<string> {
       const data = await res.json() as { homeDir: string };
       return data.homeDir;
     }
-  } catch {
-    // fallback
+  } catch (e) {
+    console.error("Caught error:", e);
   }
   return "/Users";
 }
