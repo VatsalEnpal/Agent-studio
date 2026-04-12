@@ -147,7 +147,7 @@ This checklist should be LARGER at the end of each run than at the start.
 
 ### Controls
 
-- [ ] Is the Teams view accessible from the main navigation, not just the command palette? [AUTO-ADDED, run-1*]
+- [x] Is the Teams view accessible from the main navigation, not just the command palette? [AUTO-ADDED, run-1*] [VERIFIED, run-2]
 - [ ] Is it clear what 'WORKFLOWS' means and how to create one? [AUTO-ADDED, run-1*]
 
 - [ ] Can I pause a sprint/run?
@@ -282,10 +282,12 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Is Geist Mono the ONLY font? (no Inter, Roboto, Arial, system sans-serif)
 - [ ] Is amber (#f59e0b) the ONLY accent color? (no random blues, purples, or other accents)
 - [ ] Are colors used semantically? (green=success, red=error, amber=active — never decorative)
+- [ ] Are toggle switches using amber (not green) for the active state? [AUTO-ADDED, run-2]
 - [ ] Is there any decorative element that doesn't convey information? (gradients, illustrations, shadows for style)
 
 ### Visual Sizing & Proportions
 
+- [ ] Do icon-only navigation buttons have tooltips or labels for discoverability? [AUTO-ADDED, run-2]
 - [ ] Are ALL icons at least 16px? (no icons smaller than 16px — they become unreadable)
 - [ ] Are primary action icons 20px? (new session, create room, etc.)
 - [ ] Is body text consistently 13px? (not jumping between 12px and 16px randomly)
@@ -299,6 +301,7 @@ This checklist should be LARGER at the end of each run than at the start.
 
 ### Dark Mode Consistency
 
+- [ ] Does the empty state from one tab bleed into other tabs? (buttons, text, or UI from hidden views should not be visible) [AUTO-ADDED, run-2]
 - [ ] Is the app dark everywhere? (no white or light gray panels/backgrounds leaking through)
 - [ ] Are there any Radix UI default styles showing light backgrounds? (modals, dropdowns, tooltips)
 - [ ] Are scrollbars dark? (not bright white system scrollbars)
@@ -324,6 +327,7 @@ This checklist should be LARGER at the end of each run than at the start.
 - [ ] Is destructive confirmation direct? ("Kill session? Can't be undone." NOT "Are you sure you want to proceed?")
 - [ ] Is there any emoji in the UI? (there shouldn't be)
 - [ ] Is there any exclamation mark in UI text? (there shouldn't be)
+- [ ] Are tab/section names consistent with the design spec and documentation? [AUTO-ADDED, run-2]
 
 ### Animation & Polish
 
@@ -364,6 +368,7 @@ Track additions and removals here.
 | 1   | 4             | 0             | checklist_gap | 88           |
 | 2   | 1             | 0             | checklist_gap | 91           |
 | 1*  | 7             | 0             | checklist_gap | 78           |
+| 2   | 5             | 0             | checklist_gap | 88.1         |
 
 ## Miss Categories (for auto-evolution)
 

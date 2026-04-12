@@ -7,14 +7,14 @@
       "issue_id": "ISSUE-8",
       "description": "Fix Default Working Directory to use the actual project directory instead of the Electron app bundle path (/Applications/Agent Studio.app/Contents/Resources). Auto-detect from cwd or first tracked project.",
       "severity": "CRITICAL",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-2",
       "issue_id": "ISSUE-1",
       "description": "Show Teams, Memory, and Reports tabs in the top navigation. If agent system is not configured, show tabs but display an explanatory empty state with a CTA to configure instead of hiding them entirely.",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-3",
@@ -42,7 +42,7 @@
       "issue_id": "ISSUE-7",
       "description": "Make the default model setting in General actually propagate to the New Session launcher modal. The model dropdown should reflect whatever is configured in settings.",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-7",
@@ -56,7 +56,7 @@
       "issue_id": "ISSUE-14",
       "description": "Add Teams tab to the main top navigation bar so users can discover rooms and sprints without using the command palette.",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-9",
@@ -269,10 +269,53 @@
       "status": "fixed"
     }
   ],
+    {
+      "id": "TASK-39",
+      "issue_id": "ISSUE-39",
+      "description": "Fix the Sessions empty state 'New Session' button bleeding through to ALL other tabs (Teams, Sprints, Knowledge, Settings). The button floats at a fixed position overlapping content. This is a z-index or visibility regression introduced by the tab navigation fix.",
+      "severity": "HIGH",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-40",
+      "issue_id": "ISSUE-40",
+      "description": "Rename 'Knowledge' tab to 'Memory' for consistency with the design spec, IDENTITY.md, and all task/checklist references.",
+      "severity": "MEDIUM",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-41",
+      "issue_id": "ISSUE-41",
+      "description": "Change notification toggle switches from green to amber to comply with IDENTITY.md color scheme (amber is the only accent color).",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-42",
+      "issue_id": "ISSUE-42",
+      "description": "Add text labels to the left icon sidebar navigation or ensure tooltips appear on hover for discoverability.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-43",
+      "issue_id": "ISSUE-43",
+      "description": "Add dynamic git branch info back to the About section, or include more system information to make the section useful.",
+      "severity": "LOW",
+      "status": "pending"
+    },
+    {
+      "id": "TASK-44",
+      "issue_id": "ISSUE-44",
+      "description": "Improve session name display in History sidebar -- names are heavily truncated at 200px sidebar width. Show more context or use full-width tooltips on hover.",
+      "severity": "LOW",
+      "status": "pending"
+    }
+  ],
   "stats": {
-    "total": 38,
-    "pending": 28,
-    "fixed": 10,
-    "verified": 0
+    "total": 44,
+    "pending": 34,
+    "fixed": 6,
+    "verified": 4
   }
 }

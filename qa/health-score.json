@@ -7,7 +7,7 @@
   },
   "checklist_evolution": {
     "initial_items": 173,
-    "auto_added": 9,
+    "auto_added": 14,
     "pruned": 0
   },
   "runs": [
@@ -22,6 +22,20 @@
       "total_issues": 38,
       "health_score": 78,
       "notes": "First audit as new user. Major discoverability issues with hidden tabs (Teams, Memory, Reports). Session naming is broken. Default working directory points to Electron app bundle."
+    },
+    {
+      "run": 2,
+      "timestamp": "2026-04-12T18:30:00Z",
+      "health_score": 88.1,
+      "total_checks": 185,
+      "bugs_found": 6,
+      "critical": 0,
+      "high": 1,
+      "medium": 1,
+      "low": 4,
+      "checklist_items_added": 5,
+      "convergence_trend": [78, 88.1],
+      "notes": "QA validation of Brain 2 fixes. 4 of 10 fixes verified (default cwd, model propagation, nav tabs, hidden tabs). 6 fixes could not be verified (no running sessions). 1 HIGH regression: Sessions empty state New Session button bleeds through to all tabs. 5 new low-to-medium issues found."
     }
   ]
 }
