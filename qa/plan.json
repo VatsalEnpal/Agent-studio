@@ -189,14 +189,14 @@
       "issue_id": "ISSUE-4",
       "description": "Add a brief explanation or tooltip for the API peak/off-peak indicator for new users.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-28",
       "issue_id": "ISSUE-9",
       "description": "Dynamically read the git branch name for the About section instead of using a hardcoded/stale value.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-29",
@@ -210,21 +210,21 @@
       "issue_id": "ISSUE-20",
       "description": "Add an 'Add Repo' button to the Repos section in the sidebar for quick repo addition.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-31",
       "issue_id": "ISSUE-21",
       "description": "Make the :8080 port button open the URL in the browser or show a confirmation toast.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-32",
       "issue_id": "ISSUE-22",
       "description": "Fix the API: Off-Peak badge to not wrap awkwardly at narrow viewport widths.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-33",
@@ -301,7 +301,7 @@
       "issue_id": "ISSUE-43",
       "description": "Add dynamic git branch info back to the About section, or include more system information to make the section useful.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-44",
@@ -327,8 +327,8 @@
   ],
   "stats": {
     "total": 46,
-    "pending": 13,
-    "fixed": 13,
+    "pending": 7,
+    "fixed": 19,
     "verified": 21,
     "failed_verification": 0
   }
