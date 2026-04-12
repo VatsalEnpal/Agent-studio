@@ -178,6 +178,19 @@ export function RoomChat() {
     useUIStore.getState().setActiveMode("sessions");
   }, []);
 
+  // Handler for clicking agent names in chat messages — finds the agent
+  // in the current room and jumps to its terminal session.
+  const handleAgentClick = useCallback(
+    (agentId: string) => {
+      const agents = room?.agents ?? [];
+      const agent = agents.find((a) => a.id === agentId);
+      if (agent) {
+        jumpToSession(agent);
+      }
+    },
+    [room?.agents, jumpToSession],
+  );
+
   // Filtered agents for mention dropdown (safe even when room is null)
   const filteredAgents = (room?.agents ?? []).filter(
     (a) =>
@@ -363,6 +376,7 @@ export function RoomChat() {
                     msg={msg}
                     onApprove={handleApprove}
                     onReject={handleReject}
+                    onAgentClick={handleAgentClick}
                   />
                 ))}
                 <div ref={messagesEndRef} />
