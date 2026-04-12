@@ -135,7 +135,11 @@ export function saveConfig(config: AgentStudioConfig): void {
  * Detects the current project and any git repos in the parent directory.
  */
 export function generateDefaultConfig(): AgentStudioConfig {
-  const cwd = process.cwd();
+  const rawCwd = process.cwd();
+  // Electron packaged apps set cwd to the app bundle (e.g. /Applications/Agent Studio.app/...).
+  // Detect this and fall back to home directory so sessions don't run inside the bundle.
+  const isInsideAppBundle = rawCwd.includes(".app/Contents/");
+  const cwd = isInsideAppBundle ? os.homedir() : rawCwd;
   const parentDir = join(cwd, "..");
 
   // ---------- Projects ----------
@@ -301,6 +305,8 @@ export function getMainProjectDir(): string {
   const projects = config.projects ?? [];
   const main = projects.find((p) => !p.isProd);
   if (main?.path) return main.path;
-  // Fallback: parent of cwd
-  return join(process.cwd(), "..");
+  // Fallback: home directory (not cwd, which may be an Electron app bundle)
+  const rawCwd = process.cwd();
+  if (rawCwd.includes(".app/Contents/")) return os.homedir();
+  return join(rawCwd, "..");
 }
