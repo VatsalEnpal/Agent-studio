@@ -641,7 +641,7 @@ export default function Home() {
           {activeMode === "memory" && (
             <div className="px-3 py-2.5">
               <h3 className="text-label uppercase tracking-wider text-text-ghost">
-                Knowledge
+                Memory
               </h3>
             </div>
           )}
@@ -767,7 +767,7 @@ export default function Home() {
               </ErrorBoundary>
             </div>
 
-            {/* Memory / Knowledge */}
+            {/* Memory */}
             <div className={activeMode === "memory" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"}>
               <ErrorBoundary fallbackLabel="Memory view error">
                 <MemoryView />

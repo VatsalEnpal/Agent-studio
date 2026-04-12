@@ -63,7 +63,7 @@ const sectionItems: Omit<NavItem, "badge">[] = [
   { id: "sessions", label: "Sessions", icon: SessionsIcon, accent: "sessions" },
   { id: "teams", label: "Teams", icon: RoomsIcon, accent: "teams" },
   { id: "sprints", label: "Sprints", icon: SprintsIcon, accent: "sprints" },
-  { id: "knowledge", label: "Knowledge", icon: MemoryIcon, accent: "knowledge" },
+  { id: "knowledge", label: "Memory", icon: MemoryIcon, accent: "knowledge" },
 ];
 
 /** Keyboard shortcut hints for nav tooltips */
