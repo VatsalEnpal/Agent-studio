@@ -2,7 +2,12 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { CloseIcon, SearchIcon, ChevronDownIcon, SessionsIcon } from "@/components/ui/icons";
+import {
+  CloseIcon,
+  SearchIcon,
+  ChevronDownIcon,
+  SessionsIcon,
+} from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import type { LauncherPreset } from "@/lib/types";
 
@@ -61,11 +66,23 @@ interface AgentOption {
 
 const DEFAULT_AGENTS: AgentOption[] = [
   { id: "none", name: "No Agent", description: "Plain Claude session" },
-  { id: "orchestrator", name: "orchestrator", description: "Coordinates agent teams" },
+  {
+    id: "orchestrator",
+    name: "orchestrator",
+    description: "Coordinates agent teams",
+  },
   { id: "frontend", name: "frontend", description: "Builds UI code" },
-  { id: "backend", name: "backend", description: "Builds APIs and server logic" },
+  {
+    id: "backend",
+    name: "backend",
+    description: "Builds APIs and server logic",
+  },
   { id: "qa", name: "qa", description: "Tests the application" },
-  { id: "security", name: "security", description: "Reviews code for vulnerabilities" },
+  {
+    id: "security",
+    name: "security",
+    description: "Reviews code for vulnerabilities",
+  },
   { id: "pmo", name: "pmo", description: "Scans for tasks" },
   { id: "documentation", name: "documentation", description: "Maintains docs" },
 ];
@@ -127,8 +144,9 @@ export function SessionLauncher({
   const [customName, setCustomName] = useState("");
   const [model, setModel] = useState<"opus" | "sonnet" | "haiku">("sonnet");
   const [agent, setAgent] = useState("none");
-  const [permissions, setPermissions] =
-    useState<"bypass" | "default" | "plan" | "auto">("default");
+  const [permissions, setPermissions] = useState<
+    "bypass" | "default" | "plan" | "auto"
+  >("default");
   const [channel, setChannel] = useState<"none" | "telegram">("none");
   const [cwd, setCwd] = useState("~");
   const [resume, setResume] = useState("");
@@ -166,7 +184,7 @@ export function SessionLauncher({
       try {
         const res = await fetch("/api/config");
         if (res.ok) {
-          const data = await res.json() as {
+          const data = (await res.json()) as {
             config: {
               defaults: {
                 workingDirectory: string;
@@ -178,7 +196,9 @@ export function SessionLauncher({
           const defaults = data.config?.defaults;
           if (defaults?.workingDirectory) {
             setCwd(defaults.workingDirectory);
-            for (const p of PRESETS) { p.cwd = defaults.workingDirectory; }
+            for (const p of PRESETS) {
+              p.cwd = defaults.workingDirectory;
+            }
           }
           setDefaultsFromConfig({
             model: defaults?.model ?? "sonnet",
@@ -186,7 +206,9 @@ export function SessionLauncher({
           });
           setDefaultCwdLoaded(true);
         }
-      } catch { /* use default */ }
+      } catch {
+        /* use default */
+      }
     })();
   }, [defaultCwdLoaded]);
 
@@ -224,7 +246,10 @@ export function SessionLauncher({
   useEffect(() => {
     if (!resumeDropdownOpen) return;
     const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setResumeDropdownOpen(false);
       }
     };
@@ -250,6 +275,33 @@ export function SessionLauncher({
     setCwd(preset.cwd);
     setResume("");
   }, []);
+
+  const handlePresetLaunch = useCallback(
+    async (preset: LauncherPreset) => {
+      if (launching) return;
+      setLaunching(true);
+      setError(null);
+      applyPreset(preset);
+      try {
+        const sessionName =
+          preset.agent !== "none" ? preset.agent : `claude-${preset.model}`;
+        await onLaunch({
+          name: sessionName,
+          model: preset.model,
+          agent: preset.agent,
+          permissions: preset.permissions,
+          channel: preset.channel,
+          cwd: preset.cwd,
+        });
+        onOpenChange(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Launch failed");
+      } finally {
+        setLaunching(false);
+      }
+    },
+    [launching, applyPreset, onLaunch, onOpenChange],
+  );
 
   const handleLaunch = useCallback(async () => {
     if (launching) return;
@@ -311,7 +363,8 @@ export function SessionLauncher({
   }, [launching, model, cwd, onLaunch, onOpenChange]);
 
   // Helper for input/select styling
-  const inputCls = "w-full px-2.5 py-1.5 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:border-border-subtle focus:outline-none transition-all";
+  const inputCls =
+    "w-full px-2.5 py-1.5 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:border-border-subtle focus:outline-none transition-all";
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -320,7 +373,9 @@ export function SessionLauncher({
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[480px] max-h-[85vh] overflow-y-auto bg-bg-elevated border border-border-subtle rounded shadow-modal scrollbar-thin outline-none">
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-border-default">
-            <Dialog.Description className="sr-only">Launch a new Claude Code session</Dialog.Description>
+            <Dialog.Description className="sr-only">
+              Launch a new Claude Code session
+            </Dialog.Description>
             <Dialog.Title className="text-section-heading text-text-primary">
               New Session
             </Dialog.Title>
@@ -350,8 +405,15 @@ export function SessionLauncher({
                   >
                     {resume ? (
                       <>
-                        <span className="truncate flex-1">{shortProject(recentSessions.find(s => s.id === resume)?.project ?? resume)}</span>
-                        <span className="text-label text-text-ghost font-mono">{resume.slice(0, 8)}</span>
+                        <span className="truncate flex-1">
+                          {shortProject(
+                            recentSessions.find((s) => s.id === resume)
+                              ?.project ?? resume,
+                          )}
+                        </span>
+                        <span className="text-label text-text-ghost font-mono">
+                          {resume.slice(0, 8)}
+                        </span>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -364,8 +426,13 @@ export function SessionLauncher({
                       </>
                     ) : (
                       <>
-                        <span className="flex-1">Select a previous session...</span>
-                        <ChevronDownIcon size={12} className="text-text-ghost" />
+                        <span className="flex-1">
+                          Select a previous session...
+                        </span>
+                        <ChevronDownIcon
+                          size={12}
+                          className="text-text-ghost"
+                        />
                       </>
                     )}
                   </button>
@@ -384,7 +451,9 @@ export function SessionLauncher({
                       </div>
                       <div className="overflow-y-auto max-h-36">
                         {filteredSessions.length === 0 ? (
-                          <p className="px-3 py-2 text-label text-text-ghost">No sessions found</p>
+                          <p className="px-3 py-2 text-label text-text-ghost">
+                            No sessions found
+                          </p>
                         ) : (
                           filteredSessions.slice(0, 15).map((session) => (
                             <button
@@ -445,7 +514,7 @@ export function SessionLauncher({
                 {PRESETS.map((preset) => (
                   <button
                     key={preset.name}
-                    onClick={() => applyPreset(preset)}
+                    onClick={() => handlePresetLaunch(preset)}
                     disabled={launching}
                     className={cn(
                       "flex flex-col items-center gap-1.5 p-2.5 rounded border transition-all",
@@ -469,7 +538,9 @@ export function SessionLauncher({
             {/* Divider */}
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-border-default" />
-              <span className="text-label text-text-ghost">or customize below</span>
+              <span className="text-label text-text-ghost">
+                or customize below
+              </span>
               <div className="flex-1 h-px bg-border-default" />
             </div>
 
@@ -517,7 +588,9 @@ export function SessionLauncher({
                   onChange={(e) => {
                     const selectedId = e.target.value;
                     setAgent(selectedId);
-                    const selectedAgent = agents.find((a) => a.id === selectedId);
+                    const selectedAgent = agents.find(
+                      (a) => a.id === selectedId,
+                    );
                     if (selectedAgent?.model) {
                       setModel(selectedAgent.model);
                     }
@@ -526,7 +599,8 @@ export function SessionLauncher({
                 >
                   {agents.map((a) => (
                     <option key={a.id} value={a.id} title={a.description}>
-                      {a.name}{a.description ? ` — ${a.description}` : ""}
+                      {a.name}
+                      {a.description ? ` — ${a.description}` : ""}
                     </option>
                   ))}
                 </select>
@@ -540,11 +614,7 @@ export function SessionLauncher({
                   value={permissions}
                   onChange={(e) =>
                     setPermissions(
-                      e.target.value as
-                        | "bypass"
-                        | "default"
-                        | "plan"
-                        | "auto",
+                      e.target.value as "bypass" | "default" | "plan" | "auto",
                     )
                   }
                   className={inputCls}
@@ -601,7 +671,9 @@ export function SessionLauncher({
           {/* Footer */}
           <div className="flex items-center justify-between px-5 py-3 border-t border-border-default">
             <span className="text-label text-text-ghost">
-              {resume ? `resume: ${resume.slice(0, 20)}${resume.length > 20 ? "..." : ""}` : (
+              {resume ? (
+                `resume: ${resume.slice(0, 20)}${resume.length > 20 ? "..." : ""}`
+              ) : (
                 <>
                   {model} {agent !== "none" ? `+ ${agent}` : ""}{" "}
                   {permissions !== "bypass" ? `(${permissions})` : ""}
@@ -618,7 +690,9 @@ export function SessionLauncher({
               )}
             >
               {launching ? "Launching..." : resume ? "Resume" : "Launch"}
-              {!launching && <span className="ml-2 text-label opacity-60">Enter</span>}
+              {!launching && (
+                <span className="ml-2 text-label opacity-60">Enter</span>
+              )}
             </button>
           </div>
         </Dialog.Content>

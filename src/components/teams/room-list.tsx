@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useCallback, useRef, useState } from "react";
-import { HashIcon, PlusIcon, CloseIcon, CheckIcon, SettingsIcon } from "@/components/ui/icons";
+import {
+  HashIcon,
+  PlusIcon,
+  CloseIcon,
+  CheckIcon,
+  SettingsIcon,
+} from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import { useRoomsStore } from "@/stores/rooms";
@@ -16,7 +22,8 @@ function relativeMessageTime(iso: string): string {
     if (diff < 3600_000) return `${Math.floor(diff / 60_000)}m`;
     if (diff < 86400_000) return `${Math.floor(diff / 3600_000)}h`;
     return `${Math.floor(diff / 86400_000)}d`;
-  } catch {
+  } catch (e) {
+    console.error("Failed to format relative message time:", e);
     return "";
   }
 }
@@ -37,7 +44,9 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
   const hasAgentSystem = useHasAgentSystem();
 
   const [closingRoomId, setClosingRoomId] = useState<string | null>(null);
-  const closingRoom = closingRoomId ? rooms.find((r) => r.id === closingRoomId) : null;
+  const closingRoom = closingRoomId
+    ? rooms.find((r) => r.id === closingRoomId)
+    : null;
 
   // Compute total unread across all rooms
   const totalUnread = rooms.reduce((acc, room) => {
@@ -45,7 +54,9 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
     const seen = lastSeenByRoom[room.id];
     const msgs = room.messages ?? [];
     const unread = seen
-      ? msgs.filter((m) => new Date(m.timestamp) > new Date(seen) && m.from !== "user").length
+      ? msgs.filter(
+          (m) => new Date(m.timestamp) > new Date(seen) && m.from !== "user",
+        ).length
       : msgs.filter((m) => m.from !== "user").length;
     return acc + unread;
   }, 0);
@@ -61,8 +72,8 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           selectRoom(data[0].id);
         }
       }
-    } catch {
-      // ignore fetch errors
+    } catch (e) {
+      console.error("Failed to fetch rooms:", e);
     }
     setLoading(false);
   }, [setRooms, selectRoom, setLoading]);
@@ -94,8 +105,8 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
             .selectRoom(active.length > 0 ? active[0].id : null);
         }
       }
-    } catch {
-      // ignore
+    } catch (e) {
+      console.error("Failed to close room:", e);
     }
     setClosingRoomId(null);
   }, [closingRoomId, selectedRoomId]);
@@ -124,7 +135,12 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
   );
 
   return (
-    <div className="flex flex-col h-full overflow-hidden relative" onKeyDown={handleKeyDown} tabIndex={-1} ref={listRef}>
+    <div
+      className="flex flex-col h-full overflow-hidden relative"
+      onKeyDown={handleKeyDown}
+      tabIndex={-1}
+      ref={listRef}
+    >
       {/* Tab nav area */}
       <div className="px-3 pt-3 pb-2">
         <div className="flex rounded bg-bg-input p-0.5">
@@ -186,7 +202,9 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
         {activeRooms.length === 0 && (
           <div className="text-center py-6 px-4">
             <HashIcon size={20} className="text-text-ghost mx-auto mb-2" />
-            <p className="text-xs text-text-secondary font-medium">No active rooms</p>
+            <p className="text-xs text-text-secondary font-medium">
+              No active rooms
+            </p>
             <p className="text-xs text-text-tertiary mt-1">
               {hasAgentSystem
                 ? "Create a room to start collaborating with agents"
@@ -251,11 +269,13 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
       {closingRoom && (
         <div className="absolute inset-0 z-20 bg-bg-base/90 flex items-center justify-center px-4">
           <div className="bg-bg-elevated border border-border-subtle rounded-[4px] p-4 w-full max-w-[280px] space-y-3">
-            <p className="text-xs font-medium text-text-primary">
-              Close room?
-            </p>
+            <p className="text-xs font-medium text-text-primary">Close room?</p>
             <p className="text-xs text-text-secondary leading-relaxed">
-              This will close <span className="font-medium text-text-primary">{closingRoom.name}</span> and its agent sessions. Chat history is preserved.
+              This will close{" "}
+              <span className="font-medium text-text-primary">
+                {closingRoom.name}
+              </span>{" "}
+              and its agent sessions. Chat history is preserved.
             </p>
             <div className="flex items-center gap-2 justify-end">
               <button
@@ -295,23 +315,29 @@ function RoomItem({
   const workingCount = agents.filter((a) => a.status === "working").length;
 
   const messages = room.messages ?? [];
-  const unreadCount = !room.active ? 0 : lastSeen
-    ? messages.filter(
-        (m) => new Date(m.timestamp) > new Date(lastSeen) && m.from !== "user",
-      ).length
-    : messages.filter((m) => m.from !== "user").length;
+  const unreadCount = !room.active
+    ? 0
+    : lastSeen
+      ? messages.filter(
+          (m) =>
+            new Date(m.timestamp) > new Date(lastSeen) && m.from !== "user",
+        ).length
+      : messages.filter((m) => m.from !== "user").length;
 
   // Last message metadata
   const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
   const lastMsgTime = lastMsg ? relativeMessageTime(lastMsg.timestamp) : null;
-  const lastMsgSender = lastMsg?.from === "user" ? "You" : lastMsg?.from ?? null;
+  const lastMsgSender =
+    lastMsg?.from === "user" ? "You" : (lastMsg?.from ?? null);
 
   return (
     <div
       role="button"
       tabIndex={0}
       onClick={onSelect}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(); }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") onSelect();
+      }}
       className={cn(
         "group flex items-center gap-2.5 w-full px-2.5 py-2 rounded text-left transition-all cursor-pointer",
         selected
@@ -327,7 +353,9 @@ function RoomItem({
           <span
             className={cn(
               "text-xs truncate",
-              selected ? "text-text-primary font-medium" : "text-text-secondary",
+              selected
+                ? "text-text-primary font-medium"
+                : "text-text-secondary",
             )}
           >
             {room.name}
@@ -360,7 +388,9 @@ function RoomItem({
               </span>
               {lastMsgTime && (
                 <>
-                  <span className="text-text-ghost/40 text-[8px]">&middot;</span>
+                  <span className="text-text-ghost/40 text-[8px]">
+                    &middot;
+                  </span>
                   <span className="text-2xs text-text-ghost tabular-nums shrink-0">
                     {lastMsgTime}
                   </span>
@@ -374,7 +404,9 @@ function RoomItem({
         {/* Last message preview */}
         {lastMsg && room.active && (
           <p className="text-2xs text-text-ghost truncate mt-0.5">
-            <span className="font-medium text-text-tertiary">{lastMsgSender}: </span>
+            <span className="font-medium text-text-tertiary">
+              {lastMsgSender}:{" "}
+            </span>
             {(lastMsg.text ?? "").slice(0, 60).replace(/\s+/g, " ")}
           </p>
         )}

@@ -1,7 +1,12 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { CheckIcon, CloseIcon, PlayIcon, ClockIcon } from "@/components/ui/icons";
+import {
+  CheckIcon,
+  CloseIcon,
+  PlayIcon,
+  ClockIcon,
+} from "@/components/ui/icons";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 import { useReportsStore, type Report } from "@/stores/reports";
@@ -15,7 +20,8 @@ function formatTimestamp(iso: string): string {
       hour: "2-digit",
       minute: "2-digit",
     });
-  } catch {
+  } catch (e) {
+    console.error("Failed to format report timestamp:", e);
     return iso;
   }
 }
@@ -35,10 +41,12 @@ export function ReportDetail({ report }: ReportDetailProps) {
   const handleApproveAll = useCallback(async () => {
     setApprovingAll(true);
     try {
-      const res = await fetch(`/api/reports/${report.id}/approve`, { method: "POST" });
+      const res = await fetch(`/api/reports/${report.id}/approve`, {
+        method: "POST",
+      });
       if (res.ok) approveReport(report.id);
-    } catch {
-      // Best effort
+    } catch (e) {
+      console.error("Failed to approve all report actions:", e);
     } finally {
       setApprovingAll(false);
     }
@@ -46,10 +54,12 @@ export function ReportDetail({ report }: ReportDetailProps) {
 
   const handleDismiss = useCallback(async () => {
     try {
-      const res = await fetch(`/api/reports/${report.id}/dismiss`, { method: "POST" });
+      const res = await fetch(`/api/reports/${report.id}/dismiss`, {
+        method: "POST",
+      });
       if (res.ok) dismissReport(report.id);
-    } catch {
-      // Best effort
+    } catch (e) {
+      console.error("Failed to dismiss report:", e);
     }
   }, [report.id, dismissReport]);
 
@@ -62,8 +72,8 @@ export function ReportDetail({ report }: ReportDetailProps) {
           { method: "POST" },
         );
         if (res.ok) approveAction(report.id, actionId);
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Failed to approve report action:", e);
       } finally {
         setActionLoading(null);
       }
@@ -83,8 +93,10 @@ export function ReportDetail({ report }: ReportDetailProps) {
             className={cn(
               "px-2 py-0.5 rounded text-xs font-medium",
               report.status === "pending" && "bg-yellow-500/15 text-yellow-400",
-              report.status === "approved" && "bg-emerald-500/15 text-emerald-400",
-              report.status === "dismissed" && "bg-bg-elevated text-text-tertiary",
+              report.status === "approved" &&
+                "bg-emerald-500/15 text-emerald-400",
+              report.status === "dismissed" &&
+                "bg-bg-elevated text-text-tertiary",
             )}
           >
             {report.status}
@@ -148,7 +160,10 @@ export function ReportDetail({ report }: ReportDetailProps) {
                         <>
                           <button
                             onClick={() => void handleApproveAction(action.id)}
-                            disabled={actionLoading === action.id || report.status !== "pending"}
+                            disabled={
+                              actionLoading === action.id ||
+                              report.status !== "pending"
+                            }
                             className="px-2 py-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {actionLoading === action.id ? "..." : "Approve"}

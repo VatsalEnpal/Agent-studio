@@ -21,7 +21,10 @@ import { TitleBar } from "@/components/ui/top-bar";
 import { SidebarShell } from "@/components/ui/sidebar-shell";
 import { ConnectionBanner } from "@/components/ui/connection-banner";
 import { ToastContainer } from "@/components/ui/notification-toast";
-import { CommandPalette, type CommandItem } from "@/components/ui/command-palette";
+import {
+  CommandPalette,
+  type CommandItem,
+} from "@/components/ui/command-palette";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 import { SessionSidebar } from "@/components/sessions/session-sidebar";
@@ -48,10 +51,7 @@ import { Onboarding } from "@/components/setup/onboarding";
 
 import { cn } from "@/lib/utils";
 import type { Session, WsMessage, RepoStatus, ActiveMode } from "@/lib/types";
-import {
-  SessionsIcon,
-  SprintsIcon,
-} from "@/components/ui/icons";
+import { SessionsIcon, SprintsIcon } from "@/components/ui/icons";
 
 // ---------------------------------------------------------------------------
 // Preflight types
@@ -109,7 +109,9 @@ export default function Home() {
   const [selectedRepo, setSelectedRepo] = useState<RepoStatus | null>(null);
   const [showDevServers, setShowDevServers] = useState(false);
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
-  const [navBadges, setNavBadges] = useState<Partial<Record<NavPage, number>>>({});
+  const [navBadges, setNavBadges] = useState<Partial<Record<NavPage, number>>>(
+    {},
+  );
 
   useEffect(() => {
     setHydrated(true);
@@ -133,8 +135,8 @@ export default function Home() {
   const selectedSprintId = useSprintsStore((s) => s.selectedSprintId);
   const selectSprint = useSprintsStore((s) => s.selectSprint);
 
-  const memoryEntryCount = useMemoryStore((s) =>
-    s.entries.filter((e) => !e.superseded_by).length,
+  const memoryEntryCount = useMemoryStore(
+    (s) => s.entries.filter((e) => !e.superseded_by).length,
   );
 
   // Hooks
@@ -159,7 +161,7 @@ export default function Home() {
     return sum;
   }, [usageData.managed]);
 
-// --- Notification manager ---
+  // --- Notification manager ---
   useEffect(() => {
     const cleanup = initNotificationManager();
     return cleanup;
@@ -195,8 +197,8 @@ export default function Home() {
         setPreflight(data);
         return data.ready;
       }
-    } catch {
-      /* server not ready */
+    } catch (e) {
+      console.error("Preflight check failed (server may not be ready):", e);
     }
     setPreflightLoading(false);
     return false;
@@ -223,8 +225,8 @@ export default function Home() {
               setShowSetupWizard(true);
             }
           }
-        } catch {
-          /* use defaults */
+        } catch (e) {
+          console.error("Failed to fetch config after preflight:", e);
         }
       }
       setPreflightLoading(false);
@@ -363,8 +365,8 @@ export default function Home() {
             };
             resolvedCwd = resolvedCwd.replace("~", cfg.homeDir);
           }
-        } catch {
-          // Fall through
+        } catch (e) {
+          console.error("Failed to resolve home directory from config:", e);
         }
       }
 
@@ -427,7 +429,8 @@ export default function Home() {
       }
 
       // Auto-name: combine agent + project directory for distinguishable names
-      const cwdBasename = resolvedCwd.split("/").filter(Boolean).pop() ?? "session";
+      const cwdBasename =
+        resolvedCwd.split("/").filter(Boolean).pop() ?? "session";
       let autoName: string;
       if (config.name) {
         autoName = config.name;
@@ -450,14 +453,12 @@ export default function Home() {
             agent: config.agent,
             permissions: config.permissions,
             channel: config.channel,
-            group:
-              config.agent === "orchestrator" ? "sprint" : "standalone",
+            group: config.agent === "orchestrator" ? "sprint" : "standalone",
           },
         }),
       });
 
-      if (!res.ok)
-        throw new Error(`Failed to create session (${res.status})`);
+      if (!res.ok) throw new Error(`Failed to create session (${res.status})`);
     },
     [],
   );
@@ -497,7 +498,11 @@ export default function Home() {
         label: session.name,
         category: "sessions",
         icon: SessionsIcon,
-        keywords: [session.meta?.agent ?? "", session.meta?.model ?? "", session.cwd],
+        keywords: [
+          session.meta?.agent ?? "",
+          session.meta?.model ?? "",
+          session.cwd,
+        ],
         onSelect: () => {
           setActiveMode("sessions");
           useSessionsStore.getState().setFocused(session.id);
@@ -582,8 +587,8 @@ export default function Home() {
                     "~",
                 );
               }
-            } catch {
-              /* ignore */
+            } catch (e) {
+              console.error("Failed to fetch config after setup wizard:", e);
             }
           })();
         }}
@@ -603,7 +608,9 @@ export default function Home() {
 
       {/* Title bar — full width across top */}
       <TitleBar
-        sessionName={focusedId ? sessions.find((s) => s.id === focusedId)?.name : undefined}
+        sessionName={
+          focusedId ? sessions.find((s) => s.id === focusedId)?.name : undefined
+        }
         sessionCount={activeSessionCount}
         totalCost={totalCost}
       />
@@ -652,7 +659,8 @@ export default function Home() {
                 Reports
               </h3>
               <p className="text-2xs text-text-tertiary mt-1 leading-snug">
-                Automation output and approvals. Configure schedules in Settings.
+                Automation output and approvals. Configure schedules in
+                Settings.
               </p>
             </div>
           )}
@@ -741,13 +749,17 @@ export default function Home() {
               ) : (
                 <ErrorBoundary fallbackLabel="Terminal error">
                   <div className="flex flex-col h-full">
-                    <SessionStatsBar sessionId={focusedId ?? nonRoomSessions[0].id} />
+                    <SessionStatsBar
+                      sessionId={focusedId ?? nonRoomSessions[0].id}
+                    />
                     <TerminalPaneV2
                       sessionId={focusedId ?? nonRoomSessions[0].id}
-                      visible={activeMode === "sessions" && !showGitView && !showDevServers}
-                      fontSize={
-                        focusedId ? zoomLevels[focusedId] ?? 13 : 13
+                      visible={
+                        activeMode === "sessions" &&
+                        !showGitView &&
+                        !showDevServers
                       }
+                      fontSize={focusedId ? (zoomLevels[focusedId] ?? 13) : 13}
                     />
                   </div>
                 </ErrorBoundary>
@@ -755,35 +767,65 @@ export default function Home() {
             </div>
 
             {/* Teams */}
-            <div className={activeMode === "teams" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"}>
+            <div
+              className={
+                activeMode === "teams"
+                  ? "absolute inset-0 z-10 animate-page-crossfade"
+                  : "hidden"
+              }
+            >
               <ErrorBoundary fallbackLabel="Teams view error">
                 <TeamsView />
               </ErrorBoundary>
             </div>
 
             {/* Sprints */}
-            <div className={activeMode === "sprints" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"}>
+            <div
+              className={
+                activeMode === "sprints"
+                  ? "absolute inset-0 z-10 animate-page-crossfade"
+                  : "hidden"
+              }
+            >
               <ErrorBoundary fallbackLabel="Sprints view error">
                 <SprintsView />
               </ErrorBoundary>
             </div>
 
             {/* Memory */}
-            <div className={activeMode === "memory" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"}>
+            <div
+              className={
+                activeMode === "memory"
+                  ? "absolute inset-0 z-10 animate-page-crossfade"
+                  : "hidden"
+              }
+            >
               <ErrorBoundary fallbackLabel="Memory view error">
                 <MemoryView />
               </ErrorBoundary>
             </div>
 
             {/* Reports (scheduled automations) */}
-            <div className={activeMode === "reports" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"}>
+            <div
+              className={
+                activeMode === "reports"
+                  ? "absolute inset-0 z-10 animate-page-crossfade"
+                  : "hidden"
+              }
+            >
               <ErrorBoundary fallbackLabel="Reports view error">
                 <ReportsView />
               </ErrorBoundary>
             </div>
 
             {/* Settings */}
-            <div className={activeMode === "settings" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"}>
+            <div
+              className={
+                activeMode === "settings"
+                  ? "absolute inset-0 z-10 animate-page-crossfade"
+                  : "hidden"
+              }
+            >
               <ErrorBoundary fallbackLabel="Settings view error">
                 <SettingsView />
               </ErrorBoundary>

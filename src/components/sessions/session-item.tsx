@@ -14,7 +14,9 @@ function getCustomNames(): Record<string, string> {
   try {
     const raw = localStorage.getItem(RENAME_KEY);
     if (raw) return JSON.parse(raw) as Record<string, string>;
-  } catch { /* ignore */ }
+  } catch (e) {
+    console.error("Failed to parse custom session names from localStorage:", e);
+  }
   return {};
 }
 
@@ -23,7 +25,9 @@ function setCustomName(sessionId: string, name: string): void {
   names[sessionId] = name;
   try {
     localStorage.setItem(RENAME_KEY, JSON.stringify(names));
-  } catch { /* ignore */ }
+  } catch (e) {
+    console.error("Failed to save custom session name to localStorage:", e);
+  }
 }
 
 interface SessionItemProps {
@@ -66,7 +70,10 @@ export function SessionItem({
   }, [killing, onKill]);
 
   const isExited = session.status === "exited";
-  const isRunning = session.status === "active" || session.status === "building" || session.status === "starting";
+  const isRunning =
+    session.status === "active" ||
+    session.status === "building" ||
+    session.status === "starting";
 
   // Auto-remove exited sessions after 10 seconds
   useEffect(() => {
@@ -110,7 +117,14 @@ export function SessionItem({
     } else if (!trimmed) {
       const names = getCustomNames();
       delete names[session.id];
-      try { localStorage.setItem(RENAME_KEY, JSON.stringify(names)); } catch { /* ignore */ }
+      try {
+        localStorage.setItem(RENAME_KEY, JSON.stringify(names));
+      } catch (e) {
+        console.error(
+          "Failed to clear custom session name in localStorage:",
+          e,
+        );
+      }
       setCustomNameState(null);
     }
     setEditing(false);
@@ -149,10 +163,11 @@ export function SessionItem({
           className={cn(
             "w-[5px] h-[5px] rounded-full shrink-0",
             statusDot,
-            (session.status === "building" || session.status === "starting") && "animate-pulse-dot",
+            (session.status === "building" || session.status === "starting") &&
+              "animate-pulse-dot",
           )}
           style={
-            (session.status === "active" || session.status === "building")
+            session.status === "active" || session.status === "building"
               ? { boxShadow: "0 0 6px var(--accent-sessions-glow)" }
               : undefined
           }
@@ -213,7 +228,10 @@ export function SessionItem({
             killing
               ? "text-error opacity-70 cursor-not-allowed"
               : "text-text-ghost hover:text-error hover:bg-error/10 active:bg-error/20",
-            !killing && (focused ? "opacity-70 hover:opacity-100" : "opacity-0 group-hover:opacity-100"),
+            !killing &&
+              (focused
+                ? "opacity-70 hover:opacity-100"
+                : "opacity-0 group-hover:opacity-100"),
           )}
           title={killing ? "Killing..." : "Kill session"}
         >
@@ -234,7 +252,10 @@ export function SessionItem({
           </span>
         )}
         {usage.totalCost > 0 && (
-          <span className="text-label text-text-ghost tabular-nums shrink-0" title="Session cost">
+          <span
+            className="text-label text-text-ghost tabular-nums shrink-0"
+            title="Session cost"
+          >
             ${usage.totalCost < 0.01 ? "<0.01" : usage.totalCost.toFixed(2)}
           </span>
         )}
@@ -247,7 +268,11 @@ export function SessionItem({
               <span
                 className={cn(
                   "h-full rounded-full block transition-all",
-                  contextPercent >= 90 ? "bg-error" : contextPercent >= 70 ? "bg-sprints" : "bg-sessions",
+                  contextPercent >= 90
+                    ? "bg-error"
+                    : contextPercent >= 70
+                      ? "bg-sprints"
+                      : "bg-sessions",
                 )}
                 style={{ width: `${Math.min(100, contextPercent)}%` }}
               />

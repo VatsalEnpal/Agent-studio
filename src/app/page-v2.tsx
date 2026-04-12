@@ -116,7 +116,8 @@ function useFocusedSessionStatus() {
   return {
     agent: focused.meta?.agent ?? focused.name,
     model: usage.modelShort ?? focused.meta?.model ?? "unknown",
-    contextPercent: usage.contextPercent ?? focused.meta?.contextPercent ?? null,
+    contextPercent:
+      usage.contextPercent ?? focused.meta?.contextPercent ?? null,
     cost: usage.totalCost,
     lastActivity: focused.status,
     branch,
@@ -185,8 +186,8 @@ export default function PageV2() {
         setPreflight(data);
         return data.ready;
       }
-    } catch {
-      /* server not ready */
+    } catch (e) {
+      console.error("Preflight check failed (server may not be ready):", e);
     }
     setPreflightLoading(false);
     return false;
@@ -213,8 +214,8 @@ export default function PageV2() {
               setShowSetupWizard(true);
             }
           }
-        } catch {
-          /* use defaults */
+        } catch (e) {
+          console.error("Failed to fetch config after preflight:", e);
         }
       }
       setPreflightLoading(false);
@@ -353,8 +354,8 @@ export default function PageV2() {
             };
             resolvedCwd = resolvedCwd.replace("~", cfg.homeDir);
           }
-        } catch {
-          // Fall through
+        } catch (e) {
+          console.error("Failed to resolve home directory from config:", e);
         }
       }
 
@@ -379,7 +380,8 @@ export default function PageV2() {
             },
           }),
         });
-        if (!res.ok) throw new Error(`Failed to continue session (${res.status})`);
+        if (!res.ok)
+          throw new Error(`Failed to continue session (${res.status})`);
         return;
       }
 
@@ -402,7 +404,8 @@ export default function PageV2() {
             },
           }),
         });
-        if (!res.ok) throw new Error(`Failed to resume session (${res.status})`);
+        if (!res.ok)
+          throw new Error(`Failed to resume session (${res.status})`);
         return;
       }
 
@@ -418,7 +421,8 @@ export default function PageV2() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: config.agent !== "none" ? config.agent : `claude-${config.model}`,
+          name:
+            config.agent !== "none" ? config.agent : `claude-${config.model}`,
           command: "claude",
           args: args.length > 0 ? args : ["--dangerously-skip-permissions"],
           cwd: resolvedCwd,
@@ -427,8 +431,7 @@ export default function PageV2() {
             agent: config.agent,
             permissions: config.permissions,
             channel: config.channel,
-            group:
-              config.agent === "orchestrator" ? "sprint" : "standalone",
+            group: config.agent === "orchestrator" ? "sprint" : "standalone",
           },
         }),
       });
@@ -533,8 +536,8 @@ export default function PageV2() {
                     "~",
                 );
               }
-            } catch {
-              /* ignore */
+            } catch (e) {
+              console.error("Failed to fetch config after setup wizard:", e);
             }
           })();
         }}
@@ -557,9 +560,7 @@ export default function PageV2() {
 
   // Find the focused session for terminal
   const focusedSession = sessions.find((s) => s.id === focusedId);
-  const nonRoomSessions = sessions.filter(
-    (s) => s.meta?.group !== "room",
-  );
+  const nonRoomSessions = sessions.filter((s) => s.meta?.group !== "room");
   const showTerminal = activeMode === "sessions" && !selectedRepo;
   const showGitView = activeMode === "sessions" && selectedRepo != null;
 
@@ -645,11 +646,7 @@ export default function PageV2() {
                     <TerminalPaneV2
                       sessionId={focusedId ?? nonRoomSessions[0].id}
                       visible={showTerminal}
-                      fontSize={
-                        focusedId
-                          ? zoomLevels[focusedId] ?? 13
-                          : 13
-                      }
+                      fontSize={focusedId ? (zoomLevels[focusedId] ?? 13) : 13}
                     />
                   </ErrorBoundary>
                 )}

@@ -1,9 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRightIcon, CheckIcon, SpinnerIcon, ClockIcon, CircleIcon, CloseIcon, FileIcon, ArrowRightIcon, ShieldIcon, ChevronDownIcon } from "@/components/ui/icons";
+import {
+  ChevronRightIcon,
+  CheckIcon,
+  SpinnerIcon,
+  ClockIcon,
+  CircleIcon,
+  CloseIcon,
+  FileIcon,
+  ArrowRightIcon,
+  ShieldIcon,
+  ChevronDownIcon,
+} from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
-import type { WorkflowStep, StepRichContent, ScanLogEntry, HandoffEntry } from "@/stores/workflows";
+import type {
+  WorkflowStep,
+  StepRichContent,
+  ScanLogEntry,
+  HandoffEntry,
+} from "@/stores/workflows";
 
 const STATUS_CONFIG: Record<
   WorkflowStep["status"],
@@ -52,6 +68,8 @@ const AGENT_COLORS: Record<string, string> = {
 
 export function StepCard({ step }: { step: WorkflowStep }) {
   const [expanded, setExpanded] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const config = STATUS_CONFIG[step.status];
   const Icon = config.icon;
 
@@ -81,12 +99,18 @@ export function StepCard({ step }: { step: WorkflowStep }) {
         disabled={!canExpand}
         className={cn(
           "flex items-center gap-2.5 w-full px-3 py-2.5 text-left transition-all",
-          canExpand && "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(124,131,247,0.04)] cursor-pointer",
+          canExpand &&
+            "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(124,131,247,0.04)] cursor-pointer",
           !canExpand && "cursor-default",
         )}
       >
         {/* Status icon */}
-        <div className={cn("shrink-0 w-5 h-5 flex items-center justify-center rounded-full", config.bg)}>
+        <div
+          className={cn(
+            "shrink-0 w-5 h-5 flex items-center justify-center rounded-full",
+            config.bg,
+          )}
+        >
           <Icon
             className={cn(
               "w-3 h-3",
@@ -121,10 +145,14 @@ export function StepCard({ step }: { step: WorkflowStep }) {
                 "inline-flex px-1.5 py-0.5 rounded text-[8px] font-mono",
                 step.status === "pending"
                   ? "bg-bg-elevated/50 text-text-tertiary"
-                  : (AGENT_COLORS[agent] ?? "bg-bg-elevated text-text-secondary"),
+                  : (AGENT_COLORS[agent] ??
+                      "bg-bg-elevated text-text-secondary"),
               )}
             >
-              {agent.replace("-worker", "").replace("-tester", "").replace("-reviewer", "")}
+              {agent
+                .replace("-worker", "")
+                .replace("-tester", "")
+                .replace("-reviewer", "")}
             </span>
           ))}
         </div>
@@ -135,11 +163,14 @@ export function StepCard({ step }: { step: WorkflowStep }) {
             {formatDuration(step.durationMs)}
           </span>
         )}
-        {step.status === "completed" && step.completedAt && step.startedAt && step.durationMs == null && (
-          <span className="text-2xs text-text-tertiary/60 font-mono shrink-0">
-            done
-          </span>
-        )}
+        {step.status === "completed" &&
+          step.completedAt &&
+          step.startedAt &&
+          step.durationMs == null && (
+            <span className="text-2xs text-text-tertiary/60 font-mono shrink-0">
+              done
+            </span>
+          )}
 
         {/* Expand chevron -- hidden for pending */}
         {canExpand && (
@@ -156,7 +187,10 @@ export function StepCard({ step }: { step: WorkflowStep }) {
       {expanded && canExpand && (
         <div className="px-3 pb-3 pt-0 border-t border-border-default/50">
           {step.richContent ? (
-            <RichContentRenderer content={step.richContent} stepStatus={step.status} />
+            <RichContentRenderer
+              content={step.richContent}
+              stepStatus={step.status}
+            />
           ) : step.details ? (
             <p className="text-xs text-text-secondary leading-relaxed mt-2 whitespace-pre-wrap">
               {step.details}
@@ -166,34 +200,68 @@ export function StepCard({ step }: { step: WorkflowStep }) {
           {step.action && (
             <div className="mt-3">
               <button
+                disabled={actionLoading}
                 onClick={() => {
-                  // Fetch home dir from config, then create orchestrator session
+                  const agent = step.agents[0] ?? "orchestrator";
+                  setActionLoading(true);
+                  setActionError(null);
                   void (async () => {
-                    let cwd = "~";
                     try {
-                      const cfgRes = await fetch("/api/config");
-                      if (cfgRes.ok) {
-                        const cfg = await cfgRes.json() as { homeDir: string; cwd: string };
-                        cwd = cfg.cwd;
+                      let cwd = "~";
+                      try {
+                        const cfgRes = await fetch("/api/config");
+                        if (cfgRes.ok) {
+                          const cfg = (await cfgRes.json()) as {
+                            homeDir: string;
+                            cwd: string;
+                          };
+                          cwd = cfg.cwd;
+                        }
+                      } catch (err: unknown) {
+                        console.error(
+                          "Failed to fetch config, using default cwd:",
+                          err,
+                        );
                       }
-                    } catch { /* use default */ }
-                    await fetch("/api/sessions", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        name: "orchestrator",
-                        command: "claude",
-                        args: ["--dangerously-skip-permissions", "--model", "opus", "--agent", "orchestrator"],
-                        cwd,
-                        meta: {
-                          model: "opus",
-                          agent: "orchestrator",
-                          permissions: "bypass",
-                          channel: "none",
-                          group: "sprint",
-                        },
-                      }),
-                    });
+                      const res = await fetch("/api/sessions", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          name: agent,
+                          command: "claude",
+                          args: [
+                            "--dangerously-skip-permissions",
+                            "--model",
+                            "opus",
+                            "--agent",
+                            agent,
+                          ],
+                          cwd,
+                          meta: {
+                            model: "opus",
+                            agent,
+                            permissions: "bypass",
+                            channel: "none",
+                            group: "sprint",
+                          },
+                        }),
+                      });
+                      if (!res.ok) {
+                        const text = await res.text();
+                        throw new Error(
+                          `Session creation failed (${String(res.status)}): ${text}`,
+                        );
+                      }
+                    } catch (err: unknown) {
+                      const message =
+                        err instanceof Error
+                          ? err.message
+                          : "Unknown error launching session";
+                      console.error("Step action failed:", err);
+                      setActionError(message);
+                    } finally {
+                      setActionLoading(false);
+                    }
                   })();
                 }}
                 className={cn(
@@ -201,13 +269,18 @@ export function StepCard({ step }: { step: WorkflowStep }) {
                   step.status === "waiting"
                     ? "px-5 py-2.5 text-xs bg-amber-500 text-black hover:bg-amber-400 animate-pulse shadow-lg shadow-amber-500/25"
                     : "px-3 py-1.5 text-xs bg-rooms text-black hover:bg-rooms/80",
+                  actionLoading && "opacity-60 cursor-not-allowed",
                 )}
               >
-                {step.action.label}
+                {actionLoading ? "Launching..." : step.action.label}
               </button>
+              {actionError && (
+                <p className="text-2xs text-error mt-1.5">{actionError}</p>
+              )}
               {step.status === "waiting" && (
                 <p className="text-2xs text-amber-400/60 mt-1.5">
-                  Creates an orchestrator session to handle this step.
+                  Launches a {step.agents[0] ?? "orchestrator"} session to
+                  handle this step.
                 </p>
               )}
             </div>
@@ -218,7 +291,13 @@ export function StepCard({ step }: { step: WorkflowStep }) {
   );
 }
 
-function RichContentRenderer({ content, stepStatus }: { content: StepRichContent; stepStatus: string }) {
+function RichContentRenderer({
+  content,
+  stepStatus,
+}: {
+  content: StepRichContent;
+  stepStatus: string;
+}) {
   switch (content.type) {
     case "pmo-scan":
       return <PmoScanContent content={content} />;
@@ -267,7 +346,10 @@ function PmoScanContent({ content }: { content: StepRichContent }) {
             Recent Scans
           </span>
           <div className="space-y-0.5 max-h-40 overflow-y-auto">
-            {(showFull ? content.scanEntries : content.scanEntries.slice(-3)).map((entry, i) => (
+            {(showFull
+              ? content.scanEntries
+              : content.scanEntries.slice(-3)
+            ).map((entry, i) => (
               <ScanEntry key={i} entry={entry} />
             ))}
           </div>
@@ -298,7 +380,8 @@ function PmoScanContent({ content }: { content: StepRichContent }) {
 }
 
 function ScanEntry({ entry }: { entry: ScanLogEntry }) {
-  const isReady = entry.status.includes("READY") && !entry.status.includes("NOT");
+  const isReady =
+    entry.status.includes("READY") && !entry.status.includes("NOT");
   const isNotReady = entry.status.includes("NOT READY");
 
   return (
@@ -306,7 +389,11 @@ function ScanEntry({ entry }: { entry: ScanLogEntry }) {
       <span
         className={cn(
           "shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full",
-          isReady ? "bg-sessions" : isNotReady ? "bg-error" : "bg-text-tertiary",
+          isReady
+            ? "bg-sessions"
+            : isNotReady
+              ? "bg-error"
+              : "bg-text-tertiary",
         )}
       />
       <div className="flex-1 min-w-0">
@@ -328,7 +415,9 @@ function ScanEntry({ entry }: { entry: ScanLogEntry }) {
           </span>
         </div>
         <p className="text-2xs text-text-secondary leading-relaxed mt-0.5 break-words">
-          {entry.detail.length > 200 ? entry.detail.slice(0, 200) + "..." : entry.detail}
+          {entry.detail.length > 200
+            ? entry.detail.slice(0, 200) + "..."
+            : entry.detail}
         </p>
       </div>
     </div>
@@ -346,7 +435,8 @@ function ReadinessContent({ content }: { content: StepRichContent }) {
           <StatusBadge status={content.readinessStatus} />
           {content.ticketsFound != null && content.ticketsFound > 0 && (
             <span className="text-xs text-text-secondary">
-              {content.ticketsFound} To Do tickets across {content.domains?.length ?? 0} domains
+              {content.ticketsFound} To Do tickets across{" "}
+              {content.domains?.length ?? 0} domains
             </span>
           )}
         </div>
@@ -455,7 +545,10 @@ function SprintSpecContent({ content }: { content: StepRichContent }) {
                 AGENT_COLORS[agent] ?? "bg-bg-elevated text-text-secondary",
               )}
             >
-              {agent.replace("-worker", "").replace("-tester", "").replace("-reviewer", "")}
+              {agent
+                .replace("-worker", "")
+                .replace("-tester", "")
+                .replace("-reviewer", "")}
             </span>
           ))}
         </div>
@@ -524,7 +617,9 @@ function ApprovalContent({ content }: { content: StepRichContent }) {
           <span className="flex items-center gap-1 text-sessions">
             <ShieldIcon className="w-2.5 h-2.5" /> {content.taskCount.safe} safe
           </span>
-          <span className="text-amber-400">{content.taskCount.medium} medium risk</span>
+          <span className="text-amber-400">
+            {content.taskCount.medium} medium risk
+          </span>
           <span className="text-error">{content.taskCount.high} high risk</span>
         </div>
       )}
@@ -533,7 +628,13 @@ function ApprovalContent({ content }: { content: StepRichContent }) {
 }
 
 // ---- Gate Content (Backend Build, Frontend Build, QA) ----
-function GateContent({ content, stepStatus }: { content: StepRichContent; stepStatus: string }) {
+function GateContent({
+  content,
+  stepStatus,
+}: {
+  content: StepRichContent;
+  stepStatus: string;
+}) {
   const [showHandoffs, setShowHandoffs] = useState(false);
 
   return (
@@ -542,7 +643,9 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
       {stepStatus === "completed" && (
         <div className="flex items-center gap-2 px-2 py-1.5 bg-sessions/10 rounded">
           <CheckIcon className="w-3.5 h-3.5 text-sessions shrink-0" />
-          <span className="text-xs text-sessions font-medium">All checks passed</span>
+          <span className="text-xs text-sessions font-medium">
+            All checks passed
+          </span>
         </div>
       )}
 
@@ -603,7 +706,12 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
             onClick={() => setShowHandoffs(!showHandoffs)}
             className="text-2xs text-rooms hover:text-rooms/80 transition-all flex items-center gap-1"
           >
-            <ChevronDownIcon className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
+            <ChevronDownIcon
+              className={cn(
+                "w-2.5 h-2.5 transition-transform",
+                !showHandoffs && "-rotate-90",
+              )}
+            />
             View Handoffs ({content.handoffs.length})
           </button>
           {showHandoffs && (
@@ -619,9 +727,13 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
       {/* Agent notes */}
       {content.agentNotes && (
         <div className="bg-bg-elevated/30 rounded p-2">
-          <span className="text-[8px] text-text-tertiary uppercase tracking-wider">Agent Notes</span>
+          <span className="text-[8px] text-text-tertiary uppercase tracking-wider">
+            Agent Notes
+          </span>
           <p className="text-2xs text-text-secondary mt-0.5 leading-relaxed">
-            {content.agentNotes.length > 300 ? content.agentNotes.slice(0, 300) + "..." : content.agentNotes}
+            {content.agentNotes.length > 300
+              ? content.agentNotes.slice(0, 300) + "..."
+              : content.agentNotes}
           </p>
         </div>
       )}
@@ -638,7 +750,9 @@ function DeployContent({ content }: { content: StepRichContent }) {
       {content.deploySummary && (
         <div className="flex items-center gap-2 px-2.5 py-2 bg-bg-elevated/30 rounded border border-border-default/50">
           <CheckIcon className="w-3.5 h-3.5 text-sessions shrink-0" />
-          <span className="text-xs text-text-secondary font-medium">{content.deploySummary}</span>
+          <span className="text-xs text-text-secondary font-medium">
+            {content.deploySummary}
+          </span>
         </div>
       )}
 
@@ -674,7 +788,12 @@ function DeployContent({ content }: { content: StepRichContent }) {
             onClick={() => setShowHandoffs(!showHandoffs)}
             className="text-2xs text-rooms hover:text-rooms/80 transition-all flex items-center gap-1"
           >
-            <ChevronDownIcon className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
+            <ChevronDownIcon
+              className={cn(
+                "w-2.5 h-2.5 transition-transform",
+                !showHandoffs && "-rotate-90",
+              )}
+            />
             All Handoffs ({content.handoffs.length})
           </button>
           {showHandoffs && (
@@ -738,11 +857,17 @@ function HealthBadge({ score }: { score: number }) {
 function HandoffCard({ handoff }: { handoff: HandoffEntry }) {
   return (
     <div className="flex items-center gap-2 px-2 py-1 bg-bg-elevated/20 rounded">
-      <span className="text-[8px] font-mono text-rooms shrink-0">{handoff.from}</span>
+      <span className="text-[8px] font-mono text-rooms shrink-0">
+        {handoff.from}
+      </span>
       <ArrowRightIcon className="w-2.5 h-2.5 text-text-tertiary shrink-0" />
-      <span className="text-[8px] font-mono text-rooms shrink-0">{handoff.to}</span>
+      <span className="text-[8px] font-mono text-rooms shrink-0">
+        {handoff.to}
+      </span>
       <span className="text-2xs text-text-tertiary truncate flex-1 min-w-0">
-        {handoff.detail.length > 80 ? handoff.detail.slice(0, 80) + "..." : handoff.detail}
+        {handoff.detail.length > 80
+          ? handoff.detail.slice(0, 80) + "..."
+          : handoff.detail}
       </span>
     </div>
   );
@@ -759,7 +884,10 @@ function MarkdownRenderer({ text }: { text: string }) {
         // H1
         if (trimmed.startsWith("# ")) {
           return (
-            <h3 key={i} className="text-xs font-semibold text-text-primary mt-2 mb-0.5">
+            <h3
+              key={i}
+              className="text-xs font-semibold text-text-primary mt-2 mb-0.5"
+            >
               {trimmed.slice(2)}
             </h3>
           );
@@ -767,7 +895,10 @@ function MarkdownRenderer({ text }: { text: string }) {
         // H2
         if (trimmed.startsWith("## ")) {
           return (
-            <h4 key={i} className="text-xs font-semibold text-text-secondary mt-1.5 mb-0.5">
+            <h4
+              key={i}
+              className="text-xs font-semibold text-text-secondary mt-1.5 mb-0.5"
+            >
               {trimmed.slice(3)}
             </h4>
           );
@@ -775,7 +906,10 @@ function MarkdownRenderer({ text }: { text: string }) {
         // H3
         if (trimmed.startsWith("### ")) {
           return (
-            <h5 key={i} className="text-2xs font-semibold text-text-secondary mt-1">
+            <h5
+              key={i}
+              className="text-2xs font-semibold text-text-secondary mt-1"
+            >
               {trimmed.slice(4)}
             </h5>
           );
@@ -785,14 +919,19 @@ function MarkdownRenderer({ text }: { text: string }) {
           return (
             <div key={i} className="flex items-start gap-1.5 pl-1">
               <span className="text-rooms mt-[3px] text-[6px]">&#x25CF;</span>
-              <span className="text-2xs text-text-tertiary leading-relaxed">{trimmed.slice(2)}</span>
+              <span className="text-2xs text-text-tertiary leading-relaxed">
+                {trimmed.slice(2)}
+              </span>
             </div>
           );
         }
         // Bold metadata lines like "Status: PLANNING"
         if (trimmed.match(/^[A-Z][a-z]+:/) || trimmed.match(/^\*\*.+\*\*/)) {
           return (
-            <p key={i} className="text-2xs text-text-secondary font-medium leading-relaxed">
+            <p
+              key={i}
+              className="text-2xs text-text-secondary font-medium leading-relaxed"
+            >
               {trimmed.replace(/\*\*/g, "")}
             </p>
           );
