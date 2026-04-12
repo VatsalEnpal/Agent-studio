@@ -87,8 +87,8 @@ export function SettingsAutomations() {
         if (templateRes.ok) {
           setTemplates((await templateRes.json()) as AutomationTemplate[]);
         }
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Caught error:", e);
       } finally {
         setLoading(false);
       }

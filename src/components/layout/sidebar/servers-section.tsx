@@ -17,8 +17,8 @@ export function ServersSection() {
       if (res.ok) {
         setDevServers((await res.json()) as DevServer[]);
       }
-    } catch {
-      // Best effort
+    } catch (e) {
+      console.error("Caught error:", e);
     }
   }, []);
 
@@ -27,8 +27,8 @@ export function ServersSection() {
       try {
         await fetch(`/api/servers/${pid}/stop`, { method: "POST" });
         setTimeout(() => void fetchDevServers(), 1500);
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     },
     [fetchDevServers],
@@ -47,8 +47,8 @@ export function ServersSection() {
         } else {
           setTimeout(() => void fetchDevServers(), 3000);
         }
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     },
     [fetchDevServers],
@@ -63,8 +63,8 @@ export function ServersSection() {
           body: JSON.stringify(server),
         });
         void fetchDevServers();
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     },
     [fetchDevServers],
@@ -77,8 +77,8 @@ export function ServersSection() {
           method: "DELETE",
         });
         void fetchDevServers();
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     },
     [fetchDevServers],

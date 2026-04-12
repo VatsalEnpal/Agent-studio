@@ -18,8 +18,8 @@ export function RecentSection() {
       if (res.ok) {
         setSessions((await res.json()) as PastSession[]);
       }
-    } catch {
-      // Best effort
+    } catch (e) {
+      console.error("Caught error:", e);
     }
   }, []);
 

@@ -17,8 +17,8 @@ export function RunningSection() {
       if (res.ok) {
         setProcesses((await res.json()) as DiscoveredProcess[]);
       }
-    } catch {
-      // Best effort
+    } catch (e) {
+      console.error("Caught error:", e);
     }
   }, []);
 
@@ -27,8 +27,8 @@ export function RunningSection() {
       try {
         await fetch(`/api/processes/${pid}/kill`, { method: "POST" });
         setTimeout(() => void fetchProcesses(), 1000);
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Caught error:", e);
       }
     },
     [fetchProcesses],

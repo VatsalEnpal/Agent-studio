@@ -34,8 +34,8 @@ function getCustomNames(): Record<string, string> {
   try {
     const raw = localStorage.getItem(RENAME_KEY);
     if (raw) return JSON.parse(raw) as Record<string, string>;
-  } catch {
-    /* ignore */
+  } catch (e) {
+    console.error("Caught error:", e);
   }
   return {};
 }
@@ -45,8 +45,8 @@ function setCustomName(sessionId: string, name: string): void {
   names[sessionId] = name;
   try {
     localStorage.setItem(RENAME_KEY, JSON.stringify(names));
-  } catch {
-    /* ignore */
+  } catch (e) {
+    console.error("Caught error:", e);
   }
 }
 
@@ -55,8 +55,8 @@ function clearCustomName(sessionId: string): void {
   delete names[sessionId];
   try {
     localStorage.setItem(RENAME_KEY, JSON.stringify(names));
-  } catch {
-    /* ignore */
+  } catch (e) {
+    console.error("Caught error:", e);
   }
 }
 

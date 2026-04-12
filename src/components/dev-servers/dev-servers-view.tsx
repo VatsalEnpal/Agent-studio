@@ -58,8 +58,8 @@ export function DevServersView() {
       if (res.ok) {
         setServers((await res.json()) as DevServer[]);
       }
-    } catch {
-      // best effort
+    } catch (e) {
+      console.error("Failed to fetch dev servers:", e);
     } finally {
       setLoading(false);
     }
@@ -78,8 +78,8 @@ export function DevServersView() {
         await fetch(`/api/dev-servers/${pid}/stop`, { method: "POST" });
         // Wait briefly then refresh
         setTimeout(() => void fetchServers(), 1500);
-      } catch {
-        // best effort
+      } catch (e) {
+        console.error("Failed to stop dev server:", e);
       } finally {
         setTimeout(() => setStoppingPid(null), 2000);
       }
@@ -102,9 +102,7 @@ export function DevServersView() {
       <div className="px-5 py-3 border-b border-border-default shrink-0 flex items-center gap-3">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
-          <h2 className="text-xs font-medium text-text-primary">
-            Dev Servers
-          </h2>
+          <h2 className="text-xs font-medium text-text-primary">Dev Servers</h2>
           <span className="text-label text-text-ghost">
             {servers.length} listening
           </span>
