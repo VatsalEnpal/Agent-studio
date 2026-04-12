@@ -21,7 +21,7 @@
       "issue_id": "ISSUE-2",
       "description": "Add a label or tooltip to the cost display in the top bar explaining what the dollar amount represents (e.g., 'Total cost today' or 'API spend').",
       "severity": "HIGH",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-4",
@@ -112,7 +112,7 @@
       "issue_id": "ISSUE-16",
       "description": "Elevate Sprints to be more discoverable - either as a top-level tab or prominently linked from the Teams view.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-17",
@@ -175,14 +175,15 @@
       "issue_id": "ISSUE-33",
       "description": "Add Reports tab to the navigation with the ability to view automation/sprint results.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "failed",
+      "failure_reason": "Reports tab crashes with React hooks error: 'Rendered fewer hooks than expected.' The entire view is non-functional."
     },
     {
       "id": "TASK-26",
       "issue_id": "ISSUE-36",
       "description": "Surface agent system configuration in the Teams/Memory empty states, not just in Settings. Guide users to set it up from the feature they're trying to use.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-27",
@@ -196,7 +197,8 @@
       "issue_id": "ISSUE-9",
       "description": "Dynamically read the git branch name for the About section instead of using a hardcoded/stale value.",
       "severity": "LOW",
-      "status": "fixed"
+      "status": "failed",
+      "failure_reason": "About section shows Branch as '...' placeholder instead of dynamic git branch name. API endpoint may not be returning data."
     },
     {
       "id": "TASK-29",
@@ -231,7 +233,7 @@
       "issue_id": "ISSUE-27",
       "description": "Ensure consistent labeling of nav tabs (both should show icons + text or just text).",
       "severity": "LOW",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-34",
@@ -245,21 +247,21 @@
       "issue_id": "ISSUE-34",
       "description": "Add loading indicators (amber line or skeleton) for async actions like View Changes, server start/stop.",
       "severity": "LOW",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-36",
       "issue_id": "ISSUE-35",
       "description": "Verify Geist Mono is loaded and used as the primary font throughout the app.",
       "severity": "LOW",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-37",
       "issue_id": "ISSUE-37",
       "description": "Clarify the SERVERS count in the sidebar header - show running/total (e.g., '1/3') instead of just running count.",
       "severity": "LOW",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-38",
@@ -294,28 +296,29 @@
       "issue_id": "ISSUE-42",
       "description": "Add text labels to the left icon sidebar navigation or ensure tooltips appear on hover for discoverability.",
       "severity": "LOW",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-43",
       "issue_id": "ISSUE-43",
       "description": "Add dynamic git branch info back to the About section, or include more system information to make the section useful.",
       "severity": "LOW",
-      "status": "fixed"
+      "status": "failed",
+      "failure_reason": "About section shows Branch, Commit, Node, Platform, Server PID, Uptime all as '...' placeholders. System info not populated."
     },
     {
       "id": "TASK-44",
       "issue_id": "ISSUE-44",
       "description": "Improve session name display in History sidebar -- names are heavily truncated at 200px sidebar width. Show more context or use full-width tooltips on hover.",
       "severity": "LOW",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-45",
       "issue_id": "ISSUE-45",
       "description": "Sessions empty state text and New Session button appear below Dev Servers table in the Servers sub-tab. The session empty state should be hidden when the Servers view is active.",
       "severity": "LOW",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-46",
@@ -325,11 +328,40 @@
       "status": "verified"
     }
   ],
+  "new_issues_run6": [
+    {
+      "id": "ISSUE-47",
+      "severity": "HIGH",
+      "description": "Reports view crashes with React hooks error. The entire Reports tab is non-functional.",
+      "related_task": "TASK-25"
+    },
+    {
+      "id": "ISSUE-48",
+      "severity": "MEDIUM",
+      "description": "About section shows '...' placeholders for most system info fields (Branch, Commit, Node, Platform, PID, Uptime).",
+      "related_task": "TASK-28,TASK-43"
+    },
+    {
+      "id": "ISSUE-49",
+      "severity": "LOW",
+      "description": "Border radius exceeds 4px max on 17+ elements (sidebar icons 6-7px, search inputs 6px, tab pills 6px)."
+    },
+    {
+      "id": "ISSUE-50",
+      "severity": "LOW",
+      "description": "Session names in History sidebar still heavily truncated at 200px sidebar width."
+    },
+    {
+      "id": "ISSUE-51",
+      "severity": "LOW",
+      "description": "Settings > Projects (Workspace) section appears nearly empty with no visible content."
+    }
+  ],
   "stats": {
     "total": 46,
     "pending": 0,
-    "fixed": 26,
-    "verified": 21,
-    "failed_verification": 0
+    "fixed": 12,
+    "verified": 31,
+    "failed_verification": 3
   }
 }
