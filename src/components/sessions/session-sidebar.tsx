@@ -368,6 +368,16 @@ export function SessionSidebar({
     });
   }, [pausedSessions, searchQuery, pinnedIds, statusFilter]);
 
+  // Group running sessions by sprint team vs standalone
+  const sprintRunning = useMemo(
+    () => filteredRunning.filter((s) => s.meta?.group === "sprint"),
+    [filteredRunning],
+  );
+  const standaloneRunning = useMemo(
+    () => filteredRunning.filter((s) => s.meta?.group !== "sprint"),
+    [filteredRunning],
+  );
+
   return (
     <div className="flex flex-col h-full">
       {/* Segmented tab nav */}
@@ -440,34 +450,57 @@ export function SessionSidebar({
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {activeTab === "sessions" && (
           <>
-            {/* RUNNING */}
-            {(statusFilter === "all" || statusFilter === "active") && (
-              <SectionHeader label="Running" count={filteredRunning.length} />
-            )}
             {statusFilter !== "idle" && (
-              <div className="px-1 pb-2 space-y-0.5">
-                {filteredRunning.map((session) => (
-                  <SessionCard
-                    key={session.id}
-                    session={session}
-                    selected={session.id === focusedId}
-                    onSelect={() => setFocused(session.id)}
-                    onKill={() => onKillSession(session.id)}
-                    pinned={pinnedIds.has(session.id)}
-                    onTogglePin={() => togglePin(session.id)}
-                  />
-                ))}
-                {filteredRunning.length === 0 && (
-                  <div className="px-3 py-4 text-center">
-                    <p className="text-xs text-text-secondary">
-                      No running sessions
-                    </p>
-                    <p className="text-xs text-text-tertiary mt-1">
-                      Click &ldquo;New Session&rdquo; below to get started
-                    </p>
-                  </div>
+              <>
+                {/* SPRINT TEAM — shown when any sprint-group sessions exist */}
+                {sprintRunning.length > 0 && (
+                  <>
+                    <SectionHeader label="Sprint Team" count={sprintRunning.length} />
+                    <div className="px-1 pb-2 space-y-0.5">
+                      {sprintRunning.map((session) => (
+                        <SessionCard
+                          key={session.id}
+                          session={session}
+                          selected={session.id === focusedId}
+                          onSelect={() => setFocused(session.id)}
+                          onKill={() => onKillSession(session.id)}
+                          pinned={pinnedIds.has(session.id)}
+                          onTogglePin={() => togglePin(session.id)}
+                        />
+                      ))}
+                    </div>
+                  </>
                 )}
-              </div>
+
+                {/* STANDALONE — shown when there are sessions, or as the default empty state */}
+                <SectionHeader
+                  label={sprintRunning.length > 0 ? "Standalone" : "Running"}
+                  count={standaloneRunning.length}
+                />
+                <div className="px-1 pb-2 space-y-0.5">
+                  {standaloneRunning.map((session) => (
+                    <SessionCard
+                      key={session.id}
+                      session={session}
+                      selected={session.id === focusedId}
+                      onSelect={() => setFocused(session.id)}
+                      onKill={() => onKillSession(session.id)}
+                      pinned={pinnedIds.has(session.id)}
+                      onTogglePin={() => togglePin(session.id)}
+                    />
+                  ))}
+                  {filteredRunning.length === 0 && (
+                    <div className="px-3 py-4 text-center">
+                      <p className="text-xs text-text-secondary">
+                        No running sessions
+                      </p>
+                      <p className="text-xs text-text-tertiary mt-1">
+                        Click &ldquo;New Session&rdquo; below to get started
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
             {/* PAUSED */}
