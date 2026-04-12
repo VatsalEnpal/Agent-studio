@@ -72,14 +72,48 @@ function relativeTime(ts: number): string {
 
 function readableName(session: Session): string {
   const name = session.name;
+  const agent = session.meta?.agent;
+  const model = session.meta?.model;
+  const basename = session.cwd.split("/").filter(Boolean).pop() ?? "";
+
+  // If the name is a generic model/tool name, build a better one
   const genericNames = new Set([
     "claude", "claude-opus", "claude-sonnet", "claude-haiku",
-    "opus", "sonnet", "haiku",
+    "opus", "sonnet", "haiku", "session", "new-session",
+    "continue-last",
   ]);
-  if (genericNames.has(name.toLowerCase())) {
-    const basename = session.cwd.split("/").filter(Boolean).pop();
+
+  const isGeneric = genericNames.has(name.toLowerCase());
+
+  if (isGeneric) {
+    // Best: agent + project
+    if (agent && agent !== "none" && basename) {
+      return `${agent} \u00b7 ${basename}`;
+    }
+    // Good: just the project directory
     if (basename) return basename;
   }
+
+  // If name equals the agent name exactly and we have a project, enrich it
+  if (agent && name === agent && basename) {
+    return `${agent} \u00b7 ${basename}`;
+  }
+
+  // If name matches a resume pattern, make it clearer
+  const resumeMatch = name.match(/^resume-([a-f0-9]{8})$/);
+  if (resumeMatch) {
+    if (agent && agent !== "none" && agent !== "resumed") {
+      return `${agent} (resumed)`;
+    }
+    if (basename) return `${basename} (resumed)`;
+    return `session ${resumeMatch[1]}`;
+  }
+
+  // If the name is just a model name, try to build something better
+  if (model && name.toLowerCase() === model.toLowerCase()) {
+    if (basename) return basename;
+  }
+
   return name;
 }
 

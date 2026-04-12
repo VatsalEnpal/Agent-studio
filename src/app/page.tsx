@@ -425,11 +425,16 @@ export default function Home() {
         args.push("--agent", config.agent);
       }
 
-      // Auto-name: use directory basename instead of generic "claude-opus"
+      // Auto-name: combine agent + project directory for distinguishable names
       const cwdBasename = resolvedCwd.split("/").filter(Boolean).pop() ?? "session";
-      const autoName = config.agent !== "none"
-        ? config.agent
-        : config.name || cwdBasename;
+      let autoName: string;
+      if (config.name) {
+        autoName = config.name;
+      } else if (config.agent !== "none") {
+        autoName = `${config.agent} \u00b7 ${cwdBasename}`;
+      } else {
+        autoName = cwdBasename;
+      }
 
       const res = await fetch("/api/sessions", {
         method: "POST",
