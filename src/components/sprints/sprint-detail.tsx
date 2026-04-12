@@ -197,6 +197,22 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
     }
   }, [sprint.id, addToast]);
 
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+
+  const handleCancel = useCallback(async () => {
+    setCancelling(true);
+    try {
+      await fetch(`/api/sprints/${sprint.id}/cancel`, { method: "POST" });
+      addToast("Sprint cancelled", "success");
+      setConfirmingCancel(false);
+    } catch {
+      addToast("Failed to cancel sprint", "error");
+    } finally {
+      setCancelling(false);
+    }
+  }, [sprint.id, addToast]);
+
   const handleViewSpec = useCallback(async () => {
     if (specPanelOpen) {
       setSpecPanel(false);
@@ -272,6 +288,33 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
               >
                 Resume
               </button>
+            )}
+            {(sprint.status === "in_progress" || sprint.status === "paused" || sprint.status === "launching") && (
+              confirmingCancel ? (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-text-tertiary">Cancel sprint?</span>
+                  <button
+                    onClick={() => void handleCancel()}
+                    disabled={cancelling}
+                    className="px-2 py-0.5 text-xs font-medium text-error bg-error/10 rounded hover:bg-error/20 active:scale-[0.98] transition-all disabled:opacity-50"
+                  >
+                    {cancelling ? "Cancelling..." : "Confirm"}
+                  </button>
+                  <button
+                    onClick={() => setConfirmingCancel(false)}
+                    className="px-1.5 py-0.5 text-xs text-text-ghost hover:text-text-secondary transition-all"
+                  >
+                    No
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmingCancel(true)}
+                  className="px-2 py-0.5 text-xs font-medium text-error/70 hover:text-error hover:bg-error/10 rounded active:scale-[0.98] transition-all"
+                >
+                  Cancel
+                </button>
+              )
             )}
             <button
               onClick={handleViewSpec}
