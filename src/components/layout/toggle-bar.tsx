@@ -19,7 +19,7 @@ const ALL_TABS: TabConfig[] = [
   { id: "teams", label: "Teams", icon: UsersIcon },
   { id: "memory", label: "Memory", icon: BrainIcon },
   { id: "reports", label: "Reports", icon: FileIcon },
-  { id: "settings", label: "Gear", icon: SettingsIcon },
+  { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
 
 /**
@@ -102,15 +102,28 @@ function PeakHoursIndicator() {
 }
 
 function SystemWidget() {
-  const [stats, setStats] = useState<{ cpu: number; memUsed: number; memTotal: number } | null>(null);
+  const [stats, setStats] = useState<{
+    cpu: number;
+    memUsed: number;
+    memTotal: number;
+    memPressure: "normal" | "warn" | "critical";
+  } | null>(null);
   const setActiveMode = useUIStore((s) => s.setActiveMode);
 
   useEffect(() => {
     const fetchStats = () => {
       fetch("/api/system/stats")
         .then((r) => r.json())
-        .then((data: { cpu: { usage: number }; memory: { used: number; total: number } }) => {
-          setStats({ cpu: data.cpu.usage, memUsed: data.memory.used, memTotal: data.memory.total });
+        .then((data: {
+          cpu: { usage: number };
+          memory: { used: number; total: number; pressure?: "normal" | "warn" | "critical" };
+        }) => {
+          setStats({
+            cpu: data.cpu.usage,
+            memUsed: data.memory.used,
+            memTotal: data.memory.total,
+            memPressure: data.memory.pressure ?? "normal",
+          });
         })
         .catch(() => { /* ignore */ });
     };
@@ -121,17 +134,24 @@ function SystemWidget() {
 
   if (!stats) return null;
 
+  const memColor =
+    stats.memPressure === "critical"
+      ? "text-error"
+      : stats.memPressure === "warn"
+        ? "text-sprints"
+        : "text-text-tertiary";
+
   return (
     <button
       onClick={() => setActiveMode("settings")}
       className="flex items-center gap-1.5 px-2 py-0.5 rounded text-2xs font-mono text-text-tertiary hover:text-text-secondary transition-all"
-      title="System monitor"
+      title={`CPU ${stats.cpu.toFixed(0)}% / Memory ${stats.memUsed.toFixed(1)}G of ${stats.memTotal.toFixed(0)}G (app memory, excludes OS cache)`}
     >
       <CpuIcon className="w-3 h-3" />
       <span>{stats.cpu.toFixed(0)}%</span>
       <span className="text-border-default">/</span>
-      <MemoryChipIcon className="w-3 h-3" />
-      <span>{stats.memUsed.toFixed(1)}G</span>
+      <MemoryChipIcon className={cn("w-3 h-3", memColor)} />
+      <span className={memColor}>{stats.memUsed.toFixed(1)}G</span>
     </button>
   );
 }
