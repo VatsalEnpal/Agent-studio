@@ -14,7 +14,12 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { WorkflowStep, StepRichContent, ScanLogEntry, HandoffEntry } from "@/stores/workflows";
+import type {
+  WorkflowStep,
+  StepRichContent,
+  ScanLogEntry,
+  HandoffEntry,
+} from "@/stores/workflows";
 
 const STATUS_CONFIG: Record<
   WorkflowStep["status"],
@@ -63,6 +68,8 @@ const AGENT_COLORS: Record<string, string> = {
 
 export function StepCard({ step }: { step: WorkflowStep }) {
   const [expanded, setExpanded] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const config = STATUS_CONFIG[step.status];
   const Icon = config.icon;
 
@@ -97,7 +104,12 @@ export function StepCard({ step }: { step: WorkflowStep }) {
         )}
       >
         {/* Status icon */}
-        <div className={cn("shrink-0 w-5 h-5 flex items-center justify-center rounded-full", config.bg)}>
+        <div
+          className={cn(
+            "shrink-0 w-5 h-5 flex items-center justify-center rounded-full",
+            config.bg,
+          )}
+        >
           <Icon
             className={cn(
               "w-3 h-3",
@@ -132,10 +144,14 @@ export function StepCard({ step }: { step: WorkflowStep }) {
                 "inline-flex px-1.5 py-0.5 rounded text-[8px] font-mono",
                 step.status === "pending"
                   ? "bg-console-faint/50 text-console-dim"
-                  : (AGENT_COLORS[agent] ?? "bg-console-faint text-console-muted"),
+                  : (AGENT_COLORS[agent] ??
+                      "bg-console-faint text-console-muted"),
               )}
             >
-              {agent.replace("-worker", "").replace("-tester", "").replace("-reviewer", "")}
+              {agent
+                .replace("-worker", "")
+                .replace("-tester", "")
+                .replace("-reviewer", "")}
             </span>
           ))}
         </div>
@@ -146,11 +162,14 @@ export function StepCard({ step }: { step: WorkflowStep }) {
             {formatDuration(step.durationMs)}
           </span>
         )}
-        {step.status === "completed" && step.completedAt && step.startedAt && step.durationMs == null && (
-          <span className="text-[9px] text-console-dim/60 font-mono shrink-0">
-            done
-          </span>
-        )}
+        {step.status === "completed" &&
+          step.completedAt &&
+          step.startedAt &&
+          step.durationMs == null && (
+            <span className="text-[9px] text-console-dim/60 font-mono shrink-0">
+              done
+            </span>
+          )}
 
         {/* Expand chevron -- hidden for pending */}
         {canExpand && (
@@ -167,7 +186,10 @@ export function StepCard({ step }: { step: WorkflowStep }) {
       {expanded && canExpand && (
         <div className="px-3 pb-3 pt-0 border-t border-console-border/50">
           {step.richContent ? (
-            <RichContentRenderer content={step.richContent} stepStatus={step.status} />
+            <RichContentRenderer
+              content={step.richContent}
+              stepStatus={step.status}
+            />
           ) : step.details ? (
             <p className="text-[10px] text-console-muted leading-relaxed mt-2 whitespace-pre-wrap">
               {step.details}
@@ -177,48 +199,85 @@ export function StepCard({ step }: { step: WorkflowStep }) {
           {step.action && (
             <div className="mt-3">
               <button
+                disabled={actionLoading}
                 onClick={() => {
-                  // Fetch home dir from config, then create orchestrator session
+                  // Launch a session with the step's assigned agent(s)
                   void (async () => {
-                    let cwd = "~";
+                    setActionLoading(true);
+                    setActionError(null);
                     try {
-                      const cfgRes = await fetch("/api/config");
-                      if (cfgRes.ok) {
-                        const cfg = await cfgRes.json() as { homeDir: string; cwd: string };
-                        cwd = cfg.cwd;
+                      let cwd = "~";
+                      try {
+                        const cfgRes = await fetch("/api/config");
+                        if (cfgRes.ok) {
+                          const cfg = (await cfgRes.json()) as {
+                            homeDir: string;
+                            cwd: string;
+                          };
+                          cwd = cfg.cwd;
+                        }
+                      } catch (e) {
+                        console.error("Failed to fetch config for cwd:", e);
                       }
-                    } catch { /* use default */ }
-                    await fetch("/api/sessions", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        name: "orchestrator",
-                        command: "claude",
-                        args: ["--dangerously-skip-permissions", "--model", "opus", "--agent", "orchestrator"],
-                        cwd,
-                        meta: {
-                          model: "opus",
-                          agent: "orchestrator",
-                          permissions: "bypass",
-                          channel: "none",
-                          group: "sprint",
-                        },
-                      }),
-                    });
+                      // Use step's primary agent, fallback to orchestrator
+                      const primaryAgent = step.agents[0] ?? "orchestrator";
+                      const res = await fetch("/api/sessions", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          name: primaryAgent,
+                          command: "claude",
+                          args: [
+                            "--dangerously-skip-permissions",
+                            "--model",
+                            "opus",
+                            "--agent",
+                            primaryAgent,
+                          ],
+                          cwd,
+                          meta: {
+                            model: "opus",
+                            agent: primaryAgent,
+                            permissions: "bypass",
+                            channel: "none",
+                            group: "sprint",
+                          },
+                        }),
+                      });
+                      if (!res.ok) {
+                        throw new Error(
+                          `Session creation failed (${res.status})`,
+                        );
+                      }
+                    } catch (err) {
+                      const msg =
+                        err instanceof Error ? err.message : "Action failed";
+                      setActionError(msg);
+                      console.error("Step action failed:", err);
+                    } finally {
+                      setActionLoading(false);
+                    }
                   })();
                 }}
                 className={cn(
                   "rounded font-medium transition-all",
+                  actionLoading && "opacity-50 cursor-not-allowed",
                   step.status === "waiting"
                     ? "px-5 py-2.5 text-xs bg-amber-500 text-black hover:bg-amber-400 animate-pulse shadow-lg shadow-amber-500/25"
                     : "px-3 py-1.5 text-[10px] bg-console-accent text-black hover:bg-console-accent/80",
                 )}
               >
-                {step.action.label}
+                {actionLoading ? "Launching..." : step.action.label}
               </button>
-              {step.status === "waiting" && (
+              {actionError && (
+                <p className="text-[9px] text-console-error mt-1">
+                  {actionError}
+                </p>
+              )}
+              {step.status === "waiting" && !actionError && (
                 <p className="text-[9px] text-amber-400/60 mt-1.5">
-                  Creates an orchestrator session to handle this step.
+                  Launches {step.agents[0] ?? "orchestrator"} to handle this
+                  step.
                 </p>
               )}
             </div>
@@ -229,7 +288,13 @@ export function StepCard({ step }: { step: WorkflowStep }) {
   );
 }
 
-function RichContentRenderer({ content, stepStatus }: { content: StepRichContent; stepStatus: string }) {
+function RichContentRenderer({
+  content,
+  stepStatus,
+}: {
+  content: StepRichContent;
+  stepStatus: string;
+}) {
   switch (content.type) {
     case "pmo-scan":
       return <PmoScanContent content={content} />;
@@ -278,7 +343,10 @@ function PmoScanContent({ content }: { content: StepRichContent }) {
             Recent Scans
           </span>
           <div className="space-y-0.5 max-h-40 overflow-y-auto">
-            {(showFull ? content.scanEntries : content.scanEntries.slice(-3)).map((entry, i) => (
+            {(showFull
+              ? content.scanEntries
+              : content.scanEntries.slice(-3)
+            ).map((entry, i) => (
               <ScanEntry key={i} entry={entry} />
             ))}
           </div>
@@ -309,7 +377,8 @@ function PmoScanContent({ content }: { content: StepRichContent }) {
 }
 
 function ScanEntry({ entry }: { entry: ScanLogEntry }) {
-  const isReady = entry.status.includes("READY") && !entry.status.includes("NOT");
+  const isReady =
+    entry.status.includes("READY") && !entry.status.includes("NOT");
   const isNotReady = entry.status.includes("NOT READY");
 
   return (
@@ -317,7 +386,11 @@ function ScanEntry({ entry }: { entry: ScanLogEntry }) {
       <span
         className={cn(
           "shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full",
-          isReady ? "bg-console-success" : isNotReady ? "bg-console-error" : "bg-console-dim",
+          isReady
+            ? "bg-console-success"
+            : isNotReady
+              ? "bg-console-error"
+              : "bg-console-dim",
         )}
       />
       <div className="flex-1 min-w-0">
@@ -339,7 +412,9 @@ function ScanEntry({ entry }: { entry: ScanLogEntry }) {
           </span>
         </div>
         <p className="text-[9px] text-console-muted leading-relaxed mt-0.5 break-words">
-          {entry.detail.length > 200 ? entry.detail.slice(0, 200) + "..." : entry.detail}
+          {entry.detail.length > 200
+            ? entry.detail.slice(0, 200) + "..."
+            : entry.detail}
         </p>
       </div>
     </div>
@@ -357,7 +432,8 @@ function ReadinessContent({ content }: { content: StepRichContent }) {
           <StatusBadge status={content.readinessStatus} />
           {content.ticketsFound != null && content.ticketsFound > 0 && (
             <span className="text-[10px] text-console-muted">
-              {content.ticketsFound} To Do tickets across {content.domains?.length ?? 0} domains
+              {content.ticketsFound} To Do tickets across{" "}
+              {content.domains?.length ?? 0} domains
             </span>
           )}
         </div>
@@ -466,7 +542,10 @@ function SprintSpecContent({ content }: { content: StepRichContent }) {
                 AGENT_COLORS[agent] ?? "bg-console-faint text-console-muted",
               )}
             >
-              {agent.replace("-worker", "").replace("-tester", "").replace("-reviewer", "")}
+              {agent
+                .replace("-worker", "")
+                .replace("-tester", "")
+                .replace("-reviewer", "")}
             </span>
           ))}
         </div>
@@ -535,8 +614,12 @@ function ApprovalContent({ content }: { content: StepRichContent }) {
           <span className="flex items-center gap-1 text-console-success">
             <Shield className="w-2.5 h-2.5" /> {content.taskCount.safe} safe
           </span>
-          <span className="text-amber-400">{content.taskCount.medium} medium risk</span>
-          <span className="text-console-error">{content.taskCount.high} high risk</span>
+          <span className="text-amber-400">
+            {content.taskCount.medium} medium risk
+          </span>
+          <span className="text-console-error">
+            {content.taskCount.high} high risk
+          </span>
         </div>
       )}
     </div>
@@ -544,7 +627,13 @@ function ApprovalContent({ content }: { content: StepRichContent }) {
 }
 
 // ---- Gate Content (Backend Build, Frontend Build, QA) ----
-function GateContent({ content, stepStatus }: { content: StepRichContent; stepStatus: string }) {
+function GateContent({
+  content,
+  stepStatus,
+}: {
+  content: StepRichContent;
+  stepStatus: string;
+}) {
   const [showHandoffs, setShowHandoffs] = useState(false);
 
   return (
@@ -553,7 +642,9 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
       {stepStatus === "completed" && (
         <div className="flex items-center gap-2 px-2 py-1.5 bg-console-success/10 rounded">
           <Check className="w-3.5 h-3.5 text-console-success shrink-0" />
-          <span className="text-[10px] text-console-success font-medium">All checks passed</span>
+          <span className="text-[10px] text-console-success font-medium">
+            All checks passed
+          </span>
         </div>
       )}
 
@@ -614,7 +705,12 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
             onClick={() => setShowHandoffs(!showHandoffs)}
             className="text-[9px] text-console-accent hover:text-console-accent/80 transition-colors flex items-center gap-1"
           >
-            <ChevronDown className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
+            <ChevronDown
+              className={cn(
+                "w-2.5 h-2.5 transition-transform",
+                !showHandoffs && "-rotate-90",
+              )}
+            />
             View Handoffs ({content.handoffs.length})
           </button>
           {showHandoffs && (
@@ -630,9 +726,13 @@ function GateContent({ content, stepStatus }: { content: StepRichContent; stepSt
       {/* Agent notes */}
       {content.agentNotes && (
         <div className="bg-console-faint/30 rounded p-2">
-          <span className="text-[8px] text-console-dim uppercase tracking-wider">Agent Notes</span>
+          <span className="text-[8px] text-console-dim uppercase tracking-wider">
+            Agent Notes
+          </span>
           <p className="text-[9px] text-console-muted mt-0.5 leading-relaxed">
-            {content.agentNotes.length > 300 ? content.agentNotes.slice(0, 300) + "..." : content.agentNotes}
+            {content.agentNotes.length > 300
+              ? content.agentNotes.slice(0, 300) + "..."
+              : content.agentNotes}
           </p>
         </div>
       )}
@@ -649,7 +749,9 @@ function DeployContent({ content }: { content: StepRichContent }) {
       {content.deploySummary && (
         <div className="flex items-center gap-2 px-2.5 py-2 bg-console-faint/30 rounded border border-console-border/50">
           <Check className="w-3.5 h-3.5 text-console-success shrink-0" />
-          <span className="text-[10px] text-console-muted font-medium">{content.deploySummary}</span>
+          <span className="text-[10px] text-console-muted font-medium">
+            {content.deploySummary}
+          </span>
         </div>
       )}
 
@@ -685,7 +787,12 @@ function DeployContent({ content }: { content: StepRichContent }) {
             onClick={() => setShowHandoffs(!showHandoffs)}
             className="text-[9px] text-console-accent hover:text-console-accent/80 transition-colors flex items-center gap-1"
           >
-            <ChevronDown className={cn("w-2.5 h-2.5 transition-transform", !showHandoffs && "-rotate-90")} />
+            <ChevronDown
+              className={cn(
+                "w-2.5 h-2.5 transition-transform",
+                !showHandoffs && "-rotate-90",
+              )}
+            />
             All Handoffs ({content.handoffs.length})
           </button>
           {showHandoffs && (
@@ -721,7 +828,11 @@ function StatusBadge({ status }: { status: string }) {
       <span
         className={cn(
           "w-1.5 h-1.5 rounded-full",
-          isReady ? "bg-console-success" : isNotReady ? "bg-console-error" : "bg-amber-400",
+          isReady
+            ? "bg-console-success"
+            : isNotReady
+              ? "bg-console-error"
+              : "bg-amber-400",
         )}
       />
       {status}
@@ -749,11 +860,17 @@ function HealthBadge({ score }: { score: number }) {
 function HandoffCard({ handoff }: { handoff: HandoffEntry }) {
   return (
     <div className="flex items-center gap-2 px-2 py-1 bg-console-faint/20 rounded">
-      <span className="text-[8px] font-mono text-console-accent shrink-0">{handoff.from}</span>
+      <span className="text-[8px] font-mono text-console-accent shrink-0">
+        {handoff.from}
+      </span>
       <ArrowRight className="w-2.5 h-2.5 text-console-dim shrink-0" />
-      <span className="text-[8px] font-mono text-console-accent shrink-0">{handoff.to}</span>
+      <span className="text-[8px] font-mono text-console-accent shrink-0">
+        {handoff.to}
+      </span>
       <span className="text-[9px] text-console-dim truncate flex-1 min-w-0">
-        {handoff.detail.length > 80 ? handoff.detail.slice(0, 80) + "..." : handoff.detail}
+        {handoff.detail.length > 80
+          ? handoff.detail.slice(0, 80) + "..."
+          : handoff.detail}
       </span>
     </div>
   );
@@ -770,7 +887,10 @@ function MarkdownRenderer({ text }: { text: string }) {
         // H1
         if (trimmed.startsWith("# ")) {
           return (
-            <h3 key={i} className="text-[11px] font-semibold text-console-text mt-2 mb-0.5">
+            <h3
+              key={i}
+              className="text-[11px] font-semibold text-console-text mt-2 mb-0.5"
+            >
               {trimmed.slice(2)}
             </h3>
           );
@@ -778,7 +898,10 @@ function MarkdownRenderer({ text }: { text: string }) {
         // H2
         if (trimmed.startsWith("## ")) {
           return (
-            <h4 key={i} className="text-[10px] font-semibold text-console-muted mt-1.5 mb-0.5">
+            <h4
+              key={i}
+              className="text-[10px] font-semibold text-console-muted mt-1.5 mb-0.5"
+            >
               {trimmed.slice(3)}
             </h4>
           );
@@ -786,7 +909,10 @@ function MarkdownRenderer({ text }: { text: string }) {
         // H3
         if (trimmed.startsWith("### ")) {
           return (
-            <h5 key={i} className="text-[9px] font-semibold text-console-muted mt-1">
+            <h5
+              key={i}
+              className="text-[9px] font-semibold text-console-muted mt-1"
+            >
               {trimmed.slice(4)}
             </h5>
           );
@@ -795,15 +921,22 @@ function MarkdownRenderer({ text }: { text: string }) {
         if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
           return (
             <div key={i} className="flex items-start gap-1.5 pl-1">
-              <span className="text-console-accent mt-[3px] text-[6px]">&#x25CF;</span>
-              <span className="text-[9px] text-console-dim leading-relaxed">{trimmed.slice(2)}</span>
+              <span className="text-console-accent mt-[3px] text-[6px]">
+                &#x25CF;
+              </span>
+              <span className="text-[9px] text-console-dim leading-relaxed">
+                {trimmed.slice(2)}
+              </span>
             </div>
           );
         }
         // Bold metadata lines like "Status: PLANNING"
         if (trimmed.match(/^[A-Z][a-z]+:/) || trimmed.match(/^\*\*.+\*\*/)) {
           return (
-            <p key={i} className="text-[9px] text-console-muted font-medium leading-relaxed">
+            <p
+              key={i}
+              className="text-[9px] text-console-muted font-medium leading-relaxed"
+            >
               {trimmed.replace(/\*\*/g, "")}
             </p>
           );
