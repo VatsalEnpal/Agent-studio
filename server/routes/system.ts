@@ -169,6 +169,44 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
       const freeMem = os.freemem();
       const usedMem = totalMem - freeMem;
 
+      // On macOS, os.freemem() only reports "free" pages, not "available"
+      // memory. The OS keeps most RAM as disk cache, so raw usage looks ~99%.
+      // Use vm_stat to compute app memory (active + wired) for a realistic
+      // "memory pressure" figure that won't alarm users.
+      let pressureUsedGB = Math.round((usedMem / (1024 * 1024 * 1024)) * 100) / 100;
+      let pressurePercent = Math.round((usedMem / totalMem) * 1000) / 10;
+      let pressureLevel: "normal" | "warn" | "critical" = "normal";
+
+      if (process.platform === "darwin") {
+        try {
+          const { stdout: vmOutput } = await execAsync("vm_stat", { encoding: "utf-8", timeout: 3000 });
+          const pageSize = 16384; // default on Apple Silicon; fallback
+          const pageSizeMatch = vmOutput.match(/page size of (\d+) bytes/);
+          const ps = pageSizeMatch ? parseInt(pageSizeMatch[1]!, 10) : pageSize;
+
+          const getPages = (label: string): number => {
+            const m = vmOutput.match(new RegExp(`${label}:\\s+(\\d+)`));
+            return m ? parseInt(m[1]!, 10) : 0;
+          };
+
+          const activePages = getPages("Pages active");
+          const wiredPages = getPages("Pages wired down");
+          const compressedPages = getPages("Pages occupied by compressor");
+
+          const appMemBytes = (activePages + wiredPages + compressedPages) * ps;
+          pressureUsedGB = Math.round((appMemBytes / (1024 * 1024 * 1024)) * 100) / 100;
+          pressurePercent = Math.round((appMemBytes / totalMem) * 1000) / 10;
+
+          if (pressurePercent > 80) pressureLevel = "critical";
+          else if (pressurePercent > 60) pressureLevel = "warn";
+        } catch {
+          // Fall back to raw os.freemem values
+        }
+      } else {
+        if (pressurePercent > 90) pressureLevel = "critical";
+        else if (pressurePercent > 75) pressureLevel = "warn";
+      }
+
       let diskUsed = 0;
       let diskTotal = 0;
       let diskPercentage = 0;
@@ -200,9 +238,10 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
       res.json({
         cpu: { usage: Math.round(cpuUsage * 10) / 10, cores: cpus.length },
         memory: {
-          used: Math.round((usedMem / (1024 * 1024 * 1024)) * 100) / 100,
+          used: pressureUsedGB,
           total: Math.round((totalMem / (1024 * 1024 * 1024)) * 100) / 100,
-          percentage: Math.round((usedMem / totalMem) * 1000) / 10,
+          percentage: pressurePercent,
+          pressure: pressureLevel,
         },
         disk: {
           used: Math.round(diskUsed * 100) / 100,

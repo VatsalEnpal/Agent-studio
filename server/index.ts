@@ -2518,7 +2518,7 @@ Choose the schedule and model based on the task:
   });
 
   // --- System Stats API ---
-  app.get("/api/system/stats", (_req, res) => {
+  app.get("/api/system/stats", async (_req, res) => {
     try {
       // CPU usage: calculate from os.cpus()
       const cpus = os.cpus();
@@ -2530,10 +2530,46 @@ Choose the schedule and model based on the task:
       }
       const cpuUsage = totalTick > 0 ? ((1 - totalIdle / totalTick) * 100) : 0;
 
-      // Memory
+      // Memory — on macOS, show memory pressure (active + wired + compressed)
+      // instead of raw usage, which always appears ~99% due to disk cache.
       const totalMem = os.totalmem();
       const freeMem = os.freemem();
       const usedMem = totalMem - freeMem;
+
+      let pressureUsedGB = Math.round((usedMem / (1024 * 1024 * 1024)) * 100) / 100;
+      let pressurePercent = Math.round((usedMem / totalMem) * 1000) / 10;
+      let pressureLevel: "normal" | "warn" | "critical" = "normal";
+
+      if (IS_MAC) {
+        try {
+          const { promisify } = await import("node:util");
+          const execPromise = promisify(exec);
+          const { stdout: vmOutput } = await execPromise("vm_stat", { encoding: "utf-8", timeout: 3000 });
+          const pageSizeMatch = vmOutput.match(/page size of (\d+) bytes/);
+          const ps = pageSizeMatch ? parseInt(pageSizeMatch[1]!, 10) : 16384;
+
+          const getPages = (label: string): number => {
+            const m = vmOutput.match(new RegExp(`${label}:\\s+(\\d+)`));
+            return m ? parseInt(m[1]!, 10) : 0;
+          };
+
+          const activePages = getPages("Pages active");
+          const wiredPages = getPages("Pages wired down");
+          const compressedPages = getPages("Pages occupied by compressor");
+
+          const appMemBytes = (activePages + wiredPages + compressedPages) * ps;
+          pressureUsedGB = Math.round((appMemBytes / (1024 * 1024 * 1024)) * 100) / 100;
+          pressurePercent = Math.round((appMemBytes / totalMem) * 1000) / 10;
+
+          if (pressurePercent > 80) pressureLevel = "critical";
+          else if (pressurePercent > 60) pressureLevel = "warn";
+        } catch {
+          // Fall back to raw os.freemem values
+        }
+      } else {
+        if (pressurePercent > 90) pressureLevel = "critical";
+        else if (pressurePercent > 75) pressureLevel = "warn";
+      }
 
       // Disk
       let diskUsed = 0;
@@ -2561,9 +2597,10 @@ Choose the schedule and model based on the task:
       res.json({
         cpu: { usage: Math.round(cpuUsage * 10) / 10, cores: cpus.length },
         memory: {
-          used: Math.round((usedMem / (1024 * 1024 * 1024)) * 100) / 100,
+          used: pressureUsedGB,
           total: Math.round((totalMem / (1024 * 1024 * 1024)) * 100) / 100,
-          percentage: Math.round((usedMem / totalMem) * 1000) / 10,
+          percentage: pressurePercent,
+          pressure: pressureLevel,
         },
         disk: {
           used: Math.round(diskUsed * 100) / 100,
