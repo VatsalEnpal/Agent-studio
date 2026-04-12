@@ -95,35 +95,40 @@
       "issue_id": "ISSUE-15",
       "description": "Make agent name badges in room detail clickable to navigate to that agent terminal session in Sessions mode.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed",
+      "fix_notes": "Wired up onAgentClick prop in RoomChat -> ChatMessage. Clicking an agent name in chat now finds the agent's session and switches to Sessions view with that session focused."
     },
     {
       "id": "TASK-13",
       "issue_id": "ISSUE-18",
       "description": "Add notification settings section to the Settings page with toggles for Mac notifications and Telegram notifications per event type.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed",
+      "fix_notes": "SettingsNotifications component already exists with Mac and Telegram toggle columns for 5 event types (session exit, sprint complete, approval needed, cost threshold, error). Rendered in SettingsView."
     },
     {
       "id": "TASK-14",
       "issue_id": "ISSUE-22",
       "description": "Hide or disable the Next.js Dev Tools overlay badge in production/user-facing mode.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed",
+      "fix_notes": "next.config.mjs already has devIndicators: false, which hides all Next.js dev overlays including the floating badge."
     },
     {
       "id": "TASK-15",
       "issue_id": "ISSUE-23",
       "description": "Implement and verify the command palette (Cmd+K or Cmd+Shift+K) is functional and searchable.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed",
+      "fix_notes": "Command palette fully implemented: CommandPalette component uses Radix Dialog, supports search/filter, keyboard navigation (arrow keys + Enter), and includes actions for new session, kill session, view switching, memory stats, PMO scan, and per-session focus. Cmd+K shortcut in use-keyboard.ts toggles it. Rendered in page.tsx."
     },
     {
       "id": "TASK-16",
       "issue_id": "ISSUE-26",
       "description": "Improve the Create Room modal UX: show which fields are required, explain why the Create button is disabled, add a brief description of what a room does.",
       "severity": "MEDIUM",
-      "status": "pending"
+      "status": "fixed",
+      "fix_notes": "CreateRoomDialog already has: subtitle ('A room is a shared chat where your AI agents collaborate on a task.'), amber asterisks on required fields (Room Name, Topic/Goal), and dynamic footer text explaining disabled state ('Enter a room name and topic to continue.' / 'Enter a room name to continue.' / 'Enter a topic to continue.')."
     },
     {
       "id": "TASK-17",
@@ -294,9 +299,9 @@
     "medium": 14,
     "low": 18,
     "verified": 14,
-    "fixed": 0,
+    "fixed": 5,
     "partial": 0,
     "in_progress": 0,
-    "pending": 24
+    "pending": 19
   }
 }
