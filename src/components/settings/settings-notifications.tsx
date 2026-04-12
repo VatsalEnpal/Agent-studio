@@ -43,16 +43,17 @@ const NOTIFICATION_OPTIONS: {
 ];
 
 /** Toggle switch component */
-function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
+function Toggle({ checked, onChange, label }: { checked: boolean; onChange: () => void; label?: string }) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
+      aria-label={label}
       onClick={onChange}
       className={cn(
         "relative inline-flex h-4 w-8 items-center rounded-full transition-all shrink-0",
-        checked ? "bg-sessions" : "bg-border-default",
+        checked ? "bg-sprints" : "bg-border-default",
       )}
     >
       <span
@@ -101,7 +102,7 @@ export function SettingsNotifications() {
       <div className="px-4 py-3 space-y-4">
         {NOTIFICATION_OPTIONS.map(({ key, label, desc }) => (
           <div key={key} className="flex items-start gap-2">
-            <Toggle checked={prefs[key]} onChange={() => toggle(key)} />
+            <Toggle checked={prefs[key]} onChange={() => toggle(key)} label={label} />
             <div className="flex-1 min-w-0">
               <span className="text-xs text-text-primary block">
                 {label}
