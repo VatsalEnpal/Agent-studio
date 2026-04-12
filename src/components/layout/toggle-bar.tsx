@@ -199,9 +199,8 @@ export function ToggleBar() {
     })();
   }, []);
 
-  const tabs = hasAgentSystem
-    ? ALL_TABS
-    : ALL_TABS.filter((t) => t.id !== "teams" && t.id !== "memory");
+  // Always show all tabs — empty states guide users to configure what's needed
+  const tabs = ALL_TABS;
 
   return (
     <header className="flex items-center justify-between px-3 h-10 border-b border-border-default bg-bg-surface shrink-0">
