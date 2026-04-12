@@ -45,6 +45,7 @@ export function RunningSection() {
   return (
     <SessionGroup
       title="Running on Machine"
+      subtitle="All Claude processes on this machine, including ones started outside Agent Studio"
       count={processes.length}
       defaultOpen={false}
     >

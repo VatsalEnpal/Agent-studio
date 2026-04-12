@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 
 interface SessionGroupProps {
   title: string;
+  /** Short description shown as a tooltip on the section header */
+  subtitle?: string;
   count: number;
   children: React.ReactNode;
   defaultOpen?: boolean;
@@ -13,6 +15,7 @@ interface SessionGroupProps {
 
 export function SessionGroup({
   title,
+  subtitle,
   count,
   children,
   defaultOpen = true,
@@ -23,6 +26,7 @@ export function SessionGroup({
     <div>
       <button
         onClick={() => setOpen(!open)}
+        title={subtitle}
         className="flex items-center gap-1.5 w-full px-2 py-1 text-label font-semibold uppercase tracking-[0.08em] text-text-ghost hover:text-text-tertiary active:text-text-primary transition-all"
       >
         <ChevronRightIcon className={cn(
