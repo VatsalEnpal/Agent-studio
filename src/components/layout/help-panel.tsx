@@ -28,7 +28,7 @@ export function HelpPanel() {
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
-        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] bg-console-panel border border-console-border rounded-lg shadow-2xl focus:outline-none animate-in fade-in zoom-in-95 duration-150">
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[420px] bg-console-panel border border-console-border rounded shadow-2xl focus:outline-none animate-in fade-in zoom-in-95 duration-150">
           <div className="flex items-center justify-between px-5 py-3 border-b border-console-border">
             <Dialog.Title className="text-sm font-semibold text-console-text">
               Help & Guide
@@ -43,7 +43,34 @@ export function HelpPanel() {
             Keyboard shortcuts, features, and guide for Agent Studio
           </Dialog.Description>
 
-          <div className="px-5 py-4 space-y-4">
+          <div className="px-5 py-4 space-y-4 max-h-[60vh] overflow-y-auto">
+            {/* Getting Started */}
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-console-muted mb-2">
+                Getting Started
+              </p>
+              <div className="space-y-1.5 text-[11px] text-console-muted">
+                <StepRow
+                  num="1"
+                  text="Press Cmd+N to launch a session. Pick a preset or configure manually."
+                />
+                <StepRow
+                  num="2"
+                  text="Your terminal appears in the grid. Type commands or let the agent work."
+                />
+                <StepRow
+                  num="3"
+                  text="Use Teams tab to track sprint workflows across multiple agents."
+                />
+                <StepRow
+                  num="4"
+                  text="Sidebar shows git status, running processes, and past sessions."
+                />
+              </div>
+            </div>
+
+            <hr className="border-console-border" />
+
             {/* Shortcuts */}
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wider text-console-muted mb-2">
@@ -70,28 +97,51 @@ export function HelpPanel() {
                 <FeatureRow
                   icon={<Terminal className="w-3.5 h-3.5" />}
                   name="Sessions"
-                  desc="Run multiple Claude Code terminals"
+                  desc="Run up to 6 Claude Code terminals in a grid"
                 />
                 <FeatureRow
                   icon={<Users className="w-3.5 h-3.5" />}
                   name="Teams"
-                  desc="Track agent workflows and sprints"
+                  desc="Coordinate agent sprints with gated workflows"
                 />
                 <FeatureRow
                   icon={<Brain className="w-3.5 h-3.5" />}
                   name="Memory"
-                  desc="Browse agent knowledge base"
+                  desc="Search and browse agent knowledge entries"
                 />
                 <FeatureRow
                   icon={<FileBarChart className="w-3.5 h-3.5" />}
                   name="Reports"
-                  desc="Review automation results"
+                  desc="View sprint results, QA health, and handoffs"
                 />
                 <FeatureRow
                   icon={<Settings className="w-3.5 h-3.5" />}
                   name="Settings"
-                  desc="Configure workspace, automations, theme"
+                  desc="Model defaults, permissions, system monitor"
                 />
+              </div>
+            </div>
+
+            <hr className="border-console-border" />
+
+            {/* Tips */}
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-console-muted mb-2">
+                Tips
+              </p>
+              <div className="space-y-1.5 text-[11px] text-console-muted">
+                <p>
+                  Use Quick Start presets in the launcher for one-click
+                  sessions.
+                </p>
+                <p>
+                  Click any session in the sidebar to switch focus instantly.
+                </p>
+                <p>Cmd+K opens the command palette for fast navigation.</p>
+                <p>
+                  Expand sprint steps to see gate checks, handoffs, and agent
+                  notes.
+                </p>
               </div>
             </div>
 
@@ -99,9 +149,9 @@ export function HelpPanel() {
 
             {/* Guide link */}
             <p className="text-xs text-console-muted">
-              See{" "}
+              Full guide:{" "}
               <span className="text-console-text font-medium">HOWTO.md</span> in
-              the project folder for the full guide.
+              the project root.
             </p>
           </div>
 
@@ -114,6 +164,17 @@ export function HelpPanel() {
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
+  );
+}
+
+function StepRow({ num, text }: { num: string; text: string }) {
+  return (
+    <div className="flex items-start gap-2">
+      <span className="text-console-accent font-mono text-[10px] font-medium shrink-0 mt-px">
+        {num}.
+      </span>
+      <span>{text}</span>
+    </div>
   );
 }
 
