@@ -98,7 +98,7 @@ export function MemoryDetail() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="skeleton h-5 w-16 rounded-full" />
+          <div className="skeleton h-5 w-16 rounded" />
           <div className="skeleton h-3 w-20" />
         </div>
         <div className="flex items-center gap-1.5">
@@ -176,7 +176,7 @@ export function MemoryDetail() {
 
       {/* Meta info */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className={cn("text-label px-2 py-0.5 rounded-full font-medium", categoryColor(selectedEntry.category))}>
+        <span className={cn("text-label px-2 py-0.5 rounded font-medium", categoryColor(selectedEntry.category))}>
           {selectedEntry.category}
         </span>
         <span className="text-label text-text-ghost flex items-center gap-1">

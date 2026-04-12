@@ -210,7 +210,7 @@ export function MemoryView() {
               key={cat}
               onClick={() => setCategory(cat === "All" ? null : cat)}
               className={cn(
-                "flex items-center gap-0.5 px-2 py-0.5 text-xs font-medium rounded-full whitespace-nowrap transition-all",
+                "flex items-center gap-0.5 px-2 py-0.5 text-xs font-medium rounded whitespace-nowrap transition-all",
                 isActive
                   ? "bg-memory/20 text-memory border border-memory/30"
                   : "bg-bg-elevated text-text-secondary hover:text-text-primary hover:bg-bg-elevated/80 border border-transparent",
@@ -227,7 +227,7 @@ export function MemoryView() {
         <button
           onClick={() => setShowPinnedOnly(!showPinnedOnly)}
           className={cn(
-            "flex items-center gap-0.5 px-2 py-0.5 text-xs font-medium rounded-full whitespace-nowrap transition-all",
+            "flex items-center gap-0.5 px-2 py-0.5 text-xs font-medium rounded whitespace-nowrap transition-all",
             showPinnedOnly
               ? "bg-sprints/20 text-sprints border border-sprints/30"
               : "bg-bg-elevated text-text-secondary hover:text-text-primary hover:bg-bg-elevated/80 border border-transparent",
@@ -249,7 +249,7 @@ export function MemoryView() {
               key={tag}
               onClick={() => toggleTag(tag)}
               className={cn(
-                "flex items-center gap-0.5 px-1.5 py-0.5 text-2xs rounded-full whitespace-nowrap transition-all",
+                "flex items-center gap-0.5 px-1.5 py-0.5 text-2xs rounded whitespace-nowrap transition-all",
                 activeTags.has(tag)
                   ? "bg-memory/15 text-memory border border-memory/30 font-medium"
                   : "bg-bg-input text-text-ghost hover:text-text-tertiary border border-transparent",
@@ -444,7 +444,7 @@ function MemoryListItem({
         </div>
       </div>
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-        <span className={cn("text-label px-1.5 py-0.5 rounded-full font-medium", categoryColor(entry.category))}>
+        <span className={cn("text-label px-1.5 py-0.5 rounded font-medium", categoryColor(entry.category))}>
           {categoryLabel(entry.category)}
         </span>
         {date && (
