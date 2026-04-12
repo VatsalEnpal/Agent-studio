@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { StopIcon, PlayIcon, ExternalLinkIcon, TrashIcon, PlusCircleIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
+import { useToastStore } from "@/stores/toast";
 import { SessionGroup } from "@/components/sessions/session-group";
 import type { DevServer } from "./types";
 
@@ -82,6 +83,17 @@ export function ServersSection() {
     [fetchDevServers],
   );
 
+  const addToast = useToastStore((s) => s.addToast);
+
+  const handleOpenPort = useCallback(
+    (port: number) => {
+      const url = `http://localhost:${port}`;
+      window.open(url, "_blank");
+      addToast(`Opened ${url}`, "success");
+    },
+    [addToast],
+  );
+
   useEffect(() => {
     void fetchDevServers();
     const interval = setInterval(() => void fetchDevServers(), 10_000);
@@ -101,6 +113,7 @@ export function ServersSection() {
           onStop={handleStopServer}
           onStart={handleStartServer}
           onRemove={handleRemoveCustomServer}
+          onOpenPort={handleOpenPort}
         />
       ))}
       <AddServerForm onAdd={handleAddCustomServer} />
@@ -115,19 +128,15 @@ function DevServerItem({
   onStop,
   onStart,
   onRemove,
+  onOpenPort,
 }: {
   server: DevServer;
   onStop: (pid: number) => void;
   onStart: (cwd: string, command: string) => void;
   onRemove?: (name: string) => void;
+  onOpenPort: (port: number) => void;
 }) {
   const [acting, setActing] = useState(false);
-
-  const openInBrowser = () => {
-    if (server.port > 0) {
-      window.open(`http://localhost:${server.port}`, "_blank");
-    }
-  };
 
   return (
     <div
@@ -150,9 +159,9 @@ function DevServerItem({
       </span>
       {server.running && server.port > 0 && (
         <button
-          onClick={openInBrowser}
+          onClick={() => onOpenPort(server.port)}
           className="flex items-center gap-0.5 text-2xs font-mono text-text-secondary hover:text-rooms transition-all shrink-0"
-          title={`Open http://localhost:${server.port}`}
+          title={`Open http://localhost:${server.port} in browser`}
         >
           :{server.port}
           <ExternalLinkIcon className="w-2.5 h-2.5" />
