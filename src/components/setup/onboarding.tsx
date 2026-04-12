@@ -392,9 +392,10 @@ function LoadingScreen() {
 
 interface OnboardingProps {
   onComplete: () => void;
+  onDismiss?: () => void;
 }
 
-export function Onboarding({ onComplete }: OnboardingProps) {
+export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
   const [screen, setScreen] = useState<"ask" | "loading" | "result">("ask");
   const [agents, setAgents] = useState<GeneratedAgent[]>([]);
   const [automations, setAutomations] = useState<AutomationSuggestion[]>([]);
@@ -495,6 +496,17 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     onComplete();
   }, [onComplete]);
 
+  // Escape key dismisses the wizard at any point
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        void handleSkip();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [handleSkip]);
+
   const handleConfirm = useCallback(async () => {
     setApplying(true);
     try {
@@ -580,22 +592,37 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     setRefining(false);
   }, [userDescription, projectPath]);
 
+  const dismissButton = (
+    <button
+      onClick={() => void handleSkip()}
+      className="fixed top-4 right-4 z-50 w-8 h-8 flex items-center justify-center rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-all"
+      title="Close setup (Esc)"
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+        <path d="M4 4l8 8M12 4l-8 8" />
+      </svg>
+    </button>
+  );
+
   if (screen === "ask") {
-    return <AskScreen onSubmit={handleSubmit} onSkip={handleSkip} />;
+    return <>{dismissButton}<AskScreen onSubmit={handleSubmit} onSkip={handleSkip} /></>;
   }
 
   if (screen === "loading") {
-    return <LoadingScreen />;
+    return <>{dismissButton}<LoadingScreen /></>;
   }
 
   return (
-    <ResultScreen
-      agents={agents}
-      automations={automations}
-      onConfirm={handleConfirm}
-      onRefine={handleRefine}
-      applying={applying}
-      refining={refining}
-    />
+    <>
+      {dismissButton}
+      <ResultScreen
+        agents={agents}
+        automations={automations}
+        onConfirm={handleConfirm}
+        onRefine={handleRefine}
+        applying={applying}
+        refining={refining}
+      />
+    </>
   );
 }
