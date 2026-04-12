@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { StopIcon, PlayIcon, ExternalLinkIcon, TrashIcon, PlusCircleIcon } from "@/components/ui/icons";
+import { AmberLoadingBar } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useToastStore } from "@/stores/toast";
 import { SessionGroup } from "@/components/sessions/session-group";
@@ -140,6 +141,8 @@ function DevServerItem({
   const [acting, setActing] = useState(false);
 
   return (
+    <div className="relative">
+      {acting && <AmberLoadingBar className="absolute top-0 left-0 right-0 z-10" />}
     <div
       className="flex items-center gap-1.5 px-2 py-1.5 text-xs group"
       title={`${server.cwd}${server.running ? `\nPort: ${server.port}\nPID: ${server.pid}` : ""}`}
@@ -208,6 +211,7 @@ function DevServerItem({
           )}
         </>
       )}
+    </div>
     </div>
   );
 }

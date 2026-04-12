@@ -3,6 +3,22 @@
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
+// AmberLoadingBar — thin animated bar for async actions (IDENTITY.md spec)
+// ---------------------------------------------------------------------------
+
+interface AmberLoadingBarProps {
+  className?: string;
+}
+
+/**
+ * Thin amber line that animates left-to-right, like YouTube's loading bar.
+ * Used for async actions (View Changes, server start/stop, commit, push).
+ */
+export function AmberLoadingBar({ className }: AmberLoadingBarProps) {
+  return <div className={cn("amber-loading-bar", className)} aria-hidden="true" />;
+}
+
+// ---------------------------------------------------------------------------
 // Base Skeleton — shimmer rectangle
 // ---------------------------------------------------------------------------
 

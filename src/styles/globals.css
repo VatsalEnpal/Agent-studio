@@ -306,6 +306,47 @@ select:focus-visible {
 }
 
 /* =============================================================================
+   Amber loading bar (YouTube-style)
+   ============================================================================= */
+
+@keyframes amber-loading {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.amber-loading-bar {
+  position: relative;
+  overflow: hidden;
+  height: 2px;
+  width: 100%;
+  background: var(--elevation-1);
+}
+
+.amber-loading-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 50%;
+  background: var(--color-warning);
+  animation: amber-loading 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .amber-loading-bar::after {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
+  }
+}
+
+/* =============================================================================
    Text hierarchy utilities
    ============================================================================= */
 

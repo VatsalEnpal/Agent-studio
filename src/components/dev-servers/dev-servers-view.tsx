@@ -7,6 +7,7 @@ import {
   StopIcon,
   SearchIcon,
 } from "@/components/ui/icons";
+import { AmberLoadingBar } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -135,6 +136,8 @@ export function DevServersView() {
           <RefreshIcon size={14} />
         </button>
       </div>
+
+      {(loading || stoppingPid !== null) && <AmberLoadingBar />}
 
       {/* Table */}
       <div className="flex-1 overflow-y-auto scrollbar-thin">

@@ -245,7 +245,7 @@
       "issue_id": "ISSUE-34",
       "description": "Add loading indicators (amber line or skeleton) for async actions like View Changes, server start/stop.",
       "severity": "LOW",
-      "status": "pending"
+      "status": "fixed"
     },
     {
       "id": "TASK-36",
@@ -327,8 +327,8 @@
   ],
   "stats": {
     "total": 46,
-    "pending": 1,
-    "fixed": 25,
+    "pending": 0,
+    "fixed": 26,
     "verified": 21,
     "failed_verification": 0
   }
