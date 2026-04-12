@@ -104,6 +104,7 @@ export function ServersSection() {
     <SessionGroup
       title="Servers"
       count={devServers.filter((s) => s.running).length}
+      totalCount={devServers.length}
       defaultOpen={true}
     >
       {devServers.map((server) => (

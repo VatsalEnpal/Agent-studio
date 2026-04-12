@@ -9,6 +9,8 @@ interface SessionGroupProps {
   /** Short description shown as a tooltip on the section header */
   subtitle?: string;
   count: number;
+  /** When set, displays as "count/totalCount" (e.g. "1/3") */
+  totalCount?: number;
   children: React.ReactNode;
   defaultOpen?: boolean;
 }
@@ -17,6 +19,7 @@ export function SessionGroup({
   title,
   subtitle,
   count,
+  totalCount,
   children,
   defaultOpen = true,
 }: SessionGroupProps) {
@@ -34,7 +37,9 @@ export function SessionGroup({
           open && "rotate-90",
         )} />
         <span>{title}</span>
-        <span className="ml-auto text-text-ghost/60 text-label tabular-nums">{count}</span>
+        <span className="ml-auto text-text-ghost/60 text-label tabular-nums">
+          {totalCount != null ? `${count}/${totalCount}` : count}
+        </span>
       </button>
       {open && <div className="mt-1 space-y-0.5">{children}</div>}
     </div>
