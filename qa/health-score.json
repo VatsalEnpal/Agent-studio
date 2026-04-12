@@ -7,7 +7,7 @@
   },
   "checklist_evolution": {
     "initial_items": 173,
-    "auto_added": 14,
+    "auto_added": 15,
     "pruned": 0
   },
   "runs": [
@@ -50,6 +50,20 @@
       "checklist_items_added": 2,
       "convergence_trend": [78, 88.1, 92.6],
       "notes": "Full QA validation of Brain 2 batch 1+2 fixes. 10 of 15 fixes verified (session names, wizard close, Memory tab, session rename, workflows removed, toggle labels, button bleed-through, Memory rename, amber toggles). 5 fixes unable to verify (require running sessions). 0 regressions. 2 new issues: session empty state below Servers table (LOW), no sprint Cancel button (MEDIUM). All HIGH severity items now resolved."
+    },
+    {
+      "run": 4,
+      "timestamp": "2026-04-12T23:30:00Z",
+      "health_score": 94.9,
+      "total_checks": 195,
+      "bugs_found": 1,
+      "critical": 0,
+      "high": 1,
+      "medium": 0,
+      "low": 1,
+      "checklist_items_added": 1,
+      "convergence_trend": [78, 88.1, 92.6, 94.9],
+      "notes": "QA validation of Brain 2 batch 3 fixes. 3 of 10 fixes verified (TASK-15 room close confirm, TASK-18 continue button context, TASK-46 sprint cancel). 6 unable to verify (require running sessions/processes). 1 fix FAILED verification: TASK-13 session search filter broken -- input exists but does not filter results (HIGH). No regressions. Geist Mono font not applied (system monospace used instead)."
     }
   ]
 }

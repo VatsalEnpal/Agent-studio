@@ -304,6 +304,7 @@ This checklist should be LARGER at the end of each run than at the start.
 
 - [ ] Does the empty state from one tab bleed into other tabs? (buttons, text, or UI from hidden views should not be visible) [AUTO-ADDED, run-2]
 - [ ] Does the Sessions empty state appear below the Servers sub-tab content? [AUTO-ADDED, run-3]
+- [ ] Does the session search filter in History actually filter/hide non-matching results? [AUTO-ADDED, run-4]
 - [ ] Is the app dark everywhere? (no white or light gray panels/backgrounds leaking through)
 - [ ] Are there any Radix UI default styles showing light backgrounds? (modals, dropdowns, tooltips)
 - [ ] Are scrollbars dark? (not bright white system scrollbars)
@@ -372,6 +373,7 @@ Track additions and removals here.
 | 1*  | 7             | 0             | checklist_gap | 78           |
 | 2   | 5             | 0             | checklist_gap | 88.1         |
 | 3   | 2             | 0             | checklist_gap | 92.6         |
+| 4   | 1             | 0             | checklist_gap | 94.9         |
 
 ## Miss Categories (for auto-evolution)
 

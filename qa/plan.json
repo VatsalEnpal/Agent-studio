@@ -89,9 +89,9 @@
     {
       "id": "TASK-13",
       "issue_id": "ISSUE-12",
-      "description": "Add search/filter input to the Recent Sessions section in the sidebar.",
-      "severity": "MEDIUM",
-      "status": "fixed"
+      "description": "Add search/filter input to the Recent Sessions section in the sidebar. NOTE: Search input exists but does NOT filter results -- filter logic is broken or missing.",
+      "severity": "HIGH",
+      "status": "failed_verification"
     },
     {
       "id": "TASK-14",
@@ -105,7 +105,7 @@
       "issue_id": "ISSUE-15",
       "description": "Add confirmation dialog before closing/destroying rooms to prevent accidental data loss.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-16",
@@ -126,7 +126,7 @@
       "issue_id": "ISSUE-23",
       "description": "Show which session will be resumed in the 'Continue Last' button (e.g., name, time, agent used).",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified"
     },
     {
       "id": "TASK-19",
@@ -322,13 +322,14 @@
       "issue_id": "ISSUE-46",
       "description": "Sprint detail view has Resume button but no Cancel button. Users cannot abandon a sprint that is going wrong from the UI.",
       "severity": "MEDIUM",
-      "status": "fixed"
+      "status": "verified"
     }
   ],
   "stats": {
     "total": 46,
     "pending": 22,
-    "fixed": 10,
-    "verified": 14
+    "fixed": 7,
+    "verified": 17,
+    "failed_verification": 1
   }
 }
