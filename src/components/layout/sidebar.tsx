@@ -1088,8 +1088,8 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
         const procs = (await res.json()) as DiscoveredProcess[];
         setRunningProcesses(procs);
       }
-    } catch {
-      // Best effort
+    } catch (e) {
+      console.error("Failed to fetch processes:", e);
     }
   }, []);
 
@@ -1099,8 +1099,8 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
         await fetch(`/api/processes/${pid}/kill`, { method: "POST" });
         // Refresh process list after a short delay
         setTimeout(() => void fetchProcesses(), 1000);
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Failed to kill process:", e);
       }
     },
     [fetchProcesses],
@@ -1113,8 +1113,8 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
         const servers = (await res.json()) as DevServer[];
         setDevServers(servers);
       }
-    } catch {
-      // Best effort
+    } catch (e) {
+      console.error("Failed to fetch dev servers:", e);
     }
   }, []);
 
@@ -1123,8 +1123,8 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
       try {
         await fetch(`/api/servers/${pid}/stop`, { method: "POST" });
         setTimeout(() => void fetchDevServers(), 1500);
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Failed to stop server:", e);
       }
     },
     [fetchDevServers],
@@ -1145,8 +1145,8 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
           // Still refresh after delay in case of slow start
           setTimeout(() => void fetchDevServers(), 3000);
         }
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Failed to start server:", e);
       }
     },
     [fetchDevServers],
@@ -1161,8 +1161,8 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
           body: JSON.stringify(server),
         });
         void fetchDevServers();
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Failed to add dev server:", e);
       }
     },
     [fetchDevServers],
@@ -1175,8 +1175,8 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
           method: "DELETE",
         });
         void fetchDevServers();
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Failed to remove dev server:", e);
       }
     },
     [fetchDevServers],
@@ -1189,8 +1189,8 @@ export function Sidebar({ onNewSession, onKillSession }: SidebarProps) {
         const sessions = (await res.json()) as PastSession[];
         setRecentSessions(sessions);
       }
-    } catch {
-      // Best effort
+    } catch (e) {
+      console.error("Failed to fetch recent sessions:", e);
     }
   }, []);
 

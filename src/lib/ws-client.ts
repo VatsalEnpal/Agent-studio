@@ -2,7 +2,11 @@ import type { WsMessage } from "./types";
 
 type MessageHandler = (msg: WsMessage) => void;
 
-export type ConnectionState = "connecting" | "connected" | "disconnected" | "reconnecting";
+export type ConnectionState =
+  | "connecting"
+  | "connected"
+  | "disconnected"
+  | "reconnecting";
 type ConnectionHandler = (state: ConnectionState) => void;
 
 class WsClient {
@@ -30,7 +34,9 @@ class WsClient {
 
   onConnectionChange(handler: ConnectionHandler): () => void {
     this.connectionHandlers.add(handler);
-    return () => { this.connectionHandlers.delete(handler); };
+    return () => {
+      this.connectionHandlers.delete(handler);
+    };
   }
 
   connect(url: string): void {
@@ -56,8 +62,8 @@ class WsClient {
         this.ws.onerror = null;
         this.ws.onmessage = null;
         this.ws.close();
-      } catch {
-        // Ignore close errors
+      } catch (e) {
+        console.error("WebSocket close error:", e);
       }
     }
 
@@ -87,8 +93,8 @@ class WsClient {
             handler(msg);
           }
         }
-      } catch {
-        // Ignore malformed messages
+      } catch (e) {
+        console.error("Malformed WebSocket message:", e);
       }
     };
 
@@ -97,7 +103,10 @@ class WsClient {
       if (!this.intentionalClose && this.url) {
         this.reconnectAttempts++;
         this.setConnectionState("reconnecting");
-        const delay = Math.min(2000 * Math.pow(1.5, this.reconnectAttempts - 1), 15000);
+        const delay = Math.min(
+          2000 * Math.pow(1.5, this.reconnectAttempts - 1),
+          15000,
+        );
         this.reconnectTimer = setTimeout(() => {
           this.createConnection();
         }, delay);

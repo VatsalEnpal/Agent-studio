@@ -58,8 +58,8 @@ export function CreateSprintDialog({
           const configCwd = data.config?.defaults?.workingDirectory;
           if (configCwd) setCwd(configCwd);
         }
-      } catch {
-        // Keep default
+      } catch (e) {
+        console.error("Failed to fetch config for cwd:", e);
       }
     })();
   }, [open]);

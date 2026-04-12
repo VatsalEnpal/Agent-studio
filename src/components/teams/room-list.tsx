@@ -31,8 +31,8 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           selectRoom(firstRoom.id);
         }
       }
-    } catch {
-      // ignore fetch errors
+    } catch (e) {
+      console.error("Failed to fetch rooms:", e);
     }
     setLoading(false);
   }, [setRooms, selectRoom, setLoading]);

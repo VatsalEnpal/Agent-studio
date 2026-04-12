@@ -189,8 +189,8 @@ export function SessionLauncher({
           }
           setDefaultCwdLoaded(true);
         }
-      } catch {
-        /* use default */
+      } catch (e) {
+        console.error("Failed to fetch default cwd:", e);
       }
     })();
   }, [defaultCwdLoaded]);
@@ -205,8 +205,8 @@ export function SessionLauncher({
           const sessions = (await res.json()) as PastSession[];
           setRecentSessions(sessions);
         }
-      } catch {
-        // Best effort
+      } catch (e) {
+        console.error("Failed to fetch recent sessions:", e);
       }
     })();
   }, [open]);

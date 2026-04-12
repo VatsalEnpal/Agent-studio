@@ -46,7 +46,8 @@ async function fetchConfig(): Promise<AgentStudioClientConfig | null> {
     const data = (await res.json()) as AgentStudioClientConfig;
     _cachedConfig = data;
     return data;
-  } catch {
+  } catch (e) {
+    console.error("Failed to fetch config:", e);
     return null;
   }
 }
@@ -56,7 +57,9 @@ async function fetchConfig(): Promise<AgentStudioClientConfig | null> {
  * Caches the result so only one fetch per session.
  */
 export function useConfig() {
-  const [config, setConfig] = useState<AgentStudioClientConfig | null>(_cachedConfig);
+  const [config, setConfig] = useState<AgentStudioClientConfig | null>(
+    _cachedConfig,
+  );
   const [loading, setLoading] = useState(!_cachedConfig);
 
   useEffect(() => {
