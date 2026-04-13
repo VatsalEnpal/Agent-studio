@@ -52,3 +52,27 @@ CURRENT_STATE.md
 DESIGN.md
 IDENTITY.md
 .claude/scheduled_tasks.lock
+
+# Claude Code local config (user-specific, never commit)
+.claude/hooks/
+.claude/commands/
+.claude/settings.json
+.claudeignore
+.mcp.json
+.prettierrc.json
+.checkpoint.md
+.agents/
+
+# Playwright MCP cache (generated per session)
+.playwright-mcp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ShipLoop working files
+.shiploop/
+
+# Temp screenshots from QA
+verify-*.png
+issue*.png
