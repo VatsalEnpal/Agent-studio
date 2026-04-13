@@ -70,6 +70,7 @@ This pattern gives us one port for everything -- the UI, the API, and the WebSoc
 `server/terminal-manager.ts` manages the lifecycle of PTY sessions.
 
 **Creating a session:**
+
 1. Generate a UUID
 2. Resolve the command path (e.g., `claude` to `/usr/local/bin/claude`)
 3. Spawn a `node-pty` process with the command, args, cwd, and environment
@@ -78,9 +79,10 @@ This pattern gives us one port for everything -- the UI, the API, and the WebSoc
 6. Return the session object
 
 **Killing a session (tree-kill escalation):**
-1. Send `SIGTERM` to the PTY process for graceful shutdown
-2. After 2 seconds, if still alive, use `tree-kill` to `SIGKILL` the entire process tree (kills orphaned child processes that `pty.kill()` alone would miss)
-3. After 3.5 seconds, force cleanup regardless -- remove from the map and emit `sessions-update`
+
+1. Remove the session from the map immediately and emit `sessions-update` (clients see it gone instantly)
+2. Send `SIGTERM` to the PTY process for graceful shutdown
+3. After 2 seconds, use `tree-kill` to `SIGKILL` the entire process tree in the background
 
 **Spawn semaphore:** A `maxConcurrentSpawns` limit (default 4) prevents PTY fork-bombs if multiple sessions are created simultaneously. If the limit is reached, spawning still proceeds but logs a warning.
 
@@ -93,6 +95,7 @@ This pattern gives us one port for everything -- the UI, the API, and the WebSoc
 `server/sdk-session.ts` manages room agents via the `@anthropic-ai/claude-agent-sdk` instead of PTY. This replaced the earlier approach of injecting messages into a PTY and parsing raw terminal output with regex -- which was fragile and lost formatting.
 
 **How it works:**
+
 1. `SdkSessionManager` maintains a `Map<string, SdkSession>` keyed by agent ID
 2. When a message is sent to a room agent, `sendMessage()` calls `query()` from the Agent SDK with the prompt, model, cwd, and optional `--agent` profile
 3. The SDK returns structured events: the manager fires callbacks for `onTypingStart`, `onTextDelta` (streaming), `onResult` (final text + usage), and `onError`
@@ -101,6 +104,7 @@ This pattern gives us one port for everything -- the UI, the API, and the WebSoc
 6. Session IDs from the SDK are stored so agents can `--resume` conversations across messages
 
 **Room architecture** (`server/rooms.ts`):
+
 - `RoomManager` handles room lifecycle: create, list, add/remove agents, persist to disk
 - Each room has agents, messages, a topic, and a context file path
 - Messages are typed: `message`, `action`, `approval-request`, `system`
@@ -112,20 +116,20 @@ This pattern gives us one port for everything -- the UI, the API, and the WebSoc
 
 All WebSocket communication uses JSON messages with a `type` field:
 
-| Type | Sender | Payload | Purpose |
-|------|--------|---------|---------|
-| `terminal-data` | Server | `{ sessionId, data }` | Raw terminal output (ANSI) |
-| `terminal-input` | Client | `{ sessionId, data }` | Keyboard input to a session |
-| `terminal-resize` | Client | `{ sessionId, cols, rows }` | Terminal dimension change |
-| `sessions-update` | Server | `Session[]` | Session list changed |
-| `git-update` | Server | `RepoStatus[]` | Git status poll result |
-| `usage-update` | Server | `{ all, managed }` | Token/cost data (every 30s) |
-| `file-update` | Server | `{ file, content }` | Sprint/memory file changed on disk |
-| `workflow-update` | Server | `WorkflowFlow[]` | Workflow state changed |
-| `room-agent-typing` | Server | `{ roomId, agentId }` | Room agent started processing |
-| `room-agent-streaming` | Server | `{ roomId, agentId, delta }` | Room agent text delta (streaming) |
-| `room-message` | Server | `{ roomId, message }` | Final room agent reply or user message |
-| `room-agent-status` | Server | `{ roomId, agentId, status }` | Room agent status change (idle/working) |
+| Type                   | Sender | Payload                       | Purpose                                 |
+| ---------------------- | ------ | ----------------------------- | --------------------------------------- |
+| `terminal-data`        | Server | `{ sessionId, data }`         | Raw terminal output (ANSI)              |
+| `terminal-input`       | Client | `{ sessionId, data }`         | Keyboard input to a session             |
+| `terminal-resize`      | Client | `{ sessionId, cols, rows }`   | Terminal dimension change               |
+| `sessions-update`      | Server | `Session[]`                   | Session list changed                    |
+| `git-update`           | Server | `RepoStatus[]`                | Git status poll result                  |
+| `usage-update`         | Server | `{ all, managed }`            | Token/cost data (every 30s)             |
+| `file-update`          | Server | `{ file, content }`           | Sprint/memory file changed on disk      |
+| `workflow-update`      | Server | `WorkflowFlow[]`              | Workflow state changed                  |
+| `room-agent-typing`    | Server | `{ roomId, agentId }`         | Room agent started processing           |
+| `room-agent-streaming` | Server | `{ roomId, agentId, delta }`  | Room agent text delta (streaming)       |
+| `room-message`         | Server | `{ roomId, message }`         | Final room agent reply or user message  |
+| `room-agent-status`    | Server | `{ roomId, agentId, status }` | Room agent status change (idle/working) |
 
 On connect, the server immediately sends `sessions-update` and `git-update` so the client has current state without waiting for the next poll.
 
@@ -145,24 +149,30 @@ Routes are grouped by domain in `server/index.ts`:
 - **PMO** (`/api/pmo/*`) -- scheduler status and control
 - **Dev Servers** (`/api/servers`) -- start, stop, and manage dev servers
 - **Rooms** (`/api/rooms/*`) -- create rooms, spawn/remove agents, send messages, close rooms
+- **Agents** (`/api/agents/*`) -- CLI status, analyze project, generate/preview agents, apply to disk
+- **Automations** (`/api/automations/*`) -- suggest and configure scheduled automations
 
 ### Supporting Server Modules
 
-| Module | File | Responsibility |
-|--------|------|----------------|
-| Terminal Manager | `terminal-manager.ts` | PTY lifecycle, event emission |
-| Config | `config.ts` | Read, write, generate, cache config |
-| Scaffold | `scaffold.ts` | Generate `ai-agents/` directory structure |
-| Git Status | `git-status.ts` | Poll git repos, detect changes |
-| PR Creator | `pr-creator.ts` | Create PRs via `gh` CLI |
-| Session Usage | `session-usage.ts` | Read Claude status files, compute costs |
-| Process Discovery | `process-discovery.ts` | Find running Claude processes via `ps` |
-| File Watcher | `file-watcher.ts` | Watch sprint/memory files with chokidar |
-| Dev Servers | `dev-servers.ts` | Start/stop dev server child processes |
-| SDK Session Manager | `sdk-session.ts` | Claude Agent SDK lifecycle for room agents |
-| Room Manager | `rooms.ts` | Room state, persistence, context files, message history |
-| Room Routes | `routes/rooms.ts` | Room API endpoints wired to SDK callbacks |
-| Workflows | `workflows/` | Workflow engine with registry and step execution |
+| Module                 | File                        | Responsibility                                                        |
+| ---------------------- | --------------------------- | --------------------------------------------------------------------- |
+| Terminal Manager       | `terminal-manager.ts`       | PTY lifecycle, event emission                                         |
+| Config                 | `config.ts`                 | Read, write, generate, cache config                                   |
+| Scaffold               | `scaffold.ts`               | Generate `ai-agents/` directory structure                             |
+| Git Status             | `git-status.ts`             | Poll git repos, detect changes                                        |
+| PR Creator             | `pr-creator.ts`             | Create PRs via `gh` CLI                                               |
+| Session Usage          | `session-usage.ts`          | Read Claude status files, compute costs                               |
+| Process Discovery      | `process-discovery.ts`      | Find running Claude processes via `ps`                                |
+| File Watcher           | `file-watcher.ts`           | Watch sprint/memory files with chokidar                               |
+| Dev Servers            | `dev-servers.ts`            | Start/stop dev server child processes                                 |
+| SDK Session Manager    | `sdk-session.ts`            | Claude Agent SDK lifecycle for room agents                            |
+| Room Manager           | `rooms.ts`                  | Room state, persistence, context files, message history               |
+| Room Routes            | `routes/rooms.ts`           | Room API endpoints wired to SDK callbacks                             |
+| Workflows              | `workflows/`                | Workflow engine with registry and step execution                      |
+| Project Analyzer       | `project-analyzer.ts`       | Static project analysis: detect languages, frameworks, CI, databases  |
+| Agent Generator        | `agent-generator.ts`        | Generate agents via Claude CLI, parse output, write .md files         |
+| Automation Suggestions | `automation-suggestions.ts` | Suggest scheduled automations based on project profile                |
+| Demo Sanitizer         | `demo-sanitizer.ts`         | When `DEMO_MODE=true`, sanitize terminal output (usernames, API keys) |
 
 ## 3. Frontend Layer
 
@@ -174,15 +184,15 @@ The frontend is a single-page app using Next.js App Router. There is one page (`
 
 State is managed by Zustand stores in `src/stores/`:
 
-| Store | State | Key Actions |
-|-------|-------|-------------|
-| `sessions` | Session list, focused ID, visible IDs (max 6), zoom levels | `setSessions`, `addSession`, `removeSession`, `setFocused`, `swapIn`, `zoomIn/Out` |
-| `ui` | Sidebar open, launcher open, command palette open, fullscreen ID, active mode | `toggleSidebar`, `setLauncherOpen`, `setActiveMode` |
-| `git` | Repo statuses | `setRepos` |
-| `memory` | Memory entries, filters | Various |
-| `toast` | Toast notifications | `addToast`, `removeToast` |
-| `settings` | Settings state | Various |
-| `workflows` | Workflow definitions and runs | Various |
+| Store       | State                                                                         | Key Actions                                                                        |
+| ----------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `sessions`  | Session list, focused ID, visible IDs (max 6), zoom levels                    | `setSessions`, `addSession`, `removeSession`, `setFocused`, `swapIn`, `zoomIn/Out` |
+| `ui`        | Sidebar open, launcher open, command palette open, fullscreen ID, active mode | `toggleSidebar`, `setLauncherOpen`, `setActiveMode`                                |
+| `git`       | Repo statuses                                                                 | `setRepos`                                                                         |
+| `memory`    | Memory entries, filters                                                       | Various                                                                            |
+| `toast`     | Toast notifications                                                           | `addToast`, `removeToast`                                                          |
+| `settings`  | Settings state                                                                | Various                                                                            |
+| `workflows` | Workflow definitions and runs                                                 | Various                                                                            |
 
 ### xterm.js Terminal Rendering
 
@@ -219,16 +229,18 @@ src/components/
 │   └── terminal-fullscreen.tsx # Fullscreen overlay
 ├── sessions/        # Session management
 │   ├── session-launcher.tsx    # Launch modal with presets and options
+│   ├── session-sidebar.tsx     # Sessions sidebar with search, git repos
 │   ├── session-item.tsx        # Sidebar session entry
 │   └── session-group.tsx       # Grouped sessions (sprint/standalone)
 ├── layout/          # App shell
-│   ├── sidebar.tsx             # Left sidebar with sessions and git
+│   ├── sidebar/               # Sidebar sections (repos, servers, running, recent)
 │   ├── toggle-bar.tsx          # Top bar with mode tabs
 │   ├── bottom-bar.tsx          # Bottom status bar
 │   ├── command-palette.tsx     # Cmd+K palette
 │   └── help-panel.tsx          # Help/docs panel
 ├── git/             # Git features
-│   └── pr-modal.tsx            # PR creation modal
+│   ├── pr-modal.tsx            # PR creation modal
+│   └── git-view.tsx            # Git branch management panel
 ├── memory/          # Memory browser
 │   ├── memory-view.tsx         # Main memory page
 │   └── memory-detail.tsx       # Single memory entry
@@ -238,18 +250,21 @@ src/components/
 │   ├── step-card.tsx           # Individual step card
 │   ├── step-timeline.tsx       # Step progress timeline
 │   ├── flow-sidebar.tsx        # Flow navigation
-│   └── system-panel.tsx        # System status panel
+│   ├── system-panel.tsx        # System status panel
+│   └── sprint-create.tsx      # Sprint creation dialog with gate config
 ├── settings/        # Configuration
 │   ├── settings-view.tsx       # Settings container with tabs
 │   ├── settings-general.tsx    # General preferences
 │   ├── settings-workspace.tsx  # Project and agent system config
+│   ├── settings-agents.tsx     # Agent management (create, edit, delete)
+│   ├── settings-automations.tsx # Automation scheduling config
 │   ├── settings-shortcuts.tsx  # Keyboard shortcut reference
 │   ├── settings-monitor.tsx    # Process monitor
-│   ├── settings-pmo.tsx        # PMO scheduler controls
 │   ├── settings-about.tsx      # About page
 │   └── scaffold-dialog.tsx     # Agent system scaffolding UI
 ├── setup/           # First-run experience
-│   └── setup-wizard.tsx        # Multi-step setup wizard
+│   ├── setup-wizard.tsx        # Multi-step setup wizard (error handling, back nav)
+│   └── onboarding.tsx          # AI-powered agent generation with CLI check
 └── ui/              # Shared primitives
     ├── toast.tsx               # Toast notification system
     └── error-boundary.tsx      # React error boundary
@@ -270,6 +285,7 @@ Both modes run Claude Code under the hood. The SDK path is not an API wrapper --
 ### Why a single WebSocket?
 
 All real-time data (terminal I/O for all sessions, git updates, usage metrics, file changes) flows through one WebSocket connection. This simplifies:
+
 - Connection management (one reconnect loop, one health check)
 - Message routing (type-based dispatch)
 - Resource usage (one socket vs. N sockets for N sessions)
@@ -283,6 +299,7 @@ xterm.js creates a complex DOM structure with a canvas element for WebGL renderi
 ### Why Express wrapping Next.js?
 
 Next.js App Router does not natively support WebSocket or long-running server processes. By having Express as the outer layer:
+
 - WebSocket upgrades are handled before Next.js sees them
 - PTY processes, file watchers, and git pollers run in the Express process
 - API routes can access shared state (TerminalManager, GitWatcher) directly
@@ -346,16 +363,16 @@ agent-studio/
 
 ## 6. Key Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `node-pty` | PTY spawning for interactive terminal sessions |
-| `@anthropic-ai/claude-agent-sdk` | Programmatic Claude Code queries for room agents |
-| `tree-kill` | Kill entire process trees (SIGKILL escalation) |
-| `xterm.js` + `@xterm/addon-webgl` | GPU-accelerated terminal rendering in browser |
-| `react-markdown` + `remark-gfm` | Markdown rendering in room chat messages |
-| `express` + `ws` | HTTP server and WebSocket transport |
-| `chokidar` | File system watching for sprint/memory files |
-| `zustand` | Lightweight frontend state management |
+| Package                           | Purpose                                          |
+| --------------------------------- | ------------------------------------------------ |
+| `node-pty`                        | PTY spawning for interactive terminal sessions   |
+| `@anthropic-ai/claude-agent-sdk`  | Programmatic Claude Code queries for room agents |
+| `tree-kill`                       | Kill entire process trees (SIGKILL escalation)   |
+| `xterm.js` + `@xterm/addon-webgl` | GPU-accelerated terminal rendering in browser    |
+| `react-markdown` + `remark-gfm`   | Markdown rendering in room chat messages         |
+| `express` + `ws`                  | HTTP server and WebSocket transport              |
+| `chokidar`                        | File system watching for sprint/memory files     |
+| `zustand`                         | Lightweight frontend state management            |
 
 ## 7. Adding a New Feature
 
