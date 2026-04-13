@@ -2412,7 +2412,24 @@ Choose the schedule and model based on the task:
         },
       };
 
-      // We don't persist runs (they're ephemeral), just broadcast
+      // Persist run to disk so GET endpoints can retrieve it (ISSUE-04)
+      const stepsRecord: Record<string, import("./workflows/run-state.js").StepState> = {};
+      for (const s of run.steps) {
+        const stepId = (s as any).id ?? `step-${Object.keys(stepsRecord).length}`;
+        stepsRecord[stepId] = {
+          id: stepId,
+          status: "pending",
+        };
+      }
+      saveRunState({
+        runId,
+        workflowId,
+        status: "planned",
+        currentStep: null,
+        startedAt: run.startedAt,
+        steps: stepsRecord,
+      });
+
       // Add to the in-memory flow
       flow.runs.unshift(run);
 
@@ -2474,6 +2491,24 @@ Choose the schedule and model based on the task:
           agentsUsed: flow.runs[0]?.stats.agentsUsed ?? [],
         },
       };
+
+      // Persist run to disk so GET endpoints can retrieve it (ISSUE-04)
+      const stepsRecord2: Record<string, import("./workflows/run-state.js").StepState> = {};
+      for (const s of run.steps) {
+        const stepId = (s as any).id ?? `step-${Object.keys(stepsRecord2).length}`;
+        stepsRecord2[stepId] = {
+          id: stepId,
+          status: "pending",
+        };
+      }
+      saveRunState({
+        runId,
+        workflowId,
+        status: "planned",
+        currentStep: null,
+        startedAt: run.startedAt,
+        steps: stepsRecord2,
+      });
 
       flow.runs.unshift(run);
       const flows = await workflowManager.getFlows();
