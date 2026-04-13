@@ -116,8 +116,7 @@ function useFocusedSessionStatus() {
   return {
     agent: focused.meta?.agent ?? focused.name,
     model: usage.modelShort ?? focused.meta?.model ?? "unknown",
-    contextPercent:
-      usage.contextPercent ?? focused.meta?.contextPercent ?? null,
+    contextPercent: usage.contextPercent ?? focused.meta?.contextPercent ?? null,
     cost: usage.totalCost,
     lastActivity: focused.status,
     branch,
@@ -207,8 +206,7 @@ export default function PageV2() {
                 defaults: { workingDirectory: string };
               };
             };
-            const cwd =
-              data.config?.defaults?.workingDirectory ?? data.defaultCwd ?? "~";
+            const cwd = data.config?.defaults?.workingDirectory ?? data.defaultCwd ?? "~";
             setDefaultCwd(cwd);
             if (data.config && !data.config.setupComplete) {
               setShowSetupWizard(true);
@@ -243,21 +241,16 @@ export default function PageV2() {
       }
     });
 
-    const unsubRoomStatus = wsClient.on(
-      "room-agent-status",
-      (msg: WsMessage) => {
-        const payload = msg.payload as {
-          roomId: string;
-          agentId: string;
-          status: RoomAgent["status"];
-        };
-        if (payload?.roomId) {
-          useRoomsStore
-            .getState()
-            .updateAgentStatus(payload.roomId, payload.agentId, payload.status);
-        }
-      },
-    );
+    const unsubRoomStatus = wsClient.on("room-agent-status", (msg: WsMessage) => {
+      const payload = msg.payload as {
+        roomId: string;
+        agentId: string;
+        status: RoomAgent["status"];
+      };
+      if (payload?.roomId) {
+        useRoomsStore.getState().updateAgentStatus(payload.roomId, payload.agentId, payload.status);
+      }
+    });
 
     const unsubRoomApproval = wsClient.on("room-approval", (msg: WsMessage) => {
       const payload = msg.payload as {
@@ -272,50 +265,35 @@ export default function PageV2() {
       }
     });
 
-    const unsubRoomTyping = wsClient.on(
-      "room-agent-typing",
-      (msg: WsMessage) => {
-        const payload = msg.payload as {
-          roomId: string;
-          agentId: string;
-        };
-        if (payload?.roomId) {
-          useRoomsStore
-            .getState()
-            .setAgentTyping(payload.roomId, payload.agentId);
-        }
-      },
-    );
+    const unsubRoomTyping = wsClient.on("room-agent-typing", (msg: WsMessage) => {
+      const payload = msg.payload as {
+        roomId: string;
+        agentId: string;
+      };
+      if (payload?.roomId) {
+        useRoomsStore.getState().setAgentTyping(payload.roomId, payload.agentId);
+      }
+    });
 
-    const unsubRoomStreaming = wsClient.on(
-      "room-agent-streaming",
-      (msg: WsMessage) => {
-        const payload = msg.payload as {
-          roomId: string;
-          agentId: string;
-          delta: string;
-        };
-        if (payload?.roomId) {
-          useRoomsStore
-            .getState()
-            .appendStreamingDelta(
-              payload.roomId,
-              payload.agentId,
-              payload.delta,
-            );
-        }
-      },
-    );
+    const unsubRoomStreaming = wsClient.on("room-agent-streaming", (msg: WsMessage) => {
+      const payload = msg.payload as {
+        roomId: string;
+        agentId: string;
+        delta: string;
+      };
+      if (payload?.roomId) {
+        useRoomsStore
+          .getState()
+          .appendStreamingDelta(payload.roomId, payload.agentId, payload.delta);
+      }
+    });
 
-    const unsubRoomNeedsUser = wsClient.on(
-      "room-needs-user",
-      (msg: WsMessage) => {
-        const payload = msg.payload as { roomId: string };
-        if (payload?.roomId) {
-          useRoomsStore.getState().setWaitingForUser(payload.roomId);
-        }
-      },
-    );
+    const unsubRoomNeedsUser = wsClient.on("room-needs-user", (msg: WsMessage) => {
+      const payload = msg.payload as { roomId: string };
+      if (payload?.roomId) {
+        useRoomsStore.getState().setWaitingForUser(payload.roomId);
+      }
+    });
 
     wsClient.connect(`ws://${window.location.host}/ws`);
 
@@ -380,8 +358,7 @@ export default function PageV2() {
             },
           }),
         });
-        if (!res.ok)
-          throw new Error(`Failed to continue session (${res.status})`);
+        if (!res.ok) throw new Error(`Failed to continue session (${res.status})`);
         return;
       }
 
@@ -404,8 +381,7 @@ export default function PageV2() {
             },
           }),
         });
-        if (!res.ok)
-          throw new Error(`Failed to resume session (${res.status})`);
+        if (!res.ok) throw new Error(`Failed to resume session (${res.status})`);
         return;
       }
 
@@ -421,8 +397,7 @@ export default function PageV2() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name:
-            config.agent !== "none" ? config.agent : `claude-${config.model}`,
+          name: config.agent !== "none" ? config.agent : `claude-${config.model}`,
           command: "claude",
           args: args.length > 0 ? args : ["--dangerously-skip-permissions"],
           cwd: resolvedCwd,
@@ -464,9 +439,7 @@ export default function PageV2() {
         reports: "reports",
         settings: "settings",
       };
-      setActiveMode(
-        (modeMap[page] ?? "sessions") as Parameters<typeof setActiveMode>[0],
-      );
+      setActiveMode((modeMap[page] ?? "sessions") as Parameters<typeof setActiveMode>[0]);
       // Clear git view when switching modes
       if (page !== "sessions") setSelectedRepo(null);
     },
@@ -484,9 +457,7 @@ export default function PageV2() {
       <div className="h-screen flex items-center justify-center bg-canvas">
         <div className="flex flex-col items-center gap-3">
           <div className="size-8 border-2 border-text-tertiary/30 border-t-accent rounded-full animate-spin" />
-          <span className="text-label-xs text-text-tertiary">
-            Loading Agent Studio...
-          </span>
+          <span className="text-label-xs text-text-tertiary">Loading Agent Studio...</span>
         </div>
       </div>
     );
@@ -497,9 +468,7 @@ export default function PageV2() {
     return (
       <div className="h-screen flex items-center justify-center bg-canvas">
         <div className="text-center space-y-4">
-          <p className="text-title-md text-text-emphasis">
-            Agent Studio needs Claude Code
-          </p>
+          <p className="text-title-md text-text-emphasis">Agent Studio needs Claude Code</p>
           <p className="text-body-sm text-text-secondary max-w-sm">
             Please install and authenticate Claude Code to continue.
           </p>
@@ -530,11 +499,7 @@ export default function PageV2() {
                   defaultCwd: string;
                   config: { defaults: { workingDirectory: string } };
                 };
-                setDefaultCwd(
-                  data.config?.defaults?.workingDirectory ??
-                    data.defaultCwd ??
-                    "~",
-                );
+                setDefaultCwd(data.config?.defaults?.workingDirectory ?? data.defaultCwd ?? "~");
               }
             } catch (e) {
               console.error("Failed to fetch config after setup wizard:", e);
@@ -610,21 +575,16 @@ export default function PageV2() {
               <div className="h-full">
                 {showGitView && selectedRepo ? (
                   <ErrorBoundary fallbackLabel="Git view error">
-                    <GitView
-                      repo={selectedRepo}
-                      onBack={() => setSelectedRepo(null)}
-                    />
+                    <GitView repo={selectedRepo} onBack={() => setSelectedRepo(null)} />
                   </ErrorBoundary>
                 ) : nonRoomSessions.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full gap-6 animate-tab-enter">
                     <div className="text-center space-y-3">
-                      <p className="text-title-md text-text-emphasis">
-                        Ready to go.
-                      </p>
+                      <p className="text-title-md text-text-emphasis">Ready to go.</p>
                       <p className="text-body-sm text-text-tertiary max-w-sm">
                         Launch a session to start working with Claude. Press{" "}
                         <kbd className="px-1.5 py-0.5 rounded bg-surface text-text-secondary text-label-xs border border-border-subtle">
-                          Cmd+N
+                          Cmd+Shift+N
                         </kbd>{" "}
                         for the launcher.
                       </p>

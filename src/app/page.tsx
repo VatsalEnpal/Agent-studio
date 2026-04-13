@@ -671,11 +671,11 @@ export default function Home() {
                       <p className="text-xs text-text-tertiary max-w-sm">
                         Launch an interactive Claude Code session to start coding. Press{" "}
                         <kbd className="px-1 py-0.5 rounded-[3px] bg-bg-input text-text-ghost text-2xs border border-border-default">
-                          Cmd+N
+                          Cmd+Shift+N
                         </kbd>{" "}
                         or use{" "}
                         <kbd className="px-1 py-0.5 rounded-[3px] bg-bg-input text-text-ghost text-2xs border border-border-default">
-                          Cmd+K
+                          Cmd+Shift+K
                         </kbd>{" "}
                         to search across sessions and sprints.
                       </p>
