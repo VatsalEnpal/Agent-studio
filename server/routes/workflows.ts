@@ -165,9 +165,9 @@ export function workflowRoutes(deps: WorkflowRouteDeps): Router {
 
   // ---------- Run Management ----------
 
-  /** POST /api/workflows/:id/run — start a new run */
-  router.post("/:id/run", async (req, res) => {
-    const wf = registry.getWorkflow(req.params.id);
+  /** Shared logic for starting a workflow run */
+  function handleStartRun(id: string, res: import("express").Response): void {
+    const wf = registry.getWorkflow(id);
     if (!wf) {
       res.status(404).json({ error: "Workflow not found" });
       return;
@@ -180,6 +180,18 @@ export function workflowRoutes(deps: WorkflowRouteDeps): Router {
     executor.executeRun(wf, runState).catch(() => {
       // errors are tracked in run state
     });
+  }
+
+  /** POST /api/workflows/:id/run — start a new run */
+  router.post("/:id/run", (req, res) => {
+    handleStartRun(req.params.id, res);
+  });
+  // Route aliases: /start and POST /runs also start a run (ISSUE-06)
+  router.post("/:id/start", (req, res) => {
+    handleStartRun(req.params.id, res);
+  });
+  router.post("/:id/runs", (req, res) => {
+    handleStartRun(req.params.id, res);
   });
 
   /** GET /api/workflows/:id/runs — list runs for a workflow */

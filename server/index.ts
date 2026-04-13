@@ -2375,6 +2375,65 @@ Choose the schedule and model based on the task:
     }
   });
 
+  // Route aliases: /start and POST /runs also start a run (ISSUE-06)
+  app.post("/api/workflows/:id/start", async (req, res) => {
+    try {
+      const workflowId = req.params["id"];
+      const flow = await workflowManager.getFlow(workflowId);
+      if (!flow) {
+        // Also check pipeline registry
+        const pipelineWf = pipelineRegistry.getWorkflow(workflowId);
+        if (!pipelineWf) {
+          res
+            .status(404)
+            .json({ error: "Workflow not found. Use POST /api/workflows/:id/run to start a run." });
+          return;
+        }
+        // Delegate to pipeline executor
+        const runState = workflowExecutor.startRun(pipelineWf);
+        res.status(201).json({ runId: runState.runId, status: "started" });
+        workflowExecutor.executeRun(pipelineWf, runState).catch(() => {});
+        return;
+      }
+
+      const runId = `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const run = {
+        id: runId,
+        flowId: workflowId,
+        name: `${flow.name} Run`,
+        status: "waiting" as const,
+        startedAt: new Date().toISOString(),
+        steps:
+          flow.runs[0]?.steps.map((s) => ({
+            ...s,
+            status: "pending" as const,
+            startedAt: undefined,
+            completedAt: undefined,
+          })) ?? [],
+        stats: {
+          agentsUsed: flow.runs[0]?.stats.agentsUsed ?? [],
+        },
+      };
+
+      flow.runs.unshift(run);
+      const flows = await workflowManager.getFlows();
+      const targetFlow = flows.find((f) => f.id === workflowId);
+      if (targetFlow && !targetFlow.runs.find((r) => r.id === runId)) {
+        targetFlow.runs.unshift(run);
+      }
+
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
+
+      res.json({ ok: true, runId, run });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
   // Broadcast workflow updates on sprint file changes
   fileWatcher.onUpdate(() => {
     void workflowManager.getFlows().then((flows) => {
