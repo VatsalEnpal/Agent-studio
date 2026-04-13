@@ -436,6 +436,7 @@ export default function Home() {
 
   const handleKillSession = useCallback(async (sessionId: string) => {
     await fetch(`/api/sessions/${sessionId}`, { method: "DELETE" });
+    useSessionsStore.getState().removeSession(sessionId);
   }, []);
 
   const handlePush = useCallback(async (repo: RepoStatus) => {
