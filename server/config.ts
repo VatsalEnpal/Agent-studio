@@ -214,10 +214,10 @@ export function generateDefaultConfig(): AgentStudioConfig {
   const home = os.homedir();
   const workingDirectory = (projects[0]?.path ?? parentDir).replace(home, "~");
 
-  // Show setup wizard if nothing meaningful was auto-detected
-  const hasProjects = projects.length > 0;
-  const hasAgentSystem = !!agentSystem;
-  const setupComplete = hasProjects || hasAgentSystem;
+  // Always show the setup wizard on first run (auto-generated config).
+  // Even if we auto-detected projects/agent system, the user should
+  // confirm their setup. The wizard marks setupComplete: true on finish.
+  const setupComplete = false;
 
   return {
     projects,
