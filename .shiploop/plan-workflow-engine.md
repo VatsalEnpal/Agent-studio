@@ -706,19 +706,19 @@ Every time you need the server running:
 
 ## Part H: Final Verification (Tasks 33-40)
 
-### 33. [ ] TypeScript Clean
+### 33. [DONE] TypeScript Clean
 
 Run `npx tsc --noEmit`. ZERO errors. Fix any that exist.
 
-### 34. [ ] Build Clean
+### 34. [DONE] Build Clean
 
 Run `npm run build` and `npm run build:server`. Both must succeed with zero errors.
 
-### 35. [ ] All Unit Tests Pass
+### 35. [DONE] All Unit Tests Pass
 
 Run `npx vitest run`. ALL tests pass — old and new.
 
-### 36. [ ] End-to-End Workflow Test (Execute Mode)
+### 36. [DONE] End-to-End Workflow Test (Execute Mode)
 
 Via Playwright + API:
 
@@ -730,14 +730,14 @@ Via Playwright + API:
 - Verify final completion
 - Verify run state on disk matches UI
 
-### 37. [ ] End-to-End Workflow Test (Watch Mode)
+### 37. [DONE] End-to-End Workflow Test (Watch Mode)
 
 - Create watch-mode workflow pointing at a test state file
 - Write state changes to the file
 - Verify UI updates in real-time
 - Approve gate via UI → verify state file updated
 
-### 38. [ ] End-to-End Scheduled Workflow Test
+### 38. [DONE] End-to-End Scheduled Workflow Test
 
 - Create workflow with 5-second schedule (test bypass)
 - Verify: first run fires automatically
@@ -745,7 +745,7 @@ Via Playwright + API:
 - Pause schedule → verify stops firing
 - Resume → verify fires again
 
-### 39. [ ] Full App Smoke Test (Playwright)
+### 39. [DONE] Full App Smoke Test (Playwright)
 
 Complete pass through ENTIRE app:
 
@@ -754,7 +754,7 @@ Complete pass through ENTIRE app:
 - Zero console errors on clean page load
 - Take screenshots of every key workflow screen → `.shiploop/screenshots/workflow-engine/`
 
-### 40. [ ] Write Final Report
+### 40. [DONE] Write Final Report
 
 `.shiploop/reports/final-report-workflow-engine.md`:
 
