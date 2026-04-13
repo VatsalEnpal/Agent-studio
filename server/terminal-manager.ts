@@ -3,6 +3,7 @@ import treeKill from "tree-kill";
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { whichCommand, IS_WINDOWS } from "./platform.js";
+import { sanitize, sanitizeName, DEMO_MODE } from "./demo-sanitizer.js";
 
 const ALLOWED_COMMANDS = new Set([
   "claude",
@@ -170,7 +171,7 @@ export class TerminalManager {
               this.emit({
                 type: "terminal-data",
                 sessionId: id,
-                data: pending,
+                data: sanitize(pending),
               });
               pending = "";
             }
@@ -189,7 +190,7 @@ export class TerminalManager {
           this.emit({
             type: "terminal-data",
             sessionId: id,
-            data: pending,
+            data: sanitize(pending),
           });
           pending = "";
         }
@@ -302,7 +303,13 @@ export class TerminalManager {
   }
 
   listSessions(): Session[] {
-    return Array.from(this.sessions.values()).map((entry) => entry.session);
+    const sessions = Array.from(this.sessions.values()).map((entry) => entry.session);
+    if (!DEMO_MODE) return sessions;
+    // Sanitize names and paths for demo recordings
+    return sessions.map((s) => ({
+      ...s,
+      name: sanitizeName(s.name),
+    }));
   }
 
   onEvent(listener: EventListener): () => void {

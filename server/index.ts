@@ -84,6 +84,7 @@ import type { ProjectAnalysis } from "./agent-generator.js";
 import { analyzeProject as analyzeProjectEnhanced } from "./project-analyzer.js";
 import type { ProjectProfile } from "./project-analyzer.js";
 import { suggestAutomations } from "./automation-suggestions.js";
+import { sanitize } from "./demo-sanitizer.js";
 import {
   AUTOMATION_TEMPLATES as RICH_TEMPLATES,
   getTemplate,
@@ -1053,7 +1054,7 @@ Choose the schedule and model based on the task:
       res.status(404).json({ error: "Session not found" });
       return;
     }
-    res.json({ buffer });
+    res.json({ buffer: sanitize(buffer) });
   });
 
   // --- Process discovery API ---
