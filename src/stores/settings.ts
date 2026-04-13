@@ -58,28 +58,40 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       const res = await fetch("/api/settings");
       const data: AppSettings = await res.json();
 
-      // Also fetch the authoritative config to get the canonical working directory.
-      // The /api/settings endpoint may return a stale defaultCwd from .settings.json,
-      // while /api/config returns the resolved value from .agent-studio.json.
-      let configCwd: string | null = null;
+      // Also fetch the authoritative config — .agent-studio.json is the canonical
+      // source for defaults.  The /api/settings endpoint reads from .settings.json
+      // which can be stale (e.g. model changed in config but .settings.json still
+      // has the old value).  Override model, permissions, and cwd from /api/config.
       try {
         const cfgRes = await fetch("/api/config");
         if (cfgRes.ok) {
           const cfgData = (await cfgRes.json()) as {
             defaultCwd: string;
-            config: { defaults: { workingDirectory: string } };
+            config?: {
+              defaults?: {
+                model?: "opus" | "sonnet" | "haiku";
+                permissions?: "bypass" | "default" | "plan";
+                workingDirectory?: string;
+              };
+            };
           };
-          configCwd = cfgData.config?.defaults?.workingDirectory ?? cfgData.defaultCwd ?? null;
+          const cfgDefaults = cfgData.config?.defaults;
+          if (cfgDefaults?.model) {
+            data.defaultModel = cfgDefaults.model;
+          }
+          if (cfgDefaults?.permissions) {
+            data.defaultPermissions = cfgDefaults.permissions;
+          }
+          const configCwd = cfgDefaults?.workingDirectory ?? cfgData.defaultCwd ?? null;
+          if (configCwd) {
+            data.defaultCwd = configCwd;
+          }
         }
       } catch {
         // Ignore — fall back to whatever /api/settings returned
       }
 
       if (data && data.defaultModel) {
-        // Use the config's working directory as the canonical source
-        if (configCwd) {
-          data.defaultCwd = configCwd;
-        }
         set({ settings: data, settingsLoaded: true });
       } else {
         set({ settingsLoaded: true });
