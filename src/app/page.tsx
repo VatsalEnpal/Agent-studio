@@ -36,6 +36,7 @@ import { CreateRoomDialog } from "@/components/teams/create-room-dialog";
 
 import { SprintsView } from "@/components/sprints/sprints-view";
 import { SprintList } from "@/components/sprints/sprint-list";
+import { CreateSprintDialog } from "@/components/sprints/create-sprint-dialog";
 import { useSprintsStore } from "@/stores/sprints";
 
 import { MemoryView } from "@/components/memory/memory-view";
@@ -106,6 +107,7 @@ export default function Home() {
   const [selectedRepo, setSelectedRepo] = useState<RepoStatus | null>(null);
   const [showDevServers, setShowDevServers] = useState(false);
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
+  const [createSprintOpen, setCreateSprintOpen] = useState(false);
   const [navBadges, setNavBadges] = useState<Partial<Record<NavPage, number>>>({});
 
   useEffect(() => {
@@ -593,6 +595,7 @@ export default function Home() {
               sprints={sprints}
               selectedSprintId={selectedSprintId}
               onSelect={selectSprint}
+              onCreateSprint={() => setCreateSprintOpen(true)}
             />
           )}
           {activeMode === "memory" && (
@@ -779,6 +782,9 @@ export default function Home() {
       {createRoomOpen && (
         <CreateRoomDialog open={createRoomOpen} onOpenChange={setCreateRoomOpen} />
       )}
+
+      {/* Create sprint dialog */}
+      <CreateSprintDialog open={createSprintOpen} onOpenChange={setCreateSprintOpen} />
 
       {/* PR Modal */}
       <PRModal />

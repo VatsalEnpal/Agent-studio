@@ -1842,6 +1842,86 @@ Choose the schedule and model based on the task:
     }
   });
 
+  // --- Create sprint endpoint ---
+  app.post("/api/sprints/create", async (req, res) => {
+    try {
+      const { name, goal, agents, cwd, pipeline } = req.body as {
+        name?: string;
+        goal?: string;
+        agents?: string[];
+        cwd?: string;
+        pipeline?: Array<{ id: string; agent: string; name: string; description: string }>;
+      };
+      if (!name || !agents || agents.length === 0) {
+        res.status(400).json({ error: "Missing required fields: name, agents" });
+        return;
+      }
+
+      const sprintId = `sprint-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const gates = (
+        pipeline ??
+        agents.map((a, i) => ({
+          id: `gate-${i}`,
+          agent: a,
+          name: `${a.charAt(0).toUpperCase() + a.slice(1)} Phase`,
+          description: `Agent ${a} works on the sprint goal`,
+        }))
+      ).map((step, i) => ({
+        id: step.id ?? `gate-${i}`,
+        name: step.name,
+        status: i === 0 ? ("in_progress" as const) : ("not_started" as const),
+        requirements: [] as Array<{ label: string; met: boolean }>,
+        details: step.description ?? null,
+        action: null,
+        richContent: null,
+      }));
+
+      // Create the sprint as a workflow flow
+      const flow = {
+        id: sprintId,
+        name,
+        status: "planned" as const,
+        createdAt: new Date().toISOString(),
+        runs: [
+          {
+            id: `run-${Date.now()}`,
+            flowId: sprintId,
+            name: `${name} Run`,
+            startedAt: new Date().toISOString(),
+            status: "planned" as const,
+            steps: gates.map((g) => ({
+              id: g.id,
+              name: g.name,
+              status: g.status,
+              agentId: null,
+            })),
+            stats: { agentsUsed: agents },
+          },
+        ],
+      };
+
+      // Add to workflow manager's in-memory flows
+      const flows = await workflowManager.getFlows();
+      flows.unshift(flow as never);
+
+      // Broadcast update
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
+
+      res.status(201).json({
+        ok: true,
+        sprintId,
+        name,
+        gates: gates.length,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
   // --- Gate approval endpoint ---
   app.post("/api/sprints/:sprintId/gates/:gateId/approve", async (req, res) => {
     try {

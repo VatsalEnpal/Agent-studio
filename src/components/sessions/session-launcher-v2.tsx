@@ -151,17 +151,11 @@ function shortProject(project: string): string {
 // Component
 // ---------------------------------------------------------------------------
 
-export function SessionLauncherV2({
-  open,
-  onOpenChange,
-  onLaunch,
-}: SessionLauncherV2Props) {
+export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLauncherV2Props) {
   const [customName, setCustomName] = useState("");
   const [model, setModel] = useState<"opus" | "sonnet" | "haiku">("sonnet");
   const [agent, setAgent] = useState("none");
-  const [permissions, setPermissions] = useState<
-    "bypass" | "default" | "plan" | "auto"
-  >("default");
+  const [permissions, setPermissions] = useState<"bypass" | "default" | "plan" | "auto">("default");
   const [channel, setChannel] = useState<"none" | "telegram">("none");
   const [defaultCwd, setDefaultCwd] = useState("~");
   const [cwd, setCwd] = useState("~");
@@ -169,6 +163,8 @@ export function SessionLauncherV2({
   const [launching, setLaunching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [agents, setAgents] = useState<AgentOption[]>(DEFAULT_AGENTS);
+  const [agentsLoading, setAgentsLoading] = useState(false);
+  const [agentsError, setAgentsError] = useState<string | null>(null);
   const [recentSessions, setRecentSessions] = useState<PastSession[]>([]);
   const [resumeDropdownOpen, setResumeDropdownOpen] = useState(false);
   const [resumeSearch, setResumeSearch] = useState("");
@@ -231,15 +227,19 @@ export function SessionLauncherV2({
 
   // Fetch agents
   useEffect(() => {
+    setAgentsLoading(true);
+    setAgentsError(null);
     void (async () => {
       try {
         const res = await fetch("/api/agents");
-        if (res.ok) {
-          const data = (await res.json()) as AgentOption[];
-          if (Array.isArray(data) && data.length > 0) setAgents(data);
-        }
+        if (!res.ok) throw new Error(`Failed to load agents (${String(res.status)})`);
+        const data = (await res.json()) as AgentOption[];
+        if (Array.isArray(data) && data.length > 0) setAgents(data);
       } catch (e) {
         console.error("Caught error:", e);
+        setAgentsError(e instanceof Error ? e.message : "Failed to load agents");
+      } finally {
+        setAgentsLoading(false);
       }
     })();
   }, []);
@@ -264,10 +264,7 @@ export function SessionLauncherV2({
   useEffect(() => {
     if (!resumeDropdownOpen) return;
     const handler = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setResumeDropdownOpen(false);
       }
     };
@@ -290,8 +287,7 @@ export function SessionLauncherV2({
     setLaunching(true);
     setError(null);
     try {
-      const sessionName =
-        customName.trim() || (agent !== "none" ? agent : `claude-${model}`);
+      const sessionName = customName.trim() || (agent !== "none" ? agent : `claude-${model}`);
       await onLaunch({
         name: sessionName,
         model,
@@ -383,8 +379,7 @@ export function SessionLauncherV2({
       setError(null);
       applyPreset(preset);
       try {
-        const sessionName =
-          preset.agent !== "none" ? preset.agent : `claude-${preset.model}`;
+        const sessionName = preset.agent !== "none" ? preset.agent : `claude-${preset.model}`;
         await onLaunch({
           name: sessionName,
           model: preset.model,
@@ -436,9 +431,7 @@ export function SessionLauncherV2({
                   // For the Continue preset, show which session will be resumed
                   const isContinue = preset.name === "Continue";
                   const lastSession =
-                    isContinue && recentSessions.length > 0
-                      ? recentSessions[0]
-                      : null;
+                    isContinue && recentSessions.length > 0 ? recentSessions[0] : null;
                   const continueLabel = lastSession
                     ? `Continue ${shortProject(lastSession.project)}`
                     : preset.name;
@@ -450,9 +443,7 @@ export function SessionLauncherV2({
                     <button
                       key={preset.name}
                       onClick={() => handlePresetLaunch(preset)}
-                      disabled={
-                        launching || (isContinue && recentSessions.length === 0)
-                      }
+                      disabled={launching || (isContinue && recentSessions.length === 0)}
                       title={
                         isContinue && lastSession
                           ? `Resume last session in ${lastSession.project} (${formatRelativeTime(lastSession.date)})`
@@ -470,11 +461,7 @@ export function SessionLauncherV2({
                       )}
                     >
                       <span className="text-text-primary">{continueLabel}</span>
-                      {continueHint && (
-                        <span className="text-text-ghost ml-1">
-                          {continueHint}
-                        </span>
-                      )}
+                      {continueHint && <span className="text-text-ghost ml-1">{continueHint}</span>}
                     </button>
                   );
                 })}
@@ -503,8 +490,7 @@ export function SessionLauncherV2({
                       <>
                         <span className="truncate flex-1">
                           {shortProject(
-                            recentSessions.find((s) => s.id === resume)
-                              ?.project ?? resume,
+                            recentSessions.find((s) => s.id === resume)?.project ?? resume,
                           )}
                         </span>
                         <span className="text-xs text-text-ghost font-mono">
@@ -522,13 +508,8 @@ export function SessionLauncherV2({
                       </>
                     ) : (
                       <>
-                        <span className="flex-1">
-                          Select a previous session...
-                        </span>
-                        <ChevronDownIcon
-                          size={12}
-                          className="text-text-ghost"
-                        />
+                        <span className="flex-1">Select a previous session...</span>
+                        <ChevronDownIcon size={12} className="text-text-ghost" />
                       </>
                     )}
                   </button>
@@ -553,9 +534,7 @@ export function SessionLauncherV2({
                       </div>
                       <div className="overflow-y-auto max-h-36 scrollbar-thin">
                         {filteredSessions.length === 0 ? (
-                          <p className="px-3 py-2 text-xs text-text-ghost">
-                            No sessions found
-                          </p>
+                          <p className="px-3 py-2 text-xs text-text-ghost">No sessions found</p>
                         ) : (
                           filteredSessions.slice(0, 15).map((session) => (
                             <button
@@ -593,9 +572,7 @@ export function SessionLauncherV2({
             {/* Divider */}
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-border-default" />
-              <span className="text-xs text-text-ghost uppercase tracking-[0.5px]">
-                customize
-              </span>
+              <span className="text-xs text-text-ghost uppercase tracking-[0.5px]">customize</span>
               <div className="flex-1 h-px bg-border-default" />
             </div>
 
@@ -727,8 +704,7 @@ export function SessionLauncherV2({
               </button>
               {!launching && (
                 <kbd className="text-xs text-text-ghost bg-bg-input border border-border-default rounded px-1.5 py-0.5">
-                  {typeof navigator !== "undefined" &&
-                  navigator.platform?.includes("Mac")
+                  {typeof navigator !== "undefined" && navigator.platform?.includes("Mac")
                     ? "Cmd"
                     : "Ctrl"}
                   +Enter
