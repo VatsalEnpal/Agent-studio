@@ -9,6 +9,7 @@ import type {
   AgentStepDef,
   GateStepDef,
   LoopStepDef,
+  AgentGroupStepDef,
 } from "../workflows/definition.js";
 
 const TEST_DIR = join(process.cwd(), ".test-executor-" + Date.now());
@@ -765,5 +766,181 @@ describe("WorkflowExecutor — Timeout + Cancellation", () => {
     expect(result.status).toBe("paused");
     expect(result.steps["s1"].status).toBe("completed");
     expect(result.steps["s2"].status).toBe("pending");
+  });
+});
+
+describe("WorkflowExecutor — Nested Agent Groups", () => {
+  it("executes agent-group with 3 sub-steps in order", async () => {
+    const mock = new MockCommandRunner();
+    mock.setResponses([
+      { exitCode: 0, stdout: "sub1", stderr: "" },
+      { exitCode: 0, stdout: "sub2", stderr: "" },
+      { exitCode: 0, stdout: "sub3", stderr: "" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "group-1",
+          name: "Clearing",
+          type: "agent-group",
+          agent: "clearing-agent",
+          visibility: "transparent",
+          steps: [
+            {
+              id: "sub-1",
+              name: "Fetch",
+              type: "agent",
+              agent: "fetcher",
+              goal: "Fetch data",
+            } as AgentStepDef,
+            {
+              id: "sub-2",
+              name: "Process",
+              type: "agent",
+              agent: "processor",
+              goal: "Process data",
+            } as AgentStepDef,
+            {
+              id: "sub-3",
+              name: "Validate",
+              type: "agent",
+              agent: "validator",
+              goal: "Validate data",
+            } as AgentStepDef,
+          ],
+        } as AgentGroupStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    const result = await executor.executeRun(wf, runState);
+
+    expect(result.status).toBe("completed");
+    expect(result.steps["group-1"].status).toBe("completed");
+    expect(result.steps["group-1"].subSteps?.["sub-1"].status).toBe("completed");
+    expect(result.steps["group-1"].subSteps?.["sub-2"].status).toBe("completed");
+    expect(result.steps["group-1"].subSteps?.["sub-3"].status).toBe("completed");
+    expect(mock.calls).toHaveLength(3);
+  });
+
+  it("pauses at a gate sub-step within agent-group", async () => {
+    const mock = new MockCommandRunner();
+    mock.setSuccess("done");
+    const executor = new WorkflowExecutor(mock);
+    const events: ExecutorEvent[] = [];
+    executor.onEvent((e) => events.push(e));
+
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "group-1",
+          name: "Pipeline",
+          type: "agent-group",
+          steps: [
+            {
+              id: "sub-1",
+              name: "Build",
+              type: "agent",
+              agent: "backend",
+              goal: "Build",
+            } as AgentStepDef,
+            {
+              id: "sub-gate",
+              name: "Review",
+              type: "gate",
+              reviewArtifact: "output.md",
+            } as GateStepDef,
+            {
+              id: "sub-2",
+              name: "Deploy",
+              type: "agent",
+              agent: "backend",
+              goal: "Deploy",
+            } as AgentStepDef,
+          ],
+        } as AgentGroupStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    const result = await executor.executeRun(wf, runState);
+
+    expect(result.status).toBe("waiting_approval");
+    expect(result.steps["group-1"].subSteps?.["sub-1"].status).toBe("completed");
+    expect(result.steps["group-1"].subSteps?.["sub-gate"].status).toBe("waiting");
+    expect(events.some((e) => e.type === "gate-waiting" && e.stepId === "sub-gate")).toBe(true);
+  });
+
+  it("fails parent step when sub-step fails", async () => {
+    const mock = new MockCommandRunner();
+    mock.setResponses([
+      { exitCode: 0, stdout: "ok", stderr: "" },
+      { exitCode: 1, stdout: "", stderr: "sub failed" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "group-1",
+          name: "Pipeline",
+          type: "agent-group",
+          steps: [
+            {
+              id: "sub-1",
+              name: "Fetch",
+              type: "agent",
+              agent: "fetcher",
+              goal: "Fetch",
+            } as AgentStepDef,
+            {
+              id: "sub-2",
+              name: "Process",
+              type: "agent",
+              agent: "processor",
+              goal: "Process",
+            } as AgentStepDef,
+          ],
+        } as AgentGroupStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    const result = await executor.executeRun(wf, runState);
+
+    expect(result.steps["group-1"].status).toBe("failed");
+    expect(result.steps["group-1"].subSteps?.["sub-1"].status).toBe("completed");
+    expect(result.steps["group-1"].subSteps?.["sub-2"].status).toBe("failed");
+  });
+
+  it("tracks sub-steps in opaque mode (only parent status visible)", async () => {
+    const mock = new MockCommandRunner();
+    mock.setSuccess("done");
+    const executor = new WorkflowExecutor(mock);
+
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "group-1",
+          name: "Opaque Group",
+          type: "agent-group",
+          visibility: "opaque",
+          steps: [
+            {
+              id: "sub-1",
+              name: "Do Work",
+              type: "agent",
+              agent: "backend",
+              goal: "Work",
+            } as AgentStepDef,
+          ],
+        } as AgentGroupStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    const result = await executor.executeRun(wf, runState);
+
+    // In opaque mode the executor still tracks internally, but the
+    // visibility flag tells the UI how to render (not the executor's concern)
+    expect(result.steps["group-1"].status).toBe("completed");
   });
 });

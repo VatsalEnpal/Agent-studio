@@ -213,8 +213,12 @@ export class WorkflowExecutor {
           await this.executeAgentGroupStep(runState, stepDef, workflowDef, abortController.signal);
         }
 
-        // If step failed and run is paused/failed, stop
-        if (runState.status === "paused" || runState.status === "failed") {
+        // If step failed, paused, or waiting for approval, stop
+        if (
+          runState.status === "paused" ||
+          runState.status === "failed" ||
+          runState.status === "waiting_approval"
+        ) {
           return runState;
         }
       }
