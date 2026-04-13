@@ -1,12 +1,6 @@
 import { spawn } from "node:child_process";
 import { whichCommand } from "./platform.js";
-import {
-  readFileSync,
-  readdirSync,
-  existsSync,
-  mkdirSync,
-  writeFileSync,
-} from "node:fs";
+import { readFileSync, readdirSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, basename } from "node:path";
 import type { ProjectProfile } from "./project-analyzer.js";
 
@@ -68,10 +62,21 @@ function setStatus(status: GenerationStatus, extra?: Partial<GenerationState>) {
   if (extra) Object.assign(generationState, extra);
 }
 
-// ---------- Claude CLI check ----------
+// ---------- Claude CLI check (cached at startup) ----------
+
+let _claudeCliAvailable: boolean | null = null;
 
 export function isClaudeCliAvailable(): boolean {
-  return whichCommand("claude") !== null;
+  if (_claudeCliAvailable === null) {
+    _claudeCliAvailable = whichCommand("claude") !== null;
+  }
+  return _claudeCliAvailable;
+}
+
+/** Re-check CLI availability (e.g. after user installs it) */
+export function refreshClaudeCliCheck(): boolean {
+  _claudeCliAvailable = null;
+  return isClaudeCliAvailable();
 }
 
 // ---------- Prompt builder ----------
@@ -97,7 +102,9 @@ export function buildAgentGenerationPrompt(request: AgentGenerationRequest): str
     projectProfile.existingAgents.length > 0
       ? `Existing agents: ${projectProfile.existingAgents.join(", ")}`
       : null,
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const readmeSection = projectProfile.readme
     ? `\nREADME (first 2000 chars):\n${projectProfile.readme}`
@@ -242,7 +249,12 @@ export async function generateAgents(
   userDescription?: string,
   teamSize?: number,
 ): Promise<GeneratedAgent[]> {
-  const result = await generateAgentsWithClaudeMd(analysis, _projectPath, userDescription, teamSize);
+  const result = await generateAgentsWithClaudeMd(
+    analysis,
+    _projectPath,
+    userDescription,
+    teamSize,
+  );
   return result.agents;
 }
 
@@ -391,7 +403,7 @@ function parseAgentArray(arr: unknown[]): GeneratedAgent[] {
       id: String(obj.id),
       name: String(obj.name ?? obj.id),
       description: String(obj.description ?? ""),
-      model: (model === "opus" || model === "sonnet" || model === "haiku") ? model : "sonnet",
+      model: model === "opus" || model === "sonnet" || model === "haiku" ? model : "sonnet",
       mdContent: String(obj.mdContent),
       rulesFiles,
     };
@@ -461,10 +473,18 @@ export function writeAgentFiles(
     if (!existsSync(toolsDir)) {
       mkdirSync(toolsDir, { recursive: true });
     }
-    writeFileSync(memoryIndexPath, JSON.stringify({
-      rebuilt_at: new Date().toISOString(),
-      entries: [],
-    }, null, 2), "utf-8");
+    writeFileSync(
+      memoryIndexPath,
+      JSON.stringify(
+        {
+          rebuilt_at: new Date().toISOString(),
+          entries: [],
+        },
+        null,
+        2,
+      ),
+      "utf-8",
+    );
     created.push("ai-agents/tools/memory_index.json");
   }
 

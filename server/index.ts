@@ -76,6 +76,7 @@ import {
   generateAgentsWithClaudeMd,
   writeAgentFiles,
   isClaudeCliAvailable,
+  refreshClaudeCliCheck,
   previewAgents,
   getGenerationStatus,
 } from "./agent-generator.js";
@@ -836,9 +837,14 @@ Choose the schedule and model based on the task:
   });
 
   // --- Agent Generator API ---
-  app.get("/api/agents/cli-status", (_req, res) => {
+  app.get("/api/agents/cli-status", (req, res) => {
     try {
-      res.json({ available: isClaudeCliAvailable() });
+      // ?refresh=1 forces a re-check (e.g. after user installs CLI)
+      if (req.query.refresh) {
+        res.json({ available: refreshClaudeCliCheck() });
+      } else {
+        res.json({ available: isClaudeCliAvailable() });
+      }
     } catch {
       res.json({ available: false });
     }
@@ -847,7 +853,8 @@ Choose the schedule and model based on the task:
   // Enhanced project analysis (returns full ProjectProfile)
   const handleAnalyze: express.RequestHandler = (req, res) => {
     try {
-      const { projectPath } = req.body as { projectPath?: string };
+      const body = req.body as { projectPath?: string; path?: string };
+      const projectPath = body.projectPath ?? body.path;
       if (!projectPath) {
         res.status(400).json({ error: "Missing projectPath" });
         return;
