@@ -332,7 +332,9 @@ You are a teammate on Slack, not an assistant writing a report.
           protocol.resume();
         }
         agentTurnCounts.set(roomId, 0); // Reset turn counter on human input
-        protocol.humanMessage(text, "orchestrator");
+        // Route to the first agent in the room (no hardcoded orchestrator dependency)
+        const targetAgent = room.agents[0]?.id ?? "orchestrator";
+        protocol.humanMessage(text, targetAgent);
       }
 
       res.status(201).json(msg);
