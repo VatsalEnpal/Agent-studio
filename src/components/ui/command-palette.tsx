@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   SearchIcon,
   SessionsIcon,
@@ -26,12 +20,7 @@ type IconComponent = React.ComponentType<{ className?: string; size?: number }>;
 // Types
 // ---------------------------------------------------------------------------
 
-export type CommandCategory =
-  | "sessions"
-  | "rooms"
-  | "sprints"
-  | "memory"
-  | "actions";
+export type CommandCategory = "sessions" | "rooms" | "sprints" | "memory" | "actions";
 
 export interface CommandItem {
   id: string;
@@ -189,6 +178,39 @@ export function CommandPalette({ items }: CommandPaletteProps) {
           setActiveMode("memory");
         },
       },
+      {
+        id: "action-go-sprints",
+        label: "Go to Sprints",
+        category: "actions" as CommandCategory,
+        icon: SprintsIcon,
+        keywords: ["switch", "navigate", "pipeline", "workflow", "page"],
+        onSelect: () => {
+          setOpen(false);
+          setActiveMode("sprints");
+        },
+      },
+      {
+        id: "action-go-reports",
+        label: "Go to Reports",
+        category: "actions" as CommandCategory,
+        icon: ChevronRightIcon,
+        keywords: ["switch", "navigate", "output", "analysis", "page"],
+        onSelect: () => {
+          setOpen(false);
+          setActiveMode("reports");
+        },
+      },
+      {
+        id: "action-go-settings",
+        label: "Go to Settings",
+        category: "actions" as CommandCategory,
+        icon: ChevronRightIcon,
+        keywords: ["switch", "navigate", "config", "preferences", "page"],
+        onSelect: () => {
+          setOpen(false);
+          setActiveMode("settings");
+        },
+      },
     ],
     [setOpen, setActiveMode],
   );
@@ -196,10 +218,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
   // -----------------------------------------------------------------------
   // All items = external items + default actions
   // -----------------------------------------------------------------------
-  const allItems = useMemo(
-    () => [...items, ...defaultActions],
-    [items, defaultActions],
-  );
+  const allItems = useMemo(() => [...items, ...defaultActions], [items, defaultActions]);
 
   // -----------------------------------------------------------------------
   // Filtered + grouped
@@ -209,9 +228,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
 
     if (query.trim() === "") {
       // Show recently used first, then all
-      filtered = [...allItems].sort(
-        (a, b) => (b.recentTs ?? 0) - (a.recentTs ?? 0),
-      );
+      filtered = [...allItems].sort((a, b) => (b.recentTs ?? 0) - (a.recentTs ?? 0));
     } else {
       filtered = allItems.filter((item) => fuzzyMatch(query, item));
     }
@@ -224,13 +241,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
       groupMap.set(item.category, existing);
     }
 
-    const categoryOrder: CommandCategory[] = [
-      "sessions",
-      "rooms",
-      "sprints",
-      "memory",
-      "actions",
-    ];
+    const categoryOrder: CommandCategory[] = ["sessions", "rooms", "sprints", "memory", "actions"];
 
     const groups: CommandGroup[] = [];
     const flatItems: CommandItem[] = [];
@@ -255,9 +266,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
 
   // Clamp selected index when results change
   useEffect(() => {
-    setSelectedIndex((prev) =>
-      flatItems.length === 0 ? 0 : Math.min(prev, flatItems.length - 1),
-    );
+    setSelectedIndex((prev) => (flatItems.length === 0 ? 0 : Math.min(prev, flatItems.length - 1)));
   }, [flatItems.length]);
 
   // -----------------------------------------------------------------------
@@ -268,15 +277,11 @@ export function CommandPalette({ items }: CommandPaletteProps) {
       switch (e.key) {
         case "ArrowDown":
           e.preventDefault();
-          setSelectedIndex((prev) =>
-            prev < flatItems.length - 1 ? prev + 1 : 0,
-          );
+          setSelectedIndex((prev) => (prev < flatItems.length - 1 ? prev + 1 : 0));
           break;
         case "ArrowUp":
           e.preventDefault();
-          setSelectedIndex((prev) =>
-            prev > 0 ? prev - 1 : flatItems.length - 1,
-          );
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : flatItems.length - 1));
           break;
         case "Enter":
           e.preventDefault();
@@ -295,9 +300,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
 
   // Scroll selected item into view
   useEffect(() => {
-    const el = listRef.current?.querySelector(
-      `[data-cmd-index="${selectedIndex}"]`,
-    );
+    const el = listRef.current?.querySelector(`[data-cmd-index="${selectedIndex}"]`);
     el?.scrollIntoView({ block: "nearest" });
   }, [selectedIndex]);
 
@@ -308,12 +311,9 @@ export function CommandPalette({ items }: CommandPaletteProps) {
     setOpen(false);
   }, [setOpen]);
 
-  const handleContentClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-    },
-    [],
-  );
+  const handleContentClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+  }, []);
 
   // -----------------------------------------------------------------------
   // Render
@@ -348,10 +348,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
       >
         {/* Search input */}
         <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border-subtle">
-          <SearchIcon
-            size={14}
-            className="text-text-tertiary shrink-0"
-          />
+          <SearchIcon size={14} className="text-text-tertiary shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -382,11 +379,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
         </div>
 
         {/* Results */}
-        <div
-          ref={listRef}
-          className="flex-1 overflow-y-auto scrollbar-thin py-2"
-          role="listbox"
-        >
+        <div ref={listRef} className="flex-1 overflow-y-auto scrollbar-thin py-2" role="listbox">
           {flatItems.length === 0 ? (
             <div className="px-3 py-6 text-center text-xs text-text-tertiary">
               No matching commands
@@ -398,16 +391,11 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                 <div key={group.category} className="pt-1">
                   {/* Category header */}
                   <div className="flex items-center gap-2 px-4 py-1.5">
-                    <GroupIcon
-                      size={12}
-                      className={group.colorClass}
-                    />
+                    <GroupIcon size={12} className={group.colorClass} />
                     <span className={cn("text-label uppercase tracking-wider", group.colorClass)}>
                       {group.label}
                     </span>
-                    <span className="text-2xs text-text-ghost ml-auto">
-                      {group.items.length}
-                    </span>
+                    <span className="text-2xs text-text-ghost ml-auto">{group.items.length}</span>
                   </div>
 
                   {/* Items */}
@@ -437,9 +425,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                           size={14}
                           className={cn(
                             "shrink-0",
-                            isSelected
-                              ? "text-text-primary"
-                              : "text-text-tertiary",
+                            isSelected ? "text-text-primary" : "text-text-tertiary",
                           )}
                         />
                         <span className="flex-1 truncate">{item.label}</span>
@@ -449,9 +435,7 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                           </kbd>
                         )}
                         {isSelected && !item.shortcut && (
-                          <span className="text-label text-text-ghost">
-                            Enter
-                          </span>
+                          <span className="text-label text-text-ghost">Enter</span>
                         )}
                       </button>
                     );
