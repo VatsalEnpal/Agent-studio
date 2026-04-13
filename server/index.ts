@@ -2452,8 +2452,11 @@ Choose the schedule and model based on the task:
     }
   });
 
-  // Route aliases: /start and POST /runs also start a run (ISSUE-06)
-  app.post("/api/workflows/:id/start", async (req, res) => {
+  // Shared handler for route aliases: /start and /runs (ISSUE-06)
+  async function handleStartRunAlias(
+    req: import("express").Request<{ id: string }>,
+    res: import("express").Response,
+  ): Promise<void> {
     try {
       const workflowId = req.params["id"];
       const flow = await workflowManager.getFlow(workflowId);
@@ -2527,7 +2530,10 @@ Choose the schedule and model based on the task:
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
     }
-  });
+  }
+
+  app.post("/api/workflows/:id/start", (req, res) => handleStartRunAlias(req, res));
+  app.post("/api/workflows/:id/runs", (req, res) => handleStartRunAlias(req, res));
 
   // Broadcast workflow updates on sprint file changes
   fileWatcher.onUpdate(() => {
