@@ -60,7 +60,7 @@ import { PipelineRegistry } from "./workflows/workflow-registry.js";
 import { WorkflowExecutor } from "./workflows/executor.js";
 import { WorkflowScheduler } from "./workflows/scheduler.js";
 import { ClaudeCommandRunner } from "./workflows/command-runner.js";
-import { getActiveRuns, saveRunState } from "./workflows/run-state.js";
+import { getActiveRuns, saveRunState, loadRunState, listRuns } from "./workflows/run-state.js";
 import { SdkSessionManager } from "./sdk-session.js";
 import {
   getConfig,
@@ -2175,6 +2175,20 @@ Choose the schedule and model based on the task:
   app.get("/api/workflows", async (_req, res) => {
     try {
       const flows = await workflowManager.getFlows();
+      // Also include pipeline-defined workflows (ISSUE-04)
+      const pipelineWorkflows = pipelineRegistry.listWorkflows();
+      const existingIds = new Set(flows.map((f) => f.id));
+      for (const pw of pipelineWorkflows) {
+        if (!existingIds.has(pw.id)) {
+          flows.push({
+            id: pw.id,
+            name: pw.name,
+            description: pw.description ?? "",
+            icon: "Workflow",
+            runs: [],
+          } as Awaited<ReturnType<typeof workflowManager.getFlows>>[number]);
+        }
+      }
       res.json(flows);
     } catch {
       res.json([]);
@@ -2183,7 +2197,18 @@ Choose the schedule and model based on the task:
 
   app.get("/api/workflows/:flowId/runs/:runId", async (req, res) => {
     try {
-      const run = await workflowManager.getRun(req.params["flowId"], req.params["runId"]);
+      const flowId = req.params["flowId"];
+      const runId = req.params["runId"];
+
+      // Check disk-based pipeline run state first (ISSUE-04)
+      const diskRun = loadRunState(flowId, runId);
+      if (diskRun) {
+        res.json(diskRun);
+        return;
+      }
+
+      // Fall back to in-memory workflow manager
+      const run = await workflowManager.getRun(flowId, runId);
       if (!run) {
         res.status(404).json({ error: "Run not found" });
         return;
