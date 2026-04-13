@@ -1,67 +1,65 @@
-<div align="center">
+<p align="center">
+  <h1 align="center">Agent Studio</h1>
+</p>
 
-# Agent Studio
+<p align="center">
+  The command center for Claude Code.<br />
+  Run agents, coordinate teams, ship code — one window.
+</p>
 
-**Terminal-first command center for AI coding agents.**
+<p align="center">
+  <a href="https://github.com/VatsalEnpal/Agent-studio/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-black" /></a>
+  <a href="https://github.com/VatsalEnpal/Agent-studio"><img alt="Version" src="https://img.shields.io/badge/version-0.3.1-black" /></a>
+</p>
 
-[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org)
-[![Node 22+](https://img.shields.io/badge/node-22%2B-green.svg)](https://nodejs.org)
+<br />
 
-<!-- TODO: Replace with actual demo video once recorded -->
-<!-- ![Agent Studio Demo](demo-videos/final_demo.mp4) -->
+<p align="center">
+  <img src="docs/screenshots/sessions.png" alt="Agent Studio" width="800" />
+</p>
 
-</div>
+<br />
 
----
+## The problem
 
-Multiple Claude Code terminals side by side. Agent-to-agent chat rooms. Multi-step pipelines with approval gates. A knowledge base that persists across sessions. One app, one window.
+You open Claude Code. It's amazing for one task.
 
----
+Then you need a frontend agent, a backend agent, a QA agent, and security review — all at once. Now you're juggling 6 terminals, copy-pasting context between them, and nothing carries over to the next session.
 
-## Features
+Agent Studio fixes that.
 
-### Sessions
+<br />
 
-Launch up to 6 Claude Code terminals in a grid. Each one is a full interactive PTY with live stats: tokens, cost, context window %, model. Use presets (Quick Chat, Security Audit) or configure model, agent, working directory, and permissions yourself. Resume any past session. Fullscreen any pane. Zoom per-pane.
+## What's inside
 
-### Agent Teams (Rooms)
+- **Multi-terminal grid** — Up to 6 Claude Code sessions side by side with live stats
+- **Agent chat rooms** — Agents @mention each other, collaborate on tasks, with human approval gates
+- **Sprint pipelines** — Multi-step workflows (scan → build → test → review → ship) with pass/fail gates
+- **Shared memory** — Agents remember what they learn across sessions
+- **Agent wizard** — Scans your project, generates agents tailored to your exact stack
+- **Git integration** — Branch status, commit, push, and PR creation from the sidebar
+- **Dev server monitor** — Auto-discovers your running servers
+- **Automations** — Scheduled headless agent runs with reports
+- **Command palette** — `Cmd+K` to jump anywhere
+- **Desktop app** — Electron shell with system tray and native notifications
 
-Create a chat room, assign agents, give them a task. They collaborate through @mentions — one finds the bug, tags another to fix it, a third writes the test. Turn-based protocol: one agent at a time, depth limits, no loops. Clean text output, no terminal noise. Human approval gates for anything risky.
+<br />
 
-### Sprint Pipelines
+<p align="center">
+  <img src="docs/screenshots/teams.png" alt="Agent Teams" width="400" />
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/memory.png" alt="Memory" width="400" />
+</p>
 
-Define a multi-step workflow: scan, design, build, test, security review, ship. Each step passes, fails, or waits for approval. Gate toggles (skip/require) per step. QA loops. Scheduling. Progress tracking with time estimates. Nothing ships without your say-so.
+<p align="center">
+  <sub>Agent chat rooms &nbsp;·&nbsp; Shared knowledge base</sub>
+</p>
 
-### Memory
+<br />
 
-Agents write learnings to a shared knowledge base — deploy flags, flaky tests, API quirks. Every session starts with context. Search, filter by category, pin entries, add your own notes. Agents improve on your codebase over time.
+## Get started
 
-### Agent Creation
-
-First-run wizard scans your project with Claude Code CLI, detects your stack, and generates project-specific agents (not generic "frontend" / "backend" — actual agents that know your frameworks, patterns, and conventions). Edit, refine, or create agents manually from Settings.
-
-### Git Integration
-
-Auto-detects repos in your workspace. Shows branch, dirty state, changed files. Commit, push, and create PRs from the sidebar. Branch management with tracked branches. Production repo safeguards (PROD badge, push confirmation).
-
-### Dev Server Monitor
-
-Auto-discovers local dev servers running on your machine (Next.js, Vite, Express, etc.). Shows port, PID, uptime. Add custom servers.
-
-### Automations
-
-Scheduled headless Claude Code runs that produce reviewable reports. Configure schedule, model, and prompts. Results appear in the Reports tab.
-
-### Settings
-
-Default model (Opus / Sonnet / Haiku), permission level, working directory. Notifications for gate approvals, dangerous commands, task completion, session exits, context warnings. Multi-project workspace. Agent management. System monitor (CPU, memory, disk, active sessions).
-
----
-
-## Quick Start
-
-**Requirements:** Node.js 22+ and [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated.
+> **Prerequisites:** Node.js 22+ and [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed.
 
 ```bash
 git clone https://github.com/VatsalEnpal/Agent-studio.git
@@ -70,102 +68,56 @@ npm install
 npm run dev
 ```
 
-Open [localhost:8080](http://localhost:8080). The setup wizard walks you through project configuration and agent generation.
-
-**Mac desktop app:**
+Open [localhost:8080](http://localhost:8080). A setup wizard generates agents for your project.
 
 ```bash
-npm run electron:dev     # dev mode
-npm run build:mac        # build .dmg
-npm run install:mac      # install to /Applications
+npm run electron:dev     # desktop app (dev)
+npm run build:mac        # build macOS .dmg
 ```
 
-**Docker:**
+<br />
 
-```bash
-docker build -t agent-studio .
-docker run -p 8080:8080 -v $HOME/.claude:$HOME/.claude agent-studio
-```
+<p align="center">
+  <img src="docs/screenshots/settings.png" alt="Settings" width="400" />
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/sprints.png" alt="Sprints" width="400" />
+</p>
 
-| Command                | What it does                 |
-| ---------------------- | ---------------------------- |
-| `npm run dev`          | Dev server on localhost:8080 |
-| `npm run electron:dev` | Dev + Electron together      |
-| `npm start`            | Production build + start     |
-| `npm run build:mac`    | macOS `.dmg`                 |
-| `npm run type-check`   | TypeScript strict check      |
-| `npm run test`         | Vitest tests                 |
+<p align="center">
+  <sub>Settings &nbsp;·&nbsp; Sprint pipelines</sub>
+</p>
 
----
+<br />
 
-## Architecture
+## Tech stack
 
-```
-+-----------------------------------------------------+
-|  Electron (optional) -- mac shell, tray, recovery    |
-+-----------------------------------------------------+
-|  Next.js 16 + React 19 -- UI, state, terminals       |
-+-----------------------------------------------------+
-|  Express 5 -- API, WebSocket, file watchers           |
-+------------------------+----------------------------+
-|  node-pty              |  Claude Agent SDK           |
-|  (terminal sessions)   |  (agent chat rooms)         |
-+------------------------+----------------------------+
-```
+|               |                                           |
+| ------------- | ----------------------------------------- |
+| **Framework** | Next.js 16, React 19, TypeScript (strict) |
+| **Styling**   | Tailwind CSS                              |
+| **State**     | Zustand                                   |
+| **Server**    | Express 5, WebSocket                      |
+| **Terminals** | node-pty, xterm.js                        |
+| **Agents**    | Claude Agent SDK                          |
+| **Desktop**   | Electron                                  |
 
-Terminal sessions spawn Claude Code as a real PTY process. Agent chat uses the [Claude Agent SDK](https://docs.anthropic.com/en/docs/claude-code/sdk) for structured conversations. Both stream to the UI over WebSocket.
-
-**Stack:** Next.js 16 / React 19 / TypeScript (strict) / Tailwind CSS / Zustand / Express 5 / node-pty / xterm.js / Claude Agent SDK / Electron / esbuild / Vitest
-
----
-
-## Keyboard Shortcuts
-
-| Shortcut        | Action                         |
-| --------------- | ------------------------------ |
-| `Cmd+Shift+N`   | Open session launcher          |
-| `Cmd+Shift+K`   | Command palette                |
-| `Cmd+Shift+\`   | Toggle sidebar                 |
-| `Cmd+Shift+F`   | Toggle fullscreen mode         |
-| `Cmd+Enter`     | Fullscreen focused pane        |
-| `Cmd+Shift+1-6` | Focus session by position      |
-| `Tab`           | Cycle focus between sessions   |
-| `Escape`        | Exit fullscreen / close modals |
-
----
-
-## Configuration
-
-**`.agent-studio.json`** in your home directory stores workspace config: projects, defaults, notification preferences.
-
-**`.claude/agents/`** in your project stores agent definitions. Each `.md` file is an agent with a YAML frontmatter (name, description, tools) and a system prompt body.
-
-**Environment variables:**
-| Variable | Purpose |
-|----------|---------|
-| `PORT` | Server port (default: 8080) |
-| `DEMO_MODE` | When `true`, sanitizes terminal output (hides usernames, API keys) for recordings |
-
----
-
-## Design
-
-Dark theme. Geist Mono. Amber accent (`#f59e0b`). Minimal chrome, maximum terminal. Designed to look like a tool engineers actually want open all day.
-
----
+<br />
 
 ## Docs
 
-- **[HOWTO.md](HOWTO.md)** -- full user guide
-- **[CLAUDE.md](CLAUDE.md)** -- contributor and agent instructions
+|                                        |                                                                |
+| -------------------------------------- | -------------------------------------------------------------- |
+| **[HOWTO.md](HOWTO.md)**               | Full user guide — features, shortcuts, agents, troubleshooting |
+| **[ARCHITECTURE.md](ARCHITECTURE.md)** | Technical deep-dive for contributors                           |
+| **[CLAUDE.md](CLAUDE.md)**             | Agent and contributor instructions                             |
 
----
+<br />
 
 ## Acknowledgements
 
-The agent chat feature was inspired by **[TalkTo](https://github.com/hyperslack/talkto)** by [@hyperslack](https://github.com/hyperslack) -- a local-first messaging server that lets AI agents from different tools talk to each other via MCP. Same core idea -- agents shouldn't work in isolation. Two different approaches.
+Agent chat was inspired by [TalkTo](https://github.com/hyperslack/talkto) by [@hyperslack](https://github.com/hyperslack) — same idea (agents shouldn't work alone), different approach.
 
----
+<br />
 
 ## License
 
