@@ -55,6 +55,11 @@ import { WorkflowManager } from "./workflows/index.js";
 import { RoomManager } from "./rooms.js";
 import type { RoomMessage } from "./rooms.js";
 import { roomsRoutes } from "./routes/rooms.js";
+import { workflowRoutes } from "./routes/workflows.js";
+import { PipelineRegistry } from "./workflows/workflow-registry.js";
+import { WorkflowExecutor } from "./workflows/executor.js";
+import { WorkflowScheduler } from "./workflows/scheduler.js";
+import { ClaudeCommandRunner } from "./workflows/command-runner.js";
 import { SdkSessionManager } from "./sdk-session.js";
 import {
   getConfig,
@@ -3582,6 +3587,27 @@ Choose the schedule and model based on the task:
 
   // --- Room routes (mounted via route module) ---
   app.use("/api/rooms", roomsRoutes(roomManager, sdkManager, wss));
+
+  // --- Workflow engine routes ---
+  const pipelineRegistry = new PipelineRegistry();
+  const workflowExecutor = new WorkflowExecutor(new ClaudeCommandRunner());
+  const workflowScheduler = new WorkflowScheduler(async (workflowId) => {
+    const wf = pipelineRegistry.getWorkflow(workflowId);
+    if (!wf) return false;
+    const runState = workflowExecutor.startRun(wf);
+    workflowExecutor.executeRun(wf, runState).catch(() => {});
+    return true;
+  });
+  workflowScheduler.restoreSchedules();
+  app.use(
+    "/api/workflows",
+    workflowRoutes({
+      registry: pipelineRegistry,
+      executor: workflowExecutor,
+      scheduler: workflowScheduler,
+      wss,
+    }),
+  );
 
   // --- Next.js catch-all (with loading page while compiling) ---
   let nextReady = false;
