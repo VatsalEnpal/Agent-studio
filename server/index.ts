@@ -2203,7 +2203,7 @@ Choose the schedule and model based on the task:
         name?: string;
         description?: string;
         icon?: string;
-        steps?: Array<{ id: string; name: string; description?: string; agents: string[] }>;
+        steps?: Array<Record<string, unknown>>;
       };
       if (!body.name || !Array.isArray(body.steps) || body.steps.length === 0) {
         res.status(400).json({ error: "Missing name or steps" });
@@ -2211,17 +2211,17 @@ Choose the schedule and model based on the task:
       }
 
       const id = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      // Preserve the full step objects as sent by the client (ISSUE-03)
       const newWorkflow: WorkflowConfig = {
         id,
         name: body.name,
         description: body.description,
         icon: body.icon ?? "Workflow",
         steps: body.steps.map((s) => ({
-          id: s.id,
-          name: s.name,
-          description: s.description,
-          agents: s.agents ?? [],
-        })),
+          ...s,
+          id: String(s.id ?? ""),
+          name: String(s.name ?? ""),
+        })) as WorkflowConfig["steps"],
       };
 
       const cfg = getConfig();
@@ -2252,7 +2252,7 @@ Choose the schedule and model based on the task:
         name?: string;
         description?: string;
         icon?: string;
-        steps?: Array<{ id: string; name: string; description?: string; agents: string[] }>;
+        steps?: Array<Record<string, unknown>>;
       };
 
       const cfg = getConfig();
@@ -2266,13 +2266,13 @@ Choose the schedule and model based on the task:
       if (body.name !== undefined) workflows[idx]!.name = body.name;
       if (body.description !== undefined) workflows[idx]!.description = body.description;
       if (body.icon !== undefined) workflows[idx]!.icon = body.icon;
+      // Preserve the full step objects as sent by the client (ISSUE-03)
       if (body.steps !== undefined) {
         workflows[idx]!.steps = body.steps.map((s) => ({
-          id: s.id,
-          name: s.name,
-          description: s.description,
-          agents: s.agents ?? [],
-        }));
+          ...s,
+          id: String(s.id ?? ""),
+          name: String(s.name ?? ""),
+        })) as WorkflowConfig["steps"];
       }
       cfg.workflows = workflows;
       saveConfig(cfg);

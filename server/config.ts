@@ -38,8 +38,20 @@ export interface WorkflowStepConfig {
   id: string;
   name: string;
   description?: string;
-  agents: string[];
+  agents?: string[];
   dataSource?: string;
+  /** Step type: agent, gate, loop, agent-group */
+  type?: string;
+  /** Single agent name (for agent steps) */
+  agent?: string;
+  /** Goal for agent steps */
+  goal?: string;
+  /** Max iterations for loop steps */
+  maxIterations?: number;
+  /** Nested step IDs for loop steps, or inline sub-steps for agent-group */
+  steps?: (WorkflowStepConfig | string)[];
+  /** Additional fields the client sends are preserved via index signature */
+  [key: string]: unknown;
 }
 
 export interface WorkflowConfig {
