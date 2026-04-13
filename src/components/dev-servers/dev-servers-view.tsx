@@ -78,6 +78,18 @@ function AddServerDialog({ open, onOpenChange, onCreated }: AddServerDialogProps
     setTimeout(reset, 200);
   }, [onOpenChange, reset]);
 
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClose();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, handleClose]);
+
   const handleSave = useCallback(async () => {
     if (!name.trim() || !command.trim() || !cwd.trim()) return;
     setSaving(true);

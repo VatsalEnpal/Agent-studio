@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { CloseIcon, CheckIcon, UserIcon, EditIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
@@ -187,6 +187,18 @@ export function CreateAgentDialog({
       setSaving(false);
     }
   }, [slug, name, description, markdown, projectPath, onCreated]);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClose();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, handleClose]);
 
   if (!open) return null;
 
