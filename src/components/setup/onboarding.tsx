@@ -245,6 +245,7 @@ interface ResultScreenProps {
   onRefine: (message: string) => void;
   applying: boolean;
   refining: boolean;
+  errorMessage?: string | null;
 }
 
 function ResultScreen({
@@ -256,6 +257,7 @@ function ResultScreen({
   onRefine,
   applying,
   refining,
+  errorMessage,
 }: ResultScreenProps) {
   const [enabledAutomations, setEnabledAutomations] = useState<Set<string>>(() => {
     const initial = new Set<string>();
@@ -330,7 +332,9 @@ function ResultScreen({
             ))}
             {agents.length === 0 && (
               <div className="py-3 text-center space-y-2">
-                <p className="text-xs text-zinc-500">Could not analyze project.</p>
+                <p className="text-xs text-zinc-500">
+                  {errorMessage ?? "Could not analyze project."}
+                </p>
                 <p className="text-xs text-zinc-600">
                   You can create agents manually from Settings &gt; Agents.
                 </p>
@@ -484,13 +488,27 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
   const [userDescription, setUserDescription] = useState("");
   const [applying, setApplying] = useState(false);
   const [refining, setRefining] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = useCallback(async (description: string, path: string | null) => {
     setScreen("loading");
     setUserDescription(description);
     setProjectPath(path);
+    setErrorMessage(null);
 
     try {
+      // Check if Claude CLI is available before trying to generate
+      const cliRes = await fetch("/api/agents/cli-status");
+      const cliAvailable = cliRes.ok && ((await cliRes.json()) as { available: boolean }).available;
+
+      if (!cliAvailable) {
+        setErrorMessage(
+          "Claude Code CLI not found. Install Claude Code first (https://claude.ai/code) or create agents manually from Settings > Agents.",
+        );
+        setScreen("result");
+        return;
+      }
+
       // If a project path is given, use the preview endpoint which analyzes + generates
       if (path) {
         const res = await fetch("/api/generate-agents/preview", {
@@ -524,6 +542,16 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
           setScreen("result");
           return;
         }
+
+        // Preview failed — extract error message
+        try {
+          const errData = (await res.json()) as { error?: string };
+          if (errData.error) {
+            setErrorMessage(errData.error);
+          }
+        } catch {
+          // Ignore parse errors
+        }
       }
 
       // No project path or preview failed — use generate with a generic analysis
@@ -554,13 +582,22 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
           };
           setAgents(genData.agents ?? []);
           setClaudeMd(genData.claudeMd ?? null);
+        } else {
+          try {
+            const errData = (await genRes.json()) as { error?: string };
+            if (errData.error) {
+              setErrorMessage(errData.error);
+            }
+          } catch {
+            // Ignore parse errors
+          }
         }
       }
 
       setScreen("result");
     } catch (e) {
       console.error("Failed to generate agent setup:", e);
-      // If generation fails entirely, still show result (empty)
+      setErrorMessage("Failed to generate agent setup. Check that the server is running.");
       setScreen("result");
     }
   }, []);
@@ -745,6 +782,7 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
         onRefine={handleRefine}
         applying={applying}
         refining={refining}
+        errorMessage={errorMessage}
       />
     </>
   );

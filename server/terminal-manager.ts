@@ -3,6 +3,7 @@ import treeKill from "tree-kill";
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { whichCommand, IS_WINDOWS } from "./platform.js";
+import { sanitize, sanitizeName, DEMO_MODE } from "./demo-sanitizer.js";
 
 const ALLOWED_COMMANDS = new Set([
   "claude",
@@ -38,7 +39,13 @@ const MAX_BUFFER_SIZE = 100 * 1024; // 100KB per session
 export class TerminalManager {
   private sessions = new Map<
     string,
-    { session: Session; pty: pty.IPty | null; outputBuffer: string; ready: boolean; pendingWrites: string[] }
+    {
+      session: Session;
+      pty: pty.IPty | null;
+      outputBuffer: string;
+      ready: boolean;
+      pendingWrites: string[];
+    }
   >();
   private listeners = new Set<EventListener>();
   private spawnCount = 0;
@@ -50,7 +57,9 @@ export class TerminalManager {
       // For async queue, callers would need to handle promises.
       // Since the current API is synchronous, we allow slight over-limit
       // but log a warning.
-      console.warn(`[terminal-manager] Spawn limit reached (${this.spawnCount}/${this.maxConcurrentSpawns}). Spawning anyway.`);
+      console.warn(
+        `[terminal-manager] Spawn limit reached (${this.spawnCount}/${this.maxConcurrentSpawns}). Spawning anyway.`,
+      );
     }
     this.spawnCount++;
     try {
@@ -116,7 +125,13 @@ export class TerminalManager {
       meta: opts.meta,
     };
 
-    const entry = { session, pty: ptyProcess, outputBuffer: "", ready: false, pendingWrites: [] as string[] };
+    const entry = {
+      session,
+      pty: ptyProcess,
+      outputBuffer: "",
+      ready: false,
+      pendingWrites: [] as string[],
+    };
     this.sessions.set(id, entry);
 
     // Batch PTY output: collect data and flush every 50ms instead of
@@ -156,7 +171,7 @@ export class TerminalManager {
               this.emit({
                 type: "terminal-data",
                 sessionId: id,
-                data: pending,
+                data: sanitize(pending),
               });
               pending = "";
             }
@@ -175,7 +190,7 @@ export class TerminalManager {
           this.emit({
             type: "terminal-data",
             sessionId: id,
-            data: pending,
+            data: sanitize(pending),
           });
           pending = "";
         }
@@ -260,42 +275,41 @@ export class TerminalManager {
     }
 
     const pid = entry.session.pid;
+    const pty = entry.pty;
 
-    // Escalation: SIGTERM -> 2s -> SIGKILL tree -> 1s -> force cleanup
+    // Remove from sessions map immediately so clients see it gone right away
+    this.sessions.delete(id);
+    this.emit({
+      type: "sessions-update",
+      payload: this.listSessions(),
+    });
+
+    // Escalation: SIGTERM -> 2s -> SIGKILL tree (runs in background)
     // Step 1: Graceful SIGTERM
     try {
-      entry.pty.kill("SIGTERM");
+      pty.kill("SIGTERM");
     } catch {
       // PTY may already be dead
     }
 
     // Step 2: After 2s, kill entire process tree with SIGKILL
     setTimeout(() => {
-      if (entry.session.status !== "exited" && pid) {
-        treeKill(pid, "SIGKILL", (err) => {
-          if (err) {
-            // tree-kill failed — force cleanup anyway
-          }
+      if (pid) {
+        treeKill(pid, "SIGKILL", () => {
+          // tree-kill done — process fully cleaned up
         });
       }
     }, 2000);
-
-    // Step 3: After 3s total, force cleanup — keep entry for history but null out pty
-    setTimeout(() => {
-      const e = this.sessions.get(id);
-      if (e && e.session.status !== "exited") {
-        e.session.status = "exited";
-        e.pty = null;
-        this.emit({
-          type: "sessions-update",
-          payload: this.listSessions(),
-        });
-      }
-    }, 3500);
   }
 
   listSessions(): Session[] {
-    return Array.from(this.sessions.values()).map((entry) => entry.session);
+    const sessions = Array.from(this.sessions.values()).map((entry) => entry.session);
+    if (!DEMO_MODE) return sessions;
+    // Sanitize names and paths for demo recordings
+    return sessions.map((s) => ({
+      ...s,
+      name: sanitizeName(s.name),
+    }));
   }
 
   onEvent(listener: EventListener): () => void {

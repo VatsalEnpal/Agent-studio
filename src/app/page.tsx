@@ -435,8 +435,16 @@ export default function Home() {
   );
 
   const handleKillSession = useCallback(async (sessionId: string) => {
-    await fetch(`/api/sessions/${sessionId}`, { method: "DELETE" });
+    // Clear fullscreen if killing the fullscreened session
+    if (useUIStore.getState().fullscreenId === sessionId) {
+      useUIStore.getState().setFullscreen(null);
+    }
+    // Remove from client store immediately for instant UI feedback
     useSessionsStore.getState().removeSession(sessionId);
+    // Then tell server to kill the process (server also removes from its map)
+    await fetch(`/api/sessions/${sessionId}`, { method: "DELETE" }).catch(() => {
+      // Server may have already cleaned up — ignore
+    });
   }, []);
 
   const handlePush = useCallback(async (repo: RepoStatus) => {

@@ -76,6 +76,7 @@ import {
   generateAgentsWithClaudeMd,
   writeAgentFiles,
   isClaudeCliAvailable,
+  refreshClaudeCliCheck,
   previewAgents,
   getGenerationStatus,
 } from "./agent-generator.js";
@@ -83,6 +84,7 @@ import type { ProjectAnalysis } from "./agent-generator.js";
 import { analyzeProject as analyzeProjectEnhanced } from "./project-analyzer.js";
 import type { ProjectProfile } from "./project-analyzer.js";
 import { suggestAutomations } from "./automation-suggestions.js";
+import { sanitize } from "./demo-sanitizer.js";
 import {
   AUTOMATION_TEMPLATES as RICH_TEMPLATES,
   getTemplate,
@@ -836,9 +838,14 @@ Choose the schedule and model based on the task:
   });
 
   // --- Agent Generator API ---
-  app.get("/api/agents/cli-status", (_req, res) => {
+  app.get("/api/agents/cli-status", (req, res) => {
     try {
-      res.json({ available: isClaudeCliAvailable() });
+      // ?refresh=1 forces a re-check (e.g. after user installs CLI)
+      if (req.query.refresh) {
+        res.json({ available: refreshClaudeCliCheck() });
+      } else {
+        res.json({ available: isClaudeCliAvailable() });
+      }
     } catch {
       res.json({ available: false });
     }
@@ -847,7 +854,8 @@ Choose the schedule and model based on the task:
   // Enhanced project analysis (returns full ProjectProfile)
   const handleAnalyze: express.RequestHandler = (req, res) => {
     try {
-      const { projectPath } = req.body as { projectPath?: string };
+      const body = req.body as { projectPath?: string; path?: string };
+      const projectPath = body.projectPath ?? body.path;
       if (!projectPath) {
         res.status(400).json({ error: "Missing projectPath" });
         return;
@@ -1046,7 +1054,7 @@ Choose the schedule and model based on the task:
       res.status(404).json({ error: "Session not found" });
       return;
     }
-    res.json({ buffer });
+    res.json({ buffer: sanitize(buffer) });
   });
 
   // --- Process discovery API ---
