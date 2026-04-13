@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { MockCommandRunner } from "../workflows/command-runner.js";
 import { WorkflowExecutor, type ExecutorEvent } from "../workflows/executor.js";
 import { setBaseDir, loadRunState } from "../workflows/run-state.js";
-import type { WorkflowPipelineDef, AgentStepDef } from "../workflows/definition.js";
+import type { WorkflowPipelineDef, AgentStepDef, GateStepDef } from "../workflows/definition.js";
 
 const TEST_DIR = join(process.cwd(), ".test-executor-" + Date.now());
 const WORK_DIR = join(TEST_DIR, "workdir");
@@ -266,5 +266,187 @@ describe("WorkflowExecutor — Pre-Execution Validation", () => {
 
     const errors = executor.validatePreExecution(wf);
     expect(errors).toContain("Workflow must have at least one step");
+  });
+});
+
+describe("WorkflowExecutor — Gate Steps", () => {
+  it("pauses at a gate step with waiting_approval status", async () => {
+    const mock = new MockCommandRunner();
+    mock.setSuccess("done");
+    const executor = new WorkflowExecutor(mock);
+    const events: ExecutorEvent[] = [];
+    executor.onEvent((e) => events.push(e));
+
+    const wf = makeWorkflow({
+      steps: [
+        { id: "s1", name: "Build", type: "agent", agent: "backend", goal: "Build" } as AgentStepDef,
+        { id: "gate-1", name: "Review", type: "gate", reviewArtifact: "output.md" } as GateStepDef,
+        {
+          id: "s2",
+          name: "Deploy",
+          type: "agent",
+          agent: "backend",
+          goal: "Deploy",
+        } as AgentStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    const result = await executor.executeRun(wf, runState);
+
+    expect(result.status).toBe("waiting_approval");
+    expect(result.steps["gate-1"].status).toBe("waiting");
+    expect(result.steps["s2"].status).toBe("pending"); // not yet executed
+    expect(mock.calls).toHaveLength(1); // only first agent ran
+    expect(events.some((e) => e.type === "gate-waiting")).toBe(true);
+  });
+
+  it("resumes after gate approval", async () => {
+    const mock = new MockCommandRunner();
+    mock.setResponses([
+      { exitCode: 0, stdout: "built", stderr: "" },
+      { exitCode: 0, stdout: "deployed", stderr: "" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+
+    const wf = makeWorkflow({
+      steps: [
+        { id: "s1", name: "Build", type: "agent", agent: "backend", goal: "Build" } as AgentStepDef,
+        { id: "gate-1", name: "Review", type: "gate" } as GateStepDef,
+        {
+          id: "s2",
+          name: "Deploy",
+          type: "agent",
+          agent: "backend",
+          goal: "Deploy",
+        } as AgentStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    await executor.executeRun(wf, runState);
+
+    expect(runState.status).toBe("waiting_approval");
+
+    // Approve the gate
+    const result = await executor.approveGate(runState, "gate-1", wf);
+
+    expect(result.status).toBe("completed");
+    expect(result.steps["gate-1"].status).toBe("completed");
+    expect(result.steps["gate-1"].approvedBy).toBe("user");
+    expect(result.steps["s2"].status).toBe("completed");
+    expect(mock.calls).toHaveLength(2);
+  });
+
+  it("cancels run when gate is rejected without feedback", async () => {
+    const mock = new MockCommandRunner();
+    mock.setSuccess("done");
+    const executor = new WorkflowExecutor(mock);
+
+    const wf = makeWorkflow({
+      steps: [
+        { id: "s1", name: "Build", type: "agent", agent: "backend", goal: "Build" } as AgentStepDef,
+        { id: "gate-1", name: "Review", type: "gate" } as GateStepDef,
+        {
+          id: "s2",
+          name: "Deploy",
+          type: "agent",
+          agent: "backend",
+          goal: "Deploy",
+        } as AgentStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    await executor.executeRun(wf, runState);
+
+    const result = await executor.rejectGate(runState, "gate-1", wf);
+
+    expect(result.status).toBe("cancelled");
+    expect(result.steps["gate-1"].rejectedAt).toBeDefined();
+  });
+
+  it("re-runs previous agent with feedback when gate is rejected with feedback", async () => {
+    const mock = new MockCommandRunner();
+    mock.setResponses([
+      { exitCode: 0, stdout: "built v1", stderr: "" },
+      { exitCode: 0, stdout: "built v2 with feedback", stderr: "" },
+      { exitCode: 0, stdout: "deployed", stderr: "" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "s1",
+          name: "Build",
+          type: "agent",
+          agent: "backend",
+          goal: "Build the API",
+        } as AgentStepDef,
+        { id: "gate-1", name: "Review", type: "gate", allowFeedback: true } as GateStepDef,
+        {
+          id: "s2",
+          name: "Deploy",
+          type: "agent",
+          agent: "backend",
+          goal: "Deploy",
+        } as AgentStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    await executor.executeRun(wf, runState);
+
+    const result = await executor.rejectGate(runState, "gate-1", wf, "Please add error handling");
+
+    // After reject with feedback: agent re-runs, then gate re-presents
+    expect(result.status).toBe("waiting_approval");
+    expect(result.steps["gate-1"].feedback).toBe("Please add error handling");
+    // The re-run should have the feedback appended to the goal
+    const rerunArgs = mock.calls[1].args.join(" ");
+    expect(rerunArgs).toContain("Please add error handling");
+
+    // Now approve the gate to complete the workflow
+    const final = await executor.approveGate(result, "gate-1", wf);
+    expect(final.status).toBe("completed");
+    expect(mock.calls).toHaveLength(3); // build, rebuild, deploy
+  });
+
+  it("gate without artifact still works", async () => {
+    const mock = new MockCommandRunner();
+    mock.setSuccess("done");
+    const executor = new WorkflowExecutor(mock);
+    const events: ExecutorEvent[] = [];
+    executor.onEvent((e) => events.push(e));
+
+    const wf = makeWorkflow({
+      steps: [
+        { id: "s1", name: "Build", type: "agent", agent: "backend", goal: "Build" } as AgentStepDef,
+        { id: "gate-1", name: "Approve", type: "gate" } as GateStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    await executor.executeRun(wf, runState);
+
+    const gateEvent = events.find((e) => e.type === "gate-waiting");
+    expect(gateEvent).toBeDefined();
+    expect(gateEvent!.data?.artifactPath).toBeUndefined();
+  });
+
+  it("gate with artifact includes path in event", async () => {
+    const mock = new MockCommandRunner();
+    mock.setSuccess("done");
+    const executor = new WorkflowExecutor(mock);
+    const events: ExecutorEvent[] = [];
+    executor.onEvent((e) => events.push(e));
+
+    const wf = makeWorkflow({
+      steps: [
+        { id: "s1", name: "Build", type: "agent", agent: "backend", goal: "Build" } as AgentStepDef,
+        { id: "gate-1", name: "Review", type: "gate", reviewArtifact: "report.md" } as GateStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    await executor.executeRun(wf, runState);
+
+    const gateEvent = events.find((e) => e.type === "gate-waiting");
+    expect(gateEvent!.data?.artifactPath).toBe("report.md");
   });
 });
