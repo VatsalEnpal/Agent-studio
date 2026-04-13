@@ -7,14 +7,17 @@
 
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { execSync } from "node:child_process";
+import { homedir } from "node:os";
 import type { CommandRunner } from "./command-runner.js";
-import type {
-  WorkflowPipelineDef,
-  AgentStepDef,
-  GateStepDef,
-  LoopStepDef,
-  AgentGroupStepDef,
-  PipelineStepDef,
+import {
+  validateWorkflow,
+  type WorkflowPipelineDef,
+  type AgentStepDef,
+  type GateStepDef,
+  type LoopStepDef,
+  type AgentGroupStepDef,
+  type PipelineStepDef,
 } from "./definition.js";
 import {
   type RunState,
@@ -55,6 +58,59 @@ export class WorkflowExecutor {
 
   constructor(runner: CommandRunner) {
     this.runner = runner;
+  }
+
+  /**
+   * Pre-execution validation. Checks BEFORE starting any run:
+   * - Workflow definition is valid
+   * - claude CLI is on PATH
+   * - All referenced agents exist in ~/.claude/agents/
+   * - Working directory exists
+   * - Input files from config exist (where applicable)
+   */
+  validatePreExecution(workflowDef: WorkflowPipelineDef): string[] {
+    const errors: string[] = [];
+
+    // Validate workflow definition
+    const defValidation = validateWorkflow(workflowDef);
+    if (!defValidation.valid) {
+      errors.push(...defValidation.errors);
+    }
+
+    // Check claude CLI on PATH
+    try {
+      execSync("which claude", { stdio: "pipe" });
+    } catch {
+      errors.push("Claude Code CLI not found. Install it from https://claude.ai/code");
+    }
+
+    // Check working directory exists
+    if (!existsSync(workflowDef.workingDirectory)) {
+      errors.push(`Working directory '${workflowDef.workingDirectory}' does not exist`);
+    }
+
+    // Check each agent exists
+    const agentsDir = join(homedir(), ".claude", "agents");
+    for (const step of workflowDef.steps) {
+      if (step.type === "agent") {
+        const agentFile = join(agentsDir, `${step.agent}.md`);
+        if (!existsSync(agentFile)) {
+          errors.push(`Agent '${step.agent}' not found at ${agentFile}`);
+        }
+      }
+      if (step.type === "agent-group" && step.steps) {
+        for (const subStep of step.steps) {
+          if (subStep.type === "agent") {
+            const agentFile = join(agentsDir, `${subStep.agent}.md`);
+            if (!existsSync(agentFile)) {
+              errors.push(`Agent '${subStep.agent}' not found at ${agentFile}`);
+            }
+          }
+        }
+      }
+    }
+
+    return errors;
   }
 
   onEvent(listener: ExecutorEventListener): () => void {

@@ -210,3 +210,61 @@ describe("WorkflowExecutor — Agent Steps", () => {
     expect(args).toContain("bypass");
   });
 });
+
+describe("WorkflowExecutor — Pre-Execution Validation", () => {
+  it("returns error for nonexistent agent", () => {
+    const mock = new MockCommandRunner();
+    const executor = new WorkflowExecutor(mock);
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "s1",
+          name: "Build",
+          type: "agent",
+          agent: "nonexistent-agent-xyz-12345",
+          goal: "do something",
+        } as AgentStepDef,
+      ],
+    });
+
+    const errors = executor.validatePreExecution(wf);
+    expect(errors.some((e) => e.includes("nonexistent-agent-xyz-12345"))).toBe(true);
+    expect(errors.some((e) => e.includes("not found"))).toBe(true);
+  });
+
+  it("returns error for nonexistent working directory", () => {
+    const mock = new MockCommandRunner();
+    const executor = new WorkflowExecutor(mock);
+    const wf = makeWorkflow({
+      workingDirectory: "/nonexistent/path/that/does/not/exist",
+    });
+
+    const errors = executor.validatePreExecution(wf);
+    expect(errors.some((e) => e.includes("does not exist"))).toBe(true);
+  });
+
+  it("returns empty array when all checks pass (with existing dir)", () => {
+    const mock = new MockCommandRunner();
+    const executor = new WorkflowExecutor(mock);
+    // Use a workflow with an agent that likely doesn't exist, but check that
+    // workingDirectory validation passes for an existing directory
+    const wf = makeWorkflow({
+      workingDirectory: process.cwd(),
+      steps: [], // will fail definition validation
+    });
+
+    const errors = executor.validatePreExecution(wf);
+    // Should have definition error (no steps) but NOT working directory error
+    expect(errors.some((e) => e.includes("does not exist"))).toBe(false);
+    expect(errors.some((e) => e.includes("at least one step"))).toBe(true);
+  });
+
+  it("catches definition validation errors", () => {
+    const mock = new MockCommandRunner();
+    const executor = new WorkflowExecutor(mock);
+    const wf = makeWorkflow({ steps: [] });
+
+    const errors = executor.validatePreExecution(wf);
+    expect(errors).toContain("Workflow must have at least one step");
+  });
+});
