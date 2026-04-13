@@ -232,14 +232,14 @@ function NavRailItem({
       {/* Styled tooltip — appears to the right on hover */}
       <div
         className={cn(
-          "absolute left-full top-1/2 -translate-y-1/2 ml-2",
+          "absolute left-full top-1/2 -translate-y-1/2 ml-4",
           "flex items-center gap-2 px-2 py-1",
-          "bg-bg-elevated border border-border-default rounded-[4px]",
+          "bg-bg-elevated border border-border-default rounded-[4px] shadow-lg",
           "text-xs font-medium text-text-primary whitespace-nowrap",
           "opacity-0 pointer-events-none",
-          "group-hover:opacity-100",
+          "group-hover:opacity-100 group-hover:delay-300",
           "transition-opacity duration-150",
-          "z-50",
+          "z-[60]",
         )}
       >
         <span className="flex flex-col">
