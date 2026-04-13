@@ -60,6 +60,148 @@ function emptyGateStep(): StepDraft {
   };
 }
 
+// ---------- Templates ----------
+
+interface WorkflowTemplate {
+  id: string;
+  name: string;
+  description: string;
+  steps: StepDraft[];
+}
+
+const TEMPLATES: WorkflowTemplate[] = [
+  {
+    id: "code-sprint",
+    name: "Code Sprint",
+    description: "Full sprint: scan, approve, build, QA loop, review, deploy",
+    steps: [
+      {
+        ...emptyAgentStep(),
+        id: "pmo-scan",
+        name: "PMO Scan",
+        agent: "pmo",
+        goal: "Scan for tasks and create sprint spec",
+      },
+      { ...emptyGateStep(), id: "approval", name: "Sprint Approval" },
+      {
+        ...emptyAgentStep(),
+        id: "orchestrator",
+        name: "Orchestrator",
+        agent: "orchestrator",
+        goal: "Coordinate agents and assign tasks",
+      },
+      {
+        ...emptyAgentStep(),
+        id: "backend",
+        name: "Backend Build",
+        agent: "backend",
+        goal: "Implement backend changes from sprint spec",
+      },
+      {
+        ...emptyAgentStep(),
+        id: "frontend",
+        name: "Frontend Build",
+        agent: "frontend",
+        goal: "Implement frontend changes from sprint spec",
+      },
+      {
+        ...emptyAgentStep(),
+        id: "qa",
+        name: "QA Test",
+        agent: "qa",
+        goal: "Run test suite and verify all changes",
+      },
+      { ...emptyGateStep(), id: "review-gate", name: "Final Review", allowFeedback: true },
+      {
+        ...emptyAgentStep(),
+        id: "deploy",
+        name: "Deploy",
+        agent: "orchestrator",
+        goal: "Deploy the approved changes",
+      },
+    ],
+  },
+  {
+    id: "research-report",
+    name: "Research Report",
+    description: "Research, review, write, approve, publish",
+    steps: [
+      {
+        ...emptyAgentStep(),
+        id: "research",
+        name: "Research",
+        agent: "domain",
+        goal: "Research the topic and write a summary to research-output.md",
+        output: "research-output.md",
+      },
+      {
+        ...emptyGateStep(),
+        id: "review-research",
+        name: "Review Research",
+        reviewArtifact: "research-output.md",
+        allowFeedback: true,
+      },
+      {
+        ...emptyAgentStep(),
+        id: "write",
+        name: "Write Report",
+        agent: "documentation",
+        goal: "Read research-output.md and write a polished report to report.md",
+        output: "report.md",
+      },
+      {
+        ...emptyGateStep(),
+        id: "approve-report",
+        name: "Approve Report",
+        reviewArtifact: "report.md",
+      },
+    ],
+  },
+  {
+    id: "data-pipeline",
+    name: "Data Pipeline",
+    description: "Collect, validate, review, upload",
+    steps: [
+      {
+        ...emptyAgentStep(),
+        id: "collect",
+        name: "Collect Data",
+        agent: "domain",
+        goal: "Collect data from sources and save to data-raw.json",
+        output: "data-raw.json",
+      },
+      {
+        ...emptyAgentStep(),
+        id: "validate",
+        name: "Validate Data",
+        agent: "qa",
+        goal: "Validate data-raw.json and produce validation-report.md",
+        output: "validation-report.md",
+      },
+      {
+        ...emptyGateStep(),
+        id: "review-data",
+        name: "Review Validation",
+        reviewArtifact: "validation-report.md",
+        allowFeedback: true,
+      },
+      {
+        ...emptyAgentStep(),
+        id: "upload",
+        name: "Upload Data",
+        agent: "backend",
+        goal: "Upload validated data to the destination",
+      },
+    ],
+  },
+  {
+    id: "custom",
+    name: "Custom",
+    description: "Start with an empty pipeline",
+    steps: [emptyAgentStep()],
+  },
+];
+
 // ---------- Component ----------
 
 interface CreateWorkflowDialogProps {
@@ -223,6 +365,36 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
           <div className="max-h-[60vh] overflow-y-auto px-6 py-4">
             {currentStep === 1 && (
               <div className="space-y-4">
+                {/* Template selector */}
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-zinc-400">
+                    Start from template
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {TEMPLATES.map((tmpl) => (
+                      <button
+                        key={tmpl.id}
+                        onClick={() => {
+                          setName(tmpl.id === "custom" ? "" : tmpl.name);
+                          setDescription(tmpl.description);
+                          setSteps(tmpl.steps.map((s) => ({ ...s, id: `${s.id}-${Date.now()}` })));
+                        }}
+                        className={cn(
+                          "rounded-lg border p-2 text-left transition-colors",
+                          name === tmpl.name ||
+                            (tmpl.id === "custom" &&
+                              !TEMPLATES.some((t) => t.id !== "custom" && t.name === name))
+                            ? "border-blue-500/50 bg-blue-500/5"
+                            : "border-zinc-700 hover:border-zinc-600",
+                        )}
+                      >
+                        <div className="text-xs font-medium text-zinc-200">{tmpl.name}</div>
+                        <div className="text-[10px] text-zinc-500 mt-0.5">{tmpl.description}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div>
                   <label className="mb-1 block text-xs font-medium text-zinc-400">Name</label>
                   <input
