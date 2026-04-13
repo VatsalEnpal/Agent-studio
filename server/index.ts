@@ -1098,7 +1098,16 @@ Choose the schedule and model based on the task:
       const sessions = terminalManager.listSessions();
       const session = sessions.find((s) => s.id === sessionId);
       if (!session) {
-        res.status(404).json({ error: "Session not found" });
+        // Return empty usage instead of 404 — CLI-discovered sessions
+        // won't be in the server's session map but the frontend still
+        // asks for their usage. A 404 here causes an error storm when
+        // the History tab is open.
+        res.json({
+          cost: null,
+          tokens: null,
+          model: null,
+          modelShort: null,
+        });
         return;
       }
 
