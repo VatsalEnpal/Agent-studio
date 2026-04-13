@@ -214,6 +214,18 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
     setTimeout(reset, 200);
   }, [onOpenChange, reset]);
 
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleClose();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, handleClose]);
+
   const handleToggleAgent = useCallback((agentId: string) => {
     setSelectedAgents((prev) => {
       const next = new Set(prev);
