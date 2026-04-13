@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSettingsStore, type AppSettings } from "@/stores/settings";
 import { cn } from "@/lib/utils";
 import {
@@ -20,6 +20,8 @@ import { SettingsMonitor } from "./settings-monitor";
 import { SettingsShortcuts } from "./settings-shortcuts";
 import { SettingsAbout } from "./settings-about";
 import { SettingsNotifications } from "./settings-notifications";
+import { CreateAgentDialog } from "@/components/agents/create-agent-dialog";
+import { PlusIcon } from "@/components/ui/icons";
 
 type SettingsTab =
   | "general"
@@ -176,8 +178,10 @@ function SettingsAgentsDiscovery() {
     Array<{ id: string; name: string; description: string; model: string }>
   >([]);
   const [loading, setLoading] = useState(true);
+  const [createOpen, setCreateOpen] = useState(false);
 
-  useEffect(() => {
+  const loadAgents = useCallback(() => {
+    setLoading(true);
     fetch("/api/agents")
       .then((r) => r.json())
       .then(
@@ -196,16 +200,29 @@ function SettingsAgentsDiscovery() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    loadAgents();
+  }, [loadAgents]);
+
   return (
     <section className="border border-border-default rounded bg-bg-surface">
-      <div className="px-4 py-3 border-b border-border-default">
-        <h3 className="text-xs font-medium text-text-primary">Agents</h3>
-        <p className="text-label text-text-tertiary mt-0.5">
-          Auto-discovered from{" "}
-          <code className="text-text-secondary bg-bg-elevated px-1 py-0.5 rounded text-label">
-            .claude/agents/
-          </code>
-        </p>
+      <div className="px-4 py-3 border-b border-border-default flex items-start justify-between">
+        <div>
+          <h3 className="text-xs font-medium text-text-primary">Agents</h3>
+          <p className="text-label text-text-tertiary mt-0.5">
+            Auto-discovered from{" "}
+            <code className="text-text-secondary bg-bg-elevated px-1 py-0.5 rounded text-label">
+              .claude/agents/
+            </code>
+          </p>
+        </div>
+        <button
+          onClick={() => setCreateOpen(true)}
+          className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-accent text-bg-base rounded-[4px] hover:bg-accent/90 transition-all shrink-0"
+        >
+          <PlusIcon size={10} />
+          Create Agent
+        </button>
       </div>
       <div className="px-4 py-3">
         {loading ? (
@@ -245,6 +262,7 @@ function SettingsAgentsDiscovery() {
           </div>
         )}
       </div>
+      <CreateAgentDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={loadAgents} />
     </section>
   );
 }

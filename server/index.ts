@@ -23,9 +23,29 @@ import {
 } from "./file-watcher.js";
 import { GitWatcher } from "./git-status.js";
 import { createPR, getRepoBranches } from "./pr-creator.js";
-import { getDevServers, startDevServer, stopDevServer, addCustomServer, removeCustomServer } from "./dev-servers.js";
+import {
+  getDevServers,
+  startDevServer,
+  stopDevServer,
+  addCustomServer,
+  removeCustomServer,
+} from "./dev-servers.js";
 import { execSync, exec } from "node:child_process";
-import { whichCommand, isAllowedPath, killProcess as platformKill, openInOS, openTerminal, openVSCode, getDiskUsage, isSchedulerLoaded, loadScheduler, unloadScheduler, IS_MAC, findListeningPorts, getProcessCwd } from "./platform.js";
+import {
+  whichCommand,
+  isAllowedPath,
+  killProcess as platformKill,
+  openInOS,
+  openTerminal,
+  openVSCode,
+  getDiskUsage,
+  isSchedulerLoaded,
+  loadScheduler,
+  unloadScheduler,
+  IS_MAC,
+  findListeningPorts,
+  getProcessCwd,
+} from "./platform.js";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
@@ -35,17 +55,39 @@ import { RoomManager } from "./rooms.js";
 import type { RoomMessage } from "./rooms.js";
 import { roomsRoutes } from "./routes/rooms.js";
 import { SdkSessionManager } from "./sdk-session.js";
-import { getConfig, loadConfig, saveConfig, generateDefaultConfig, reloadConfig, getAgentSystemPath, getMainProjectDir, resolvePath, type AgentConfig, type WorkflowConfig } from "./config.js";
+import {
+  getConfig,
+  loadConfig,
+  saveConfig,
+  generateDefaultConfig,
+  reloadConfig,
+  getAgentSystemPath,
+  getMainProjectDir,
+  resolvePath,
+  type AgentConfig,
+  type WorkflowConfig,
+} from "./config.js";
 import { scaffoldAgentSystem, previewScaffold } from "./scaffold.js";
 import type { ScaffoldOptions } from "./scaffold.js";
 import { AutomationEngine, AUTOMATION_TEMPLATES } from "./automations.js";
 import type { Automation } from "./automations.js";
-import { generateAgents, generateAgentsWithClaudeMd, writeAgentFiles, isClaudeCliAvailable, previewAgents, getGenerationStatus } from "./agent-generator.js";
+import {
+  generateAgents,
+  generateAgentsWithClaudeMd,
+  writeAgentFiles,
+  isClaudeCliAvailable,
+  previewAgents,
+  getGenerationStatus,
+} from "./agent-generator.js";
 import type { ProjectAnalysis } from "./agent-generator.js";
 import { analyzeProject as analyzeProjectEnhanced } from "./project-analyzer.js";
 import type { ProjectProfile } from "./project-analyzer.js";
 import { suggestAutomations } from "./automation-suggestions.js";
-import { AUTOMATION_TEMPLATES as RICH_TEMPLATES, getTemplate, fillPromptTemplate } from "./automation-templates.js";
+import {
+  AUTOMATION_TEMPLATES as RICH_TEMPLATES,
+  getTemplate,
+  fillPromptTemplate,
+} from "./automation-templates.js";
 import { writeClaudeMd } from "./claudemd-generator.js";
 import { broadcast } from "./ws/broadcast.js";
 
@@ -104,7 +146,6 @@ async function main() {
   const roomManager = new RoomManager();
   const sdkManager = new SdkSessionManager();
 
-
   // Broadcast room events via WebSocket
   roomManager.on("message", (msg: RoomMessage) => {
     broadcast(wss, { type: "room-message", payload: msg } satisfies WsMessage);
@@ -114,19 +155,19 @@ async function main() {
     broadcast(wss, { type: "room-agent-status", payload } satisfies WsMessage);
   });
 
-  roomManager.on("approval", (payload: { roomId: string; messageId: string; approved: boolean }) => {
-    broadcast(wss, { type: "room-approval", payload } satisfies WsMessage);
-  });
+  roomManager.on(
+    "approval",
+    (payload: { roomId: string; messageId: string; approved: boolean }) => {
+      broadcast(wss, { type: "room-approval", payload } satisfies WsMessage);
+    },
+  );
 
   // Route WebSocket upgrades: /ws goes to our server,
   // everything else (e.g. /_next/webpack-hmr) is forwarded to Next.js
   let nextUpgradeHandler: ((req: any, socket: any, head: any) => void) | null = null;
 
   server.on("upgrade", (request, socket, head) => {
-    const { pathname } = new URL(
-      request.url!,
-      `http://${request.headers.host}`,
-    );
+    const { pathname } = new URL(request.url!, `http://${request.headers.host}`);
     if (pathname === "/ws") {
       wss.handleUpgrade(request, socket, head, (ws) => {
         wss.emit("connection", ws, request);
@@ -162,18 +203,11 @@ async function main() {
 
     ws.on("message", (raw: Buffer | string) => {
       try {
-        const msg: WsMessage = JSON.parse(
-          typeof raw === "string" ? raw : raw.toString("utf-8"),
-        );
+        const msg: WsMessage = JSON.parse(typeof raw === "string" ? raw : raw.toString("utf-8"));
 
         if (msg.type === "terminal-input" && msg.sessionId && msg.data) {
           terminalManager.writeToSession(msg.sessionId, msg.data);
-        } else if (
-          msg.type === "terminal-resize" &&
-          msg.sessionId &&
-          msg.cols &&
-          msg.rows
-        ) {
+        } else if (msg.type === "terminal-resize" && msg.sessionId && msg.cols && msg.rows) {
           terminalManager.resizeSession(msg.sessionId, msg.cols, msg.rows);
         }
       } catch {
@@ -282,7 +316,11 @@ async function main() {
       // If no agents beyond "none", add sensible defaults
       if (agents.length <= 1) {
         const defaults: AgentConfig[] = [
-          { id: "orchestrator", name: "orchestrator", description: "Coordinates agent teams and delegates work" },
+          {
+            id: "orchestrator",
+            name: "orchestrator",
+            description: "Coordinates agent teams and delegates work",
+          },
           { id: "frontend", name: "frontend", description: "Builds UI and frontend code" },
           { id: "backend", name: "backend", description: "Builds APIs, database, server logic" },
           { id: "qa", name: "qa", description: "Tests the application" },
@@ -355,7 +393,10 @@ async function main() {
 
   app.put("/api/automations/:id", (req, res) => {
     try {
-      const updated = automationEngine.updateAutomation(req.params["id"], req.body as Partial<Automation>);
+      const updated = automationEngine.updateAutomation(
+        req.params["id"],
+        req.body as Partial<Automation>,
+      );
       if (!updated) {
         res.status(404).json({ error: "Automation not found" });
         return;
@@ -430,7 +471,14 @@ async function main() {
       }
       const profile = analyzeProjectEnhanced(validPath);
       const suggestions = suggestAutomations(profile, validPath);
-      res.json({ profile: { name: profile.name, languages: profile.languages, frameworks: profile.frameworks }, suggestions });
+      res.json({
+        profile: {
+          name: profile.name,
+          languages: profile.languages,
+          frameworks: profile.frameworks,
+        },
+        suggestions,
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
@@ -537,15 +585,26 @@ Choose the schedule and model based on the task:
       });
 
       if (!output.trim()) {
-        res.status(500).json({ error: "Failed to generate automation — Claude CLI may not be available" });
+        res
+          .status(500)
+          .json({ error: "Failed to generate automation — Claude CLI may not be available" });
         return;
       }
 
       // Try to parse the JSON from the output
-      let config: { name: string; description: string; schedule: string; model: string; prompt: string };
+      let config: {
+        name: string;
+        description: string;
+        schedule: string;
+        model: string;
+        prompt: string;
+      };
       try {
         // Strip any markdown fences if present
-        const cleaned = output.replace(/```json?\n?/g, "").replace(/```\n?/g, "").trim();
+        const cleaned = output
+          .replace(/```json?\n?/g, "")
+          .replace(/```\n?/g, "")
+          .trim();
         config = JSON.parse(cleaned) as typeof config;
       } catch {
         res.status(500).json({ error: "Failed to parse generated automation config", raw: output });
@@ -560,7 +619,10 @@ Choose the schedule and model based on the task:
           description: config.description || description,
           schedule: config.schedule || "daily",
           agent: "none",
-          model: (config.model === "opus" || config.model === "sonnet" || config.model === "haiku") ? config.model : "sonnet",
+          model:
+            config.model === "opus" || config.model === "sonnet" || config.model === "haiku"
+              ? config.model
+              : "sonnet",
           prompt: config.prompt || description,
           enabled: true,
         },
@@ -593,7 +655,13 @@ Choose the schedule and model based on the task:
 
       // Check for generated agents
       const agentsDir = path.join(validPath, ".claude", "agents");
-      const agents: Array<{ id: string; name: string; description: string; model: "opus" | "sonnet" | "haiku"; mdContent: string }> = [];
+      const agents: Array<{
+        id: string;
+        name: string;
+        description: string;
+        model: "opus" | "sonnet" | "haiku";
+        mdContent: string;
+      }> = [];
       if (fs.existsSync(agentsDir)) {
         try {
           const files = fs.readdirSync(agentsDir).filter((f: string) => f.endsWith(".md"));
@@ -715,7 +783,9 @@ Choose the schedule and model based on the task:
           const raw = await readFile(memoryIndexPath, "utf-8");
           const data = JSON.parse(raw) as { total_entries?: number };
           memoryCount = data.total_entries ?? 0;
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
 
       res.json({
@@ -879,7 +949,10 @@ Choose the schedule and model based on the task:
       const result = writeAgentFiles(
         agents.map((a) => ({
           ...a,
-          model: (a.model === "opus" || a.model === "sonnet" || a.model === "haiku") ? a.model : "sonnet" as const,
+          model:
+            a.model === "opus" || a.model === "sonnet" || a.model === "haiku"
+              ? a.model
+              : ("sonnet" as const),
         })),
         projectPath,
         claudeMd,
@@ -891,18 +964,37 @@ Choose the schedule and model based on the task:
     }
   });
 
+  // Create a single agent (simple endpoint for the Create Agent dialog)
+  app.post("/api/agents/create", (req, res) => {
+    try {
+      const { id, name, description, mdContent, projectPath } = req.body as {
+        id?: string;
+        name?: string;
+        description?: string;
+        mdContent?: string;
+        projectPath?: string;
+      };
+      if (!id || !mdContent) {
+        res.status(400).json({ error: "Missing required fields: id, mdContent" });
+        return;
+      }
+      const model = "sonnet" as const;
+      const targetPath = projectPath || getConfig().defaults?.workingDirectory || process.cwd();
+      const result = writeAgentFiles(
+        [{ id, name: name ?? id, description: description ?? "", model, mdContent }],
+        targetPath,
+      );
+      res.status(201).json(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
   // --- REST API ---
   app.post("/api/sessions", (req, res) => {
     try {
-      const {
-        name,
-        command,
-        args,
-        cwd,
-        cols,
-        rows,
-        meta,
-      } = req.body as {
+      const { name, command, args, cwd, cols, rows, meta } = req.body as {
         name?: string;
         command?: string;
         args?: string[];
@@ -1058,7 +1150,19 @@ Choose the schedule and model based on the task:
 
       // Also enrich managed sessions
       const sessions = terminalManager.listSessions();
-      const managedUsage: Record<string, { cost: string; tokens: string; modelShort: string; totalCost: number; totalTokens: number; contextUsed: number; contextTotal: number; contextPercent: number }> = {};
+      const managedUsage: Record<
+        string,
+        {
+          cost: string;
+          tokens: string;
+          modelShort: string;
+          totalCost: number;
+          totalTokens: number;
+          contextUsed: number;
+          contextTotal: number;
+          contextPercent: number;
+        }
+      > = {};
       for (const session of sessions) {
         let su = getSessionUsage(session.pid);
         if (!su) {
@@ -1192,14 +1296,13 @@ Choose the schedule and model based on the task:
 
   app.post("/api/git/pr", async (req, res) => {
     try {
-      const { repo, sourceBranch, targetBranch, title, description } =
-        req.body as {
-          repo?: string;
-          sourceBranch?: string;
-          targetBranch?: string;
-          title?: string;
-          description?: string;
-        };
+      const { repo, sourceBranch, targetBranch, title, description } = req.body as {
+        repo?: string;
+        sourceBranch?: string;
+        targetBranch?: string;
+        title?: string;
+        description?: string;
+      };
 
       if (!repo || !sourceBranch || !targetBranch || !title) {
         res.status(400).json({
@@ -1294,14 +1397,11 @@ Choose the schedule and model based on the task:
         encoding: "utf-8",
         timeout: 10000,
       });
-      const output = execSync(
-        `git commit -m ${JSON.stringify(commitMsg)}`,
-        {
-          cwd: repo,
-          encoding: "utf-8",
-          timeout: 10000,
-        },
-      ).trim();
+      const output = execSync(`git commit -m ${JSON.stringify(commitMsg)}`, {
+        cwd: repo,
+        encoding: "utf-8",
+        timeout: 10000,
+      }).trim();
       res.json({ ok: true, output });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -1392,7 +1492,9 @@ Choose the schedule and model based on the task:
 
   // --- /api/sprints — maps workflow runs to Sprint objects for the Sprints page ---
   /** Map raw WorkflowFlow[] into Sprint[] for the frontend. */
-  function flowsToSprints(flows: Awaited<ReturnType<typeof workflowManager.getFlows>>): Array<Record<string, unknown>> {
+  function flowsToSprints(
+    flows: Awaited<ReturnType<typeof workflowManager.getFlows>>,
+  ): Array<Record<string, unknown>> {
     const sprints: Array<Record<string, unknown>> = [];
 
     for (const flow of flows) {
@@ -1400,11 +1502,16 @@ Choose the schedule and model based on the task:
         const gates = ((run as any).steps ?? []).map((step: any, i: number) => ({
           id: step.id ?? `gate-${i}`,
           name: step.name ?? `Step ${i + 1}`,
-          status: step.status === "completed" ? "passed"
-            : step.status === "running" || step.status === "active" ? "in_progress"
-            : step.status === "failed" ? "failed"
-            : step.status === "waiting" ? "in_progress"
-            : "not_started",
+          status:
+            step.status === "completed"
+              ? "passed"
+              : step.status === "running" || step.status === "active"
+                ? "in_progress"
+                : step.status === "failed"
+                  ? "failed"
+                  : step.status === "waiting"
+                    ? "in_progress"
+                    : "not_started",
           requirements: ((step as any).agents ?? []).map((a: string) => ({
             label: `${a} complete`,
             met: step.status === "completed",
@@ -1421,10 +1528,15 @@ Choose the schedule and model based on the task:
           if (step.details) {
             activity.push({
               id: `activity-${actIdx++}`,
-              timestamp: step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
-              agent: (step.agents?.[0]) ?? "system",
+              timestamp:
+                step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
+              agent: step.agents?.[0] ?? "system",
               action: step.details,
-              type: step.id?.includes("qa") ? "qa" : step.id?.includes("gate") || step.id?.includes("build") ? "gate" : "info",
+              type: step.id?.includes("qa")
+                ? "qa"
+                : step.id?.includes("gate") || step.id?.includes("build")
+                  ? "gate"
+                  : "info",
             });
           }
           // Add scan entries from richContent
@@ -1445,7 +1557,8 @@ Choose the schedule and model based on the task:
             for (const h of rc.handoffs) {
               activity.push({
                 id: `activity-${actIdx++}`,
-                timestamp: step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
+                timestamp:
+                  step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
                 agent: h.from ?? "system",
                 action: `Handoff to ${h.to}: ${h.detail ?? h.file}`,
                 type: "handoff",
@@ -1458,7 +1571,8 @@ Choose the schedule and model based on the task:
             for (const r of rc.gateResults) {
               activity.push({
                 id: `activity-${actIdx++}`,
-                timestamp: step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
+                timestamp:
+                  step.completedAt ?? step.startedAt ?? run.startedAt ?? new Date().toISOString(),
                 agent: step.agents?.[0] ?? "system",
                 action: r,
                 type: step.id?.includes("qa") ? "qa" : "gate",
@@ -1524,10 +1638,17 @@ Choose the schedule and model based on the task:
           const state = JSON.parse(raw);
           if (state.gates && state.gates[gateId] !== undefined) {
             const cur = state.gates[gateId];
-            state.gates[gateId] = cur === "not_started" ? "in_progress" : cur === "in_progress" ? "passed" : "in_progress";
+            state.gates[gateId] =
+              cur === "not_started"
+                ? "in_progress"
+                : cur === "in_progress"
+                  ? "passed"
+                  : "in_progress";
             await writeFile(statePath, JSON.stringify(state, null, 2) + "\n", "utf-8");
           }
-        } catch { /* state.json may not exist yet */ }
+        } catch {
+          /* state.json may not exist yet */
+        }
       }
 
       // For user-approval gate, also update sprint status in current.md
@@ -1536,12 +1657,17 @@ Choose the schedule and model based on the task:
           let md = await readFile(currentPath, "utf-8");
           md = md.replace(/Status:\s*\*\*[^*]+\*\*/, "Status: **RUNNING**");
           await writeFile(currentPath, md, "utf-8");
-        } catch { /* current.md may not exist */ }
+        } catch {
+          /* current.md may not exist */
+        }
       }
 
       // Broadcast workflow update
       const flows = await workflowManager.getFlows();
-      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
 
       res.json({ ok: true, gateId });
     } catch (err) {
@@ -1567,18 +1693,25 @@ Choose the schedule and model based on the task:
             state.status = "PAUSED";
             await writeFile(statePath, JSON.stringify(state, null, 2) + "\n", "utf-8");
           }
-        } catch { /* state.json may not exist */ }
+        } catch {
+          /* state.json may not exist */
+        }
       }
       if (currentPath) {
         try {
           let md = await readFile(currentPath, "utf-8");
           md = md.replace(/Status:\s*\*\*[^*]+\*\*/, "Status: **PAUSED**");
           await writeFile(currentPath, md, "utf-8");
-        } catch { /* current.md may not exist */ }
+        } catch {
+          /* current.md may not exist */
+        }
       }
 
       const flows = await workflowManager.getFlows();
-      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
       res.json({ ok: true, sprintId, action: "paused" });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -1602,18 +1735,25 @@ Choose the schedule and model based on the task:
             state.status = "RUNNING";
             await writeFile(statePath, JSON.stringify(state, null, 2) + "\n", "utf-8");
           }
-        } catch { /* state.json may not exist */ }
+        } catch {
+          /* state.json may not exist */
+        }
       }
       if (currentPath) {
         try {
           let md = await readFile(currentPath, "utf-8");
           md = md.replace(/Status:\s*\*\*[^*]+\*\*/, "Status: **RUNNING**");
           await writeFile(currentPath, md, "utf-8");
-        } catch { /* current.md may not exist */ }
+        } catch {
+          /* current.md may not exist */
+        }
       }
 
       const flows = await workflowManager.getFlows();
-      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
       res.json({ ok: true, sprintId, action: "resumed" });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -1636,18 +1776,25 @@ Choose the schedule and model based on the task:
           state.status = "CANCELLED";
           state.cancelledAt = new Date().toISOString();
           await writeFile(statePath, JSON.stringify(state, null, 2) + "\n", "utf-8");
-        } catch { /* state.json may not exist */ }
+        } catch {
+          /* state.json may not exist */
+        }
       }
       if (currentPath) {
         try {
           let md = await readFile(currentPath, "utf-8");
           md = md.replace(/Status:\s*\*\*[^*]+\*\*/, "Status: **CANCELLED**");
           await writeFile(currentPath, md, "utf-8");
-        } catch { /* current.md may not exist */ }
+        } catch {
+          /* current.md may not exist */
+        }
       }
 
       const flows = await workflowManager.getFlows();
-      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
       res.json({ ok: true, sprintId, action: "cancelled" });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -1670,7 +1817,9 @@ Choose the schedule and model based on the task:
           const content = await readFile(currentPath, "utf-8");
           res.json({ content, source: "current.md" });
           return;
-        } catch { /* not found, try archive */ }
+        } catch {
+          /* not found, try archive */
+        }
       }
 
       // Try archive
@@ -1678,13 +1827,18 @@ Choose the schedule and model based on the task:
       if (archiveDir) {
         try {
           const files = await readdir(archiveDir);
-          const mdFiles = files.filter((f: string) => f.endsWith(".md")).sort().reverse();
+          const mdFiles = files
+            .filter((f: string) => f.endsWith(".md"))
+            .sort()
+            .reverse();
           if (mdFiles.length > 0) {
             const content = await readFile(join(archiveDir, mdFiles[0]!), "utf-8");
             res.json({ content, source: mdFiles[0] });
             return;
           }
-        } catch { /* no archive */ }
+        } catch {
+          /* no archive */
+        }
       }
 
       res.json({ content: null, source: null });
@@ -1704,10 +1858,7 @@ Choose the schedule and model based on the task:
 
   app.get("/api/workflows/:flowId/runs/:runId", async (req, res) => {
     try {
-      const run = await workflowManager.getRun(
-        req.params["flowId"],
-        req.params["runId"],
-      );
+      const run = await workflowManager.getRun(req.params["flowId"], req.params["runId"]);
       if (!run) {
         res.status(404).json({ error: "Run not found" });
         return;
@@ -1757,7 +1908,10 @@ Choose the schedule and model based on the task:
       workflowManager.reload();
 
       const flows = await workflowManager.getFlows();
-      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
 
       res.json({ ok: true, id, workflow: newWorkflow });
     } catch (err) {
@@ -1801,7 +1955,10 @@ Choose the schedule and model based on the task:
       workflowManager.reload();
 
       const flows = await workflowManager.getFlows();
-      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
 
       res.json({ ok: true });
     } catch (err) {
@@ -1828,7 +1985,10 @@ Choose the schedule and model based on the task:
       workflowManager.reload();
 
       const flows = await workflowManager.getFlows();
-      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
 
       res.json({ ok: true });
     } catch (err) {
@@ -1855,12 +2015,13 @@ Choose the schedule and model based on the task:
         name: `${flow.name} Run`,
         status: "waiting" as const,
         startedAt: new Date().toISOString(),
-        steps: flow.runs[0]?.steps.map((s) => ({
-          ...s,
-          status: "pending" as const,
-          startedAt: undefined,
-          completedAt: undefined,
-        })) ?? [],
+        steps:
+          flow.runs[0]?.steps.map((s) => ({
+            ...s,
+            status: "pending" as const,
+            startedAt: undefined,
+            completedAt: undefined,
+          })) ?? [],
         stats: {
           agentsUsed: flow.runs[0]?.stats.agentsUsed ?? [],
         },
@@ -1877,7 +2038,10 @@ Choose the schedule and model based on the task:
         targetFlow.runs.unshift(run);
       }
 
-      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
 
       res.json({ ok: true, runId, run });
     } catch (err) {
@@ -1889,7 +2053,10 @@ Choose the schedule and model based on the task:
   // Broadcast workflow updates on sprint file changes
   fileWatcher.onUpdate(() => {
     void workflowManager.getFlows().then((flows) => {
-      broadcast(wss, { type: "workflow-update", payload: flowsToSprints(flows) } satisfies WsMessage);
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
     });
   });
 
@@ -1905,7 +2072,9 @@ Choose the schedule and model based on the task:
       let lastScan: string | null = null;
       let lastStatus: string | null = null;
       try {
-        const scanEntries = readScanLog() as unknown as Promise<Array<{ timestamp: string; status: string }>>;
+        const scanEntries = readScanLog() as unknown as Promise<
+          Array<{ timestamp: string; status: string }>
+        >;
         // readScanLog is async, handle synchronously here
         res.json({ loaded: isLoaded, lastScan: null, lastStatus: null, checking: true });
         return;
@@ -2027,7 +2196,10 @@ Choose the schedule and model based on the task:
       const selfPid = process.pid;
       const selfPort = parseInt(process.env["PORT"] ?? "8080", 10);
       const raw = findListeningPorts();
-      const seen = new Map<number, { pid: number; port: number; command: string; cwd: string; isSelf: boolean }>();
+      const seen = new Map<
+        number,
+        { pid: number; port: number; command: string; cwd: string; isSelf: boolean }
+      >();
 
       for (const entry of raw) {
         // Deduplicate by pid — take the first (lowest) port
@@ -2341,11 +2513,15 @@ Choose the schedule and model based on the task:
       const pad = (n: number, len = 2) => String(n).padStart(len, "0");
       const dateStr = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
       const categoryMap: Record<string, string> = {
-        learning: "learnings", learnings: "learnings",
-        correction: "corrections", corrections: "corrections",
-        decision: "decisions", decisions: "decisions",
+        learning: "learnings",
+        learnings: "learnings",
+        correction: "corrections",
+        corrections: "corrections",
+        decision: "decisions",
+        decisions: "decisions",
         knowledge: "knowledge",
-        "human-input": "human-inputs", "human-inputs": "human-inputs",
+        "human-input": "human-inputs",
+        "human-inputs": "human-inputs",
       };
       const folder = categoryMap[body.category] ?? "learnings";
       const memoryDir = join(MEMORY_BASE_PATH, "ai-agents", "memory", folder);
@@ -2370,7 +2546,11 @@ Choose the schedule and model based on the task:
       // Update index
       try {
         const rawIndex = await readFile(MEMORY_INDEX_PATH, "utf-8");
-        const index = JSON.parse(rawIndex) as { entries: Record<string, unknown>[]; total_entries: number; [k: string]: unknown };
+        const index = JSON.parse(rawIndex) as {
+          entries: Record<string, unknown>[];
+          total_entries: number;
+          [k: string]: unknown;
+        };
         const newIndexEntry = {
           file: relPath,
           title: body.title,
@@ -2428,14 +2608,19 @@ Choose the schedule and model based on the task:
       // Update index entry
       try {
         const rawIndex = await readFile(MEMORY_INDEX_PATH, "utf-8");
-        const index = JSON.parse(rawIndex) as { entries: Record<string, unknown>[]; total_entries: number; [k: string]: unknown };
+        const index = JSON.parse(rawIndex) as {
+          entries: Record<string, unknown>[];
+          total_entries: number;
+          [k: string]: unknown;
+        };
         const idx = index.entries.findIndex((e) => e["file"] === filePath);
         if (idx >= 0) {
           if (body.title !== undefined) index.entries[idx]!["title"] = body.title;
           if (body.tags !== undefined) index.entries[idx]!["tags"] = body.tags;
           if (body.pinned !== undefined) index.entries[idx]!["pinned"] = body.pinned;
           if (body.content?.lesson) index.entries[idx]!["key_point"] = body.content.lesson;
-          else if (body.content?.observation) index.entries[idx]!["key_point"] = body.content.observation;
+          else if (body.content?.observation)
+            index.entries[idx]!["key_point"] = body.content.observation;
           await writeFile(MEMORY_INDEX_PATH, JSON.stringify(index, null, 2), "utf-8");
         }
       } catch {
@@ -2474,7 +2659,11 @@ Choose the schedule and model based on the task:
       // Remove from index
       try {
         const rawIndex = await readFile(MEMORY_INDEX_PATH, "utf-8");
-        const index = JSON.parse(rawIndex) as { entries: Record<string, unknown>[]; total_entries: number; [k: string]: unknown };
+        const index = JSON.parse(rawIndex) as {
+          entries: Record<string, unknown>[];
+          total_entries: number;
+          [k: string]: unknown;
+        };
         index.entries = index.entries.filter((e) => e["file"] !== filePath);
         index.total_entries = index.entries.length;
         await writeFile(MEMORY_INDEX_PATH, JSON.stringify(index, null, 2), "utf-8");
@@ -2512,7 +2701,11 @@ Choose the schedule and model based on the task:
       // Update index
       try {
         const rawIndex = await readFile(MEMORY_INDEX_PATH, "utf-8");
-        const index = JSON.parse(rawIndex) as { entries: Record<string, unknown>[]; total_entries: number; [k: string]: unknown };
+        const index = JSON.parse(rawIndex) as {
+          entries: Record<string, unknown>[];
+          total_entries: number;
+          [k: string]: unknown;
+        };
         const idx = index.entries.findIndex((e) => e["file"] === filePath);
         if (idx >= 0) {
           index.entries[idx]!["pinned"] = !wasPinned;
@@ -2538,9 +2731,10 @@ Choose the schedule and model based on the task:
       let totalTick = 0;
       for (const cpu of cpus) {
         totalIdle += cpu.times.idle;
-        totalTick += cpu.times.user + cpu.times.nice + cpu.times.sys + cpu.times.irq + cpu.times.idle;
+        totalTick +=
+          cpu.times.user + cpu.times.nice + cpu.times.sys + cpu.times.irq + cpu.times.idle;
       }
-      const cpuUsage = totalTick > 0 ? ((1 - totalIdle / totalTick) * 100) : 0;
+      const cpuUsage = totalTick > 0 ? (1 - totalIdle / totalTick) * 100 : 0;
 
       // Memory — on macOS, show memory pressure (active + wired + compressed)
       // instead of raw usage, which always appears ~99% due to disk cache.
@@ -2556,7 +2750,10 @@ Choose the schedule and model based on the task:
         try {
           const { promisify } = await import("node:util");
           const execPromise = promisify(exec);
-          const { stdout: vmOutput } = await execPromise("vm_stat", { encoding: "utf-8", timeout: 3000 });
+          const { stdout: vmOutput } = await execPromise("vm_stat", {
+            encoding: "utf-8",
+            timeout: 3000,
+          });
           const pageSizeMatch = vmOutput.match(/page size of (\d+) bytes/);
           const ps = pageSizeMatch ? parseInt(pageSizeMatch[1]!, 10) : 16384;
 
@@ -2745,7 +2942,12 @@ Choose the schedule and model based on the task:
   app.get("/api/system/preflight", (_req, res) => {
     try {
       const checks = {
-        claudeCode: { installed: false } as { installed: boolean; version?: string; path?: string; authenticated?: boolean },
+        claudeCode: { installed: false } as {
+          installed: boolean;
+          version?: string;
+          path?: string;
+          authenticated?: boolean;
+        },
         node: { installed: true, version: process.version },
         git: { installed: false } as { installed: boolean; version?: string },
       };
@@ -2758,7 +2960,10 @@ Choose the schedule and model based on the task:
         checks.claudeCode.installed = true;
         checks.claudeCode.path = claudePath;
         try {
-          const versionOutput = execSync("claude --version", { encoding: "utf-8", timeout: 5000 }).trim();
+          const versionOutput = execSync("claude --version", {
+            encoding: "utf-8",
+            timeout: 5000,
+          }).trim();
           checks.claudeCode.version = versionOutput;
         } catch {
           // version check failed but CLI exists
@@ -2768,7 +2973,9 @@ Choose the schedule and model based on the task:
         const { existsSync: fsExistsPre } = require("node:fs") as typeof import("node:fs");
         checks.claudeCode.authenticated = fsExistsPre(claudeDir);
         if (!checks.claudeCode.authenticated) {
-          blockers.push("Claude Code is not authenticated. Run `claude` in your terminal and complete setup first.");
+          blockers.push(
+            "Claude Code is not authenticated. Run `claude` in your terminal and complete setup first.",
+          );
         }
       } catch {
         checks.claudeCode.installed = false;
@@ -2810,7 +3017,10 @@ Choose the schedule and model based on the task:
 
       // Verify it installed
       try {
-        const version = execSync("claude --version 2>&1", { encoding: "utf-8", timeout: 5000 }).trim();
+        const version = execSync("claude --version 2>&1", {
+          encoding: "utf-8",
+          timeout: 5000,
+        }).trim();
         res.json({ success: true, version, output: result });
       } catch {
         res.json({
@@ -2823,7 +3033,8 @@ Choose the schedule and model based on the task:
       const message = err instanceof Error ? err.message : "Installation failed";
       if (message.includes("EACCES") || message.includes("permission")) {
         res.status(403).json({
-          error: "Permission denied. Try running Agent Studio with sudo, or install Claude Code manually:\n\nsudo npm install -g @anthropic-ai/claude-code",
+          error:
+            "Permission denied. Try running Agent Studio with sudo, or install Claude Code manually:\n\nsudo npm install -g @anthropic-ai/claude-code",
           output: message,
         });
       } else {
@@ -2835,20 +3046,40 @@ Choose the schedule and model based on the task:
   // --- System Detect API ---
   app.post("/api/system/detect", (_req, res) => {
     try {
-      const { existsSync: fse, readdirSync: fsr, statSync: fss, readFileSync: fsrf, realpathSync: fsrp } = require("node:fs") as typeof import("node:fs");
+      const {
+        existsSync: fse,
+        readdirSync: fsr,
+        statSync: fss,
+        readFileSync: fsrf,
+        realpathSync: fsrp,
+      } = require("node:fs") as typeof import("node:fs");
       const { join: pj } = require("node:path") as typeof import("node:path");
       const home = os.homedir();
 
       const searchDirs = [
-        pj(home, "Code"), pj(home, "code"), pj(home, "Projects"),
-        pj(home, "Documents"), pj(home, "Desktop"), pj(home, "repos"),
-        pj(home, "dev"), pj(home, "workspace"), pj(home, "src"), pj(home, "work"),
+        pj(home, "Code"),
+        pj(home, "code"),
+        pj(home, "Projects"),
+        pj(home, "Documents"),
+        pj(home, "Desktop"),
+        pj(home, "repos"),
+        pj(home, "dev"),
+        pj(home, "workspace"),
+        pj(home, "src"),
+        pj(home, "work"),
       ];
 
       interface DetectedProject {
-        name: string; path: string; techStack: string[]; languages: string[];
-        packageManager: string; devCommand?: string; hasAgentSystem: boolean;
-        gitBranch: string; lastCommit: string; lastModified: number;
+        name: string;
+        path: string;
+        techStack: string[];
+        languages: string[];
+        packageManager: string;
+        devCommand?: string;
+        hasAgentSystem: boolean;
+        gitBranch: string;
+        lastCommit: string;
+        lastModified: number;
       }
 
       const projects: DetectedProject[] = [];
@@ -2878,7 +3109,8 @@ Choose the schedule and model based on the task:
               if (fse(pj(fullPath, "package.json"))) {
                 try {
                   const pkg = JSON.parse(fsrf(pj(fullPath, "package.json"), "utf-8")) as {
-                    dependencies?: Record<string, string>; devDependencies?: Record<string, string>;
+                    dependencies?: Record<string, string>;
+                    devDependencies?: Record<string, string>;
                     scripts?: Record<string, string>;
                   };
                   const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
@@ -2902,41 +3134,86 @@ Choose the schedule and model based on the task:
 
                   if (pkg.scripts?.["dev"]) devCommand = `${packageManager} run dev`;
                   else if (pkg.scripts?.["start"]) devCommand = `${packageManager} run start`;
-                } catch { /* bad package.json */ }
+                } catch {
+                  /* bad package.json */
+                }
               }
 
               if (fse(pj(fullPath, "requirements.txt")) || fse(pj(fullPath, "pyproject.toml"))) {
                 languages.push("Python");
-                if (packageManager === "unknown") packageManager = fse(pj(fullPath, "pyproject.toml")) ? "poetry" : "pip";
-                if (fse(pj(fullPath, "manage.py"))) { techStack.push("Django"); devCommand = devCommand ?? "python manage.py runserver"; }
+                if (packageManager === "unknown")
+                  packageManager = fse(pj(fullPath, "pyproject.toml")) ? "poetry" : "pip";
+                if (fse(pj(fullPath, "manage.py"))) {
+                  techStack.push("Django");
+                  devCommand = devCommand ?? "python manage.py runserver";
+                }
               }
-              if (fse(pj(fullPath, "go.mod"))) { languages.push("Go"); if (packageManager === "unknown") packageManager = "go"; devCommand = devCommand ?? "go run ."; }
-              if (fse(pj(fullPath, "Cargo.toml"))) { languages.push("Rust"); if (packageManager === "unknown") packageManager = "cargo"; devCommand = devCommand ?? "cargo run"; }
+              if (fse(pj(fullPath, "go.mod"))) {
+                languages.push("Go");
+                if (packageManager === "unknown") packageManager = "go";
+                devCommand = devCommand ?? "go run .";
+              }
+              if (fse(pj(fullPath, "Cargo.toml"))) {
+                languages.push("Rust");
+                if (packageManager === "unknown") packageManager = "cargo";
+                devCommand = devCommand ?? "cargo run";
+              }
               if (fse(pj(fullPath, "pom.xml")) || fse(pj(fullPath, "build.gradle"))) {
                 languages.push("Java");
-                if (packageManager === "unknown") packageManager = fse(pj(fullPath, "build.gradle")) ? "gradle" : "maven";
+                if (packageManager === "unknown")
+                  packageManager = fse(pj(fullPath, "build.gradle")) ? "gradle" : "maven";
               }
 
-              const hasAgentSystem = fse(pj(fullPath, "ai-agents")) || fse(pj(fullPath, ".claude", "agents"));
+              const hasAgentSystem =
+                fse(pj(fullPath, "ai-agents")) || fse(pj(fullPath, ".claude", "agents"));
 
               let gitBranch = "main";
-              try { gitBranch = execSync("git rev-parse --abbrev-ref HEAD", { cwd: fullPath, encoding: "utf-8", timeout: 3000 }).trim(); } catch { /* default */ }
+              try {
+                gitBranch = execSync("git rev-parse --abbrev-ref HEAD", {
+                  cwd: fullPath,
+                  encoding: "utf-8",
+                  timeout: 3000,
+                }).trim();
+              } catch {
+                /* default */
+              }
 
               let lastCommit = "";
               let lastModified = 0;
               try {
-                const ct = execSync("git log -1 --format=%ci", { cwd: fullPath, encoding: "utf-8", timeout: 3000 }).trim();
+                const ct = execSync("git log -1 --format=%ci", {
+                  cwd: fullPath,
+                  encoding: "utf-8",
+                  timeout: 3000,
+                }).trim();
                 lastModified = new Date(ct).getTime();
                 const dm = Math.floor((Date.now() - lastModified) / 60000);
                 if (dm < 60) lastCommit = `${dm}m ago`;
                 else if (dm < 1440) lastCommit = `${Math.floor(dm / 60)}h ago`;
                 else lastCommit = `${Math.floor(dm / 1440)}d ago`;
-              } catch { lastCommit = "unknown"; }
+              } catch {
+                lastCommit = "unknown";
+              }
 
-              projects.push({ name: entry, path: fullPath, techStack, languages: languages.length > 0 ? languages : ["Unknown"], packageManager, devCommand, hasAgentSystem, gitBranch, lastCommit, lastModified });
-            } catch { /* skip */ }
+              projects.push({
+                name: entry,
+                path: fullPath,
+                techStack,
+                languages: languages.length > 0 ? languages : ["Unknown"],
+                packageManager,
+                devCommand,
+                hasAgentSystem,
+                gitBranch,
+                lastCommit,
+                lastModified,
+              });
+            } catch {
+              /* skip */
+            }
           }
-        } catch { /* skip */ }
+        } catch {
+          /* skip */
+        }
       }
 
       projects.sort((a, b) => b.lastModified - a.lastModified);
@@ -2949,12 +3226,7 @@ Choose the schedule and model based on the task:
 
   // Custom error handler — no stack traces in responses
   app.use(
-    (
-      err: Error,
-      _req: express.Request,
-      res: express.Response,
-      _next: express.NextFunction,
-    ) => {
+    (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
       // eslint-disable-next-line no-console
       console.error("Server error:", err.message);
       res.status(500).json({ error: "Internal server error" });
@@ -3001,18 +3273,21 @@ Choose the schedule and model based on the task:
   // Prepare Next.js in the background — doesn't block API routes
   const nextApp = next({ dev, hostname: "127.0.0.1", port });
 
-  nextApp.prepare().then(() => {
-    handle = nextApp.getRequestHandler();
-    nextUpgradeHandler = nextApp.getUpgradeHandler();
-    nextReady = true;
-    // eslint-disable-next-line no-console
-    console.log("Next.js ready — UI is now serving");
-  }).catch((err) => {
-    // eslint-disable-next-line no-console
-    console.error("Next.js failed to compile:", err);
-    // Still mark as ready so the error page is visible instead of infinite loading
-    nextReady = true;
-  });
+  nextApp
+    .prepare()
+    .then(() => {
+      handle = nextApp.getRequestHandler();
+      nextUpgradeHandler = nextApp.getUpgradeHandler();
+      nextReady = true;
+      // eslint-disable-next-line no-console
+      console.log("Next.js ready — UI is now serving");
+    })
+    .catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error("Next.js failed to compile:", err);
+      // Still mark as ready so the error page is visible instead of infinite loading
+      nextReady = true;
+    });
 }
 
 main().catch((err) => {
