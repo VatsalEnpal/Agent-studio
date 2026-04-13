@@ -157,6 +157,16 @@ export class WorkflowExecutor {
     const abortController = new AbortController();
     this.activeRuns.set(runState.runId, { abortController, paused: false });
 
+    // Collect step IDs owned by loops — these are executed by the loop, not top-level
+    const loopOwnedSteps = new Set<string>();
+    for (const step of workflowDef.steps) {
+      if (step.type === "loop") {
+        for (const subId of step.steps) {
+          loopOwnedSteps.add(subId);
+        }
+      }
+    }
+
     try {
       for (const stepDef of workflowDef.steps) {
         // Check for cancellation
@@ -179,6 +189,11 @@ export class WorkflowExecutor {
           runState.steps[stepDef.id]?.status === "completed" ||
           runState.steps[stepDef.id]?.status === "skipped"
         ) {
+          continue;
+        }
+
+        // Skip steps that are owned by a loop — they execute inside the loop
+        if (loopOwnedSteps.has(stepDef.id)) {
           continue;
         }
 
@@ -441,10 +456,14 @@ export class WorkflowExecutor {
         // Reset sub-step state for this iteration
         runState.steps[subStepId] = { id: subStepId, status: "pending" };
 
+        // Save run status before sub-step — loop controls failure, not global handler
+        const savedStatus = runState.status;
         await this.executeAgentStep(runState, subStepDef as AgentStepDef, workflowDef, signal);
 
         if (runState.steps[subStepId].status !== "completed") {
           allPassed = false;
+          // Reset run status — loop handles its own retry/exhaustion logic
+          runState.status = savedStatus;
           break;
         }
       }
@@ -460,10 +479,6 @@ export class WorkflowExecutor {
         loopState.status = "completed";
         loopState.completedAt = new Date().toISOString();
         saveRunState(runState);
-        return;
-      }
-
-      if (runState.status === "failed" || runState.status === "cancelled") {
         return;
       }
     }

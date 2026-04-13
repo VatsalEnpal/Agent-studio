@@ -4,7 +4,12 @@ import { join } from "node:path";
 import { MockCommandRunner } from "../workflows/command-runner.js";
 import { WorkflowExecutor, type ExecutorEvent } from "../workflows/executor.js";
 import { setBaseDir, loadRunState } from "../workflows/run-state.js";
-import type { WorkflowPipelineDef, AgentStepDef, GateStepDef } from "../workflows/definition.js";
+import type {
+  WorkflowPipelineDef,
+  AgentStepDef,
+  GateStepDef,
+  LoopStepDef,
+} from "../workflows/definition.js";
 
 const TEST_DIR = join(process.cwd(), ".test-executor-" + Date.now());
 const WORK_DIR = join(TEST_DIR, "workdir");
@@ -448,5 +453,202 @@ describe("WorkflowExecutor — Gate Steps", () => {
 
     const gateEvent = events.find((e) => e.type === "gate-waiting");
     expect(gateEvent!.data?.artifactPath).toBe("report.md");
+  });
+});
+
+describe("WorkflowExecutor — Loop Steps", () => {
+  it("exits loop when condition met on 2nd iteration", async () => {
+    const mock = new MockCommandRunner();
+    // Iteration 1: build ok, qa fails. Iteration 2: build ok, qa ok.
+    mock.setResponses([
+      { exitCode: 0, stdout: "built", stderr: "" },
+      { exitCode: 1, stdout: "", stderr: "qa failed" },
+      { exitCode: 0, stdout: "rebuilt", stderr: "" },
+      { exitCode: 0, stdout: "qa passed", stderr: "" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "build",
+          name: "Build",
+          type: "agent",
+          agent: "backend",
+          goal: "Build",
+        } as AgentStepDef,
+        { id: "qa", name: "QA", type: "agent", agent: "qa", goal: "Test" } as AgentStepDef,
+        {
+          id: "loop-1",
+          name: "QA Loop",
+          type: "loop",
+          steps: ["build", "qa"],
+          maxIterations: 3,
+        } as LoopStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    const result = await executor.executeRun(wf, runState);
+
+    expect(result.steps["loop-1"].status).toBe("completed");
+    expect(result.steps["loop-1"].iteration).toBe(2);
+    expect(result.status).toBe("completed");
+    expect(mock.calls).toHaveLength(4);
+  });
+
+  it("pauses when max iterations exhausted (default onExhausted)", async () => {
+    const mock = new MockCommandRunner();
+    // All iterations fail qa
+    mock.setResponses([
+      { exitCode: 0, stdout: "built", stderr: "" },
+      { exitCode: 1, stdout: "", stderr: "qa failed" },
+      { exitCode: 0, stdout: "built", stderr: "" },
+      { exitCode: 1, stdout: "", stderr: "qa failed" },
+      { exitCode: 0, stdout: "built", stderr: "" },
+      { exitCode: 1, stdout: "", stderr: "qa failed" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "build",
+          name: "Build",
+          type: "agent",
+          agent: "backend",
+          goal: "Build",
+        } as AgentStepDef,
+        { id: "qa", name: "QA", type: "agent", agent: "qa", goal: "Test" } as AgentStepDef,
+        {
+          id: "loop-1",
+          name: "QA Loop",
+          type: "loop",
+          steps: ["build", "qa"],
+          maxIterations: 3,
+        } as LoopStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    const result = await executor.executeRun(wf, runState);
+
+    expect(result.steps["loop-1"].status).toBe("failed");
+    expect(result.steps["loop-1"].error).toContain("3 iterations");
+    expect(result.status).toBe("paused");
+  });
+
+  it("passes on first iteration when condition met immediately", async () => {
+    const mock = new MockCommandRunner();
+    mock.setResponses([
+      { exitCode: 0, stdout: "built", stderr: "" },
+      { exitCode: 0, stdout: "qa passed", stderr: "" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "build",
+          name: "Build",
+          type: "agent",
+          agent: "backend",
+          goal: "Build",
+        } as AgentStepDef,
+        { id: "qa", name: "QA", type: "agent", agent: "qa", goal: "Test" } as AgentStepDef,
+        {
+          id: "loop-1",
+          name: "QA Loop",
+          type: "loop",
+          steps: ["build", "qa"],
+          maxIterations: 1,
+        } as LoopStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    const result = await executor.executeRun(wf, runState);
+
+    expect(result.steps["loop-1"].status).toBe("completed");
+    expect(result.steps["loop-1"].iteration).toBe(1);
+    expect(result.status).toBe("completed");
+  });
+
+  it("fails run when onExhausted is 'fail'", async () => {
+    const mock = new MockCommandRunner();
+    mock.setResponses([
+      { exitCode: 0, stdout: "built", stderr: "" },
+      { exitCode: 1, stdout: "", stderr: "qa failed" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+    const events: ExecutorEvent[] = [];
+    executor.onEvent((e) => events.push(e));
+
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "build",
+          name: "Build",
+          type: "agent",
+          agent: "backend",
+          goal: "Build",
+        } as AgentStepDef,
+        { id: "qa", name: "QA", type: "agent", agent: "qa", goal: "Test" } as AgentStepDef,
+        {
+          id: "loop-1",
+          name: "QA Loop",
+          type: "loop",
+          steps: ["build", "qa"],
+          maxIterations: 1,
+          onExhausted: "fail",
+        } as LoopStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    const result = await executor.executeRun(wf, runState);
+
+    expect(result.status).toBe("failed");
+    expect(events.some((e) => e.type === "run-failed")).toBe(true);
+  });
+
+  it("skips loop when onExhausted is 'skip' and continues", async () => {
+    const mock = new MockCommandRunner();
+    mock.setResponses([
+      { exitCode: 0, stdout: "built", stderr: "" },
+      { exitCode: 1, stdout: "", stderr: "qa failed" },
+      { exitCode: 0, stdout: "deployed", stderr: "" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "build",
+          name: "Build",
+          type: "agent",
+          agent: "backend",
+          goal: "Build",
+        } as AgentStepDef,
+        { id: "qa", name: "QA", type: "agent", agent: "qa", goal: "Test" } as AgentStepDef,
+        {
+          id: "loop-1",
+          name: "QA Loop",
+          type: "loop",
+          steps: ["build", "qa"],
+          maxIterations: 1,
+          onExhausted: "skip",
+        } as LoopStepDef,
+        {
+          id: "deploy",
+          name: "Deploy",
+          type: "agent",
+          agent: "backend",
+          goal: "Deploy",
+        } as AgentStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+    const result = await executor.executeRun(wf, runState);
+
+    expect(result.steps["loop-1"].status).toBe("skipped");
+    expect(result.steps["deploy"].status).toBe("completed");
+    expect(result.status).toBe("completed");
   });
 });
