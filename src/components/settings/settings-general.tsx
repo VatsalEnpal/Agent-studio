@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SaveIcon, CheckIcon } from "@/components/ui/icons";
 import { useSettingsStore } from "@/stores/settings";
 import { useToastStore } from "@/stores/toast";
@@ -13,6 +13,44 @@ export function SettingsGeneral() {
   const addToast = useToastStore((s) => s.addToast);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Sync default model from /api/config (the canonical source used by session
+  // launcher) so the Settings page displays the same value sessions actually use.
+  const [configSynced, setConfigSynced] = useState(false);
+  useEffect(() => {
+    if (configSynced) return;
+    void (async () => {
+      try {
+        const res = await fetch("/api/config");
+        if (res.ok) {
+          const data = (await res.json()) as Record<string, unknown>;
+          const config = data.config as Record<string, unknown> | undefined;
+          const defaults = (config?.defaults ?? data.defaults) as
+            | {
+                model?: "opus" | "sonnet" | "haiku";
+                permissions?: "bypass" | "default" | "plan";
+                workingDirectory?: string;
+              }
+            | undefined;
+          if (defaults?.model) {
+            updateSetting("defaultModel", defaults.model);
+          }
+          if (defaults?.permissions) {
+            updateSetting(
+              "defaultPermissions",
+              defaults.permissions as "bypass" | "default" | "plan",
+            );
+          }
+          if (defaults?.workingDirectory) {
+            updateSetting("defaultCwd", defaults.workingDirectory);
+          }
+        }
+      } catch {
+        // Fall back to whatever the store already has
+      }
+      setConfigSynced(true);
+    })();
+  }, [configSynced, updateSetting]);
 
   const handleSave = async () => {
     setSaving(true);
