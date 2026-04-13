@@ -33,6 +33,8 @@ interface PipelineStep {
   agent: string;
   name: string;
   description: string;
+  gateRequired: boolean;
+  qaLoop: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -52,6 +54,8 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       agent: "orchestrator",
       name: "Planning",
       description: "Orchestrator reviews goal and creates task breakdown",
+      gateRequired: false,
+      qaLoop: false,
     });
   }
 
@@ -63,6 +67,8 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       agent: "backend",
       name: "Backend Build",
       description: "Build APIs, database schemas, server logic",
+      gateRequired: false,
+      qaLoop: false,
     });
   }
 
@@ -73,6 +79,8 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       agent: "frontend",
       name: "Frontend Build",
       description: "Build UI components, pages, and client logic",
+      gateRequired: false,
+      qaLoop: false,
     });
   }
 
@@ -84,6 +92,8 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       agent: "security",
       name: "Security Review",
       description: "Review code for vulnerabilities and security issues",
+      gateRequired: false,
+      qaLoop: false,
     });
   }
 
@@ -96,6 +106,8 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       agent: agentId,
       name: `${agent?.name ?? agentId} Work`,
       description: agent?.description ?? `${agentId} agent tasks`,
+      gateRequired: false,
+      qaLoop: false,
     });
   }
 
@@ -107,6 +119,8 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       agent: "pmo",
       name: "PMO Review",
       description: "Project management review and task tracking",
+      gateRequired: false,
+      qaLoop: false,
     });
   }
 
@@ -117,6 +131,8 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       agent: "qa",
       name: "QA Testing",
       description: "Run tests, verify quality, report bugs",
+      gateRequired: false,
+      qaLoop: false,
     });
   }
 
@@ -127,6 +143,8 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
     agent: deployer,
     name: "Review and Deploy",
     description: "Final review, create PR, archive sprint",
+    gateRequired: false,
+    qaLoop: false,
   });
 
   return steps;
@@ -153,6 +171,10 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
 
   // Step 3: Pipeline
   const [pipeline, setPipeline] = useState<PipelineStep[]>([]);
+
+  // Scheduling
+  const [schedule, setSchedule] = useState<"once" | "recurring">("once");
+  const [interval, setInterval] = useState<string>("4h");
 
   // Step 4: Done
   const [createdSprint, setCreatedSprint] = useState<{
@@ -214,6 +236,8 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
     setCwd("");
     setSelectedAgents(new Set());
     setPipeline([]);
+    setSchedule("once");
+    setInterval("4h");
     setError(null);
     setSaving(false);
     setCreatedSprint(null);
@@ -264,6 +288,16 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
     });
   }, []);
 
+  const handleToggleGate = useCallback((index: number) => {
+    setPipeline((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, gateRequired: !s.gateRequired } : s)),
+    );
+  }, []);
+
+  const handleToggleQaLoop = useCallback((index: number) => {
+    setPipeline((prev) => prev.map((s, i) => (i === index ? { ...s, qaLoop: !s.qaLoop } : s)));
+  }, []);
+
   const handleCreate = useCallback(async () => {
     setSaving(true);
     setError(null);
@@ -281,7 +315,10 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
             agent: p.agent,
             name: p.name,
             description: p.description,
+            gateRequired: p.gateRequired,
+            qaLoop: p.qaLoop,
           })),
+          schedule: schedule === "recurring" ? { recurring: true, interval } : undefined,
         }),
       });
       if (!res.ok) {
@@ -301,7 +338,7 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
     } finally {
       setSaving(false);
     }
-  }, [name, goal, selectedAgents, cwd, pipeline, onCreated]);
+  }, [name, goal, selectedAgents, cwd, pipeline, schedule, interval, onCreated]);
 
   if (!open) return null;
 
@@ -350,7 +387,17 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
           )}
 
           {step === "pipeline" && (
-            <StepPipeline steps={pipeline} onMove={handleMoveStep} error={error} />
+            <StepPipeline
+              steps={pipeline}
+              onMove={handleMoveStep}
+              onToggleGate={handleToggleGate}
+              onToggleQaLoop={handleToggleQaLoop}
+              schedule={schedule}
+              onScheduleChange={setSchedule}
+              interval={interval}
+              onIntervalChange={setInterval}
+              error={error}
+            />
           )}
 
           {step === "done" && <StepDone sprint={createdSprint} />}
@@ -614,12 +661,26 @@ function StepAgents({
 function StepPipeline({
   steps,
   onMove,
+  onToggleGate,
+  onToggleQaLoop,
+  schedule,
+  onScheduleChange,
+  interval: intervalValue,
+  onIntervalChange,
   error,
 }: {
   steps: PipelineStep[];
   onMove: (index: number, direction: "up" | "down") => void;
+  onToggleGate: (index: number) => void;
+  onToggleQaLoop: (index: number) => void;
+  schedule: "once" | "recurring";
+  onScheduleChange: (v: "once" | "recurring") => void;
+  interval: string;
+  onIntervalChange: (v: string) => void;
   error: string | null;
 }) {
+  const isQaAgent = (agent: string) => agent === "qa" || agent.includes("qa");
+
   return (
     <div className="space-y-3">
       <div>
@@ -627,7 +688,7 @@ function StepPipeline({
           Pipeline Steps
         </label>
         <p className="text-2xs text-text-tertiary mt-1">
-          Review the execution order. Use the arrows to reorder steps.
+          Review the execution order. Toggle gates and QA loops per step.
         </p>
       </div>
 
@@ -644,13 +705,44 @@ function StepPipeline({
 
             {/* Step info */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="text-xs font-medium text-text-primary truncate">{pStep.name}</span>
                 <span className="text-label px-1 py-0.5 rounded bg-sprints/10 text-sprints shrink-0">
                   {pStep.agent}
                 </span>
+                {pStep.gateRequired && (
+                  <span className="text-label px-1 py-0.5 rounded bg-warning/15 text-warning shrink-0">
+                    gate
+                  </span>
+                )}
+                {pStep.qaLoop && (
+                  <span className="text-label px-1 py-0.5 rounded bg-error/15 text-error shrink-0">
+                    loop
+                  </span>
+                )}
               </div>
-              <p className="text-2xs text-text-ghost mt-0.5 truncate">{pStep.description}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <label className="flex items-center gap-1 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={pStep.gateRequired}
+                    onChange={() => onToggleGate(i)}
+                    className="w-3 h-3 rounded accent-warning"
+                  />
+                  <span className="text-2xs text-text-tertiary">Approval</span>
+                </label>
+                {isQaAgent(pStep.agent) && (
+                  <label className="flex items-center gap-1 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={pStep.qaLoop}
+                      onChange={() => onToggleQaLoop(i)}
+                      className="w-3 h-3 rounded accent-error"
+                    />
+                    <span className="text-2xs text-text-tertiary">QA Loop</span>
+                  </label>
+                )}
+              </div>
             </div>
 
             {/* Reorder buttons */}
@@ -682,6 +774,51 @@ function StepPipeline({
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Scheduling */}
+      <div className="pt-2 border-t border-border-default">
+        <label className="text-label font-medium text-text-secondary uppercase tracking-wider">
+          Scheduling
+        </label>
+        <div className="flex items-center gap-2 mt-1.5">
+          <button
+            onClick={() => onScheduleChange("once")}
+            className={cn(
+              "px-2 py-1 text-2xs rounded-[4px] border transition-all",
+              schedule === "once"
+                ? "border-sprints bg-sprints/10 text-sprints"
+                : "border-border-default text-text-tertiary hover:text-text-secondary",
+            )}
+          >
+            Run once (now)
+          </button>
+          <button
+            onClick={() => onScheduleChange("recurring")}
+            className={cn(
+              "px-2 py-1 text-2xs rounded-[4px] border transition-all",
+              schedule === "recurring"
+                ? "border-sprints bg-sprints/10 text-sprints"
+                : "border-border-default text-text-tertiary hover:text-text-secondary",
+            )}
+          >
+            Recurring
+          </button>
+          {schedule === "recurring" && (
+            <select
+              value={intervalValue}
+              onChange={(e) => onIntervalChange(e.target.value)}
+              className="bg-bg-base border border-border-default rounded px-2 py-1 text-2xs text-text-secondary focus:outline-none"
+            >
+              <option value="1h">Every 1h</option>
+              <option value="2h">Every 2h</option>
+              <option value="4h">Every 4h</option>
+              <option value="8h">Every 8h</option>
+              <option value="12h">Every 12h</option>
+              <option value="24h">Every 24h</option>
+            </select>
+          )}
+        </div>
       </div>
 
       {error && <p className="text-xs text-error">{error}</p>}
