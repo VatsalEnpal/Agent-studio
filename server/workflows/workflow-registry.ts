@@ -1,8 +1,10 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { join, dirname } from "node:path";
 import type { WorkflowFlow } from "./types.js";
 import { getSprintPlanningFlow } from "./sprint-planning.js";
 import { getConfig, getAgentSystemBase } from "../config.js";
+import { validateWorkflow, type WorkflowPipelineDef } from "./definition.js";
+import { getActiveRuns } from "./run-state.js";
 
 // ---------- Public types for config-defined workflows ----------
 
@@ -104,9 +106,7 @@ function customWorkflowProvider(def: WorkflowDefinition): FlowProvider {
           details: s.description,
         })),
         stats: {
-          agentsUsed: Array.from(
-            new Set(def.steps.flatMap((s) => s.agents)),
-          ),
+          agentsUsed: Array.from(new Set(def.steps.flatMap((s) => s.agents))),
         },
       },
     ],
@@ -148,4 +148,104 @@ export function buildRegistry(): WorkflowRegistry {
   }
 
   return registry;
+}
+
+// ---------- Pipeline Registry (new workflow engine) ----------
+
+let _pipelineBaseDir = ".agent-studio/workflows";
+
+/** Override base directory for pipeline definitions (useful for tests) */
+export function setPipelineBaseDir(dir: string): void {
+  _pipelineBaseDir = dir;
+}
+
+function defPath(id: string): string {
+  return join(_pipelineBaseDir, id, "definition.json");
+}
+
+/**
+ * CRUD operations for WorkflowPipelineDef.
+ * Saves/loads definitions to `.agent-studio/workflows/{id}/definition.json`.
+ */
+export class PipelineRegistry {
+  /** Save a new workflow definition (validates first) */
+  saveWorkflow(def: WorkflowPipelineDef): { error?: string } {
+    const validation = validateWorkflow(def);
+    if (!validation.valid) {
+      return { error: validation.errors.join("; ") };
+    }
+
+    const filePath = defPath(def.id);
+    const dir = join(_pipelineBaseDir, def.id);
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+    }
+    writeFileSync(filePath, JSON.stringify(def, null, 2), "utf-8");
+    return {};
+  }
+
+  /** Update an existing workflow (validates, blocks if active run exists) */
+  updateWorkflow(id: string, patch: Partial<WorkflowPipelineDef>): { error?: string } {
+    const existing = this.getWorkflow(id);
+    if (!existing) {
+      return { error: `Workflow '${id}' not found` };
+    }
+
+    // Block if active run exists
+    const active = getActiveRuns().filter((r) => r.workflowId === id);
+    if (active.length > 0) {
+      return { error: "Cannot update workflow while runs are active. Cancel active runs first." };
+    }
+
+    const updated: WorkflowPipelineDef = { ...existing, ...patch, id };
+    return this.saveWorkflow(updated);
+  }
+
+  /** Delete a workflow (blocks if active run exists) */
+  deleteWorkflow(id: string): { error?: string } {
+    const active = getActiveRuns().filter((r) => r.workflowId === id);
+    if (active.length > 0) {
+      return { error: "Cannot delete workflow while runs are active. Cancel active runs first." };
+    }
+
+    const dir = join(_pipelineBaseDir, id);
+    if (!existsSync(dir)) {
+      return { error: `Workflow '${id}' not found` };
+    }
+
+    rmSync(dir, { recursive: true, force: true });
+    return {};
+  }
+
+  /** Get a single workflow definition */
+  getWorkflow(id: string): WorkflowPipelineDef | null {
+    const filePath = defPath(id);
+    if (!existsSync(filePath)) return null;
+    try {
+      return JSON.parse(readFileSync(filePath, "utf-8")) as WorkflowPipelineDef;
+    } catch {
+      return null;
+    }
+  }
+
+  /** List all workflow definitions */
+  listWorkflows(): WorkflowPipelineDef[] {
+    if (!existsSync(_pipelineBaseDir)) return [];
+
+    const entries = readdirSync(_pipelineBaseDir, { withFileTypes: true });
+    const workflows: WorkflowPipelineDef[] = [];
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const def = this.getWorkflow(entry.name);
+      if (def) workflows.push(def);
+    }
+
+    return workflows;
+  }
+
+  /** Load all definitions from disk (for startup) */
+  loadAll(): WorkflowPipelineDef[] {
+    return this.listWorkflows();
+  }
 }
