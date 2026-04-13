@@ -652,3 +652,118 @@ describe("WorkflowExecutor — Loop Steps", () => {
     expect(result.status).toBe("completed");
   });
 });
+
+describe("WorkflowExecutor — Timeout + Cancellation", () => {
+  it("times out a step when mock delays exceed timeout", async () => {
+    const mock = new MockCommandRunner();
+    mock.setTimeout(5000); // 5s delay
+    const executor = new WorkflowExecutor(mock);
+
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "s1",
+          name: "Slow Step",
+          type: "agent",
+          agent: "backend",
+          goal: "Do something slowly",
+          timeout: 0.1, // 100ms timeout
+        } as AgentStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+
+    // executeAgentStep will use AbortController with the step's timeout
+    // but the mock uses the signal to detect abort
+    const abortController = new AbortController();
+    setTimeout(() => abortController.abort(), 50);
+
+    await executor.executeAgentStep(
+      runState,
+      wf.steps[0] as AgentStepDef,
+      wf,
+      abortController.signal,
+    );
+
+    expect(runState.steps["s1"].status).toBe("timeout");
+    expect(runState.steps["s1"].error).toContain("timed out");
+  });
+
+  it("cancels a running workflow via cancelRun", async () => {
+    const mock = new MockCommandRunner();
+    mock.setResponses([
+      { exitCode: 0, stdout: "step1", stderr: "", delayMs: 200 },
+      { exitCode: 0, stdout: "step2", stderr: "" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "s1",
+          name: "Step 1",
+          type: "agent",
+          agent: "backend",
+          goal: "Do thing 1",
+        } as AgentStepDef,
+        {
+          id: "s2",
+          name: "Step 2",
+          type: "agent",
+          agent: "backend",
+          goal: "Do thing 2",
+        } as AgentStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+
+    // Start execution and cancel after 50ms
+    const runPromise = executor.executeRun(wf, runState);
+    setTimeout(() => executor.cancelRun(runState.runId), 50);
+
+    const result = await runPromise;
+
+    // Should be cancelled or the first step timed out
+    expect(["cancelled", "paused"]).toContain(result.status);
+  });
+
+  it("pauses a running workflow via pauseRun", async () => {
+    const mock = new MockCommandRunner();
+    // First step takes 100ms so pause has time to take effect before step 2
+    mock.setResponses([
+      { exitCode: 0, stdout: "step1", stderr: "", delayMs: 100 },
+      { exitCode: 0, stdout: "step2", stderr: "" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+
+    const wf = makeWorkflow({
+      steps: [
+        {
+          id: "s1",
+          name: "Step 1",
+          type: "agent",
+          agent: "backend",
+          goal: "Do thing 1",
+        } as AgentStepDef,
+        {
+          id: "s2",
+          name: "Step 2",
+          type: "agent",
+          agent: "backend",
+          goal: "Do thing 2",
+        } as AgentStepDef,
+      ],
+    });
+    const runState = executor.startRun(wf);
+
+    // Start run, then pause after 20ms (while step 1 is executing)
+    const runPromise = executor.executeRun(wf, runState);
+    setTimeout(() => executor.pauseRun(runState.runId), 20);
+    const result = await runPromise;
+
+    // Step 1 completes, but pause flag is checked before step 2
+    expect(result.status).toBe("paused");
+    expect(result.steps["s1"].status).toBe("completed");
+    expect(result.steps["s2"].status).toBe("pending");
+  });
+});
