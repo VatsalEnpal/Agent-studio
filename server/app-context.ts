@@ -66,7 +66,7 @@ export interface ISdkSessionManager {
     },
   ): Promise<void>;
   getSession(agentId: string): unknown;
-  destroySession(agentId: string): void;
+  destroySession(agentId: string): void | Promise<void>;
 }
 
 /** Manages sprint lifecycle, gates, and agent coordination. */

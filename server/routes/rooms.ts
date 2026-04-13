@@ -18,7 +18,8 @@ export function roomsRoutes(
   function broadcast(type: string, payload: unknown): void {
     const msg = JSON.stringify({ type, payload });
     for (const client of wss.clients) {
-      if ((client as WebSocket).readyState === 1) { // WebSocket.OPEN
+      if ((client as WebSocket).readyState === 1) {
+        // WebSocket.OPEN
         (client as WebSocket).send(msg);
       }
     }
@@ -103,10 +104,15 @@ EXAMPLE bad message:
 You are a teammate on Slack, not an assistant writing a report.
 ---
 `;
-          messageToSend = contextPrefix + prompt + "\n\n[ROOM REMINDER: Max 3-4 sentences. Summarize findings briefly. List max 3-5 items, not everything. @mention who should act next. No reports.]";
+          messageToSend =
+            contextPrefix +
+            prompt +
+            "\n\n[ROOM REMINDER: Max 3-4 sentences. Summarize findings briefly. List max 3-5 items, not everything. @mention who should act next. No reports.]";
         } else {
           // Not first message — still append brevity reminder after the prompt
-          messageToSend = prompt + "\n\n[ROOM REMINDER: Max 3-4 sentences. Summarize findings briefly. List max 3-5 items, not everything. @mention who should act next. No reports.]";
+          messageToSend =
+            prompt +
+            "\n\n[ROOM REMINDER: Max 3-4 sentences. Summarize findings briefly. List max 3-5 items, not everything. @mention who should act next. No reports.]";
         }
 
         const callbacks = makeSdkCallbacks(roomId);
@@ -190,14 +196,18 @@ You are a teammate on Slack, not an assistant writing a report.
           }
 
           const mentions = parseMentions(text);
-          console.log(`[room-chain] Agent ${agentId} finished (turn ${turns}/${SOFT_STOP_TURNS}). Mentions: [${mentions.join(", ")}]`);
+          console.log(
+            `[room-chain] Agent ${agentId} finished (turn ${turns}/${SOFT_STOP_TURNS}). Mentions: [${mentions.join(", ")}]`,
+          );
 
           const mentionsUser = mentions.includes("user") || mentions.includes("vatsal");
           const mentionsAgents = mentions.some((m) => m !== "user" && m !== "vatsal");
 
           // Let the protocol handle chaining to @mentioned agents FIRST
           protocol.handleAgentResponse(agentId, text);
-          console.log(`[room-chain] After handleAgentResponse: queue=${protocol.queueLength}, active=${protocol.activeAgent}`);
+          console.log(
+            `[room-chain] After handleAgentResponse: queue=${protocol.queueLength}, active=${protocol.activeAgent}`,
+          );
 
           // If agent also mentioned the user, notify but only pause if no other agents were chained
           if (mentionsUser) {
@@ -283,20 +293,32 @@ You are a teammate on Slack, not an assistant writing a report.
   router.post("/:id/messages", (req, res) => {
     try {
       const roomId = req.params["id"]!;
-      const { from, text, to, id: clientId } = req.body as {
-        from?: string; text?: string; to?: string; id?: string;
+      const {
+        from,
+        text,
+        to,
+        id: clientId,
+      } = req.body as {
+        from?: string;
+        text?: string;
+        to?: string;
+        id?: string;
       };
       if (!text) {
         res.status(400).json({ error: "Missing 'text'" });
         return;
       }
 
-      const msg = roomManager.addMessage(roomId, {
-        from: from ?? "user",
-        text,
-        to,
-        type: "message",
-      }, clientId);
+      const msg = roomManager.addMessage(
+        roomId,
+        {
+          from: from ?? "user",
+          text,
+          to,
+          type: "message",
+        },
+        clientId,
+      );
 
       if (!msg) {
         res.status(404).json({ error: "Room not found" });
@@ -341,11 +363,11 @@ You are a teammate on Slack, not an assistant writing a report.
 
       roomManager.addMessage(roomId, {
         from: "system",
-        text: `Room ready. ${room.agents.length} agents available: ${room.agents.map(a => a.name).join(", ")}. @mention an agent to start.`,
+        text: `Room ready. ${room.agents.length} agents available: ${room.agents.map((a) => a.name).join(", ")}. @mention an agent to start.`,
         type: "system",
       });
 
-      res.json({ spawned: room.agents.map(a => ({ agentId: a.id })) });
+      res.json({ spawned: room.agents.map((a) => ({ agentId: a.id })) });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
@@ -370,17 +392,21 @@ You are a teammate on Slack, not an assistant writing a report.
     res.json({ ok: true });
   });
 
-  // --- Close room: destroy SDK sessions ---
-  router.delete("/:id", (req, res) => {
+  // --- Close room: destroy SDK sessions with graceful shutdown ---
+  router.delete("/:id", async (req, res) => {
     try {
       const roomId = req.params["id"]!;
       const room = roomManager.getRoom(roomId);
       if (room) {
-        for (const agent of room.agents) {
-          sdkManager.destroySession(agent.id);
-        }
+        // Destroy all agent SDK sessions in parallel.
+        // Each destroySession call sends SIGTERM to the underlying Claude
+        // Code subprocess; the SDK escalates to SIGKILL after 5 s.
+        // We await all of them so the response is only sent once processes
+        // are confirmed dead (or the safety timeout fires).
+        await Promise.all(room.agents.map((agent) => sdkManager.destroySession(agent.id)));
       }
       protocols.delete(roomId);
+      agentTurnCounts.delete(roomId);
       roomManager.closeRoom(roomId);
       res.json({ ok: true });
     } catch (err) {
