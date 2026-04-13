@@ -223,7 +223,9 @@ interface StepRowProps {
 function StepRow({ stepDef, stepState, isLast, onApprove, onReject, onRetry }: StepRowProps) {
   const [feedbackText, setFeedbackText] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const status = stepState?.status ?? "pending";
+  const isGroup = stepDef.type === "agent-group";
 
   return (
     <div className="flex gap-3">
@@ -346,6 +348,52 @@ function StepRow({ stepDef, stepState, isLast, onApprove, onReject, onRetry }: S
               <RefreshIcon className="h-2.5 w-2.5" />
               Retry
             </button>
+          </div>
+        )}
+
+        {/* Agent group: expandable sub-steps */}
+        {isGroup && (
+          <div className="mt-1">
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-zinc-300"
+            >
+              {expanded ? (
+                <ChevronDownIcon className="h-3 w-3" />
+              ) : (
+                <ChevronRightIcon className="h-3 w-3" />
+              )}
+              {expanded ? "Collapse" : "Expand"} sub-steps
+              {!expanded && stepState?.subSteps && (
+                <span className="text-zinc-600">
+                  (
+                  {Object.values(stepState.subSteps).filter((s) => s.status === "completed").length}
+                  /{Object.values(stepState.subSteps).length} complete)
+                </span>
+              )}
+            </button>
+
+            {expanded && stepState?.subSteps && (
+              <div className="ml-2 mt-1 border-l border-zinc-800 pl-3 space-y-1">
+                {Object.values(stepState.subSteps).map((sub) => (
+                  <div key={sub.id} className="flex items-center gap-2">
+                    <div
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        STEP_STATUS_DOT[sub.status] || "bg-zinc-600",
+                      )}
+                    />
+                    <span className="text-[10px] text-zinc-400">{sub.id}</span>
+                    <span className="text-[10px] text-zinc-600">{sub.status}</span>
+                    {sub.error && (
+                      <span className="text-[10px] text-red-400 truncate max-w-xs">
+                        {sub.error}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
