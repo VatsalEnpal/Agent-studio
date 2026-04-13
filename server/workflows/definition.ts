@@ -38,7 +38,7 @@ export interface AgentStepDef {
   output?: string;
   model?: "sonnet" | "opus" | "haiku";
   permissions?: "default" | "bypass" | "plan" | "auto";
-  onFailure?: "pause" | "retry" | "skip";
+  onFailure?: "pause" | "retry" | "skip" | "fail";
   maxRetries?: number;
   timeout?: number; // seconds
   /** For hybrid mode: "internal" (Agent Studio executes) or "external" (watched) */
