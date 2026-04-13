@@ -832,6 +832,12 @@ Choose the schedule and model based on the task:
         res.status(400).json({ error: "Missing projectPath or agents array" });
         return;
       }
+      const validPath = validateProjectPath(options.projectPath);
+      if (!validPath) {
+        res.status(403).json({ error: "Path not allowed" });
+        return;
+      }
+      options.projectPath = validPath;
       const result = scaffoldAgentSystem(options);
       if (result.alreadyExists) {
         res.status(409).json({ error: "Agent system already exists at this path", result });
