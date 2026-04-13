@@ -114,10 +114,11 @@ function agentIcon(name: string): string {
 interface AskScreenProps {
   onSubmit: (description: string, projectPath: string | null) => void;
   onSkip: () => void;
+  initialDescription?: string;
 }
 
-function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
-  const [description, setDescription] = useState("");
+function AskScreen({ onSubmit, onSkip, initialDescription = "" }: AskScreenProps) {
+  const [description, setDescription] = useState(initialDescription);
   const [showProject, setShowProject] = useState(false);
   const [projectPath, setProjectPath] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -240,6 +241,7 @@ interface ResultScreenProps {
   automations: AutomationSuggestion[];
   onConfirm: () => void;
   onSkip: () => void;
+  onBack: () => void;
   onRefine: (message: string) => void;
   applying: boolean;
   refining: boolean;
@@ -250,6 +252,7 @@ function ResultScreen({
   automations,
   onConfirm,
   onSkip,
+  onBack,
   onRefine,
   applying,
   refining,
@@ -281,7 +284,26 @@ function ResultScreen({
   return (
     <div className="h-screen flex items-center justify-center bg-canvas">
       <div className="w-full max-w-2xl px-6 py-8 max-h-screen overflow-y-auto">
-        <h2 className="text-lg font-semibold text-white mb-6">Here&apos;s your setup:</h2>
+        <div className="flex items-center gap-3 mb-6">
+          <button
+            onClick={onBack}
+            className="p-1 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-all"
+            title="Back to description"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
+              <path d="M10 3L5 8l5 5" />
+            </svg>
+          </button>
+          <h2 className="text-lg font-semibold text-white">Here&apos;s your setup:</h2>
+        </div>
 
         {/* Agents */}
         <div className="mb-6">
@@ -693,7 +715,11 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
     return (
       <>
         {dismissButton}
-        <AskScreen onSubmit={handleSubmit} onSkip={handleSkip} />
+        <AskScreen
+          onSubmit={handleSubmit}
+          onSkip={handleSkip}
+          initialDescription={userDescription}
+        />
       </>
     );
   }
@@ -715,6 +741,7 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
         automations={automations}
         onConfirm={handleConfirm}
         onSkip={handleSkip}
+        onBack={() => setScreen("ask")}
         onRefine={handleRefine}
         applying={applying}
         refining={refining}
