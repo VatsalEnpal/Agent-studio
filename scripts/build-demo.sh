@@ -2,21 +2,38 @@
 #
 # Post-produce the demo video from raw Playwright recording.
 #
+# Pipeline:
+#   1. Trim raw to best 16s (cut dead air at start/end)
+#   2. Scale to 1280x720 for Twitter/GitHub (SD version)
+#   3. Generate end card (3s, amber "Agent Studio" on dark bg)
+#   4. Concatenate with crossfade
+#   5. Export: final_demo.mp4 (720p), final_demo_hd.mp4 (1080p), final_demo.gif
+#
 # Usage:
 #   ./scripts/build-demo.sh [input.webm]
 #
-# Defaults to demo-videos/raw.webm if no input given.
-# Output: demo-videos/final_demo.mp4
-#
-# Requires: ffmpeg (brew install ffmpeg)
+# Requires: ffmpeg-full (brew install ffmpeg-full)
 
 set -euo pipefail
+
+FFMPEG="/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg"
+FFPROBE="/opt/homebrew/opt/ffmpeg-full/bin/ffprobe"
+
+if [ ! -x "$FFMPEG" ]; then
+  echo "Error: ffmpeg-full not found at $FFMPEG"
+  echo "Install: brew install ffmpeg-full"
+  exit 1
+fi
 
 INPUT="${1:-}"
 OUTPUT_DIR="demo-videos"
 FINAL="$OUTPUT_DIR/final_demo.mp4"
+FINAL_HD="$OUTPUT_DIR/final_demo_hd.mp4"
+FINAL_GIF="$OUTPUT_DIR/final_demo.gif"
 ENDCARD="$OUTPUT_DIR/_endcard.mp4"
+ENDCARD_HD="$OUTPUT_DIR/_endcard_hd.mp4"
 TRIMMED="$OUTPUT_DIR/_trimmed.mp4"
+TRIMMED_HD="$OUTPUT_DIR/_trimmed_hd.mp4"
 
 # Find input — either explicit arg or the most recent .webm in demo-videos/
 if [ -z "$INPUT" ]; then
@@ -33,51 +50,115 @@ if [ ! -f "$INPUT" ]; then
   exit 1
 fi
 
-echo "Input: $INPUT"
+RAW_DURATION=$($FFPROBE -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$INPUT" | cut -d. -f1)
+echo ""
+echo "Input: $INPUT (${RAW_DURATION}s)"
+echo ""
 
-# --- Step 1: Convert and trim to ~18s with fade-in ---
-echo "Step 1: Converting to MP4 and trimming..."
-ffmpeg -y -i "$INPUT" \
-  -t 18 \
-  -vf "fade=in:0:15,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:color=#0a0a0a" \
-  -c:v libx264 -crf 23 -preset medium -r 30 \
+# --- Step 1: Trim and create 720p version ---
+# Skip first 1.5s (page load), take 16s of content
+echo "Step 1: Trimming to 16s and scaling to 720p..."
+$FFMPEG -y -ss 1.5 -i "$INPUT" \
+  -t 16 \
+  -vf "fade=in:0:15,fade=out:st=15:d=1,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:color=#0a0a0a" \
+  -c:v libx264 -crf 22 -preset medium -r 30 \
+  -pix_fmt yuv420p \
   -an \
   "$TRIMMED" 2>/dev/null
 
-echo "  Trimmed: $TRIMMED"
+echo "  Trimmed 720p: $TRIMMED"
+
+# --- Step 1b: Trim and create 1080p version ---
+echo "Step 1b: Trimming to 16s (1080p)..."
+$FFMPEG -y -ss 1.5 -i "$INPUT" \
+  -t 16 \
+  -vf "fade=in:0:15,fade=out:st=15:d=1,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=#0a0a0a" \
+  -c:v libx264 -crf 20 -preset medium -r 30 \
+  -pix_fmt yuv420p \
+  -an \
+  "$TRIMMED_HD" 2>/dev/null
+
+echo "  Trimmed 1080p: $TRIMMED_HD"
 
 # --- Step 2: Generate end card (3s) ---
+# Use drawtext for "Agent Studio" in amber + tagline in grey
 echo "Step 2: Generating end card..."
-ffmpeg -y \
+
+# 720p end card
+$FFMPEG -y \
   -f lavfi -i "color=c=0x0a0a0a:s=1280x720:d=3:r=30" \
-  -vf "drawtext=text='Agent Studio':fontcolor=0xf59e0b:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2-30:fontfile=/System/Library/Fonts/SFNSMono.ttf,drawtext=text='Terminal-first command center for AI agents':fontcolor=0x71717a:fontsize=20:x=(w-text_w)/2:y=(h-text_h)/2+30:fontfile=/System/Library/Fonts/SFNSMono.ttf" \
-  -c:v libx264 -crf 23 -preset medium -r 30 \
+  -vf "drawtext=text='Agent Studio':fontcolor=0xf59e0b:fontsize=56:x=(w-text_w)/2:y=(h/2)-40:font='SF Mono',drawtext=text='IDE for AI agent teams':fontcolor=0x71717a:fontsize=22:x=(w-text_w)/2:y=(h/2)+30:font='SF Mono',fade=in:0:10" \
+  -c:v libx264 -crf 22 -preset medium -r 30 \
+  -pix_fmt yuv420p \
   -t 3 \
   "$ENDCARD" 2>/dev/null
 
-echo "  End card: $ENDCARD"
+echo "  End card 720p: $ENDCARD"
+
+# 1080p end card
+$FFMPEG -y \
+  -f lavfi -i "color=c=0x0a0a0a:s=1920x1080:d=3:r=30" \
+  -vf "drawtext=text='Agent Studio':fontcolor=0xf59e0b:fontsize=72:x=(w-text_w)/2:y=(h/2)-50:font='SF Mono',drawtext=text='IDE for AI agent teams':fontcolor=0x71717a:fontsize=28:x=(w-text_w)/2:y=(h/2)+40:font='SF Mono',fade=in:0:10" \
+  -c:v libx264 -crf 20 -preset medium -r 30 \
+  -pix_fmt yuv420p \
+  -t 3 \
+  "$ENDCARD_HD" 2>/dev/null
+
+echo "  End card 1080p: $ENDCARD_HD"
 
 # --- Step 3: Concatenate with crossfade ---
 echo "Step 3: Concatenating with crossfade..."
-ffmpeg -y \
+
+# 720p final
+$FFMPEG -y \
   -i "$TRIMMED" -i "$ENDCARD" \
-  -filter_complex "[0:v][1:v]xfade=transition=fade:duration=0.5:offset=17.5[v]" \
+  -filter_complex "[0:v][1:v]xfade=transition=fade:duration=0.8:offset=15.2[v]" \
   -map "[v]" \
-  -c:v libx264 -crf 23 -preset medium -r 30 \
+  -c:v libx264 -crf 22 -preset medium -r 30 \
+  -pix_fmt yuv420p \
   -movflags +faststart \
   "$FINAL" 2>/dev/null
 
-echo "  Final: $FINAL"
+echo "  Final 720p: $FINAL"
+
+# 1080p final
+$FFMPEG -y \
+  -i "$TRIMMED_HD" -i "$ENDCARD_HD" \
+  -filter_complex "[0:v][1:v]xfade=transition=fade:duration=0.8:offset=15.2[v]" \
+  -map "[v]" \
+  -c:v libx264 -crf 20 -preset medium -r 30 \
+  -pix_fmt yuv420p \
+  -movflags +faststart \
+  "$FINAL_HD" 2>/dev/null
+
+echo "  Final 1080p: $FINAL_HD"
+
+# --- Step 4: Generate GIF fallback ---
+echo "Step 4: Generating GIF..."
+
+# Use palettegen for better quality
+$FFMPEG -y -i "$FINAL" \
+  -vf "fps=12,scale=640:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer:bayer_scale=3" \
+  "$FINAL_GIF" 2>/dev/null
+
+echo "  GIF: $FINAL_GIF"
 
 # --- Cleanup temp files ---
-rm -f "$TRIMMED" "$ENDCARD"
+rm -f "$TRIMMED" "$TRIMMED_HD" "$ENDCARD" "$ENDCARD_HD"
 
 # --- Report ---
-SIZE=$(du -h "$FINAL" | cut -f1)
-DURATION=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$FINAL" 2>/dev/null | cut -d. -f1)
 echo ""
 echo "Done!"
-echo "  Output:   $FINAL"
-echo "  Duration: ${DURATION}s"
-echo "  Size:     $SIZE"
-echo "  Format:   1280x720, H.264, CRF 23, 30fps"
+echo ""
+
+for f in "$FINAL" "$FINAL_HD" "$FINAL_GIF"; do
+  if [ -f "$f" ]; then
+    SIZE=$(du -h "$f" | cut -f1)
+    DURATION=$($FFPROBE -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$f" 2>/dev/null | cut -d. -f1 || echo "?")
+    RES=$($FFPROBE -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "$f" 2>/dev/null || echo "?")
+    echo "  $(basename "$f")"
+    echo "    Duration: ${DURATION}s | Size: $SIZE | Resolution: $RES"
+  fi
+done
+
+echo ""
