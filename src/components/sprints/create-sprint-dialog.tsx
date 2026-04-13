@@ -171,6 +171,11 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
         if (projects && projects.length > 0) {
           const main = projects.find((p) => !p.isProd);
           setCwd(main?.path ?? projects[0]?.path ?? "");
+        } else {
+          const defaults = data.defaults as { workingDirectory?: string } | undefined;
+          if (defaults?.workingDirectory) {
+            setCwd(defaults.workingDirectory);
+          }
         }
       })
       .catch(() => {
