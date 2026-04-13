@@ -1294,6 +1294,227 @@ Choose the schedule and model based on the task:
     }
   });
 
+  // --- Git details (commits, changed files, branches for a repo) ---
+  app.get("/api/git/details", (req, res) => {
+    try {
+      const repoPath = req.query["path"] as string | undefined;
+      if (!repoPath) {
+        res.status(400).json({ error: "Missing 'path' query parameter" });
+        return;
+      }
+      if (!fs.existsSync(repoPath) || !fs.statSync(repoPath).isDirectory()) {
+        res.status(400).json({ error: "Invalid directory path" });
+        return;
+      }
+
+      // Current branch
+      let currentBranch = "unknown";
+      try {
+        currentBranch = execSync("git rev-parse --abbrev-ref HEAD", {
+          cwd: repoPath,
+          encoding: "utf-8",
+          timeout: 5000,
+        }).trim();
+      } catch {
+        // ignore
+      }
+
+      // Branches with ahead/behind relative to main/master
+      let branchEntries: {
+        name: string;
+        isCurrent: boolean;
+        lastCommit: string;
+        ahead?: number;
+        behind?: number;
+      }[] = [];
+      try {
+        const branchOutput = execSync("git branch --format='%(refname:short)'", {
+          cwd: repoPath,
+          encoding: "utf-8",
+          timeout: 5000,
+        }).trim();
+        if (branchOutput) {
+          const branchNames = branchOutput
+            .split("\n")
+            .map((b) => b.trim().replace(/^'|'$/g, ""))
+            .filter((b) => b.length > 0);
+
+          // Detect main branch name (main or master)
+          const mainBranch = branchNames.includes("main")
+            ? "main"
+            : branchNames.includes("master")
+              ? "master"
+              : null;
+
+          branchEntries = branchNames.map((name) => {
+            const isCurrent = name === currentBranch;
+            let lastCommit = "";
+            try {
+              lastCommit = execSync(`git log -1 --format="%s" ${JSON.stringify(name)}`, {
+                cwd: repoPath,
+                encoding: "utf-8",
+                timeout: 5000,
+              }).trim();
+            } catch {
+              // ignore
+            }
+
+            let ahead: number | undefined;
+            let behind: number | undefined;
+            if (mainBranch && name !== mainBranch) {
+              try {
+                const aheadStr = execSync(
+                  `git rev-list --count ${JSON.stringify(mainBranch)}..${JSON.stringify(name)}`,
+                  { cwd: repoPath, encoding: "utf-8", timeout: 5000 },
+                ).trim();
+                ahead = parseInt(aheadStr, 10) || 0;
+              } catch {
+                // ignore
+              }
+              try {
+                const behindStr = execSync(
+                  `git rev-list --count ${JSON.stringify(name)}..${JSON.stringify(mainBranch)}`,
+                  { cwd: repoPath, encoding: "utf-8", timeout: 5000 },
+                ).trim();
+                behind = parseInt(behindStr, 10) || 0;
+              } catch {
+                // ignore
+              }
+            }
+
+            return { name, isCurrent, lastCommit, ahead, behind };
+          });
+        }
+      } catch {
+        // ignore
+      }
+
+      // Recent commits (last 20)
+      let commits: { hash: string; message: string; author: string; date: string }[] = [];
+      try {
+        const logOutput = execSync('git log -20 --format="%H|||%s|||%an|||%ar"', {
+          cwd: repoPath,
+          encoding: "utf-8",
+          timeout: 10000,
+        }).trim();
+        if (logOutput) {
+          commits = logOutput.split("\n").map((line) => {
+            const [hash = "", message = "", author = "", date = ""] = line.split("|||");
+            return { hash, message, author, date };
+          });
+        }
+      } catch {
+        // ignore
+      }
+
+      // Changed files
+      let changedFiles: { path: string; status: string }[] = [];
+      try {
+        const statusOutput = execSync("git status --porcelain", {
+          cwd: repoPath,
+          encoding: "utf-8",
+          timeout: 5000,
+        }).trim();
+        if (statusOutput) {
+          changedFiles = statusOutput.split("\n").map((line) => {
+            const status = line.substring(0, 2).trim();
+            const filePath = line.substring(3);
+            return { path: filePath, status };
+          });
+        }
+      } catch {
+        // ignore
+      }
+
+      res.json({
+        commits,
+        changedFiles,
+        branches: branchEntries,
+        currentBranch,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- Git create branch ---
+  app.post("/api/git/branch", (req, res) => {
+    try {
+      const { path: repoPath, name } = req.body as {
+        path?: string;
+        name?: string;
+      };
+      if (!repoPath || !name) {
+        res.status(400).json({ error: "Missing 'path' or 'name'" });
+        return;
+      }
+      if (!fs.existsSync(repoPath) || !fs.statSync(repoPath).isDirectory()) {
+        res.status(400).json({ error: "Invalid directory path" });
+        return;
+      }
+
+      // Validate branch name (no spaces, no special chars except - _ / .)
+      if (!/^[\w./-]+$/.test(name)) {
+        res.status(400).json({ error: "Invalid branch name" });
+        return;
+      }
+
+      execSync(`git checkout -b ${JSON.stringify(name)}`, {
+        cwd: repoPath,
+        encoding: "utf-8",
+        timeout: 10000,
+      });
+      res.json({ ok: true, branch: name });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // --- Git checkout (switch branch) ---
+  app.post("/api/git/checkout", (req, res) => {
+    try {
+      const { path: repoPath, branch } = req.body as {
+        path?: string;
+        branch?: string;
+      };
+      if (!repoPath || !branch) {
+        res.status(400).json({ error: "Missing 'path' or 'branch'" });
+        return;
+      }
+      if (!fs.existsSync(repoPath) || !fs.statSync(repoPath).isDirectory()) {
+        res.status(400).json({ error: "Invalid directory path" });
+        return;
+      }
+
+      // Check for uncommitted changes first
+      const statusOutput = execSync("git status --porcelain", {
+        cwd: repoPath,
+        encoding: "utf-8",
+        timeout: 5000,
+      }).trim();
+      if (statusOutput) {
+        res.json({
+          ok: false,
+          error: "uncommitted changes",
+          dirty: true,
+        });
+        return;
+      }
+
+      execSync(`git checkout ${JSON.stringify(branch)}`, {
+        cwd: repoPath,
+        encoding: "utf-8",
+        timeout: 10000,
+      });
+      res.json({ ok: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
   app.post("/api/git/pr", async (req, res) => {
     try {
       const { repo, sourceBranch, targetBranch, title, description } = req.body as {
