@@ -50,9 +50,7 @@ export function TerminalGrid({
         return focused ? [focused] : nonRoomSessions.length > 0 ? [nonRoomSessions[0]] : [];
       })();
 
-  const { gridClass, spanClasses } = computeGridLayout(
-    isAgentTeam ? sessionsToRender.length : 1,
-  );
+  const { gridClass, spanClasses } = computeGridLayout(isAgentTeam ? sessionsToRender.length : 1);
 
   // When session count or fullscreen state changes, refit all terminals after layout settles
   useEffect(() => {
@@ -69,13 +67,11 @@ export function TerminalGrid({
           <div className="w-14 h-14 rounded bg-bg-elevated/50 flex items-center justify-center mx-auto mb-2">
             <span className="text-2xl">&#9889;</span>
           </div>
-          <p className="text-text-primary text-sm font-medium tracking-tight">
-            Ready to go.
-          </p>
+          <p className="text-text-primary text-sm font-medium tracking-tight">Ready to go.</p>
           <p className="text-text-tertiary text-xs max-w-sm leading-relaxed">
             Launch a session to start working with Claude. Press{" "}
             <kbd className="px-1 py-0.5 rounded bg-border-default text-text-secondary text-xs">
-              Cmd+N
+              Cmd+Shift+N
             </kbd>{" "}
             anytime for the full launcher.
           </p>
@@ -88,14 +84,18 @@ export function TerminalGrid({
             className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded border border-rooms/30 bg-rooms/5 hover:border-rooms/50 hover:bg-rooms/8 hover:shadow-glow-sm active:scale-[0.98] transition-all"
           >
             <span className="text-sm font-medium text-text-primary">Start a Quick Chat</span>
-            <span className="text-xs text-text-tertiary">Ask Claude anything — uses Sonnet, no agent needed.</span>
+            <span className="text-xs text-text-tertiary">
+              Ask Claude anything — uses Sonnet, no agent needed.
+            </span>
           </button>
           <button
             onClick={onStartSprint ?? onCreateSession}
             className="btn-lift w-full flex flex-col items-center gap-1.5 px-5 py-4 rounded border border-border-default hover:border-rooms/40 hover:bg-bg-elevated/40 hover:shadow-card active:scale-[0.98] transition-all"
           >
             <span className="text-sm font-medium text-text-primary">Start a Sprint</span>
-            <span className="text-xs text-text-tertiary">Launch a full agent team to work on your project.</span>
+            <span className="text-xs text-text-tertiary">
+              Launch a full agent team to work on your project.
+            </span>
           </button>
           <button
             onClick={onContinueLast ?? onCreateSession}
@@ -110,7 +110,9 @@ export function TerminalGrid({
   }
 
   return (
-    <div className={cn("grid gap-1 h-full p-1", isAgentTeam ? gridClass : "grid-cols-1 grid-rows-1")}>
+    <div
+      className={cn("grid gap-1 h-full p-1", isAgentTeam ? gridClass : "grid-cols-1 grid-rows-1")}
+    >
       {sessionsToRender.map((session, i) => {
         const isFullscreen = session.id === fullscreenId;
         return (
@@ -137,9 +139,7 @@ export function TerminalGrid({
             {isFullscreen && (
               <div className="relative z-10 flex items-center justify-between px-4 py-2 bg-bg-surface border-b border-border-default">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-text-primary">
-                    {session.name}
-                  </span>
+                  <span className="text-xs font-medium text-text-primary">{session.name}</span>
                   {session.meta?.model && (
                     <span className="text-2xs px-1 py-0.5 rounded bg-border-default text-text-tertiary">
                       {session.meta.model}
@@ -164,13 +164,7 @@ export function TerminalGrid({
             )}
 
             {/* Terminal pane */}
-            <div
-              className={cn(
-                isFullscreen
-                  ? "relative z-10 h-[calc(100vh-41px)]"
-                  : "h-full",
-              )}
-            >
+            <div className={cn(isFullscreen ? "relative z-10 h-[calc(100vh-41px)]" : "h-full")}>
               <ErrorBoundary fallbackLabel={`Session "${session.name}" crashed`}>
                 <TerminalPane
                   sessionId={session.id}
@@ -182,9 +176,7 @@ export function TerminalGrid({
                   visible={visible}
                   onFocus={() => setFocused(session.id)}
                   onKill={() => onKillSession(session.id)}
-                  onDoubleClick={() =>
-                    setFullscreen(isFullscreen ? null : session.id)
-                  }
+                  onDoubleClick={() => setFullscreen(isFullscreen ? null : session.id)}
                 />
               </ErrorBoundary>
             </div>

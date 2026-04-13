@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { StopIcon, PlayIcon, ExternalLinkIcon, TrashIcon, PlusCircleIcon } from "@/components/ui/icons";
+import {
+  StopIcon,
+  PlayIcon,
+  ExternalLinkIcon,
+  TrashIcon,
+  PlusCircleIcon,
+} from "@/components/ui/icons";
 import { AmberLoadingBar } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useToastStore } from "@/stores/toast";
@@ -97,7 +103,7 @@ export function ServersSection() {
 
   useEffect(() => {
     void fetchDevServers();
-    const interval = setInterval(() => void fetchDevServers(), 10_000);
+    const interval = setInterval(() => void fetchDevServers(), 30_000);
     return () => clearInterval(interval);
   }, [fetchDevServers]);
 
@@ -143,75 +149,75 @@ function DevServerItem({
   return (
     <div className="relative">
       {acting && <AmberLoadingBar className="absolute top-0 left-0 right-0 z-10" />}
-    <div
-      className="flex items-center gap-1.5 px-2 py-1.5 text-xs group"
-      title={`${server.cwd}${server.running ? `\nPort: ${server.port}\nPID: ${server.pid}` : ""}`}
-    >
-      <span
-        className={cn(
-          "w-2 h-2 rounded-full shrink-0",
-          server.running ? "bg-emerald-400" : "bg-text-tertiary",
+      <div
+        className="flex items-center gap-1.5 px-2 py-1.5 text-xs group"
+        title={`${server.cwd}${server.running ? `\nPort: ${server.port}\nPID: ${server.pid}` : ""}`}
+      >
+        <span
+          className={cn(
+            "w-2 h-2 rounded-full shrink-0",
+            server.running ? "bg-emerald-400" : "bg-text-tertiary",
+          )}
+        />
+        <span className="text-xs text-text-primary truncate flex-1">
+          {server.name}
+          {server.isSelf && (
+            <span className="ml-1 text-[8px] px-1 py-0.5 rounded bg-rooms/15 text-rooms">
+              this app
+            </span>
+          )}
+        </span>
+        {server.running && server.port > 0 && (
+          <button
+            onClick={() => onOpenPort(server.port)}
+            className="flex items-center gap-0.5 text-2xs font-mono text-text-secondary hover:text-rooms transition-all shrink-0"
+            title={`Open http://localhost:${server.port} in browser`}
+          >
+            :{server.port}
+            <ExternalLinkIcon className="w-2.5 h-2.5" />
+          </button>
         )}
-      />
-      <span className="text-xs text-text-primary truncate flex-1">
-        {server.name}
-        {server.isSelf && (
-          <span className="ml-1 text-[8px] px-1 py-0.5 rounded bg-rooms/15 text-rooms">
-            this app
-          </span>
-        )}
-      </span>
-      {server.running && server.port > 0 && (
-        <button
-          onClick={() => onOpenPort(server.port)}
-          className="flex items-center gap-0.5 text-2xs font-mono text-text-secondary hover:text-rooms transition-all shrink-0"
-          title={`Open http://localhost:${server.port} in browser`}
-        >
-          :{server.port}
-          <ExternalLinkIcon className="w-2.5 h-2.5" />
-        </button>
-      )}
-      {server.running && !server.isSelf && (
-        <button
-          onClick={() => {
-            setActing(true);
-            onStop(server.pid);
-            setTimeout(() => setActing(false), 2000);
-          }}
-          disabled={acting}
-          className="p-0.5 text-text-tertiary hover:text-error opacity-0 group-hover:opacity-100 transition-all shrink-0"
-          title="Stop server"
-        >
-          <StopIcon className="w-3 h-3" />
-        </button>
-      )}
-      {!server.running && (
-        <>
+        {server.running && !server.isSelf && (
           <button
             onClick={() => {
               setActing(true);
-              onStart(server.cwd, server.command);
-              setTimeout(() => setActing(false), 5000);
+              onStop(server.pid);
+              setTimeout(() => setActing(false), 2000);
             }}
             disabled={acting}
-            className="flex items-center gap-0.5 px-1.5 py-0.5 text-[8px] font-medium text-sessions bg-sessions/10 hover:bg-sessions/20 rounded transition-all shrink-0"
-            title="Start server"
+            className="p-0.5 text-text-tertiary hover:text-error opacity-0 group-hover:opacity-100 transition-all shrink-0"
+            title="Stop server"
           >
-            <PlayIcon className="w-2 h-2" />
-            {acting ? "Starting..." : "Start"}
+            <StopIcon className="w-3 h-3" />
           </button>
-          {server.isCustom && onRemove && (
+        )}
+        {!server.running && (
+          <>
             <button
-              onClick={() => onRemove(server.name)}
-              className="p-0.5 text-text-tertiary hover:text-error opacity-0 group-hover:opacity-100 transition-all shrink-0"
-              title="Remove server"
+              onClick={() => {
+                setActing(true);
+                onStart(server.cwd, server.command);
+                setTimeout(() => setActing(false), 5000);
+              }}
+              disabled={acting}
+              className="flex items-center gap-0.5 px-1.5 py-0.5 text-[8px] font-medium text-sessions bg-sessions/10 hover:bg-sessions/20 rounded transition-all shrink-0"
+              title="Start server"
             >
-              <TrashIcon className="w-3 h-3" />
+              <PlayIcon className="w-2 h-2" />
+              {acting ? "Starting..." : "Start"}
             </button>
-          )}
-        </>
-      )}
-    </div>
+            {server.isCustom && onRemove && (
+              <button
+                onClick={() => onRemove(server.name)}
+                className="p-0.5 text-text-tertiary hover:text-error opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                title="Remove server"
+              >
+                <TrashIcon className="w-3 h-3" />
+              </button>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

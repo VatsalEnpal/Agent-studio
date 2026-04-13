@@ -62,18 +62,12 @@ export function SystemPanel() {
 
   const load = useCallback(async () => {
     const [memoryRes, sessionsRes, scansRes] = await Promise.all([
-      fetchJson<{ total: number; categories: Record<string, number> }>(
-        "/api/memory/stats",
-      ),
+      fetchJson<{ total: number; categories: Record<string, number> }>("/api/memory/stats"),
       fetchJson<Array<{ id: string }>>("/api/sessions"),
-      fetchJson<Array<{ timestamp: string; status: string; detail: string }>>(
-        "/api/sprint/scans",
-      ),
+      fetchJson<Array<{ timestamp: string; status: string; detail: string }>>("/api/sprint/scans"),
     ]);
 
-    const lastScanEntry = scansRes?.length
-      ? scansRes[scansRes.length - 1]
-      : null;
+    const lastScanEntry = scansRes?.length ? scansRes[scansRes.length - 1] : null;
 
     // Determine scheduler status (weekend/weekday)
     const now = new Date();
@@ -118,7 +112,7 @@ export function SystemPanel() {
     const interval = setInterval(() => {
       void load();
       void loadPmoStatus();
-    }, 30_000);
+    }, 60_000);
     return () => clearInterval(interval);
   }, [load, loadPmoStatus]);
 
@@ -157,9 +151,7 @@ export function SystemPanel() {
   }, [scanning, loadPmoStatus, load, addToast]);
 
   // Build memory categories summary for tooltip
-  const categoryEntries = Object.entries(stats.memoryCategories).sort(
-    (a, b) => b[1] - a[1],
-  );
+  const categoryEntries = Object.entries(stats.memoryCategories).sort((a, b) => b[1] - a[1]);
 
   return (
     <div className="space-y-1.5 pt-2 border-t border-border-default mt-2">
@@ -171,15 +163,21 @@ export function SystemPanel() {
       <StatRow
         icon={<SprintsIconInline />}
         label="Avg Context"
-        value={usageData.all.length > 0
-          ? `${Math.round(usageData.all.reduce((sum, s) => sum + (s.contextPercent ?? 0), 0) / usageData.all.length)}%`
-          : "0%"}
+        value={
+          usageData.all.length > 0
+            ? `${Math.round(usageData.all.reduce((sum, s) => sum + (s.contextPercent ?? 0), 0) / usageData.all.length)}%`
+            : "0%"
+        }
         valueColor={
           usageData.all.length > 0 &&
-          usageData.all.reduce((sum, s) => sum + (s.contextPercent ?? 0), 0) / usageData.all.length >= 90
+          usageData.all.reduce((sum, s) => sum + (s.contextPercent ?? 0), 0) /
+            usageData.all.length >=
+            90
             ? "text-error"
             : usageData.all.length > 0 &&
-              usageData.all.reduce((sum, s) => sum + (s.contextPercent ?? 0), 0) / usageData.all.length >= 70
+                usageData.all.reduce((sum, s) => sum + (s.contextPercent ?? 0), 0) /
+                  usageData.all.length >=
+                  70
               ? "text-sprints"
               : "text-sessions"
         }
@@ -237,14 +235,18 @@ export function SystemPanel() {
             <SprintsIconInline />
           </span>
           <span className="text-2xs text-text-ghost flex-1">Status</span>
-          <span className={cn(
-            "flex items-center gap-1 text-2xs font-mono shrink-0",
-            pmoFull?.loaded ? "text-sessions" : "text-text-ghost",
-          )}>
-            <span className={cn(
-              "w-1.5 h-1.5 rounded-full shrink-0",
-              pmoFull?.loaded ? "bg-sessions" : "bg-text-ghost",
-            )} />
+          <span
+            className={cn(
+              "flex items-center gap-1 text-2xs font-mono shrink-0",
+              pmoFull?.loaded ? "text-sessions" : "text-text-ghost",
+            )}
+          >
+            <span
+              className={cn(
+                "w-1.5 h-1.5 rounded-full shrink-0",
+                pmoFull?.loaded ? "bg-sessions" : "bg-text-ghost",
+              )}
+            />
             {pmoFull?.loaded ? "Running (every 2h)" : "Paused"}
           </span>
         </div>
@@ -254,11 +256,16 @@ export function SystemPanel() {
           <div className="flex items-center gap-2 px-1 py-0.5">
             <span className="text-text-ghost shrink-0 w-3" />
             <span className="text-2xs text-text-ghost flex-1">Last Scan</span>
-            <span className={cn(
-              "text-2xs font-mono shrink-0 max-w-[120px] truncate",
-              pmoFull.lastStatus?.includes("NOT READY") ? "text-error" :
-              pmoFull.lastStatus?.includes("READY") ? "text-sessions" : "text-text-secondary",
-            )}>
+            <span
+              className={cn(
+                "text-2xs font-mono shrink-0 max-w-[120px] truncate",
+                pmoFull.lastStatus?.includes("NOT READY")
+                  ? "text-error"
+                  : pmoFull.lastStatus?.includes("READY")
+                    ? "text-sessions"
+                    : "text-text-secondary",
+              )}
+            >
               {formatScanTime(pmoFull.lastScan)} — {pmoFull.lastStatus ?? "?"}
             </span>
           </div>
@@ -315,7 +322,17 @@ export function SystemPanel() {
 /** Inline sprints-style icon at small size */
 function SprintsIconInline() {
   return (
-    <svg width={12} height={12} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" className="text-text-ghost">
+    <svg
+      width={12}
+      height={12}
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="text-text-ghost"
+    >
       <circle cx="8" cy="8" r="6" />
       <polyline points="5.5 8 7.2 9.8 10.5 6.2" />
     </svg>

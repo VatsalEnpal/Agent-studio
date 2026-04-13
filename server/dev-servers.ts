@@ -3,7 +3,12 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { getConfig } from "./config.js";
-import { findNodeListeningPorts, findPortsForPid, getProcessCwd, killProcessGroup } from "./platform.js";
+import {
+  findNodeListeningPorts,
+  findPortsForPid,
+  getProcessCwd,
+  killProcessGroup,
+} from "./platform.js";
 
 export interface DevServer {
   pid: number;
@@ -20,6 +25,8 @@ export interface KnownProject {
   name: string;
   cwd: string;
   command: string;
+  port?: number;
+  autoStart?: boolean;
   isCustom?: boolean;
 }
 
@@ -53,10 +60,23 @@ export function getCustomServers(): KnownProject[] {
   return (custom ?? []).map((s) => ({ ...s, isCustom: true }));
 }
 
-export function addCustomServer(server: { name: string; cwd: string; command: string }): void {
+export function addCustomServer(server: {
+  name: string;
+  cwd: string;
+  command: string;
+  port?: number;
+  autoStart?: boolean;
+}): void {
   const settings = readSettings();
   const custom = (settings["customServers"] as KnownProject[] | undefined) ?? [];
-  custom.push({ name: server.name, cwd: server.cwd, command: server.command });
+  const entry: KnownProject = {
+    name: server.name,
+    cwd: server.cwd,
+    command: server.command,
+  };
+  if (server.port) entry.port = server.port;
+  if (server.autoStart) entry.autoStart = server.autoStart;
+  custom.push(entry);
   settings["customServers"] = custom;
   writeSettings(settings);
 }
@@ -100,10 +120,7 @@ function detectRunningServers(): DevServer[] {
 
       // Derive a name from the cwd
       const sep = path.sep;
-      const dirName =
-        cwd !== "unknown"
-          ? cwd.split(sep).pop() ?? "dev-server"
-          : "dev-server";
+      const dirName = cwd !== "unknown" ? (cwd.split(sep).pop() ?? "dev-server") : "dev-server";
       const isSelf = entry.pid === selfPid || entry.port === selfPort;
 
       servers.push({
@@ -137,9 +154,7 @@ export function getDevServers(): DevServer[] {
   for (const project of knownProjects) {
     if (!existsSync(project.cwd)) continue;
 
-    const match = running.find(
-      (s) => s.cwd === project.cwd || s.name.startsWith(project.name),
-    );
+    const match = running.find((s) => s.cwd === project.cwd || s.name.startsWith(project.name));
 
     if (match) {
       // Update the name to use our known project name
@@ -153,7 +168,7 @@ export function getDevServers(): DevServer[] {
       // Project exists but not running
       result.push({
         pid: 0,
-        port: 0,
+        port: project.port ?? 0,
         command: project.command,
         cwd: project.cwd,
         name: project.name,
@@ -165,9 +180,7 @@ export function getDevServers(): DevServer[] {
   }
 
   // Ensure agent-studio is always in the list and marked as self
-  const agentStudio = result.find(
-    (s) => s.name === "agent-studio" || s.port === selfPort,
-  );
+  const agentStudio = result.find((s) => s.name === "agent-studio" || s.port === selfPort);
   if (agentStudio) {
     agentStudio.isSelf = true;
     agentStudio.name = "agent-studio";

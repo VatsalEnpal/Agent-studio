@@ -6,6 +6,8 @@ import {
   ExternalLinkIcon,
   StopIcon,
   SearchIcon,
+  PlusIcon,
+  CloseIcon,
 } from "@/components/ui/icons";
 import { AmberLoadingBar } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -43,6 +45,195 @@ function processLabel(cmd: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// Add Server Dialog
+// ---------------------------------------------------------------------------
+
+interface AddServerDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreated: () => void;
+}
+
+function AddServerDialog({ open, onOpenChange, onCreated }: AddServerDialogProps) {
+  const [name, setName] = useState("");
+  const [port, setPort] = useState("");
+  const [command, setCommand] = useState("");
+  const [cwd, setCwd] = useState("");
+  const [autoStart, setAutoStart] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const reset = useCallback(() => {
+    setName("");
+    setPort("");
+    setCommand("");
+    setCwd("");
+    setAutoStart(false);
+    setError(null);
+    setSaving(false);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    onOpenChange(false);
+    setTimeout(reset, 200);
+  }, [onOpenChange, reset]);
+
+  const handleSave = useCallback(async () => {
+    if (!name.trim() || !command.trim() || !cwd.trim()) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/dev-servers/custom", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          port: port ? parseInt(port, 10) : undefined,
+          command: command.trim(),
+          cwd: cwd.trim(),
+          autoStart,
+        }),
+      });
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        throw new Error(data.error || `Failed to add server (${res.status})`);
+      }
+      onCreated();
+      handleClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setSaving(false);
+    }
+  }, [name, port, command, cwd, autoStart, onCreated, handleClose]);
+
+  if (!open) return null;
+
+  const canSave = name.trim() && command.trim() && cwd.trim();
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-bg-base/80 backdrop-blur-[2px]" onClick={handleClose} />
+
+      {/* Dialog */}
+      <div className="relative w-full max-w-md bg-bg-surface border border-border-default rounded-[4px] overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border-default">
+          <div className="flex items-center gap-2">
+            <PlusIcon size={14} className="text-accent" />
+            <h2 className="text-xs font-medium text-text-primary">Add Server</h2>
+          </div>
+          <button
+            onClick={handleClose}
+            className="p-1 text-text-ghost hover:text-text-secondary transition-all"
+          >
+            <CloseIcon size={12} />
+          </button>
+        </div>
+
+        {/* Form */}
+        <div className="px-4 py-4 space-y-3">
+          {/* Name */}
+          <div className="space-y-1">
+            <label className="text-label font-medium text-text-secondary uppercase tracking-wider">
+              Name
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="my-api-server"
+              className="w-full px-3 py-2 text-xs bg-bg-input border border-border-default rounded-[4px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-accent transition-all"
+              autoFocus
+            />
+          </div>
+
+          {/* Port */}
+          <div className="space-y-1">
+            <label className="text-label font-medium text-text-secondary uppercase tracking-wider">
+              Port
+            </label>
+            <input
+              type="number"
+              value={port}
+              onChange={(e) => setPort(e.target.value)}
+              placeholder="3000"
+              className="w-full px-3 py-2 text-xs bg-bg-input border border-border-default rounded-[4px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-accent transition-all"
+            />
+          </div>
+
+          {/* Command */}
+          <div className="space-y-1">
+            <label className="text-label font-medium text-text-secondary uppercase tracking-wider">
+              Command
+            </label>
+            <input
+              type="text"
+              value={command}
+              onChange={(e) => setCommand(e.target.value)}
+              placeholder="npm run dev"
+              className="w-full px-3 py-2 text-xs font-mono bg-bg-input border border-border-default rounded-[4px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-accent transition-all"
+            />
+          </div>
+
+          {/* Working Directory */}
+          <div className="space-y-1">
+            <label className="text-label font-medium text-text-secondary uppercase tracking-wider">
+              Working Directory
+            </label>
+            <input
+              type="text"
+              value={cwd}
+              onChange={(e) => setCwd(e.target.value)}
+              placeholder="/Users/you/projects/my-app"
+              className="w-full px-3 py-2 text-xs font-mono bg-bg-input border border-border-default rounded-[4px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-accent transition-all"
+            />
+          </div>
+
+          {/* Auto-start */}
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={autoStart}
+              onChange={(e) => setAutoStart(e.target.checked)}
+              className="w-3.5 h-3.5 rounded-[2px] border border-border-default bg-bg-input accent-accent cursor-pointer"
+            />
+            <span className="text-xs text-text-secondary">
+              Start automatically when Agent Studio launches
+            </span>
+          </label>
+
+          {error && <p className="text-xs text-error">{error}</p>}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-border-default">
+          <button
+            onClick={handleClose}
+            className="px-3 py-1.5 text-xs text-text-secondary hover:text-text-primary transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => void handleSave()}
+            disabled={!canSave || saving}
+            className={cn(
+              "px-3 py-1.5 text-xs font-medium rounded-[4px] transition-all",
+              canSave && !saving
+                ? "bg-accent text-bg-base hover:bg-accent/90"
+                : "bg-bg-elevated text-text-ghost cursor-not-allowed",
+            )}
+          >
+            {saving ? "Adding..." : "Add Server"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -51,6 +242,7 @@ export function DevServersView() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [stoppingPid, setStoppingPid] = useState<number | null>(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const fetchServers = useCallback(async () => {
     try {
@@ -67,7 +259,7 @@ export function DevServersView() {
 
   useEffect(() => {
     void fetchServers();
-    const interval = setInterval(() => void fetchServers(), 5000);
+    const interval = setInterval(() => void fetchServers(), 15_000);
     return () => clearInterval(interval);
   }, [fetchServers]);
 
@@ -103,9 +295,10 @@ export function DevServersView() {
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
           <h2 className="text-xs font-medium text-text-primary">Dev Servers</h2>
-          <span className="text-label text-text-ghost">
-            {servers.length} listening
+          <span className="text-2xs text-text-ghost hidden sm:inline">
+            Running processes and listening ports
           </span>
+          <span className="text-label text-text-ghost ml-auto">{servers.length} listening</span>
         </div>
 
         {/* Search */}
@@ -122,6 +315,15 @@ export function DevServersView() {
             className="w-full pl-6 pr-2 py-1 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
           />
         </div>
+
+        <button
+          onClick={() => setAddDialogOpen(true)}
+          className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-accent text-bg-base hover:bg-accent/90 rounded-[4px] transition-all active:scale-[0.96]"
+          title="Add Server"
+        >
+          <PlusIcon size={12} />
+          Add Server
+        </button>
 
         <button
           onClick={() => {
@@ -182,9 +384,7 @@ export function DevServersView() {
               {/* Port */}
               <div className="w-14 shrink-0 flex items-center gap-1.5">
                 <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
-                <span className="text-xs font-mono text-sessions font-medium">
-                  {server.port}
-                </span>
+                <span className="text-xs font-mono text-sessions font-medium">{server.port}</span>
               </div>
 
               {/* Process name */}
@@ -203,9 +403,7 @@ export function DevServersView() {
 
               {/* PID */}
               <div className="w-16 shrink-0 text-right">
-                <span className="text-label text-text-ghost font-mono">
-                  {server.pid}
-                </span>
+                <span className="text-label text-text-ghost font-mono">{server.pid}</span>
               </div>
 
               {/* Actions */}
@@ -246,6 +444,13 @@ export function DevServersView() {
           ))
         )}
       </div>
+
+      {/* Add Server Dialog */}
+      <AddServerDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+        onCreated={() => void fetchServers()}
+      />
     </div>
   );
 }

@@ -57,8 +57,8 @@ export function useUsage(): UsageState {
       }
     });
 
-    // Also poll every 15 seconds for freshness
-    const interval = setInterval(() => void fetchUsage(), 15_000);
+    // Also poll every 30 seconds for freshness
+    const interval = setInterval(() => void fetchUsage(), 30_000);
 
     return () => {
       mountedRef.current = false;
@@ -153,7 +153,7 @@ export function useSessionUsage(sessionId: string | null): {
     };
 
     void fetchData();
-    const interval = setInterval(() => void fetchData(), 15_000);
+    const interval = setInterval(() => void fetchData(), 30_000);
 
     return () => {
       cancelled = true;

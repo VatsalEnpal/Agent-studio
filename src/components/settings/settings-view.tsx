@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSettingsStore, type AppSettings } from "@/stores/settings";
+import { useState, useEffect, useCallback } from "react";
+import { useSettingsStore } from "@/stores/settings";
 import { cn } from "@/lib/utils";
 import {
   SettingsIcon,
@@ -20,6 +20,8 @@ import { SettingsMonitor } from "./settings-monitor";
 import { SettingsShortcuts } from "./settings-shortcuts";
 import { SettingsAbout } from "./settings-about";
 import { SettingsNotifications } from "./settings-notifications";
+import { CreateAgentDialog } from "@/components/agents/create-agent-dialog";
+import { PlusIcon } from "@/components/ui/icons";
 
 type SettingsTab =
   | "general"
@@ -30,12 +32,27 @@ type SettingsTab =
   | "shortcuts"
   | "about";
 
-const TABS: { id: SettingsTab; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; desc: string }[] = [
+const TABS: {
+  id: SettingsTab;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  desc: string;
+}[] = [
   { id: "general", label: "General", icon: SettingsIcon, desc: "Model, theme, notifications" },
   { id: "projects", label: "Projects", icon: FolderIcon, desc: "Tracked repos and agent system" },
   { id: "agents", label: "Agents", icon: UserIcon, desc: "Discovered agent definitions" },
-  { id: "dev-servers", label: "Dev Servers", icon: MonitorIcon, desc: "Server monitoring and ports" },
-  { id: "sprint-protocol", label: "Automations", icon: SprintsIcon, desc: "Sprint protocol, PMO scans, scheduled tasks" },
+  {
+    id: "dev-servers",
+    label: "System Monitor",
+    icon: MonitorIcon,
+    desc: "CPU, memory, disk, active processes",
+  },
+  {
+    id: "sprint-protocol",
+    label: "Automations",
+    icon: SprintsIcon,
+    desc: "Sprint protocol, PMO scans, scheduled tasks",
+  },
   { id: "shortcuts", label: "Shortcuts", icon: BoltIcon, desc: "Keyboard shortcuts reference" },
   { id: "about", label: "About", icon: InfoIcon, desc: "Version and system info" },
 ];
@@ -43,8 +60,8 @@ const TABS: { id: SettingsTab; label: string; icon: React.ComponentType<{ size?:
 export function SettingsView() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("general");
   const setSystemStats = useSettingsStore((s) => s.setSystemStats);
-  const setSettings = useSettingsStore((s) => s.setSettings);
   const setStatsLoading = useSettingsStore((s) => s.setStatsLoading);
+  const fetchSettings = useSettingsStore((s) => s.fetchSettings);
 
   // Poll system stats every 5 seconds
   useEffect(() => {
@@ -56,27 +73,27 @@ export function SettingsView() {
         .then((data) => {
           if (active) setSystemStats(data);
         })
-        .catch(() => { /* ignore */ })
-        .finally(() => { if (active) setStatsLoading(false); });
+        .catch(() => {
+          /* ignore */
+        })
+        .finally(() => {
+          if (active) setStatsLoading(false);
+        });
     };
 
     setStatsLoading(true);
     fetchStats();
-    const interval = setInterval(fetchStats, 5000);
-    return () => { active = false; clearInterval(interval); };
+    const interval = setInterval(fetchStats, 15_000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, [setSystemStats, setStatsLoading]);
 
-  // Load saved settings on mount
+  // Load saved settings on mount (fetches from server, applies config defaults)
   useEffect(() => {
-    fetch("/api/settings")
-      .then((r) => r.json())
-      .then((data: AppSettings) => {
-        if (data && data.defaultModel) {
-          setSettings(data);
-        }
-      })
-      .catch(() => { /* use defaults */ });
-  }, [setSettings]);
+    void fetchSettings();
+  }, [fetchSettings]);
 
   return (
     <div className="flex h-full">
@@ -105,10 +122,12 @@ export function SettingsView() {
                 />
                 <span className="text-xs font-medium">{tab.label}</span>
               </div>
-              <p className={cn(
-                "text-2xs mt-0.5 pl-5 leading-snug",
-                activeTab === tab.id ? "text-text-tertiary" : "text-text-ghost",
-              )}>
+              <p
+                className={cn(
+                  "text-2xs mt-0.5 pl-5 leading-snug",
+                  activeTab === tab.id ? "text-text-tertiary" : "text-text-ghost",
+                )}
+              >
                 {tab.desc}
               </p>
             </button>
@@ -150,8 +169,10 @@ function SettingsAgentsDiscovery() {
     Array<{ id: string; name: string; description: string; model: string }>
   >([]);
   const [loading, setLoading] = useState(true);
+  const [createOpen, setCreateOpen] = useState(false);
 
-  useEffect(() => {
+  const loadAgents = useCallback(() => {
+    setLoading(true);
     fetch("/api/agents")
       .then((r) => r.json())
       .then(
@@ -170,13 +191,29 @@ function SettingsAgentsDiscovery() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    loadAgents();
+  }, [loadAgents]);
+
   return (
     <section className="border border-border-default rounded bg-bg-surface">
-      <div className="px-4 py-3 border-b border-border-default">
-        <h3 className="text-xs font-medium text-text-primary">Agents</h3>
-        <p className="text-label text-text-tertiary mt-0.5">
-          Auto-discovered from <code className="text-text-secondary bg-bg-elevated px-1 py-0.5 rounded text-label">.claude/agents/</code>
-        </p>
+      <div className="px-4 py-3 border-b border-border-default flex items-start justify-between">
+        <div>
+          <h3 className="text-xs font-medium text-text-primary">Agents</h3>
+          <p className="text-label text-text-tertiary mt-0.5">
+            Auto-discovered from{" "}
+            <code className="text-text-secondary bg-bg-elevated px-1 py-0.5 rounded text-label">
+              .claude/agents/
+            </code>
+          </p>
+        </div>
+        <button
+          onClick={() => setCreateOpen(true)}
+          className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-accent text-bg-base rounded-[4px] hover:bg-accent/90 transition-all shrink-0"
+        >
+          <PlusIcon size={10} />
+          Create Agent
+        </button>
       </div>
       <div className="px-4 py-3">
         {loading ? (
@@ -190,7 +227,8 @@ function SettingsAgentsDiscovery() {
           </div>
         ) : agents.length === 0 ? (
           <p className="text-xs text-text-tertiary text-center py-4">
-            No agents discovered. Create agent definitions in <code className="text-text-secondary">.claude/agents/</code>.
+            No agents discovered. Create agent definitions in{" "}
+            <code className="text-text-secondary">.claude/agents/</code>.
           </p>
         ) : (
           <div className="space-y-2">
@@ -201,9 +239,7 @@ function SettingsAgentsDiscovery() {
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-text-primary">
-                      {agent.name}
-                    </span>
+                    <span className="text-xs font-medium text-text-primary">{agent.name}</span>
                     <span className="text-label px-1.5 py-0.5 rounded bg-bg-elevated text-text-tertiary font-mono">
                       {agent.model}
                     </span>
@@ -217,6 +253,7 @@ function SettingsAgentsDiscovery() {
           </div>
         )}
       </div>
+      <CreateAgentDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={loadAgents} />
     </section>
   );
 }

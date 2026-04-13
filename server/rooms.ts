@@ -1,5 +1,12 @@
 import { EventEmitter } from "events";
-import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { getAgentSystemBase } from "./config.js";
@@ -42,15 +49,15 @@ export interface Room {
 // ---------------------------------------------------------------------------
 
 const PTY_ARTIFACT_RE = [
-  /\x1B\[[0-9;]*[a-zA-Z]/g,                     // standard ANSI escape
-  /\x1B\][^\x07\x1B]*(?:\x07|\x1B\\)/g,         // OSC sequences
-  /\x1B\[[\?]?[0-9;]*[a-zA-Z]/g,                // private mode
-  /\[>[0-9]+[a-z]/g,                              // DEC sequences
-  /\x1B/g,                                        // leftover ESC
-  /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g,          // control chars
-  /[✢✶✻✽✳⏺❯·⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏●⎿▗▖▘▝▀▄█▌▐░▒▓]/g,     // spinner / UI / block glyphs
+  /\x1B\[[0-9;]*[a-zA-Z]/g, // standard ANSI escape
+  /\x1B\][^\x07\x1B]*(?:\x07|\x1B\\)/g, // OSC sequences
+  /\x1B\[[\?]?[0-9;]*[a-zA-Z]/g, // private mode
+  /\[>[0-9]+[a-z]/g, // DEC sequences
+  /\x1B/g, // leftover ESC
+  /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, // control chars
+  /[✢✶✻✽✳⏺❯·⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏●⎿▗▖▘▝▀▄█▌▐░▒▓]/g, // spinner / UI / block glyphs
   /[─━│┃┌┐└┘├┤┬┴┼╋╌╍╎╏═║╒╓╔╕╖╗╘╙╚╛╜╝╞╟╠╡╢╣╤╥╦╧╨╩╪╫╬──]+/g, // box-drawing characters
-  /https?:\/\/claude\.ai\/code\/session_[a-zA-Z0-9]+/g,          // Claude Code session URLs
+  /https?:\/\/claude\.ai\/code\/session_[a-zA-Z0-9]+/g, // Claude Code session URLs
 ];
 
 /** Lines that are pure Claude Code UI chrome — remove entirely */
@@ -81,11 +88,11 @@ function sanitizePtyMessage(text: string): string {
   }
 
   // Remove lines that are pure UI chrome or spinner verbs
-  const lines = cleaned.split("\n").filter(line => {
+  const lines = cleaned.split("\n").filter((line) => {
     const trimmed = line.trim();
     if (!trimmed) return false; // blank
     if (SPINNER_VERB_RE.test(trimmed)) return false;
-    if (UI_CHROME_RE.some(re => re.test(trimmed))) return false;
+    if (UI_CHROME_RE.some((re) => re.test(trimmed))) return false;
     // Single-character junk lines (leftover from character-at-a-time PTY capture)
     if (trimmed.length <= 2 && !/[a-zA-Z0-9]/.test(trimmed)) return false;
     // Lines that are mostly non-alpha (symbols, dots, dashes)
@@ -96,7 +103,8 @@ function sanitizePtyMessage(text: string): string {
     return true;
   });
 
-  cleaned = lines.join("\n")
+  cleaned = lines
+    .join("\n")
     .replace(/ {3,}/g, "  ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
@@ -149,8 +157,15 @@ export class RoomManager extends EventEmitter {
     this.loadRooms();
   }
 
-  createRoom(name: string, topic: string, agentConfigs: Array<{ id: string; name: string; model: "opus" | "sonnet" | "haiku" }>): Room {
-    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  createRoom(
+    name: string,
+    topic: string,
+    agentConfigs: Array<{ id: string; name: string; model: "opus" | "sonnet" | "haiku" }>,
+  ): Room {
+    const id = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
 
     if (this.rooms.has(id)) {
       throw new Error(`Room "${name}" already exists`);
@@ -159,32 +174,33 @@ export class RoomManager extends EventEmitter {
     const roomDir = join(this.roomsDir, id);
     if (!existsSync(roomDir)) mkdirSync(roomDir, { recursive: true });
 
-    // Always include orchestrator
-    const agents: RoomAgent[] = [];
-    const hasOrchestrator = agentConfigs.some(a => a.id === "orchestrator");
-    if (!hasOrchestrator) {
-      agents.push({ id: "orchestrator", name: "Orchestrator", model: "opus", status: "offline" });
-    }
-    for (const cfg of agentConfigs) {
-      agents.push({ id: cfg.id, name: cfg.name, model: cfg.model, status: "offline" });
-    }
+    // Build agent list from user selection — no forced agents
+    const agents: RoomAgent[] = agentConfigs.map((cfg) => ({
+      id: cfg.id,
+      name: cfg.name,
+      model: cfg.model,
+      status: "offline" as const,
+    }));
 
     const contextFile = join(roomDir, "context.md");
-    writeFileSync(contextFile, [
-      `# Room: ${name}`,
-      `## Topic: ${topic}`,
-      `## Status: Starting`,
-      "",
-      "### Completed",
-      "(nothing yet)",
-      "",
-      "### In Progress",
-      "(nothing yet)",
-      "",
-      "### Pending",
-      "(nothing yet)",
-      "",
-    ].join("\n"));
+    writeFileSync(
+      contextFile,
+      [
+        `# Room: ${name}`,
+        `## Topic: ${topic}`,
+        `## Status: Starting`,
+        "",
+        "### Completed",
+        "(nothing yet)",
+        "",
+        "### In Progress",
+        "(nothing yet)",
+        "",
+        "### Pending",
+        "(nothing yet)",
+        "",
+      ].join("\n"),
+    );
 
     const room: Room = {
       id,
@@ -202,14 +218,18 @@ export class RoomManager extends EventEmitter {
 
     this.addMessage(id, {
       from: "system",
-      text: `Room "${name}" created. Topic: ${topic}. Agents: ${agents.map(a => a.name).join(", ")}`,
+      text: `Room "${name}" created. Topic: ${topic}. Agents: ${agents.map((a) => a.name).join(", ")}`,
       type: "system",
     });
 
     return room;
   }
 
-  addMessage(roomId: string, msg: Omit<RoomMessage, "id" | "roomId" | "timestamp">, clientId?: string): RoomMessage | null {
+  addMessage(
+    roomId: string,
+    msg: Omit<RoomMessage, "id" | "roomId" | "timestamp">,
+    clientId?: string,
+  ): RoomMessage | null {
     const room = this.rooms.get(roomId);
     if (!room) return null;
 
@@ -260,7 +280,7 @@ export class RoomManager extends EventEmitter {
       `# Room: ${room.name}`,
       `## Topic: ${room.topic}`,
       `## Status: Active`,
-      `## Agents: ${room.agents.map(a => `${a.name} (${a.status})`).join(", ")}`,
+      `## Agents: ${room.agents.map((a) => `${a.name} (${a.status})`).join(", ")}`,
       "",
       "### Completed",
       completed.length > 0 ? completed.join("\n") : "(nothing yet)",
@@ -269,7 +289,7 @@ export class RoomManager extends EventEmitter {
       inProgress.length > 0 ? inProgress.join("\n") : "(nothing yet)",
       "",
       "### Recent Messages (last 10)",
-      ...room.messages.slice(-10).map(m => `- **${m.from}**: ${(m.text ?? "").slice(0, 150)}`),
+      ...room.messages.slice(-10).map((m) => `- **${m.from}**: ${(m.text ?? "").slice(0, 150)}`),
       "",
     ].join("\n");
     writeFileSync(room.contextFile, content);
@@ -286,7 +306,7 @@ export class RoomManager extends EventEmitter {
   linkSession(roomId: string, agentId: string, sessionId: string): void {
     const room = this.rooms.get(roomId);
     if (!room) return;
-    const agent = room.agents.find(a => a.id === agentId);
+    const agent = room.agents.find((a) => a.id === agentId);
     if (agent) {
       agent.sessionId = sessionId;
       agent.status = "idle";
@@ -298,7 +318,7 @@ export class RoomManager extends EventEmitter {
   setAgentStatus(roomId: string, agentId: string, status: RoomAgent["status"]): void {
     const room = this.rooms.get(roomId);
     if (!room) return;
-    const agent = room.agents.find(a => a.id === agentId);
+    const agent = room.agents.find((a) => a.id === agentId);
     if (agent) {
       agent.status = status;
       this.saveRoom(room);
@@ -309,7 +329,7 @@ export class RoomManager extends EventEmitter {
   approveAction(roomId: string, messageId: string): boolean {
     const room = this.rooms.get(roomId);
     if (!room) return false;
-    const msg = room.messages.find(m => m.id === messageId);
+    const msg = room.messages.find((m) => m.id === messageId);
     if (msg && msg.type === "approval-request" && msg.approvalStatus === "pending") {
       msg.approvalStatus = "approved";
       this.saveRoom(room);
@@ -322,7 +342,7 @@ export class RoomManager extends EventEmitter {
   rejectAction(roomId: string, messageId: string): boolean {
     const room = this.rooms.get(roomId);
     if (!room) return false;
-    const msg = room.messages.find(m => m.id === messageId);
+    const msg = room.messages.find((m) => m.id === messageId);
     if (msg && msg.type === "approval-request" && msg.approvalStatus === "pending") {
       msg.approvalStatus = "rejected";
       this.saveRoom(room);
@@ -336,10 +356,11 @@ export class RoomManager extends EventEmitter {
     const room = this.rooms.get(roomId);
     if (!room) return [];
     room.active = false;
-    const sessionIds = room.agents
-      .filter(a => a.sessionId)
-      .map(a => a.sessionId!);
-    room.agents.forEach(a => { a.status = "offline"; a.sessionId = undefined; });
+    const sessionIds = room.agents.filter((a) => a.sessionId).map((a) => a.sessionId!);
+    room.agents.forEach((a) => {
+      a.status = "offline";
+      a.sessionId = undefined;
+    });
     this.saveRoom(room);
     this.addMessage(roomId, { from: "system", text: "Room closed.", type: "system" });
     return sessionIds;
@@ -363,8 +384,11 @@ export class RoomManager extends EventEmitter {
           try {
             const room = JSON.parse(readFileSync(file, "utf-8")) as Room;
             // Filter out broken agents (missing id or name) and reset status
-            room.agents = (room.agents ?? []).filter(a => a && a.id && a.name);
-            room.agents.forEach(a => { a.status = "offline"; a.sessionId = undefined; });
+            room.agents = (room.agents ?? []).filter((a) => a && a.id && a.name);
+            room.agents.forEach((a) => {
+              a.status = "offline";
+              a.sessionId = undefined;
+            });
 
             // Sanitize legacy PTY messages
             for (const msg of room.messages) {

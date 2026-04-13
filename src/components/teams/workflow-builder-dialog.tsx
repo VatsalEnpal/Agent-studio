@@ -2,7 +2,22 @@
 
 import { useState, useEffect, useCallback } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { CloseIcon, SpinnerIcon, PlusIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon, RocketIcon, BugIcon, ShieldIcon, WrenchIcon, BoltIcon, GitBranchIcon, EyeIcon, FileCodeIcon } from "@/components/ui/icons";
+import {
+  CloseIcon,
+  SpinnerIcon,
+  PlusIcon,
+  TrashIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  RocketIcon,
+  BugIcon,
+  ShieldIcon,
+  WrenchIcon,
+  BoltIcon,
+  GitBranchIcon,
+  EyeIcon,
+  FileCodeIcon,
+} from "@/components/ui/icons";
 import { useWorkflowStore, type WorkflowDraft } from "@/stores/workflows";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
@@ -20,14 +35,23 @@ const ICON_OPTIONS = [
 ] as const;
 
 // Pre-built templates
-const TEMPLATES: { name: string; description: string; icon: string; steps: Array<{ name: string; description: string; agent: string }> }[] = [
+const TEMPLATES: {
+  name: string;
+  description: string;
+  icon: string;
+  steps: Array<{ name: string; description: string; agent: string }>;
+}[] = [
   {
     name: "Code Review",
     description: "QA scans code, Security reviews, then generates report",
     icon: "Eye",
     steps: [
       { name: "QA Scan", description: "Scan code for bugs and issues", agent: "qa-tester" },
-      { name: "Security Review", description: "Review for security vulnerabilities", agent: "security-reviewer" },
+      {
+        name: "Security Review",
+        description: "Review for security vulnerabilities",
+        agent: "security-reviewer",
+      },
       { name: "Report", description: "Generate review report", agent: "orchestrator" },
     ],
   },
@@ -86,17 +110,29 @@ export function WorkflowBuilderDialog() {
   const addToast = useToastStore((s) => s.addToast);
 
   const [agents, setAgents] = useState<AgentOption[]>([]);
+  const [agentsLoading, setAgentsLoading] = useState(false);
+  const [agentsError, setAgentsError] = useState<string | null>(null);
   const [showTemplates, setShowTemplates] = useState(!editingId);
 
   // Fetch agents on open
   useEffect(() => {
     if (open) {
+      setAgentsLoading(true);
+      setAgentsError(null);
       fetch("/api/agents")
-        .then((r) => r.json())
+        .then((r) => {
+          if (!r.ok) throw new Error(`Failed to load agents (${String(r.status)})`);
+          return r.json();
+        })
         .then((data: AgentOption[]) => {
           if (Array.isArray(data)) setAgents(data);
+          else setAgents([]);
         })
-        .catch(() => setAgents([]));
+        .catch((err: unknown) => {
+          setAgents([]);
+          setAgentsError(err instanceof Error ? err.message : "Failed to load agents");
+        })
+        .finally(() => setAgentsLoading(false));
       setShowTemplates(!editingId && !draft.name);
     }
   }, [open, editingId, draft.name]);
@@ -153,7 +189,7 @@ export function WorkflowBuilderDialog() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = await res.json() as { ok?: boolean; error?: string };
+      const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!data.ok) throw new Error(data.error ?? "Failed to save");
 
       addToast(editingId ? "Workflow updated" : "Workflow created", "success");
@@ -169,10 +205,16 @@ export function WorkflowBuilderDialog() {
   const isEdit = !!editingId;
 
   return (
-    <Dialog.Root open={open} onOpenChange={(v) => { if (!v) close(); }}>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) close();
+      }}
+    >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 z-50" />
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[620px] max-h-[85vh] overflow-y-auto bg-bg-surface border border-border-default rounded shadow-xl">
+          <Dialog.Description className="sr-only">Configure workflow builder</Dialog.Description>
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border-default">
             <Dialog.Title className="text-xs font-medium text-text-primary">
@@ -193,7 +235,8 @@ export function WorkflowBuilderDialog() {
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {TEMPLATES.map((tpl) => {
-                  const TplIcon = ICON_OPTIONS.find((i) => i.value === tpl.icon)?.icon ?? RocketIcon;
+                  const TplIcon =
+                    ICON_OPTIONS.find((i) => i.value === tpl.icon)?.icon ?? RocketIcon;
                   return (
                     <button
                       key={tpl.name}
@@ -203,8 +246,12 @@ export function WorkflowBuilderDialog() {
                       <TplIcon className="w-3.5 h-3.5 text-text-secondary shrink-0 mt-0.5" />
                       <div className="min-w-0">
                         <p className="text-xs font-medium text-text-primary">{tpl.name}</p>
-                        <p className="text-[8px] text-text-tertiary mt-0.5 line-clamp-2">{tpl.description}</p>
-                        <p className="text-[8px] text-text-tertiary mt-1">{tpl.steps.length} steps</p>
+                        <p className="text-[8px] text-text-tertiary mt-0.5 line-clamp-2">
+                          {tpl.description}
+                        </p>
+                        <p className="text-[8px] text-text-tertiary mt-1">
+                          {tpl.steps.length} steps
+                        </p>
                       </div>
                     </button>
                   );
@@ -223,7 +270,9 @@ export function WorkflowBuilderDialog() {
             {/* Basic info */}
             <div className="grid grid-cols-[1fr_auto] gap-3">
               <div>
-                <label className="text-2xs font-medium text-text-tertiary uppercase tracking-wider">Name</label>
+                <label className="text-2xs font-medium text-text-tertiary uppercase tracking-wider">
+                  Name
+                </label>
                 <input
                   type="text"
                   value={draft.name}
@@ -233,7 +282,9 @@ export function WorkflowBuilderDialog() {
                 />
               </div>
               <div>
-                <label className="text-2xs font-medium text-text-tertiary uppercase tracking-wider">Icon</label>
+                <label className="text-2xs font-medium text-text-tertiary uppercase tracking-wider">
+                  Icon
+                </label>
                 <div className="mt-1 flex items-center gap-1">
                   {ICON_OPTIONS.map((opt) => {
                     const IconComp = opt.icon;
@@ -258,7 +309,9 @@ export function WorkflowBuilderDialog() {
             </div>
 
             <div>
-              <label className="text-2xs font-medium text-text-tertiary uppercase tracking-wider">Description</label>
+              <label className="text-2xs font-medium text-text-tertiary uppercase tracking-wider">
+                Description
+              </label>
               <input
                 type="text"
                 value={draft.description}
@@ -282,6 +335,20 @@ export function WorkflowBuilderDialog() {
                   Add Step
                 </button>
               </div>
+
+              {/* Agent loading / error feedback */}
+              {agentsLoading && (
+                <div className="flex items-center gap-2 px-2 py-1.5 rounded bg-bg-elevated/50">
+                  <div className="w-3 h-3 border border-text-tertiary border-t-transparent rounded-full animate-spin shrink-0" />
+                  <span className="text-xs text-text-tertiary">Loading agents...</span>
+                </div>
+              )}
+              {agentsError && <p className="text-xs text-error px-2 py-1">{agentsError}</p>}
+              {!agentsLoading && !agentsError && agents.length === 0 && (
+                <p className="text-xs text-text-tertiary px-2 py-1">
+                  No agents found. Create agent definitions in .claude/agents/ first.
+                </p>
+              )}
 
               <div className="space-y-2">
                 {draft.steps.map((step, idx) => (
@@ -402,7 +469,9 @@ function StepRow({
         >
           <option value="">Assign agent...</option>
           {agents.map((a) => (
-            <option key={a.id} value={a.id}>{a.name}</option>
+            <option key={a.id} value={a.id}>
+              {a.name}
+            </option>
           ))}
         </select>
       </div>
@@ -422,21 +491,19 @@ function StepRow({
 function StepPreview({ steps }: { steps: Array<{ id: string; name: string; agent: string }> }) {
   return (
     <div>
-      <p className="text-2xs font-medium text-text-tertiary uppercase tracking-wider mb-2">Preview</p>
+      <p className="text-2xs font-medium text-text-tertiary uppercase tracking-wider mb-2">
+        Preview
+      </p>
       <div className="flex items-center gap-1 overflow-x-auto pb-1">
         {steps.map((step, idx) => (
           <div key={step.id} className="flex items-center gap-1 shrink-0">
-            {idx > 0 && (
-              <div className="w-4 h-px bg-border-default" />
-            )}
+            {idx > 0 && <div className="w-4 h-px bg-border-default" />}
             <div className="flex items-center gap-1.5 px-2 py-1 bg-bg-base border border-border-default rounded text-2xs">
               <span className="w-3.5 h-3.5 flex items-center justify-center rounded-full bg-rooms/20 text-rooms text-[8px] font-mono shrink-0">
                 {idx + 1}
               </span>
               <span className="text-text-primary font-medium whitespace-nowrap">{step.name}</span>
-              {step.agent && (
-                <span className="text-text-tertiary text-[8px]">({step.agent})</span>
-              )}
+              {step.agent && <span className="text-text-tertiary text-[8px]">({step.agent})</span>}
             </div>
           </div>
         ))}

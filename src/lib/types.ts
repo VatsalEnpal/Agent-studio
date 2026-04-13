@@ -75,6 +75,8 @@ export interface BranchInfo {
   name: string;
   lastCommit: string;
   isCurrent: boolean;
+  ahead?: number;
+  behind?: number;
 }
 
 export interface RepoStatus {

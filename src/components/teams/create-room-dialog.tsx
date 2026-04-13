@@ -17,49 +17,38 @@ interface AgentConfig {
   name: string;
   model: "opus" | "sonnet" | "haiku";
   enabled: boolean;
-  locked?: boolean;
 }
 
-const DEFAULT_AGENTS: AgentConfig[] = [
-  {
-    id: "orchestrator",
-    name: "Orchestrator",
-    model: "opus",
-    enabled: true,
-    locked: true,
-  },
-  { id: "frontend-worker", name: "Frontend", model: "sonnet", enabled: false },
-  { id: "backend-worker", name: "Backend", model: "sonnet", enabled: false },
-  { id: "qa-tester", name: "QA Tester", model: "sonnet", enabled: false },
-  {
-    id: "security-reviewer",
-    name: "Security",
-    model: "sonnet",
-    enabled: false,
-  },
-  { id: "pmo", name: "PMO", model: "haiku", enabled: false },
-];
-
-export function CreateRoomDialog({
-  open,
-  onOpenChange,
-}: CreateRoomDialogProps) {
+export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) {
   const [name, setName] = useState("");
   const [topic, setTopic] = useState("");
-  const [agents, setAgents] = useState<AgentConfig[]>(
-    DEFAULT_AGENTS.map((a) => ({ ...a })),
-  );
+  const [agents, setAgents] = useState<AgentConfig[]>([]);
   const [creating, setCreating] = useState(false);
   const addRoom = useRoomsStore((s) => s.addRoom);
   const selectRoom = useRoomsStore((s) => s.selectRoom);
 
+  // Fetch discovered agents from server when dialog opens
   useEffect(() => {
-    if (open) {
-      setName("");
-      setTopic("");
-      setAgents(DEFAULT_AGENTS.map((a) => ({ ...a })));
-      setCreating(false);
-    }
+    if (!open) return;
+    setName("");
+    setTopic("");
+    setCreating(false);
+    fetch("/api/agents")
+      .then((res) => res.json())
+      .then((data: Array<{ id: string; name: string; description?: string }>) => {
+        const agentConfigs: AgentConfig[] = data
+          .filter((a) => a.id !== "none")
+          .map((a) => ({
+            id: a.id,
+            name: a.name,
+            model: a.id === "orchestrator" ? ("opus" as const) : ("sonnet" as const),
+            enabled: false,
+          }));
+        setAgents(agentConfigs);
+      })
+      .catch(() => {
+        setAgents([]);
+      });
   }, [open]);
 
   // Escape key to close
@@ -73,19 +62,12 @@ export function CreateRoomDialog({
   }, [open, onOpenChange]);
 
   const toggleAgent = useCallback((id: string) => {
-    setAgents((prev) =>
-      prev.map((a) =>
-        a.id === id && !a.locked ? { ...a, enabled: !a.enabled } : a,
-      ),
-    );
+    setAgents((prev) => prev.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a)));
   }, []);
 
-  const setAgentModel = useCallback(
-    (id: string, model: "opus" | "sonnet" | "haiku") => {
-      setAgents((prev) => prev.map((a) => (a.id === id ? { ...a, model } : a)));
-    },
-    [],
-  );
+  const setAgentModel = useCallback((id: string, model: "opus" | "sonnet" | "haiku") => {
+    setAgents((prev) => prev.map((a) => (a.id === id ? { ...a, model } : a)));
+  }, []);
 
   const handleCreate = useCallback(async () => {
     if (!name.trim() || !topic.trim() || creating) return;
@@ -140,9 +122,7 @@ export function CreateRoomDialog({
       <div className="relative z-10 w-full max-w-md bg-bg-elevated border border-border-subtle rounded shadow-modal animate-slide-up">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-border-default">
-          <h2 className="text-xs font-semibold text-text-primary">
-            Create Team Room
-          </h2>
+          <h2 className="text-xs font-semibold text-text-primary">Create Team Room</h2>
           <button
             onClick={() => onOpenChange(false)}
             className="p-0.5 rounded text-text-ghost hover:text-text-secondary transition-all"
@@ -203,20 +183,13 @@ export function CreateRoomDialog({
                     {/* Checkbox */}
                     <button
                       onClick={() => toggleAgent(agent.id)}
-                      disabled={agent.locked}
                       className={cn(
                         "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all",
-                        agent.enabled
-                          ? "bg-rooms border-rooms"
-                          : "border-text-tertiary",
-                        agent.locked && "opacity-60 cursor-not-allowed",
+                        agent.enabled ? "bg-rooms border-rooms" : "border-text-tertiary",
                       )}
                     >
                       {agent.enabled && (
-                        <svg
-                          className="w-3 h-3 text-bg-base"
-                          viewBox="0 0 12 12"
-                        >
+                        <svg className="w-3 h-3 text-bg-base" viewBox="0 0 12 12">
                           <path
                             d="M2 6l3 3 5-6"
                             stroke="currentColor"
@@ -235,27 +208,17 @@ export function CreateRoomDialog({
                         className="w-[18px] h-[18px] rounded-[4px] flex items-center justify-center shrink-0"
                         style={{ backgroundColor: color + "25" }}
                       >
-                        <span
-                          className="text-[8px] font-bold"
-                          style={{ color }}
-                        >
+                        <span className="text-[8px] font-bold" style={{ color }}>
                           {agent.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <span
                         className={cn(
                           "text-xs font-medium truncate",
-                          agent.enabled
-                            ? "text-text-primary"
-                            : "text-text-secondary",
+                          agent.enabled ? "text-text-primary" : "text-text-secondary",
                         )}
                       >
                         {agent.name}
-                        {agent.locked && (
-                          <span className="text-label text-text-tertiary ml-1">
-                            (required)
-                          </span>
-                        )}
                       </span>
                     </div>
 
@@ -263,10 +226,7 @@ export function CreateRoomDialog({
                     <select
                       value={agent.model}
                       onChange={(e) =>
-                        setAgentModel(
-                          agent.id,
-                          e.target.value as "opus" | "sonnet" | "haiku",
-                        )
+                        setAgentModel(agent.id, e.target.value as "opus" | "sonnet" | "haiku")
                       }
                       className="bg-bg-base border border-border-default rounded px-2 py-1 text-label font-mono text-text-secondary focus:outline-none focus:border-border-subtle transition-all"
                     >

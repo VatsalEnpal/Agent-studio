@@ -1,7 +1,16 @@
 "use client";
 
 import { useMemo, useState, useCallback } from "react";
-import { CloseIcon, CheckIcon, SprintsIcon, ArrowLeftIcon, BoltIcon, ChevronRightIcon } from "@/components/ui/icons";
+import {
+  CloseIcon,
+  CheckIcon,
+  SprintsIcon,
+  ArrowLeftIcon,
+  BoltIcon,
+  ChevronRightIcon,
+  PlayIcon,
+  PauseIcon,
+} from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useSprintsStore, type Sprint } from "@/stores/sprints";
 import { useToastStore } from "@/stores/toast";
@@ -71,9 +80,7 @@ function ExpandedGatePanel({ gate }: { gate: Sprint["gates"][number] }) {
   return (
     <div className="px-4 py-3 bg-bg-elevated/50 border-t border-border-subtle">
       {gate.details && (
-        <p className="text-xs text-text-secondary mb-2 leading-relaxed">
-          {gate.details}
-        </p>
+        <p className="text-xs text-text-secondary mb-2 leading-relaxed">{gate.details}</p>
       )}
 
       {gate.requirements.length > 0 && (
@@ -92,17 +99,18 @@ function ExpandedGatePanel({ gate }: { gate: Sprint["gates"][number] }) {
                 )}
               >
                 {req.met && (
-                  <svg className="w-2 h-2 text-sessions" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    className="w-2 h-2 text-sessions"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M2 6l3 3 5-5" />
                   </svg>
                 )}
               </div>
-              <span
-                className={cn(
-                  "text-xs",
-                  req.met ? "text-text-primary" : "text-text-tertiary",
-                )}
-              >
+              <span className={cn("text-xs", req.met ? "text-text-primary" : "text-text-tertiary")}>
                 {req.label}
               </span>
             </div>
@@ -116,7 +124,10 @@ function ExpandedGatePanel({ gate }: { gate: Sprint["gates"][number] }) {
             Gate Checks
           </span>
           {gateChecks.map((check, i) => (
-            <div key={i} className="text-xs text-text-secondary pl-2 border-l border-border-default">
+            <div
+              key={i}
+              className="text-xs text-text-secondary pl-2 border-l border-border-default"
+            >
               {check}
             </div>
           ))}
@@ -129,7 +140,10 @@ function ExpandedGatePanel({ gate }: { gate: Sprint["gates"][number] }) {
             Build Summary
           </span>
           {buildSummary.map((item, i) => (
-            <div key={i} className="text-xs text-text-secondary pl-2 border-l border-border-default">
+            <div
+              key={i}
+              className="text-xs text-text-secondary pl-2 border-l border-border-default"
+            >
               {item}
             </div>
           ))}
@@ -155,6 +169,10 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
   const addToast = useToastStore((s) => s.addToast);
 
   const [approvingGate, setApprovingGate] = useState<string | null>(null);
+  const [confirmingPause, setConfirmingPause] = useState(false);
+  const [pausing, setPausing] = useState(false);
+  const [confirmingResume, setConfirmingResume] = useState(false);
+  const [resuming, setResuming] = useState(false);
 
   const badge = statusBadge(sprint.status);
   const eta = estimateETA(sprint);
@@ -164,36 +182,47 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
   const totalGates = sprint.gates.length;
   const progressPct = totalGates > 0 ? Math.round((passedGates / totalGates) * 100) : 0;
 
-  const handleApproveGate = useCallback(async (gateId: string) => {
-    setApprovingGate(gateId);
-    try {
-      const res = await fetch(`/api/sprints/${sprint.id}/gates/${gateId}/approve`, {
-        method: "POST",
-      });
-      if (!res.ok) throw new Error("Failed to approve gate");
-      addToast("Gate approved", "success");
-    } catch {
-      addToast("Failed to approve gate", "error");
-    } finally {
-      setApprovingGate(null);
-    }
-  }, [sprint.id, addToast]);
+  const handleApproveGate = useCallback(
+    async (gateId: string) => {
+      setApprovingGate(gateId);
+      try {
+        const res = await fetch(`/api/sprints/${sprint.id}/gates/${gateId}/approve`, {
+          method: "POST",
+        });
+        if (!res.ok) throw new Error("Failed to approve gate");
+        addToast("Gate approved", "success");
+      } catch {
+        addToast("Failed to approve gate", "error");
+      } finally {
+        setApprovingGate(null);
+      }
+    },
+    [sprint.id, addToast],
+  );
 
   const handlePause = useCallback(async () => {
+    setPausing(true);
     try {
       await fetch(`/api/sprints/${sprint.id}/pause`, { method: "POST" });
       addToast("Sprint paused", "success");
+      setConfirmingPause(false);
     } catch {
       addToast("Failed to pause sprint", "error");
+    } finally {
+      setPausing(false);
     }
   }, [sprint.id, addToast]);
 
   const handleResume = useCallback(async () => {
+    setResuming(true);
     try {
       await fetch(`/api/sprints/${sprint.id}/resume`, { method: "POST" });
       addToast("Sprint resumed", "success");
+      setConfirmingResume(false);
     } catch {
       addToast("Failed to resume sprint", "error");
+    } finally {
+      setResuming(false);
     }
   }, [sprint.id, addToast]);
 
@@ -262,10 +291,12 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
-              <span className={cn(
-                "text-2xs font-medium",
-                progressPct === 100 ? "text-sessions" : "text-text-tertiary",
-              )}>
+              <span
+                className={cn(
+                  "text-2xs font-medium",
+                  progressPct === 100 ? "text-sessions" : "text-text-tertiary",
+                )}
+              >
                 {progressPct}%
               </span>
             </div>
@@ -273,24 +304,64 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
 
           {/* Pause/Resume + View Spec + elapsed + ETA */}
           <div className="flex items-center gap-2 ml-auto shrink-0">
-            {sprint.status === "in_progress" && (
-              <button
-                onClick={handlePause}
-                className="px-2 py-0.5 text-xs font-medium text-sprints bg-sprints/10 rounded hover:bg-sprints/20 active:scale-[0.98] transition-all"
-              >
-                Pause
-              </button>
-            )}
-            {sprint.status === "paused" && (
-              <button
-                onClick={handleResume}
-                className="px-2 py-0.5 text-xs font-medium text-sessions bg-sessions/10 rounded hover:bg-sessions/20 active:scale-[0.98] transition-all"
-              >
-                Resume
-              </button>
-            )}
-            {(sprint.status === "in_progress" || sprint.status === "paused" || sprint.status === "launching") && (
-              confirmingCancel ? (
+            {sprint.status === "in_progress" &&
+              (confirmingPause ? (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-text-tertiary">Pause sprint?</span>
+                  <button
+                    onClick={() => void handlePause()}
+                    disabled={pausing}
+                    className="px-2 py-0.5 text-xs font-medium text-sprints bg-sprints/10 rounded hover:bg-sprints/20 active:scale-[0.98] transition-all disabled:opacity-50"
+                  >
+                    {pausing ? "Pausing..." : "Pause"}
+                  </button>
+                  <button
+                    onClick={() => setConfirmingPause(false)}
+                    className="px-1.5 py-0.5 text-xs text-text-ghost hover:text-text-secondary transition-all"
+                  >
+                    No
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmingPause(true)}
+                  className="flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-sprints bg-sprints/10 rounded hover:bg-sprints/20 active:scale-[0.98] transition-all"
+                >
+                  <PauseIcon size={12} />
+                  Pause
+                </button>
+              ))}
+            {sprint.status === "paused" &&
+              (confirmingResume ? (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-text-tertiary">Resume this sprint?</span>
+                  <button
+                    onClick={() => void handleResume()}
+                    disabled={resuming}
+                    className="px-2.5 py-0.5 text-xs font-medium bg-sprints text-bg-base rounded hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
+                  >
+                    {resuming ? "Resuming..." : "Resume"}
+                  </button>
+                  <button
+                    onClick={() => setConfirmingResume(false)}
+                    className="px-1.5 py-0.5 text-xs text-text-ghost hover:text-text-secondary transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmingResume(true)}
+                  className="flex items-center gap-1 px-3 py-1 text-xs font-semibold bg-sprints text-bg-base rounded hover:opacity-90 active:scale-[0.98] transition-all shadow-sm"
+                >
+                  <PlayIcon size={12} />
+                  Resume Sprint
+                </button>
+              ))}
+            {(sprint.status === "in_progress" ||
+              sprint.status === "paused" ||
+              sprint.status === "launching") &&
+              (confirmingCancel ? (
                 <div className="flex items-center gap-1">
                   <span className="text-xs text-text-tertiary">Cancel sprint?</span>
                   <button
@@ -314,8 +385,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                 >
                   Cancel
                 </button>
-              )
-            )}
+              ))}
             <button
               onClick={handleViewSpec}
               className={cn(
@@ -328,9 +398,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
               <SprintsIcon size={12} />
               Spec
             </button>
-            <span className="text-xs text-text-ghost">
-              {formatElapsed(sprint.startedAt)}
-            </span>
+            <span className="text-xs text-text-ghost">{formatElapsed(sprint.startedAt)}</span>
             {eta && (
               <span className="text-xs text-text-ghost" title="Estimated time remaining">
                 ETA {eta}
@@ -364,9 +432,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
         {specPanelOpen && (
           <div className="w-[360px] border-r border-border-default bg-bg-base flex flex-col shrink-0 overflow-hidden">
             <div className="px-3 py-2 border-b border-border-default flex items-center justify-between shrink-0">
-              <span className="text-xs font-semibold text-text-primary">
-                Sprint Spec
-              </span>
+              <span className="text-xs font-semibold text-text-primary">Sprint Spec</span>
               <button
                 onClick={() => setSpecPanel(false)}
                 className="p-0.5 text-text-tertiary hover:text-text-secondary transition-all rounded"
@@ -401,7 +467,10 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                 const isCurrent = gate.status === "in_progress";
                 const isFailed = gate.status === "failed";
                 const isExpanded = expandedGateId === gate.id;
-                const isReady = isCurrent && gate.requirements.length > 0 && gate.requirements.every((r) => r.met);
+                const isReady =
+                  isCurrent &&
+                  gate.requirements.length > 0 &&
+                  gate.requirements.every((r) => r.met);
                 const hasAction = gate.action && (isCurrent || gate.status === "not_started");
 
                 return (
@@ -412,50 +481,71 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                       className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-bg-elevated/50 transition-all"
                     >
                       {/* Status dot */}
-                      <div className={cn(
-                        "w-2.5 h-2.5 rounded-full shrink-0",
-                        isPassed && "bg-sessions",
-                        isCurrent && "bg-sprints animate-pulse-dot",
-                        isFailed && "bg-error",
-                        !isPassed && !isCurrent && !isFailed && "bg-border-default",
-                      )} />
+                      <div
+                        className={cn(
+                          "w-2.5 h-2.5 rounded-full shrink-0",
+                          isPassed && "bg-sessions",
+                          isCurrent && "bg-sprints animate-pulse-dot",
+                          isFailed && "bg-error",
+                          !isPassed && !isCurrent && !isFailed && "bg-border-default",
+                        )}
+                      />
 
                       {/* Gate name */}
-                      <span className={cn(
-                        "text-xs font-medium flex-1 truncate",
-                        isPassed ? "text-text-primary" : isCurrent ? "text-sprints" : isFailed ? "text-error" : "text-text-tertiary",
-                      )}>
+                      <span
+                        className={cn(
+                          "text-xs font-medium flex-1 truncate",
+                          isPassed
+                            ? "text-text-primary"
+                            : isCurrent
+                              ? "text-sprints"
+                              : isFailed
+                                ? "text-error"
+                                : "text-text-tertiary",
+                        )}
+                      >
                         {gate.name}
                       </span>
 
                       {/* Status label */}
-                      <span className={cn(
-                        "text-2xs font-medium px-1.5 py-0.5 rounded-full shrink-0",
-                        isPassed && "bg-sessions/10 text-sessions",
-                        isCurrent && "bg-sprints/10 text-sprints",
-                        isFailed && "bg-error/10 text-error",
-                        !isPassed && !isCurrent && !isFailed && "text-text-ghost",
-                      )}>
-                        {isPassed ? "Passed" : isCurrent ? "In Progress" : isFailed ? "Failed" : "Pending"}
+                      <span
+                        className={cn(
+                          "text-2xs font-medium px-1.5 py-0.5 rounded-full shrink-0",
+                          isPassed && "bg-sessions/10 text-sessions",
+                          isCurrent && "bg-sprints/10 text-sprints",
+                          isFailed && "bg-error/10 text-error",
+                          !isPassed && !isCurrent && !isFailed && "text-text-ghost",
+                        )}
+                      >
+                        {isPassed
+                          ? "Passed"
+                          : isCurrent
+                            ? "In Progress"
+                            : isFailed
+                              ? "Failed"
+                              : "Pending"}
                       </span>
 
                       {/* Expand chevron */}
-                      <ChevronRightIcon size={14} className={cn(
-                        "text-text-ghost transition-transform",
-                        isExpanded && "rotate-90",
-                      )} />
+                      <ChevronRightIcon
+                        size={14}
+                        className={cn(
+                          "text-text-ghost transition-transform",
+                          isExpanded && "rotate-90",
+                        )}
+                      />
                     </button>
 
                     {/* Expanded details — inline below the gate */}
-                    {isExpanded && (
-                      <ExpandedGatePanel gate={gate} />
-                    )}
+                    {isExpanded && <ExpandedGatePanel gate={gate} />}
 
                     {/* Approve button for gates ready for approval */}
                     {isReady && (
                       <div className="px-4 py-2 bg-sprints/5 flex items-center gap-2">
                         <CheckIcon size={12} className="text-sprints shrink-0" />
-                        <span className="text-xs text-sprints flex-1">{gate.name} ready for approval</span>
+                        <span className="text-xs text-sprints flex-1">
+                          {gate.name} ready for approval
+                        </span>
                         <button
                           onClick={handleViewSpec}
                           className="px-2 py-1 text-xs font-medium text-sprints bg-sprints/10 rounded hover:bg-sprints/20 transition-all"
@@ -476,7 +566,9 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                     {hasAction && !isReady && (
                       <div className="px-4 py-2 bg-sprints/5 flex items-center gap-2">
                         <BoltIcon size={12} className="text-sprints shrink-0" />
-                        <span className="text-xs font-medium text-text-primary flex-1">{gate.name}</span>
+                        <span className="text-xs font-medium text-text-primary flex-1">
+                          {gate.name}
+                        </span>
                         <button
                           onClick={handleViewSpec}
                           className="px-2 py-1 text-xs font-medium text-sprints bg-sprints/10 rounded hover:bg-sprints/20 transition-all"
@@ -515,7 +607,10 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                 {sprint.completedAt && (
                   <span>Completed: {new Date(sprint.completedAt).toLocaleString()}</span>
                 )}
-                <span>Gates: {sprint.gates.filter((g) => g.status === "passed").length}/{sprint.gates.length} passed</span>
+                <span>
+                  Gates: {sprint.gates.filter((g) => g.status === "passed").length}/
+                  {sprint.gates.length} passed
+                </span>
               </div>
 
               {/* View activity logs link */}
@@ -531,19 +626,14 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
           <div className="flex-1 flex min-h-0">
             {/* Activity log */}
             <div className="flex-1 flex flex-col min-h-0">
-              <ActivityLog
-                entries={sprint.activity}
-                onHandoffClick={setHandoffPanelData}
-              />
+              <ActivityLog entries={sprint.activity} onHandoffClick={setHandoffPanelData} />
             </div>
 
             {/* Handoff detail panel */}
             {handoffPanelData && (
               <div className="w-64 border-l border-border-default bg-bg-elevated flex flex-col overflow-hidden shrink-0">
                 <div className="px-2.5 py-2 border-b border-border-default flex items-center justify-between shrink-0">
-                  <span className="text-xs font-semibold text-text-primary">
-                    Handoff Detail
-                  </span>
+                  <span className="text-xs font-semibold text-text-primary">Handoff Detail</span>
                   <button
                     onClick={() => setHandoffPanelData(null)}
                     className="p-0.5 text-text-tertiary hover:text-text-secondary transition-all"

@@ -20,12 +20,14 @@ export function SettingsPmo() {
     fetch("/api/pmo/status-full")
       .then((r) => r.json())
       .then((data: PmoStatus) => setStatus(data))
-      .catch(() => { /* ignore */ });
+      .catch(() => {
+        /* ignore */
+      });
   };
 
   useEffect(() => {
     fetchStatus();
-    const interval = setInterval(fetchStatus, 15000);
+    const interval = setInterval(fetchStatus, 30_000);
     return () => clearInterval(interval);
   }, []);
 
@@ -48,7 +50,8 @@ export function SettingsPmo() {
       <div className="px-4 py-3 border-b border-border-default">
         <h3 className="text-body font-medium text-text-primary">PMO Scheduler</h3>
         <p className="text-label text-text-tertiary mt-0.5">
-          Periodic project health scans. The PMO agent reviews code quality, test coverage, and open issues on a schedule.
+          Periodic project health scans. The PMO agent reviews code quality, test coverage, and open
+          issues on a schedule.
         </p>
       </div>
       <div className="px-4 py-3 space-y-3">
@@ -90,10 +93,12 @@ export function SettingsPmo() {
             {status.lastStatus && (
               <div className="flex items-center justify-between">
                 <span className="text-label text-text-tertiary">Status</span>
-                <span className={cn(
-                  "text-label font-medium",
-                  status.lastStatus === "ok" ? "text-sessions" : "text-error",
-                )}>
+                <span
+                  className={cn(
+                    "text-label font-medium",
+                    status.lastStatus === "ok" ? "text-sessions" : "text-error",
+                  )}
+                >
                   {status.lastStatus}
                 </span>
               </div>

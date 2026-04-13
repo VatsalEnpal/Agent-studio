@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon } from "@/components/ui/icons";
+import { CheckIcon, PlusIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { formatRelative } from "@/hooks/use-relative-time";
 import type { Sprint } from "@/stores/sprints";
@@ -9,6 +9,7 @@ interface SprintListProps {
   sprints: Sprint[];
   selectedSprintId: string | null;
   onSelect: (id: string) => void;
+  onCreateSprint?: () => void;
 }
 
 function gateProgress(sprint: Sprint): { passed: number; total: number } {
@@ -29,23 +30,22 @@ function formatDate(iso?: string): string {
   }
 }
 
-export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListProps) {
+export function SprintList({
+  sprints,
+  selectedSprintId,
+  onSelect,
+  onCreateSprint,
+}: SprintListProps) {
   const active = sprints.filter(
     (s) => s.status === "in_progress" || s.status === "launching" || s.status === "paused",
   );
-  const completed = sprints.filter(
-    (s) => s.status === "completed",
-  );
-  const planned = sprints.filter(
-    (s) => s.status === "planned",
-  );
+  const completed = sprints.filter((s) => s.status === "completed");
+  const planned = sprints.filter((s) => s.status === "planned");
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="px-3 py-2.5 border-b border-border-default shrink-0 flex items-center justify-between">
-        <h3 className="text-label text-text-ghost uppercase tracking-[0.06em]">
-          Sprints
-        </h3>
+        <h3 className="text-label text-text-ghost uppercase tracking-[0.06em]">Sprints</h3>
         {sprints.length > 0 && (
           <span className="text-2xs text-text-ghost tabular-nums">
             {active.length > 0 ? `${active.length} active` : `${sprints.length} total`}
@@ -78,7 +78,10 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
                     </span>
                     {/* UX #8: Headless run indicator */}
                     {sprint.agents.length === 0 && (
-                      <span className="text-label px-1 py-0.5 rounded bg-sprints/10 text-sprints shrink-0" title="Headless run — no agents attached">
+                      <span
+                        className="text-label px-1 py-0.5 rounded bg-sprints/10 text-sprints shrink-0"
+                        title="Headless run — no agents attached"
+                      >
                         headless
                       </span>
                     )}
@@ -168,9 +171,7 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
               >
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full border border-text-ghost shrink-0" />
-                  <span className="text-xs text-text-tertiary truncate">
-                    {sprint.name}
-                  </span>
+                  <span className="text-xs text-text-tertiary truncate">{sprint.name}</span>
                 </div>
               </button>
             ))}
@@ -183,28 +184,41 @@ export function SprintList({ sprints, selectedSprintId, onSelect }: SprintListPr
             <CheckIcon size={20} className="text-text-ghost mx-auto mb-2" />
             <p className="text-xs text-text-secondary font-medium">No sprints running</p>
             <p className="text-xs text-text-tertiary mt-1 leading-relaxed">
-              Sprints are created automatically by the PMO agent, or you can start one manually from a plan.
+              Sprints are created automatically by the PMO agent, or you can start one manually.
             </p>
           </div>
         )}
       </div>
+
+      {/* Bottom: New Sprint button */}
+      {onCreateSprint && (
+        <div className="px-3 py-2 border-t border-border-default shrink-0">
+          <button
+            onClick={onCreateSprint}
+            className={cn(
+              "flex items-center justify-center gap-1.5 w-full",
+              "px-3 py-1.5 rounded",
+              "text-xs font-medium",
+              "border border-dashed border-sprints/40 text-sprints",
+              "hover:bg-sprints/5 hover:border-sprints/60",
+              "active:scale-[0.98] transition-all",
+            )}
+            title="New sprint"
+          >
+            <PlusIcon size={12} />
+            New Sprint
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-function SprintSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function SprintSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
       <div className="px-2 pb-1.5">
-        <span className="text-label text-text-ghost uppercase tracking-[0.06em]">
-          {title}
-        </span>
+        <span className="text-label text-text-ghost uppercase tracking-[0.06em]">{title}</span>
       </div>
       <div className="space-y-0.5">{children}</div>
     </div>

@@ -15,13 +15,7 @@ import { cn } from "@/lib/utils";
 // Types
 // ---------------------------------------------------------------------------
 
-export type NavPage =
-  | "sessions"
-  | "teams"
-  | "sprints"
-  | "knowledge"
-  | "reports"
-  | "settings";
+export type NavPage = "sessions" | "teams" | "sprints" | "knowledge" | "reports" | "settings";
 
 interface NavItem {
   id: NavPage;
@@ -63,12 +57,42 @@ const accentDot: Record<string, string> = {
 // Static data — section icons (settings is separate, pinned to bottom)
 // ---------------------------------------------------------------------------
 
-const sectionItems: Omit<NavItem, "badge">[] = [
-  { id: "sessions", label: "Sessions", icon: SessionsIcon, accent: "sessions" },
-  { id: "teams", label: "Teams", icon: RoomsIcon, accent: "teams" },
-  { id: "sprints", label: "Sprints", icon: SprintsIcon, accent: "sprints" },
-  { id: "knowledge", label: "Memory", icon: MemoryIcon, accent: "knowledge" },
-  { id: "reports", label: "Reports", icon: FileIcon, accent: "reports" },
+const sectionItems: (Omit<NavItem, "badge"> & { hint: string })[] = [
+  {
+    id: "sessions",
+    label: "Sessions",
+    icon: SessionsIcon,
+    accent: "sessions",
+    hint: "Interactive Claude Code terminals",
+  },
+  {
+    id: "teams",
+    label: "Teams",
+    icon: RoomsIcon,
+    accent: "teams",
+    hint: "Multi-agent collaboration rooms",
+  },
+  {
+    id: "sprints",
+    label: "Sprints",
+    icon: SprintsIcon,
+    accent: "sprints",
+    hint: "Automated multi-agent pipelines",
+  },
+  {
+    id: "knowledge",
+    label: "Memory",
+    icon: MemoryIcon,
+    accent: "knowledge",
+    hint: "Agent learnings and knowledge base",
+  },
+  {
+    id: "reports",
+    label: "Reports",
+    icon: FileIcon,
+    accent: "reports",
+    hint: "Automation output and approvals",
+  },
 ];
 
 /** Keyboard shortcut hints for nav tooltips */
@@ -106,8 +130,7 @@ export function NavRail({ activePage, onNavigate, badges }: NavRailProps) {
           "mb-3.5 select-none",
         )}
         style={{
-          backgroundImage:
-            "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 100%)",
+          backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 100%)",
         }}
       >
         A
@@ -150,7 +173,7 @@ function NavRailItem({
   badge,
   onNavigate,
 }: {
-  item: Omit<NavItem, "badge">;
+  item: Omit<NavItem, "badge"> & { hint?: string };
   isActive: boolean;
   badge?: number;
   onNavigate: (page: NavPage) => void;
@@ -198,7 +221,7 @@ function NavRailItem({
             className={cn(
               "absolute top-0 right-0",
               "w-[5px] h-[5px] rounded-full",
-              accentClass ? accentDot[item.accent ?? ""] ?? "bg-error" : "bg-error",
+              accentClass ? (accentDot[item.accent ?? ""] ?? "bg-error") : "bg-error",
               "ring-[1.5px] ring-bg-base",
             )}
             aria-label={`${badge} unread`}
@@ -209,20 +232,23 @@ function NavRailItem({
       {/* Styled tooltip — appears to the right on hover */}
       <div
         className={cn(
-          "absolute left-full top-1/2 -translate-y-1/2 ml-2",
+          "absolute left-full top-1/2 -translate-y-1/2 ml-4",
           "flex items-center gap-2 px-2 py-1",
-          "bg-bg-elevated border border-border-default rounded-[4px]",
+          "bg-bg-elevated border border-border-default rounded-[4px] shadow-lg",
           "text-xs font-medium text-text-primary whitespace-nowrap",
           "opacity-0 pointer-events-none",
-          "group-hover:opacity-100",
+          "group-hover:opacity-100 group-hover:delay-300",
           "transition-opacity duration-150",
-          "z-50",
+          "z-[60]",
         )}
       >
-        {item.label}
-        {shortcut && (
-          <kbd className="text-2xs font-mono text-text-ghost">{shortcut}</kbd>
-        )}
+        <span className="flex flex-col">
+          <span className="flex items-center gap-2">
+            {item.label}
+            {shortcut && <kbd className="text-2xs font-mono text-text-ghost">{shortcut}</kbd>}
+          </span>
+          {item.hint && <span className="text-2xs text-text-ghost font-normal">{item.hint}</span>}
+        </span>
       </div>
     </div>
   );

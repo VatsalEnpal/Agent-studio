@@ -22,7 +22,7 @@ export function MemoryDeleteDialog() {
       const res = await fetch(`/api/memory/entries/${encodeURIComponent(entry.file)}`, {
         method: "DELETE",
       });
-      const data = await res.json() as { ok?: boolean; error?: string };
+      const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!data.ok) throw new Error(data.error ?? "Failed to delete");
       removeEntry(entry.file);
       addToast("Memory deleted", "success");
@@ -36,10 +36,16 @@ export function MemoryDeleteDialog() {
   }, [entry, removeEntry, addToast, close, setSaving]);
 
   return (
-    <Dialog.Root open={open} onOpenChange={(v) => { if (!v) close(); }}>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) close();
+      }}
+    >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50" />
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[400px] bg-bg-elevated border border-border-subtle rounded shadow-modal">
+          <Dialog.Description className="sr-only">Confirm memory deletion</Dialog.Description>
           <div className="flex items-center justify-between px-4 py-3 border-b border-border-default">
             <Dialog.Title className="text-xs font-medium text-error flex items-center gap-1.5">
               <TrashIcon size={14} />
@@ -62,7 +68,8 @@ export function MemoryDeleteDialog() {
               </p>
             )}
             <p className="text-label text-text-ghost mt-2">
-              This action cannot be undone. The memory file and its index entry will be permanently removed.
+              This action cannot be undone. The memory file and its index entry will be permanently
+              removed.
             </p>
           </div>
 

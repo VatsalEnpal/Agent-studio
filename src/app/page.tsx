@@ -21,10 +21,7 @@ import { TitleBar } from "@/components/ui/top-bar";
 import { SidebarShell } from "@/components/ui/sidebar-shell";
 import { ConnectionBanner } from "@/components/ui/connection-banner";
 import { ToastContainer } from "@/components/ui/notification-toast";
-import {
-  CommandPalette,
-  type CommandItem,
-} from "@/components/ui/command-palette";
+import { CommandPalette, type CommandItem } from "@/components/ui/command-palette";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 import { SessionSidebar } from "@/components/sessions/session-sidebar";
@@ -39,6 +36,7 @@ import { CreateRoomDialog } from "@/components/teams/create-room-dialog";
 
 import { SprintsView } from "@/components/sprints/sprints-view";
 import { SprintList } from "@/components/sprints/sprint-list";
+import { CreateSprintDialog } from "@/components/sprints/create-sprint-dialog";
 import { useSprintsStore } from "@/stores/sprints";
 
 import { MemoryView } from "@/components/memory/memory-view";
@@ -109,9 +107,8 @@ export default function Home() {
   const [selectedRepo, setSelectedRepo] = useState<RepoStatus | null>(null);
   const [showDevServers, setShowDevServers] = useState(false);
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
-  const [navBadges, setNavBadges] = useState<Partial<Record<NavPage, number>>>(
-    {},
-  );
+  const [createSprintOpen, setCreateSprintOpen] = useState(false);
+  const [navBadges, setNavBadges] = useState<Partial<Record<NavPage, number>>>({});
 
   useEffect(() => {
     setHydrated(true);
@@ -135,9 +132,7 @@ export default function Home() {
   const selectedSprintId = useSprintsStore((s) => s.selectedSprintId);
   const selectSprint = useSprintsStore((s) => s.selectSprint);
 
-  const memoryEntryCount = useMemoryStore(
-    (s) => s.entries.filter((e) => !e.superseded_by).length,
-  );
+  const memoryEntryCount = useMemoryStore((s) => s.entries.filter((e) => !e.superseded_by).length);
 
   // Hooks
   useKeyboardShortcuts();
@@ -218,8 +213,7 @@ export default function Home() {
                 defaults: { workingDirectory: string };
               };
             };
-            const cwd =
-              data.config?.defaults?.workingDirectory ?? data.defaultCwd ?? "~";
+            const cwd = data.config?.defaults?.workingDirectory ?? data.defaultCwd ?? "~";
             setDefaultCwd(cwd);
             if (data.config && !data.config.setupComplete) {
               setShowSetupWizard(true);
@@ -254,21 +248,16 @@ export default function Home() {
       }
     });
 
-    const unsubRoomStatus = wsClient.on(
-      "room-agent-status",
-      (msg: WsMessage) => {
-        const payload = msg.payload as {
-          roomId: string;
-          agentId: string;
-          status: RoomAgent["status"];
-        };
-        if (payload?.roomId) {
-          useRoomsStore
-            .getState()
-            .updateAgentStatus(payload.roomId, payload.agentId, payload.status);
-        }
-      },
-    );
+    const unsubRoomStatus = wsClient.on("room-agent-status", (msg: WsMessage) => {
+      const payload = msg.payload as {
+        roomId: string;
+        agentId: string;
+        status: RoomAgent["status"];
+      };
+      if (payload?.roomId) {
+        useRoomsStore.getState().updateAgentStatus(payload.roomId, payload.agentId, payload.status);
+      }
+    });
 
     const unsubRoomApproval = wsClient.on("room-approval", (msg: WsMessage) => {
       const payload = msg.payload as {
@@ -283,50 +272,35 @@ export default function Home() {
       }
     });
 
-    const unsubRoomTyping = wsClient.on(
-      "room-agent-typing",
-      (msg: WsMessage) => {
-        const payload = msg.payload as {
-          roomId: string;
-          agentId: string;
-        };
-        if (payload?.roomId) {
-          useRoomsStore
-            .getState()
-            .setAgentTyping(payload.roomId, payload.agentId);
-        }
-      },
-    );
+    const unsubRoomTyping = wsClient.on("room-agent-typing", (msg: WsMessage) => {
+      const payload = msg.payload as {
+        roomId: string;
+        agentId: string;
+      };
+      if (payload?.roomId) {
+        useRoomsStore.getState().setAgentTyping(payload.roomId, payload.agentId);
+      }
+    });
 
-    const unsubRoomStreaming = wsClient.on(
-      "room-agent-streaming",
-      (msg: WsMessage) => {
-        const payload = msg.payload as {
-          roomId: string;
-          agentId: string;
-          delta: string;
-        };
-        if (payload?.roomId) {
-          useRoomsStore
-            .getState()
-            .appendStreamingDelta(
-              payload.roomId,
-              payload.agentId,
-              payload.delta,
-            );
-        }
-      },
-    );
+    const unsubRoomStreaming = wsClient.on("room-agent-streaming", (msg: WsMessage) => {
+      const payload = msg.payload as {
+        roomId: string;
+        agentId: string;
+        delta: string;
+      };
+      if (payload?.roomId) {
+        useRoomsStore
+          .getState()
+          .appendStreamingDelta(payload.roomId, payload.agentId, payload.delta);
+      }
+    });
 
-    const unsubRoomNeedsUser = wsClient.on(
-      "room-needs-user",
-      (msg: WsMessage) => {
-        const payload = msg.payload as { roomId: string };
-        if (payload?.roomId) {
-          useRoomsStore.getState().setWaitingForUser(payload.roomId);
-        }
-      },
-    );
+    const unsubRoomNeedsUser = wsClient.on("room-needs-user", (msg: WsMessage) => {
+      const payload = msg.payload as { roomId: string };
+      if (payload?.roomId) {
+        useRoomsStore.getState().setWaitingForUser(payload.roomId);
+      }
+    });
 
     wsClient.connect(`ws://${window.location.host}/ws`);
 
@@ -391,8 +365,7 @@ export default function Home() {
             },
           }),
         });
-        if (!res.ok)
-          throw new Error(`Failed to continue session (${res.status})`);
+        if (!res.ok) throw new Error(`Failed to continue session (${res.status})`);
         return;
       }
 
@@ -415,8 +388,7 @@ export default function Home() {
             },
           }),
         });
-        if (!res.ok)
-          throw new Error(`Failed to resume session (${res.status})`);
+        if (!res.ok) throw new Error(`Failed to resume session (${res.status})`);
         return;
       }
 
@@ -429,8 +401,7 @@ export default function Home() {
       }
 
       // Auto-name: combine agent + project directory for distinguishable names
-      const cwdBasename =
-        resolvedCwd.split("/").filter(Boolean).pop() ?? "session";
+      const cwdBasename = resolvedCwd.split("/").filter(Boolean).pop() ?? "session";
       let autoName: string;
       if (config.name) {
         autoName = config.name;
@@ -465,6 +436,7 @@ export default function Home() {
 
   const handleKillSession = useCallback(async (sessionId: string) => {
     await fetch(`/api/sessions/${sessionId}`, { method: "DELETE" });
+    useSessionsStore.getState().removeSession(sessionId);
   }, []);
 
   const handlePush = useCallback(async (repo: RepoStatus) => {
@@ -498,11 +470,7 @@ export default function Home() {
         label: session.name,
         category: "sessions",
         icon: SessionsIcon,
-        keywords: [
-          session.meta?.agent ?? "",
-          session.meta?.model ?? "",
-          session.cwd,
-        ],
+        keywords: [session.meta?.agent ?? "", session.meta?.model ?? "", session.cwd],
         onSelect: () => {
           setActiveMode("sessions");
           useSessionsStore.getState().setFocused(session.id);
@@ -536,9 +504,7 @@ export default function Home() {
       <div className="h-screen flex items-center justify-center bg-canvas">
         <div className="flex flex-col items-center gap-3">
           <div className="size-8 border-2 border-text-tertiary/30 border-t-accent rounded-full animate-spin" />
-          <span className="text-label-xs text-text-tertiary">
-            Loading Agent Studio...
-          </span>
+          <span className="text-label-xs text-text-tertiary">Loading Agent Studio...</span>
         </div>
       </div>
     );
@@ -548,9 +514,7 @@ export default function Home() {
     return (
       <div className="h-screen flex items-center justify-center bg-canvas">
         <div className="text-center space-y-3">
-          <p className="text-xs font-medium text-text-primary">
-            Agent Studio needs Claude Code
-          </p>
+          <p className="text-xs font-medium text-text-primary">Agent Studio needs Claude Code</p>
           <p className="text-xs text-text-secondary max-w-sm">
             Please install and authenticate Claude Code to continue.
           </p>
@@ -581,11 +545,7 @@ export default function Home() {
                   defaultCwd: string;
                   config: { defaults: { workingDirectory: string } };
                 };
-                setDefaultCwd(
-                  data.config?.defaults?.workingDirectory ??
-                    data.defaultCwd ??
-                    "~",
-                );
+                setDefaultCwd(data.config?.defaults?.workingDirectory ?? data.defaultCwd ?? "~");
               }
             } catch (e) {
               console.error("Failed to fetch config after setup wizard:", e);
@@ -608,9 +568,7 @@ export default function Home() {
 
       {/* Title bar — full width across top */}
       <TitleBar
-        sessionName={
-          focusedId ? sessions.find((s) => s.id === focusedId)?.name : undefined
-        }
+        sessionName={focusedId ? sessions.find((s) => s.id === focusedId)?.name : undefined}
         sessionCount={activeSessionCount}
         totalCost={totalCost}
       />
@@ -618,11 +576,7 @@ export default function Home() {
       {/* Main 3-column layout below title bar */}
       <div className="flex flex-1 min-h-0">
         {/* Nav rail */}
-        <NavRail
-          activePage={currentNavPage}
-          onNavigate={handleNavigate}
-          badges={navBadges}
-        />
+        <NavRail activePage={currentNavPage} onNavigate={handleNavigate} badges={navBadges} />
 
         {/* Sidebar — content switches based on active mode */}
         <SidebarShell collapsed={!sidebarOpen}>
@@ -636,39 +590,37 @@ export default function Home() {
               onDevServers={(show) => setShowDevServers(show ?? false)}
             />
           )}
-          {activeMode === "teams" && (
-            <RoomList onCreateRoom={() => setCreateRoomOpen(true)} />
-          )}
+          {activeMode === "teams" && <RoomList onCreateRoom={() => setCreateRoomOpen(true)} />}
           {activeMode === "sprints" && (
             <SprintList
               sprints={sprints}
               selectedSprintId={selectedSprintId}
               onSelect={selectSprint}
+              onCreateSprint={() => setCreateSprintOpen(true)}
             />
           )}
           {activeMode === "memory" && (
             <div className="px-3 py-2.5">
-              <h3 className="text-label uppercase tracking-wider text-text-ghost">
-                Memory
-              </h3>
+              <h3 className="text-label uppercase tracking-wider text-text-ghost">Memory</h3>
+              <p className="text-2xs text-text-tertiary mt-1 leading-snug">
+                Agent learnings, corrections, and decisions stored across sessions.
+              </p>
             </div>
           )}
           {activeMode === "reports" && (
             <div className="px-3 py-2.5">
-              <h3 className="text-label uppercase tracking-wider text-text-ghost">
-                Reports
-              </h3>
+              <h3 className="text-label uppercase tracking-wider text-text-ghost">Reports</h3>
               <p className="text-2xs text-text-tertiary mt-1 leading-snug">
-                Automation output and approvals. Configure schedules in
-                Settings.
+                Automation output and approvals. Configure schedules in Settings.
               </p>
             </div>
           )}
           {activeMode === "settings" && (
             <div className="px-3 py-2.5">
-              <h3 className="text-label uppercase tracking-wider text-text-ghost">
-                Settings
-              </h3>
+              <h3 className="text-label uppercase tracking-wider text-text-ghost">Settings</h3>
+              <p className="text-2xs text-text-tertiary mt-1 leading-snug">
+                Model defaults, projects, agent system, and system monitor.
+              </p>
             </div>
           )}
         </SidebarShell>
@@ -684,9 +636,7 @@ export default function Home() {
             <div
               className={cn(
                 "absolute inset-0",
-                activeMode === "sessions"
-                  ? "visible z-10"
-                  : "invisible z-0 pointer-events-none",
+                activeMode === "sessions" ? "visible z-10" : "invisible z-0 pointer-events-none",
               )}
             >
               {/* Dev servers overlay — shown above terminal, doesn't unmount it */}
@@ -702,10 +652,7 @@ export default function Home() {
               {showGitView && selectedRepo && (
                 <div className="absolute inset-0 z-20">
                   <ErrorBoundary fallbackLabel="Git view error">
-                    <GitView
-                      repo={selectedRepo}
-                      onBack={() => setSelectedRepo(null)}
-                    />
+                    <GitView repo={selectedRepo} onBack={() => setSelectedRepo(null)} />
                   </ErrorBoundary>
                 </div>
               )}
@@ -721,15 +668,17 @@ export default function Home() {
                 activeMode === "sessions" && !showDevServers && !showGitView ? (
                   <div className="flex flex-col items-center justify-center h-full gap-4">
                     <div className="text-center space-y-2">
-                      <p className="text-xs font-medium text-text-secondary">
-                        Ready to go.
-                      </p>
+                      <p className="text-xs font-medium text-text-secondary">Ready to go.</p>
                       <p className="text-xs text-text-tertiary max-w-sm">
-                        Launch a session to start working with Claude. Press{" "}
+                        Launch an interactive Claude Code session to start coding. Press{" "}
                         <kbd className="px-1 py-0.5 rounded-[3px] bg-bg-input text-text-ghost text-2xs border border-border-default">
-                          Cmd+N
+                          Cmd+Shift+N
                         </kbd>{" "}
-                        for the launcher.
+                        or use{" "}
+                        <kbd className="px-1 py-0.5 rounded-[3px] bg-bg-input text-text-ghost text-2xs border border-border-default">
+                          Cmd+Shift+K
+                        </kbd>{" "}
+                        to search across sessions and sprints.
                       </p>
                     </div>
                     <button
@@ -749,16 +698,10 @@ export default function Home() {
               ) : (
                 <ErrorBoundary fallbackLabel="Terminal error">
                   <div className="flex flex-col h-full">
-                    <SessionStatsBar
-                      sessionId={focusedId ?? nonRoomSessions[0].id}
-                    />
+                    <SessionStatsBar sessionId={focusedId ?? nonRoomSessions[0].id} />
                     <TerminalPaneV2
                       sessionId={focusedId ?? nonRoomSessions[0].id}
-                      visible={
-                        activeMode === "sessions" &&
-                        !showGitView &&
-                        !showDevServers
-                      }
+                      visible={activeMode === "sessions" && !showGitView && !showDevServers}
                       fontSize={focusedId ? (zoomLevels[focusedId] ?? 13) : 13}
                     />
                   </div>
@@ -769,9 +712,7 @@ export default function Home() {
             {/* Teams */}
             <div
               className={
-                activeMode === "teams"
-                  ? "absolute inset-0 z-10 animate-page-crossfade"
-                  : "hidden"
+                activeMode === "teams" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"
               }
             >
               <ErrorBoundary fallbackLabel="Teams view error">
@@ -782,9 +723,7 @@ export default function Home() {
             {/* Sprints */}
             <div
               className={
-                activeMode === "sprints"
-                  ? "absolute inset-0 z-10 animate-page-crossfade"
-                  : "hidden"
+                activeMode === "sprints" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"
               }
             >
               <ErrorBoundary fallbackLabel="Sprints view error">
@@ -795,9 +734,7 @@ export default function Home() {
             {/* Memory */}
             <div
               className={
-                activeMode === "memory"
-                  ? "absolute inset-0 z-10 animate-page-crossfade"
-                  : "hidden"
+                activeMode === "memory" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"
               }
             >
               <ErrorBoundary fallbackLabel="Memory view error">
@@ -808,9 +745,7 @@ export default function Home() {
             {/* Reports (scheduled automations) */}
             <div
               className={
-                activeMode === "reports"
-                  ? "absolute inset-0 z-10 animate-page-crossfade"
-                  : "hidden"
+                activeMode === "reports" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"
               }
             >
               <ErrorBoundary fallbackLabel="Reports view error">
@@ -846,11 +781,11 @@ export default function Home() {
 
       {/* Create room dialog */}
       {createRoomOpen && (
-        <CreateRoomDialog
-          open={createRoomOpen}
-          onOpenChange={setCreateRoomOpen}
-        />
+        <CreateRoomDialog open={createRoomOpen} onOpenChange={setCreateRoomOpen} />
       )}
+
+      {/* Create sprint dialog */}
+      <CreateSprintDialog open={createSprintOpen} onOpenChange={setCreateSprintOpen} />
 
       {/* PR Modal */}
       <PRModal />

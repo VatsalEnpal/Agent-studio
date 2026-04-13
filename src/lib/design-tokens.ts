@@ -223,7 +223,7 @@ export function agentColor(name: string): string {
  * @returns A hex color string
  */
 export function contextColor(percent: number): string {
-  if (percent < 60) return colors.success;
-  if (percent < 80) return colors.warning;
+  if (percent < 30) return colors.success;
+  if (percent < 60) return colors.warning;
   return colors.error;
 }

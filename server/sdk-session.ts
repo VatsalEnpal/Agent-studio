@@ -7,10 +7,10 @@ import { randomUUID } from "node:crypto";
 export interface SdkSession {
   agentId: string;
   roomId: string;
-  sessionId: string;       // Claude Code session ID for --resume
+  sessionId: string; // Claude Code session ID for --resume
   cwd: string;
   model: string;
-  agentProfile?: string;   // --agent flag value
+  agentProfile?: string; // --agent flag value
   busy: boolean;
   activeQuery: ReturnType<typeof query> | null;
 }
@@ -18,7 +18,11 @@ export interface SdkSession {
 export interface SdkSessionCallbacks {
   onTypingStart: (agentId: string) => void;
   onTextDelta: (agentId: string, delta: string) => void;
-  onResult: (agentId: string, text: string, usage?: { totalCostUsd: number; inputTokens: number; outputTokens: number }) => void;
+  onResult: (
+    agentId: string,
+    text: string,
+    usage?: { totalCostUsd: number; inputTokens: number; outputTokens: number },
+  ) => void;
   onError: (agentId: string, err: Error) => void;
   onIdle: (agentId: string) => void;
 }
@@ -53,7 +57,11 @@ export class SdkSessionManager extends EventEmitter {
     return this.sessions.get(agentId);
   }
 
-  async sendMessage(agentId: string, prompt: string, callbacks: SdkSessionCallbacks): Promise<void> {
+  async sendMessage(
+    agentId: string,
+    prompt: string,
+    callbacks: SdkSessionCallbacks,
+  ): Promise<void> {
     const session = this.sessions.get(agentId);
     if (!session) {
       callbacks.onError(agentId, new Error(`No SDK session for agent ${agentId}`));
@@ -71,7 +79,11 @@ export class SdkSessionManager extends EventEmitter {
     await this.executeQuery(session, prompt, callbacks);
   }
 
-  private async executeQuery(session: SdkSession, prompt: string, callbacks: SdkSessionCallbacks): Promise<void> {
+  private async executeQuery(
+    session: SdkSession,
+    prompt: string,
+    callbacks: SdkSessionCallbacks,
+  ): Promise<void> {
     session.busy = true;
     callbacks.onTypingStart(session.agentId);
 
@@ -163,26 +175,81 @@ export class SdkSessionManager extends EventEmitter {
     session.busy = false;
   }
 
-  destroySession(agentId: string): void {
-    this.interruptAgent(agentId);
+  /**
+   * Destroy an SDK session, closing the active query and cleaning up.
+   * Returns a Promise that resolves once the underlying subprocess is
+   * confirmed gone (or after a safety timeout).  The SDK's own close()
+   * already does SIGTERM -> 2 s -> SIGKILL, but we add a 10 s outer
+   * guard so the caller can await full cleanup.
+   */
+  destroySession(agentId: string): Promise<void> {
+    const session = this.sessions.get(agentId);
+    if (!session) {
+      this.messageQueues.delete(agentId);
+      return Promise.resolve();
+    }
+
+    // Clear queue first so nothing fires after close
+    this.messageQueues.set(agentId, []);
+
+    const activeQuery = session.activeQuery;
+    session.activeQuery = null;
+    session.busy = false;
+
+    // Remove from maps immediately so no new work is dispatched
     this.sessions.delete(agentId);
     this.messageQueues.delete(agentId);
+
+    if (!activeQuery) {
+      return Promise.resolve();
+    }
+
+    // Close the query — the SDK internally sends SIGTERM, then SIGKILL
+    // after 5 s.  We wrap in a 10 s guard so we never hang indefinitely.
+    return new Promise<void>((resolve) => {
+      const guardTimer = setTimeout(() => {
+        console.warn(`[sdk-session] Cleanup guard timeout for agent ${agentId} — forcing resolve`);
+        resolve();
+      }, 10_000);
+      // Unref so the timer does not keep the process alive on shutdown
+      guardTimer.unref();
+
+      try {
+        activeQuery.close();
+      } catch {
+        // Query may already be closed
+      }
+
+      // The SDK's close() fires internal SIGTERM -> SIGKILL via setTimeout.
+      // Give it a moment to run, then resolve.  If the subprocess is still
+      // shutting down the unref'd SDK timers will finish it off.
+      setTimeout(() => {
+        clearTimeout(guardTimer);
+        resolve();
+      }, 500).unref();
+    });
   }
 
-  destroyAll(): string[] {
+  /**
+   * Destroy all active SDK sessions.  Waits for each to complete
+   * cleanup (up to the per-session guard timeout).
+   */
+  async destroyAll(): Promise<string[]> {
     const agentIds = [...this.sessions.keys()];
-    for (const id of agentIds) {
-      this.destroySession(id);
-    }
+    await Promise.all(agentIds.map((id) => this.destroySession(id)));
     return agentIds;
   }
 
   private resolveModel(model: string): string {
     switch (model) {
-      case "opus": return "claude-opus-4-6";
-      case "sonnet": return "claude-sonnet-4-6";
-      case "haiku": return "claude-haiku-4-5-20251001";
-      default: return model;
+      case "opus":
+        return "claude-opus-4-6";
+      case "sonnet":
+        return "claude-sonnet-4-6";
+      case "haiku":
+        return "claude-haiku-4-5-20251001";
+      default:
+        return model;
     }
   }
 }

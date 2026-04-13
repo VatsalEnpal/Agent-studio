@@ -36,10 +36,7 @@ export function SprintsView() {
       // Auto-select first active sprint
       if (!useSprintsStore.getState().selectedSprintId && data.length > 0) {
         const active = data.find(
-          (s) =>
-            s.status === "in_progress" ||
-            s.status === "launching" ||
-            s.status === "paused",
+          (s) => s.status === "in_progress" || s.status === "launching" || s.status === "paused",
         );
         selectSprint(active?.id ?? data[0]!.id);
       }
@@ -67,10 +64,7 @@ export function SprintsView() {
     const stillExists = selectedSprintId && sprints.some((s) => s.id === selectedSprintId);
     if (!stillExists) {
       const active = sprints.find(
-        (s) =>
-          s.status === "in_progress" ||
-          s.status === "launching" ||
-          s.status === "paused",
+        (s) => s.status === "in_progress" || s.status === "launching" || s.status === "paused",
       );
       selectSprint(active?.id ?? sprints[0]!.id);
     }
@@ -90,16 +84,14 @@ export function SprintsView() {
             <SprintsIcon size={20} className="text-text-ghost" />
           </div>
           <p className="text-xs font-medium text-text-secondary">
-            {sprints.length === 0
-              ? "No sprints running"
-              : "Select a sprint to view details"}
+            {sprints.length === 0 ? "No sprints running" : "Select a sprint to view details"}
           </p>
           {sprints.length === 0 && (
             <>
-              <p className="text-xs text-text-tertiary max-w-[240px] leading-relaxed">
+              <p className="text-xs text-text-tertiary max-w-[300px] leading-relaxed">
                 {hasAgentSystem
-                  ? "Sprints are created automatically by the PMO agent when it detects pending work in your projects."
-                  : "Sprints require an agent system. Set one up to enable the PMO agent and automated workflows."}
+                  ? "Sprints are automated multi-agent pipelines. The PMO agent detects pending work, distributes it to your agents, and loops through build/test cycles until passing."
+                  : "Sprints are automated multi-agent pipelines that build, test, and fix code without manual intervention. Set up an agent system first to enable them."}
               </p>
               {!hasAgentSystem && (
                 <button

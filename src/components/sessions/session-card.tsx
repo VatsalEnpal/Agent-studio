@@ -78,8 +78,15 @@ function readableName(session: Session): string {
 
   // If the name is a generic model/tool name, build a better one
   const genericNames = new Set([
-    "claude", "claude-opus", "claude-sonnet", "claude-haiku",
-    "opus", "sonnet", "haiku", "session", "new-session",
+    "claude",
+    "claude-opus",
+    "claude-sonnet",
+    "claude-haiku",
+    "opus",
+    "sonnet",
+    "haiku",
+    "session",
+    "new-session",
     "continue-last",
   ]);
 
@@ -208,9 +215,7 @@ export function SessionCard({
   const effectiveModel = usage.modelShort ?? session.meta?.model ?? null;
   const contextPercent = usage.contextPercent ?? session.meta?.contextPercent ?? 0;
   const costDisplay =
-    usage.totalCost > 0
-      ? `$${usage.totalCost.toFixed(2)}`
-      : session.meta?.cost ?? null;
+    usage.totalCost > 0 ? `$${usage.totalCost.toFixed(2)}` : (session.meta?.cost ?? null);
   const displayName = customNameState || readableName(session);
 
   const startEditing = useCallback(() => {
@@ -233,9 +238,7 @@ export function SessionCard({
 
   const isExited = session.status === "exited";
   const isRunning =
-    session.status === "active" ||
-    session.status === "building" ||
-    session.status === "starting";
+    session.status === "active" || session.status === "building" || session.status === "starting";
 
   const handleKill = useCallback(() => {
     if (killing) return;
@@ -331,7 +334,10 @@ export function SessionCard({
             autoFocus
           />
         ) : (
-          <span className="text-xs font-medium text-text-primary truncate group-hover:whitespace-normal group-hover:line-clamp-2 flex-1 min-w-0">
+          <span
+            className="text-xs font-medium text-text-primary truncate group-hover:whitespace-normal group-hover:line-clamp-2 flex-1 min-w-0 max-w-[140px]"
+            title={displayName}
+          >
             {displayName}
           </span>
         )}
@@ -409,9 +415,7 @@ export function SessionCard({
                 : cn(
                     "text-text-ghost border-border-default",
                     "hover:text-sessions hover:border-sessions/30",
-                    selected
-                      ? "opacity-80"
-                      : "opacity-0 group-hover:opacity-100",
+                    selected ? "opacity-80" : "opacity-0 group-hover:opacity-100",
                   ),
             )}
             title="Resume session"
@@ -432,9 +436,7 @@ export function SessionCard({
                 ? "text-error opacity-70 cursor-not-allowed"
                 : cn(
                     "text-text-ghost hover:text-error",
-                    selected
-                      ? "opacity-70 hover:opacity-100"
-                      : "opacity-0 group-hover:opacity-100",
+                    selected ? "opacity-70 hover:opacity-100" : "opacity-0 group-hover:opacity-100",
                   ),
             )}
             title={killing ? "Killing..." : "Kill session"}
@@ -454,9 +456,7 @@ export function SessionCard({
 
         {/* UX #3: Live elapsed timer */}
         {elapsed && (
-          <span className="text-xs text-text-tertiary tabular-nums shrink-0">
-            {elapsed}
-          </span>
+          <span className="text-xs text-text-tertiary tabular-nums shrink-0">{elapsed}</span>
         )}
 
         <span className="flex-1" />
@@ -468,9 +468,7 @@ export function SessionCard({
         )}
 
         {costDisplay && (
-          <span className="text-[8px] font-mono text-sprints/70 shrink-0">
-            {costDisplay}
-          </span>
+          <span className="text-[8px] font-mono text-sprints/70 shrink-0">{costDisplay}</span>
         )}
 
         {!elapsed && session.updatedAt > 0 && (

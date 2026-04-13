@@ -24,6 +24,8 @@ export interface DevServerConfig {
   name: string;
   path: string;
   command: string;
+  port?: number;
+  autoStart?: boolean;
 }
 
 export interface DefaultsConfig {

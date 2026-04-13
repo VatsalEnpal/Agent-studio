@@ -86,9 +86,7 @@ function PeakHoursIndicator() {
       <div
         className={cn(
           "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-2xs font-medium transition-all cursor-default",
-          info.isPeak
-            ? "bg-red-500/10 text-red-400/90"
-            : "bg-emerald-500/8 text-emerald-400/80",
+          info.isPeak ? "bg-red-500/10 text-red-400/90" : "bg-emerald-500/8 text-emerald-400/80",
         )}
       >
         <span
@@ -108,9 +106,8 @@ function PeakHoursIndicator() {
           {info.isPeak ? "Peak Hours Active" : "Off-Peak Hours"}
         </p>
         <p className="text-2xs text-text-secondary leading-relaxed mb-2">
-          Anthropic API has rate limits that vary by time of day. During peak
-          hours (14:00-20:00 Berlin / 5am-11am PT), expect slower responses and
-          tighter throttling.
+          Anthropic API has rate limits that vary by time of day. During peak hours (14:00-20:00
+          Berlin / 5am-11am PT), expect slower responses and tighter throttling.
         </p>
         <div className="flex items-center justify-between text-2xs">
           <span className="text-text-tertiary">Berlin time</span>
@@ -162,7 +159,7 @@ function SystemWidget() {
         });
     };
     fetchStats();
-    const interval = setInterval(fetchStats, 5000);
+    const interval = setInterval(fetchStats, 15_000);
     return () => clearInterval(interval);
   }, []);
 
@@ -214,11 +211,7 @@ function FullscreenButton() {
       className="p-1 text-text-tertiary hover:text-text-secondary transition-all rounded hover:bg-bg-elevated/50"
       title={isFs ? "Exit fullscreen" : "Fullscreen"}
     >
-      {isFs ? (
-        <CollapseIcon className="w-3.5 h-3.5" />
-      ) : (
-        <ExpandIcon className="w-3.5 h-3.5" />
-      )}
+      {isFs ? <CollapseIcon className="w-3.5 h-3.5" /> : <ExpandIcon className="w-3.5 h-3.5" />}
     </button>
   );
 }
@@ -317,9 +310,7 @@ export function ToggleBar() {
         <ThemeToggle />
         <PeakHoursIndicator />
         <HelpPanel />
-        <span className="text-2xs text-text-tertiary/70 font-mono tracking-wide">
-          agent-studio
-        </span>
+        <span className="text-2xs text-text-tertiary/70 font-mono tracking-wide">agent-studio</span>
       </div>
     </header>
   );

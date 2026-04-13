@@ -31,13 +31,9 @@ export function EmptyState({
         className,
       )}
     >
-      <Icon
-        className="size-6 text-text-ghost"
-      />
+      <Icon className="size-6 text-text-ghost" />
       <h3 className="text-xs font-medium text-text-secondary">{title}</h3>
-      <p className="text-xs text-text-tertiary max-w-[300px]">
-        {description}
-      </p>
+      <p className="text-xs text-text-tertiary max-w-[300px]">{description}</p>
       {actionLabel && onAction && (
         <button
           onClick={onAction}
@@ -89,7 +85,7 @@ export function EmptySprintsState({ onAction }: { onAction?: () => void }) {
     <EmptyState
       icon={PlayIcon}
       title="No sprints running"
-      description="Sprints are multi-step automated workflows. The PMO agent creates them when it detects pending work, or you can start one manually."
+      description="Sprints are automated multi-agent pipelines. The PMO agent detects pending work, the orchestrator distributes tasks, agents build and test in a loop until passing. Configure agents first, then create sprint pipelines."
       actionLabel="New Sprint"
       onAction={onAction}
     />
@@ -101,7 +97,7 @@ export function EmptyMemoryState() {
     <EmptyState
       icon={MemoryIcon}
       title="No memories stored"
-      description="Agents automatically save learnings, corrections, and decisions here as they work. This builds institutional knowledge over time."
+      description="Agents automatically save learnings, corrections, and decisions here as they work. You can also create entries manually. This builds institutional knowledge across sessions."
     />
   );
 }

@@ -36,7 +36,7 @@ export function RunningSection() {
 
   useEffect(() => {
     void fetchProcesses();
-    const interval = setInterval(() => void fetchProcesses(), 15_000);
+    const interval = setInterval(() => void fetchProcesses(), 30_000);
     return () => clearInterval(interval);
   }, [fetchProcesses]);
 
@@ -50,11 +50,7 @@ export function RunningSection() {
       defaultOpen={false}
     >
       {processes.map((proc) => (
-        <RunningProcessItem
-          key={proc.pid}
-          proc={proc}
-          onKillProcess={handleKillProcess}
-        />
+        <RunningProcessItem key={proc.pid} proc={proc} onKillProcess={handleKillProcess} />
       ))}
     </SessionGroup>
   );
@@ -73,14 +69,9 @@ function RunningProcessItem({
   const [confirmKill, setConfirmKill] = useState(false);
   const sessions = useSessionsStore((s) => s.sessions);
 
-  const roomSession = sessions.find(
-    (s) => s.pid === proc.pid && s.meta?.group === "room",
-  );
+  const roomSession = sessions.find((s) => s.pid === proc.pid && s.meta?.group === "room");
   const roomName = roomSession?.meta?.roomName;
-  const projectName =
-    proc.cwd !== "unknown"
-      ? (proc.cwd.split("/").pop() ?? "Claude")
-      : "Claude";
+  const projectName = proc.cwd !== "unknown" ? (proc.cwd.split("/").pop() ?? "Claude") : "Claude";
   const uptime = formatUptime(proc.startTime);
 
   return (
@@ -91,9 +82,7 @@ function RunningProcessItem({
       <div className="flex items-center gap-2">
         <CpuIcon className="w-3 h-3 text-text-secondary shrink-0" />
         <span className="text-xs text-text-primary flex-1 truncate">
-          {roomName
-            ? `${roomSession?.meta?.agent ?? "Agent"}`
-            : projectName}
+          {roomName ? `${roomSession?.meta?.agent ?? "Agent"}` : projectName}
         </span>
         {roomName && (
           <span className="text-2xs px-1 py-0.5 rounded bg-rooms/20 text-rooms font-mono shrink-0">
