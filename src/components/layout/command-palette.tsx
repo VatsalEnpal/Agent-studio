@@ -160,6 +160,50 @@ export function CommandPalette({
           void fetch("/api/pmo/scan", { method: "POST" });
         },
       },
+      {
+        id: "view-sprints",
+        label: "Sprints View",
+        description: "Switch to sprints dashboard",
+        icon: SprintsIcon,
+        keywords: ["sprints", "pipeline", "workflow", "agents"],
+        onSelect: () => {
+          close();
+          setActiveMode("sprints");
+        },
+      },
+      {
+        id: "view-reports",
+        label: "Reports View",
+        description: "View generated reports",
+        icon: FileIcon,
+        keywords: ["reports", "analysis", "output"],
+        onSelect: () => {
+          close();
+          setActiveMode("reports");
+        },
+      },
+      {
+        id: "view-settings",
+        label: "Settings",
+        description: "Open app settings",
+        icon: SettingsIcon,
+        keywords: ["settings", "config", "preferences", "options"],
+        onSelect: () => {
+          close();
+          setActiveMode("settings");
+        },
+      },
+      {
+        id: "view-servers",
+        label: "Dev Servers",
+        description: "View running dev servers",
+        icon: MonitorIcon,
+        keywords: ["servers", "dev", "ports", "processes"],
+        onSelect: () => {
+          close();
+          setActiveMode("sessions");
+        },
+      },
     ];
 
     // Add session-switching actions
