@@ -167,12 +167,17 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
     fetch("/api/config")
       .then((res) => res.json())
       .then((data: Record<string, unknown>) => {
-        const projects = data.projects as Array<{ path: string; isProd?: boolean }> | undefined;
+        const config = data.config as Record<string, unknown> | undefined;
+        const projects = (config?.projects ?? data.projects) as
+          | Array<{ path: string; isProd?: boolean }>
+          | undefined;
         if (projects && projects.length > 0) {
           const main = projects.find((p) => !p.isProd);
           setCwd(main?.path ?? projects[0]?.path ?? "");
         } else {
-          const defaults = data.defaults as { workingDirectory?: string } | undefined;
+          const defaults = (config?.defaults ?? data.defaults) as
+            | { workingDirectory?: string }
+            | undefined;
           if (defaults?.workingDirectory) {
             setCwd(defaults.workingDirectory);
           }
