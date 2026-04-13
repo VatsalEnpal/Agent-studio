@@ -55,6 +55,8 @@ export class WorkflowExecutor {
   private runner: CommandRunner;
   private listeners: ExecutorEventListener[] = [];
   private activeRuns = new Map<string, { abortController: AbortController; paused: boolean }>();
+  /** Override retry delay for tests (default: 60000ms) */
+  _testRetryDelayMs?: number;
 
   constructor(runner: CommandRunner) {
     this.runner = runner;
@@ -266,11 +268,34 @@ export class WorkflowExecutor {
     }
 
     try {
-      const result = await this.runner.run("claude", args, {
+      let result = await this.runner.run("claude", args, {
         cwd: workflowDef.workingDirectory,
         timeout: (stepDef.timeout ?? 300) * 1000,
         signal,
       });
+
+      // Rate limit detection + auto-retry
+      const combined = result.stdout + result.stderr;
+      if (this.isRateLimited(combined)) {
+        const retryDelay = this._testRetryDelayMs ?? 60_000;
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+
+        result = await this.runner.run("claude", args, {
+          cwd: workflowDef.workingDirectory,
+          timeout: (stepDef.timeout ?? 300) * 1000,
+          signal,
+        });
+
+        const retryOutput = result.stdout + result.stderr;
+        if (this.isRateLimited(retryOutput)) {
+          stepState.status = "failed";
+          stepState.error = "Rate limited after retry";
+          stepState.completedAt = new Date().toISOString();
+          saveRunState(runState);
+          this.handleStepFailure(runState, stepDef);
+          return;
+        }
+      }
 
       if (result.exitCode === 0) {
         // Check if output file was expected and exists
@@ -657,5 +682,16 @@ export class WorkflowExecutor {
     if (control) {
       control.paused = true;
     }
+  }
+
+  /** Check if output indicates a rate limit */
+  private isRateLimited(output: string): boolean {
+    const lower = output.toLowerCase();
+    return (
+      lower.includes("429") ||
+      lower.includes("529") ||
+      lower.includes("rate limit") ||
+      lower.includes("overloaded")
+    );
   }
 }

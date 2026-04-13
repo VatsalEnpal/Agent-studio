@@ -944,3 +944,58 @@ describe("WorkflowExecutor — Nested Agent Groups", () => {
     expect(result.steps["group-1"].status).toBe("completed");
   });
 });
+
+describe("WorkflowExecutor — Rate Limit Detection", () => {
+  it("detects rate limit and retries successfully", async () => {
+    const mock = new MockCommandRunner();
+    mock.setResponses([
+      { exitCode: 1, stdout: "429 Too Many Requests", stderr: "" },
+      { exitCode: 0, stdout: "success after retry", stderr: "" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+    executor._testRetryDelayMs = 10; // 10ms instead of 60s
+
+    const wf = makeWorkflow();
+    const runState = executor.startRun(wf);
+    const result = await executor.executeRun(wf, runState);
+
+    expect(result.status).toBe("completed");
+    expect(result.steps["step-1"].status).toBe("completed");
+    expect(mock.calls).toHaveLength(2); // original + retry
+  });
+
+  it("pauses run when both attempts are rate limited", async () => {
+    const mock = new MockCommandRunner();
+    mock.setResponses([
+      { exitCode: 1, stdout: "429 Too Many Requests", stderr: "" },
+      { exitCode: 1, stdout: "429 Too Many Requests", stderr: "" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+    executor._testRetryDelayMs = 10;
+
+    const wf = makeWorkflow();
+    const runState = executor.startRun(wf);
+    const result = await executor.executeRun(wf, runState);
+
+    expect(result.status).toBe("paused");
+    expect(result.steps["step-1"].status).toBe("failed");
+    expect(result.steps["step-1"].error).toContain("Rate limited after retry");
+  });
+
+  it("detects overloaded keyword in stderr", async () => {
+    const mock = new MockCommandRunner();
+    mock.setResponses([
+      { exitCode: 1, stdout: "", stderr: "Server overloaded, try later" },
+      { exitCode: 0, stdout: "ok", stderr: "" },
+    ]);
+    const executor = new WorkflowExecutor(mock);
+    executor._testRetryDelayMs = 10;
+
+    const wf = makeWorkflow();
+    const runState = executor.startRun(wf);
+    const result = await executor.executeRun(wf, runState);
+
+    expect(result.status).toBe("completed");
+    expect(mock.calls).toHaveLength(2);
+  });
+});
