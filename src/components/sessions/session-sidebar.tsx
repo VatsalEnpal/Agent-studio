@@ -585,6 +585,9 @@ export function SessionSidebar({
         {activeTab === "servers" && <SidebarServerList />}
       </div>
 
+      {/* Git Repos */}
+      <SidebarRepos />
+
       {/* Bottom: Servers link + New Session button */}
       <div className="px-3 py-2 border-t border-border-default space-y-1.5">
         {onDevServers && (
@@ -616,6 +619,52 @@ export function SessionSidebar({
           <kbd className="ml-auto text-2xs font-mono opacity-40">{"\u21E7\u2318N"}</kbd>
         </button>
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Git Repos section
+// ---------------------------------------------------------------------------
+
+function SidebarRepos() {
+  const repos = useGitStore((s) => s.repos);
+  const [open, setOpen] = useState(true);
+
+  if (repos.length === 0) return null;
+
+  return (
+    <div className="px-3 py-1 border-t border-border-default">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1 w-full py-1 text-2xs font-medium text-text-ghost uppercase tracking-wider hover:text-text-secondary transition-all"
+      >
+        {open ? <ChevronDownIcon size={10} /> : <ChevronRightIcon size={10} />}
+        Repos
+        <span className="ml-auto text-text-ghost tabular-nums">{repos.length}</span>
+      </button>
+      {open && (
+        <div className="space-y-0.5 mt-0.5">
+          {repos.map((repo) => (
+            <div
+              key={repo.path}
+              className="flex items-center gap-1.5 px-1 py-1 rounded hover:bg-bg-elevated/50 transition-all text-xs"
+              title={repo.path}
+            >
+              <span
+                className={cn(
+                  "w-[5px] h-[5px] rounded-full shrink-0",
+                  repo.dirty ? "bg-error" : "bg-sessions",
+                )}
+              />
+              <span className="text-text-primary truncate flex-1">{repo.name}</span>
+              <span className="text-2xs font-mono text-rooms truncate max-w-[80px]">
+                {repo.branch}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
