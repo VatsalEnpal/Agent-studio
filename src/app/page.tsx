@@ -39,6 +39,11 @@ import { SprintList } from "@/components/sprints/sprint-list";
 import { CreateSprintDialog } from "@/components/sprints/create-sprint-dialog";
 import { useSprintsStore } from "@/stores/sprints";
 
+import { WorkflowList } from "@/components/workflows/workflow-list";
+import { WorkflowDetail } from "@/components/workflows/workflow-detail";
+import { CreateWorkflowDialog } from "@/components/workflows/create-workflow-dialog";
+import { useWorkflowV2Store } from "@/stores/workflows-v2";
+
 import { MemoryView } from "@/components/memory/memory-view";
 import { ReportsView } from "@/components/reports/reports-view";
 import { SettingsView } from "@/components/settings/settings-view";
@@ -108,6 +113,7 @@ export default function Home() {
   const [showDevServers, setShowDevServers] = useState(false);
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
   const [createSprintOpen, setCreateSprintOpen] = useState(false);
+  const [createWorkflowOpen, setCreateWorkflowOpen] = useState(false);
   const [navBadges, setNavBadges] = useState<Partial<Record<NavPage, number>>>({});
 
   useEffect(() => {
@@ -131,6 +137,10 @@ export default function Home() {
   const sprints = useSprintsStore((s) => s.sprints);
   const selectedSprintId = useSprintsStore((s) => s.selectedSprintId);
   const selectSprint = useSprintsStore((s) => s.selectSprint);
+
+  const workflows = useWorkflowV2Store((s) => s.workflows);
+  const selectedWorkflowId = useWorkflowV2Store((s) => s.selectedWorkflowId);
+  const selectWorkflow = useWorkflowV2Store((s) => s.selectWorkflow);
 
   const memoryEntryCount = useMemoryStore((s) => s.entries.filter((e) => !e.superseded_by).length);
 
@@ -600,12 +610,27 @@ export default function Home() {
           )}
           {activeMode === "teams" && <RoomList onCreateRoom={() => setCreateRoomOpen(true)} />}
           {activeMode === "sprints" && (
-            <SprintList
-              sprints={sprints}
-              selectedSprintId={selectedSprintId}
-              onSelect={selectSprint}
-              onCreateSprint={() => setCreateSprintOpen(true)}
-            />
+            <>
+              <SprintList
+                sprints={sprints}
+                selectedSprintId={selectedSprintId}
+                onSelect={(id) => {
+                  selectSprint(id);
+                  selectWorkflow(null);
+                }}
+                onCreateSprint={() => setCreateSprintOpen(true)}
+              />
+              <div className="border-t border-border-default mt-2 pt-2">
+                <WorkflowList
+                  selectedId={selectedWorkflowId}
+                  onSelectWorkflow={(id) => {
+                    selectWorkflow(id);
+                    selectSprint("");
+                  }}
+                  onCreateNew={() => setCreateWorkflowOpen(true)}
+                />
+              </div>
+            </>
           )}
           {activeMode === "memory" && (
             <div className="px-3 py-2.5">
@@ -728,14 +753,18 @@ export default function Home() {
               </ErrorBoundary>
             </div>
 
-            {/* Sprints */}
+            {/* Sprints & Workflows */}
             <div
               className={
                 activeMode === "sprints" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"
               }
             >
               <ErrorBoundary fallbackLabel="Sprints view error">
-                <SprintsView />
+                {selectedWorkflowId && workflows.find((w) => w.id === selectedWorkflowId) ? (
+                  <WorkflowDetail workflow={workflows.find((w) => w.id === selectedWorkflowId)!} />
+                ) : (
+                  <SprintsView />
+                )}
               </ErrorBoundary>
             </div>
 
@@ -794,6 +823,9 @@ export default function Home() {
 
       {/* Create sprint dialog */}
       <CreateSprintDialog open={createSprintOpen} onOpenChange={setCreateSprintOpen} />
+
+      {/* Create workflow dialog */}
+      <CreateWorkflowDialog open={createWorkflowOpen} onOpenChange={setCreateWorkflowOpen} />
 
       {/* PR Modal */}
       <PRModal />

@@ -182,14 +182,14 @@ export function WorkflowDetail({ workflow }: WorkflowDetailProps) {
 
         {activeRun && (
           <div className="space-y-1">
-            {workflow.steps.map((stepDef, idx) => {
+            {(workflow.steps ?? []).map((stepDef, idx) => {
               const stepState = activeRun.steps[stepDef.id];
               return (
                 <StepRow
                   key={stepDef.id}
                   stepDef={stepDef}
                   stepState={stepState}
-                  isLast={idx === workflow.steps.length - 1}
+                  isLast={idx === (workflow.steps ?? []).length - 1}
                   workflowId={workflow.id}
                   runId={activeRun.runId}
                   onApprove={() => approveGate(workflow.id, activeRun.runId, stepDef.id)}

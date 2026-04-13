@@ -185,7 +185,7 @@ function WorkflowEntry({
       <div className="min-w-0 flex-1">
         <div className="truncate font-medium text-xs">{workflow.name}</div>
         <div className="flex items-center gap-2 text-[10px] text-zinc-500">
-          <span>{workflow.steps.length} steps</span>
+          <span>{workflow.steps?.length ?? 0} steps</span>
           {schedule && (
             <>
               <span className="text-zinc-700">|</span>
