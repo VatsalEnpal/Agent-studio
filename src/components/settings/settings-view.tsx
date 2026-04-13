@@ -83,7 +83,7 @@ export function SettingsView() {
 
     setStatsLoading(true);
     fetchStats();
-    const interval = setInterval(fetchStats, 5000);
+    const interval = setInterval(fetchStats, 15_000);
     return () => {
       active = false;
       clearInterval(interval);

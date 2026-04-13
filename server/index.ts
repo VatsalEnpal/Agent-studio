@@ -1143,7 +1143,7 @@ Choose the schedule and model based on the task:
     }
   });
 
-  // --- Usage polling: broadcast usage updates every 30s ---
+  // --- Usage polling: broadcast usage updates every 60s ---
   setInterval(() => {
     try {
       const usage = getAllSessionUsage();
@@ -1192,7 +1192,7 @@ Choose the schedule and model based on the task:
     } catch {
       // Ignore polling errors
     }
-  }, 30_000);
+  }, 60_000);
 
   // --- File watcher for sprint/memory files ---
   const fileWatcher = new FileWatcher();
@@ -1266,7 +1266,7 @@ Choose the schedule and model based on the task:
       payload: repos,
     } satisfies WsMessage);
   });
-  gitWatcher.start(10_000);
+  gitWatcher.start(30_000);
 
   // --- Git REST API ---
   app.get("/api/git/status", (_req, res) => {
@@ -2902,6 +2902,34 @@ Choose the schedule and model based on the task:
       }
       const success = stopDevServer(pid);
       res.json({ ok: success });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  app.post("/api/dev-servers/custom", (req, res) => {
+    try {
+      const { name, port, command, cwd, autoStart } = req.body as {
+        name?: string;
+        port?: number;
+        command?: string;
+        cwd?: string;
+        autoStart?: boolean;
+      };
+      if (!name || !command || !cwd) {
+        res.status(400).json({ error: "name, command, and cwd are required" });
+        return;
+      }
+      addCustomServer({
+        name,
+        cwd,
+        command,
+        port: port ?? undefined,
+        autoStart: autoStart ?? false,
+      });
+      const servers = getDevServers();
+      res.json(servers);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
