@@ -243,6 +243,9 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-2 px-4 py-2.5 border-t border-border-default">
+          {enabledCount === 0 && (
+            <span className="text-2xs text-text-ghost mr-auto">Select at least one agent</span>
+          )}
           <button
             onClick={() => onOpenChange(false)}
             className="px-2.5 py-1 text-xs font-medium text-text-secondary hover:text-text-primary rounded transition-all"
@@ -251,7 +254,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
           </button>
           <button
             onClick={() => void handleCreate()}
-            disabled={!name.trim() || !topic.trim() || creating}
+            disabled={!name.trim() || !topic.trim() || enabledCount === 0 || creating}
             className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded bg-rooms text-bg-base hover:bg-rooms/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
           >
             <PlusIcon size={12} />
