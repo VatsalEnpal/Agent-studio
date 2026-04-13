@@ -60,6 +60,7 @@ import { PipelineRegistry } from "./workflows/workflow-registry.js";
 import { WorkflowExecutor } from "./workflows/executor.js";
 import { WorkflowScheduler } from "./workflows/scheduler.js";
 import { ClaudeCommandRunner } from "./workflows/command-runner.js";
+import { getActiveRuns, saveRunState } from "./workflows/run-state.js";
 import { SdkSessionManager } from "./sdk-session.js";
 import {
   getConfig,
@@ -3599,6 +3600,30 @@ Choose the schedule and model based on the task:
     return true;
   });
   workflowScheduler.restoreSchedules();
+
+  // --- Server restart recovery: detect interrupted runs ---
+  {
+    const interrupted = getActiveRuns().filter((r) => r.status === "running");
+    for (const run of interrupted) {
+      // Mark running steps as interrupted
+      for (const step of Object.values(run.steps)) {
+        if (step.status === "running") {
+          step.status = "interrupted";
+        }
+      }
+      run.status = "paused";
+      saveRunState(run);
+      console.log(
+        `[workflow-engine] Run '${run.runId}' (workflow '${run.workflowId}') was interrupted by server restart. Paused at step '${run.currentStep}'.`,
+      );
+    }
+    if (interrupted.length > 0) {
+      console.log(
+        `[workflow-engine] ${interrupted.length} interrupted run(s) detected. Resume via API or UI.`,
+      );
+    }
+  }
+
   app.use(
     "/api/workflows",
     workflowRoutes({
