@@ -31,29 +31,25 @@ function updateTabTitle(attentionCount: number): void {
  * - Update favicon color (green/yellow/red)
  * - Update tab title with attention count
  * - Fire toast notifications when sessions exit
+ *
+ * Badge logic: only exited sessions with a non-zero exit code that
+ * have not yet been acknowledged count toward the tab badge.
+ * A session is acknowledged once the exit toast has been shown.
  */
 export function useNotifications() {
   const sessions = useSessionsStore((s) => s.sessions);
   const addToast = useToastStore((s) => s.addToast);
   const prevSessionsRef = useRef<Map<string, string>>(new Map());
+  /** IDs of exited sessions whose toast has already fired. */
+  const acknowledgedRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const exitedSessions = sessions.filter((s) => s.status === "exited");
-    const buildingSessions = sessions.filter((s) => s.status === "building" || s.status === "starting");
-    const attentionCount = exitedSessions.length;
+    const buildingSessions = sessions.filter(
+      (s) => s.status === "building" || s.status === "starting",
+    );
 
-    // Determine favicon color
-    let faviconColor: FaviconColor = "green";
-    if (exitedSessions.length > 0) {
-      faviconColor = "red";
-    } else if (buildingSessions.length > 0) {
-      faviconColor = "yellow";
-    }
-
-    setFavicon(faviconColor);
-    updateTabTitle(attentionCount);
-
-    // Detect newly exited sessions and fire toasts
+    // Detect newly exited sessions, fire toasts, and mark as acknowledged
     const prevMap = prevSessionsRef.current;
     for (const session of sessions) {
       const prevStatus = prevMap.get(session.id);
@@ -68,8 +64,35 @@ export function useNotifications() {
         if (prefs.sessionExit) {
           notifySessionExit(session.name, typeof code === "number" ? code : -1, session.id);
         }
+        // Mark this session as acknowledged so it no longer counts toward the badge
+        acknowledgedRef.current.add(session.id);
       }
     }
+
+    // Clean up acknowledged set: remove IDs no longer present in the store
+    const currentIds = new Set(sessions.map((s) => s.id));
+    for (const id of acknowledgedRef.current) {
+      if (!currentIds.has(id)) {
+        acknowledgedRef.current.delete(id);
+      }
+    }
+
+    // Only count exited sessions with errors that have NOT been acknowledged
+    const unacknowledgedErrorSessions = exitedSessions.filter(
+      (s) => s.exitCode !== 0 && !acknowledgedRef.current.has(s.id),
+    );
+    const attentionCount = unacknowledgedErrorSessions.length;
+
+    // Determine favicon color
+    let faviconColor: FaviconColor = "green";
+    if (unacknowledgedErrorSessions.length > 0) {
+      faviconColor = "red";
+    } else if (buildingSessions.length > 0) {
+      faviconColor = "yellow";
+    }
+
+    setFavicon(faviconColor);
+    updateTabTitle(attentionCount);
 
     // Update the previous sessions map
     const newMap = new Map<string, string>();
