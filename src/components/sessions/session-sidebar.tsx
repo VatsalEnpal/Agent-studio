@@ -163,8 +163,20 @@ function SidebarServerList() {
           key={`${s.pid}-${s.port}`}
           className="flex items-center gap-2 px-3 py-1.5 rounded hover:bg-bg-elevated/50 transition-all"
         >
-          <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
-          <span className="text-xs font-mono text-sessions font-medium shrink-0">:{s.port}</span>
+          <span
+            className={cn(
+              "w-[5px] h-[5px] rounded-full shrink-0",
+              s.running ? "bg-sessions" : "bg-text-tertiary",
+            )}
+          />
+          <span
+            className={cn(
+              "text-xs font-mono font-medium shrink-0",
+              s.running ? "text-sessions" : "text-text-ghost",
+            )}
+          >
+            {s.running && s.port > 0 ? `:${s.port}` : "--"}
+          </span>
           <span className="text-xs text-text-tertiary truncate flex-1 min-w-0">
             {s.command.split("/").pop() ?? s.command}
           </span>

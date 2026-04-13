@@ -395,8 +395,20 @@ export function DevServersView() {
             >
               {/* Port */}
               <div className="w-14 shrink-0 flex items-center gap-1.5">
-                <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
-                <span className="text-xs font-mono text-sessions font-medium">{server.port}</span>
+                <span
+                  className={cn(
+                    "w-[5px] h-[5px] rounded-full shrink-0",
+                    server.running ? "bg-sessions" : "bg-text-tertiary",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-xs font-mono font-medium",
+                    server.running ? "text-sessions" : "text-text-ghost",
+                  )}
+                >
+                  {server.running && server.port > 0 ? server.port : "--"}
+                </span>
               </div>
 
               {/* Process name */}
@@ -404,6 +416,7 @@ export function DevServersView() {
                 <span className="text-xs text-text-primary truncate block">
                   {processLabel(server.command)}
                 </span>
+                {!server.running && <span className="text-2xs text-text-ghost">Not running</span>}
               </div>
 
               {/* Directory */}
@@ -415,7 +428,9 @@ export function DevServersView() {
 
               {/* PID */}
               <div className="w-16 shrink-0 text-right">
-                <span className="text-label text-text-ghost font-mono">{server.pid}</span>
+                <span className="text-label text-text-ghost font-mono">
+                  {server.running && server.pid > 0 ? server.pid : "--"}
+                </span>
               </div>
 
               {/* Actions */}
