@@ -55,12 +55,17 @@ echo ""
 echo "Input: $INPUT (${RAW_DURATION}s)"
 echo ""
 
+# --- Find the right trim point ---
+# The raw video starts with page load + loading spinner.
+# We need to find where real content begins (file size jump in frames).
+# Default: skip 8s to get past load + initial render delay.
+SKIP="${SKIP:-8}"
+
 # --- Step 1: Trim and create 720p version ---
-# Skip first 1.5s (page load), take 16s of content
-echo "Step 1: Trimming to 16s and scaling to 720p..."
-$FFMPEG -y -ss 1.5 -i "$INPUT" \
+echo "Step 1: Trimming 16s starting at ${SKIP}s, scaling to 720p..."
+$FFMPEG -y -ss "$SKIP" -i "$INPUT" \
   -t 16 \
-  -vf "fade=in:0:15,fade=out:st=15:d=1,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:color=#0a0a0a" \
+  -vf "fade=in:0:5,fade=out:st=15:d=1,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:color=#0a0a0a" \
   -c:v libx264 -crf 22 -preset medium -r 30 \
   -pix_fmt yuv420p \
   -an \
@@ -69,10 +74,10 @@ $FFMPEG -y -ss 1.5 -i "$INPUT" \
 echo "  Trimmed 720p: $TRIMMED"
 
 # --- Step 1b: Trim and create 1080p version ---
-echo "Step 1b: Trimming to 16s (1080p)..."
-$FFMPEG -y -ss 1.5 -i "$INPUT" \
+echo "Step 1b: Trimming 16s starting at ${SKIP}s (1080p)..."
+$FFMPEG -y -ss "$SKIP" -i "$INPUT" \
   -t 16 \
-  -vf "fade=in:0:15,fade=out:st=15:d=1,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=#0a0a0a" \
+  -vf "fade=in:0:5,fade=out:st=15:d=1,scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=#0a0a0a" \
   -c:v libx264 -crf 20 -preset medium -r 30 \
   -pix_fmt yuv420p \
   -an \

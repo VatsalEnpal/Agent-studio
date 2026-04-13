@@ -140,14 +140,23 @@ const page = await context.newPage();
 
 const wait = (ms) => page.waitForTimeout(ms);
 
-// Navigate and wait for full load
+// Navigate and wait for full load + terminal rendering
 await page.goto(BASE, { waitUntil: "networkidle" });
-await wait(2000); // Let terminals render their output
+await wait(1000);
+
+// Ensure we're on sessions tab and terminal content has rendered
+await page.keyboard.press("Meta+1");
+await wait(3000); // Critical: wait for xterm.js to render terminal content
+
+// Click the first session to make sure terminal output is visible
+const firstSession = page.locator("text=velocity-").first();
+if (await firstSession.isVisible({ timeout: 1000 }).catch(() => false)) {
+  await firstSession.click();
+  await wait(1000);
+}
 
 // ─── Shot 1: Sessions — THE HOOK (4s) ──────────────────────────────────────
 console.log("  Shot 1: Sessions (5 terminals streaming)");
-await page.keyboard.press("Meta+1");
-await wait(500);
 
 // Take hero screenshot
 await page.screenshot({
