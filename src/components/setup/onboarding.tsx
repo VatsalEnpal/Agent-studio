@@ -239,6 +239,7 @@ interface ResultScreenProps {
   agents: GeneratedAgent[];
   automations: AutomationSuggestion[];
   onConfirm: () => void;
+  onSkip: () => void;
   onRefine: (message: string) => void;
   applying: boolean;
   refining: boolean;
@@ -248,6 +249,7 @@ function ResultScreen({
   agents,
   automations,
   onConfirm,
+  onSkip,
   onRefine,
   applying,
   refining,
@@ -305,7 +307,12 @@ function ResultScreen({
               </div>
             ))}
             {agents.length === 0 && (
-              <p className="text-xs text-zinc-600 py-2 text-center">No agents generated.</p>
+              <div className="py-3 text-center space-y-2">
+                <p className="text-xs text-zinc-500">Could not analyze project.</p>
+                <p className="text-xs text-zinc-600">
+                  You can create agents manually from Settings &gt; Agents.
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -374,6 +381,15 @@ function ResultScreen({
               </>
             )}
           </button>
+
+          {agents.length === 0 && (
+            <button
+              onClick={onSkip}
+              className="text-xs text-zinc-500 hover:text-zinc-300 underline underline-offset-2 transition-all"
+            >
+              Skip &mdash; I&apos;ll create agents myself
+            </button>
+          )}
 
           {/* Refinement input */}
           <div className="w-full max-w-md">
@@ -698,6 +714,7 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
         agents={agents}
         automations={automations}
         onConfirm={handleConfirm}
+        onSkip={handleSkip}
         onRefine={handleRefine}
         applying={applying}
         refining={refining}
