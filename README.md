@@ -1,103 +1,46 @@
-<div align="center">
+<p align="center">
+  <h1 align="center">Agent Studio</h1>
+</p>
+
+<p align="center">
+  An IDE for AI agent teams.<br />
+  Design agents. Orchestrate workflows. Ship code.
+</p>
+
+<p align="center">
+  <a href="https://github.com/VatsalEnpal/Agent-studio/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-black" /></a>
+  <a href="https://github.com/VatsalEnpal/Agent-studio"><img alt="Version" src="https://img.shields.io/badge/version-0.3.1-black" /></a>
+</p>
 
 <br />
 
-# Agent Studio
+## Why
 
-### One window. Multiple agents. Full control.
+IDEs changed how we write code. Agent Studio does the same for how we **work with AI agents**.
 
-<br />
+Today, running agents means opening terminals, copy-pasting context, losing everything between sessions, and having no way to make agents actually collaborate. It's like writing code without an IDE — possible, but painful.
 
-[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org)
-[![Node 22+](https://img.shields.io/badge/node-22%2B-green.svg)](https://nodejs.org)
-[![v0.3.1](https://img.shields.io/badge/version-0.3.1-amber.svg)](https://github.com/VatsalEnpal/Agent-studio)
-
-</div>
+Agent Studio is the missing environment. You design agents that understand your specific codebase, orchestrate them into automated pipelines, give them shared memory so they learn over time, and let them talk to each other in real-time chat rooms. All from one interface.
 
 <br />
 
-<div align="center">
-<img src="demo-videos/screenshots/hero-terminal-grid.png" width="720" alt="Agent Studio — 4 Claude Code agents running in parallel" />
-</div>
+## What you can build
 
-<div align="center">
-<img src="demo-videos/final_demo.gif" width="720" alt="Agent Studio demo — sessions, sprints, rooms, memory" />
-<br />
-<sub>20s demo: Real Claude Code sessions → Sprint timeline → Room chat → Memory</sub>
-</div>
+**Custom agent teams for any project.** A setup wizard analyzes your codebase — frameworks, patterns, conventions — and generates specialized agents. Not generic "frontend" or "backend" bots. Agents that know _your_ stack, _your_ patterns, _your_ architecture. Edit them, version them, share them with your team.
 
-<br />
+**Automated engineering pipelines.** Define multi-step workflows: scan the codebase, check readiness, design the solution, build it, run tests, security review, ship. Each step can pass, fail, or pause for your approval. Configure which gates are mandatory and which can auto-advance. Schedule pipelines to run on their own.
 
-> You open Claude Code in a terminal. It's great for one task. But when you need a frontend agent, a backend agent, QA, and security review all running at once — you're alt-tabbing between 6 terminals, copy-pasting context, and losing your mind.
->
-> Agent Studio puts everything in one place.
+**Agent-to-agent collaboration rooms.** Create a chat room, assign agents, give them a problem. They @mention each other — one finds the bug, tags another to fix it, a third writes the test. You watch in real-time, approve when needed. A turn-based protocol prevents chaos.
 
-<br />
+**Persistent knowledge across everything.** When an agent discovers that your deploy needs a specific flag, or a test is flaky on CI, or the API requires pagination — that goes into a shared knowledge base. Every future session starts with that context. Your agents compound their understanding of your codebase over time.
 
----
-
-<br />
-
-## What you get
-
-<table>
-<tr>
-<td width="50%">
-
-**Run 6 agents side by side**
-
-Full interactive terminals in a grid. Live stats per session — tokens, cost, context %, model. Launch with presets or configure everything. Resume past sessions. Zoom and fullscreen any pane.
-
-</td>
-<td width="50%">
-
-**Agent-to-agent chat rooms**
-
-Agents collaborate through @mentions. One finds the bug, tags another to fix it, a third writes the test. Turn-based protocol keeps things orderly. You approve anything risky.
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-**Sprint pipelines with gates**
-
-Multi-step workflows: scan, design, build, test, review, ship. Each step passes, fails, or waits for your approval. Nothing ships without you saying so.
-
-</td>
-<td width="50%">
-
-**Shared memory across sessions**
-
-Agents remember what they learn — deploy flags, flaky tests, API quirks. Search, filter, pin entries. Your agents get smarter over time.
-
-</td>
-</tr>
-</table>
-
-<br />
-
-<div align="center">
-<table>
-<tr>
-<td><img src="demo-videos/screenshots/hero-room-chat.png" width="360" alt="Agent chat rooms" /></td>
-<td><img src="demo-videos/screenshots/hero-memory.png" width="360" alt="Shared memory" /></td>
-</tr>
-<tr>
-<td align="center"><sub>Agent chat rooms with @mentions</sub></td>
-<td align="center"><sub>Shared knowledge base — learnings, corrections, decisions</sub></td>
-</tr>
-</table>
-</div>
-
-<br />
-
----
+**A full control panel for everything running.** Live terminals with stats (tokens, cost, context window), git integration (branches, commits, PRs from the sidebar), dev server monitoring, system resources, process discovery. Everything an engineering team needs, in one window.
 
 <br />
 
 ## Get started
+
+> **Prerequisites:** Node.js 22+ and [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed.
 
 ```bash
 git clone https://github.com/VatsalEnpal/Agent-studio.git
@@ -106,91 +49,55 @@ npm install
 npm run dev
 ```
 
-Open **[localhost:8080](http://localhost:8080)**. A setup wizard scans your project and generates agents tailored to your stack.
+Open [localhost:8080](http://localhost:8080). The setup wizard walks you through everything.
 
-**Need the desktop app?** `npm run electron:dev`
-**Docker?** `docker build -t agent-studio . && docker run -p 8080:8080 agent-studio`
-
-<br />
-
----
-
-<br />
-
-## Also included
-
-|                           |                                                                                  |
-| ------------------------- | -------------------------------------------------------------------------------- |
-| **Git sidebar**           | Auto-detects repos, shows branches + dirty state, commit/push/PR from the UI     |
-| **Agent creation wizard** | Scans your project with Claude Code CLI, generates project-specific agents       |
-| **Dev server monitor**    | Auto-discovers running dev servers (Next.js, Vite, Express)                      |
-| **Automations**           | Scheduled headless Claude Code runs that produce reports                         |
-| **Command palette**       | `Cmd+K` to jump anywhere                                                         |
-| **Keyboard-first**        | `Cmd+Shift+N` new session, `Cmd+Shift+K` palette, `Tab` cycle panes, `Esc` close |
-
-<br />
-
-<div align="center">
-<table>
-<tr>
-<td><img src="demo-videos/screenshots/hero-settings.png" width="360" alt="Settings" /></td>
-<td><img src="demo-videos/screenshots/hero-sprint-timeline.png" width="360" alt="Sprints" /></td>
-</tr>
-<tr>
-<td align="center"><sub>Settings — model defaults, system monitor, keyboard shortcuts</sub></td>
-<td align="center"><sub>Sprint pipeline — 50% complete, mixed gate states</sub></td>
-</tr>
-</table>
-</div>
-
-<br />
-
----
+```bash
+npm run electron:dev     # desktop app
+npm run build:mac        # macOS .dmg
+```
 
 <br />
 
 ## How it works
 
-```
-Electron (optional)  ──  mac shell, tray, crash recovery
-Next.js 16 + React 19  ──  UI, state, terminals
-Express 5  ──  API, WebSocket, file watchers
-node-pty  |  Claude Agent SDK
-(terminals)  |  (chat rooms)
-```
+Two execution modes under one roof:
 
-Two execution modes: **terminal sessions** (real PTY via `node-pty`) for interactive coding, and **room agents** (Claude Agent SDK) for structured collaboration. Both stream over a single WebSocket.
+**Terminal sessions** — Real PTY processes via `node-pty`. Same as running Claude Code in your terminal, but with a grid layout, live stats, zoom, fullscreen, and session management. Up to 6 running simultaneously.
 
-**Stack:** Next.js 16 / React 19 / TypeScript (strict) / Tailwind CSS / Zustand / Express 5 / node-pty / xterm.js / Electron
+**Agent SDK rooms** — Structured conversations via the Claude Agent SDK. Clean markdown output, streaming responses, typing indicators, approval gates. No terminal noise — just the conversation.
+
+Both stream over a single WebSocket. The server (Express 5) wraps Next.js, manages PTY lifecycles, watches files, polls git, and coordinates everything on one port.
 
 <br />
 
----
+## Tech stack
+
+|               |                                           |
+| ------------- | ----------------------------------------- |
+| **Framework** | Next.js 16, React 19, TypeScript (strict) |
+| **Styling**   | Tailwind CSS, Geist Mono                  |
+| **State**     | Zustand                                   |
+| **Server**    | Express 5, WebSocket                      |
+| **Terminals** | node-pty, xterm.js                        |
+| **Agents**    | Claude Agent SDK                          |
+| **Desktop**   | Electron                                  |
 
 <br />
 
-## Design
+## Docs
 
-Dark theme. Geist Mono. Amber accent. Minimal chrome, maximum terminal.
-
-Built to be the kind of tool you actually want open all day.
-
-<br />
-
----
+|                                        |                                                 |
+| -------------------------------------- | ----------------------------------------------- |
+| **[HOWTO.md](HOWTO.md)**               | User guide — features, shortcuts, configuration |
+| **[ARCHITECTURE.md](ARCHITECTURE.md)** | Technical deep-dive for contributors            |
+| **[CLAUDE.md](CLAUDE.md)**             | Agent and contributor instructions              |
 
 <br />
 
-<div align="center">
+## Acknowledgements
 
-**[HOWTO.md](HOWTO.md)** — full user guide &nbsp;&nbsp;|&nbsp;&nbsp; **[ARCHITECTURE.md](ARCHITECTURE.md)** — technical deep-dive &nbsp;&nbsp;|&nbsp;&nbsp; **[CLAUDE.md](CLAUDE.md)** — contributor guide
+Agent chat was inspired by [TalkTo](https://github.com/hyperslack/talkto) by [@hyperslack](https://github.com/hyperslack) — same idea (agents shouldn't work alone), different approach.
 
-<br />
+## License
 
-Inspired by **[TalkTo](https://github.com/hyperslack/talkto)** — same idea (agents shouldn't work alone), different approach.
-
-<br />
-
-[MIT License](LICENSE)
-
-</div>
+[MIT](LICENSE)
