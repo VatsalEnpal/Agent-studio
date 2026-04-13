@@ -363,5 +363,13 @@ export function workflowRoutes(deps: WorkflowRouteDeps): Router {
     }
   });
 
+  // ---------- Catch-all for unmatched /api/workflows/* routes (ISSUE-01) ----------
+  router.all("/{*path}", (_req, res) => {
+    res.status(404).json({
+      error: "Not Found",
+      hint: "Valid workflow endpoints: GET /, POST /, GET /:id, PUT /:id, DELETE /:id, POST /:id/run, GET /:id/runs, GET /:id/runs/:runId",
+    });
+  });
+
   return router;
 }
