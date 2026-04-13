@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useSettingsStore, type AppSettings } from "@/stores/settings";
+import { useSettingsStore } from "@/stores/settings";
 import { cn } from "@/lib/utils";
 import {
   SettingsIcon,
@@ -60,8 +60,8 @@ const TABS: {
 export function SettingsView() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("general");
   const setSystemStats = useSettingsStore((s) => s.setSystemStats);
-  const setSettings = useSettingsStore((s) => s.setSettings);
   const setStatsLoading = useSettingsStore((s) => s.setStatsLoading);
+  const fetchSettings = useSettingsStore((s) => s.fetchSettings);
 
   // Poll system stats every 5 seconds
   useEffect(() => {
@@ -90,19 +90,10 @@ export function SettingsView() {
     };
   }, [setSystemStats, setStatsLoading]);
 
-  // Load saved settings on mount
+  // Load saved settings on mount (fetches from server, applies config defaults)
   useEffect(() => {
-    fetch("/api/settings")
-      .then((r) => r.json())
-      .then((data: AppSettings) => {
-        if (data && data.defaultModel) {
-          setSettings(data);
-        }
-      })
-      .catch(() => {
-        /* use defaults */
-      });
-  }, [setSettings]);
+    void fetchSettings();
+  }, [fetchSettings]);
 
   return (
     <div className="flex h-full">

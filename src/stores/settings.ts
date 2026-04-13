@@ -19,24 +19,28 @@ export interface AppSettings {
 interface SettingsState {
   systemStats: SystemStats | null;
   settings: AppSettings;
+  settingsLoaded: boolean;
   statsLoading: boolean;
 
   setSystemStats: (stats: SystemStats) => void;
   setSettings: (settings: AppSettings) => void;
   updateSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void;
   setStatsLoading: (l: boolean) => void;
+  /** Fetch settings from the server and update the store. */
+  fetchSettings: () => Promise<void>;
 }
 
-// Sensible fallback; overridden by server config on mount
+// Sensible fallback; overridden by server config via fetchSettings
 const defaultSettings: AppSettings = {
   defaultModel: "sonnet",
   defaultPermissions: "bypass",
   defaultCwd: "~",
 };
 
-export const useSettingsStore = create<SettingsState>((set) => ({
+export const useSettingsStore = create<SettingsState>((set, get) => ({
   systemStats: null,
   settings: defaultSettings,
+  settingsLoaded: false,
   statsLoading: false,
 
   setSystemStats: (systemStats) => set({ systemStats }),
@@ -46,4 +50,21 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       settings: { ...state.settings, [key]: value },
     })),
   setStatsLoading: (statsLoading) => set({ statsLoading }),
+
+  fetchSettings: async () => {
+    // Skip if already loaded (avoids redundant fetches)
+    if (get().settingsLoaded) return;
+    try {
+      const res = await fetch("/api/settings");
+      const data: AppSettings = await res.json();
+      if (data && data.defaultModel) {
+        set({ settings: data, settingsLoaded: true });
+      } else {
+        set({ settingsLoaded: true });
+      }
+    } catch {
+      // On error, keep hardcoded defaults but mark as loaded
+      set({ settingsLoaded: true });
+    }
+  },
 }));
