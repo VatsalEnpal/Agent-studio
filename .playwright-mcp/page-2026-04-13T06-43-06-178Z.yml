@@ -1,0 +1,176 @@
+- generic [ref=e1]:
+  - alert [ref=e6]
+  - generic [ref=e50]:
+    - banner [ref=e51]:
+      - generic [ref=e52]:
+        - generic "Close" [ref=e53]
+        - generic "Minimize" [ref=e54]
+        - generic "Maximize" [ref=e55]
+      - generic [ref=e56]: Agent Studio
+      - generic "Connected to server" [ref=e58]
+    - generic [ref=e59]:
+      - navigation "Main navigation" [ref=e60]:
+        - generic [ref=e61]: A
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - button "Sessions" [ref=e64] [cursor=pointer]:
+              - img [ref=e66]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e69]:
+            - button "Teams" [ref=e70] [cursor=pointer]:
+              - img [ref=e71]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e73]:
+            - button "Sprints" [ref=e74] [cursor=pointer]:
+              - img [ref=e75]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e78]:
+            - button "Memory" [ref=e79] [cursor=pointer]:
+              - img [ref=e80]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e82]:
+            - button "Reports" [ref=e83] [cursor=pointer]:
+              - img [ref=e84]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e86]:
+          - button "Settings" [ref=e87] [cursor=pointer]:
+            - img [ref=e88]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e91]:
+        - generic [ref=e758]:
+          - heading "Settings" [level=3] [ref=e759]
+          - paragraph [ref=e760]: Model defaults, projects, agent system, and system monitor.
+      - main [ref=e119]:
+        - generic [ref=e262]:
+          - generic [ref=e263]:
+            - button "General Model, theme, notifications" [ref=e264] [cursor=pointer]:
+              - generic [ref=e265]:
+                - img [ref=e266]
+                - generic [ref=e269]: General
+              - paragraph [ref=e270]: Model, theme, notifications
+            - button "Projects Tracked repos and agent system" [ref=e271] [cursor=pointer]:
+              - generic [ref=e272]:
+                - img [ref=e273]
+                - generic [ref=e275]: Projects
+              - paragraph [ref=e276]: Tracked repos and agent system
+            - button "Agents Discovered agent definitions" [ref=e277] [cursor=pointer]:
+              - generic [ref=e278]:
+                - img [ref=e279]
+                - generic [ref=e282]: Agents
+              - paragraph [ref=e283]: Discovered agent definitions
+            - button "System Monitor CPU, memory, disk, active processes" [ref=e284] [cursor=pointer]:
+              - generic [ref=e285]:
+                - img [ref=e286]
+                - generic [ref=e288]: System Monitor
+              - paragraph [ref=e289]: CPU, memory, disk, active processes
+            - button "Automations Sprint protocol, PMO scans, scheduled tasks" [ref=e290] [cursor=pointer]:
+              - generic [ref=e291]:
+                - img [ref=e292]
+                - generic [ref=e295]: Automations
+              - paragraph [ref=e296]: Sprint protocol, PMO scans, scheduled tasks
+            - button "Shortcuts Keyboard shortcuts reference" [ref=e297] [cursor=pointer]:
+              - generic [ref=e298]:
+                - img [ref=e299]
+                - generic [ref=e301]: Shortcuts
+              - paragraph [ref=e302]: Keyboard shortcuts reference
+            - button "About Version and system info" [ref=e303] [cursor=pointer]:
+              - generic [ref=e304]:
+                - img [ref=e305]
+                - generic [ref=e308]: About
+              - paragraph [ref=e309]: Version and system info
+          - generic [ref=e761]:
+            - generic [ref=e762]:
+              - generic [ref=e763]:
+                - heading "Agents" [level=3] [ref=e764]
+                - paragraph [ref=e765]:
+                  - text: Auto-discovered from
+                  - code [ref=e766]: .claude/agents/
+              - button "Create Agent" [ref=e767] [cursor=pointer]:
+                - img [ref=e768]
+                - text: Create Agent
+            - generic [ref=e770]:
+              - generic [ref=e772]:
+                - generic [ref=e774]: No Agent
+                - paragraph [ref=e776]: Plain Claude session
+              - generic [ref=e778]:
+                - generic [ref=e780]: orchestrator
+                - paragraph [ref=e782]: Coordinates agent teams and delegates work
+              - generic [ref=e784]:
+                - generic [ref=e786]: frontend
+                - paragraph [ref=e788]: Builds UI and frontend code
+              - generic [ref=e790]:
+                - generic [ref=e792]: backend
+                - paragraph [ref=e794]: Builds APIs, database, server logic
+              - generic [ref=e796]:
+                - generic [ref=e798]: qa
+                - paragraph [ref=e800]: Tests the application
+              - generic [ref=e802]:
+                - generic [ref=e804]: security
+                - paragraph [ref=e806]: Reviews code for vulnerabilities
+              - generic [ref=e808]:
+                - generic [ref=e810]: pmo
+                - paragraph [ref=e812]: Scans for tasks, manages sprints
+              - generic [ref=e814]:
+                - generic [ref=e816]: documentation
+                - paragraph [ref=e818]: Maintains docs and READMEs
+            - generic [ref=e821]:
+              - generic [ref=e822]:
+                - generic [ref=e823]:
+                  - img [ref=e824]
+                  - heading "Create Agent" [level=2] [ref=e827]
+                  - generic [ref=e828]:
+                    - generic [ref=e829]:
+                      - generic [ref=e830]: "1"
+                      - generic [ref=e831]: Describe
+                      - generic [ref=e832]: ·
+                    - generic [ref=e833]:
+                      - generic [ref=e834]: "2"
+                      - generic [ref=e835]: Configure
+                      - generic [ref=e836]: ·
+                    - generic [ref=e837]:
+                      - generic [ref=e838]: "3"
+                      - generic [ref=e839]: Preview
+                - button [ref=e840] [cursor=pointer]:
+                  - img [ref=e841]
+              - generic [ref=e891]:
+                - paragraph [ref=e893]:
+                  - text: Define a new agent for your project. Agents are markdown files in
+                  - code [ref=e894]: .claude/agents/
+                  - text: that give Claude a specific role, tools, and rules.
+                - generic [ref=e895]:
+                  - text: Agent Name
+                  - textbox "e.g. Database Migration Agent" [active] [ref=e896]: Test Agent
+                  - paragraph [ref=e897]: "File: .claude/agents/test-agent.md"
+                - generic [ref=e898]:
+                  - text: What should this agent do?
+                  - textbox "Describe the agent's role and responsibilities. Be specific about what it should focus on, what it should never do, and how it relates to other agents." [ref=e899]: This agent tests the application end to end
+              - button "Next" [ref=e900] [cursor=pointer]

@@ -1,0 +1,132 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]:
+        - text: Agent Studio
+        - generic [ref=e13]: ·
+        - generic [ref=e14]: test-kill-cleanup
+      - generic "Connected to server" [ref=e16]
+    - generic [ref=e17]:
+      - navigation "Main navigation" [ref=e18]:
+        - generic [ref=e19]: A
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - button "Sessions" [active] [ref=e22] [cursor=pointer]:
+              - img [ref=e24]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e27]:
+            - button "Teams" [ref=e28] [cursor=pointer]:
+              - img [ref=e29]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e31]:
+            - button "Sprints" [ref=e32] [cursor=pointer]:
+              - img [ref=e33]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e36]:
+            - button "Memory" [ref=e37] [cursor=pointer]:
+              - img [ref=e38]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e40]:
+            - button "Reports" [ref=e41] [cursor=pointer]:
+              - img [ref=e42]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e44]:
+          - button "Settings" [ref=e45] [cursor=pointer]:
+            - img [ref=e46]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e49]:
+        - generic [ref=e292]:
+          - generic [ref=e294]:
+            - button "Sessions" [ref=e295] [cursor=pointer]
+            - button "History" [ref=e296] [cursor=pointer]
+            - button "Servers" [ref=e297] [cursor=pointer]
+          - generic [ref=e299]:
+            - img [ref=e300]
+            - textbox "Search..." [ref=e303]
+          - generic [ref=e304]:
+            - button "Running" [ref=e305]:
+              - generic [ref=e306]: Running
+            - generic [ref=e308]:
+              - paragraph [ref=e309]: No running sessions
+              - paragraph [ref=e310]: Click “New Session” below to get started
+          - generic [ref=e311]:
+            - button "Dev Servers" [ref=e312] [cursor=pointer]: Dev Servers
+            - button "New Session ⇧⌘N" [ref=e314] [cursor=pointer]:
+              - img [ref=e315]
+              - text: New Session
+              - generic [ref=e316]: ⇧⌘N
+      - main [ref=e77]:
+        - generic [ref=e79]:
+          - generic "/tmp" [ref=e81]
+          - generic [ref=e85]:
+            - textbox "Terminal input" [ref=e86]
+            - generic:
+              - generic:
+                - generic: ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+              - generic:
+                - generic: Accessing
+                - generic: "workspace:"
+              - generic:
+                - generic: /private/tmp
+              - generic:
+                - generic: "Quick safety check: Is this a project you created or one you trust? (Like your own code, a well-known open source project, or"
+              - generic:
+                - generic: work from your team). If not, take a moment to review what's in this folder first.
+              - generic:
+                - generic: Claude Code'll be able to read, edit, and execute files here.
+              - generic:
+                - generic: Security
+                - generic: guide
+              - generic:
+                - generic: ❯
+                - generic: "1."
+                - generic: Yes,
+                - generic: I
+                - generic: trust
+                - generic: this
+                - generic: folder
+              - generic:
+                - generic: "2."
+                - generic: No, exit
+              - generic:
+                - generic: Enter
+                - generic: to
+                - generic: confirm
+                - generic: ·
+                - generic: Esc
+                - generic: to
+                - generic: cancel
+  - alert [ref=e6]

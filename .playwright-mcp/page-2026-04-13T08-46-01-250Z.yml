@@ -1,0 +1,335 @@
+- generic [ref=e1]:
+  - alert [ref=e6]
+  - generic [ref=e45]:
+    - banner [ref=e46]:
+      - generic [ref=e47]:
+        - generic "Close" [ref=e48]
+        - generic "Minimize" [ref=e49]
+        - generic "Maximize" [ref=e50]
+      - generic [ref=e51]: Agent Studio
+      - generic "Connected to server" [ref=e53]
+    - generic [ref=e54]:
+      - navigation "Main navigation" [ref=e55]:
+        - generic [ref=e56]: A
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - button "Sessions" [ref=e59] [cursor=pointer]:
+              - img [ref=e61]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e64]:
+            - button "Teams" [ref=e65] [cursor=pointer]:
+              - img [ref=e66]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e68]:
+            - button "Sprints" [ref=e69] [cursor=pointer]:
+              - img [ref=e70]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e73]:
+            - button "Memory" [ref=e74] [cursor=pointer]:
+              - img [ref=e75]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e77]:
+            - button "Reports" [ref=e78] [cursor=pointer]:
+              - img [ref=e79]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e81]:
+          - button "Settings" [ref=e82] [cursor=pointer]:
+            - img [ref=e83]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e86]:
+        - generic [ref=e88]:
+          - generic [ref=e90]:
+            - button "Sessions" [ref=e91] [cursor=pointer]
+            - button "History" [active] [ref=e92] [cursor=pointer]
+            - button "Servers" [ref=e93] [cursor=pointer]
+          - generic [ref=e95]:
+            - img [ref=e96]
+            - textbox "Search..." [ref=e99]
+          - generic [ref=e100]:
+            - generic [ref=e121]:
+              - generic [ref=e122]: Today
+              - generic [ref=e123]:
+                - 'generic "AgentStudio Status: exited Path: /Users/vatsalbhatt230813/Code/AgentStudio Created: 4/13/2026, 10:44:47 AM" [ref=e124] [cursor=pointer]':
+                  - generic [ref=e125]:
+                    - generic [ref=e127]: AgentStudio
+                    - button "Rename session" [ref=e128]:
+                      - img [ref=e129]
+                    - button "Copy session ID" [ref=e132]:
+                      - img [ref=e133]
+                    - button "Resume" [ref=e136]
+                  - generic [ref=e137]:
+                    - generic [ref=e138]: "# /loop — schedule a recurring or self-paced pr..."
+                    - generic [ref=e139]: $44.9
+                    - generic [ref=e140]: just now
+                - 'generic "InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/13/2026, 10:41:36 AM" [ref=e141] [cursor=pointer]':
+                  - generic [ref=e142]:
+                    - generic [ref=e144]: InPipeline
+                    - button "Rename session" [ref=e145]:
+                      - img [ref=e146]
+                    - button "Copy session ID" [ref=e149]:
+                      - img [ref=e150]
+                    - button "Resume" [ref=e153]
+                  - generic [ref=e154]:
+                    - generic [ref=e155]: For the new chat — paste this as your first mes...
+                    - generic [ref=e156]: $70.7
+                    - generic [ref=e157]: 4m ago
+                - 'generic "pmo — InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/13/2026, 9:13:49 AM" [ref=e158] [cursor=pointer]':
+                  - generic [ref=e159]:
+                    - generic [ref=e161]: pmo — InPipeline
+                    - button "Rename session" [ref=e162]:
+                      - img [ref=e163]
+                    - button "Copy session ID" [ref=e166]:
+                      - img [ref=e167]
+                    - button "Resume" [ref=e170]
+                  - generic [ref=e171]:
+                    - generic [ref=e172]: Run sprint readiness scan. Check Notion for una...
+                    - generic [ref=e173]: $5.95
+                    - generic [ref=e174]: 1h ago
+                - 'generic "project Status: exited Path: /private/tmp/shiploop/test/project Created: 4/13/2026, 9:11:23 AM" [ref=e175] [cursor=pointer]':
+                  - generic [ref=e176]:
+                    - generic [ref=e178]: project
+                    - button "Rename session" [ref=e179]:
+                      - img [ref=e180]
+                    - button "Copy session ID" [ref=e183]:
+                      - img [ref=e184]
+                    - button "Resume" [ref=e187]
+                  - generic [ref=e188]:
+                    - generic [ref=e189]: hello, what files are in this project?
+                    - generic [ref=e190]: $0.07
+                    - generic [ref=e191]: 1h ago
+                - 'generic "AgentStudio Status: exited Path: /Users/vatsalbhatt230813/Code/AgentStudio Created: 4/13/2026, 8:34:15 AM" [ref=e192] [cursor=pointer]':
+                  - generic [ref=e193]:
+                    - generic [ref=e195]: AgentStudio
+                    - button "Rename session" [ref=e196]:
+                      - img [ref=e197]
+                    - button "Copy session ID" [ref=e200]:
+                      - img [ref=e201]
+                    - button "Resume" [ref=e204]
+                  - generic [ref=e205]:
+                    - generic [ref=e206]: "# /loop — schedule a recurring or self-paced pr..."
+                    - generic [ref=e207]: $185.0
+                    - generic [ref=e208]: 2h ago
+                - 'generic "InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/13/2026, 8:24:24 AM" [ref=e209] [cursor=pointer]':
+                  - generic [ref=e210]:
+                    - generic [ref=e212]: InPipeline
+                    - button "Rename session" [ref=e213]:
+                      - img [ref=e214]
+                    - button "Copy session ID" [ref=e217]:
+                      - img [ref=e218]
+                    - button "Resume" [ref=e221]
+                  - generic [ref=e222]:
+                    - generic [ref=e223]: ~/Code/InPipeline
+                    - generic [ref=e224]: $11.4
+                    - generic [ref=e225]: 2h ago
+                - 'generic "studio Status: exited Path: /Users/vatsalbhatt230813/Code/side/projects/agent/studio Created: 4/13/2026, 7:53:57 AM" [ref=e226] [cursor=pointer]':
+                  - generic [ref=e227]:
+                    - generic [ref=e229]: studio
+                    - button "Rename session" [ref=e230]:
+                      - img [ref=e231]
+                    - button "Copy session ID" [ref=e234]:
+                      - img [ref=e235]
+                    - button "Resume" [ref=e238]
+                  - generic [ref=e239]:
+                    - generic [ref=e240]: "# /loop — schedule a recurring or self-paced pr..."
+                    - generic [ref=e241]: $64.6
+                    - generic [ref=e242]: 2h ago
+                - 'generic "pmo — InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/13/2026, 7:13:15 AM" [ref=e243] [cursor=pointer]':
+                  - generic [ref=e244]:
+                    - generic [ref=e246]: pmo — InPipeline
+                    - button "Rename session" [ref=e247]:
+                      - img [ref=e248]
+                    - button "Copy session ID" [ref=e251]:
+                      - img [ref=e252]
+                    - button "Resume" [ref=e255]
+                  - generic [ref=e256]:
+                    - generic [ref=e257]: Run sprint readiness scan. Check Notion for una...
+                    - generic [ref=e258]: $3.76
+                    - generic [ref=e259]: 3h ago
+                - 'generic "pmo — InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/13/2026, 5:12:28 AM" [ref=e260] [cursor=pointer]':
+                  - generic [ref=e261]:
+                    - generic [ref=e263]: pmo — InPipeline
+                    - button "Rename session" [ref=e264]:
+                      - img [ref=e265]
+                    - button "Copy session ID" [ref=e268]:
+                      - img [ref=e269]
+                    - button "Resume" [ref=e272]
+                  - generic [ref=e273]:
+                    - generic [ref=e274]: Run sprint readiness scan. Check Notion for una...
+                    - generic [ref=e275]: $5.84
+                    - generic [ref=e276]: 5h ago
+                - 'generic "pmo — InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/13/2026, 3:11:53 AM" [ref=e277] [cursor=pointer]':
+                  - generic [ref=e278]:
+                    - generic [ref=e280]: pmo — InPipeline
+                    - button "Rename session" [ref=e281]:
+                      - img [ref=e282]
+                    - button "Copy session ID" [ref=e285]:
+                      - img [ref=e286]
+                    - button "Resume" [ref=e289]
+                  - generic [ref=e290]:
+                    - generic [ref=e291]: Run sprint readiness scan. Check Notion for una...
+                    - generic [ref=e292]: $3.69
+                    - generic [ref=e293]: 7h ago
+                - 'generic "pmo — InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/13/2026, 1:11:14 AM" [ref=e294] [cursor=pointer]':
+                  - generic [ref=e295]:
+                    - generic [ref=e297]: pmo — InPipeline
+                    - button "Rename session" [ref=e298]:
+                      - img [ref=e299]
+                    - button "Copy session ID" [ref=e302]:
+                      - img [ref=e303]
+                    - button "Resume" [ref=e306]
+                  - generic [ref=e307]:
+                    - generic [ref=e308]: Run sprint readiness scan. Check Notion for una...
+                    - generic [ref=e309]: $3.70
+                    - generic [ref=e310]: 9h ago
+            - generic [ref=e311]:
+              - generic [ref=e312]: Yesterday
+              - generic [ref=e313]:
+                - 'generic "pmo — InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/12/2026, 11:10:41 PM" [ref=e314] [cursor=pointer]':
+                  - generic [ref=e315]:
+                    - generic [ref=e317]: pmo — InPipeline
+                    - button "Rename session" [ref=e318]:
+                      - img [ref=e319]
+                    - button "Copy session ID" [ref=e322]:
+                      - img [ref=e323]
+                    - button "Resume" [ref=e326]
+                  - generic [ref=e327]:
+                    - generic [ref=e328]: Run sprint readiness scan. Check Notion for una...
+                    - generic [ref=e329]: $6.08
+                    - generic [ref=e330]: 11h ago
+                - 'generic "pmo — InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/12/2026, 9:09:49 PM" [ref=e331] [cursor=pointer]':
+                  - generic [ref=e332]:
+                    - generic [ref=e334]: pmo — InPipeline
+                    - button "Rename session" [ref=e335]:
+                      - img [ref=e336]
+                    - button "Copy session ID" [ref=e339]:
+                      - img [ref=e340]
+                    - button "Resume" [ref=e343]
+                  - generic [ref=e344]:
+                    - generic [ref=e345]: Run sprint readiness scan. Check Notion for una...
+                    - generic [ref=e346]: $4.66
+                    - generic [ref=e347]: 13h ago
+                - 'generic "pmo — InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/12/2026, 7:09:13 PM" [ref=e348] [cursor=pointer]':
+                  - generic [ref=e349]:
+                    - generic [ref=e351]: pmo — InPipeline
+                    - button "Rename session" [ref=e352]:
+                      - img [ref=e353]
+                    - button "Copy session ID" [ref=e356]:
+                      - img [ref=e357]
+                    - button "Resume" [ref=e360]
+                  - generic [ref=e361]:
+                    - generic [ref=e362]: Run sprint readiness scan. Check Notion for una...
+                    - generic [ref=e363]: $5.85
+                    - generic [ref=e364]: 15h ago
+                - 'generic "AgentStudio Status: exited Path: /Users/vatsalbhatt230813/Code/AgentStudio Created: 4/12/2026, 6:40:56 PM" [ref=e365] [cursor=pointer]':
+                  - generic [ref=e366]:
+                    - generic [ref=e368]: AgentStudio
+                    - button "Rename session" [ref=e369]:
+                      - img [ref=e370]
+                    - button "Copy session ID" [ref=e373]:
+                      - img [ref=e374]
+                    - button "Resume" [ref=e377]
+                  - generic [ref=e378]:
+                    - generic [ref=e379]: ~/Code/AgentStudio
+                    - generic [ref=e380]: $109.1
+                    - generic [ref=e381]: 16h ago
+                - 'generic "InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/12/2026, 5:59:04 PM" [ref=e382] [cursor=pointer]':
+                  - generic [ref=e383]:
+                    - generic [ref=e385]: InPipeline
+                    - button "Rename session" [ref=e386]:
+                      - img [ref=e387]
+                    - button "Copy session ID" [ref=e390]:
+                      - img [ref=e391]
+                    - button "Resume" [ref=e394]
+                  - generic [ref=e395]:
+                    - generic [ref=e396]: Your conversation history is SAFE All 164 co...
+                    - generic [ref=e397]: $344.5
+                    - generic [ref=e398]: 16h ago
+                - 'generic "pmo — InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/12/2026, 5:08:22 PM" [ref=e399] [cursor=pointer]':
+                  - generic [ref=e400]:
+                    - generic [ref=e402]: pmo — InPipeline
+                    - button "Rename session" [ref=e403]:
+                      - img [ref=e404]
+                    - button "Copy session ID" [ref=e407]:
+                      - img [ref=e408]
+                    - button "Resume" [ref=e411]
+                  - generic [ref=e412]:
+                    - generic [ref=e413]: Run sprint readiness scan. Check Notion for una...
+                    - generic [ref=e414]: $4.12
+                    - generic [ref=e415]: 17h ago
+                - 'generic "pmo — InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/12/2026, 3:07:49 PM" [ref=e416] [cursor=pointer]':
+                  - generic [ref=e417]:
+                    - generic [ref=e419]: pmo — InPipeline
+                    - button "Rename session" [ref=e420]:
+                      - img [ref=e421]
+                    - button "Copy session ID" [ref=e424]:
+                      - img [ref=e425]
+                    - button "Resume" [ref=e428]
+                  - generic [ref=e429]:
+                    - generic [ref=e430]: Run sprint readiness scan. Check Notion for una...
+                    - generic [ref=e431]: $4.63
+                    - generic [ref=e432]: 19h ago
+                - 'generic "pmo — InPipeline Status: exited Path: /Users/vatsalbhatt230813/Code/InPipeline Created: 4/12/2026, 1:07:01 PM" [ref=e433] [cursor=pointer]':
+                  - generic [ref=e434]:
+                    - generic [ref=e436]: pmo — InPipeline
+                    - button "Rename session" [ref=e437]:
+                      - img [ref=e438]
+                    - button "Copy session ID" [ref=e441]:
+                      - img [ref=e442]
+                    - button "Resume" [ref=e445]
+                  - generic [ref=e446]:
+                    - generic [ref=e447]: Run sprint readiness scan. Check Notion for una...
+                    - generic [ref=e448]: $4.17
+                    - generic [ref=e449]: 21h ago
+                - 'generic "AgentStudio Status: exited Path: /Users/vatsalbhatt230813/Code/AgentStudio Created: 4/12/2026, 1:00:41 PM" [ref=e450] [cursor=pointer]':
+                  - generic [ref=e451]:
+                    - generic [ref=e453]: AgentStudio
+                    - button "Rename session" [ref=e454]:
+                      - img [ref=e455]
+                    - button "Copy session ID" [ref=e458]:
+                      - img [ref=e459]
+                    - button "Resume" [ref=e462]
+                  - generic [ref=e463]:
+                    - generic [ref=e464]: "Unknown skill: lopp"
+                    - generic [ref=e465]: $8.43
+                    - generic [ref=e466]: 21h ago
+          - generic [ref=e107]:
+            - button "Dev Servers" [ref=e108] [cursor=pointer]: Dev Servers
+            - button "New Session ⇧⌘N" [ref=e110] [cursor=pointer]:
+              - img [ref=e111]
+              - text: New Session
+              - generic [ref=e112]: ⇧⌘N
+      - main [ref=e114]:
+        - generic [ref=e116]:
+          - generic [ref=e117]:
+            - paragraph [ref=e118]: Ready to go.
+            - paragraph [ref=e119]: Launch an interactive Claude Code session to start coding. Press Cmd+Shift+N or use Cmd+Shift+K to search across sessions and sprints.
+          - button "New Session" [ref=e120] [cursor=pointer]

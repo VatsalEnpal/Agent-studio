@@ -1,0 +1,89 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]:
+        - text: Agent Studio
+        - generic [ref=e401]: ·
+        - generic [ref=e402]: Session B
+      - generic "Connected to server" [ref=e14]
+    - generic [ref=e15]:
+      - navigation "Main navigation" [ref=e16]:
+        - generic [ref=e17]: A
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - button "Sessions" [ref=e20] [cursor=pointer]:
+              - img [ref=e22]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e25]:
+            - button "Teams" [ref=e26] [cursor=pointer]:
+              - img [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e29]:
+            - button "Sprints" [ref=e30] [cursor=pointer]:
+              - img [ref=e31]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e34]:
+            - button "Memory" [ref=e35] [cursor=pointer]:
+              - img [ref=e36]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e38]:
+            - button "Reports" [ref=e39] [cursor=pointer]:
+              - img [ref=e40]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e42]:
+          - button "Settings" [ref=e43] [cursor=pointer]:
+            - img [ref=e44]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e47]:
+        - generic [ref=e836]:
+          - generic [ref=e838]:
+            - button "Rooms" [ref=e839] [cursor=pointer]
+            - button "Agents" [ref=e840] [cursor=pointer]
+          - generic [ref=e842]:
+            - img [ref=e843]
+            - paragraph [ref=e846]: No active rooms
+            - paragraph [ref=e847]: Create a room to start collaborating with agents
+          - generic [ref=e848]:
+            - button "New Room" [ref=e849] [cursor=pointer]:
+              - img [ref=e850]
+              - text: New Room
+            - paragraph [ref=e851]: "Tip: use ⌘K to search rooms"
+      - main [ref=e75]:
+        - generic [ref=e856]:
+          - img [ref=e858]
+          - paragraph [ref=e861]: No room selected
+          - paragraph [ref=e862]: Select a room from the sidebar or create a new one to start chatting with your agent team.
+  - alert [ref=e6]

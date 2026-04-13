@@ -1,0 +1,115 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]:
+        - text: Agent Studio
+        - generic [ref=e401]: ·
+        - generic [ref=e402]: Session B
+      - generic "Connected to server" [ref=e14]
+    - generic [ref=e15]:
+      - navigation "Main navigation" [ref=e16]:
+        - generic [ref=e17]: A
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - button "Sessions" [ref=e20] [cursor=pointer]:
+              - img [ref=e22]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e25]:
+            - button "Teams" [ref=e26] [cursor=pointer]:
+              - img [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e29]:
+            - button "Sprints" [ref=e30] [cursor=pointer]:
+              - img [ref=e31]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e34]:
+            - button "Memory" [ref=e35] [cursor=pointer]:
+              - img [ref=e36]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e38]:
+            - button "Reports" [ref=e39] [cursor=pointer]:
+              - img [ref=e40]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e42]:
+          - button "Settings" [ref=e43] [cursor=pointer]:
+            - img [ref=e44]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e47]:
+        - generic [ref=e727]:
+          - heading "Sprints" [level=3] [ref=e729]
+          - generic [ref=e731]:
+            - img [ref=e732]
+            - paragraph [ref=e734]: No sprints running
+            - paragraph [ref=e735]: Sprints are created automatically by the PMO agent, or you can start one manually.
+          - button "New Sprint" [ref=e737] [cursor=pointer]:
+            - img [ref=e738]
+            - text: New Sprint
+      - main [ref=e75]:
+        - generic [ref=e741]:
+          - img [ref=e743]
+          - paragraph [ref=e746]: No sprints running
+          - paragraph [ref=e747]: Sprints are automated multi-agent pipelines. The PMO agent detects pending work, distributes it to your agents, and loops through build/test cycles until passing.
+    - generic [ref=e750]:
+      - generic [ref=e751]:
+        - generic [ref=e752]:
+          - img [ref=e753]
+          - heading "Create Sprint" [level=2] [ref=e756]
+          - generic [ref=e757]:
+            - generic [ref=e758]:
+              - img [ref=e787]
+              - generic [ref=e760]: Define
+              - generic [ref=e761]: ·
+            - generic [ref=e762]:
+              - generic [ref=e763]: "2"
+              - generic [ref=e764]: Agents
+              - generic [ref=e765]: ·
+            - generic [ref=e766]:
+              - generic [ref=e767]: "3"
+              - generic [ref=e768]: Pipeline
+        - button [ref=e769] [cursor=pointer]:
+          - img [ref=e770]
+      - generic [ref=e789]:
+        - generic [ref=e790]:
+          - text: Select Agents
+          - paragraph [ref=e791]: Choose which agents participate in this sprint. Select at least one.
+        - button "test-agent Agent from my-platform" [active] [ref=e793] [cursor=pointer]:
+          - generic [ref=e794]: test-agent
+          - generic [ref=e795]: Agent from my-platform
+        - paragraph [ref=e799]: 1 agent selected
+      - generic [ref=e784]:
+        - button "Back" [ref=e797] [cursor=pointer]
+        - button "Preview Pipeline" [ref=e798] [cursor=pointer]
+  - alert [ref=e6]

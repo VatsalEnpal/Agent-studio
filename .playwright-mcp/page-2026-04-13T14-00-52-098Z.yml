@@ -1,0 +1,111 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic "Close" [ref=e5]
+        - generic "Minimize" [ref=e6]
+        - generic "Maximize" [ref=e7]
+      - generic [ref=e8]:
+        - text: Agent Studio
+        - generic [ref=e9]: ·
+        - generic [ref=e10]: backend · velocity-api
+      - generic "Connected to server" [ref=e12]
+    - generic [ref=e13]:
+      - navigation "Main navigation" [ref=e14]:
+        - generic [ref=e15]: A
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - button "Sessions" [ref=e18] [cursor=pointer]:
+              - img [ref=e20]
+              - generic "1 unread" [ref=e23]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e24]:
+            - button "Teams" [ref=e25] [cursor=pointer]:
+              - img [ref=e26]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e28]:
+            - button "Sprints" [ref=e29] [cursor=pointer]:
+              - img [ref=e30]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e33]:
+            - button "Memory" [ref=e34] [cursor=pointer]:
+              - img [ref=e35]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e37]:
+            - button "Reports" [ref=e38] [cursor=pointer]:
+              - img [ref=e39]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e41]:
+          - button "Settings" [ref=e42] [cursor=pointer]:
+            - img [ref=e43]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e46]:
+        - generic [ref=e48]:
+          - generic [ref=e50]:
+            - button "Sessions" [ref=e51] [cursor=pointer]
+            - button "History" [ref=e52] [cursor=pointer]
+            - button "Servers" [ref=e53] [cursor=pointer]
+          - generic [ref=e55]:
+            - img [ref=e56]
+            - textbox "Search..." [ref=e59]
+          - generic [ref=e60]:
+            - button "Running 1" [ref=e61]:
+              - generic [ref=e62]: Running
+              - generic [ref=e63]: "1"
+            - 'generic "backend · velocity-api Status: active Path: /tmp/agent-studio-demo/velocity-api Model: sonnet Created: 4/13/2026, 4:00:44 PM" [ref=e65] [cursor=pointer]':
+              - generic [ref=e66]:
+                - generic "backend · velocity-api" [ref=e68]
+                - button "Rename session" [ref=e69]:
+                  - img [ref=e70]
+                - button "Pin session" [ref=e73]:
+                  - img [ref=e74]
+                - button "Copy session ID" [ref=e76]:
+                  - img [ref=e77]
+                - button "Kill session" [ref=e80]:
+                  - img [ref=e81]
+              - generic [ref=e84]:
+                - generic [ref=e85]: /tmp/agent-studio-demo/velocity-api
+                - generic [ref=e86]: 7s
+                - generic [ref=e87]: sonnet
+          - generic [ref=e88]:
+            - button "Dev Servers" [ref=e89] [cursor=pointer]: Dev Servers
+            - button "New Session ⇧⌘N" [ref=e91] [cursor=pointer]:
+              - img [ref=e92]
+              - text: New Session
+              - generic [ref=e93]: ⇧⌘N
+      - main [ref=e95]:
+        - generic [ref=e97]:
+          - generic [ref=e98]:
+            - generic [ref=e99]: sonnet
+            - generic "/tmp/agent-studio-demo/velocity-api" [ref=e100]
+          - textbox "Terminal input" [ref=e105]
+  - alert [ref=e106]

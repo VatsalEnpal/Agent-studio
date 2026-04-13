@@ -1,0 +1,237 @@
+- generic:
+  - generic:
+    - banner:
+      - generic:
+        - text: Agent Studio
+        - generic: ·
+        - generic: Agent Session 1
+    - generic:
+      - navigation:
+        - generic: A
+        - generic:
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic:
+          - button:
+            - img
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - button: Sessions
+                - button: History
+                - button: Servers
+            - generic:
+              - generic:
+                - img
+                - textbox:
+                  - /placeholder: Search...
+            - generic:
+              - button:
+                - generic: Running
+                - generic: "2"
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Session A
+                    - button:
+                      - img
+                    - button:
+                      - img
+                    - button:
+                      - img
+                    - button:
+                      - img
+                  - generic:
+                    - generic: ~
+                    - generic: 58s
+                    - generic: opus
+                - generic:
+                  - generic:
+                    - generic: Session B
+                    - button:
+                      - img
+                    - button:
+                      - img
+                    - button:
+                      - img
+                    - button:
+                      - img
+                  - generic:
+                    - generic: ~
+                    - generic: 27s
+                    - generic: opus
+            - generic:
+              - button: Dev Servers
+              - button:
+                - img
+                - text: New Session
+                - generic: ⇧⌘N
+      - generic:
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic: opus
+                - generic: ~
+              - generic:
+                - generic:
+                  - generic:
+                    - textbox
+                    - generic:
+                      - generic:
+                        - generic: ╭───
+                        - generic: Claude
+                        - generic: Code
+                        - generic: v2.1.104
+                        - generic: ──────────────────────────────────────────────────────────────────────────────────────────────────────╮
+                      - generic:
+                        - generic: │
+                        - generic: │
+                        - generic: Tips
+                        - generic: for
+                        - generic: getting
+                        - generic: started
+                        - generic: │
+                      - generic:
+                        - generic: │
+                        - generic: Welcome
+                        - generic: back
+                        - generic: Vatsal!
+                        - generic: │
+                        - generic: Run /init to create a CLAUDE.md file with instructions for Claude
+                        - generic: │
+                      - generic:
+                        - generic: │
+                        - generic: │
+                        - generic: "Note: You have launched claude in your home directory. For the best exp…"
+                        - generic: │
+                      - generic:
+                        - generic: │
+                        - generic: ▗
+                        - generic: ▗ ▖
+                        - generic: ▖
+                        - generic: │
+                        - generic: ────────────────────────────────────────────────────────────────────────
+                        - generic: │
+                      - generic:
+                        - generic: │
+                        - generic: │
+                        - generic: Recent
+                        - generic: activity
+                        - generic: │
+                      - generic:
+                        - generic: │
+                        - generic: ▘▘
+                        - generic: ▝▝
+                        - generic: │
+                        - generic: "No"
+                        - generic: recent
+                        - generic: activity
+                        - generic: │
+                      - generic:
+                        - generic: │
+                        - generic: Opus
+                        - generic: "4.6"
+                        - generic: with
+                        - generic: high
+                        - generic: effort
+                        - generic: ·
+                        - generic: Claude
+                        - generic: Max
+                        - generic: ·
+                        - generic: │
+                        - generic: │
+                      - generic:
+                        - generic: │
+                        - generic: vatsal.bhatt@enpal.de's
+                        - generic: Organization
+                        - generic: │
+                        - generic: │
+                      - generic:
+                        - generic: │
+                        - generic: /Users/vatsalbhatt230813
+                        - generic: │
+                        - generic: │
+                      - generic:
+                        - generic: ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+                      - generic:
+                        - generic: /remote-control is active
+                        - generic: · Code in CLI or at https://claude.ai/code/session_01JpVpvnhHbEkcD3fk4e7c1G
+                      - generic:
+                        - generic: ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                      - generic:
+                        - generic: ❯
+                      - generic:
+                        - generic: ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                      - generic:
+                        - generic: ⏵⏵
+                        - generic: bypass
+                        - generic: permissions
+                        - generic: "on"
+                        - generic: (shift+tab
+                        - generic: to
+                        - generic: cycle)
+  - alert
+  - dialog "Kill Session" [ref=e679]:
+    - generic [ref=e680]:
+      - heading "Kill Session" [level=2] [ref=e681]:
+        - img [ref=e682]
+        - text: Kill Session
+      - button [active] [ref=e685] [cursor=pointer]:
+        - img [ref=e686]
+    - generic [ref=e689]:
+      - paragraph [ref=e690]: This will terminate the running session. Any unsaved work may be lost.
+      - paragraph [ref=e691]: “Session A”
+    - generic [ref=e692]:
+      - button "Cancel" [ref=e693] [cursor=pointer]
+      - button "Kill" [ref=e694] [cursor=pointer]

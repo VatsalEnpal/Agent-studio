@@ -1,0 +1,18 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e6]
+  - button "Close setup (Esc)" [ref=e7] [cursor=pointer]:
+    - img [ref=e8]
+  - generic [ref=e34]:
+    - heading "Here's your setup:" [level=2] [ref=e35]
+    - generic [ref=e36]:
+      - generic [ref=e38]: Your Agents
+      - paragraph [ref=e40]: No agents generated.
+    - generic [ref=e41]:
+      - button "Looks good — let's go" [ref=e42] [cursor=pointer]:
+        - text: Looks good — let's go
+        - img [ref=e43]
+      - generic [ref=e45]:
+        - paragraph [ref=e46]: "Want to change something? Just tell me:"
+        - generic [ref=e47]:
+          - textbox "Remove the inventory one, add a social media agent..." [ref=e48]
+          - button "Update" [disabled] [ref=e49]

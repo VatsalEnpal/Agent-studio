@@ -1,0 +1,250 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]:
+        - text: Agent Studio
+        - generic [ref=e13]: ·
+        - generic [ref=e14]: velocity-api build
+      - generic "Connected to server" [ref=e16]
+    - generic [ref=e17]:
+      - navigation "Main navigation" [ref=e18]:
+        - generic [ref=e19]: A
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - button "Sessions" [active] [ref=e22] [cursor=pointer]:
+              - img [ref=e24]
+              - generic "5 unread" [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e28]:
+            - button "Teams" [ref=e29] [cursor=pointer]:
+              - img [ref=e30]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e32]:
+            - button "Sprints" [ref=e33] [cursor=pointer]:
+              - img [ref=e34]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e37]:
+            - button "Memory" [ref=e38] [cursor=pointer]:
+              - img [ref=e39]
+              - generic "95 unread" [ref=e41]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e42]:
+            - button "Reports" [ref=e43] [cursor=pointer]:
+              - img [ref=e44]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e46]:
+          - button "Settings" [ref=e47] [cursor=pointer]:
+            - img [ref=e48]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e51]:
+        - generic [ref=e1449]:
+          - generic [ref=e1451]:
+            - button "Sessions" [ref=e1452] [cursor=pointer]
+            - button "History" [ref=e1453] [cursor=pointer]
+            - button "Servers" [ref=e1454] [cursor=pointer]
+          - generic [ref=e1456]:
+            - img [ref=e1457]
+            - textbox "Search..." [ref=e1460]
+          - generic [ref=e1461]:
+            - button "Running 5" [ref=e1462]:
+              - generic [ref=e1463]: Running
+              - generic [ref=e1464]: "5"
+            - generic [ref=e1465]:
+              - 'generic "velocity-api build Status: active Path: /tmp/agent-studio-demo/velocity-api Model: sonnet Created: 4/13/2026, 2:55:16 PM" [ref=e1466] [cursor=pointer]':
+                - generic [ref=e1467]:
+                  - generic "velocity-api build" [ref=e1469]
+                  - button "Rename session" [ref=e1470]:
+                    - img [ref=e1471]
+                  - button "Pin session" [ref=e1474]:
+                    - img [ref=e1475]
+                  - button "Copy session ID" [ref=e1477]:
+                    - img [ref=e1478]
+                  - button "Kill session" [ref=e1481]:
+                    - img [ref=e1482]
+                - generic [ref=e1485]:
+                  - generic [ref=e1486]: /tmp/agent-studio-demo/velocity-api
+                  - generic [ref=e1487]: 7m 3s
+                  - generic [ref=e1488]: sonnet
+              - 'generic "nova-dashboard dev Status: active Path: /tmp/agent-studio-demo/nova-dashboard Model: sonnet Created: 4/13/2026, 2:55:17 PM" [ref=e1489] [cursor=pointer]':
+                - generic [ref=e1490]:
+                  - generic "nova-dashboard dev" [ref=e1492]
+                  - button "Rename session" [ref=e1493]:
+                    - img [ref=e1494]
+                  - button "Pin session" [ref=e1497]:
+                    - img [ref=e1498]
+                  - button "Copy session ID" [ref=e1500]:
+                    - img [ref=e1501]
+                  - button "Kill session" [ref=e1504]:
+                    - img [ref=e1505]
+                - generic [ref=e1508]:
+                  - generic [ref=e1509]: /tmp/agent-studio-demo/nova-dashboard
+                  - generic [ref=e1510]: 7m 3s
+                  - generic [ref=e1511]: sonnet
+              - 'generic "mercury-pipeline tests Status: active Path: /tmp/agent-studio-demo/mercury-pipeline Model: haiku Created: 4/13/2026, 2:55:17 PM" [ref=e1512] [cursor=pointer]':
+                - generic [ref=e1513]:
+                  - generic "mercury-pipeline tests" [ref=e1515]
+                  - button "Rename session" [ref=e1516]:
+                    - img [ref=e1517]
+                  - button "Pin session" [ref=e1520]:
+                    - img [ref=e1521]
+                  - button "Copy session ID" [ref=e1523]:
+                    - img [ref=e1524]
+                  - button "Kill session" [ref=e1527]:
+                    - img [ref=e1528]
+                - generic [ref=e1531]:
+                  - generic [ref=e1532]: /tmp/agent-studio-demo/mercury-pipeline
+                  - generic [ref=e1533]: 7m 3s
+                  - generic [ref=e1534]: haiku
+              - 'generic "orchestrator planning Status: active Path: /tmp/agent-studio-demo/velocity-api Model: opus Created: 4/13/2026, 2:55:17 PM" [ref=e1535] [cursor=pointer]':
+                - generic [ref=e1536]:
+                  - generic "orchestrator planning" [ref=e1538]
+                  - button "Rename session" [ref=e1539]:
+                    - img [ref=e1540]
+                  - button "Pin session" [ref=e1543]:
+                    - img [ref=e1544]
+                  - button "Copy session ID" [ref=e1546]:
+                    - img [ref=e1547]
+                  - button "Kill session" [ref=e1550]:
+                    - img [ref=e1551]
+                - generic [ref=e1554]:
+                  - generic [ref=e1555]: /tmp/agent-studio-demo/velocity-api
+                  - generic [ref=e1556]: 7m 3s
+                  - generic [ref=e1557]: opus
+              - 'generic "devops deploy-check Status: active Path: /tmp/agent-studio-demo/velocity-api Model: sonnet Created: 4/13/2026, 2:55:17 PM" [ref=e1558] [cursor=pointer]':
+                - generic [ref=e1559]:
+                  - generic "devops deploy-check" [ref=e1561]
+                  - button "Rename session" [ref=e1562]:
+                    - img [ref=e1563]
+                  - button "Pin session" [ref=e1566]:
+                    - img [ref=e1567]
+                  - button "Copy session ID" [ref=e1569]:
+                    - img [ref=e1570]
+                  - button "Kill session" [ref=e1573]:
+                    - img [ref=e1574]
+                - generic [ref=e1577]:
+                  - generic [ref=e1578]: /tmp/agent-studio-demo/velocity-api
+                  - generic [ref=e1579]: 7m 2s
+                  - generic [ref=e1580]: sonnet
+          - generic [ref=e1581]:
+            - button "Repos 2" [ref=e1582] [cursor=pointer]:
+              - img [ref=e1583]
+              - text: Repos
+              - generic [ref=e1585]: "2"
+            - generic [ref=e1586]:
+              - generic "/Users/vatsalbhatt230813/Code/staging-frontend" [ref=e1587]:
+                - generic [ref=e1589]: staging-frontend
+                - generic [ref=e1590]: staging/frontend
+              - generic "/Users/vatsalbhatt230813/Code/InPipeline/enpal-energy-vnb-portal" [ref=e1591]:
+                - generic [ref=e1593]: enpal-energy-vnb-portal (PROD)
+                - generic [ref=e1594]: main
+          - generic [ref=e1595]:
+            - button "Dev Servers" [ref=e1596] [cursor=pointer]: Dev Servers
+            - button "New Session ⇧⌘N" [ref=e1598] [cursor=pointer]:
+              - img [ref=e1599]
+              - text: New Session
+              - generic [ref=e1600]: ⇧⌘N
+      - main [ref=e206]:
+        - generic [ref=e208]:
+          - generic [ref=e209]:
+            - generic [ref=e210]: sonnet
+            - generic "/tmp/agent-studio-demo/velocity-api" [ref=e211]
+          - generic [ref=e215]:
+            - textbox "Terminal input" [ref=e216]
+            - generic:
+              - generic:
+                - generic: ━━━
+                - generic: velocity-api
+                - generic: ━━━
+              - generic:
+                - generic: $ go build ./...
+              - generic:
+                - generic: ✓
+                - generic: compiled
+                - generic: api/handlers
+              - generic:
+                - generic: ✓
+                - generic: compiled
+                - generic: api/middleware
+              - generic:
+                - generic: ✓
+                - generic: compiled
+                - generic: api/models
+              - generic:
+                - generic: $ go test ./... -v
+              - generic:
+                - generic: === RUN TestUserCreate
+              - generic:
+                - generic: "---"
+                - generic: PASS
+                - generic: ": TestUserCreate (0.04s)"
+              - generic:
+                - generic: === RUN TestUserAuth
+              - generic:
+                - generic: "---"
+                - generic: PASS
+                - generic: ": TestUserAuth (0.12s)"
+              - generic:
+                - generic: === RUN TestPagination
+              - generic:
+                - generic: "---"
+                - generic: PASS
+                - generic: ": TestPagination (0.08s)"
+              - generic:
+                - generic: === RUN TestRateLimit
+              - generic:
+                - generic: "---"
+                - generic: PASS
+                - generic: ": TestRateLimit (0.23s)"
+              - generic:
+                - generic: === RUN TestWebSocket
+              - generic:
+                - generic: "---"
+                - generic: PASS
+                - generic: ": TestWebSocket (0.15s)"
+              - generic:
+                - generic: ok
+                - generic: github.com/acme/velocity-api
+                - generic: 0.62s
+              - generic:
+                - generic: ✓ All 5 tests passed
+              - generic:
+                - generic: $ go vet ./...
+              - generic:
+                - generic: ✓
+                - generic: No issues found
+              - generic:
+                - generic: ⚡ Build complete — ready to deploy
+  - alert [ref=e6]

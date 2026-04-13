@@ -21,6 +21,7 @@
 import { mkdirSync, writeFileSync, readFileSync, existsSync, copyFileSync } from "node:fs";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
+import WebSocket from "ws";
 
 const BASE_URL = "http://localhost:8080";
 const PROJECT_ROOT = process.cwd();
@@ -123,18 +124,220 @@ for (const proj of PROJECTS) {
     execSync(`git init -q`, { cwd: proj.path });
     execSync(`git checkout -b main`, { cwd: proj.path, stdio: "ignore" });
 
-    // Create some files based on project type
+    // Create substantial source files — Claude needs real code to read and modify
     if (proj.lang === "go") {
-      writeFileSync(join(proj.path, "main.go"), `package main\n\nimport "fmt"\n\nfunc main() {\n\tfmt.Println("velocity-api v2.4.1")\n}\n`);
-      writeFileSync(join(proj.path, "go.mod"), `module github.com/acme/velocity-api\n\ngo 1.22\n`);
-      writeFileSync(join(proj.path, "handlers.go"), `package main\n\ntype Handler struct {\n\tdb *DB\n}\n`);
+      writeFileSync(join(proj.path, "main.go"), [
+        'package main',
+        '',
+        'import (',
+        '\t"fmt"',
+        '\t"log"',
+        '\t"net/http"',
+        '\t"os"',
+        ')',
+        '',
+        'func main() {',
+        '\tport := os.Getenv("PORT")',
+        '\tif port == "" {',
+        '\t\tport = "8080"',
+        '\t}',
+        '',
+        '\tdb := &DB{users: make(map[string]User)}',
+        '\thandler := &Handler{db: db}',
+        '',
+        '\tmux := http.NewServeMux()',
+        '\tmux.HandleFunc("/api/users", handler.ListUsers)',
+        '\tmux.HandleFunc("/api/users/create", handler.CreateUser)',
+        '\tmux.HandleFunc("/api/users/search", handler.SearchUsers)',
+        '\tmux.HandleFunc("/health", handler.Health)',
+        '',
+        '\tfmt.Printf("velocity-api v2.4.1 starting on :%s\\n", port)',
+        '\tlog.Fatal(http.ListenAndServe(":"+port, mux))',
+        '}',
+      ].join('\n') + '\n');
+      writeFileSync(join(proj.path, "go.mod"), 'module github.com/acme/velocity-api\n\ngo 1.22\n');
+      writeFileSync(join(proj.path, "handlers.go"), [
+        'package main',
+        '',
+        'import (',
+        '\t"encoding/json"',
+        '\t"fmt"',
+        '\t"net/http"',
+        ')',
+        '',
+        'type Handler struct {',
+        '\tdb *DB',
+        '}',
+        '',
+        'func (h *Handler) ListUsers(w http.ResponseWriter, r *http.Request) {',
+        '\tusers := make([]User, 0)',
+        '\tfor _, u := range h.db.users {',
+        '\t\tusers = append(users, u)',
+        '\t}',
+        '\tjson.NewEncoder(w).Encode(users)',
+        '}',
+        '',
+        'func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {',
+        '\tvar input struct {',
+        '\t\tEmail    string `json:"email"`',
+        '\t\tPassword string `json:"password"`',
+        '\t\tName     string `json:"name"`',
+        '\t}',
+        '\tjson.NewDecoder(r.Body).Decode(&input)',
+        '\t// TODO: password stored in plaintext — needs hashing',
+        '\tuser := User{',
+        '\t\tID:       fmt.Sprintf("usr_%d", len(h.db.users)+1),',
+        '\t\tEmail:    input.Email,',
+        '\t\tPassword: input.Password,',
+        '\t\tName:     input.Name,',
+        '\t\tRole:     "user",',
+        '\t}',
+        '\th.db.users[user.ID] = user',
+        '\tw.WriteHeader(201)',
+        '\tjson.NewEncoder(w).Encode(user)',
+        '}',
+        '',
+        'func (h *Handler) SearchUsers(w http.ResponseWriter, r *http.Request) {',
+        '\tquery := r.URL.Query().Get("q")',
+        '\t// BUG: vulnerable to injection — query used unsanitized',
+        '\tresults := make([]User, 0)',
+        '\tfor _, u := range h.db.users {',
+        '\t\tif u.Name == query || u.Email == query {',
+        '\t\t\tresults = append(results, u)',
+        '\t\t}',
+        '\t}',
+        '\tjson.NewEncoder(w).Encode(results)',
+        '}',
+        '',
+        'func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {',
+        '\tjson.NewEncoder(w).Encode(map[string]string{"status": "ok", "version": "2.4.1"})',
+        '}',
+      ].join('\n') + '\n');
+      writeFileSync(join(proj.path, "db.go"), [
+        'package main',
+        '',
+        'type DB struct {',
+        '\tusers map[string]User',
+        '}',
+        '',
+        'type User struct {',
+        '\tID       string `json:"id"`',
+        '\tEmail    string `json:"email"`',
+        '\tPassword string `json:"password"`',
+        '\tName     string `json:"name"`',
+        '\tRole     string `json:"role"`',
+        '\tCreated  string `json:"created"`',
+        '}',
+      ].join('\n') + '\n');
     } else if (proj.lang === "react") {
-      writeFileSync(join(proj.path, "package.json"), JSON.stringify({ name: "nova-dashboard", version: "3.1.0", scripts: { dev: "next dev", build: "next build" } }, null, 2));
+      writeFileSync(join(proj.path, "package.json"), JSON.stringify({
+        name: "nova-dashboard", version: "3.1.0",
+        scripts: { dev: "next dev", build: "next build", test: "jest" },
+        dependencies: { "next": "16.0.1", "react": "19.0.0", "tailwindcss": "4.0.0" },
+      }, null, 2));
       mkdirSync(join(proj.path, "src", "components"), { recursive: true });
-      writeFileSync(join(proj.path, "src", "components", "Dashboard.tsx"), `export function Dashboard() {\n  return <div>Nova Dashboard</div>\n}\n`);
+      mkdirSync(join(proj.path, "src", "lib"), { recursive: true });
+      writeFileSync(join(proj.path, "src", "components", "Dashboard.tsx"), [
+        'import { useState, useEffect } from "react";',
+        '',
+        'interface Metric {',
+        '  label: string;',
+        '  value: number;',
+        '  change: number;',
+        '}',
+        '',
+        'export function Dashboard() {',
+        '  const [metrics, setMetrics] = useState<Metric[]>([]);',
+        '  const [loading, setLoading] = useState(true);',
+        '',
+        '  useEffect(() => {',
+        '    fetch("/api/metrics")',
+        '      .then(r => r.json())',
+        '      .then(data => { setMetrics(data); setLoading(false); });',
+        '  }, []);',
+        '',
+        '  if (loading) return <div>Loading...</div>;',
+        '',
+        '  return (',
+        '    <div className="p-6">',
+        '      <h1 className="text-2xl font-bold mb-4">Nova Dashboard</h1>',
+        '      <div className="grid grid-cols-3 gap-4">',
+        '        {metrics.map(m => (',
+        '          <div key={m.label} className="bg-white p-4 rounded shadow">',
+        '            <p className="text-gray-500 text-sm">{m.label}</p>',
+        '            <p className="text-2xl font-bold">{m.value}</p>',
+        '            <p className={m.change > 0 ? "text-green-500" : "text-red-500"}>',
+        '              {m.change > 0 ? "+" : ""}{m.change}%',
+        '            </p>',
+        '          </div>',
+        '        ))}',
+        '      </div>',
+        '    </div>',
+        '  );',
+        '}',
+      ].join('\n') + '\n');
+      writeFileSync(join(proj.path, "src", "lib", "api.ts"), [
+        'const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";',
+        '',
+        'export async function fetchMetrics() {',
+        '  const res = await fetch(`${BASE_URL}/api/metrics`);',
+        '  if (!res.ok) throw new Error("Failed to fetch metrics");',
+        '  return res.json();',
+        '}',
+        '',
+        'export async function fetchEvents(limit = 50) {',
+        '  const res = await fetch(`${BASE_URL}/api/events?limit=${limit}`);',
+        '  if (!res.ok) throw new Error("Failed to fetch events");',
+        '  return res.json();',
+        '}',
+      ].join('\n') + '\n');
     } else {
-      writeFileSync(join(proj.path, "pipeline.py"), `"""Mercury data pipeline — ETL for analytics."""\n\ndef run():\n    extract()\n    transform()\n    load()\n`);
-      writeFileSync(join(proj.path, "requirements.txt"), `pandas==2.2.0\npyarrow==15.0.0\nsqlalchemy==2.0.27\n`);
+      writeFileSync(join(proj.path, "pipeline.py"), [
+        '"""Mercury data pipeline — ETL for analytics."""',
+        'import pandas as pd',
+        'from sqlalchemy import create_engine',
+        '',
+        'DB_URL = "postgresql://localhost:5432/analytics"',
+        '',
+        'def extract(source_path: str) -> pd.DataFrame:',
+        '    """Read CSV data from source."""',
+        '    df = pd.read_csv(source_path)',
+        '    print(f"Extracted {len(df)} rows from {source_path}")',
+        '    return df',
+        '',
+        'def transform(df: pd.DataFrame) -> pd.DataFrame:',
+        '    """Clean and normalize data."""',
+        '    df = df.dropna(subset=["user_id", "event_type"])',
+        '    df["event_type"] = df["event_type"].str.lower().str.strip()',
+        '    df["timestamp"] = pd.to_datetime(df["timestamp"])',
+        '    df = df.drop_duplicates(subset=["user_id", "timestamp"])',
+        '    print(f"Transformed: {len(df)} rows after cleaning")',
+        '    return df',
+        '',
+        'def load(df: pd.DataFrame, table: str = "events") -> int:',
+        '    """Load data into PostgreSQL."""',
+        '    engine = create_engine(DB_URL)',
+        '    rows = df.to_sql(table, engine, if_exists="append", index=False)',
+        '    print(f"Loaded {rows} rows into {table}")',
+        '    return rows',
+        '',
+        'def run(source_path: str = "data/events.csv"):',
+        '    """Execute full ETL pipeline."""',
+        '    df = extract(source_path)',
+        '    df = transform(df)',
+        '    loaded = load(df)',
+        '    return loaded',
+      ].join('\n') + '\n');
+      writeFileSync(join(proj.path, "requirements.txt"), 'pandas==2.2.0\npyarrow==15.0.0\nsqlalchemy==2.0.27\npytest==8.0.0\npytest-cov==4.1.0\n');
+      writeFileSync(join(proj.path, "config.py"), [
+        '"""Pipeline configuration."""',
+        'import os',
+        '',
+        'DB_URL = os.getenv("DATABASE_URL", "postgresql://localhost:5432/analytics")',
+        'BATCH_SIZE = int(os.getenv("BATCH_SIZE", "1000"))',
+        'MAX_RETRIES = int(os.getenv("MAX_RETRIES", "3"))',
+        'RETRY_DELAY = float(os.getenv("RETRY_DELAY", "1.0"))',
+      ].join('\n') + '\n');
     }
 
     execSync(`git add -A && git commit -q -m "Initial commit" --allow-empty`, {
@@ -444,263 +647,100 @@ if (Array.isArray(existingSessions)) {
   }
 }
 
-// Session output scripts — these produce realistic, visually interesting terminal content
-const SESSION_SCRIPTS = [
+// Verify claude CLI is available for real sessions
+try {
+  execSync('claude --version', { stdio: 'pipe' });
+  log("✅", "Claude CLI available");
+} catch {
+  console.error("❌ Claude CLI not found. Install: npm install -g @anthropic-ai/claude-code");
+  process.exit(1);
+}
+
+// Connect WebSocket for delivering prompts to interactive sessions
+const ws = new WebSocket("ws://localhost:8080/ws");
+await new Promise((resolve, reject) => {
+  ws.on("open", resolve);
+  ws.on("error", reject);
+  setTimeout(() => reject(new Error("WebSocket timeout")), 5000);
+});
+log("🔌", "WebSocket connected for prompt delivery");
+
+// Real Claude Code sessions — interactive mode with prompts sent as keyboard input.
+// This produces the full Claude Code TUI experience: thinking indicators,
+// tool use blocks, code diffs, and streaming output visible in real-time.
+// (Note: -p mode buffers all output until completion, hiding the interactive UI)
+const SESSION_DEFS = [
   {
-    name: "velocity-api build",
+    name: "backend · velocity-api",
     cwd: PROJECTS[0].path,
     model: "sonnet",
     agent: "backend",
-    // Simulates a Go build + test cycle
-    script: `
-printf '\\033[1;36m━━━ velocity-api ━━━\\033[0m\\n\\n'
-printf '\\033[90m$ go build ./...\\033[0m\\n'
-sleep 0.3
-printf '\\033[32m✓\\033[0m compiled \\033[1mapi/handlers\\033[0m\\n'
-sleep 0.2
-printf '\\033[32m✓\\033[0m compiled \\033[1mapi/middleware\\033[0m\\n'
-sleep 0.2
-printf '\\033[32m✓\\033[0m compiled \\033[1mapi/models\\033[0m\\n'
-sleep 0.3
-printf '\\n\\033[90m$ go test ./... -v\\033[0m\\n'
-sleep 0.4
-printf '=== RUN   TestUserCreate\\n'
-sleep 0.3
-printf '    --- \\033[32mPASS\\033[0m: TestUserCreate (0.04s)\\n'
-sleep 0.2
-printf '=== RUN   TestUserAuth\\n'
-sleep 0.5
-printf '    --- \\033[32mPASS\\033[0m: TestUserAuth (0.12s)\\n'
-sleep 0.2
-printf '=== RUN   TestPagination\\n'
-sleep 0.4
-printf '    --- \\033[32mPASS\\033[0m: TestPagination (0.08s)\\n'
-sleep 0.2
-printf '=== RUN   TestRateLimit\\n'
-sleep 0.6
-printf '    --- \\033[32mPASS\\033[0m: TestRateLimit (0.23s)\\n'
-sleep 0.2
-printf '=== RUN   TestWebSocket\\n'
-sleep 0.4
-printf '    --- \\033[32mPASS\\033[0m: TestWebSocket (0.15s)\\n'
-sleep 0.2
-printf '\\n\\033[32mok\\033[0m  github.com/acme/velocity-api  \\033[90m0.62s\\033[0m\\n'
-printf '\\n\\033[1;32m✓ All 5 tests passed\\033[0m\\n\\n'
-sleep 0.5
-printf '\\033[90m$ go vet ./...\\033[0m\\n'
-sleep 0.3
-printf '\\033[32m✓\\033[0m No issues found\\n\\n'
-printf '\\033[1;33m⚡ Build complete — ready to deploy\\033[0m\\n'
-sleep 999
-`,
+    prompt: "Read all Go files in this project. Then add JWT-based authentication: create auth.go with /api/auth/login and /api/auth/signup handlers. Hash passwords with bcrypt, generate JWT tokens with HS256, and add middleware that validates the Authorization header. Also fix the security bugs you find in the existing handlers — especially the plaintext password storage and missing input validation. Do not ask questions — use reasonable defaults and write all the code.",
   },
   {
-    name: "nova-dashboard dev",
+    name: "frontend · nova-dashboard",
     cwd: PROJECTS[1].path,
     model: "sonnet",
     agent: "frontend",
-    // Simulates Next.js dev server with HMR
-    script: `
-printf '\\033[1;35m━━━ nova-dashboard ━━━\\033[0m\\n\\n'
-printf '  \\033[36m▲ Next.js 16.0.1\\033[0m\\n'
-printf '  - Local:        \\033[36mhttp://localhost:3000\\033[0m\\n'
-printf '  - Network:      \\033[36mhttp://192.168.1.42:3000\\033[0m\\n'
-printf '  - Environments: .env.local\\n\\n'
-sleep 0.5
-printf ' \\033[32m✓\\033[0m Ready in 1.2s\\n\\n'
-sleep 0.8
-printf '\\033[90m ○ Compiling /dashboard ...\\033[0m\\n'
-sleep 0.6
-printf '\\033[32m ✓\\033[0m Compiled /dashboard in 340ms (428 modules)\\n'
-sleep 1.0
-printf '\\033[90m ○ Compiling /dashboard/analytics ...\\033[0m\\n'
-sleep 0.4
-printf '\\033[32m ✓\\033[0m Compiled /dashboard/analytics in 180ms (92 modules)\\n'
-sleep 0.8
-printf '\\033[90m ○ Compiling /settings ...\\033[0m\\n'
-sleep 0.3
-printf '\\033[32m ✓\\033[0m Compiled /settings in 120ms (64 modules)\\n'
-sleep 0.6
-printf '\\n\\033[33m ⚠\\033[0m Fast Refresh: 3 components updated\\n'
-sleep 0.4
-printf '\\033[90m ○ Compiling /api/auth/[...nextauth] ...\\033[0m\\n'
-sleep 0.5
-printf '\\033[32m ✓\\033[0m Compiled /api/auth/[...nextauth] in 90ms\\n'
-sleep 0.5
-printf '\\n\\033[1;32m⚡ HMR active — watching for changes\\033[0m\\n'
-sleep 999
-`,
+    prompt: "Read the existing React code in this project — especially Dashboard.tsx and api.ts. Then create a new AnalyticsDashboard.tsx component in src/components/ that replaces the basic Dashboard. Include: a 4-card stats summary row (total requests, avg latency, error rate, uptime), a data table showing recent API events with columns for timestamp/method/path/status/duration, and a service health section with colored status badges. Use TypeScript interfaces for all data shapes, React hooks for state and data fetching, and Tailwind CSS utility classes. Do not ask questions — make all design decisions yourself and write complete, production-ready code.",
   },
   {
-    name: "mercury-pipeline tests",
+    name: "qa · mercury-pipeline",
     cwd: PROJECTS[2].path,
-    model: "haiku",
+    model: "sonnet",
     agent: "qa",
-    // Simulates pytest with rich output
-    script: `
-printf '\\033[1;33m━━━ mercury-pipeline ━━━\\033[0m\\n\\n'
-printf '\\033[90m$ pytest tests/ -v --tb=short\\033[0m\\n\\n'
-sleep 0.3
-printf '\\033[1mcollected 18 items\\033[0m\\n\\n'
-sleep 0.2
-printf 'tests/test_extract.py::test_csv_source \\033[32mPASSED\\033[0m\\n'
-sleep 0.15
-printf 'tests/test_extract.py::test_api_source \\033[32mPASSED\\033[0m\\n'
-sleep 0.15
-printf 'tests/test_extract.py::test_s3_source \\033[32mPASSED\\033[0m\\n'
-sleep 0.15
-printf 'tests/test_transform.py::test_clean_nulls \\033[32mPASSED\\033[0m\\n'
-sleep 0.15
-printf 'tests/test_transform.py::test_normalize \\033[32mPASSED\\033[0m\\n'
-sleep 0.15
-printf 'tests/test_transform.py::test_deduplicate \\033[32mPASSED\\033[0m\\n'
-sleep 0.15
-printf 'tests/test_transform.py::test_schema_validation \\033[32mPASSED\\033[0m\\n'
-sleep 0.15
-printf 'tests/test_load.py::test_postgres_insert \\033[32mPASSED\\033[0m\\n'
-sleep 0.25
-printf 'tests/test_load.py::test_upsert_conflict \\033[32mPASSED\\033[0m\\n'
-sleep 0.15
-printf 'tests/test_load.py::test_batch_size \\033[32mPASSED\\033[0m\\n'
-sleep 0.15
-printf 'tests/test_retry.py::test_exponential_backoff \\033[32mPASSED\\033[0m\\n'
-sleep 0.2
-printf 'tests/test_retry.py::test_jitter \\033[32mPASSED\\033[0m\\n'
-sleep 0.15
-printf 'tests/test_retry.py::test_max_retries \\033[32mPASSED\\033[0m\\n'
-sleep 0.15
-printf 'tests/test_integration.py::test_full_pipeline \\033[32mPASSED\\033[0m\\n'
-sleep 0.5
-printf 'tests/test_integration.py::test_incremental_load \\033[32mPASSED\\033[0m\\n'
-sleep 0.3
-printf 'tests/test_integration.py::test_error_recovery \\033[32mPASSED\\033[0m\\n'
-sleep 0.2
-printf 'tests/test_integration.py::test_concurrent_writes \\033[32mPASSED\\033[0m\\n'
-sleep 0.15
-printf 'tests/test_integration.py::test_idempotency \\033[32mPASSED\\033[0m\\n'
-sleep 0.1
-printf '\\n\\033[1;32m18 passed\\033[0m\\033[90m in 3.42s\\033[0m\\n\\n'
-sleep 0.3
-printf '\\033[90m---------- coverage: 87%% ----------\\033[0m\\n'
-printf 'Name                      Stmts   Miss  Cover\\n'
-printf '\\033[90m─────────────────────────────────────────\\033[0m\\n'
-printf 'pipeline.py                  42      3    93%%\\n'
-printf 'extract.py                   38      5    87%%\\n'
-printf 'transform.py                 56      8    86%%\\n'
-printf 'load.py                      44      7    84%%\\n'
-printf 'retry.py                     18      2    89%%\\n'
-printf '\\033[90m─────────────────────────────────────────\\033[0m\\n'
-printf '\\033[1mTOTAL\\033[0m                       198     25    \\033[32m87%%\\033[0m\\n'
-printf '\\n\\033[1;32m✓ All tests passed, coverage above threshold\\033[0m\\n'
-sleep 999
-`,
+    prompt: "Read pipeline.py and config.py in this project. Then write a comprehensive pytest test suite: create tests/test_pipeline.py and tests/conftest.py. Cover extract() with tests for valid CSV, empty files, missing files, and malformed data. Cover transform() with tests for null handling, duplicate removal, type conversion, and edge cases. Cover load() with tests using a mocked database engine. Cover run() with an integration test. Use @pytest.fixture for shared data, @pytest.mark.parametrize for multiple inputs, and unittest.mock for external deps. Do not ask questions — write all tests directly.",
   },
   {
-    name: "orchestrator planning",
-    cwd: PROJECTS[0].path,
-    model: "opus",
-    agent: "orchestrator",
-    // Simulates an orchestrator agent reasoning
-    script: `
-printf '\\033[1;34m━━━ Orchestrator ━━━\\033[0m\\n\\n'
-printf '\\033[90m◆ Analyzing sprint goals...\\033[0m\\n\\n'
-sleep 0.5
-printf '\\033[1mSprint: Auth System Overhaul\\033[0m\\n'
-printf '\\033[90m─────────────────────────────────\\033[0m\\n\\n'
-sleep 0.3
-printf '\\033[36m→ Phase 1:\\033[0m Backend API schema  \\033[32m[DONE]\\033[0m\\n'
-printf '  \\033[90mAssigned: backend  |  PR #47 merged\\033[0m\\n\\n'
-sleep 0.4
-printf '\\033[36m→ Phase 2:\\033[0m Frontend auth flow  \\033[33m[ACTIVE]\\033[0m\\n'
-printf '  \\033[90mAssigned: frontend  |  3 of 5 components done\\033[0m\\n\\n'
-sleep 0.4
-printf '\\033[36m→ Phase 3:\\033[0m Integration tests  \\033[33m[ACTIVE]\\033[0m\\n'
-printf '  \\033[90mAssigned: qa  |  Running test suite...\\033[0m\\n\\n'
-sleep 0.4
-printf '\\033[36m→ Phase 4:\\033[0m Security review  \\033[90m[PENDING]\\033[0m\\n'
-printf '  \\033[90mBlocked by: Phase 2, Phase 3\\033[0m\\n\\n'
-sleep 0.4
-printf '\\033[36m→ Phase 5:\\033[0m Deploy to staging  \\033[90m[PENDING]\\033[0m\\n'
-printf '  \\033[90mBlocked by: Phase 4\\033[0m\\n\\n'
-sleep 0.5
-printf '\\033[90m─────────────────────────────────\\033[0m\\n'
-printf '\\033[1mProgress:\\033[0m \\033[32m████████\\033[33m██████\\033[90m██████████\\033[0m 40%%\\n\\n'
-sleep 0.3
-printf '\\033[1;36m📋 Next actions:\\033[0m\\n'
-printf '  1. Review frontend PR #52 (auth flow components)\\n'
-printf '  2. Unblock QA on test fixtures\\n'
-printf '  3. Schedule security review with devops\\n\\n'
-sleep 0.5
-printf '\\033[32m✓ Sprint plan updated\\033[0m\\n'
-sleep 999
-`,
-  },
-  {
-    name: "devops deploy-check",
+    name: "orchestrator · velocity-api",
     cwd: PROJECTS[0].path,
     model: "sonnet",
-    agent: "devops",
-    // Simulates deployment health checks
-    script: `
-printf '\\033[1;31m━━━ DevOps: Staging Health ━━━\\033[0m\\n\\n'
-printf '\\033[90m$ kubectl get pods -n staging\\033[0m\\n\\n'
-sleep 0.3
-printf 'NAME                            READY   STATUS    AGE\\n'
-printf '\\033[90m────────────────────────────────────────────────────\\033[0m\\n'
-printf 'velocity-api-7d4f8b9c6-\\033[32mwx2k1\\033[0m   1/1     \\033[32mRunning\\033[0m   4h\\n'
-printf 'velocity-api-7d4f8b9c6-\\033[32mm9p3r\\033[0m   1/1     \\033[32mRunning\\033[0m   4h\\n'
-printf 'velocity-api-7d4f8b9c6-\\033[32maj7s2\\033[0m   1/1     \\033[32mRunning\\033[0m   4h\\n'
-printf 'nova-dash-5c8e1a3b2-\\033[32mhk4d8\\033[0m      1/1     \\033[32mRunning\\033[0m   2h\\n'
-printf 'nova-dash-5c8e1a3b2-\\033[32mqr6f1\\033[0m      1/1     \\033[32mRunning\\033[0m   2h\\n'
-printf 'mercury-pipe-9f2d7e4a1-\\033[32mzn5w3\\033[0m   1/1     \\033[32mRunning\\033[0m   6h\\n'
-printf 'redis-master-0                  1/1     \\033[32mRunning\\033[0m   12d\\n'
-printf 'postgres-0                      1/1     \\033[32mRunning\\033[0m   12d\\n'
-sleep 0.5
-printf '\\n\\033[90m$ curl -s staging.internal/health\\033[0m\\n'
-sleep 0.3
-printf '\\033[32m{\\033[0m "status": "healthy", "version": "2.4.1", "uptime": "4h12m" \\033[32m}\\033[0m\\n\\n'
-sleep 0.3
-printf '\\033[90m$ kubectl top pods -n staging\\033[0m\\n\\n'
-sleep 0.3
-printf 'NAME                            CPU    MEMORY\\n'
-printf '\\033[90m────────────────────────────────────────────────────\\033[0m\\n'
-printf 'velocity-api-7d4f8b9c6-wx2k1   24m    128Mi\\n'
-printf 'velocity-api-7d4f8b9c6-m9p3r   18m    122Mi\\n'
-printf 'velocity-api-7d4f8b9c6-aj7s2   21m    126Mi\\n'
-printf 'nova-dash-5c8e1a3b2-hk4d8      12m    96Mi\\n'
-printf 'nova-dash-5c8e1a3b2-qr6f1      14m    98Mi\\n'
-printf 'mercury-pipe-9f2d7e4a1-zn5w3   45m    256Mi\\n'
-sleep 0.3
-printf '\\n\\033[1;32m✓ All systems healthy — staging is GO\\033[0m\\n'
-sleep 999
-`,
+    agent: "orchestrator",
+    prompt: "Read every file in this Go project: main.go, handlers.go, db.go, go.mod. Perform a thorough security audit. For each file, check for: plaintext password storage, missing input validation, unhandled errors from json.Decode, missing Content-Type headers, no authentication on endpoints, missing rate limiting, no CORS configuration, and the search endpoint injection risk. Write your findings as SECURITY-AUDIT.md with severity levels (CRITICAL/HIGH/MEDIUM/LOW), the specific vulnerable code, and complete fix code for each finding. Do not ask questions — audit everything and write the full report.",
   },
 ];
 
 const createdSessions = [];
-for (const sess of SESSION_SCRIPTS) {
+for (const sess of SESSION_DEFS) {
+  // Launch Claude in interactive mode (no -p flag) — shows full TUI
   const result = await api("POST", "/api/sessions", {
     name: sess.name,
-    command: "bash",
-    args: ["-c", sess.script],
+    command: "claude",
+    args: [
+      "--model", sess.model,
+      "--dangerously-skip-permissions",
+    ],
     cwd: sess.cwd,
-    cols: 100,
-    rows: 30,
+    cols: 110,
+    rows: 32,
     meta: {
       model: sess.model,
       agent: sess.agent,
       permissions: "bypass",
       channel: "none",
-      group: "standalone",
+      group: "sprint",
     },
   });
   if (result?.id) {
     createdSessions.push(result.id);
+    // Send prompt as keyboard input via WebSocket.
+    // The terminal-manager queues writes until Claude's prompt is ready,
+    // then flushes them — so this works even if sent immediately.
+    ws.send(JSON.stringify({
+      type: "terminal-input",
+      sessionId: result.id,
+      data: sess.prompt + "\r",
+    }));
+    log("🖥️", `Session ${sess.name} started + prompt queued`);
+  } else {
+    log("⚠️", `Failed to start session: ${sess.name}`);
   }
-  // Small delay between session starts so they stagger visually
-  await sleep(200);
+  // Stagger launches — server has a 4-concurrent-spawn limit
+  await sleep(1500);
 }
-log("🖥️", `Started ${createdSessions.length} terminal sessions`);
+
+ws.close();
+log("🖥️", `Started ${createdSessions.length} real Claude Code sessions (interactive mode)`);
 
 // ─── Step 7: Create sprint via file-based system ────────────────────────────
 // The sprint-planning flow reads from sprints/ directory files.
@@ -925,11 +965,11 @@ if (roomId) {
 // ─── Done! ──────────────────────────────────────────────────────────────────
 
 // Wait for sessions to produce some output
-log("⏳", "Waiting 5s for sessions to produce output...");
-await sleep(5000);
+log("⏳", "Waiting 20s for Claude sessions to start streaming output...");
+await sleep(20000);
 
 console.log("\n🎬 Demo seed complete!\n");
-console.log("  Sessions:  " + createdSessions.length);
+console.log("  Sessions:  " + createdSessions.length + " (real Claude Code)");
 console.log("  Sprint:    1 active (IN PROGRESS) + 1 archived");
 console.log("  Room:      1 (13 messages)");
 console.log("  Memory:    " + MEMORY_ENTRIES.length + " entries");

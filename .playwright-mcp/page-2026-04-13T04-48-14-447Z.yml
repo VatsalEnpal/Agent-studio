@@ -1,0 +1,136 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]: Agent Studio
+      - generic "Connected to server" [ref=e14]
+    - generic [ref=e15]:
+      - navigation "Main navigation" [ref=e16]:
+        - generic [ref=e17]: A
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - button "Sessions" [ref=e20] [cursor=pointer]:
+              - img [ref=e22]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e25]:
+            - button "Teams" [ref=e26] [cursor=pointer]:
+              - img [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e29]:
+            - button "Sprints" [ref=e30] [cursor=pointer]:
+              - img [ref=e31]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e34]:
+            - button "Memory" [ref=e35] [cursor=pointer]:
+              - img [ref=e36]
+              - generic "95 unread" [ref=e38]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e39]:
+            - button "Reports" [ref=e40] [cursor=pointer]:
+              - img [ref=e41]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e43]:
+          - button "Settings" [ref=e44] [cursor=pointer]:
+            - img [ref=e45]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e48]:
+        - generic [ref=e84]:
+          - heading "Settings" [level=3] [ref=e85]
+          - paragraph [ref=e86]: Model defaults, projects, agent system, and system monitor.
+      - main [ref=e76]:
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - button "General Model, theme, notifications" [ref=e90] [cursor=pointer]:
+              - generic [ref=e91]:
+                - img [ref=e92]
+                - generic [ref=e95]: General
+              - paragraph [ref=e96]: Model, theme, notifications
+            - button "Projects Tracked repos and agent system" [ref=e97] [cursor=pointer]:
+              - generic [ref=e98]:
+                - img [ref=e99]
+                - generic [ref=e101]: Projects
+              - paragraph [ref=e102]: Tracked repos and agent system
+            - button "Agents Discovered agent definitions" [ref=e103] [cursor=pointer]:
+              - generic [ref=e104]:
+                - img [ref=e105]
+                - generic [ref=e108]: Agents
+              - paragraph [ref=e109]: Discovered agent definitions
+            - button "System Monitor CPU, memory, disk, active processes" [ref=e110] [cursor=pointer]:
+              - generic [ref=e111]:
+                - img [ref=e112]
+                - generic [ref=e114]: System Monitor
+              - paragraph [ref=e115]: CPU, memory, disk, active processes
+            - button "Automations Sprint protocol, PMO scans, scheduled tasks" [ref=e116] [cursor=pointer]:
+              - generic [ref=e117]:
+                - img [ref=e118]
+                - generic [ref=e121]: Automations
+              - paragraph [ref=e122]: Sprint protocol, PMO scans, scheduled tasks
+            - button "Shortcuts Keyboard shortcuts reference" [ref=e123] [cursor=pointer]:
+              - generic [ref=e124]:
+                - img [ref=e125]
+                - generic [ref=e127]: Shortcuts
+              - paragraph [ref=e128]: Keyboard shortcuts reference
+            - button "About Version and system info" [ref=e129] [cursor=pointer]:
+              - generic [ref=e130]:
+                - img [ref=e131]
+                - generic [ref=e134]: About
+              - paragraph [ref=e135]: Version and system info
+          - generic [ref=e199]:
+            - generic [ref=e200]:
+              - generic [ref=e201]:
+                - heading "Agents" [level=3] [ref=e202]
+                - paragraph [ref=e203]:
+                  - text: Auto-discovered from
+                  - code [ref=e204]: .claude/agents/
+              - button "Create Agent" [ref=e205] [cursor=pointer]:
+                - img [ref=e206]
+                - text: Create Agent
+            - generic [ref=e208]:
+              - generic [ref=e210]:
+                - generic [ref=e212]: No Agent
+                - paragraph [ref=e214]: Plain Claude session
+              - generic [ref=e216]:
+                - generic [ref=e218]: datadog-expert
+                - paragraph [ref=e220]: Observability specialist for tracing, logging, OTEL, and Datadog configuration
+              - generic [ref=e222]:
+                - generic [ref=e224]: gdpr-compliance
+                - paragraph [ref=e226]: EU GDPR/BDSG compliance advisor for data protection, privacy by design, and data subject rights
+              - generic [ref=e228]:
+                - generic [ref=e230]: nextjs-core-dev
+                - paragraph [ref=e232]: Senior Next.js/React 19 developer for app architecture, rendering, performance, and component patterns
+              - generic [ref=e234]:
+                - generic [ref=e236]: security-expert
+                - paragraph [ref=e238]: OWASP-focused security engineer for auth, input validation, headers, and access control review
+  - alert [ref=e6]

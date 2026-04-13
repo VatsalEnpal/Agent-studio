@@ -1,31 +1,25 @@
 #!/usr/bin/env node
 /**
- * Demo Video Recording — Captures Agent Studio at maximum visual density.
+ * Demo Video Recording — Captures Agent Studio with real Claude Code sessions.
  *
- * Approach (from video-approach.md):
- *   Shot 1 (0-4s):  Sessions — 5 terminals streaming in grid (THE HOOK)
- *   Shot 2 (4-8s):  Sprints  — Auth System Overhaul at 50%, mixed gates
- *   Shot 3 (8-12s): Rooms    — Agent conversation with @mentions
- *   Shot 4 (12-15s): Memory  — 10 entries across categories with tags
- *   End card added in post-production (ffmpeg).
+ * Shot list (~14s of content, end card added in post-production):
+ *   Shot 1 (3s):  Backend session  — Claude reading code + generating auth (HERO)
+ *   Shot 2 (2s):  Frontend session — Claude building dashboard component
+ *   Shot 3 (2s):  Sprint timeline  — Auth System Overhaul, mixed gate states
+ *   Shot 4 (2s):  Room chat        — Agent conversation with @mentions
+ *   Shot 5 (2s):  QA session       — Claude writing tests
+ *   Shot 6 (2s):  Memory tab       — 10 knowledge entries across categories
  *
- * Prerequisites:
- *   1. Run seed first:  node scripts/seed-demo.mjs
- *   2. Restart server:  kill server, DEMO_MODE=true npm run dev
- *   3. Run seed again:  node scripts/seed-demo.mjs
- *   4. Then record:     node scripts/record-demo.mjs
+ * The sidebar shows all 4 sessions running with live cost tracking.
+ * Quick cuts between sessions create energy while keeping text readable.
  *
- * Or use the all-in-one:
- *   node scripts/record-demo.mjs --full
- *     (kills server, seeds, restarts, seeds again, records)
- *
- * Output:
- *   demo-videos/raw.webm              — Raw Playwright recording
- *   demo-videos/screenshots/*.png     — High-res screenshots at each shot
+ * Usage:
+ *   node scripts/record-demo.mjs --full   # Full pipeline: kill, start, seed, record
+ *   node scripts/record-demo.mjs          # Record only (seed already done)
  */
 
 import { chromium } from "playwright";
-import { mkdirSync, existsSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import { execSync, spawn } from "node:child_process";
 
 const BASE = "http://localhost:8080";
@@ -44,7 +38,7 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-async function waitForServer(url, timeoutMs = 15000) {
+async function waitForServer(url, timeoutMs = 30000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
@@ -59,13 +53,13 @@ async function waitForServer(url, timeoutMs = 15000) {
   throw new Error(`Server not ready at ${url} after ${timeoutMs}ms`);
 }
 
-// ─── Full mode: seed + restart + record ─────────────────────────────────────
+// ─── Full mode: kill → start server → seed → wait → record ─────────────────
 
 if (FULL_MODE) {
   console.log("\n🎬 Full recording pipeline\n");
 
   // Kill existing server
-  console.log("  Killing existing server...");
+  console.log("  1. Killing existing server...");
   try {
     execSync("kill $(lsof -ti :8080) 2>/dev/null", { stdio: "ignore" });
     await sleep(2000);
@@ -73,20 +67,8 @@ if (FULL_MODE) {
     // no server to kill
   }
 
-  // Run seed to create config + data on disk
-  console.log("  Running seed (pass 1 — config + files)...");
-  execSync("node scripts/seed-demo.mjs 2>/dev/null", { stdio: "inherit" });
-
-  // Kill server again (seed may have communicated with it)
-  try {
-    execSync("kill $(lsof -ti :8080) 2>/dev/null", { stdio: "ignore" });
-    await sleep(2000);
-  } catch {
-    // fine
-  }
-
-  // Restart server with demo config already on disk
-  console.log("  Starting server with DEMO_MODE...");
+  // Start fresh server with DEMO_MODE for path sanitization
+  console.log("  2. Starting server with DEMO_MODE...");
   const server = spawn("npm", ["run", "dev"], {
     env: { ...process.env, DEMO_MODE: "true" },
     detached: true,
@@ -95,13 +77,19 @@ if (FULL_MODE) {
   server.unref();
 
   await waitForServer(BASE);
-  console.log("  Server ready.\n");
+  console.log("     Server ready.");
 
-  // Run seed again to create sessions/rooms/sprints via API
-  console.log("  Running seed (pass 2 — API data)...");
+  // Run seed — creates projects, config, sessions (real Claude Code), sprint, room
+  console.log("  3. Running seed...");
   execSync("node scripts/seed-demo.mjs", { stdio: "inherit" });
 
-  console.log("\n  Starting recording...\n");
+  // Wait for Claude sessions to be actively streaming.
+  // Trust dialog auto-approved (~5s) → Claude initializes (~10s) → starts processing (~15s)
+  // We want sessions mid-processing: thinking indicators, tool calls visible.
+  console.log("  4. Waiting 35s for Claude sessions to be mid-processing...");
+  await sleep(35000);
+
+  console.log("  5. Starting recording...\n");
 }
 
 // ─── Pre-flight checks ─────────────────────────────────────────────────────
@@ -109,16 +97,14 @@ if (FULL_MODE) {
 try {
   await waitForServer(BASE, 5000);
 } catch {
-  console.error("❌ Server not running. Start with: DEMO_MODE=true npm run dev");
-  console.error("   Or use --full flag: node scripts/record-demo.mjs --full");
+  console.error("❌ Server not running. Use --full flag or start manually:");
+  console.error("   DEMO_MODE=true npm run dev && node scripts/seed-demo.mjs");
   process.exit(1);
 }
 
-// Verify we have sessions
 const health = await fetch(`${BASE}/api/health`).then((r) => r.json());
 if (health.activeSessions < 3) {
-  console.error("❌ Only " + health.activeSessions + " sessions active. Run seed first:");
-  console.error("   node scripts/seed-demo.mjs");
+  console.error(`❌ Only ${health.activeSessions} sessions active. Run seed first.`);
   process.exit(1);
 }
 
@@ -126,6 +112,11 @@ console.log("🎬 Recording demo...\n");
 console.log(`  Resolution: ${WIDTH}x${HEIGHT}`);
 console.log(`  Sessions:   ${health.activeSessions} active`);
 console.log(`  Output:     ${OUTPUT_DIR}/\n`);
+
+// Get session list so we can switch between them by clicking in the sidebar
+const sessions = await fetch(`${BASE}/api/sessions`).then((r) => r.json());
+const sessionNames = sessions.map((s) => s.name);
+console.log(`  Session names: ${sessionNames.join(", ")}\n`);
 
 // ─── Record ─────────────────────────────────────────────────────────────────
 
@@ -142,35 +133,50 @@ const wait = (ms) => page.waitForTimeout(ms);
 
 // Navigate and wait for full load + terminal rendering
 await page.goto(BASE, { waitUntil: "networkidle" });
-await wait(1000);
+await wait(2000);
 
-// Ensure we're on sessions tab and terminal content has rendered
+// Ensure we're on sessions tab
 await page.keyboard.press("Meta+1");
-await wait(3000); // Critical: wait for xterm.js to render terminal content
+await wait(2000); // Wait for xterm.js to render
 
-// Click the first session to make sure terminal output is visible
-const firstSession = page.locator("text=velocity-").first();
-if (await firstSession.isVisible({ timeout: 1000 }).catch(() => false)) {
-  await firstSession.click();
-  await wait(1000);
+// ─── Shot 1: Backend Session — THE HERO SHOT (3s) ──────────────────────────
+// Shows Claude reading Go files and generating JWT auth code.
+// Sidebar shows all 4 sessions with live costs.
+console.log("  Shot 1: Backend session (auth code generation — HERO)");
+
+// Click on the backend session to focus it
+const backendSession = page.locator("text=backend").first();
+if (await backendSession.isVisible({ timeout: 1000 }).catch(() => false)) {
+  await backendSession.click();
+  await wait(500);
 }
 
-// ─── Shot 1: Sessions — THE HOOK (4s) ──────────────────────────────────────
-console.log("  Shot 1: Sessions (5 terminals streaming)");
-
-// Take hero screenshot
 await page.screenshot({
   path: `${SCREENSHOTS_DIR}/hero-terminal-grid.png`,
   type: "png",
 });
-await wait(3500);
+await wait(3000);
 
-// ─── Shot 2: Sprints — Pipeline at 50% (4s) ────────────────────────────────
-console.log("  Shot 2: Sprints (mixed gate states)");
+// ─── Shot 2: Frontend Session — Quick cut (2s) ─────────────────────────────
+console.log("  Shot 2: Frontend session (dashboard component)");
+
+const frontendSession = page.locator("text=frontend").first();
+if (await frontendSession.isVisible({ timeout: 1000 }).catch(() => false)) {
+  await frontendSession.click();
+  await wait(500);
+}
+
+await page.screenshot({
+  path: `${SCREENSHOTS_DIR}/hero-frontend-session.png`,
+  type: "png",
+});
+await wait(1500);
+
+// ─── Shot 3: Sprint Timeline — Mixed states (2s) ───────────────────────────
+console.log("  Shot 3: Sprint timeline (Auth System Overhaul)");
 await page.keyboard.press("Meta+3");
 await wait(500);
 
-// Click the active sprint if needed
 const sprintItem = page.locator("text=Auth System Overhaul").first();
 if (await sprintItem.isVisible({ timeout: 1000 }).catch(() => false)) {
   await sprintItem.click();
@@ -181,32 +187,48 @@ await page.screenshot({
   path: `${SCREENSHOTS_DIR}/hero-sprint-timeline.png`,
   type: "png",
 });
-await wait(3000);
+await wait(1500);
 
-// ─── Shot 3: Rooms — Agent conversation (4s) ────────────────────────────────
-console.log("  Shot 3: Rooms (agent collaboration)");
+// ─── Shot 4: Room Chat — Agent conversation (2s) ───────────────────────────
+console.log("  Shot 4: Room chat (Sprint War Room)");
 await page.keyboard.press("Meta+2");
 await wait(500);
 
-// Click the room
 const roomItem = page.locator("text=Sprint War Room").first();
 if (await roomItem.isVisible({ timeout: 1000 }).catch(() => false)) {
   await roomItem.click();
   await wait(500);
 }
 
-// Scroll to see a good range of messages
-await page.mouse.wheel(0, 200);
-await wait(300);
+// Scroll to the status update message
+await page.mouse.wheel(0, 400);
+await wait(200);
 
 await page.screenshot({
   path: `${SCREENSHOTS_DIR}/hero-room-chat.png`,
   type: "png",
 });
-await wait(3000);
+await wait(1500);
 
-// ─── Shot 4: Memory — Knowledge entries (3s) ────────────────────────────────
-console.log("  Shot 4: Memory (10 entries, categories, tags)");
+// ─── Shot 5: QA Session — Writing tests (2s) ───────────────────────────────
+console.log("  Shot 5: QA session (writing tests)");
+await page.keyboard.press("Meta+1");
+await wait(300);
+
+const qaSession = page.locator("text=qa").first();
+if (await qaSession.isVisible({ timeout: 1000 }).catch(() => false)) {
+  await qaSession.click();
+  await wait(500);
+}
+
+await page.screenshot({
+  path: `${SCREENSHOTS_DIR}/hero-qa-session.png`,
+  type: "png",
+});
+await wait(1500);
+
+// ─── Shot 6: Memory — Knowledge entries (2s) ────────────────────────────────
+console.log("  Shot 6: Memory (10 entries, categories)");
 await page.keyboard.press("Meta+4");
 await wait(500);
 
@@ -214,12 +236,12 @@ await page.screenshot({
   path: `${SCREENSHOTS_DIR}/hero-memory.png`,
   type: "png",
 });
-await wait(2500);
+await wait(1500);
 
-// ─── Final: Back to sessions for the close (1s) ────────────────────────────
+// ─── Final: Brief return to sessions ────────────────────────────────────────
 console.log("  Final: Back to sessions");
 await page.keyboard.press("Meta+1");
-await wait(1500);
+await wait(1000);
 
 // ─── Done ───────────────────────────────────────────────────────────────────
 
@@ -231,8 +253,10 @@ await browser.close();
 console.log(`\n🎬 Recording complete!\n`);
 console.log(`  Raw video:    ${videoPath ?? OUTPUT_DIR + "/raw.webm"}`);
 console.log(`  Screenshots:  ${SCREENSHOTS_DIR}/`);
-console.log(`    - hero-terminal-grid.png`);
-console.log(`    - hero-sprint-timeline.png`);
-console.log(`    - hero-room-chat.png`);
-console.log(`    - hero-memory.png`);
+console.log(`    - hero-terminal-grid.png     (backend session — hero)`);
+console.log(`    - hero-frontend-session.png  (frontend session)`);
+console.log(`    - hero-sprint-timeline.png   (sprint timeline)`);
+console.log(`    - hero-room-chat.png         (room chat)`);
+console.log(`    - hero-qa-session.png        (QA session)`);
+console.log(`    - hero-memory.png            (memory entries)`);
 console.log(`\n  Next: run scripts/build-demo.sh to post-produce.\n`);

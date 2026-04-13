@@ -1,0 +1,206 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]:
+        - text: Agent Studio
+        - generic [ref=e401]: ·
+        - generic [ref=e402]: Agent Session 1
+      - generic "Connected to server" [ref=e14]
+    - generic [ref=e15]:
+      - navigation "Main navigation" [ref=e16]:
+        - generic [ref=e17]: A
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - button "Sessions" [ref=e20] [cursor=pointer]:
+              - img [ref=e22]
+              - generic "1 unread" [ref=e571]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e25]:
+            - button "Teams" [ref=e26] [cursor=pointer]:
+              - img [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e29]:
+            - button "Sprints" [ref=e30] [cursor=pointer]:
+              - img [ref=e31]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e34]:
+            - button "Memory" [ref=e35] [cursor=pointer]:
+              - img [ref=e36]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e38]:
+            - button "Reports" [ref=e39] [cursor=pointer]:
+              - img [ref=e40]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e42]:
+          - button "Settings" [ref=e43] [cursor=pointer]:
+            - img [ref=e44]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e47]:
+        - generic [ref=e315]:
+          - generic [ref=e317]:
+            - button "Sessions" [ref=e318] [cursor=pointer]
+            - button "History" [ref=e319] [cursor=pointer]
+            - button "Servers" [ref=e320] [cursor=pointer]
+          - generic [ref=e322]:
+            - img [ref=e323]
+            - textbox "Search..." [ref=e326]
+          - generic [ref=e327]:
+            - button "Running 1" [ref=e572]:
+              - generic [ref=e329]: Running
+              - generic [ref=e573]: "1"
+            - 'generic "Session A Status: active Path: /Users/vatsalbhatt230813 Model: opus Created: 4/13/2026, 9:16:52 AM" [ref=e574] [cursor=pointer]':
+              - generic [ref=e575]:
+                - generic [ref=e577]: Session A
+                - button "Rename session" [ref=e578]:
+                  - img [ref=e579]
+                - button "Pin session" [ref=e582]:
+                  - img [ref=e583]
+                - button "Copy session ID" [ref=e585]:
+                  - img [ref=e586]
+                - button "Kill session" [ref=e589]:
+                  - img [ref=e590]
+              - generic [ref=e593]:
+                - generic [ref=e594]: ~
+                - generic [ref=e595]: 1s
+                - generic [ref=e596]: opus
+          - generic [ref=e334]:
+            - button "Dev Servers" [ref=e335] [cursor=pointer]: Dev Servers
+            - button "New Session ⇧⌘N" [ref=e337] [cursor=pointer]:
+              - img [ref=e338]
+              - text: New Session
+              - generic [ref=e339]: ⇧⌘N
+      - main [ref=e75]:
+        - generic [ref=e429]:
+          - generic [ref=e430]:
+            - generic [ref=e431]: opus
+            - generic "/Users/vatsalbhatt230813" [ref=e432]: ~
+          - generic [ref=e436]:
+            - textbox "Terminal input" [ref=e437]
+            - generic:
+              - generic:
+                - generic: ╭───
+                - generic: Claude
+                - generic: Code
+                - generic: v2.1.104
+                - generic: ──────────────────────────────────────────────────────────────────────────────────────────────────────╮
+              - generic:
+                - generic: │
+                - generic: │
+                - generic: Tips
+                - generic: for
+                - generic: getting
+                - generic: started
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: Welcome
+                - generic: back
+                - generic: Vatsal!
+                - generic: │
+                - generic: Run /init to create a CLAUDE.md file with instructions for Claude
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: │
+                - generic: "Note: You have launched claude in your home directory. For the best exp…"
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: ▗
+                - generic: ▗ ▖
+                - generic: ▖
+                - generic: │
+                - generic: ────────────────────────────────────────────────────────────────────────
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: │
+                - generic: Recent
+                - generic: activity
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: ▘▘
+                - generic: ▝▝
+                - generic: │
+                - generic: "No"
+                - generic: recent
+                - generic: activity
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: Opus
+                - generic: "4.6"
+                - generic: with
+                - generic: high
+                - generic: effort
+                - generic: ·
+                - generic: Claude
+                - generic: Max
+                - generic: ·
+                - generic: │
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: vatsal.bhatt@enpal.de's
+                - generic: Organization
+                - generic: │
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: /Users/vatsalbhatt230813
+                - generic: │
+                - generic: │
+              - generic:
+                - generic: ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+              - generic:
+                - generic: /remote-control is active
+                - generic: · Code in CLI or at https://claude.ai/code/session_01JpVpvnhHbEkcD3fk4e7c1G
+              - generic:
+                - generic: ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+              - generic:
+                - generic: ❯
+              - generic:
+                - generic: ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+              - generic:
+                - generic: ⏵⏵
+                - generic: bypass
+                - generic: permissions
+                - generic: "on"
+                - generic: (shift+tab
+                - generic: to
+                - generic: cycle)
+  - alert [ref=e6]

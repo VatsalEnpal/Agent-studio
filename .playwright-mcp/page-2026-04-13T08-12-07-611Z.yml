@@ -1,0 +1,142 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic "Close" [ref=e5]
+        - generic "Minimize" [ref=e6]
+        - generic "Maximize" [ref=e7]
+      - generic [ref=e8]: Agent Studio
+      - generic "Connected to server" [ref=e10]
+    - generic [ref=e11]:
+      - navigation "Main navigation" [ref=e12]:
+        - generic [ref=e13]: A
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - button "Sessions" [ref=e16] [cursor=pointer]:
+              - img [ref=e18]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e21]:
+            - button "Teams" [ref=e22] [cursor=pointer]:
+              - img [ref=e23]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e25]:
+            - button "Sprints" [ref=e26] [cursor=pointer]:
+              - img [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e30]:
+            - button "Memory" [ref=e31] [cursor=pointer]:
+              - img [ref=e32]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e34]:
+            - button "Reports" [ref=e35] [cursor=pointer]:
+              - img [ref=e36]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e38]:
+          - button "Settings" [ref=e39] [cursor=pointer]:
+            - img [ref=e40]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e43]:
+        - generic [ref=e335]:
+          - generic [ref=e337]:
+            - button "Sessions" [ref=e338] [cursor=pointer]
+            - button "History" [ref=e339] [cursor=pointer]
+            - button "Servers" [active] [ref=e340] [cursor=pointer]
+          - generic [ref=e342]:
+            - img [ref=e343]
+            - textbox "Search..." [ref=e346]
+          - generic [ref=e365]:
+            - generic [ref=e366]:
+              - generic [ref=e368]: :8081
+              - generic [ref=e369]: node
+            - generic [ref=e370]:
+              - generic [ref=e372]: :8080
+              - generic [ref=e373]: node
+            - generic [ref=e374]:
+              - generic [ref=e376]: :0
+              - generic [ref=e377]: npm run dev
+          - generic [ref=e354]:
+            - button "Dev Servers" [ref=e355] [cursor=pointer]: Dev Servers
+            - button "New Session ⇧⌘N" [ref=e357] [cursor=pointer]:
+              - img [ref=e358]
+              - text: New Session
+              - generic [ref=e359]: ⇧⌘N
+      - main [ref=e71]:
+        - generic [ref=e379]:
+          - generic [ref=e380]:
+            - generic [ref=e381]:
+              - heading "Dev Servers" [level=2] [ref=e383]
+              - generic [ref=e384]: Running processes and listening ports
+              - generic [ref=e385]: 3 listening
+            - generic [ref=e386]:
+              - img [ref=e387]
+              - textbox "Filter..." [ref=e390]
+            - button "Add Server" [ref=e391] [cursor=pointer]:
+              - img [ref=e392]
+              - text: Add Server
+            - button "Refresh" [ref=e393] [cursor=pointer]:
+              - img [ref=e394]
+          - generic [ref=e397]:
+            - generic [ref=e398]:
+              - generic [ref=e399]: Port
+              - generic [ref=e400]: Process
+              - generic [ref=e401]: Directory
+              - generic [ref=e402]: PID
+              - generic [ref=e403]: Actions
+            - generic [ref=e404]:
+              - generic [ref=e407]: "8081"
+              - generic [ref=e409]: Node
+              - generic [ref=e411]: /
+              - generic [ref=e412]: "20810"
+              - generic [ref=e413]:
+                - link "Open http://localhost:8081" [ref=e414] [cursor=pointer]:
+                  - /url: http://localhost:8081
+                  - img [ref=e415]
+                - button "Stop process" [ref=e419] [cursor=pointer]:
+                  - img [ref=e420]
+            - generic [ref=e422]:
+              - generic [ref=e425]: "8080"
+              - generic [ref=e427]: Node
+              - generic [ref=e429]: /
+              - generic [ref=e430]: "45269"
+              - generic [ref=e431]:
+                - link "Open http://localhost:8080" [ref=e432] [cursor=pointer]:
+                  - /url: http://localhost:8080
+                  - img [ref=e433]
+                - generic [ref=e437]: self
+            - generic [ref=e438]:
+              - generic [ref=e441]: "0"
+              - generic [ref=e443]: Npm run dev
+              - generic [ref=e445]: /tmp/shiploop-test-project
+              - generic [ref=e446]: "0"
+              - button "Stop process" [ref=e448] [cursor=pointer]:
+                - img [ref=e449]
+  - alert [ref=e78]

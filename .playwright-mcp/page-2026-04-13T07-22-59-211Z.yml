@@ -1,0 +1,127 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]:
+        - text: Agent Studio
+        - generic [ref=e401]: ·
+        - generic [ref=e402]: Session B
+      - generic "Connected to server" [ref=e14]
+    - generic [ref=e15]:
+      - navigation "Main navigation" [ref=e16]:
+        - generic [ref=e17]: A
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - button "Sessions" [ref=e20] [cursor=pointer]:
+              - img [ref=e22]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e25]:
+            - button "Teams" [ref=e26] [cursor=pointer]:
+              - img [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e29]:
+            - button "Sprints" [ref=e30] [cursor=pointer]:
+              - img [ref=e31]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e34]:
+            - button "Memory" [ref=e35] [cursor=pointer]:
+              - img [ref=e36]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e38]:
+            - button "Reports" [ref=e39] [cursor=pointer]:
+              - img [ref=e40]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e42]:
+          - button "Settings" [ref=e43] [cursor=pointer]:
+            - img [ref=e44]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e47]:
+        - generic [ref=e933]:
+          - heading "Memory" [level=3] [ref=e934]
+          - paragraph [ref=e935]: Agent learnings, corrections, and decisions stored across sessions.
+      - main [ref=e75]:
+        - generic [ref=e937]:
+          - generic [ref=e938]:
+            - generic [ref=e939]:
+              - img [ref=e940]
+              - textbox "Search memories..." [ref=e943]
+            - button "New" [ref=e944] [cursor=pointer]:
+              - img [ref=e945]
+              - text: New
+          - generic [ref=e946]:
+            - button "All 0" [ref=e1103] [cursor=pointer]:
+              - text: All
+              - generic [ref=e948]: "0"
+            - button "Learnings 0" [ref=e1104] [cursor=pointer]:
+              - text: Learnings
+              - generic [ref=e950]: "0"
+            - button "Corrections 0" [ref=e951] [cursor=pointer]:
+              - text: Corrections
+              - generic [ref=e952]: "0"
+            - button "Decisions 0" [ref=e953] [cursor=pointer]:
+              - text: Decisions
+              - generic [ref=e954]: "0"
+            - button "Human Inputs 0" [ref=e955] [cursor=pointer]:
+              - text: Human Inputs
+              - generic [ref=e956]: "0"
+            - button "Knowledge 0" [ref=e957] [cursor=pointer]:
+              - text: Knowledge
+              - generic [ref=e958]: "0"
+            - button "Pinned 0" [ref=e960] [cursor=pointer]:
+              - text: Pinned
+              - generic [ref=e961]: "0"
+          - generic [ref=e962]:
+            - generic [ref=e1105]:
+              - img [ref=e1107]
+              - generic [ref=e1109]: No memories stored
+              - paragraph [ref=e1110]:
+                - text: Agent memories are stored in
+                - code [ref=e1111]: ai-agents/memory/
+                - text: and help your agents learn from past work.
+              - paragraph [ref=e1112]: Memories are created automatically when agents complete tasks, or you can create them manually.
+              - button "Create Agent System" [ref=e1113] [cursor=pointer]:
+                - img [ref=e1114]
+                - text: Create Agent System
+            - generic [ref=e977]:
+              - img [ref=e1117]
+              - paragraph [ref=e1119]: No memory selected
+              - paragraph [ref=e1120]: Select a memory from the list to view its full details
+    - generic "Notifications":
+      - alert [ref=e1122]:
+        - img [ref=e1124]
+        - paragraph [ref=e1128]: Memory deleted
+        - button "Dismiss notification" [ref=e1129] [cursor=pointer]:
+          - img [ref=e1130]
+  - alert [ref=e6]

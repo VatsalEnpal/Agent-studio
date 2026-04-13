@@ -44,6 +44,7 @@ export class TerminalManager {
       pty: pty.IPty | null;
       outputBuffer: string;
       ready: boolean;
+      trustApproved: boolean;
       pendingWrites: string[];
     }
   >();
@@ -130,6 +131,7 @@ export class TerminalManager {
       pty: ptyProcess,
       outputBuffer: "",
       ready: false,
+      trustApproved: false,
       pendingWrites: [] as string[],
     };
     this.sessions.set(id, entry);
@@ -151,6 +153,22 @@ export class TerminalManager {
         // Shell readiness detection: look for prompt indicators
         if (!entry.ready) {
           const bufferTail = entry.outputBuffer.slice(-500);
+
+          // Auto-approve Claude Code workspace trust dialog:
+          // When Claude starts in a new directory, it shows a trust prompt.
+          // Auto-approve it so pending writes (user prompts) can proceed.
+          // Note: ANSI cursor positioning codes separate words, so we match
+          // individual keywords rather than full phrases.
+          if (
+            !entry.trustApproved &&
+            bufferTail.includes("trust") &&
+            bufferTail.includes("folder") &&
+            bufferTail.includes("confirm")
+          ) {
+            entry.trustApproved = true;
+            ptyProcess.write("\r");
+          }
+
           // Match common prompt patterns: $, >, ❯, %, or Claude's ">" prompt
           if (/[>$❯%]\s*$/.test(bufferTail) || bufferTail.includes("Claude Code")) {
             entry.ready = true;

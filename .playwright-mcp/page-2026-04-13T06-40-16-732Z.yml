@@ -1,0 +1,141 @@
+- generic [ref=e1]:
+  - alert [ref=e6]
+  - generic [ref=e50]:
+    - banner [ref=e51]:
+      - generic [ref=e52]:
+        - generic "Close" [ref=e53]
+        - generic "Minimize" [ref=e54]
+        - generic "Maximize" [ref=e55]
+      - generic [ref=e56]: Agent Studio
+      - generic "Connected to server" [ref=e58]
+    - generic [ref=e59]:
+      - navigation "Main navigation" [ref=e60]:
+        - generic [ref=e61]: A
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - button "Sessions" [ref=e64] [cursor=pointer]:
+              - img [ref=e66]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e69]:
+            - button "Teams" [ref=e70] [cursor=pointer]:
+              - img [ref=e71]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e73]:
+            - button "Sprints" [ref=e74] [cursor=pointer]:
+              - img [ref=e75]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e78]:
+            - button "Memory" [ref=e79] [cursor=pointer]:
+              - img [ref=e80]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e82]:
+            - button "Reports" [ref=e83] [cursor=pointer]:
+              - img [ref=e84]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e86]:
+          - button "Settings" [ref=e87] [cursor=pointer]:
+            - img [ref=e88]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e91]:
+        - generic [ref=e258]:
+          - heading "Settings" [level=3] [ref=e259]
+          - paragraph [ref=e260]: Model defaults, projects, agent system, and system monitor.
+      - main [ref=e119]:
+        - generic [ref=e262]:
+          - generic [ref=e263]:
+            - button "General Model, theme, notifications" [ref=e264] [cursor=pointer]:
+              - generic [ref=e265]:
+                - img [ref=e266]
+                - generic [ref=e269]: General
+              - paragraph [ref=e270]: Model, theme, notifications
+            - button "Projects Tracked repos and agent system" [ref=e271] [cursor=pointer]:
+              - generic [ref=e272]:
+                - img [ref=e273]
+                - generic [ref=e275]: Projects
+              - paragraph [ref=e276]: Tracked repos and agent system
+            - button "Agents Discovered agent definitions" [ref=e277] [cursor=pointer]:
+              - generic [ref=e278]:
+                - img [ref=e279]
+                - generic [ref=e282]: Agents
+              - paragraph [ref=e283]: Discovered agent definitions
+            - button "System Monitor CPU, memory, disk, active processes" [ref=e284] [cursor=pointer]:
+              - generic [ref=e285]:
+                - img [ref=e286]
+                - generic [ref=e288]: System Monitor
+              - paragraph [ref=e289]: CPU, memory, disk, active processes
+            - button "Automations Sprint protocol, PMO scans, scheduled tasks" [active] [ref=e290] [cursor=pointer]:
+              - generic [ref=e291]:
+                - img [ref=e292]
+                - generic [ref=e295]: Automations
+              - paragraph [ref=e296]: Sprint protocol, PMO scans, scheduled tasks
+            - button "Shortcuts Keyboard shortcuts reference" [ref=e297] [cursor=pointer]:
+              - generic [ref=e298]:
+                - img [ref=e299]
+                - generic [ref=e301]: Shortcuts
+              - paragraph [ref=e302]: Keyboard shortcuts reference
+            - button "About Version and system info" [ref=e303] [cursor=pointer]:
+              - generic [ref=e304]:
+                - img [ref=e305]
+                - generic [ref=e308]: About
+              - paragraph [ref=e309]: Version and system info
+          - generic [ref=e311]:
+            - generic [ref=e530]:
+              - generic [ref=e531]:
+                - heading "PMO Scheduler" [level=3] [ref=e532]
+                - paragraph [ref=e533]: Periodic project health scans. The PMO agent reviews code quality, test coverage, and open issues on a schedule.
+              - generic [ref=e534]:
+                - generic [ref=e538]: Paused
+                - generic [ref=e539]:
+                  - button "Start" [ref=e540] [cursor=pointer]:
+                    - img [ref=e541]
+                    - text: Start
+                  - button "Run Scan Now" [ref=e543] [cursor=pointer]:
+                    - img [ref=e544]
+                    - text: Run Scan Now
+            - generic [ref=e547]:
+              - generic [ref=e548]:
+                - generic [ref=e549]:
+                  - img [ref=e550]
+                  - heading "Automations" [level=3] [ref=e552]
+                  - generic [ref=e553]: (0)
+                - generic [ref=e554]:
+                  - button "Suggestions" [ref=e555] [cursor=pointer]:
+                    - img [ref=e556]
+                    - text: Suggestions
+                  - button "Add" [ref=e558] [cursor=pointer]:
+                    - img [ref=e559]
+                    - text: Add
+              - generic [ref=e560]:
+                - paragraph [ref=e561]: No automations configured. Click "Add" to create one.
+                - generic [ref=e562]:
+                  - textbox "Describe an automation... (e.g., 'Review code for security issues daily')" [ref=e563]
+                  - button "Generate" [disabled] [ref=e564]

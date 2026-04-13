@@ -1,0 +1,233 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]:
+        - text: Agent Studio
+        - generic [ref=e138]: ·
+        - generic [ref=e139]: Test Session 1
+      - generic [ref=e13]:
+        - generic "Total API spend across all active sessions" [ref=e268]:
+          - generic [ref=e269]: Spend
+          - text: $0.07
+        - generic "Connected to server" [ref=e14]
+    - generic [ref=e15]:
+      - navigation "Main navigation" [ref=e16]:
+        - generic [ref=e17]: A
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - button "Sessions" [active] [ref=e20] [cursor=pointer]:
+              - img [ref=e22]
+              - generic "1 unread" [ref=e405]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e25]:
+            - button "Teams" [ref=e26] [cursor=pointer]:
+              - img [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e29]:
+            - button "Sprints" [ref=e30] [cursor=pointer]:
+              - img [ref=e31]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e34]:
+            - button "Memory" [ref=e35] [cursor=pointer]:
+              - img [ref=e36]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e38]:
+            - button "Reports" [ref=e39] [cursor=pointer]:
+              - img [ref=e40]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e42]:
+          - button "Settings" [ref=e43] [cursor=pointer]:
+            - img [ref=e44]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e47]:
+        - generic [ref=e1507]:
+          - generic [ref=e1509]:
+            - button "Sessions" [ref=e1510] [cursor=pointer]
+            - button "History" [ref=e1511] [cursor=pointer]
+            - button "Servers" [ref=e1512] [cursor=pointer]
+          - generic [ref=e1514]:
+            - img [ref=e1515]
+            - textbox "Search..." [ref=e1518]
+          - generic [ref=e1519]:
+            - button "Running 1" [ref=e1520]:
+              - generic [ref=e1521]: Running
+              - generic [ref=e1522]: "1"
+            - 'generic "Test Session 1 Status: active Path: /tmp/shiploop-test-project Model: sonnet Tokens: 63,084 Cost: $0.07 Context: 2% Created: 4/13/2026, 8:56:02 AM" [ref=e1524] [cursor=pointer]':
+              - generic [ref=e1525]:
+                - generic [ref=e1527]: Test Session 1
+                - button "Rename session" [ref=e1528]:
+                  - img [ref=e1529]
+                - button "Pin session" [ref=e1532]:
+                  - img [ref=e1533]
+                - button "Copy session ID" [ref=e1535]:
+                  - img [ref=e1536]
+                - button "Kill session" [ref=e1539]:
+                  - img [ref=e1540]
+              - generic [ref=e1543]:
+                - generic [ref=e1544]: /tmp/shiploop-test-project
+                - generic [ref=e1545]: 9m 46s
+                - generic [ref=e1546]: sonnet
+                - generic [ref=e1547]: $0.07
+          - generic [ref=e1550]:
+            - button "Dev Servers" [ref=e1551] [cursor=pointer]: Dev Servers
+            - button "New Session ⇧⌘N" [ref=e1553] [cursor=pointer]:
+              - img [ref=e1554]
+              - text: New Session
+              - generic [ref=e1555]: ⇧⌘N
+      - main [ref=e75]:
+        - generic [ref=e166]:
+          - generic [ref=e167]:
+            - generic [ref=e168]: sonnet
+            - generic [ref=e407]: 63.1K tokens
+            - generic [ref=e408]: $0.07
+            - generic [ref=e409]:
+              - generic [ref=e410]: Context
+              - generic [ref=e413]: 2%
+            - generic "/tmp/shiploop-test-project" [ref=e414]
+          - generic [ref=e173]:
+            - textbox "Terminal input" [ref=e174]
+            - generic:
+              - generic:
+                - generic: ╭───
+                - generic: Claude
+                - generic: Code
+                - generic: v2.1.104
+                - generic: ───────────────────────────────────────────────────────────────────────────────────────────────╮
+              - generic:
+                - generic: │
+                - generic: │
+                - generic: Tips
+                - generic: for
+                - generic: getting
+                - generic: started
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: Welcome
+                - generic: back
+                - generic: Vatsal!
+                - generic: │
+                - generic: Run /init to create a CLAUDE.md file with instructions for Claude
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: │
+                - generic: ─────────────────────────────────────────────────────────────────
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: ▗
+                - generic: ▗ ▖
+                - generic: ▖
+                - generic: │
+                - generic: Recent
+                - generic: activity
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: │
+                - generic: "No"
+                - generic: recent
+                - generic: activity
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: ▘▘
+                - generic: ▝▝
+                - generic: │
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: Sonnet
+                - generic: "4.6"
+                - generic: with
+                - generic: high
+                - generic: effort
+                - generic: ·
+                - generic: Claude
+                - generic: Max
+                - generic: ·
+                - generic: │
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: vatsal.bhatt@enpal.de's
+                - generic: Organization
+                - generic: │
+                - generic: │
+              - generic:
+                - generic: │
+                - generic: /private/tmp/shiploop-test-project
+                - generic: │
+                - generic: │
+              - generic:
+                - generic: ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+              - generic:
+                - generic: /remote-control is active
+                - generic: · Code in CLI or at https://claude.ai/code/session_01X5nfW7TrNbuBQAWNhZmXob
+              - generic:
+                - generic: ❯
+                - generic: hello, what files are in this project?
+              - generic:
+                - generic: Searched for
+                - generic: "1"
+                - generic: pattern (ctrl+o to expand)
+              - generic:
+                - generic: ⏺
+                - generic: "Here are the notable files in the project:"
+              - generic:
+                - generic: "-"
+                - generic: package.json
+                - generic: — project manifest
+              - generic:
+                - generic: "-"
+                - generic: ai-agents/tools/memory_index.json
+                - generic: — memory index for AI agents
+              - generic:
+                - generic: "-"
+                - generic: .claude/agents/test-agent.md
+                - generic: — a Claude agent definition
+              - generic:
+                - generic: It's a pretty sparse project so far. Would you like to explore any of these files?
+              - generic:
+                - generic: ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+              - generic:
+                - generic: ❯
+              - generic:
+                - generic: ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+              - generic:
+                - generic: "? for shortcuts"
+  - alert [ref=e6]

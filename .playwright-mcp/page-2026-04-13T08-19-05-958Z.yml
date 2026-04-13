@@ -1,0 +1,165 @@
+- generic:
+  - generic:
+    - banner:
+      - generic:
+        - text: Agent Studio
+        - generic: ·
+        - generic: claude-sonnet
+    - generic:
+      - navigation:
+        - generic: A
+        - generic:
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic:
+          - button:
+            - img
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary:
+        - generic:
+          - generic:
+            - heading [level=3]: Memory
+            - paragraph: Agent learnings, corrections, and decisions stored across sessions.
+      - generic:
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - textbox:
+                    - /placeholder: Search memories...
+                - button:
+                  - img
+                  - text: New
+              - generic:
+                - button:
+                  - text: All
+                  - generic: "0"
+                - button:
+                  - text: Learnings
+                  - generic: "0"
+                - button:
+                  - text: Corrections
+                  - generic: "0"
+                - button:
+                  - text: Decisions
+                  - generic: "0"
+                - button:
+                  - text: Human Inputs
+                  - generic: "0"
+                - button:
+                  - text: Knowledge
+                  - generic: "0"
+                - button:
+                  - text: Pinned
+                  - generic: "0"
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - img
+                    - generic: No memories stored
+                    - paragraph:
+                      - text: Agent memories are stored in
+                      - code: ai-agents/memory/
+                      - text: and help your agents learn from past work.
+                    - paragraph: Memories are created automatically when agents complete tasks, or you can create them manually.
+                    - button:
+                      - img
+                      - text: Create Agent System
+                - generic:
+                  - generic:
+                    - generic:
+                      - img
+                    - paragraph: No memory selected
+                    - paragraph: Select a memory from the list to view its full details
+  - alert
+  - dialog "Create Memory" [ref=e1310]:
+    - generic [ref=e1311]:
+      - heading "Create Memory" [level=2] [ref=e1312]
+      - button [active] [ref=e1313] [cursor=pointer]:
+        - img [ref=e1314]
+    - generic [ref=e1317]:
+      - generic [ref=e1318]:
+        - text: Title
+        - textbox "Brief description of this memory" [ref=e1319]
+      - generic [ref=e1320]:
+        - text: Category
+        - combobox [ref=e1321]:
+          - option "Learning" [selected]
+          - option "Correction"
+          - option "Decision"
+          - option "Knowledge"
+          - option "Human Input"
+      - generic [ref=e1322]:
+        - text: Observation
+        - paragraph [ref=e1323]: What did you notice or encounter?
+        - textbox [ref=e1324]
+      - generic [ref=e1325]:
+        - text: Action
+        - paragraph [ref=e1326]: What was done about it?
+        - textbox [ref=e1327]
+      - generic [ref=e1328]:
+        - text: Outcome
+        - paragraph [ref=e1329]: What happened as a result?
+        - textbox [ref=e1330]
+      - generic [ref=e1331]:
+        - text: Lesson
+        - paragraph [ref=e1332]: What should be remembered for next time?
+        - textbox [ref=e1333]
+      - generic [ref=e1334]:
+        - text: Tags
+        - generic [ref=e1335]:
+          - textbox "Add tag (Enter or comma to add)" [ref=e1336]
+          - button "Add" [ref=e1337] [cursor=pointer]
+    - generic [ref=e1338]:
+      - button "Cancel" [ref=e1339] [cursor=pointer]
+      - button "Create" [disabled] [ref=e1340]

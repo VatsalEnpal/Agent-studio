@@ -1,0 +1,11 @@
+# Keep Claude Code context clean — exclude noise
+node_modules/
+.next/
+test-results/
+qa-screenshots/
+test-screenshots/
+logs/
+*.log
+package-lock.json
+pnpm-lock.yaml
+.DS_Store

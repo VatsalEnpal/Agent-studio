@@ -18,13 +18,13 @@
 <br />
 
 <div align="center">
-<img src="demo-videos/screenshots/hero-terminal-grid.png" width="720" alt="Agent Studio — 5 agents running in parallel" />
+<img src="demo-videos/screenshots/hero-terminal-grid.png" width="720" alt="Agent Studio — 4 Claude Code agents running in parallel" />
 </div>
 
 <div align="center">
 <img src="demo-videos/final_demo.gif" width="720" alt="Agent Studio demo — sessions, sprints, rooms, memory" />
 <br />
-<sub>18s demo: Sessions → Sprints → Rooms → Memory</sub>
+<sub>20s demo: Real Claude Code sessions → Sprint timeline → Room chat → Memory</sub>
 </div>
 
 <br />
