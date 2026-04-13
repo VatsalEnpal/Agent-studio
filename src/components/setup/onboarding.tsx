@@ -129,10 +129,7 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
 
   const handleSubmit = () => {
     if (!description.trim()) return;
-    onSubmit(
-      description.trim(),
-      showProject && projectPath.trim() ? projectPath.trim() : null,
-    );
+    onSubmit(description.trim(), showProject && projectPath.trim() ? projectPath.trim() : null);
   };
 
   return (
@@ -142,15 +139,12 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
         <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
             <BoltIcon className="w-6 h-6 text-amber-400" />
-            <h1 className="text-2xl font-semibold text-white tracking-tight">
-              Agent Studio
-            </h1>
+            <h1 className="text-2xl font-semibold text-white tracking-tight">Agent Studio</h1>
           </div>
           <p className="text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
             Your AI-powered command center.
             <br />
-            Tell me what you&apos;re working on &mdash; I&apos;ll build your
-            perfect setup.
+            Tell me what you&apos;re working on &mdash; I&apos;ll build your perfect setup.
           </p>
         </div>
 
@@ -194,9 +188,7 @@ function AskScreen({ onSubmit, onSkip }: AskScreenProps) {
                 showProject && "bg-amber-500/20 border-amber-500/50",
               )}
             >
-              {showProject && (
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              )}
+              {showProject && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
             </span>
             I also have a code project
           </button>
@@ -260,15 +252,13 @@ function ResultScreen({
   applying,
   refining,
 }: ResultScreenProps) {
-  const [enabledAutomations, setEnabledAutomations] = useState<Set<string>>(
-    () => {
-      const initial = new Set<string>();
-      automations.forEach((a) => {
-        if (a.priority === "recommended") initial.add(a.template.id);
-      });
-      return initial;
-    },
-  );
+  const [enabledAutomations, setEnabledAutomations] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    automations.forEach((a) => {
+      if (a.priority === "recommended") initial.add(a.template.id);
+    });
+    return initial;
+  });
   const [refinementInput, setRefinementInput] = useState("");
 
   const toggleAutomation = (id: string) => {
@@ -289,9 +279,7 @@ function ResultScreen({
   return (
     <div className="h-screen flex items-center justify-center bg-canvas">
       <div className="w-full max-w-2xl px-6 py-8 max-h-screen overflow-y-auto">
-        <h2 className="text-lg font-semibold text-white mb-6">
-          Here&apos;s your setup:
-        </h2>
+        <h2 className="text-lg font-semibold text-white mb-6">Here&apos;s your setup:</h2>
 
         {/* Agents */}
         <div className="mb-6">
@@ -306,26 +294,18 @@ function ResultScreen({
                 key={agent.id}
                 className="flex items-start gap-3 py-2 px-2 rounded hover:bg-zinc-800/40 transition-all"
               >
-                <span className="text-base mt-0.5">
-                  {agentIcon(agent.name)}
-                </span>
+                <span className="text-base mt-0.5">{agentIcon(agent.name)}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-zinc-200">
-                      {agent.name}
-                    </span>
+                    <span className="text-sm font-medium text-zinc-200">{agent.name}</span>
                     <ModelBadge model={agent.model} />
                   </div>
-                  <p className="text-xs text-zinc-500 mt-0.5">
-                    {agent.description}
-                  </p>
+                  <p className="text-xs text-zinc-500 mt-0.5">{agent.description}</p>
                 </div>
               </div>
             ))}
             {agents.length === 0 && (
-              <p className="text-xs text-zinc-600 py-2 text-center">
-                No agents generated.
-              </p>
+              <p className="text-xs text-zinc-600 py-2 text-center">No agents generated.</p>
             )}
           </div>
         </div>
@@ -358,13 +338,9 @@ function ResultScreen({
                     )}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <span className="text-sm text-zinc-300">
-                      {auto.template.name}
-                    </span>
+                    <span className="text-sm text-zinc-300">{auto.template.name}</span>
                   </div>
-                  <span className="text-xs text-zinc-600 shrink-0">
-                    {auto.template.schedule}
-                  </span>
+                  <span className="text-xs text-zinc-600 shrink-0">{auto.template.schedule}</span>
                   <ModelBadge model={auto.template.model} />
                 </button>
               ))}
@@ -376,12 +352,14 @@ function ResultScreen({
         <div className="flex flex-col items-center gap-4">
           <button
             onClick={onConfirm}
-            disabled={applying}
+            disabled={applying || agents.length === 0}
             className={cn(
               "flex items-center gap-2 px-8 py-2.5 rounded text-sm font-medium transition-all",
               applying
                 ? "bg-zinc-700 text-zinc-400 cursor-wait"
-                : "bg-amber-500 text-black hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/10 active:scale-[0.98]",
+                : agents.length === 0
+                  ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                  : "bg-amber-500 text-black hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/10 active:scale-[0.98]",
             )}
           >
             {applying ? (
@@ -426,11 +404,7 @@ function ResultScreen({
                     : "bg-zinc-800 text-zinc-600 cursor-not-allowed",
                 )}
               >
-                {refining ? (
-                  <SpinnerIcon className="w-3 h-3 animate-spin" />
-                ) : (
-                  "Update"
-                )}
+                {refining ? <SpinnerIcon className="w-3 h-3 animate-spin" /> : "Update"}
               </button>
             </div>
           </div>
@@ -448,12 +422,8 @@ function LoadingScreen() {
       <div className="text-center space-y-4">
         <SpinnerIcon className="w-8 h-8 text-amber-400 animate-spin mx-auto" />
         <div>
-          <p className="text-sm text-zinc-300 font-medium">
-            Building your setup...
-          </p>
-          <p className="text-xs text-zinc-600 mt-1">
-            Analyzing your needs and generating agents
-          </p>
+          <p className="text-sm text-zinc-300 font-medium">Building your setup...</p>
+          <p className="text-xs text-zinc-600 mt-1">Analyzing your needs and generating agents</p>
         </div>
       </div>
     </div>
@@ -477,89 +447,85 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
   const [applying, setApplying] = useState(false);
   const [refining, setRefining] = useState(false);
 
-  const handleSubmit = useCallback(
-    async (description: string, path: string | null) => {
-      setScreen("loading");
-      setUserDescription(description);
-      setProjectPath(path);
+  const handleSubmit = useCallback(async (description: string, path: string | null) => {
+    setScreen("loading");
+    setUserDescription(description);
+    setProjectPath(path);
 
-      try {
-        // If a project path is given, use the preview endpoint which analyzes + generates
-        if (path) {
-          const res = await fetch("/api/generate-agents/preview", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              projectPath: path,
-              userDescription: description,
-            }),
-          });
-          if (res.ok) {
-            const data = (await res.json()) as PreviewResult;
-            setAgents(data.agents ?? []);
-            setClaudeMd(data.claudeMd ?? null);
-
-            // Also fetch automation suggestions
-            try {
-              const autoRes = await fetch("/api/automations/suggest", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ projectPath: path }),
-              });
-              if (autoRes.ok) {
-                const autoData =
-                  (await autoRes.json()) as AutomationSuggestion[];
-                setAutomations(autoData);
-              }
-            } catch (e) {
-              console.error("Failed to fetch automation suggestions:", e);
-            }
-
-            setScreen("result");
-            return;
-          }
-        }
-
-        // No project path or preview failed — use generate with a generic analysis
-        const analyzeRes = await fetch("/api/analyze-project", {
+    try {
+      // If a project path is given, use the preview endpoint which analyzes + generates
+      if (path) {
+        const res = await fetch("/api/generate-agents/preview", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ path: path ?? "." }),
+          body: JSON.stringify({
+            projectPath: path,
+            userDescription: description,
+          }),
         });
-        let profile = null;
-        if (analyzeRes.ok) {
-          profile = await analyzeRes.json();
-        }
+        if (res.ok) {
+          const data = (await res.json()) as PreviewResult;
+          setAgents(data.agents ?? []);
+          setClaudeMd(data.claudeMd ?? null);
 
-        if (profile) {
-          const genRes = await fetch("/api/agents/generate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              analysis: profile,
-              projectPath: path ?? ".",
-              userDescription: description,
-            }),
-          });
-          if (genRes.ok) {
-            const genData = (await genRes.json()) as {
-              agents: GeneratedAgent[];
-              claudeMd?: string;
-            };
-            setAgents(genData.agents ?? []);
-            setClaudeMd(genData.claudeMd ?? null);
+          // Also fetch automation suggestions
+          try {
+            const autoRes = await fetch("/api/automations/suggest", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ projectPath: path }),
+            });
+            if (autoRes.ok) {
+              const autoData = (await autoRes.json()) as AutomationSuggestion[];
+              setAutomations(autoData);
+            }
+          } catch (e) {
+            console.error("Failed to fetch automation suggestions:", e);
           }
-        }
 
-        setScreen("result");
-      } catch (e) {
-        console.error("Failed to generate agent setup:", e);
-        // If generation fails entirely, still show result (empty)
-        setScreen("result");
+          setScreen("result");
+          return;
+        }
       }
-    },
-    [],
-  );
+
+      // No project path or preview failed — use generate with a generic analysis
+      const analyzeRes = await fetch("/api/analyze-project", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: path ?? "." }),
+      });
+      let profile = null;
+      if (analyzeRes.ok) {
+        profile = await analyzeRes.json();
+      }
+
+      if (profile) {
+        const genRes = await fetch("/api/agents/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            analysis: profile,
+            projectPath: path ?? ".",
+            userDescription: description,
+          }),
+        });
+        if (genRes.ok) {
+          const genData = (await genRes.json()) as {
+            agents: GeneratedAgent[];
+            claudeMd?: string;
+          };
+          setAgents(genData.agents ?? []);
+          setClaudeMd(genData.claudeMd ?? null);
+        }
+      }
+
+      setScreen("result");
+    } catch (e) {
+      console.error("Failed to generate agent setup:", e);
+      // If generation fails entirely, still show result (empty)
+      setScreen("result");
+    }
+  }, []);
 
   const handleSkip = useCallback(async () => {
     try {
