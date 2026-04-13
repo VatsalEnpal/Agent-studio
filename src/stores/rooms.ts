@@ -43,11 +43,11 @@ interface RoomsState {
   lastSeenByRoom: Record<string, string>;
 
   // Streaming state (TalkTo-style)
-  typingAgents: Record<string, TypingAgent[]>;    // roomId -> agent activity info
-  streamingText: Record<string, string>;           // agentId -> accumulated text so far
+  typingAgents: Record<string, TypingAgent[]>; // roomId -> agent activity info
+  streamingText: Record<string, string>; // agentId -> accumulated text so far
 
   // Chain-paused state: true when agents are waiting for human input
-  waitingForUser: Record<string, boolean>;         // roomId -> boolean
+  waitingForUser: Record<string, boolean>; // roomId -> boolean
 
   setRooms: (rooms: Room[]) => void;
   addRoom: (room: Room) => void;
@@ -81,12 +81,13 @@ export const useRoomsStore = create<RoomsState>((set) => ({
 
   setRooms: (rooms) => set({ rooms }),
   addRoom: (room) => set((state) => ({ rooms: [...state.rooms, room] })),
-  selectRoom: (id) => set((state) => ({
-    selectedRoomId: id,
-    lastSeenByRoom: id
-      ? { ...state.lastSeenByRoom, [id]: new Date().toISOString() }
-      : state.lastSeenByRoom,
-  })),
+  selectRoom: (id) =>
+    set((state) => ({
+      selectedRoomId: id,
+      lastSeenByRoom: id
+        ? { ...state.lastSeenByRoom, [id]: new Date().toISOString() }
+        : state.lastSeenByRoom,
+    })),
   setLoading: (loading) => set({ loading }),
 
   addMessage: (roomId, msg) =>
@@ -104,7 +105,7 @@ export const useRoomsStore = create<RoomsState>((set) => ({
       }
       return {
         rooms: state.rooms.map((r) =>
-          r.id === roomId ? { ...r, messages: [...r.messages, msg] } : r,
+          r.id === roomId ? { ...r, messages: [...r.messages, msg].slice(-200) } : r,
         ),
         streamingText: newStreamingText,
         typingAgents: newTyping,
@@ -132,9 +133,7 @@ export const useRoomsStore = create<RoomsState>((set) => ({
         r.id === roomId
           ? {
               ...r,
-              agents: r.agents.map((a) =>
-                a.id === agentId ? { ...a, status } : a,
-              ),
+              agents: r.agents.map((a) => (a.id === agentId ? { ...a, status } : a)),
             }
           : r,
       ),
@@ -148,7 +147,10 @@ export const useRoomsStore = create<RoomsState>((set) => ({
               ...r,
               messages: r.messages.map((m) =>
                 m.id === messageId
-                  ? { ...m, approvalStatus: approved ? "approved" as const : "rejected" as const }
+                  ? {
+                      ...m,
+                      approvalStatus: approved ? ("approved" as const) : ("rejected" as const),
+                    }
                   : m,
               ),
             }
@@ -188,9 +190,7 @@ export const useRoomsStore = create<RoomsState>((set) => ({
       return {
         typingAgents: {
           ...state.typingAgents,
-          [roomId]: current.map((ta) =>
-            ta.agentId === agentId ? { ...ta, activity } : ta,
-          ),
+          [roomId]: current.map((ta) => (ta.agentId === agentId ? { ...ta, activity } : ta)),
         },
       };
     }),
