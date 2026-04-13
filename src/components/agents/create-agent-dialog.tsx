@@ -97,6 +97,10 @@ export function CreateAgentDialog({
   // Step 3: Preview
   const [markdown, setMarkdown] = useState("");
 
+  // AI generation
+  const [generating, setGenerating] = useState(false);
+  const [cliAvailable, setCliAvailable] = useState<boolean | null>(null);
+
   // Result
   const [createdFiles, setCreatedFiles] = useState<string[]>([]);
 
@@ -111,8 +115,24 @@ export function CreateAgentDialog({
     setMarkdown("");
     setError(null);
     setSaving(false);
+    setGenerating(false);
     setCreatedFiles([]);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    void (async () => {
+      try {
+        const res = await fetch("/api/agents/cli-status");
+        if (res.ok) {
+          const data = (await res.json()) as { available: boolean };
+          setCliAvailable(data.available);
+        }
+      } catch {
+        setCliAvailable(false);
+      }
+    })();
+  }, [open]);
 
   const handleClose = useCallback(() => {
     onOpenChange(false);
@@ -145,7 +165,38 @@ export function CreateAgentDialog({
     setRules((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  const goToPreview = useCallback(() => {
+  const goToPreview = useCallback(async () => {
+    // Try smart generation if CLI is available
+    if (cliAvailable) {
+      setGenerating(true);
+      setStep("preview");
+      try {
+        const res = await fetch("/api/agents/preview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectPath: projectPath || ".",
+            userDescription: `Create a single agent named "${name}" (id: ${slug}). Role: ${description}. Tools: ${Array.from(selectedTools).join(", ")}. Rules: ${rules.filter((r) => r.trim()).join("; ")}. Generate ONLY this one agent, not a full team.`,
+            teamSize: 1,
+          }),
+        });
+        if (res.ok) {
+          const data = (await res.json()) as { agents: Array<{ mdContent: string; id: string }> };
+          // Find the agent matching our slug, or use the first one
+          const match = data.agents?.find((a) => a.id === slug) ?? data.agents?.[0];
+          if (match?.mdContent) {
+            setMarkdown(match.mdContent);
+            setGenerating(false);
+            return;
+          }
+        }
+      } catch {
+        // Fall through to dumb template
+      }
+      setGenerating(false);
+    }
+
+    // Fallback: dumb template
     const md = generateAgentMd({
       name,
       slug,
@@ -155,8 +206,8 @@ export function CreateAgentDialog({
       body: "",
     });
     setMarkdown(md);
-    setStep("preview");
-  }, [name, slug, description, selectedTools, rules]);
+    if (step !== "preview") setStep("preview");
+  }, [name, slug, description, selectedTools, rules, cliAvailable, projectPath, step]);
 
   const handleSave = useCallback(async () => {
     setSaving(true);
@@ -248,7 +299,12 @@ export function CreateAgentDialog({
           )}
 
           {step === "preview" && (
-            <StepPreview markdown={markdown} onMarkdownChange={setMarkdown} error={error} />
+            <StepPreview
+              markdown={markdown}
+              onMarkdownChange={setMarkdown}
+              error={error}
+              generating={generating}
+            />
           )}
 
           {step === "done" && <StepDone name={name} createdFiles={createdFiles} />}
@@ -282,12 +338,18 @@ export function CreateAgentDialog({
               </button>
             )}
             {step === "configure" && (
-              <button
-                onClick={goToPreview}
-                className="px-3 py-1.5 text-xs font-medium rounded-[4px] bg-text-primary text-bg-base hover:bg-text-secondary transition-all"
-              >
-                Preview
-              </button>
+              <div className="flex items-center gap-2">
+                {cliAvailable && <span className="text-2xs text-accent">✦ AI-enhanced</span>}
+                {cliAvailable === false && (
+                  <span className="text-2xs text-text-ghost">Basic template</span>
+                )}
+                <button
+                  onClick={() => void goToPreview()}
+                  className="px-3 py-1.5 text-xs font-medium rounded-[4px] bg-text-primary text-bg-base hover:bg-text-secondary transition-all"
+                >
+                  {cliAvailable ? "Generate with AI" : "Preview"}
+                </button>
+              </div>
             )}
             {step === "preview" && (
               <button
@@ -519,11 +581,23 @@ function StepPreview({
   markdown,
   onMarkdownChange,
   error,
+  generating,
 }: {
   markdown: string;
   onMarkdownChange: (v: string) => void;
   error: string | null;
+  generating?: boolean;
 }) {
+  if (generating) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-8">
+        <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+        <p className="text-xs text-text-secondary">Generating agent with Claude Code...</p>
+        <p className="text-2xs text-text-ghost">This may take up to 30 seconds</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
