@@ -211,7 +211,10 @@ export function SessionCard({
   );
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const usage = useSessionUsage(session.id);
+  // Only fetch usage for running sessions — exited/history sessions won't have
+  // live usage data, and fetching for every history card causes an N+1 request storm.
+  const isExitedSession = session.status === "exited";
+  const usage = useSessionUsage(isExitedSession ? null : session.id);
   const effectiveModel = usage.modelShort ?? session.meta?.model ?? null;
   const contextPercent = usage.contextPercent ?? session.meta?.contextPercent ?? 0;
   const costDisplay =
