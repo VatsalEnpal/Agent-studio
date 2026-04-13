@@ -297,7 +297,7 @@ export async function previewAgents(
 
 // ---------- Claude CLI runner ----------
 
-function runClaudeHeadless(prompt: string, model = "sonnet", timeoutMs = 120_000): Promise<string> {
+function runClaudeHeadless(prompt: string, model = "sonnet", timeoutMs = 30_000): Promise<string> {
   return new Promise((resolve, reject) => {
     const args = ["--model", model, "--print", prompt];
     const proc = spawn("claude", args, {

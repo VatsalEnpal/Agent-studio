@@ -458,7 +458,7 @@ function ResultScreen({
 
 // ---------- Loading screen ----------
 
-function LoadingScreen() {
+function LoadingScreen({ onSkip }: { onSkip?: () => void }) {
   return (
     <div className="h-screen flex items-center justify-center bg-canvas">
       <div className="text-center space-y-4">
@@ -467,6 +467,14 @@ function LoadingScreen() {
           <p className="text-sm text-zinc-300 font-medium">Building your setup...</p>
           <p className="text-xs text-zinc-600 mt-1">Analyzing your needs and generating agents</p>
         </div>
+        {onSkip && (
+          <button
+            onClick={onSkip}
+            className="px-3 py-1.5 text-xs text-zinc-500 hover:text-zinc-300 border border-zinc-700 hover:border-zinc-500 rounded transition-all"
+          >
+            Skip — I'll create agents myself
+          </button>
+        )}
       </div>
     </div>
   );
@@ -765,7 +773,7 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
     return (
       <>
         {dismissButton}
-        <LoadingScreen />
+        <LoadingScreen onSkip={() => setScreen("result")} />
       </>
     );
   }

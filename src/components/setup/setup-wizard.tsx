@@ -2,7 +2,25 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { RocketIcon, FolderIcon, BrainIcon, SettingsIcon, ChevronRightIcon, ArrowLeftIcon, PlusIcon, CloseIcon, CheckIcon, WarningIcon, SpinnerIcon, UsersIcon, GitBranchIcon, BellIcon, SparkleIcon, PencilIcon, UndoIcon } from "@/components/ui/icons";
+import {
+  RocketIcon,
+  FolderIcon,
+  BrainIcon,
+  SettingsIcon,
+  ChevronRightIcon,
+  ArrowLeftIcon,
+  PlusIcon,
+  CloseIcon,
+  CheckIcon,
+  WarningIcon,
+  SpinnerIcon,
+  UsersIcon,
+  GitBranchIcon,
+  BellIcon,
+  SparkleIcon,
+  PencilIcon,
+  UndoIcon,
+} from "@/components/ui/icons";
 
 interface ProjectEntry {
   name: string;
@@ -47,7 +65,12 @@ interface SetupWizardProps {
 
 // Available agent definitions
 const AVAILABLE_AGENTS = [
-  { id: "orchestrator", label: "orchestrator", desc: "Coordinates the team, delegates work", defaultOn: true },
+  {
+    id: "orchestrator",
+    label: "orchestrator",
+    desc: "Coordinates the team, delegates work",
+    defaultOn: true,
+  },
   { id: "frontend", label: "frontend", desc: "Builds UI and frontend code", defaultOn: true },
   { id: "backend", label: "backend", desc: "Builds APIs, database, server code", defaultOn: true },
   { id: "qa", label: "qa", desc: "Tests the application", defaultOn: true },
@@ -62,7 +85,14 @@ type WorkflowType = "sprint" | "simple" | "custom";
 function getAllSteps(agentSystem: AgentSystemState) {
   const base = ["Welcome", "Projects", "Agent System", "Preferences"] as const;
   if (agentSystem.enabled && agentSystem.createNew) {
-    return [...base.slice(0, 3), "Describe Project", "Agent Team", "Workflow", "Automation", ...base.slice(3)] as const;
+    return [
+      ...base.slice(0, 3),
+      "Describe Project",
+      "Agent Team",
+      "Workflow",
+      "Automation",
+      ...base.slice(3),
+    ] as const;
   }
   return base;
 }
@@ -166,7 +196,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
       try {
         const res = await fetch("/api/config");
         if (!res.ok) return;
-        const data = await res.json() as {
+        const data = (await res.json()) as {
           homeDir: string;
           mainProjectDir: string;
           config: {
@@ -204,10 +234,12 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
       try {
         const detectRes = await fetch("/api/system/detect", { method: "POST" });
         if (detectRes.ok) {
-          const data = await detectRes.json() as { projects: DetectedProject[] };
+          const data = (await detectRes.json()) as { projects: DetectedProject[] };
           setDetectedProjects(data.projects ?? []);
         }
-      } catch (e) { console.error("Caught error:", e); }
+      } catch (e) {
+        console.error("Caught error:", e);
+      }
       setDetecting(false);
       setDetectionDone(true);
 
@@ -215,10 +247,12 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
       try {
         const preRes = await fetch("/api/system/preflight");
         if (preRes.ok) {
-          const preData = await preRes.json() as { checks: { claudeCode: { version?: string } } };
+          const preData = (await preRes.json()) as { checks: { claudeCode: { version?: string } } };
           setClaudeVersion(preData.checks?.claudeCode?.version ?? "");
         }
-      } catch (e) { console.error("Caught error:", e); }
+      } catch (e) {
+        console.error("Caught error:", e);
+      }
     })();
   }, []);
 
@@ -228,7 +262,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
       try {
         const res = await fetch("/api/agents/cli-status");
         if (res.ok) {
-          const data = await res.json() as { available: boolean };
+          const data = (await res.json()) as { available: boolean };
           setAiGen((prev) => ({ ...prev, cliAvailable: data.available }));
         }
       } catch {
@@ -248,7 +282,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
         body: JSON.stringify({ projectPath: projects[0].path }),
       });
       if (res.ok) {
-        const data = await res.json() as Record<string, unknown>;
+        const data = (await res.json()) as Record<string, unknown>;
         setScanResult(data);
       }
     } catch (e) {
@@ -275,7 +309,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
           body: JSON.stringify({ projectPath }),
         });
         if (!analyzeRes.ok) throw new Error("Failed to analyze project");
-        analysis = await analyzeRes.json() as Record<string, unknown>;
+        analysis = (await analyzeRes.json()) as Record<string, unknown>;
       }
 
       setAiGen((prev) => ({ ...prev, status: "generating", analysis }));
@@ -292,10 +326,10 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
         }),
       });
       if (!genRes.ok) {
-        const errData = await genRes.json() as { error?: string };
+        const errData = (await genRes.json()) as { error?: string };
         throw new Error(errData.error ?? "Generation failed");
       }
-      const genData = await genRes.json() as { agents: GeneratedAgentDef[]; claudeMd?: string };
+      const genData = (await genRes.json()) as { agents: GeneratedAgentDef[]; claudeMd?: string };
       const agents = genData.agents ?? [];
 
       setAiGen((prev) => ({ ...prev, status: "done", agents, claudeMd: genData.claudeMd ?? null }));
@@ -326,7 +360,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
           `/api/setup/validate-agent-system?path=${encodeURIComponent(agentSystem.path)}`,
         );
         if (res.ok) {
-          const data = await res.json() as {
+          const data = (await res.json()) as {
             memoryIndex: boolean;
             currentSprint: boolean;
             scanLog: boolean;
@@ -343,10 +377,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
   const addProject = useCallback(() => {
     if (!newProjectPath.trim()) return;
     const name = newProjectPath.trim().split("/").pop() ?? "project";
-    setProjects((prev) => [
-      ...prev,
-      { name, path: newProjectPath.trim(), isProd: false },
-    ]);
+    setProjects((prev) => [...prev, { name, path: newProjectPath.trim(), isProd: false }]);
     setNewProjectPath("");
   }, [newProjectPath]);
 
@@ -355,15 +386,11 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
   }, []);
 
   const toggleProd = useCallback((idx: number) => {
-    setProjects((prev) =>
-      prev.map((p, i) => (i === idx ? { ...p, isProd: !p.isProd } : p)),
-    );
+    setProjects((prev) => prev.map((p, i) => (i === idx ? { ...p, isProd: !p.isProd } : p)));
   }, []);
 
   const toggleAgent = useCallback((id: string) => {
-    setSelectedAgents((prev) =>
-      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id],
-    );
+    setSelectedAgents((prev) => (prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]));
   }, []);
 
   const handleFinish = useCallback(async () => {
@@ -387,7 +414,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
         });
 
         if (scaffoldRes.ok) {
-          const result = await scaffoldRes.json() as { created: string[] };
+          const result = (await scaffoldRes.json()) as { created: string[] };
           setScaffoldResult(result);
           agentSystem.path = `${projectPath}/ai-agents`;
         }
@@ -410,14 +437,15 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
       // Build the config
       const config = {
         projects,
-        agentSystem: agentSystem.enabled && agentSystem.path
-          ? {
-              path: agentSystem.path,
-              memoryIndex: "tools/memory_index.json",
-              sprintDir: "sprints/",
-              scanLog: "sprints/scan_log.md",
-            }
-          : undefined,
+        agentSystem:
+          agentSystem.enabled && agentSystem.path
+            ? {
+                path: agentSystem.path,
+                memoryIndex: "tools/memory_index.json",
+                sprintDir: "sprints/",
+                scanLog: "sprints/scan_log.md",
+              }
+            : undefined,
         devServers: projects
           .filter((p) => !p.isProd)
           .map((p) => ({
@@ -428,10 +456,8 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
         defaults: {
           model,
           permissions,
-          workingDirectory: projects[0]?.path?.replace(
-            new RegExp(`^${await getHomeDir()}`),
-            "~",
-          ) ?? "~",
+          workingDirectory:
+            projects[0]?.path?.replace(new RegExp(`^${await getHomeDir()}`), "~") ?? "~",
         },
         setupComplete: true,
         version: "1.0.0",
@@ -451,7 +477,20 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
     } finally {
       setSaving(false);
     }
-  }, [projects, agentSystem, model, permissions, selectedAgents, workflow, telegramEnabled, schedulerEnabled, schedulerInterval, onComplete, useAiAgents, aiGen.agents]);
+  }, [
+    projects,
+    agentSystem,
+    model,
+    permissions,
+    selectedAgents,
+    workflow,
+    telegramEnabled,
+    schedulerEnabled,
+    schedulerInterval,
+    onComplete,
+    useAiAgents,
+    aiGen.agents,
+  ]);
 
   const canAdvance = (): boolean => {
     const currentStep = STEPS[step];
@@ -472,9 +511,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               key={s}
               className={cn(
                 "flex-1 py-2 text-center text-xs font-medium transition-all border-b-2",
-                i <= step
-                  ? "text-rooms border-rooms"
-                  : "text-text-tertiary border-transparent",
+                i <= step ? "text-rooms border-rooms" : "text-text-tertiary border-transparent",
                 i < step && "text-sessions border-sessions",
               )}
             >
@@ -507,10 +544,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
             />
           )}
           {currentStep === "Agent System" && (
-            <AgentSystemStep
-              agentSystem={agentSystem}
-              setAgentSystem={setAgentSystem}
-            />
+            <AgentSystemStep agentSystem={agentSystem} setAgentSystem={setAgentSystem} />
           )}
           {currentStep === "Describe Project" && (
             <DescribeProjectStep
@@ -535,14 +569,14 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
               editingAgentId={editingAgentId}
               setEditingAgentId={setEditingAgentId}
               setAiGen={setAiGen}
-              projectTechStack={detectedProjects.find((d) => projects.some((p) => p.path === d.path))?.techStack ?? []}
+              projectTechStack={
+                detectedProjects.find((d) => projects.some((p) => p.path === d.path))?.techStack ??
+                []
+              }
             />
           )}
           {currentStep === "Workflow" && (
-            <WorkflowStep
-              workflow={workflow}
-              setWorkflow={setWorkflow}
-            />
+            <WorkflowStep workflow={workflow} setWorkflow={setWorkflow} />
           )}
           {currentStep === "Automation" && (
             <AutomationStep
@@ -570,9 +604,16 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
                     `/api/automation-suggestions?project=${encodeURIComponent(projects[0].path)}`,
                   );
                   if (res.ok) {
-                    const data = await res.json() as {
+                    const data = (await res.json()) as {
                       suggestions: Array<{
-                        template: { id: string; name: string; description: string; icon: string; defaultSchedule: string; defaultModel: "opus" | "sonnet" | "haiku" };
+                        template: {
+                          id: string;
+                          name: string;
+                          description: string;
+                          icon: string;
+                          defaultSchedule: string;
+                          defaultModel: "opus" | "sonnet" | "haiku";
+                        };
                         reason: string;
                         priority: "recommended" | "optional";
                       }>;
@@ -682,12 +723,10 @@ function WelcomeStep({
         <RocketIcon className="w-8 h-8 text-rooms" />
       </div>
       <div>
-        <h2 className="text-lg font-semibold text-text-primary mb-2">
-          Welcome to Agent Studio
-        </h2>
+        <h2 className="text-lg font-semibold text-text-primary mb-2">Welcome to Agent Studio</h2>
         <p className="text-sm text-text-secondary max-w-md">
-          Your command center for AI coding agents. Manage sessions, monitor
-          sprints, and track agent memory — all from one dashboard.
+          Your command center for AI coding agents. Manage sessions, monitor sprints, and track
+          agent memory — all from one dashboard.
         </p>
       </div>
 
@@ -763,10 +802,7 @@ function ProjectsStep({
     if (isSelected(dp.path)) {
       setProjects((prev) => prev.filter((p) => p.path !== dp.path));
     } else {
-      setProjects((prev) => [
-        ...prev,
-        { name: dp.name, path: dp.path, isProd: false },
-      ]);
+      setProjects((prev) => [...prev, { name: dp.name, path: dp.path, isProd: false }]);
     }
   };
 
@@ -774,7 +810,10 @@ function ProjectsStep({
   const [autoSelected, setAutoSelected] = useState(false);
   useEffect(() => {
     if (autoSelected || !detectionDone || detectedProjects.length === 0) return;
-    if (projects.length > 0) { setAutoSelected(true); return; }
+    if (projects.length > 0) {
+      setAutoSelected(true);
+      return;
+    }
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const recent = detectedProjects.filter((d) => d.lastModified > sevenDaysAgo);
     if (recent.length > 0) {
@@ -785,9 +824,11 @@ function ProjectsStep({
 
   // Badge colors for tech stack
   const stackColor = (tech: string) => {
-    if (tech.includes("React") || tech.includes("Next")) return "bg-blue-500/15 text-blue-400 border-blue-500/25";
+    if (tech.includes("React") || tech.includes("Next"))
+      return "bg-blue-500/15 text-blue-400 border-blue-500/25";
     if (tech.includes("Vue")) return "bg-green-500/15 text-green-400 border-green-500/25";
-    if (tech.includes("Python") || tech.includes("Django")) return "bg-yellow-500/15 text-yellow-400 border-yellow-500/25";
+    if (tech.includes("Python") || tech.includes("Django"))
+      return "bg-yellow-500/15 text-yellow-400 border-yellow-500/25";
     if (tech.includes("Go")) return "bg-cyan-500/15 text-cyan-400 border-cyan-500/25";
     if (tech.includes("Rust")) return "bg-orange-500/15 text-orange-400 border-orange-500/25";
     if (tech.includes("Tailwind")) return "bg-teal-500/15 text-teal-400 border-teal-500/25";
@@ -852,7 +893,10 @@ function ProjectsStep({
                 </div>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {[...dp.techStack, ...dp.languages].slice(0, 5).map((t) => (
-                    <span key={t} className={cn("text-2xs px-1.5 py-0.5 rounded border", stackColor(t))}>
+                    <span
+                      key={t}
+                      className={cn("text-2xs px-1.5 py-0.5 rounded border", stackColor(t))}
+                    >
                       {t}
                     </span>
                   ))}
@@ -864,41 +908,45 @@ function ProjectsStep({
       )}
 
       {/* Selected projects (from manual add) that aren't in detected list */}
-      {projects.filter((p) => !detectedProjects.some((d) => d.path === p.path)).map((p, i) => (
-        <div
-          key={`manual-${p.path}-${i}`}
-          className="flex items-center gap-2 px-3 py-2 bg-rooms/10 border border-rooms/30 rounded text-xs"
-        >
-          <CheckIcon className="w-3.5 h-3.5 text-rooms shrink-0" />
-          <span className="flex-1 text-text-primary font-mono truncate text-xs">{p.path}</span>
-          <button
-            onClick={() => toggleProd(projects.indexOf(p))}
-            className={cn(
-              "px-2 py-0.5 text-2xs font-medium rounded border transition-all",
-              p.isProd
-                ? "bg-red-500/15 text-red-400 border-red-500/30"
-                : "bg-bg-elevated text-text-tertiary border-transparent hover:border-border-default",
-            )}
+      {projects
+        .filter((p) => !detectedProjects.some((d) => d.path === p.path))
+        .map((p, i) => (
+          <div
+            key={`manual-${p.path}-${i}`}
+            className="flex items-center gap-2 px-3 py-2 bg-rooms/10 border border-rooms/30 rounded text-xs"
           >
-            {p.isProd ? "PROD" : "dev"}
-          </button>
-          <button
-            onClick={() => removeProject(projects.indexOf(p))}
-            className="p-0.5 text-text-tertiary hover:text-error transition-all"
-          >
-            <CloseIcon className="w-3 h-3" />
-          </button>
-        </div>
-      ))}
+            <CheckIcon className="w-3.5 h-3.5 text-rooms shrink-0" />
+            <span className="flex-1 text-text-primary font-mono truncate text-xs">{p.path}</span>
+            <button
+              onClick={() => toggleProd(projects.indexOf(p))}
+              className={cn(
+                "px-2 py-0.5 text-2xs font-medium rounded border transition-all",
+                p.isProd
+                  ? "bg-red-500/15 text-red-400 border-red-500/30"
+                  : "bg-bg-elevated text-text-tertiary border-transparent hover:border-border-default",
+              )}
+            >
+              {p.isProd ? "PROD" : "dev"}
+            </button>
+            <button
+              onClick={() => removeProject(projects.indexOf(p))}
+              className="p-0.5 text-text-tertiary hover:text-error transition-all"
+            >
+              <CloseIcon className="w-3 h-3" />
+            </button>
+          </div>
+        ))}
 
       {/* Manual add */}
-      {(showManualInput || detectedProjects.length === 0) ? (
+      {showManualInput || detectedProjects.length === 0 ? (
         <div className="flex gap-2">
           <input
             type="text"
             value={newProjectPath}
             onChange={(e) => setNewProjectPath(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") addProject(); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") addProject();
+            }}
             placeholder="/path/to/project"
             className="flex-1 px-3 py-2 text-xs font-mono bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:border-rooms focus:outline-none"
           />
@@ -950,8 +998,8 @@ function AgentSystemStep({
           AI Agent System
         </h2>
         <p className="text-xs text-text-tertiary">
-          An agent system gives your AI agents memory, sprint management, and
-          structured communication.
+          An agent system gives your AI agents memory, sprint management, and structured
+          communication.
         </p>
       </div>
 
@@ -982,24 +1030,18 @@ function AgentSystemStep({
             }
             className="accent-rooms"
           />
-          <span className="text-xs text-text-primary">
-            I have one already
-          </span>
+          <span className="text-xs text-text-primary">I have one already</span>
         </label>
 
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="radio"
             checked={agentSystem.enabled && agentSystem.createNew}
-            onChange={() =>
-              setAgentSystem((prev) => ({ ...prev, enabled: true, createNew: true }))
-            }
+            onChange={() => setAgentSystem((prev) => ({ ...prev, enabled: true, createNew: true }))}
             className="accent-rooms"
           />
           <div>
-            <span className="text-xs text-rooms font-medium">
-              Create a new one
-            </span>
+            <span className="text-xs text-rooms font-medium">Create a new one</span>
             <span className="text-xs text-text-tertiary ml-2">
               — we&apos;ll scaffold it in your project
             </span>
@@ -1013,9 +1055,7 @@ function AgentSystemStep({
           <input
             type="text"
             value={agentSystem.path}
-            onChange={(e) =>
-              setAgentSystem((prev) => ({ ...prev, path: e.target.value }))
-            }
+            onChange={(e) => setAgentSystem((prev) => ({ ...prev, path: e.target.value }))}
             placeholder="/path/to/ai-agents"
             className="w-full px-3 py-2 text-xs font-mono bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:border-rooms focus:outline-none"
           />
@@ -1031,14 +1071,8 @@ function AgentSystemStep({
                     : undefined
                 }
               />
-              <ValidationRow
-                label="sprints/current.md"
-                found={agentSystem.found.currentSprint}
-              />
-              <ValidationRow
-                label="sprints/scan_log.md"
-                found={agentSystem.found.scanLog}
-              />
+              <ValidationRow label="sprints/current.md" found={agentSystem.found.currentSprint} />
+              <ValidationRow label="sprints/scan_log.md" found={agentSystem.found.scanLog} />
             </div>
           )}
         </div>
@@ -1051,13 +1085,14 @@ function AgentSystemStep({
             <BrainIcon className="w-3.5 h-3.5 shrink-0 mt-0.5 text-rooms" />
             <span>
               We&apos;ll create <code className="text-rooms">ai-agents/</code> and{" "}
-              <code className="text-rooms">.claude/agents/</code> in your first
-              project directory. Choose your agents on the next page.
+              <code className="text-rooms">.claude/agents/</code> in your first project directory.
+              Choose your agents on the next page.
             </span>
           </div>
           <div>
             <label className="block text-xs text-text-secondary mb-1">
-              What kind of project are you building? <span className="text-text-tertiary">(optional)</span>
+              What kind of project are you building?{" "}
+              <span className="text-text-tertiary">(optional)</span>
             </label>
             <input
               type="text"
@@ -1122,7 +1157,9 @@ function DescribeProjectStep({
       <textarea
         value={projectDescription}
         onChange={(e) => setProjectDescription(e.target.value)}
-        placeholder={"Describe your project in a few sentences. For example:\n\"React Native fitness app with FastAPI backend on AWS...\"\n\nThe more detail, the better the agents."}
+        placeholder={
+          'Describe your project in a few sentences. For example:\n"React Native fitness app with FastAPI backend on AWS..."\n\nThe more detail, the better the agents.'
+        }
         rows={4}
         className="w-full px-3 py-2 text-xs bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:border-rooms focus:outline-none resize-y"
       />
@@ -1145,12 +1182,18 @@ function DescribeProjectStep({
           <span className="text-xs text-text-secondary font-medium">Detected:</span>
           <div className="flex flex-wrap gap-1.5">
             {scanData.frameworks?.map((fw) => (
-              <span key={fw} className="px-2 py-0.5 text-xs font-medium bg-rooms/10 text-rooms border border-rooms/20 rounded-full">
+              <span
+                key={fw}
+                className="px-2 py-0.5 text-xs font-medium bg-rooms/10 text-rooms border border-rooms/20 rounded-full"
+              >
                 {fw}
               </span>
             ))}
             {scanData.languages?.map((lang) => (
-              <span key={lang} className="px-2 py-0.5 text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">
+              <span
+                key={lang}
+                className="px-2 py-0.5 text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full"
+              >
                 {lang}
               </span>
             ))}
@@ -1240,7 +1283,9 @@ function AgentTeamStep({
         </div>
         <div>
           <p className="text-sm font-medium text-text-primary">
-            {aiGen.status === "analyzing" ? "Analyzing your project..." : "Generating tailored agents..."}
+            {aiGen.status === "analyzing"
+              ? "Analyzing your project..."
+              : "Generating tailored agents..."}
           </p>
           <p className="text-xs text-text-tertiary mt-1">
             {aiGen.status === "analyzing"
@@ -1248,6 +1293,15 @@ function AgentTeamStep({
               : "Claude is creating agent definitions for your tech stack"}
           </p>
         </div>
+        <button
+          onClick={() => {
+            setAiGen((prev) => ({ ...prev, status: "idle", error: null }));
+            setUseAiAgents(false);
+          }}
+          className="px-3 py-1.5 text-xs text-text-tertiary hover:text-text-secondary border border-border-default hover:border-text-secondary rounded transition-all"
+        >
+          Skip — I'll pick agents myself
+        </button>
       </div>
     );
   }
@@ -1267,7 +1321,10 @@ function AgentTeamStep({
             </p>
           </div>
           <button
-            onClick={() => { setUseAiAgents(false); setEditingAgentId(null); }}
+            onClick={() => {
+              setUseAiAgents(false);
+              setEditingAgentId(null);
+            }}
             className="px-2 py-1 text-xs text-text-tertiary hover:text-text-secondary border border-border-default rounded transition-all"
           >
             Use templates
@@ -1291,9 +1348,7 @@ function AgentTeamStep({
                   onChange={() => toggleAgent(agent.id)}
                   className="accent-rooms"
                 />
-                <span className="text-xs font-mono text-rooms w-24 truncate">
-                  {agent.id}
-                </span>
+                <span className="text-xs font-mono text-rooms w-24 truncate">{agent.id}</span>
                 <span className="text-xs text-text-secondary flex-1 truncate">
                   {agent.description}
                 </span>
@@ -1383,9 +1438,7 @@ function AgentTeamStep({
       {aiGen.status === "error" && (
         <div className="flex items-start gap-2 px-3 py-2 bg-yellow-500/5 border border-yellow-500/20 rounded text-xs text-yellow-400">
           <WarningIcon className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-          <span>
-            AI generation failed: {aiGen.error}. Using generic templates instead.
-          </span>
+          <span>AI generation failed: {aiGen.error}. Using generic templates instead.</span>
         </div>
       )}
 
@@ -1393,14 +1446,33 @@ function AgentTeamStep({
         {AVAILABLE_AGENTS.map((agent) => {
           // Smart reason based on project tech stack
           const stack = projectTechStack ?? [];
-          const hasReact = stack.some((t) => t.includes("React") || t.includes("Next") || t.includes("Vue") || t.includes("Svelte") || t.includes("Angular"));
-          const hasPython = stack.some((t) => t.includes("Python") || t.includes("Django") || t.includes("Go") || t.includes("Rust") || t.includes("Java"));
+          const hasReact = stack.some(
+            (t) =>
+              t.includes("React") ||
+              t.includes("Next") ||
+              t.includes("Vue") ||
+              t.includes("Svelte") ||
+              t.includes("Angular"),
+          );
+          const hasPython = stack.some(
+            (t) =>
+              t.includes("Python") ||
+              t.includes("Django") ||
+              t.includes("Go") ||
+              t.includes("Rust") ||
+              t.includes("Java"),
+          );
           let reason = "";
-          if (agent.id === "frontend" && hasReact) reason = "Your project uses " + (stack.find((t) => t.includes("React") || t.includes("Next") || t.includes("Vue")) ?? "a frontend framework");
+          if (agent.id === "frontend" && hasReact)
+            reason =
+              "Your project uses " +
+              (stack.find((t) => t.includes("React") || t.includes("Next") || t.includes("Vue")) ??
+                "a frontend framework");
           else if (agent.id === "backend" && hasPython) reason = "Your project has backend code";
           else if (agent.id === "orchestrator") reason = "Coordinates the whole team";
           else if (agent.id === "qa") reason = "Every project needs testing";
-          else if (agent.id === "security" && stack.length > 0) reason = "Reviews code for vulnerabilities";
+          else if (agent.id === "security" && stack.length > 0)
+            reason = "Reviews code for vulnerabilities";
 
           return (
             <label
@@ -1418,16 +1490,10 @@ function AgentTeamStep({
                 onChange={() => toggleAgent(agent.id)}
                 className="accent-rooms"
               />
-              <span className="text-xs font-mono text-text-primary w-28">
-                {agent.label}
-              </span>
+              <span className="text-xs font-mono text-text-primary w-28">{agent.label}</span>
               <div className="flex-1 min-w-0">
                 <span className="text-xs text-text-tertiary">{agent.desc}</span>
-                {reason && (
-                  <span className="text-2xs text-rooms ml-1.5">
-                    — {reason}
-                  </span>
-                )}
+                {reason && <span className="text-2xs text-rooms ml-1.5">— {reason}</span>}
               </div>
             </label>
           );
@@ -1447,9 +1513,7 @@ function AgentTeamStep({
         >
           Select None
         </button>
-        <span className="text-xs text-text-tertiary ml-auto">
-          {selectedAgents.length} selected
-        </span>
+        <span className="text-xs text-text-tertiary ml-auto">{selectedAgents.length} selected</span>
       </div>
     </div>
   );
@@ -1490,9 +1554,7 @@ function WorkflowStep({
           <GitBranchIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           How does your team work?
         </h2>
-        <p className="text-xs text-text-tertiary">
-          Choose a workflow pattern for your agents.
-        </p>
+        <p className="text-xs text-text-tertiary">Choose a workflow pattern for your agents.</p>
       </div>
 
       <div className="space-y-2">
@@ -1513,15 +1575,9 @@ function WorkflowStep({
               className="accent-rooms mt-0.5"
             />
             <div>
-              <span className="text-xs font-medium text-text-primary">
-                {opt.label}
-              </span>
-              <p className="text-xs text-text-secondary mt-0.5">
-                {opt.desc}
-              </p>
-              <p className="text-xs text-text-tertiary mt-0.5 italic">
-                {opt.detail}
-              </p>
+              <span className="text-xs font-medium text-text-primary">{opt.label}</span>
+              <p className="text-xs text-text-secondary mt-0.5">{opt.desc}</p>
+              <p className="text-xs text-text-tertiary mt-0.5 italic">{opt.detail}</p>
             </div>
           </label>
         ))}
@@ -1617,9 +1673,7 @@ function AutomationStep({
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-text-primary">
-                        {s.name}
-                      </span>
+                      <span className="text-xs font-medium text-text-primary">{s.name}</span>
                       <span className="text-2xs text-text-tertiary">{s.schedule}</span>
                       <span className="text-2xs text-text-tertiary">{s.model}</span>
                     </div>
@@ -1650,12 +1704,10 @@ function AutomationStep({
             className="accent-rooms mt-0.5"
           />
           <div>
-            <span className="text-xs font-medium text-text-primary">
-              Telegram notifications
-            </span>
+            <span className="text-xs font-medium text-text-primary">Telegram notifications</span>
             <p className="text-xs text-text-secondary mt-0.5">
-              Get pinged when sprints are ready or gates pass.
-              Requires a Telegram bot token (you can set this up later).
+              Get pinged when sprints are ready or gates pass. Requires a Telegram bot token (you
+              can set this up later).
             </p>
           </div>
         </label>
@@ -1676,21 +1728,16 @@ function AutomationStep({
             className="accent-rooms mt-0.5"
           />
           <div>
-            <span className="text-xs font-medium text-text-primary">
-              PMO scheduler
-            </span>
+            <span className="text-xs font-medium text-text-primary">PMO scheduler</span>
             <p className="text-xs text-text-secondary mt-0.5">
-              Automatically scan for tasks on a schedule.
-              Requires launchd (macOS) or cron (Linux).
+              Automatically scan for tasks on a schedule. Requires launchd (macOS) or cron (Linux).
             </p>
           </div>
         </label>
 
         {schedulerEnabled && (
           <div className="pl-9">
-            <label className="text-xs text-text-secondary block mb-1">
-              Scan interval (hours)
-            </label>
+            <label className="text-xs text-text-secondary block mb-1">Scan interval (hours)</label>
             <input
               type="number"
               min={1}
@@ -1722,17 +1769,10 @@ function ValidationRow({
       ) : (
         <CloseIcon className="w-3 h-3 text-text-tertiary" />
       )}
-      <span
-        className={cn(
-          "font-mono",
-          found ? "text-text-primary" : "text-text-tertiary",
-        )}
-      >
+      <span className={cn("font-mono", found ? "text-text-primary" : "text-text-tertiary")}>
         {label}
       </span>
-      {detail && (
-        <span className="text-text-secondary">({detail})</span>
-      )}
+      {detail && <span className="text-text-secondary">({detail})</span>}
     </div>
   );
 }
@@ -1765,26 +1805,20 @@ function PreferencesStep({
           <SettingsIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           Quick Preferences
         </h2>
-        <p className="text-xs text-text-tertiary">
-          You can change everything in Settings later.
-        </p>
+        <p className="text-xs text-text-tertiary">You can change everything in Settings later.</p>
       </div>
 
       {/* Scaffold summary */}
       {scaffoldResult && scaffoldResult.created.length > 0 && (
         <div className="flex items-start gap-2 px-3 py-2 bg-green-500/5 border border-green-500/20 rounded text-xs text-green-400">
           <CheckIcon className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-          <span>
-            Agent system created: {scaffoldResult.created.length} files generated.
-          </span>
+          <span>Agent system created: {scaffoldResult.created.length} files generated.</span>
         </div>
       )}
 
       {/* Model */}
       <div>
-        <label className="text-xs text-text-secondary block mb-2">
-          Default Model
-        </label>
+        <label className="text-xs text-text-secondary block mb-2">Default Model</label>
         <div className="flex items-center gap-2">
           {(["opus", "sonnet", "haiku"] as const).map((m) => (
             <button
@@ -1816,9 +1850,7 @@ function PreferencesStep({
 
       {/* Permissions */}
       <div>
-        <label className="text-xs text-text-secondary block mb-2">
-          Default Permissions
-        </label>
+        <label className="text-xs text-text-secondary block mb-2">Default Permissions</label>
         <div className="flex items-center gap-2">
           {(["default", "bypass", "plan"] as const).map((p) => (
             <button
@@ -1853,7 +1885,7 @@ async function getHomeDir(): Promise<string> {
   try {
     const res = await fetch("/api/config");
     if (res.ok) {
-      const data = await res.json() as { homeDir: string };
+      const data = (await res.json()) as { homeDir: string };
       return data.homeDir;
     }
   } catch (e) {
