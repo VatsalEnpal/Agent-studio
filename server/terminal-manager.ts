@@ -20,7 +20,8 @@ function resolveCommand(cmd: string): string {
   if (cmd.startsWith("/") || (IS_WINDOWS && /^[a-zA-Z]:\\/.test(cmd))) return cmd;
   return whichCommand(cmd) ?? cmd;
 }
-import type { Session, SessionMeta, WsMessage } from "./types.js";
+import type { Session, SessionMeta } from "./types.js";
+import type { WsMessage } from "./shared/types.js";
 
 interface CreateSessionOptions {
   name: string;

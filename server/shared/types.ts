@@ -192,8 +192,16 @@ export type WsEventType =
   | "sprint-update"
   | "memory-update"
   | "git-update"
+  | "file-update"
+  | "workflow-update"
+  | "usage-update"
   | "server-status"
-  | "notification";
+  | "notification"
+  // Workflow engine events
+  | "workflow-step-update"
+  | "workflow-gate-waiting"
+  | "workflow-run-complete"
+  | "workflow-run-failed";
 
 /** A WebSocket message exchanged between server and client. */
 export interface WsMessage {

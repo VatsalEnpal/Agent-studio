@@ -49,7 +49,8 @@ import {
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import type { SessionMeta, WsMessage } from "./types.js";
+import type { SessionMeta } from "./types.js";
+import type { WsMessage } from "./shared/types.js";
 import { WorkflowManager } from "./workflows/index.js";
 import { RoomManager } from "./rooms.js";
 import type { RoomMessage } from "./rooms.js";
