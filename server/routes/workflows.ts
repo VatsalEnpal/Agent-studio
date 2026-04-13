@@ -13,6 +13,7 @@ import { PipelineRegistry } from "../workflows/workflow-registry.js";
 import { WorkflowExecutor } from "../workflows/executor.js";
 import { WorkflowScheduler } from "../workflows/scheduler.js";
 import { MockCommandRunner, ClaudeCommandRunner } from "../workflows/command-runner.js";
+import { importSprintAsWorkflow } from "../workflows/sprint-import.js";
 import { loadRunState, listRuns, getActiveRuns, deleteRun } from "../workflows/run-state.js";
 import type { WorkflowPipelineDef } from "../workflows/definition.js";
 import type { WsMessage } from "../shared/types.js";
@@ -327,6 +328,27 @@ export function workflowRoutes(deps: WorkflowRouteDeps): Router {
   router.delete("/:id/schedule", (req, res) => {
     scheduler.unschedule(req.params.id);
     res.json({ status: "unscheduled", workflowId: req.params.id });
+  });
+
+  // ---------- Import ----------
+
+  /** POST /api/workflows/import-sprint — import existing sprint as watch-mode workflow */
+  router.post("/import-sprint", (_req, res) => {
+    const result = importSprintAsWorkflow();
+    if (result.error) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+    if (result.workflow) {
+      const saveResult = registry.saveWorkflow(result.workflow);
+      if (saveResult.error) {
+        res.status(400).json({ error: saveResult.error });
+        return;
+      }
+      res
+        .status(201)
+        .json({ id: result.workflow.id, name: result.workflow.name, status: "imported" });
+    }
   });
 
   return router;
