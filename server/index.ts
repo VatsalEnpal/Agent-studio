@@ -2204,6 +2204,7 @@ Choose the schedule and model based on the task:
         description?: string;
         icon?: string;
         steps?: Array<Record<string, unknown>>;
+        schedule?: unknown;
       };
       if (!body.name || !Array.isArray(body.steps) || body.steps.length === 0) {
         res.status(400).json({ error: "Missing name or steps" });
@@ -2224,6 +2225,14 @@ Choose the schedule and model based on the task:
         })) as WorkflowConfig["steps"],
       };
 
+      // Handle schedule field gracefully (ISSUE-02) — log warning, don't crash
+      let scheduleWarning: string | undefined;
+      if (body.schedule) {
+        scheduleWarning =
+          "Schedule field received but scheduling is only supported via POST /api/workflows/:id/schedule. The workflow was created without a schedule.";
+        console.warn(`[workflow] ${scheduleWarning}`);
+      }
+
       const cfg = getConfig();
       const workflows = cfg.workflows ?? [];
       workflows.push(newWorkflow);
@@ -2232,13 +2241,39 @@ Choose the schedule and model based on the task:
       reloadConfig();
       workflowManager.reload();
 
+      // Also persist to the pipeline registry for disk-based storage (ISSUE-02)
+      try {
+        pipelineRegistry.saveWorkflow({
+          id,
+          name: body.name,
+          description: body.description,
+          mode: "execute",
+          trigger: { type: "manual" },
+          workingDirectory: ".",
+          steps: body.steps.map((s) => ({
+            id: String(s.id ?? ""),
+            name: String(s.name ?? ""),
+            type: (s.type as "agent" | "gate" | "loop" | "agent-group") ?? "agent",
+            agent: String(s.agent ?? ""),
+            goal: String(s.goal ?? s.description ?? ""),
+            ...s,
+          })) as import("./workflows/definition.js").PipelineStepDef[],
+        });
+      } catch {
+        // Pipeline persistence is best-effort; config file is the primary store
+      }
+
       const flows = await workflowManager.getFlows();
       broadcast(wss, {
         type: "workflow-update",
         payload: flowsToSprints(flows),
       } satisfies WsMessage);
 
-      res.json({ ok: true, id, workflow: newWorkflow });
+      const result: Record<string, unknown> = { ok: true, id, workflow: newWorkflow };
+      if (scheduleWarning) {
+        result.warning = scheduleWarning;
+      }
+      res.json(result);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
