@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  RefreshIcon,
-  ExternalLinkIcon,
-  StopIcon,
-  SearchIcon,
-} from "@/components/ui/icons";
+import { RefreshIcon, ExternalLinkIcon, StopIcon, SearchIcon } from "@/components/ui/icons";
 import { AmberLoadingBar } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -103,9 +98,10 @@ export function DevServersView() {
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
           <h2 className="text-xs font-medium text-text-primary">Dev Servers</h2>
-          <span className="text-label text-text-ghost">
-            {servers.length} listening
+          <span className="text-2xs text-text-ghost hidden sm:inline">
+            Running processes and listening ports
           </span>
+          <span className="text-label text-text-ghost ml-auto">{servers.length} listening</span>
         </div>
 
         {/* Search */}
@@ -182,9 +178,7 @@ export function DevServersView() {
               {/* Port */}
               <div className="w-14 shrink-0 flex items-center gap-1.5">
                 <span className="w-[5px] h-[5px] rounded-full bg-sessions shrink-0" />
-                <span className="text-xs font-mono text-sessions font-medium">
-                  {server.port}
-                </span>
+                <span className="text-xs font-mono text-sessions font-medium">{server.port}</span>
               </div>
 
               {/* Process name */}
@@ -203,9 +197,7 @@ export function DevServersView() {
 
               {/* PID */}
               <div className="w-16 shrink-0 text-right">
-                <span className="text-label text-text-ghost font-mono">
-                  {server.pid}
-                </span>
+                <span className="text-label text-text-ghost font-mono">{server.pid}</span>
               </div>
 
               {/* Actions */}

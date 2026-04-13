@@ -1,6 +1,13 @@
 "use client";
 
-import { CpuIcon, DiskIcon, MemoryChipIcon, MonitorIcon, SessionsIcon, ClockIcon } from "@/components/ui/icons";
+import {
+  CpuIcon,
+  DiskIcon,
+  MemoryChipIcon,
+  MonitorIcon,
+  SessionsIcon,
+  ClockIcon,
+} from "@/components/ui/icons";
 import { useSettingsStore } from "@/stores/settings";
 import { cn } from "@/lib/utils";
 
@@ -51,7 +58,10 @@ export function SettingsMonitor() {
   return (
     <section className="border border-border-default rounded bg-bg-surface">
       <div className="px-4 py-3 border-b border-border-default flex items-center justify-between">
-        <h3 className="text-xs font-medium text-text-primary">System Monitor</h3>
+        <div>
+          <h3 className="text-xs font-medium text-text-primary">System Monitor</h3>
+          <p className="text-2xs text-text-tertiary mt-0.5">System resources and health</p>
+        </div>
         <span className="text-label text-text-tertiary">Updates every 5s</span>
       </div>
       <div className="px-4 py-3 grid grid-cols-2 gap-3">
@@ -62,16 +72,24 @@ export function SettingsMonitor() {
               <CpuIcon className="w-3 h-3" />
               CPU
             </span>
-            <span className={cn(
-              "text-body font-mono font-medium",
-              stats.cpu.usage > 80 ? "text-error" : stats.cpu.usage > 50 ? "text-rooms" : "text-sessions",
-            )}>
+            <span
+              className={cn(
+                "text-body font-mono font-medium",
+                stats.cpu.usage > 80
+                  ? "text-error"
+                  : stats.cpu.usage > 50
+                    ? "text-rooms"
+                    : "text-sessions",
+              )}
+            >
               {stats.cpu.usage.toFixed(1)}%
             </span>
           </div>
           <UsageBar
             percentage={stats.cpu.usage}
-            color={stats.cpu.usage > 80 ? "bg-error" : stats.cpu.usage > 50 ? "bg-rooms" : "bg-sessions"}
+            color={
+              stats.cpu.usage > 80 ? "bg-error" : stats.cpu.usage > 50 ? "bg-rooms" : "bg-sessions"
+            }
           />
           <span className="text-label text-text-tertiary">{stats.cpu.cores} cores</span>
         </div>
@@ -83,16 +101,28 @@ export function SettingsMonitor() {
               <MemoryChipIcon className="w-3 h-3" />
               Memory
             </span>
-            <span className={cn(
-              "text-body font-mono font-medium",
-              stats.memory.percentage > 80 ? "text-error" : stats.memory.percentage > 60 ? "text-rooms" : "text-sessions",
-            )}>
+            <span
+              className={cn(
+                "text-body font-mono font-medium",
+                stats.memory.percentage > 80
+                  ? "text-error"
+                  : stats.memory.percentage > 60
+                    ? "text-rooms"
+                    : "text-sessions",
+              )}
+            >
               {stats.memory.percentage.toFixed(0)}%
             </span>
           </div>
           <UsageBar
             percentage={stats.memory.percentage}
-            color={stats.memory.percentage > 80 ? "bg-error" : stats.memory.percentage > 60 ? "bg-rooms" : "bg-sessions"}
+            color={
+              stats.memory.percentage > 80
+                ? "bg-error"
+                : stats.memory.percentage > 60
+                  ? "bg-rooms"
+                  : "bg-sessions"
+            }
           />
           <span className="text-label text-text-tertiary">
             {formatBytes(stats.memory.used)} / {formatBytes(stats.memory.total)}
@@ -106,16 +136,28 @@ export function SettingsMonitor() {
               <DiskIcon className="w-3 h-3" />
               Disk
             </span>
-            <span className={cn(
-              "text-body font-mono font-medium",
-              stats.disk.percentage > 90 ? "text-error" : stats.disk.percentage > 70 ? "text-rooms" : "text-text-primary",
-            )}>
+            <span
+              className={cn(
+                "text-body font-mono font-medium",
+                stats.disk.percentage > 90
+                  ? "text-error"
+                  : stats.disk.percentage > 70
+                    ? "text-rooms"
+                    : "text-text-primary",
+              )}
+            >
               {stats.disk.percentage.toFixed(0)}%
             </span>
           </div>
           <UsageBar
             percentage={stats.disk.percentage}
-            color={stats.disk.percentage > 90 ? "bg-error" : stats.disk.percentage > 70 ? "bg-rooms" : "bg-bg-elevated"}
+            color={
+              stats.disk.percentage > 90
+                ? "bg-error"
+                : stats.disk.percentage > 70
+                  ? "bg-rooms"
+                  : "bg-bg-elevated"
+            }
           />
           <span className="text-label text-text-tertiary">
             {formatBytes(stats.disk.used)} / {formatBytes(stats.disk.total)}
@@ -150,10 +192,12 @@ export function SettingsMonitor() {
             <div className="flex items-center gap-4">
               <span className="text-label text-text-tertiary flex items-center gap-1">
                 <ClockIcon className="w-3 h-3" />
-                Uptime: <span className="text-text-primary font-mono">{formatUptime(stats.uptime)}</span>
+                Uptime:{" "}
+                <span className="text-text-primary font-mono">{formatUptime(stats.uptime)}</span>
               </span>
               <span className="text-label text-text-tertiary">
-                WebSocket: <span className="text-sessions font-mono">{stats.wsConnections} connected</span>
+                WebSocket:{" "}
+                <span className="text-sessions font-mono">{stats.wsConnections} connected</span>
               </span>
             </div>
           </div>

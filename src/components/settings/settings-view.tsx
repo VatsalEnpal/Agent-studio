@@ -30,12 +30,27 @@ type SettingsTab =
   | "shortcuts"
   | "about";
 
-const TABS: { id: SettingsTab; label: string; icon: React.ComponentType<{ size?: number; className?: string }>; desc: string }[] = [
+const TABS: {
+  id: SettingsTab;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  desc: string;
+}[] = [
   { id: "general", label: "General", icon: SettingsIcon, desc: "Model, theme, notifications" },
   { id: "projects", label: "Projects", icon: FolderIcon, desc: "Tracked repos and agent system" },
   { id: "agents", label: "Agents", icon: UserIcon, desc: "Discovered agent definitions" },
-  { id: "dev-servers", label: "Dev Servers", icon: MonitorIcon, desc: "Server monitoring and ports" },
-  { id: "sprint-protocol", label: "Automations", icon: SprintsIcon, desc: "Sprint protocol, PMO scans, scheduled tasks" },
+  {
+    id: "dev-servers",
+    label: "System Monitor",
+    icon: MonitorIcon,
+    desc: "CPU, memory, disk, active processes",
+  },
+  {
+    id: "sprint-protocol",
+    label: "Automations",
+    icon: SprintsIcon,
+    desc: "Sprint protocol, PMO scans, scheduled tasks",
+  },
   { id: "shortcuts", label: "Shortcuts", icon: BoltIcon, desc: "Keyboard shortcuts reference" },
   { id: "about", label: "About", icon: InfoIcon, desc: "Version and system info" },
 ];
@@ -56,14 +71,21 @@ export function SettingsView() {
         .then((data) => {
           if (active) setSystemStats(data);
         })
-        .catch(() => { /* ignore */ })
-        .finally(() => { if (active) setStatsLoading(false); });
+        .catch(() => {
+          /* ignore */
+        })
+        .finally(() => {
+          if (active) setStatsLoading(false);
+        });
     };
 
     setStatsLoading(true);
     fetchStats();
     const interval = setInterval(fetchStats, 5000);
-    return () => { active = false; clearInterval(interval); };
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, [setSystemStats, setStatsLoading]);
 
   // Load saved settings on mount
@@ -75,7 +97,9 @@ export function SettingsView() {
           setSettings(data);
         }
       })
-      .catch(() => { /* use defaults */ });
+      .catch(() => {
+        /* use defaults */
+      });
   }, [setSettings]);
 
   return (
@@ -105,10 +129,12 @@ export function SettingsView() {
                 />
                 <span className="text-xs font-medium">{tab.label}</span>
               </div>
-              <p className={cn(
-                "text-2xs mt-0.5 pl-5 leading-snug",
-                activeTab === tab.id ? "text-text-tertiary" : "text-text-ghost",
-              )}>
+              <p
+                className={cn(
+                  "text-2xs mt-0.5 pl-5 leading-snug",
+                  activeTab === tab.id ? "text-text-tertiary" : "text-text-ghost",
+                )}
+              >
                 {tab.desc}
               </p>
             </button>
@@ -175,7 +201,10 @@ function SettingsAgentsDiscovery() {
       <div className="px-4 py-3 border-b border-border-default">
         <h3 className="text-xs font-medium text-text-primary">Agents</h3>
         <p className="text-label text-text-tertiary mt-0.5">
-          Auto-discovered from <code className="text-text-secondary bg-bg-elevated px-1 py-0.5 rounded text-label">.claude/agents/</code>
+          Auto-discovered from{" "}
+          <code className="text-text-secondary bg-bg-elevated px-1 py-0.5 rounded text-label">
+            .claude/agents/
+          </code>
         </p>
       </div>
       <div className="px-4 py-3">
@@ -190,7 +219,8 @@ function SettingsAgentsDiscovery() {
           </div>
         ) : agents.length === 0 ? (
           <p className="text-xs text-text-tertiary text-center py-4">
-            No agents discovered. Create agent definitions in <code className="text-text-secondary">.claude/agents/</code>.
+            No agents discovered. Create agent definitions in{" "}
+            <code className="text-text-secondary">.claude/agents/</code>.
           </p>
         ) : (
           <div className="space-y-2">
@@ -201,9 +231,7 @@ function SettingsAgentsDiscovery() {
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-text-primary">
-                      {agent.name}
-                    </span>
+                    <span className="text-xs font-medium text-text-primary">{agent.name}</span>
                     <span className="text-label px-1.5 py-0.5 rounded bg-bg-elevated text-text-tertiary font-mono">
                       {agent.model}
                     </span>
