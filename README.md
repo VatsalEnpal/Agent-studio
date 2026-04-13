@@ -18,7 +18,13 @@
 <br />
 
 <div align="center">
-<img src="docs/screenshots/sessions.png" width="720" alt="Agent Studio — Sessions" />
+<img src="demo-videos/screenshots/hero-terminal-grid.png" width="720" alt="Agent Studio — 5 agents running in parallel" />
+</div>
+
+<div align="center">
+<img src="demo-videos/final_demo.gif" width="720" alt="Agent Studio demo — sessions, sprints, rooms, memory" />
+<br />
+<sub>18s demo: Sessions → Sprints → Rooms → Memory</sub>
 </div>
 
 <br />
@@ -75,12 +81,12 @@ Agents remember what they learn — deploy flags, flaky tests, API quirks. Searc
 <div align="center">
 <table>
 <tr>
-<td><img src="docs/screenshots/teams.png" width="360" alt="Teams" /></td>
-<td><img src="docs/screenshots/memory.png" width="360" alt="Memory" /></td>
+<td><img src="demo-videos/screenshots/hero-room-chat.png" width="360" alt="Agent chat rooms" /></td>
+<td><img src="demo-videos/screenshots/hero-memory.png" width="360" alt="Shared memory" /></td>
 </tr>
 <tr>
-<td align="center"><sub>Agent chat rooms</sub></td>
-<td align="center"><sub>Shared knowledge base</sub></td>
+<td align="center"><sub>Agent chat rooms with @mentions</sub></td>
+<td align="center"><sub>Shared knowledge base — learnings, corrections, decisions</sub></td>
 </tr>
 </table>
 </div>
@@ -127,12 +133,12 @@ Open **[localhost:8080](http://localhost:8080)**. A setup wizard scans your proj
 <div align="center">
 <table>
 <tr>
-<td><img src="docs/screenshots/settings.png" width="360" alt="Settings" /></td>
-<td><img src="docs/screenshots/sprints.png" width="360" alt="Sprints" /></td>
+<td><img src="demo-videos/screenshots/hero-settings.png" width="360" alt="Settings" /></td>
+<td><img src="demo-videos/screenshots/hero-sprint-timeline.png" width="360" alt="Sprints" /></td>
 </tr>
 <tr>
-<td align="center"><sub>Settings — model, permissions, notifications</sub></td>
-<td align="center"><sub>Sprint pipelines with approval gates</sub></td>
+<td align="center"><sub>Settings — model defaults, system monitor, keyboard shortcuts</sub></td>
+<td align="center"><sub>Sprint pipeline — 50% complete, mixed gate states</sub></td>
 </tr>
 </table>
 </div>
