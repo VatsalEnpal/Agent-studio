@@ -82,6 +82,11 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
   // Step 2: Pipeline
   const [steps, setSteps] = useState<StepDraft[]>([emptyAgentStep()]);
 
+  // Step 3: Trigger
+  const [triggerType, setTriggerType] = useState<"manual" | "scheduled" | "event">("manual");
+  const [interval, setInterval] = useState("every 2h");
+  const [stateFilePath, setStateFilePath] = useState("");
+
   // Available agents
   const [agents, setAgents] = useState<string[]>([]);
 
@@ -104,6 +109,9 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
     setDescription("");
     setWorkingDirectory("");
     setSteps([emptyAgentStep()]);
+    setTriggerType("manual");
+    setInterval("every 2h");
+    setStateFilePath("");
     setSaving(false);
   }, []);
 
@@ -160,6 +168,13 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
       };
     });
 
+    const trigger: WorkflowPipelineClient["trigger"] =
+      triggerType === "scheduled"
+        ? { type: "scheduled", interval }
+        : triggerType === "event"
+          ? { type: "event", stateFile: stateFilePath }
+          : { type: "manual" };
+
     const def: WorkflowPipelineClient = {
       id: name
         .toLowerCase()
@@ -167,9 +182,9 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
         .replace(/(^-|-$)/g, ""),
       name,
       description,
-      mode: "execute",
-      trigger: { type: "manual" },
-      workingDirectory: workingDirectory || process.cwd?.() || "/tmp",
+      mode: triggerType === "event" ? "watch" : "execute",
+      trigger,
+      workingDirectory: workingDirectory || "/tmp",
       steps: pipelineSteps,
     };
 
@@ -195,7 +210,7 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
             <Dialog.Title className="text-lg font-semibold text-zinc-100">
               Create Workflow
               <span className="ml-2 text-sm font-normal text-zinc-500">
-                Step {currentStep} of 2
+                Step {currentStep} of 4
               </span>
             </Dialog.Title>
             <Dialog.Close asChild>
@@ -397,6 +412,126 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
                 </div>
               </div>
             )}
+
+            {currentStep === 3 && (
+              <div className="space-y-4">
+                <p className="text-xs text-zinc-500">How should this workflow be triggered?</p>
+
+                <div className="space-y-2">
+                  {(["manual", "scheduled", "event"] as const).map((type) => (
+                    <label
+                      key={type}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors",
+                        triggerType === type
+                          ? "border-blue-500/50 bg-blue-500/5"
+                          : "border-zinc-700 hover:border-zinc-600",
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="trigger"
+                        value={type}
+                        checked={triggerType === type}
+                        onChange={() => setTriggerType(type)}
+                        className="accent-blue-500"
+                      />
+                      <div>
+                        <div className="text-sm font-medium text-zinc-200 capitalize">{type}</div>
+                        <div className="text-[10px] text-zinc-500">
+                          {type === "manual" && "Run manually when you click 'Run'"}
+                          {type === "scheduled" && "Run automatically on a schedule"}
+                          {type === "event" && "Watch a state file for changes"}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+
+                {triggerType === "scheduled" && (
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-zinc-400">Interval</label>
+                    <select
+                      value={interval}
+                      onChange={(e) => setInterval(e.target.value)}
+                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200 focus:border-zinc-500 focus:outline-none"
+                    >
+                      <option value="every 30m">Every 30 minutes</option>
+                      <option value="every 1h">Every hour</option>
+                      <option value="every 2h">Every 2 hours</option>
+                      <option value="every 4h">Every 4 hours</option>
+                      <option value="every 8h">Every 8 hours</option>
+                      <option value="every 12h">Every 12 hours</option>
+                      <option value="every 1d">Every day</option>
+                    </select>
+                  </div>
+                )}
+
+                {triggerType === "event" && (
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-zinc-400">
+                      State File Path
+                    </label>
+                    <input
+                      value={stateFilePath}
+                      onChange={(e) => setStateFilePath(e.target.value)}
+                      placeholder="sprints/state.json"
+                      className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:border-zinc-500 focus:outline-none"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {currentStep === 4 && (
+              <div className="space-y-4">
+                <p className="text-xs text-zinc-500">Review your workflow before creating it.</p>
+
+                <div className="rounded-lg border border-zinc-700 bg-zinc-800/50 p-4 space-y-3">
+                  <div>
+                    <div className="text-xs text-zinc-500">Name</div>
+                    <div className="text-sm font-medium text-zinc-200">{name}</div>
+                  </div>
+                  {description && (
+                    <div>
+                      <div className="text-xs text-zinc-500">Description</div>
+                      <div className="text-sm text-zinc-300">{description}</div>
+                    </div>
+                  )}
+                  <div>
+                    <div className="text-xs text-zinc-500">Trigger</div>
+                    <div className="text-sm text-zinc-300">
+                      {triggerType === "manual" && "Runs manually"}
+                      {triggerType === "scheduled" && `${interval.replace("every ", "Every ")}`}
+                      {triggerType === "event" && `Watches: ${stateFilePath || "(no path)"}`}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-zinc-500 mb-1">
+                      Pipeline ({steps.length} steps)
+                    </div>
+                    <div className="space-y-1">
+                      {steps.map((s, i) => (
+                        <div key={s.id} className="flex items-center gap-2 text-xs">
+                          <span className="text-zinc-600">{i + 1}.</span>
+                          <span
+                            className={cn(
+                              "rounded px-1 py-0.5 text-[9px] font-semibold uppercase",
+                              s.type === "agent"
+                                ? "bg-blue-500/15 text-blue-400"
+                                : "bg-amber-500/15 text-amber-400",
+                            )}
+                          >
+                            {s.type}
+                          </span>
+                          <span className="text-zinc-300">{s.name || s.agent || "Unnamed"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Footer */}
@@ -417,10 +552,10 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
                   Cancel
                 </button>
               </Dialog.Close>
-              {currentStep < 2 ? (
+              {currentStep < 4 ? (
                 <button
                   onClick={() => setCurrentStep((s) => s + 1)}
-                  disabled={!name.trim()}
+                  disabled={currentStep === 1 && !name.trim()}
                   className="rounded-lg bg-zinc-700 px-4 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-600 disabled:opacity-50"
                 >
                   Next
