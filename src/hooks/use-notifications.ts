@@ -53,6 +53,12 @@ export function useNotifications() {
     const prevMap = prevSessionsRef.current;
     for (const session of sessions) {
       const prevStatus = prevMap.get(session.id);
+      // Sessions that arrive already exited on first observation (fresh page load)
+      // should be auto-acknowledged — no toast, no badge
+      if (prevStatus === undefined && session.status === "exited") {
+        acknowledgedRef.current.add(session.id);
+        continue;
+      }
       if (prevStatus && prevStatus !== "exited" && session.status === "exited") {
         const code = session.exitCode != null ? session.exitCode : "unknown";
         addToast(
