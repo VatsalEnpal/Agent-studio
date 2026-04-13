@@ -10,6 +10,9 @@ import {
   SessionsIcon,
   RoomsIcon,
   SprintsIcon,
+  FileIcon,
+  SettingsIcon,
+  MonitorIcon,
 } from "@/components/ui/icons";
 import { useUIStore } from "@/stores/ui";
 import { useSessionsStore } from "@/stores/sessions";
@@ -55,7 +58,9 @@ export function CommandPalette({
       void fetch("/api/memory/stats")
         .then((r) => r.json())
         .then((d: { total?: number }) => setMemoryTotal(d.total ?? 0))
-        .catch(() => { /* optional — memory stats are cosmetic */ });
+        .catch(() => {
+          /* optional — memory stats are cosmetic */
+        });
     }
   }, [open]);
 
@@ -67,10 +72,18 @@ export function CommandPalette({
 
   /** Map action IDs to pillar accent colors for their icons */
   const accentForAction = (id: string): string | undefined => {
-    if (id.startsWith("focus-") || id === "new-session" || id === "view-sessions") return "text-sessions";
+    if (
+      id.startsWith("focus-") ||
+      id === "new-session" ||
+      id === "view-sessions" ||
+      id === "view-servers"
+    )
+      return "text-sessions";
     if (id === "view-teams" || id === "new-room") return "text-rooms";
     if (id === "view-memory") return "text-memory";
-    if (id === "pmo-scan") return "text-sprints";
+    if (id === "pmo-scan" || id === "view-sprints") return "text-sprints";
+    if (id === "view-reports") return "text-rooms";
+    if (id === "view-settings") return "text-text-secondary";
     return undefined;
   };
 
@@ -171,16 +184,7 @@ export function CommandPalette({
     }
 
     return list;
-  }, [
-    close,
-    focusedId,
-    sessions,
-    memoryTotal,
-    onNewSession,
-    onKillSession,
-    setActiveMode,
-    swapIn,
-  ]);
+  }, [close, focusedId, sessions, memoryTotal, onNewSession, onKillSession, setActiveMode, swapIn]);
 
   // Filter actions by query
   const filtered = useMemo(() => {
@@ -188,8 +192,7 @@ export function CommandPalette({
     const q = query.toLowerCase();
     return actions.filter(
       (action) =>
-        action.label.toLowerCase().includes(q) ||
-        action.keywords.some((kw) => kw.includes(q)),
+        action.label.toLowerCase().includes(q) || action.keywords.some((kw) => kw.includes(q)),
     );
   }, [actions, query]);
 
@@ -269,7 +272,10 @@ export function CommandPalette({
           </div>
 
           {/* Results */}
-          <div ref={listRef} className="overflow-y-auto max-h-[calc(60vh-52px)] py-1 scrollbar-thin">
+          <div
+            ref={listRef}
+            className="overflow-y-auto max-h-[calc(60vh-52px)] py-1 scrollbar-thin"
+          >
             {filtered.length === 0 ? (
               <div className="flex items-center justify-center py-6 text-text-ghost text-xs">
                 <SearchIcon size={14} className="mr-2" />
@@ -293,11 +299,15 @@ export function CommandPalette({
                         : "text-text-secondary hover:bg-bg-input/50",
                     )}
                   >
-                    <Icon size={14} className={cn("shrink-0", index === selectedIndex && accent ? accent : "text-text-ghost")} />
+                    <Icon
+                      size={14}
+                      className={cn(
+                        "shrink-0",
+                        index === selectedIndex && accent ? accent : "text-text-ghost",
+                      )}
+                    />
                     <div className="flex-1 min-w-0">
-                      <span className="text-xs font-medium block truncate">
-                        {action.label}
-                      </span>
+                      <span className="text-xs font-medium block truncate">{action.label}</span>
                       {action.description && (
                         <span className="text-label text-text-ghost block truncate">
                           {action.description}
