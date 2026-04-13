@@ -201,6 +201,17 @@ export function CommandPalette({ items }: CommandPaletteProps) {
         },
       },
       {
+        id: "action-go-dev-servers",
+        label: "Go to Dev Servers",
+        category: "actions" as CommandCategory,
+        icon: ChevronRightIcon,
+        keywords: ["switch", "navigate", "dev", "servers", "running", "processes", "page"],
+        onSelect: () => {
+          setOpen(false);
+          setActiveMode("sessions");
+        },
+      },
+      {
         id: "action-go-settings",
         label: "Go to Settings",
         category: "actions" as CommandCategory,
