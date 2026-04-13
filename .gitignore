@@ -76,3 +76,4 @@ Thumbs.db
 # Temp screenshots from QA
 verify-*.png
 issue*.png
+.shiploop/
