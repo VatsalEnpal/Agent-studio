@@ -1033,7 +1033,7 @@ Choose the schedule and model based on the task:
       const session = terminalManager.createSession({
         name,
         command: command ?? "claude",
-        args: args ?? ["--dangerously-skip-permissions"],
+        args: args ?? ["--model", "sonnet"],
         cwd,
         cols,
         rows,

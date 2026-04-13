@@ -176,18 +176,37 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
     permissions: "bypass" | "default" | "plan" | "auto";
   } | null>(null);
 
-  // Reset form on open — use defaults from config so user sees their configured values
+  // Reset form on open — always re-read saved settings so user sees latest configured values
   useEffect(() => {
     if (open) {
       setCustomName("");
-      setModel(configDefaults?.model ?? "sonnet");
       setAgent("none");
-      setPermissions(configDefaults?.permissions ?? "default");
       setChannel("none");
       setCwd(defaultCwd);
       setResume("");
       setError(null);
       setLaunching(false);
+
+      // Fetch latest saved settings each time dialog opens
+      void (async () => {
+        try {
+          const res = await fetch("/api/settings");
+          if (res.ok) {
+            const settings = (await res.json()) as {
+              defaultModel?: "opus" | "sonnet" | "haiku";
+              defaultPermissions?: "bypass" | "default" | "plan" | "auto";
+            };
+            setModel(settings.defaultModel ?? configDefaults?.model ?? "sonnet");
+            setPermissions(settings.defaultPermissions ?? configDefaults?.permissions ?? "default");
+            return;
+          }
+        } catch {
+          // Settings endpoint unavailable
+        }
+        // Fallback to config defaults
+        setModel(configDefaults?.model ?? "sonnet");
+        setPermissions(configDefaults?.permissions ?? "default");
+      })();
     }
   }, [open, defaultCwd, configDefaults]);
 
@@ -230,9 +249,27 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
                 permissions?: "bypass" | "default" | "plan" | "auto";
               }
             | undefined;
+
+          // User-saved settings override config defaults
+          let savedModel = defaults?.model ?? "sonnet";
+          let savedPermissions = defaults?.permissions ?? "default";
+          try {
+            const settingsRes = await fetch("/api/settings");
+            if (settingsRes.ok) {
+              const settings = (await settingsRes.json()) as {
+                defaultModel?: "opus" | "sonnet" | "haiku";
+                defaultPermissions?: "bypass" | "default" | "plan" | "auto";
+              };
+              if (settings.defaultModel) savedModel = settings.defaultModel;
+              if (settings.defaultPermissions) savedPermissions = settings.defaultPermissions;
+            }
+          } catch {
+            // Settings endpoint unavailable, use config defaults
+          }
+
           setConfigDefaults({
-            model: defaults?.model ?? "sonnet",
-            permissions: defaults?.permissions ?? "default",
+            model: savedModel,
+            permissions: savedPermissions,
           });
           setDefaultCwdLoaded(true);
         }

@@ -357,7 +357,10 @@ export default function Home() {
       const args: string[] = [];
 
       if (config.continueSession) {
-        args.push("--continue", "--dangerously-skip-permissions");
+        args.push("--continue");
+        if (config.permissions === "bypass") {
+          args.push("--dangerously-skip-permissions");
+        }
         const res = await fetch("/api/sessions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -369,7 +372,7 @@ export default function Home() {
             meta: {
               model: config.model,
               agent: "continued",
-              permissions: "bypass",
+              permissions: config.permissions,
               channel: "none",
               group: "standalone",
             },
@@ -380,7 +383,10 @@ export default function Home() {
       }
 
       if (config.resume) {
-        args.push("--resume", config.resume, "--dangerously-skip-permissions");
+        args.push("--resume", config.resume);
+        if (config.permissions === "bypass") {
+          args.push("--dangerously-skip-permissions");
+        }
         const res = await fetch("/api/sessions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -392,7 +398,7 @@ export default function Home() {
             meta: {
               model: config.model,
               agent: "resumed",
-              permissions: "bypass",
+              permissions: config.permissions,
               channel: "none",
               group: "standalone",
             },
@@ -427,7 +433,7 @@ export default function Home() {
         body: JSON.stringify({
           name: autoName,
           command: "claude",
-          args: args.length > 0 ? args : ["--dangerously-skip-permissions"],
+          args,
           cwd: resolvedCwd,
           meta: {
             model: config.model,
