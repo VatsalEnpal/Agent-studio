@@ -57,7 +57,29 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     try {
       const res = await fetch("/api/settings");
       const data: AppSettings = await res.json();
+
+      // Also fetch the authoritative config to get the canonical working directory.
+      // The /api/settings endpoint may return a stale defaultCwd from .settings.json,
+      // while /api/config returns the resolved value from .agent-studio.json.
+      let configCwd: string | null = null;
+      try {
+        const cfgRes = await fetch("/api/config");
+        if (cfgRes.ok) {
+          const cfgData = (await cfgRes.json()) as {
+            defaultCwd: string;
+            config: { defaults: { workingDirectory: string } };
+          };
+          configCwd = cfgData.config?.defaults?.workingDirectory ?? cfgData.defaultCwd ?? null;
+        }
+      } catch {
+        // Ignore — fall back to whatever /api/settings returned
+      }
+
       if (data && data.defaultModel) {
+        // Use the config's working directory as the canonical source
+        if (configCwd) {
+          data.defaultCwd = configCwd;
+        }
         set({ settings: data, settingsLoaded: true });
       } else {
         set({ settingsLoaded: true });
