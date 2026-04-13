@@ -24,8 +24,27 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
   const [topic, setTopic] = useState("");
   const [agents, setAgents] = useState<AgentConfig[]>([]);
   const [creating, setCreating] = useState(false);
+  const [defaultModel, setDefaultModel] = useState<"opus" | "sonnet" | "haiku">("sonnet");
   const addRoom = useRoomsStore((s) => s.addRoom);
   const selectRoom = useRoomsStore((s) => s.selectRoom);
+
+  // Fetch global default model from config
+  useEffect(() => {
+    fetch("/api/config")
+      .then((res) => res.json())
+      .then((data: Record<string, unknown>) => {
+        const config = data.config as Record<string, unknown> | undefined;
+        const defaults = (config?.defaults ?? data.defaults) as
+          | { model?: "opus" | "sonnet" | "haiku" }
+          | undefined;
+        if (defaults?.model) {
+          setDefaultModel(defaults.model);
+        }
+      })
+      .catch(() => {
+        // Keep fallback "sonnet"
+      });
+  }, []);
 
   // Fetch discovered agents from server when dialog opens
   useEffect(() => {
@@ -41,7 +60,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
           .map((a) => ({
             id: a.id,
             name: a.name,
-            model: a.id === "orchestrator" ? ("opus" as const) : ("sonnet" as const),
+            model: a.id === "orchestrator" ? ("opus" as const) : defaultModel,
             enabled: false,
           }));
         setAgents(agentConfigs);
@@ -49,7 +68,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
       .catch(() => {
         setAgents([]);
       });
-  }, [open]);
+  }, [open, defaultModel]);
 
   // Escape key to close
   useEffect(() => {
