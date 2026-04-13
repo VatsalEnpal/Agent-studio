@@ -16,6 +16,7 @@ import { MockCommandRunner, ClaudeCommandRunner } from "../workflows/command-run
 import { loadRunState, listRuns, getActiveRuns, deleteRun } from "../workflows/run-state.js";
 import type { WorkflowPipelineDef } from "../workflows/definition.js";
 import type { WsMessage } from "../shared/types.js";
+import notifier from "node-notifier";
 
 interface WorkflowRouteDeps {
   registry: PipelineRegistry;
@@ -51,6 +52,43 @@ export function workflowRoutes(deps: WorkflowRouteDeps): Router {
     const wsType = typeMap[event.type];
     if (wsType) {
       broadcast(wss, { type: wsType, payload: event } satisfies WsMessage);
+    }
+
+    // Gate notifications: Mac notification via node-notifier
+    if (event.type === "gate-waiting") {
+      const stepId = event.stepId ?? "unknown";
+      const wfDef = registry.getWorkflow(event.workflowId);
+      const wfName = wfDef?.name ?? event.workflowId;
+      const stepDef = wfDef?.steps.find((s) => s.id === stepId);
+      const gateName = stepDef?.name ?? stepId;
+      const notify = (stepDef?.type === "gate" ? stepDef.notify : undefined) ?? [];
+
+      // Always send in-app notification via WebSocket (already done above)
+      // Also send a "notification" type for the toast system
+      broadcast(wss, {
+        type: "notification",
+        payload: {
+          type: "gate-approval",
+          title: "Approval Needed",
+          body: `Workflow '${wfName}' needs approval at '${gateName}'`,
+          priority: "high",
+          targetPage: "workflows",
+          targetId: event.workflowId,
+        },
+      } satisfies WsMessage);
+
+      // Mac notification (if configured)
+      if (notify.length === 0 || notify.includes("mac")) {
+        try {
+          notifier.notify({
+            title: "Agent Studio — Approval Needed",
+            message: `Workflow '${wfName}' needs approval at '${gateName}'`,
+            sound: true,
+          });
+        } catch {
+          // node-notifier can fail silently on some platforms
+        }
+      }
     }
   });
 
