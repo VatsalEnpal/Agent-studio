@@ -43,6 +43,7 @@ export function ConfirmDialog({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50 animate-fade-in" />
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[380px] bg-bg-elevated border border-border-subtle rounded shadow-modal animate-slide-up">
+          <Dialog.Description className="sr-only">Confirm action</Dialog.Description>
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border-default">
             <Dialog.Title
@@ -63,9 +64,7 @@ export function ConfirmDialog({
 
           {/* Body */}
           <div className="px-4 py-4">
-            <p className="text-xs text-text-primary leading-relaxed">
-              {description}
-            </p>
+            <p className="text-xs text-text-primary leading-relaxed">{description}</p>
             {detail && (
               <p className="text-label text-text-secondary mt-2 font-medium truncate">
                 &ldquo;{detail}&rdquo;

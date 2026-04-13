@@ -133,6 +133,7 @@ export function PRModal() {
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50" />
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-bg-elevated border border-border-subtle rounded shadow-modal z-50 outline-none">
+          <Dialog.Description className="sr-only">Create a pull request</Dialog.Description>
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-border-default">
             <div className="flex items-center gap-2">
@@ -157,18 +158,15 @@ export function PRModal() {
               <div className="flex items-start gap-2 px-3 py-2 bg-error/10 border border-error/20 rounded text-error">
                 <WarningIcon size={14} className="shrink-0 mt-0.5" />
                 <p className="text-xs leading-relaxed">
-                  This is the <strong>production repository</strong>. This PR
-                  will be reviewed by the team. Changes require explicit approval.
+                  This is the <strong>production repository</strong>. This PR will be reviewed by
+                  the team. Changes require explicit approval.
                 </p>
               </div>
             )}
 
             {/* Repo */}
             <div className="text-xs text-text-ghost">
-              Repo:{" "}
-              <span className="text-text-secondary">
-                {prModalRepo?.name ?? "unknown"}
-              </span>
+              Repo: <span className="text-text-secondary">{prModalRepo?.name ?? "unknown"}</span>
             </div>
 
             {/* Source branch */}
@@ -246,10 +244,8 @@ export function PRModal() {
                   </p>
                   <p className="text-xs">
                     Type{" "}
-                    <span className="font-mono font-bold bg-error/20 px-1 rounded">
-                      CONFIRM
-                    </span>{" "}
-                    to proceed:
+                    <span className="font-mono font-bold bg-error/20 px-1 rounded">CONFIRM</span> to
+                    proceed:
                   </p>
                   <input
                     type="text"

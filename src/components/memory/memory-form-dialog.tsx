@@ -34,8 +34,8 @@ function emptyForm(): MemoryFormData {
 
 export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
   const isCreate = mode === "create";
-  const open = useMemoryStore((s) => isCreate ? s.createDialogOpen : s.editDialogOpen);
-  const close = useMemoryStore((s) => isCreate ? s.closeCreateDialog : s.closeEditDialog);
+  const open = useMemoryStore((s) => (isCreate ? s.createDialogOpen : s.editDialogOpen));
+  const close = useMemoryStore((s) => (isCreate ? s.closeCreateDialog : s.closeEditDialog));
   const editingEntry = useMemoryStore((s) => s.editingEntry);
   const saving = useMemoryStore((s) => s.saving);
   const setSaving = useMemoryStore((s) => s.setSaving);
@@ -107,7 +107,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
         });
-        const data = await res.json() as { ok?: boolean; file?: string; error?: string };
+        const data = (await res.json()) as { ok?: boolean; file?: string; error?: string };
         if (!data.ok) throw new Error(data.error ?? "Failed to create");
         addEntry({
           file: data.file!,
@@ -125,7 +125,7 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
         });
-        const data = await res.json() as { ok?: boolean; error?: string };
+        const data = (await res.json()) as { ok?: boolean; error?: string };
         if (!data.ok) throw new Error(data.error ?? "Failed to update");
         updateEntry(editingEntry.file, {
           title: form.title,
@@ -145,10 +145,16 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
   }, [form, isCreate, editingEntry, addEntry, updateEntry, addToast, close, setSaving]);
 
   return (
-    <Dialog.Root open={open} onOpenChange={(v) => { if (!v) close(); }}>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) close();
+      }}
+    >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50" />
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[480px] max-h-[85vh] overflow-y-auto bg-bg-elevated border border-border-subtle rounded shadow-modal scrollbar-thin">
+          <Dialog.Description className="sr-only">Create or edit a memory entry</Dialog.Description>
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-2 border-b border-border-default">
             <Dialog.Title className="text-xs font-semibold text-text-primary">
@@ -164,7 +170,9 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
           <div className="px-4 py-3 space-y-3">
             {/* Title */}
             <div>
-              <label className="text-2xs font-medium text-text-ghost uppercase tracking-[0.5px]">Title</label>
+              <label className="text-2xs font-medium text-text-ghost uppercase tracking-[0.5px]">
+                Title
+              </label>
               <input
                 type="text"
                 value={form.title}
@@ -176,7 +184,9 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
 
             {/* Category */}
             <div>
-              <label className="text-2xs font-medium text-text-ghost uppercase tracking-[0.5px]">Category</label>
+              <label className="text-2xs font-medium text-text-ghost uppercase tracking-[0.5px]">
+                Category
+              </label>
               <select
                 value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
@@ -184,7 +194,9 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
                 className="mt-1 w-full px-2 py-1 text-xs bg-bg-input border border-border-default rounded text-text-primary focus:outline-none focus:border-memory transition-all disabled:opacity-50"
               >
                 {CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -215,7 +227,9 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
 
             {/* Tags */}
             <div>
-              <label className="text-2xs font-medium text-text-ghost uppercase tracking-[0.5px]">Tags</label>
+              <label className="text-2xs font-medium text-text-ghost uppercase tracking-[0.5px]">
+                Tags
+              </label>
               <div className="mt-1 flex items-center gap-1.5 flex-wrap">
                 {form.tags.map((tag) => (
                   <span
@@ -223,7 +237,10 @@ export function MemoryFormDialog({ mode }: { mode: "create" | "edit" }) {
                     className="inline-flex items-center gap-1 text-label px-1.5 py-0.5 bg-bg-elevated text-text-secondary rounded"
                   >
                     {tag}
-                    <button onClick={() => removeTag(tag)} className="text-text-ghost hover:text-text-primary">
+                    <button
+                      onClick={() => removeTag(tag)}
+                      className="text-text-ghost hover:text-text-primary"
+                    >
                       <CloseIcon size={8} />
                     </button>
                   </span>
