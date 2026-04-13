@@ -1,0 +1,117 @@
+- generic [ref=e1]:
+  - alert [ref=e6]
+  - generic [ref=e50]:
+    - banner [ref=e51]:
+      - generic [ref=e52]:
+        - generic "Close" [ref=e53]
+        - generic "Minimize" [ref=e54]
+        - generic "Maximize" [ref=e55]
+      - generic [ref=e56]: Agent Studio
+      - generic "Connected to server" [ref=e58]
+    - generic [ref=e59]:
+      - navigation "Main navigation" [ref=e60]:
+        - generic [ref=e61]: A
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - button "Sessions" [ref=e64] [cursor=pointer]:
+              - img [ref=e66]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e69]:
+            - button "Teams" [ref=e70] [cursor=pointer]:
+              - img [ref=e71]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e73]:
+            - button "Sprints" [ref=e74] [cursor=pointer]:
+              - img [ref=e75]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e78]:
+            - button "Memory" [ref=e79] [cursor=pointer]:
+              - img [ref=e80]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e82]:
+            - button "Reports" [ref=e83] [cursor=pointer]:
+              - img [ref=e84]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e86]:
+          - button "Settings" [ref=e87] [cursor=pointer]:
+            - img [ref=e88]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e91]:
+        - generic [ref=e954]:
+          - generic [ref=e956]:
+            - button "Sessions" [ref=e957] [cursor=pointer]
+            - button "History" [ref=e958] [cursor=pointer]
+            - button "Servers" [active] [ref=e959] [cursor=pointer]
+          - generic [ref=e961]:
+            - img [ref=e962]
+            - textbox "Search..." [ref=e965]
+          - generic [ref=e985]:
+            - generic [ref=e987]: :8080
+            - generic [ref=e988]: node
+          - generic [ref=e973]:
+            - button "Dev Servers" [ref=e974] [cursor=pointer]: Dev Servers
+            - button "New Session ⇧⌘N" [ref=e976] [cursor=pointer]:
+              - img [ref=e977]
+              - text: New Session
+              - generic [ref=e978]: ⇧⌘N
+      - main [ref=e119]:
+        - generic [ref=e990]:
+          - generic [ref=e991]:
+            - generic [ref=e992]:
+              - heading "Dev Servers" [level=2] [ref=e994]
+              - generic [ref=e995]: Running processes and listening ports
+              - generic [ref=e996]: 1 listening
+            - generic [ref=e997]:
+              - img [ref=e998]
+              - textbox "Filter..." [ref=e1001]
+            - button "Add Server" [ref=e1002] [cursor=pointer]:
+              - img [ref=e1003]
+              - text: Add Server
+            - button "Refresh" [ref=e1004] [cursor=pointer]:
+              - img [ref=e1005]
+          - generic [ref=e1008]:
+            - generic [ref=e1009]:
+              - generic [ref=e1010]: Port
+              - generic [ref=e1011]: Process
+              - generic [ref=e1012]: Directory
+              - generic [ref=e1013]: PID
+              - generic [ref=e1014]: Actions
+            - generic [ref=e1015]:
+              - generic [ref=e1018]: "8080"
+              - generic [ref=e1020]: Node
+              - generic [ref=e1022]: /
+              - generic [ref=e1023]: "86253"
+              - generic [ref=e1024]:
+                - link "Open http://localhost:8080" [ref=e1025] [cursor=pointer]:
+                  - /url: http://localhost:8080
+                  - img [ref=e1026]
+                - generic [ref=e1030]: self

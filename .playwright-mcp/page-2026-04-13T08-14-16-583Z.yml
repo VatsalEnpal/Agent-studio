@@ -1,0 +1,206 @@
+- generic:
+  - generic:
+    - banner:
+      - generic: Agent Studio
+    - generic:
+      - navigation:
+        - generic: A
+        - generic:
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic:
+          - button:
+            - img
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - button: Sessions
+                - button: History
+                - button: Servers
+            - generic:
+              - generic:
+                - img
+                - textbox:
+                  - /placeholder: Search...
+            - generic:
+              - generic:
+                - generic:
+                  - generic: :8081
+                  - generic: node
+                - generic:
+                  - generic: :8080
+                  - generic: node
+                - generic:
+                  - generic: :0
+                  - generic: npm run dev
+            - generic:
+              - button: Dev Servers
+              - button:
+                - img
+                - text: New Session
+                - generic: ⇧⌘N
+      - generic:
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=2]: Dev Servers
+                    - generic: Running processes and listening ports
+                    - generic: 3 listening
+                  - generic:
+                    - img
+                    - textbox:
+                      - /placeholder: Filter...
+                  - button:
+                    - img
+                    - text: Add Server
+                  - button:
+                    - img
+                - generic:
+                  - generic:
+                    - generic: Port
+                    - generic: Process
+                    - generic: Directory
+                    - generic: PID
+                    - generic: Actions
+                  - generic:
+                    - generic:
+                      - generic: "8081"
+                    - generic:
+                      - generic: Node
+                    - generic:
+                      - generic: /
+                    - generic: "20810"
+                    - generic:
+                      - link:
+                        - /url: http://localhost:8081
+                        - img
+                      - button:
+                        - img
+                  - generic:
+                    - generic:
+                      - generic: "8080"
+                    - generic:
+                      - generic: Node
+                    - generic:
+                      - generic: /
+                    - generic: "45269"
+                    - generic:
+                      - link:
+                        - /url: http://localhost:8080
+                        - img
+                      - generic: self
+                  - generic:
+                    - generic:
+                      - generic: "0"
+                    - generic:
+                      - generic: Npm run dev
+                    - generic:
+                      - generic: /tmp/shiploop-test-project
+                    - generic: "0"
+                    - generic:
+                      - button:
+                        - img
+  - alert
+  - dialog "New Session" [ref=e452]:
+    - paragraph [ref=e453]: Launch a new Claude Code session
+    - generic [ref=e454]:
+      - heading "New Session" [level=2] [ref=e455]
+      - button [active] [ref=e456] [cursor=pointer]:
+        - img [ref=e457]
+    - generic [ref=e460]:
+      - generic [ref=e461]:
+        - generic [ref=e462]: Quick Start
+        - generic [ref=e463]:
+          - button "Continue AgentStudio43m ago" [ref=e464] [cursor=pointer]
+          - button "Quick Chat" [ref=e465] [cursor=pointer]
+          - button "Start Sprint" [ref=e466] [cursor=pointer]
+          - button "Security Audit" [ref=e467] [cursor=pointer]
+          - button "PMO Scan" [ref=e468] [cursor=pointer]
+      - generic [ref=e469]:
+        - generic [ref=e470]: Resume Previous
+        - button "Select a previous session..." [ref=e472] [cursor=pointer]:
+          - generic [ref=e473]: Select a previous session...
+          - img [ref=e474]
+      - generic [ref=e478]: customize
+      - generic [ref=e480]:
+        - generic [ref=e481]: Model
+        - generic [ref=e482]:
+          - button "opus" [ref=e483] [cursor=pointer]
+          - button "sonnet" [ref=e484] [cursor=pointer]
+          - button "haiku" [ref=e485] [cursor=pointer]
+      - generic [ref=e486]:
+        - generic [ref=e487]: Agent
+        - combobox [ref=e488]:
+          - option "No Agent" [selected]
+          - option "test-agent"
+      - generic [ref=e489]:
+        - generic [ref=e490]: Permissions
+        - generic [ref=e491]:
+          - button "bypass" [ref=e492] [cursor=pointer]
+          - button "default" [ref=e493] [cursor=pointer]
+          - button "plan" [ref=e494] [cursor=pointer]
+          - button "auto" [ref=e495] [cursor=pointer]
+      - generic [ref=e496]:
+        - generic [ref=e497]: Working Directory
+        - textbox [ref=e498]: /tmp/shiploop-test-project
+      - generic [ref=e499]:
+        - generic [ref=e500]: Session Name
+        - textbox "Auto-generated if empty" [ref=e501]
+    - generic [ref=e502]:
+      - generic [ref=e503]: sonnet
+      - generic [ref=e504]:
+        - button "Launch" [ref=e505] [cursor=pointer]
+        - generic [ref=e506]: Cmd+Enter

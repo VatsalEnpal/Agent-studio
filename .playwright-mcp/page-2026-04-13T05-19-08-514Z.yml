@@ -1,0 +1,160 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]: Agent Studio
+      - generic "Connected to server" [ref=e14]
+    - generic [ref=e15]:
+      - navigation "Main navigation" [ref=e16]:
+        - generic [ref=e17]: A
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - button "Sessions" [ref=e20] [cursor=pointer]:
+              - img [ref=e22]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e25]:
+            - button "Teams" [ref=e26] [cursor=pointer]:
+              - img [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e29]:
+            - button "Sprints" [ref=e30] [cursor=pointer]:
+              - img [ref=e31]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e34]:
+            - button "Memory" [ref=e35] [cursor=pointer]:
+              - img [ref=e36]
+              - generic "95 unread" [ref=e38]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e39]:
+            - button "Reports" [ref=e40] [cursor=pointer]:
+              - img [ref=e41]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e43]:
+          - button "Settings" [ref=e44] [cursor=pointer]:
+            - img [ref=e45]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e48]:
+        - generic [ref=e2813]:
+          - generic [ref=e2815]:
+            - button "Sessions" [ref=e2816] [cursor=pointer]
+            - button "History" [ref=e2817] [cursor=pointer]
+            - button "Servers" [ref=e2818] [cursor=pointer]
+          - generic [ref=e2820]:
+            - img [ref=e2821]
+            - textbox "Search..." [ref=e2824]
+          - generic [ref=e2843]:
+            - generic [ref=e2844]:
+              - generic [ref=e2846]: :8080
+              - generic [ref=e2847]: node
+            - generic [ref=e2848]:
+              - generic [ref=e2850]: :0
+              - generic [ref=e2851]: npm run dev
+            - generic [ref=e2852]:
+              - generic [ref=e2854]: :0
+              - generic [ref=e2855]: npm run dev
+            - generic [ref=e2856]:
+              - generic [ref=e2858]: :0
+              - generic [ref=e2859]: npm run dev
+          - generic [ref=e2832]:
+            - button "Dev Servers" [active] [ref=e2833] [cursor=pointer]: Dev Servers
+            - button "New Session ⇧⌘N" [ref=e2835] [cursor=pointer]:
+              - img [ref=e2836]
+              - text: New Session
+              - generic [ref=e2837]: ⇧⌘N
+      - main [ref=e76]:
+        - generic [ref=e2861]:
+          - generic [ref=e2862]:
+            - generic [ref=e2863]:
+              - heading "Dev Servers" [level=2] [ref=e2865]
+              - generic [ref=e2866]: Running processes and listening ports
+              - generic [ref=e2867]: 4 listening
+            - generic [ref=e2868]:
+              - img [ref=e2869]
+              - textbox "Filter..." [ref=e2872]
+            - button "Add Server" [ref=e2873] [cursor=pointer]:
+              - img [ref=e2874]
+              - text: Add Server
+            - button "Refresh" [ref=e2875] [cursor=pointer]:
+              - img [ref=e2876]
+          - generic [ref=e2879]:
+            - generic [ref=e2880]:
+              - generic [ref=e2881]: Port
+              - generic [ref=e2882]: Process
+              - generic [ref=e2883]: Directory
+              - generic [ref=e2884]: PID
+              - generic [ref=e2885]: Actions
+            - generic [ref=e2886]:
+              - generic [ref=e2889]: "8080"
+              - generic [ref=e2891]: Node
+              - generic [ref=e2893]: /
+              - generic [ref=e2894]: "44295"
+              - generic [ref=e2895]:
+                - link "Open http://localhost:8080" [ref=e2896] [cursor=pointer]:
+                  - /url: http://localhost:8080
+                  - img [ref=e2897]
+                - generic [ref=e2901]: self
+            - generic [ref=e2902]:
+              - generic [ref=e2905]: "0"
+              - generic [ref=e2907]: Npm run dev
+              - generic [ref=e2909]: ~/Code/InPipeline/agent-console
+              - generic [ref=e2910]: "0"
+              - button "Stop process" [ref=e2912] [cursor=pointer]:
+                - img [ref=e2913]
+            - generic [ref=e2915]:
+              - generic [ref=e2918]: "0"
+              - generic [ref=e2920]: Npm run dev
+              - generic [ref=e2922]: ~/Code/staging-frontend
+              - generic [ref=e2923]: "0"
+              - button "Stop process" [ref=e2925] [cursor=pointer]:
+                - img [ref=e2926]
+            - generic [ref=e2928]:
+              - generic [ref=e2931]: "0"
+              - generic [ref=e2933]: Npm run dev
+              - generic [ref=e2935]: ~/Code/InPipeline/enpal-energy-vnb-portal
+              - generic [ref=e2936]: "0"
+              - button "Stop process" [ref=e2938] [cursor=pointer]:
+                - img [ref=e2939]
+  - generic [ref=e2946] [cursor=pointer]:
+    - button "Open issues overlay" [ref=e2947]:
+      - img [ref=e2949]
+      - generic [ref=e2951]:
+        - generic [ref=e2952]: "3"
+        - generic [ref=e2953]: "4"
+      - generic [ref=e2954]:
+        - text: Issue
+        - generic [ref=e2955]: s
+    - button "Collapse issues badge" [ref=e2956]:
+      - img [ref=e2957]
+  - alert [ref=e6]

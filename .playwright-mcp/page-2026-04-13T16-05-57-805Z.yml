@@ -1,0 +1,258 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic "Close" [ref=e5]
+        - generic "Minimize" [ref=e6]
+        - generic "Maximize" [ref=e7]
+      - generic [ref=e8]: Agent Studio
+      - generic "Connected to server" [ref=e10]
+    - generic [ref=e11]:
+      - navigation "Main navigation" [ref=e12]:
+        - generic [ref=e13]: A
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - button "Sessions" [ref=e16] [cursor=pointer]:
+              - img [ref=e18]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e21]:
+            - button "Teams" [active] [ref=e22] [cursor=pointer]:
+              - img [ref=e23]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e25]:
+            - button "Sprints" [ref=e26] [cursor=pointer]:
+              - img [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e30]:
+            - button "Memory" [ref=e31] [cursor=pointer]:
+              - img [ref=e32]
+              - generic "95 unread" [ref=e34]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e35]:
+            - button "Reports" [ref=e36] [cursor=pointer]:
+              - img [ref=e37]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e39]:
+          - button "Settings" [ref=e40] [cursor=pointer]:
+            - img [ref=e41]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e44]:
+        - generic [ref=e289]:
+          - generic [ref=e291]:
+            - button "Rooms" [ref=e292] [cursor=pointer]
+            - button "Agents" [ref=e293] [cursor=pointer]
+          - generic [ref=e294]:
+            - generic [ref=e295]:
+              - img [ref=e296]
+              - paragraph [ref=e299]: No active rooms
+              - paragraph [ref=e300]: Create a room to start collaborating with agents
+            - generic [ref=e301]: Archived
+            - button "Chain fix test Legacy" [ref=e302] [cursor=pointer]:
+              - img [ref=e303]
+              - generic [ref=e306]:
+                - generic [ref=e308]: Chain fix test
+                - generic [ref=e310]: Legacy
+            - button "Chain test Legacy" [ref=e311] [cursor=pointer]:
+              - img [ref=e312]
+              - generic [ref=e315]:
+                - generic [ref=e317]: Chain test
+                - generic [ref=e319]: Legacy
+            - button "Checkin the live PMO tickets Legacy" [ref=e320] [cursor=pointer]:
+              - img [ref=e321]
+              - generic [ref=e324]:
+                - generic [ref=e326]: Checkin the live PMO tickets
+                - generic [ref=e328]: Legacy
+            - button "Checking tickets Legacy" [ref=e329] [cursor=pointer]:
+              - img [ref=e330]
+              - generic [ref=e333]:
+                - generic [ref=e335]: Checking tickets
+                - generic [ref=e337]: Legacy
+            - button "Debug chain Legacy" [ref=e338] [cursor=pointer]:
+              - img [ref=e339]
+              - generic [ref=e342]:
+                - generic [ref=e344]: Debug chain
+                - generic [ref=e346]: Legacy
+            - button "pmo-old-ticket-check Legacy" [ref=e347] [cursor=pointer]:
+              - img [ref=e348]
+              - generic [ref=e351]:
+                - generic [ref=e353]: pmo-old-ticket-check
+                - generic [ref=e355]: Legacy
+            - button "PMO ticket checker Legacy" [ref=e356] [cursor=pointer]:
+              - img [ref=e357]
+              - generic [ref=e360]:
+                - generic [ref=e362]: PMO ticket checker
+                - generic [ref=e364]: Legacy
+            - button "PMO ticket mapping Legacy" [ref=e365] [cursor=pointer]:
+              - img [ref=e366]
+              - generic [ref=e369]:
+                - generic [ref=e371]: PMO ticket mapping
+                - generic [ref=e373]: Legacy
+            - button "PMO tickets monitoring Legacy" [ref=e374] [cursor=pointer]:
+              - img [ref=e375]
+              - generic [ref=e378]:
+                - generic [ref=e380]: PMO tickets monitoring
+                - generic [ref=e382]: Legacy
+            - button "PMO tickets test Legacy" [ref=e383] [cursor=pointer]:
+              - img [ref=e384]
+              - generic [ref=e387]:
+                - generic [ref=e389]: PMO tickets test
+                - generic [ref=e391]: Legacy
+            - button "QA final Legacy" [ref=e392] [cursor=pointer]:
+              - img [ref=e393]
+              - generic [ref=e396]:
+                - generic [ref=e398]: QA final
+                - generic [ref=e400]: Legacy
+            - button "Slack test Legacy" [ref=e401] [cursor=pointer]:
+              - img [ref=e402]
+              - generic [ref=e405]:
+                - generic [ref=e407]: Slack test
+                - generic [ref=e409]: Legacy
+            - button "Slack v2 Legacy" [ref=e410] [cursor=pointer]:
+              - img [ref=e411]
+              - generic [ref=e414]:
+                - generic [ref=e416]: Slack v2
+                - generic [ref=e418]: Legacy
+            - button "Slack v3 Legacy" [ref=e419] [cursor=pointer]:
+              - img [ref=e420]
+              - generic [ref=e423]:
+                - generic [ref=e425]: Slack v3
+                - generic [ref=e427]: Legacy
+            - button "Sonnet test Legacy" [ref=e428] [cursor=pointer]:
+              - img [ref=e429]
+              - generic [ref=e432]:
+                - generic [ref=e434]: Sonnet test
+                - generic [ref=e436]: Legacy
+            - button "Sprint planning Legacy" [ref=e437] [cursor=pointer]:
+              - img [ref=e438]
+              - generic [ref=e441]:
+                - generic [ref=e443]: Sprint planning
+                - generic [ref=e445]: Legacy
+            - button "Sprint War Room Legacy" [ref=e446] [cursor=pointer]:
+              - img [ref=e447]
+              - generic [ref=e450]:
+                - generic [ref=e452]: Sprint War Room
+                - generic [ref=e454]: Legacy
+            - button "Test pmo Legacy" [ref=e455] [cursor=pointer]:
+              - img [ref=e456]
+              - generic [ref=e459]:
+                - generic [ref=e461]: Test pmo
+                - generic [ref=e463]: Legacy
+            - button "Test room Legacy" [ref=e464] [cursor=pointer]:
+              - img [ref=e465]
+              - generic [ref=e468]:
+                - generic [ref=e470]: Test room
+                - generic [ref=e472]: Legacy
+            - button "Testing the pmo tickets Legacy" [ref=e473] [cursor=pointer]:
+              - img [ref=e474]
+              - generic [ref=e477]:
+                - generic [ref=e479]: Testing the pmo tickets
+                - generic [ref=e481]: Legacy
+            - button "Ticket audit Legacy" [ref=e482] [cursor=pointer]:
+              - img [ref=e483]
+              - generic [ref=e486]:
+                - generic [ref=e488]: Ticket audit
+                - generic [ref=e490]: Legacy
+            - button "Ticket triage Legacy" [ref=e491] [cursor=pointer]:
+              - img [ref=e492]
+              - generic [ref=e495]:
+                - generic [ref=e497]: Ticket triage
+                - generic [ref=e499]: Legacy
+            - button "Visual QA room Legacy" [ref=e500] [cursor=pointer]:
+              - img [ref=e501]
+              - generic [ref=e504]:
+                - generic [ref=e506]: Visual QA room
+                - generic [ref=e508]: Legacy
+          - generic [ref=e509]:
+            - button "New Room" [ref=e510] [cursor=pointer]:
+              - img [ref=e511]
+              - text: New Room
+            - paragraph [ref=e512]: "Tip: use ⌘K to search rooms"
+      - main [ref=e86]:
+        - generic [ref=e516]:
+          - generic [ref=e518]:
+            - img [ref=e519]
+            - generic [ref=e522]:
+              - generic [ref=e523]: Chain fix test
+              - generic [ref=e524]: Test that @user doesnt block chain
+            - generic [ref=e525]:
+              - 'generic "Orchestrator: offline" [ref=e526]':
+                - generic [ref=e527]: O
+              - 'generic "Frontend: offline" [ref=e528]':
+                - generic [ref=e529]: F
+              - 'generic "PMO: offline" [ref=e530]':
+                - generic [ref=e531]: P
+            - generic [ref=e532]: "3"
+          - generic [ref=e533]: This room was created in an older version. Messages may contain terminal artifacts.
+          - generic [ref=e535]:
+            - generic [ref=e538]: "Room \"Chain fix test\" created. Topic: Test that @user doesnt block chain. Agents: Orchestrator, Frontend, PMO"
+            - generic [ref=e542]: "Room ready. 3 agents available: Orchestrator, Frontend, PMO. @mention an agent to start."
+            - generic [ref=e545]:
+              - generic [ref=e546]:
+                - generic [ref=e547]:
+                  - generic [ref=e548]: 5d ago
+                  - generic [ref=e549]: You
+                - paragraph [ref=e552]: "@orchestrator check priorities, ask @frontend and @pmo, then tell @user the summary"
+              - generic [ref=e555]: "Y"
+            - generic [ref=e557]:
+              - generic [ref=e560]: O
+              - generic [ref=e561]:
+                - generic [ref=e562]:
+                  - generic "View session" [ref=e563] [cursor=pointer]: orchestrator
+                  - generic [ref=e564]: 5d ago
+                - paragraph [ref=e567]: "@frontend, @pmo — what's blocking us right now? Any stuck tickets or PRs? @user I'm checking with the team on current blockers to make sure communication flows properly through the chain."
+                - button "Details" [ref=e568] [cursor=pointer]:
+                  - img [ref=e569]
+                  - text: Details
+            - generic [ref=e572]:
+              - generic [ref=e575]: F
+              - generic [ref=e576]:
+                - generic [ref=e577]:
+                  - generic "View session" [ref=e578] [cursor=pointer]: frontend
+                  - generic [ref=e579]: 5d ago
+                - paragraph [ref=e582]: Memory shows V1 prod deployment was pending as of March 13, and Sprint V3 (pagination, CSV, OTP) hit an API 529 block. Nothing actively blocking today. @user — is V1 still staging-only, or did prod deployment land? Need to know before planning V3 work.
+                - button "Details" [ref=e583] [cursor=pointer]:
+                  - img [ref=e584]
+                  - text: Details
+            - generic [ref=e588]: Agents are waiting for your input.
+            - generic [ref=e591]:
+              - generic [ref=e594]: P
+              - generic [ref=e595]:
+                - generic [ref=e596]:
+                  - generic "View session" [ref=e597] [cursor=pointer]: pmo
+                  - generic [ref=e598]: 5d ago
+                - paragraph [ref=e601]: Checked Notion task board — no stale blockers currently. @frontend are the V3 features (pagination, CSV) still on track post-API stabilization from 3/18? Any PR reviews stuck waiting? @user is this test confirming chain flow through PMO→Frontend→Orchestrator works with your mention?
+                - button "Details" [ref=e602] [cursor=pointer]:
+                  - img [ref=e603]
+                  - text: Details
+            - generic [ref=e607]: Room closed.
+            - generic [ref=e611]: Room closed.
+  - alert [ref=e93]

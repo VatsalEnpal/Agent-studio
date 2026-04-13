@@ -49,11 +49,18 @@ import {
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import type { SessionMeta, WsMessage } from "./types.js";
+import type { SessionMeta } from "./types.js";
+import type { WsMessage } from "./shared/types.js";
 import { WorkflowManager } from "./workflows/index.js";
 import { RoomManager } from "./rooms.js";
 import type { RoomMessage } from "./rooms.js";
 import { roomsRoutes } from "./routes/rooms.js";
+import { workflowRoutes } from "./routes/workflows.js";
+import { PipelineRegistry } from "./workflows/workflow-registry.js";
+import { WorkflowExecutor } from "./workflows/executor.js";
+import { WorkflowScheduler } from "./workflows/scheduler.js";
+import { ClaudeCommandRunner } from "./workflows/command-runner.js";
+import { getActiveRuns, saveRunState, loadRunState, listRuns } from "./workflows/run-state.js";
 import { SdkSessionManager } from "./sdk-session.js";
 import {
   getConfig,
@@ -825,6 +832,12 @@ Choose the schedule and model based on the task:
         res.status(400).json({ error: "Missing projectPath or agents array" });
         return;
       }
+      const validPath = validateProjectPath(options.projectPath);
+      if (!validPath) {
+        res.status(403).json({ error: "Path not allowed" });
+        return;
+      }
+      options.projectPath = validPath;
       const result = scaffoldAgentSystem(options);
       if (result.alreadyExists) {
         res.status(409).json({ error: "Agent system already exists at this path", result });
@@ -2168,6 +2181,20 @@ Choose the schedule and model based on the task:
   app.get("/api/workflows", async (_req, res) => {
     try {
       const flows = await workflowManager.getFlows();
+      // Also include pipeline-defined workflows (ISSUE-04)
+      const pipelineWorkflows = pipelineRegistry.listWorkflows();
+      const existingIds = new Set(flows.map((f) => f.id));
+      for (const pw of pipelineWorkflows) {
+        if (!existingIds.has(pw.id)) {
+          flows.push({
+            id: pw.id,
+            name: pw.name,
+            description: pw.description ?? "",
+            icon: "Workflow",
+            runs: [],
+          } as Awaited<ReturnType<typeof workflowManager.getFlows>>[number]);
+        }
+      }
       res.json(flows);
     } catch {
       res.json([]);
@@ -2176,7 +2203,18 @@ Choose the schedule and model based on the task:
 
   app.get("/api/workflows/:flowId/runs/:runId", async (req, res) => {
     try {
-      const run = await workflowManager.getRun(req.params["flowId"], req.params["runId"]);
+      const flowId = req.params["flowId"];
+      const runId = req.params["runId"];
+
+      // Check disk-based pipeline run state first (ISSUE-04)
+      const diskRun = loadRunState(flowId, runId);
+      if (diskRun) {
+        res.json(diskRun);
+        return;
+      }
+
+      // Fall back to in-memory workflow manager
+      const run = await workflowManager.getRun(flowId, runId);
       if (!run) {
         res.status(404).json({ error: "Run not found" });
         return;
@@ -2196,7 +2234,8 @@ Choose the schedule and model based on the task:
         name?: string;
         description?: string;
         icon?: string;
-        steps?: Array<{ id: string; name: string; description?: string; agents: string[] }>;
+        steps?: Array<Record<string, unknown>>;
+        schedule?: unknown;
       };
       if (!body.name || !Array.isArray(body.steps) || body.steps.length === 0) {
         res.status(400).json({ error: "Missing name or steps" });
@@ -2204,18 +2243,26 @@ Choose the schedule and model based on the task:
       }
 
       const id = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      // Preserve the full step objects as sent by the client (ISSUE-03)
       const newWorkflow: WorkflowConfig = {
         id,
         name: body.name,
         description: body.description,
         icon: body.icon ?? "Workflow",
         steps: body.steps.map((s) => ({
-          id: s.id,
-          name: s.name,
-          description: s.description,
-          agents: s.agents ?? [],
-        })),
+          ...s,
+          id: String(s.id ?? ""),
+          name: String(s.name ?? ""),
+        })) as WorkflowConfig["steps"],
       };
+
+      // Handle schedule field gracefully (ISSUE-02) — log warning, don't crash
+      let scheduleWarning: string | undefined;
+      if (body.schedule) {
+        scheduleWarning =
+          "Schedule field received but scheduling is only supported via POST /api/workflows/:id/schedule. The workflow was created without a schedule.";
+        console.warn(`[workflow] ${scheduleWarning}`);
+      }
 
       const cfg = getConfig();
       const workflows = cfg.workflows ?? [];
@@ -2225,13 +2272,39 @@ Choose the schedule and model based on the task:
       reloadConfig();
       workflowManager.reload();
 
+      // Also persist to the pipeline registry for disk-based storage (ISSUE-02)
+      try {
+        pipelineRegistry.saveWorkflow({
+          id,
+          name: body.name,
+          description: body.description,
+          mode: "execute",
+          trigger: { type: "manual" },
+          workingDirectory: ".",
+          steps: body.steps.map((s) => ({
+            id: String(s.id ?? ""),
+            name: String(s.name ?? ""),
+            type: (s.type as "agent" | "gate" | "loop" | "agent-group") ?? "agent",
+            agent: String(s.agent ?? ""),
+            goal: String(s.goal ?? s.description ?? ""),
+            ...s,
+          })) as import("./workflows/definition.js").PipelineStepDef[],
+        });
+      } catch {
+        // Pipeline persistence is best-effort; config file is the primary store
+      }
+
       const flows = await workflowManager.getFlows();
       broadcast(wss, {
         type: "workflow-update",
         payload: flowsToSprints(flows),
       } satisfies WsMessage);
 
-      res.json({ ok: true, id, workflow: newWorkflow });
+      const result: Record<string, unknown> = { ok: true, id, workflow: newWorkflow };
+      if (scheduleWarning) {
+        result.warning = scheduleWarning;
+      }
+      res.json(result);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
@@ -2245,7 +2318,7 @@ Choose the schedule and model based on the task:
         name?: string;
         description?: string;
         icon?: string;
-        steps?: Array<{ id: string; name: string; description?: string; agents: string[] }>;
+        steps?: Array<Record<string, unknown>>;
       };
 
       const cfg = getConfig();
@@ -2259,13 +2332,13 @@ Choose the schedule and model based on the task:
       if (body.name !== undefined) workflows[idx]!.name = body.name;
       if (body.description !== undefined) workflows[idx]!.description = body.description;
       if (body.icon !== undefined) workflows[idx]!.icon = body.icon;
+      // Preserve the full step objects as sent by the client (ISSUE-03)
       if (body.steps !== undefined) {
         workflows[idx]!.steps = body.steps.map((s) => ({
-          id: s.id,
-          name: s.name,
-          description: s.description,
-          agents: s.agents ?? [],
-        }));
+          ...s,
+          id: String(s.id ?? ""),
+          name: String(s.name ?? ""),
+        })) as WorkflowConfig["steps"];
       }
       cfg.workflows = workflows;
       saveConfig(cfg);
@@ -2345,7 +2418,24 @@ Choose the schedule and model based on the task:
         },
       };
 
-      // We don't persist runs (they're ephemeral), just broadcast
+      // Persist run to disk so GET endpoints can retrieve it (ISSUE-04)
+      const stepsRecord: Record<string, import("./workflows/run-state.js").StepState> = {};
+      for (const s of run.steps) {
+        const stepId = (s as any).id ?? `step-${Object.keys(stepsRecord).length}`;
+        stepsRecord[stepId] = {
+          id: stepId,
+          status: "pending",
+        };
+      }
+      saveRunState({
+        runId,
+        workflowId,
+        status: "planned",
+        currentStep: null,
+        startedAt: run.startedAt,
+        steps: stepsRecord,
+      });
+
       // Add to the in-memory flow
       flow.runs.unshift(run);
 
@@ -2367,6 +2457,89 @@ Choose the schedule and model based on the task:
       res.status(500).json({ error: message });
     }
   });
+
+  // Shared handler for route aliases: /start and /runs (ISSUE-06)
+  async function handleStartRunAlias(
+    req: import("express").Request<{ id: string }>,
+    res: import("express").Response,
+  ): Promise<void> {
+    try {
+      const workflowId = req.params["id"];
+      const flow = await workflowManager.getFlow(workflowId);
+      if (!flow) {
+        // Also check pipeline registry
+        const pipelineWf = pipelineRegistry.getWorkflow(workflowId);
+        if (!pipelineWf) {
+          res
+            .status(404)
+            .json({ error: "Workflow not found. Use POST /api/workflows/:id/run to start a run." });
+          return;
+        }
+        // Delegate to pipeline executor
+        const runState = workflowExecutor.startRun(pipelineWf);
+        res.status(201).json({ runId: runState.runId, status: "started" });
+        workflowExecutor.executeRun(pipelineWf, runState).catch(() => {});
+        return;
+      }
+
+      const runId = `run-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const run = {
+        id: runId,
+        flowId: workflowId,
+        name: `${flow.name} Run`,
+        status: "waiting" as const,
+        startedAt: new Date().toISOString(),
+        steps:
+          flow.runs[0]?.steps.map((s) => ({
+            ...s,
+            status: "pending" as const,
+            startedAt: undefined,
+            completedAt: undefined,
+          })) ?? [],
+        stats: {
+          agentsUsed: flow.runs[0]?.stats.agentsUsed ?? [],
+        },
+      };
+
+      // Persist run to disk so GET endpoints can retrieve it (ISSUE-04)
+      const stepsRecord2: Record<string, import("./workflows/run-state.js").StepState> = {};
+      for (const s of run.steps) {
+        const stepId = (s as any).id ?? `step-${Object.keys(stepsRecord2).length}`;
+        stepsRecord2[stepId] = {
+          id: stepId,
+          status: "pending",
+        };
+      }
+      saveRunState({
+        runId,
+        workflowId,
+        status: "planned",
+        currentStep: null,
+        startedAt: run.startedAt,
+        steps: stepsRecord2,
+      });
+
+      flow.runs.unshift(run);
+      const flows = await workflowManager.getFlows();
+      const targetFlow = flows.find((f) => f.id === workflowId);
+      if (targetFlow && !targetFlow.runs.find((r) => r.id === runId)) {
+        targetFlow.runs.unshift(run);
+      }
+
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
+
+      res.json({ ok: true, runId, run });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  }
+
+  app.post("/api/workflows/:id/start", (req, res) => handleStartRunAlias(req, res));
+  app.post("/api/workflows/:id/runs", (req, res) => handleStartRunAlias(req, res));
 
   // Broadcast workflow updates on sprint file changes
   fileWatcher.onUpdate(() => {
@@ -3581,6 +3754,51 @@ Choose the schedule and model based on the task:
 
   // --- Room routes (mounted via route module) ---
   app.use("/api/rooms", roomsRoutes(roomManager, sdkManager, wss));
+
+  // --- Workflow engine routes ---
+  const pipelineRegistry = new PipelineRegistry();
+  const workflowExecutor = new WorkflowExecutor(new ClaudeCommandRunner());
+  const workflowScheduler = new WorkflowScheduler(async (workflowId) => {
+    const wf = pipelineRegistry.getWorkflow(workflowId);
+    if (!wf) return false;
+    const runState = workflowExecutor.startRun(wf);
+    workflowExecutor.executeRun(wf, runState).catch(() => {});
+    return true;
+  });
+  workflowScheduler.restoreSchedules();
+
+  // --- Server restart recovery: detect interrupted runs ---
+  {
+    const interrupted = getActiveRuns().filter((r) => r.status === "running");
+    for (const run of interrupted) {
+      // Mark running steps as interrupted
+      for (const step of Object.values(run.steps)) {
+        if (step.status === "running") {
+          step.status = "interrupted";
+        }
+      }
+      run.status = "paused";
+      saveRunState(run);
+      console.log(
+        `[workflow-engine] Run '${run.runId}' (workflow '${run.workflowId}') was interrupted by server restart. Paused at step '${run.currentStep}'.`,
+      );
+    }
+    if (interrupted.length > 0) {
+      console.log(
+        `[workflow-engine] ${interrupted.length} interrupted run(s) detected. Resume via API or UI.`,
+      );
+    }
+  }
+
+  app.use(
+    "/api/workflows",
+    workflowRoutes({
+      registry: pipelineRegistry,
+      executor: workflowExecutor,
+      scheduler: workflowScheduler,
+      wss,
+    }),
+  );
 
   // --- Next.js catch-all (with loading page while compiling) ---
   let nextReady = false;

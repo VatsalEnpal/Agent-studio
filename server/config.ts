@@ -38,8 +38,20 @@ export interface WorkflowStepConfig {
   id: string;
   name: string;
   description?: string;
-  agents: string[];
+  agents?: string[];
   dataSource?: string;
+  /** Step type: agent, gate, loop, agent-group */
+  type?: string;
+  /** Single agent name (for agent steps) */
+  agent?: string;
+  /** Goal for agent steps */
+  goal?: string;
+  /** Max iterations for loop steps */
+  maxIterations?: number;
+  /** Nested step IDs for loop steps, or inline sub-steps for agent-group */
+  steps?: (WorkflowStepConfig | string)[];
+  /** Additional fields the client sends are preserved via index signature */
+  [key: string]: unknown;
 }
 
 export interface WorkflowConfig {
@@ -202,10 +214,10 @@ export function generateDefaultConfig(): AgentStudioConfig {
   const home = os.homedir();
   const workingDirectory = (projects[0]?.path ?? parentDir).replace(home, "~");
 
-  // Show setup wizard if nothing meaningful was auto-detected
-  const hasProjects = projects.length > 0;
-  const hasAgentSystem = !!agentSystem;
-  const setupComplete = hasProjects || hasAgentSystem;
+  // Always show the setup wizard on first run (auto-generated config).
+  // Even if we auto-detected projects/agent system, the user should
+  // confirm their setup. The wizard marks setupComplete: true on finish.
+  const setupComplete = false;
 
   return {
     projects,

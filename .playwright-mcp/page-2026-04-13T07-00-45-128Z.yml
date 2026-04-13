@@ -1,0 +1,186 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]:
+        - text: Agent Studio
+        - generic [ref=e138]: ·
+        - generic [ref=e139]: Test Session 1
+      - generic [ref=e13]:
+        - generic "Total API spend across all active sessions" [ref=e268]:
+          - generic [ref=e269]: Spend
+          - text: $0.07
+        - generic "Connected to server" [ref=e14]
+    - generic [ref=e15]:
+      - navigation "Main navigation" [ref=e16]:
+        - generic [ref=e17]: A
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - button "Sessions" [ref=e20] [cursor=pointer]:
+              - img [ref=e22]
+              - generic "1 unread" [ref=e405]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e25]:
+            - button "Teams" [ref=e26] [cursor=pointer]:
+              - img [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e29]:
+            - button "Sprints" [ref=e30] [cursor=pointer]:
+              - img [ref=e31]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e34]:
+            - button "Memory" [ref=e35] [cursor=pointer]:
+              - img [ref=e36]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e38]:
+            - button "Reports" [ref=e39] [cursor=pointer]:
+              - img [ref=e40]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e42]:
+          - button "Settings" [ref=e43] [cursor=pointer]:
+            - img [ref=e44]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e47]:
+        - generic [ref=e416]:
+          - heading "Settings" [level=3] [ref=e417]
+          - paragraph [ref=e418]: Model defaults, projects, agent system, and system monitor.
+      - main [ref=e75]:
+        - generic [ref=e420]:
+          - generic [ref=e421]:
+            - button "General Model, theme, notifications" [ref=e422] [cursor=pointer]:
+              - generic [ref=e423]:
+                - img [ref=e424]
+                - generic [ref=e427]: General
+              - paragraph [ref=e428]: Model, theme, notifications
+            - button "Projects Tracked repos and agent system" [ref=e429] [cursor=pointer]:
+              - generic [ref=e430]:
+                - img [ref=e431]
+                - generic [ref=e433]: Projects
+              - paragraph [ref=e434]: Tracked repos and agent system
+            - button "Agents Discovered agent definitions" [ref=e435] [cursor=pointer]:
+              - generic [ref=e436]:
+                - img [ref=e437]
+                - generic [ref=e440]: Agents
+              - paragraph [ref=e441]: Discovered agent definitions
+            - button "System Monitor CPU, memory, disk, active processes" [ref=e442] [cursor=pointer]:
+              - generic [ref=e443]:
+                - img [ref=e444]
+                - generic [ref=e446]: System Monitor
+              - paragraph [ref=e447]: CPU, memory, disk, active processes
+            - button "Automations Sprint protocol, PMO scans, scheduled tasks" [ref=e448] [cursor=pointer]:
+              - generic [ref=e449]:
+                - img [ref=e450]
+                - generic [ref=e453]: Automations
+              - paragraph [ref=e454]: Sprint protocol, PMO scans, scheduled tasks
+            - button "Shortcuts Keyboard shortcuts reference" [ref=e455] [cursor=pointer]:
+              - generic [ref=e456]:
+                - img [ref=e457]
+                - generic [ref=e459]: Shortcuts
+              - paragraph [ref=e460]: Keyboard shortcuts reference
+            - button "About Version and system info" [ref=e461] [cursor=pointer]:
+              - generic [ref=e462]:
+                - img [ref=e463]
+                - generic [ref=e466]: About
+              - paragraph [ref=e467]: Version and system info
+          - generic [ref=e531]:
+            - generic [ref=e532]:
+              - generic [ref=e533]:
+                - heading "Agents" [level=3] [ref=e534]
+                - paragraph [ref=e535]:
+                  - text: Auto-discovered from
+                  - code [ref=e536]: .claude/agents/
+              - button "Create Agent" [ref=e537] [cursor=pointer]:
+                - img [ref=e538]
+                - text: Create Agent
+            - generic [ref=e540]:
+              - generic [ref=e542]:
+                - generic [ref=e544]: No Agent
+                - paragraph [ref=e546]: Plain Claude session
+              - generic [ref=e548]:
+                - generic [ref=e550]: test-agent
+                - paragraph [ref=e552]: Agent from my-web-app
+            - generic [ref=e555]:
+              - generic [ref=e556]:
+                - generic [ref=e557]:
+                  - img [ref=e558]
+                  - heading "Create Agent" [level=2] [ref=e561]
+                  - generic [ref=e562]:
+                    - generic [ref=e563]:
+                      - img [ref=e591]
+                      - generic [ref=e565]: Describe
+                      - generic [ref=e566]: ·
+                    - generic [ref=e567]:
+                      - generic [ref=e568]: "2"
+                      - generic [ref=e569]: Configure
+                      - generic [ref=e570]: ·
+                    - generic [ref=e571]:
+                      - generic [ref=e572]: "3"
+                      - generic [ref=e573]: Preview
+                - button [ref=e574] [cursor=pointer]:
+                  - img [ref=e575]
+              - generic [ref=e593]:
+                - generic [ref=e594]:
+                  - text: Tools
+                  - paragraph [ref=e595]: Which tools should this agent have access to?
+                  - generic [ref=e596]:
+                    - button "Bash Run shell commands" [ref=e597] [cursor=pointer]:
+                      - generic [ref=e598]: Bash
+                      - generic [ref=e599]: Run shell commands
+                    - button "Read Read files" [ref=e600] [cursor=pointer]:
+                      - generic [ref=e601]: Read
+                      - generic [ref=e602]: Read files
+                    - button "Write Create files" [ref=e603] [cursor=pointer]:
+                      - generic [ref=e604]: Write
+                      - generic [ref=e605]: Create files
+                    - button "Edit Edit files" [ref=e606] [cursor=pointer]:
+                      - generic [ref=e607]: Edit
+                      - generic [ref=e608]: Edit files
+                    - button "Glob Find files by pattern" [ref=e609] [cursor=pointer]:
+                      - generic [ref=e610]: Glob
+                      - generic [ref=e611]: Find files by pattern
+                    - button "Grep Search file contents" [ref=e612] [cursor=pointer]:
+                      - generic [ref=e613]: Grep
+                      - generic [ref=e614]: Search file contents
+                - generic [ref=e615]:
+                  - text: Rules
+                  - paragraph [ref=e616]: Key constraints and guidelines for this agent.
+                  - generic [ref=e618]:
+                    - generic [ref=e619]: "1."
+                    - textbox "e.g. Never modify production directly" [ref=e620]
+                  - button "+ Add rule" [ref=e621] [cursor=pointer]
+              - generic [ref=e587]:
+                - button "Back" [ref=e623] [cursor=pointer]
+                - button "Preview" [ref=e624] [cursor=pointer]
+  - alert [ref=e6]

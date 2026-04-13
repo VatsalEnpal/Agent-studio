@@ -1,0 +1,167 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]:
+        - text: Agent Studio
+        - generic [ref=e13]: ·
+        - generic [ref=e14]: test-kill-cleanup
+      - generic "Connected to server" [ref=e16]
+    - generic [ref=e17]:
+      - navigation "Main navigation" [ref=e18]:
+        - generic [ref=e19]: A
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - button "Sessions" [ref=e22] [cursor=pointer]:
+              - img [ref=e24]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e27]:
+            - button "Teams" [ref=e28] [cursor=pointer]:
+              - img [ref=e29]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e31]:
+            - button "Sprints" [ref=e32] [cursor=pointer]:
+              - img [ref=e33]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e36]:
+            - button "Memory" [ref=e37] [cursor=pointer]:
+              - img [ref=e38]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e40]:
+            - button "Reports" [ref=e41] [cursor=pointer]:
+              - img [ref=e42]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e44]:
+          - button "Settings" [active] [ref=e45] [cursor=pointer]:
+            - img [ref=e46]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e49]:
+        - generic [ref=e88]:
+          - heading "Settings" [level=3] [ref=e89]
+          - paragraph [ref=e90]: Model defaults, projects, agent system, and system monitor.
+      - main [ref=e77]:
+        - generic [ref=e92]:
+          - generic [ref=e93]:
+            - button "General Model, theme, notifications" [ref=e94] [cursor=pointer]:
+              - generic [ref=e95]:
+                - img [ref=e96]
+                - generic [ref=e99]: General
+              - paragraph [ref=e100]: Model, theme, notifications
+            - button "Projects Tracked repos and agent system" [ref=e101] [cursor=pointer]:
+              - generic [ref=e102]:
+                - img [ref=e103]
+                - generic [ref=e105]: Projects
+              - paragraph [ref=e106]: Tracked repos and agent system
+            - button "Agents Discovered agent definitions" [ref=e107] [cursor=pointer]:
+              - generic [ref=e108]:
+                - img [ref=e109]
+                - generic [ref=e112]: Agents
+              - paragraph [ref=e113]: Discovered agent definitions
+            - button "System Monitor CPU, memory, disk, active processes" [ref=e114] [cursor=pointer]:
+              - generic [ref=e115]:
+                - img [ref=e116]
+                - generic [ref=e118]: System Monitor
+              - paragraph [ref=e119]: CPU, memory, disk, active processes
+            - button "Automations Sprint protocol, PMO scans, scheduled tasks" [ref=e120] [cursor=pointer]:
+              - generic [ref=e121]:
+                - img [ref=e122]
+                - generic [ref=e125]: Automations
+              - paragraph [ref=e126]: Sprint protocol, PMO scans, scheduled tasks
+            - button "Shortcuts Keyboard shortcuts reference" [ref=e127] [cursor=pointer]:
+              - generic [ref=e128]:
+                - img [ref=e129]
+                - generic [ref=e131]: Shortcuts
+              - paragraph [ref=e132]: Keyboard shortcuts reference
+            - button "About Version and system info" [ref=e133] [cursor=pointer]:
+              - generic [ref=e134]:
+                - img [ref=e135]
+                - generic [ref=e138]: About
+              - paragraph [ref=e139]: Version and system info
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - heading "General" [level=3] [ref=e144]
+              - generic [ref=e145]:
+                - generic [ref=e146]:
+                  - generic [ref=e147]: Default Model
+                  - generic [ref=e148]:
+                    - button "opus" [ref=e149] [cursor=pointer]
+                    - button "sonnet" [ref=e150] [cursor=pointer]
+                    - button "haiku" [ref=e151] [cursor=pointer]
+                - generic [ref=e152]:
+                  - generic [ref=e153]: Default Permissions
+                  - combobox [ref=e154]:
+                    - option "Bypass (skip permissions)" [selected]
+                    - option "Default"
+                    - option "Plan mode"
+                - generic [ref=e155]:
+                  - generic [ref=e156]: Default Working Directory
+                  - textbox [ref=e157]: ~/Code/InPipeline
+                - button "Save Settings" [ref=e159] [cursor=pointer]:
+                  - img [ref=e160]
+                  - text: Save Settings
+            - generic [ref=e164]:
+              - generic [ref=e165]:
+                - heading "Notifications" [level=3] [ref=e166]:
+                  - img [ref=e167]
+                  - text: Notifications
+                - button "Send Test" [ref=e170] [cursor=pointer]
+              - generic [ref=e171]:
+                - paragraph [ref=e172]: Stored in this browser only. Settings will not sync across devices or browsers.
+                - generic [ref=e173]:
+                  - switch "Sprint gate approvals" [checked] [ref=e174] [cursor=pointer]
+                  - generic [ref=e176]:
+                    - generic [ref=e177]: Sprint gate approvals
+                    - paragraph [ref=e178]: When a sprint phase needs your sign-off
+                - generic [ref=e179]:
+                  - switch "Dangerous action alerts" [checked] [ref=e180] [cursor=pointer]
+                  - generic [ref=e182]:
+                    - generic [ref=e183]: Dangerous action alerts
+                    - paragraph [ref=e184]: When an agent wants to run destructive commands
+                - generic [ref=e185]:
+                  - switch "Agent task completion" [checked] [ref=e186] [cursor=pointer]
+                  - generic [ref=e188]:
+                    - generic [ref=e189]: Agent task completion
+                    - paragraph [ref=e190]: When an agent finishes a task
+                - generic [ref=e191]:
+                  - switch "Session exit" [checked] [ref=e192] [cursor=pointer]
+                  - generic [ref=e194]:
+                    - generic [ref=e195]: Session exit
+                    - paragraph [ref=e196]: When a Claude session ends
+                - generic [ref=e197]:
+                  - switch "Context window warnings" [checked] [ref=e198] [cursor=pointer]
+                  - generic [ref=e200]:
+                    - generic [ref=e201]: Context window warnings
+                    - paragraph [ref=e202]: When a session hits 80%+ context usage
+  - alert [ref=e6]

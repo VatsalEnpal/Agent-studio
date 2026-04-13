@@ -1,0 +1,164 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]:
+        - text: Agent Studio
+        - generic [ref=e401]: ·
+        - generic [ref=e402]: Session B
+      - generic "Connected to server" [ref=e14]
+    - generic [ref=e15]:
+      - navigation "Main navigation" [ref=e16]:
+        - generic [ref=e17]: A
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - button "Sessions" [ref=e20] [cursor=pointer]:
+              - img [ref=e22]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e25]:
+            - button "Teams" [ref=e26] [cursor=pointer]:
+              - img [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e29]:
+            - button "Sprints" [ref=e30] [cursor=pointer]:
+              - img [ref=e31]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e34]:
+            - button "Memory" [ref=e35] [cursor=pointer]:
+              - img [ref=e36]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e38]:
+            - button "Reports" [ref=e39] [cursor=pointer]:
+              - img [ref=e40]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e42]:
+          - button "Settings" [ref=e43] [cursor=pointer]:
+            - img [ref=e44]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e47]:
+        - generic [ref=e836]:
+          - generic [ref=e838]:
+            - button "Rooms" [ref=e839] [cursor=pointer]
+            - button "Agents" [ref=e840] [cursor=pointer]
+          - generic [ref=e842]:
+            - img [ref=e843]
+            - paragraph [ref=e846]: No active rooms
+            - paragraph [ref=e847]: Create a room to start collaborating with agents
+          - generic [ref=e848]:
+            - button "New Room" [ref=e849] [cursor=pointer]:
+              - img [ref=e850]
+              - text: New Room
+            - paragraph [ref=e851]: "Tip: use ⌘K to search rooms"
+      - main [ref=e75]:
+        - generic [ref=e856]:
+          - img [ref=e858]
+          - paragraph [ref=e861]: No room selected
+          - paragraph [ref=e862]: Select a room from the sidebar or create a new one to start chatting with your agent team.
+    - generic [ref=e865]:
+      - generic [ref=e866]:
+        - heading "Create Team Room" [level=2] [ref=e867]
+        - button [ref=e868] [cursor=pointer]:
+          - img [ref=e869]
+      - generic [ref=e872]:
+        - generic [ref=e873]:
+          - generic [ref=e874]: Room Name
+          - textbox "auth-refactor" [active] [ref=e875]
+        - generic [ref=e876]:
+          - generic [ref=e877]: Topic / Goal
+          - textbox "Refactor auth flow to use server-side sessions" [ref=e878]
+        - generic [ref=e879]:
+          - generic [ref=e880]: Agents (1 selected)
+          - generic [ref=e881]:
+            - generic [ref=e882]:
+              - button [disabled] [ref=e883]:
+                - img [ref=e884]
+              - generic [ref=e886]:
+                - generic [ref=e888]: O
+                - generic [ref=e889]: Orchestrator(required)
+              - combobox [ref=e890]:
+                - option "opus" [selected]
+                - option "sonnet"
+                - option "haiku"
+            - generic [ref=e891]:
+              - button [ref=e892] [cursor=pointer]
+              - generic [ref=e893]:
+                - generic [ref=e895]: F
+                - generic [ref=e896]: Frontend
+              - combobox [ref=e897]:
+                - option "opus"
+                - option "sonnet" [selected]
+                - option "haiku"
+            - generic [ref=e898]:
+              - button [ref=e899] [cursor=pointer]
+              - generic [ref=e900]:
+                - generic [ref=e902]: B
+                - generic [ref=e903]: Backend
+              - combobox [ref=e904]:
+                - option "opus"
+                - option "sonnet" [selected]
+                - option "haiku"
+            - generic [ref=e905]:
+              - button [ref=e906] [cursor=pointer]
+              - generic [ref=e907]:
+                - generic [ref=e909]: Q
+                - generic [ref=e910]: QA Tester
+              - combobox [ref=e911]:
+                - option "opus"
+                - option "sonnet" [selected]
+                - option "haiku"
+            - generic [ref=e912]:
+              - button [ref=e913] [cursor=pointer]
+              - generic [ref=e914]:
+                - generic [ref=e916]: S
+                - generic [ref=e917]: Security
+              - combobox [ref=e918]:
+                - option "opus"
+                - option "sonnet" [selected]
+                - option "haiku"
+            - generic [ref=e919]:
+              - button [ref=e920] [cursor=pointer]
+              - generic [ref=e921]:
+                - generic [ref=e923]: P
+                - generic [ref=e924]: PMO
+              - combobox [ref=e925]:
+                - option "opus"
+                - option "sonnet"
+                - option "haiku" [selected]
+      - generic [ref=e926]:
+        - button "Cancel" [ref=e927] [cursor=pointer]
+        - button "Create Room" [disabled] [ref=e928]:
+          - img [ref=e929]
+          - text: Create Room
+  - alert [ref=e6]

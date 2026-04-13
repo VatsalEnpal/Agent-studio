@@ -24,8 +24,27 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
   const [topic, setTopic] = useState("");
   const [agents, setAgents] = useState<AgentConfig[]>([]);
   const [creating, setCreating] = useState(false);
+  const [defaultModel, setDefaultModel] = useState<"opus" | "sonnet" | "haiku">("sonnet");
   const addRoom = useRoomsStore((s) => s.addRoom);
   const selectRoom = useRoomsStore((s) => s.selectRoom);
+
+  // Fetch global default model from config
+  useEffect(() => {
+    fetch("/api/config")
+      .then((res) => res.json())
+      .then((data: Record<string, unknown>) => {
+        const config = data.config as Record<string, unknown> | undefined;
+        const defaults = (config?.defaults ?? data.defaults) as
+          | { model?: "opus" | "sonnet" | "haiku" }
+          | undefined;
+        if (defaults?.model) {
+          setDefaultModel(defaults.model);
+        }
+      })
+      .catch(() => {
+        // Keep fallback "sonnet"
+      });
+  }, []);
 
   // Fetch discovered agents from server when dialog opens
   useEffect(() => {
@@ -41,7 +60,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
           .map((a) => ({
             id: a.id,
             name: a.name,
-            model: a.id === "orchestrator" ? ("opus" as const) : ("sonnet" as const),
+            model: a.id === "orchestrator" ? ("opus" as const) : defaultModel,
             enabled: false,
           }));
         setAgents(agentConfigs);
@@ -49,7 +68,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
       .catch(() => {
         setAgents([]);
       });
-  }, [open]);
+  }, [open, defaultModel]);
 
   // Escape key to close
   useEffect(() => {
@@ -243,6 +262,9 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-2 px-4 py-2.5 border-t border-border-default">
+          {enabledCount === 0 && (
+            <span className="text-2xs text-text-ghost mr-auto">Select at least one agent</span>
+          )}
           <button
             onClick={() => onOpenChange(false)}
             className="px-2.5 py-1 text-xs font-medium text-text-secondary hover:text-text-primary rounded transition-all"
@@ -251,7 +273,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
           </button>
           <button
             onClick={() => void handleCreate()}
-            disabled={!name.trim() || !topic.trim() || creating}
+            disabled={!name.trim() || !topic.trim() || enabledCount === 0 || creating}
             className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded bg-rooms text-bg-base hover:bg-rooms/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
           >
             <PlusIcon size={12} />

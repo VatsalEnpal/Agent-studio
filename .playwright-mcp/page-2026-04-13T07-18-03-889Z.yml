@@ -1,0 +1,150 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]:
+        - text: Agent Studio
+        - generic [ref=e401]: ·
+        - generic [ref=e402]: Session A
+      - generic "Connected to server" [ref=e14]
+    - generic [ref=e15]:
+      - navigation "Main navigation" [ref=e16]:
+        - generic [ref=e17]: A
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - button "Sessions" [ref=e20] [cursor=pointer]:
+              - img [ref=e22]
+              - generic "1 unread" [ref=e695]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e25]:
+            - button "Teams" [ref=e26] [cursor=pointer]:
+              - img [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e29]:
+            - button "Sprints" [ref=e30] [cursor=pointer]:
+              - img [ref=e31]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e34]:
+            - button "Memory" [ref=e35] [cursor=pointer]:
+              - img [ref=e36]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e38]:
+            - button "Reports" [ref=e39] [cursor=pointer]:
+              - img [ref=e40]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e42]:
+          - button "Settings" [ref=e43] [cursor=pointer]:
+            - img [ref=e44]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e47]:
+        - generic [ref=e315]:
+          - generic [ref=e317]:
+            - button "Sessions" [ref=e318] [cursor=pointer]
+            - button "History" [ref=e319] [cursor=pointer]
+            - button "Servers" [ref=e320] [cursor=pointer]
+          - generic [ref=e322]:
+            - img [ref=e323]
+            - textbox "Search..." [ref=e326]
+          - generic [ref=e327]:
+            - button "Running 1" [ref=e696]:
+              - generic [ref=e329]: Running
+              - generic [ref=e573]: "1"
+            - 'generic "Session B Status: active Path: /Users/vatsalbhatt230813 Model: opus Created: 4/13/2026, 9:17:23 AM" [ref=e655] [cursor=pointer]':
+              - generic [ref=e656]:
+                - generic [ref=e658]: Session B
+                - button "Rename session" [ref=e659]:
+                  - img [ref=e660]
+                - button "Pin session" [ref=e663]:
+                  - img [ref=e664]
+                - button "Copy session ID" [ref=e666]:
+                  - img [ref=e667]
+                - button "Kill session" [ref=e670]:
+                  - img [ref=e671]
+              - generic [ref=e674]:
+                - generic [ref=e675]: ~
+                - generic [ref=e676]: 40s
+                - generic [ref=e677]: opus
+          - generic [ref=e334]:
+            - button "Dev Servers" [ref=e335] [cursor=pointer]: Dev Servers
+            - button "New Session ⇧⌘N" [ref=e337] [cursor=pointer]:
+              - img [ref=e338]
+              - text: New Session
+              - generic [ref=e339]: ⇧⌘N
+      - main [ref=e75]:
+        - generic [ref=e429]:
+          - generic [ref=e430]:
+            - generic [ref=e431]: opus
+            - generic "/Users/vatsalbhatt230813" [ref=e432]: ~
+          - generic [ref=e699]:
+            - textbox "Terminal input" [ref=e700]
+            - generic:
+              - generic:
+                - generic: ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+              - generic:
+                - generic: Accessing
+                - generic: "workspace:"
+              - generic:
+                - generic: /Users/vatsalbhatt230813
+              - generic:
+                - generic: "Quick safety check: Is this a project you created or one you trust? (Like your own code, a well-known open source"
+              - generic:
+                - generic: project, or work from your team). If not, take a moment to review what's in this folder first.
+              - generic:
+                - generic: Claude Code'll be able to read, edit, and execute files here.
+              - generic:
+                - generic: Security
+                - generic: guide
+              - generic:
+                - generic: ❯
+                - generic: "1."
+                - generic: Yes,
+                - generic: I
+                - generic: trust
+                - generic: this
+                - generic: folder
+              - generic:
+                - generic: "2."
+                - generic: No, exit
+              - generic:
+                - generic: Enter
+                - generic: to
+                - generic: confirm
+                - generic: ·
+                - generic: Esc
+                - generic: to
+                - generic: cancel
+              - generic:
+                - generic: ^[[O^[P>|xterm.js(6.1.0-beta.195)^[\^[[?1;2c
+  - alert [ref=e6]

@@ -1,0 +1,88 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic "Close" [ref=e5]
+        - generic "Minimize" [ref=e6]
+        - generic "Maximize" [ref=e7]
+      - generic [ref=e8]:
+        - text: Agent Studio
+        - generic [ref=e9]: ·
+        - generic [ref=e10]: test-kill-cleanup
+      - generic "Connected to server" [ref=e12]
+    - generic [ref=e13]:
+      - navigation "Main navigation" [ref=e14]:
+        - generic [ref=e15]: A
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - button "Sessions" [ref=e18] [cursor=pointer]:
+              - img [ref=e20]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e23]:
+            - button "Teams" [ref=e24] [cursor=pointer]:
+              - img [ref=e25]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e27]:
+            - button "Sprints" [active] [ref=e28] [cursor=pointer]:
+              - img [ref=e29]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e32]:
+            - button "Memory" [ref=e33] [cursor=pointer]:
+              - img [ref=e34]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e36]:
+            - button "Reports" [ref=e37] [cursor=pointer]:
+              - img [ref=e38]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e40]:
+          - button "Settings" [ref=e41] [cursor=pointer]:
+            - img [ref=e42]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e45]:
+        - generic [ref=e83]:
+          - heading "Sprints" [level=3] [ref=e85]
+          - generic [ref=e87]:
+            - img [ref=e88]
+            - paragraph [ref=e90]: No sprints running
+            - paragraph [ref=e91]: Sprints are created automatically by the PMO agent, or you can start one manually.
+          - button "New Sprint" [ref=e93] [cursor=pointer]:
+            - img [ref=e94]
+            - text: New Sprint
+      - main [ref=e73]:
+        - generic [ref=e97]:
+          - img [ref=e99]
+          - paragraph [ref=e102]: No sprints running
+          - paragraph [ref=e103]: Sprints are automated multi-agent pipelines that build, test, and fix code without manual intervention. Set up an agent system first to enable them.
+          - button "Create Agent System" [ref=e104] [cursor=pointer]:
+            - img [ref=e105]
+            - text: Create Agent System
+  - alert [ref=e81]

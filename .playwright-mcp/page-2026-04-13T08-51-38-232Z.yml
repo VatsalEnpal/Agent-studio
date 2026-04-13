@@ -1,0 +1,117 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic "Close" [ref=e5]
+        - generic "Minimize" [ref=e6]
+        - generic "Maximize" [ref=e7]
+      - generic [ref=e8]: Agent Studio
+      - generic "Connected to server" [ref=e10]
+    - generic [ref=e11]:
+      - navigation "Main navigation" [ref=e12]:
+        - generic [ref=e13]: A
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - button "Sessions" [ref=e16] [cursor=pointer]:
+              - img [ref=e18]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e21]:
+            - button "Teams" [ref=e22] [cursor=pointer]:
+              - img [ref=e23]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e25]:
+            - button "Sprints" [ref=e26] [cursor=pointer]:
+              - img [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e30]:
+            - button "Memory" [ref=e31] [cursor=pointer]:
+              - img [ref=e32]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e34]:
+            - button "Reports" [ref=e35] [cursor=pointer]:
+              - img [ref=e36]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e38]:
+          - button "Settings" [ref=e39] [cursor=pointer]:
+            - img [ref=e40]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e43]:
+        - generic [ref=e573]:
+          - heading "Sprints" [level=3] [ref=e575]
+          - generic [ref=e577]:
+            - img [ref=e578]
+            - paragraph [ref=e580]: No sprints running
+            - paragraph [ref=e581]: Sprints are created automatically by the PMO agent, or you can start one manually.
+          - button "New Sprint" [ref=e583] [cursor=pointer]:
+            - img [ref=e584]
+            - text: New Sprint
+      - main [ref=e71]:
+        - generic [ref=e587]:
+          - img [ref=e589]
+          - paragraph [ref=e592]: No sprints running
+          - paragraph [ref=e593]: Sprints are automated multi-agent pipelines that build, test, and fix code without manual intervention. Set up an agent system first to enable them.
+          - button "Create Agent System" [ref=e594] [cursor=pointer]:
+            - img [ref=e595]
+            - text: Create Agent System
+    - generic [ref=e674]:
+      - generic [ref=e675]:
+        - generic [ref=e676]:
+          - img [ref=e677]
+          - heading "Create Sprint" [level=2] [ref=e680]
+          - generic [ref=e681]:
+            - generic [ref=e682]:
+              - generic [ref=e683]: "1"
+              - generic [ref=e684]: Define
+              - generic [ref=e685]: ·
+            - generic [ref=e686]:
+              - generic [ref=e687]: "2"
+              - generic [ref=e688]: Agents
+              - generic [ref=e689]: ·
+            - generic [ref=e690]:
+              - generic [ref=e691]: "3"
+              - generic [ref=e692]: Pipeline
+        - button [ref=e693] [cursor=pointer]:
+          - img [ref=e694]
+      - generic [ref=e698]:
+        - paragraph [ref=e700]: Define the sprint goal. Sprints are automated multi-agent pipelines that build, test, and fix code without manual intervention.
+        - generic [ref=e701]:
+          - text: Sprint Name
+          - textbox "e.g. Add user authentication" [active] [ref=e702]
+        - generic [ref=e703]:
+          - text: Goal
+          - textbox "Describe what this sprint should accomplish. Be specific about deliverables, acceptance criteria, and constraints." [ref=e704]
+        - generic [ref=e705]:
+          - text: Working Directory
+          - textbox "/path/to/project" [ref=e706]
+          - paragraph [ref=e707]: The project directory where agents will work.
+      - button "Next" [disabled] [ref=e710]
+  - alert [ref=e78]

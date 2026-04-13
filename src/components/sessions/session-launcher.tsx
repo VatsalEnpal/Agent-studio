@@ -2,12 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import {
-  CloseIcon,
-  SearchIcon,
-  ChevronDownIcon,
-  SessionsIcon,
-} from "@/components/ui/icons";
+import { CloseIcon, SearchIcon, ChevronDownIcon, SessionsIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import type { LauncherPreset } from "@/lib/types";
 
@@ -136,17 +131,11 @@ function shortProject(project: string): string {
   return project.split("/").pop() ?? project;
 }
 
-export function SessionLauncher({
-  open,
-  onOpenChange,
-  onLaunch,
-}: SessionLauncherProps) {
+export function SessionLauncher({ open, onOpenChange, onLaunch }: SessionLauncherProps) {
   const [customName, setCustomName] = useState("");
   const [model, setModel] = useState<"opus" | "sonnet" | "haiku">("sonnet");
   const [agent, setAgent] = useState("none");
-  const [permissions, setPermissions] = useState<
-    "bypass" | "default" | "plan" | "auto"
-  >("default");
+  const [permissions, setPermissions] = useState<"bypass" | "default" | "plan" | "auto">("default");
   const [channel, setChannel] = useState<"none" | "telegram">("none");
   const [cwd, setCwd] = useState("~");
   const [resume, setResume] = useState("");
@@ -184,22 +173,41 @@ export function SessionLauncher({
       try {
         const res = await fetch("/api/config");
         if (res.ok) {
-          const data = (await res.json()) as {
-            config: {
-              defaults: {
-                workingDirectory: string;
-                model?: "opus" | "sonnet" | "haiku";
-                permissions?: "bypass" | "default" | "plan" | "auto";
-              };
-            };
-          };
-          const defaults = data.config?.defaults;
-          if (defaults?.workingDirectory) {
-            setCwd(defaults.workingDirectory);
-            for (const p of PRESETS) {
-              p.cwd = defaults.workingDirectory;
+          const data = (await res.json()) as Record<string, unknown>;
+          const config = data.config as Record<string, unknown> | undefined;
+
+          // Check projects first (same logic as Create Sprint dialog)
+          const projects = (config?.projects ?? data.projects) as
+            | Array<{ path: string; isProd?: boolean }>
+            | undefined;
+          if (projects && projects.length > 0) {
+            const main = projects.find((p) => !p.isProd);
+            const projectPath = main?.path ?? projects[0]?.path ?? "";
+            if (projectPath) {
+              setCwd(projectPath);
+              for (const p of PRESETS) {
+                p.cwd = projectPath;
+              }
+            }
+          } else {
+            // Fallback to defaults.workingDirectory
+            const defaults = (config?.defaults ?? data.defaults) as
+              | { workingDirectory?: string }
+              | undefined;
+            if (defaults?.workingDirectory) {
+              setCwd(defaults.workingDirectory);
+              for (const p of PRESETS) {
+                p.cwd = defaults.workingDirectory;
+              }
             }
           }
+
+          const defaults = (config?.defaults ?? data.defaults) as
+            | {
+                model?: "opus" | "sonnet" | "haiku";
+                permissions?: "bypass" | "default" | "plan" | "auto";
+              }
+            | undefined;
           setDefaultsFromConfig({
             model: defaults?.model ?? "sonnet",
             permissions: defaults?.permissions ?? "default",
@@ -246,10 +254,7 @@ export function SessionLauncher({
   useEffect(() => {
     if (!resumeDropdownOpen) return;
     const handler = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setResumeDropdownOpen(false);
       }
     };
@@ -283,8 +288,7 @@ export function SessionLauncher({
       setError(null);
       applyPreset(preset);
       try {
-        const sessionName =
-          preset.agent !== "none" ? preset.agent : `claude-${preset.model}`;
+        const sessionName = preset.agent !== "none" ? preset.agent : `claude-${preset.model}`;
         await onLaunch({
           name: sessionName,
           model: preset.model,
@@ -308,8 +312,7 @@ export function SessionLauncher({
     setLaunching(true);
     setError(null);
     try {
-      const sessionName =
-        customName.trim() || (agent !== "none" ? agent : `claude-${model}`);
+      const sessionName = customName.trim() || (agent !== "none" ? agent : `claude-${model}`);
       await onLaunch({
         name: sessionName,
         model,
@@ -407,8 +410,7 @@ export function SessionLauncher({
                       <>
                         <span className="truncate flex-1">
                           {shortProject(
-                            recentSessions.find((s) => s.id === resume)
-                              ?.project ?? resume,
+                            recentSessions.find((s) => s.id === resume)?.project ?? resume,
                           )}
                         </span>
                         <span className="text-label text-text-ghost font-mono">
@@ -426,13 +428,8 @@ export function SessionLauncher({
                       </>
                     ) : (
                       <>
-                        <span className="flex-1">
-                          Select a previous session...
-                        </span>
-                        <ChevronDownIcon
-                          size={12}
-                          className="text-text-ghost"
-                        />
+                        <span className="flex-1">Select a previous session...</span>
+                        <ChevronDownIcon size={12} className="text-text-ghost" />
                       </>
                     )}
                   </button>
@@ -451,9 +448,7 @@ export function SessionLauncher({
                       </div>
                       <div className="overflow-y-auto max-h-36">
                         {filteredSessions.length === 0 ? (
-                          <p className="px-3 py-2 text-label text-text-ghost">
-                            No sessions found
-                          </p>
+                          <p className="px-3 py-2 text-label text-text-ghost">No sessions found</p>
                         ) : (
                           filteredSessions.slice(0, 15).map((session) => (
                             <button
@@ -507,9 +502,7 @@ export function SessionLauncher({
                   <span className="text-label font-medium text-text-primary">
                     {launching ? "Starting..." : "Continue"}
                   </span>
-                  <span className="text-label text-text-ghost">
-                    last session
-                  </span>
+                  <span className="text-label text-text-ghost">last session</span>
                 </button>
                 {PRESETS.map((preset) => (
                   <button
@@ -524,12 +517,8 @@ export function SessionLauncher({
                     )}
                   >
                     <SessionsIcon size={16} className="text-[#f59e0b]" />
-                    <span className="text-label font-medium text-text-primary">
-                      {preset.name}
-                    </span>
-                    <span className="text-label text-text-ghost">
-                      {preset.description}
-                    </span>
+                    <span className="text-label font-medium text-text-primary">{preset.name}</span>
+                    <span className="text-label text-text-ghost">{preset.description}</span>
                   </button>
                 ))}
               </div>
@@ -538,9 +527,7 @@ export function SessionLauncher({
             {/* Divider */}
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-border-default" />
-              <span className="text-label text-text-ghost">
-                or customize below
-              </span>
+              <span className="text-label text-text-ghost">or customize below</span>
               <div className="flex-1 h-px bg-border-default" />
             </div>
 
@@ -566,9 +553,7 @@ export function SessionLauncher({
                 </label>
                 <select
                   value={model}
-                  onChange={(e) =>
-                    setModel(e.target.value as "opus" | "sonnet" | "haiku")
-                  }
+                  onChange={(e) => setModel(e.target.value as "opus" | "sonnet" | "haiku")}
                   className={inputCls}
                 >
                   {MODELS.map((m) => (
@@ -588,9 +573,7 @@ export function SessionLauncher({
                   onChange={(e) => {
                     const selectedId = e.target.value;
                     setAgent(selectedId);
-                    const selectedAgent = agents.find(
-                      (a) => a.id === selectedId,
-                    );
+                    const selectedAgent = agents.find((a) => a.id === selectedId);
                     if (selectedAgent?.model) {
                       setModel(selectedAgent.model);
                     }
@@ -613,9 +596,7 @@ export function SessionLauncher({
                 <select
                   value={permissions}
                   onChange={(e) =>
-                    setPermissions(
-                      e.target.value as "bypass" | "default" | "plan" | "auto",
-                    )
+                    setPermissions(e.target.value as "bypass" | "default" | "plan" | "auto")
                   }
                   className={inputCls}
                 >
@@ -633,9 +614,7 @@ export function SessionLauncher({
                 </label>
                 <select
                   value={channel}
-                  onChange={(e) =>
-                    setChannel(e.target.value as "none" | "telegram")
-                  }
+                  onChange={(e) => setChannel(e.target.value as "none" | "telegram")}
                   className={inputCls}
                 >
                   {CHANNELS.map((c) => (
@@ -690,9 +669,7 @@ export function SessionLauncher({
               )}
             >
               {launching ? "Launching..." : resume ? "Resume" : "Launch"}
-              {!launching && (
-                <span className="ml-2 text-label opacity-60">Enter</span>
-              )}
+              {!launching && <span className="ml-2 text-label opacity-60">Enter</span>}
             </button>
           </div>
         </Dialog.Content>

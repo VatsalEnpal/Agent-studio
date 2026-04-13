@@ -1,0 +1,149 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]:
+        - text: Agent Studio
+        - generic [ref=e13]: ·
+        - generic [ref=e14]: velocity-api build
+      - generic "Connected to server" [ref=e16]
+    - generic [ref=e17]:
+      - navigation "Main navigation" [ref=e18]:
+        - generic [ref=e19]: A
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - button "Sessions" [ref=e22] [cursor=pointer]:
+              - img [ref=e24]
+              - generic "5 unread" [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e28]:
+            - button "Teams" [ref=e29] [cursor=pointer]:
+              - img [ref=e30]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e32]:
+            - button "Sprints" [active] [ref=e33] [cursor=pointer]:
+              - img [ref=e34]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e37]:
+            - button "Memory" [ref=e38] [cursor=pointer]:
+              - img [ref=e39]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e41]:
+            - button "Reports" [ref=e42] [cursor=pointer]:
+              - img [ref=e43]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e45]:
+          - button "Settings" [ref=e46] [cursor=pointer]:
+            - img [ref=e47]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e50]:
+        - generic [ref=e619]:
+          - generic [ref=e620]:
+            - heading "Sprints" [level=3] [ref=e621]
+            - generic [ref=e622]: 1 total
+          - generic [ref=e624]:
+            - generic [ref=e625]: Completed
+            - button "Auth System Overhaul" [ref=e627] [cursor=pointer]:
+              - generic [ref=e628]:
+                - img [ref=e629]
+                - generic [ref=e631]: Auth System Overhaul
+          - button "New Sprint" [ref=e633] [cursor=pointer]:
+            - img [ref=e634]
+            - text: New Sprint
+      - main [ref=e191]:
+        - generic [ref=e637]:
+          - generic [ref=e639]:
+            - button "Back to sprint list" [ref=e640] [cursor=pointer]:
+              - img [ref=e641]
+            - heading "Auth System Overhaul" [level=2] [ref=e643]
+            - generic [ref=e644]: Completed
+            - generic [ref=e647]: 0%
+            - generic [ref=e648]:
+              - button "Spec" [ref=e649] [cursor=pointer]:
+                - img [ref=e650]
+                - text: Spec
+              - generic [ref=e653]: 1m
+          - generic [ref=e654]:
+            - button "Overview" [ref=e655] [cursor=pointer]
+            - button "Activity" [ref=e656] [cursor=pointer]
+          - generic [ref=e658]:
+            - generic [ref=e659]:
+              - button "PMO Scan Pending" [ref=e661] [cursor=pointer]:
+                - generic [ref=e663]: PMO Scan
+                - generic [ref=e664]: Pending
+                - img [ref=e665]
+              - button "Readiness Report Pending" [ref=e668] [cursor=pointer]:
+                - generic [ref=e670]: Readiness Report
+                - generic [ref=e671]: Pending
+                - img [ref=e672]
+              - generic [ref=e674]:
+                - button "Sprint Approval Pending" [ref=e675] [cursor=pointer]:
+                  - generic [ref=e677]: Sprint Approval
+                  - generic [ref=e678]: Pending
+                  - img [ref=e679]
+                - generic [ref=e681]:
+                  - img [ref=e682]
+                  - generic [ref=e684]: Sprint Approval
+                  - button "View full spec" [ref=e685] [cursor=pointer]
+                  - button "Approve" [ref=e686] [cursor=pointer]
+              - 'button "Phase 0: Design & Spec Pending" [ref=e688] [cursor=pointer]':
+                - generic [ref=e690]: "Phase 0: Design & Spec"
+                - generic [ref=e691]: Pending
+                - img [ref=e692]
+              - 'button "Gate 1: Backend Build Pending" [ref=e695] [cursor=pointer]':
+                - generic [ref=e697]: "Gate 1: Backend Build"
+                - generic [ref=e698]: Pending
+                - img [ref=e699]
+              - 'button "Gate 2: Frontend Build Pending" [ref=e702] [cursor=pointer]':
+                - generic [ref=e704]: "Gate 2: Frontend Build"
+                - generic [ref=e705]: Pending
+                - img [ref=e706]
+              - 'button "Gate 3: QA Testing Pending" [ref=e709] [cursor=pointer]':
+                - generic [ref=e711]: "Gate 3: QA Testing"
+                - generic [ref=e712]: Pending
+                - img [ref=e713]
+              - 'button "Ship: Deploy & Archive Pending" [ref=e716] [cursor=pointer]':
+                - generic [ref=e718]: "Ship: Deploy & Archive"
+                - generic [ref=e719]: Pending
+                - img [ref=e720]
+            - generic [ref=e722]:
+              - generic [ref=e723]:
+                - generic [ref=e724]: "Agents:"
+                - generic [ref=e725]: pmo · orchestrator · backend-worker · frontend-worker · qa-tester
+              - generic [ref=e726]:
+                - generic [ref=e727]: "Started: 4/13/2026, 2:33:30 PM"
+                - generic [ref=e728]: "Gates: 0/8 passed"
+              - button "View activity logs" [ref=e729] [cursor=pointer]
+  - alert [ref=e6]

@@ -199,20 +199,37 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
       try {
         const res = await fetch("/api/config");
         if (res.ok) {
-          const data = (await res.json()) as {
-            config: {
-              defaults: {
-                workingDirectory: string;
+          const data = (await res.json()) as Record<string, unknown>;
+          const config = data.config as Record<string, unknown> | undefined;
+
+          // Check projects first (same logic as Create Sprint dialog)
+          const projects = (config?.projects ?? data.projects) as
+            | Array<{ path: string; isProd?: boolean }>
+            | undefined;
+          if (projects && projects.length > 0) {
+            const main = projects.find((p) => !p.isProd);
+            const projectPath = main?.path ?? projects[0]?.path ?? "";
+            if (projectPath) {
+              setDefaultCwd(projectPath);
+              setCwd(projectPath);
+            }
+          } else {
+            // Fallback to defaults.workingDirectory
+            const defaults = (config?.defaults ?? data.defaults) as
+              | { workingDirectory?: string }
+              | undefined;
+            if (defaults?.workingDirectory) {
+              setDefaultCwd(defaults.workingDirectory);
+              setCwd(defaults.workingDirectory);
+            }
+          }
+
+          const defaults = (config?.defaults ?? data.defaults) as
+            | {
                 model?: "opus" | "sonnet" | "haiku";
                 permissions?: "bypass" | "default" | "plan" | "auto";
-              };
-            };
-          };
-          const defaults = data.config?.defaults;
-          if (defaults?.workingDirectory) {
-            setDefaultCwd(defaults.workingDirectory);
-            setCwd(defaults.workingDirectory);
-          }
+              }
+            | undefined;
           setConfigDefaults({
             model: defaults?.model ?? "sonnet",
             permissions: defaults?.permissions ?? "default",

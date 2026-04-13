@@ -1,0 +1,478 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e7]:
+      - generic [ref=e8]:
+        - generic "Close" [ref=e9]
+        - generic "Minimize" [ref=e10]
+        - generic "Maximize" [ref=e11]
+      - generic [ref=e12]:
+        - text: Agent Studio
+        - generic [ref=e13]: ·
+        - generic [ref=e14]: velocity-api build
+      - generic "Connected to server" [ref=e16]
+    - generic [ref=e17]:
+      - navigation "Main navigation" [ref=e18]:
+        - generic [ref=e19]: A
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - button "Sessions" [ref=e22] [cursor=pointer]:
+              - img [ref=e24]
+              - generic "5 unread" [ref=e27]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic [ref=e28]:
+            - button "Teams" [ref=e29] [cursor=pointer]:
+              - img [ref=e30]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic [ref=e32]:
+            - button "Sprints" [ref=e33] [cursor=pointer]:
+              - img [ref=e34]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic [ref=e37]:
+            - button "Memory" [ref=e38] [cursor=pointer]:
+              - img [ref=e39]
+              - generic "95 unread" [ref=e41]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic [ref=e42]:
+            - button "Reports" [ref=e43] [cursor=pointer]:
+              - img [ref=e44]
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic [ref=e46]:
+          - button "Settings" [ref=e47] [cursor=pointer]:
+            - img [ref=e48]
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary "Sidebar" [ref=e51]:
+        - generic [ref=e334]:
+          - generic [ref=e336]:
+            - button "Rooms" [ref=e337] [cursor=pointer]
+            - button "Agents" [active] [ref=e338] [cursor=pointer]
+          - generic [ref=e339]:
+            - generic [ref=e377]:
+              - generic [ref=e378]: Active
+              - button "Read all" [ref=e379] [cursor=pointer]:
+                - img [ref=e380]
+                - text: Read all
+            - 'button "Checkin the live PMO tickets O F B P 4 agents · 4d system: Agents have been discussing for a while. Send a message to c 23" [ref=e382] [cursor=pointer]':
+              - img [ref=e383]
+              - generic [ref=e386]:
+                - generic [ref=e388]: Checkin the live PMO tickets
+                - generic [ref=e389]:
+                  - generic [ref=e390]:
+                    - 'generic "Orchestrator: offline" [ref=e391]':
+                      - generic [ref=e392]: O
+                    - 'generic "Frontend: offline" [ref=e393]':
+                      - generic [ref=e394]: F
+                    - 'generic "Backend: offline" [ref=e395]':
+                      - generic [ref=e396]: B
+                    - 'generic "PMO: offline" [ref=e397]':
+                      - generic [ref=e398]: P
+                  - generic [ref=e399]: 4 agents
+                  - generic [ref=e400]: ·
+                  - generic [ref=e401]: 4d
+                - paragraph [ref=e402]:
+                  - generic [ref=e403]: "system:"
+                  - text: Agents have been discussing for a while. Send a message to c
+              - generic [ref=e404]: "23"
+              - button "Close room" [ref=e405]:
+                - img [ref=e406]
+            - 'button "Checking tickets O F B P 4 agents · 27m system: Agents are waiting for your input. 29" [ref=e409] [cursor=pointer]':
+              - img [ref=e410]
+              - generic [ref=e413]:
+                - generic [ref=e415]: Checking tickets
+                - generic [ref=e416]:
+                  - generic [ref=e417]:
+                    - 'generic "Orchestrator: offline" [ref=e418]':
+                      - generic [ref=e419]: O
+                    - 'generic "Frontend: offline" [ref=e420]':
+                      - generic [ref=e421]: F
+                    - 'generic "Backend: offline" [ref=e422]':
+                      - generic [ref=e423]: B
+                    - 'generic "PMO: offline" [ref=e424]':
+                      - generic [ref=e425]: P
+                  - generic [ref=e426]: 4 agents
+                  - generic [ref=e427]: ·
+                  - generic [ref=e428]: 27m
+                - paragraph [ref=e429]:
+                  - generic [ref=e430]: "system:"
+                  - text: Agents are waiting for your input.
+              - generic [ref=e431]: "29"
+              - button "Close room" [ref=e432]:
+                - img [ref=e433]
+            - 'button "pmo-old-ticket-check O 1 agent · 12d system: Room \"pmo-old-ticket-check\" created. Topic: Duplicate test. 1" [ref=e436] [cursor=pointer]':
+              - img [ref=e437]
+              - generic [ref=e440]:
+                - generic [ref=e442]: pmo-old-ticket-check
+                - generic [ref=e443]:
+                  - 'generic "Orchestrator: offline" [ref=e445]':
+                    - generic [ref=e446]: O
+                  - generic [ref=e447]: 1 agent
+                  - generic [ref=e448]: ·
+                  - generic [ref=e449]: 12d
+                - paragraph [ref=e450]:
+                  - generic [ref=e451]: "system:"
+                  - text: "Room \"pmo-old-ticket-check\" created. Topic: Duplicate test."
+              - generic [ref=e452]: "1"
+              - button "Close room" [ref=e453]:
+                - img [ref=e454]
+            - 'button "QA final O P 2 agents · 5d orchestrator: Quick clarification: are we testing the **staging portal for 4" [ref=e457] [cursor=pointer]':
+              - img [ref=e458]
+              - generic [ref=e461]:
+                - generic [ref=e463]: QA final
+                - generic [ref=e464]:
+                  - generic [ref=e465]:
+                    - 'generic "Orchestrator: offline" [ref=e466]':
+                      - generic [ref=e467]: O
+                    - 'generic "PMO: offline" [ref=e468]':
+                      - generic [ref=e469]: P
+                  - generic [ref=e470]: 2 agents
+                  - generic [ref=e471]: ·
+                  - generic [ref=e472]: 5d
+                - paragraph [ref=e473]:
+                  - generic [ref=e474]: "orchestrator:"
+                  - text: "Quick clarification: are we testing the **staging portal for"
+              - generic [ref=e475]: "4"
+              - button "Close room" [ref=e476]:
+                - img [ref=e477]
+            - 'button "Sonnet test O F P 3 agents · 5d pmo: Pulled the Reaper Hub Tasks DB. Here''s what''s stale (not Don 6" [ref=e480] [cursor=pointer]':
+              - img [ref=e481]
+              - generic [ref=e484]:
+                - generic [ref=e486]: Sonnet test
+                - generic [ref=e487]:
+                  - generic [ref=e488]:
+                    - 'generic "Orchestrator: offline" [ref=e489]':
+                      - generic [ref=e490]: O
+                    - 'generic "Frontend: offline" [ref=e491]':
+                      - generic [ref=e492]: F
+                    - 'generic "PMO: offline" [ref=e493]':
+                      - generic [ref=e494]: P
+                  - generic [ref=e495]: 3 agents
+                  - generic [ref=e496]: ·
+                  - generic [ref=e497]: 5d
+                - paragraph [ref=e498]:
+                  - generic [ref=e499]: "pmo:"
+                  - text: Pulled the Reaper Hub Tasks DB. Here's what's stale (not Don
+              - generic [ref=e500]: "6"
+              - button "Close room" [ref=e501]:
+                - img [ref=e502]
+            - 'button "Sprint planning O F B P 4 agents · 5d system: Agent pmo error: Claude Code returned an error result: Not l" [ref=e825] [cursor=pointer]':
+              - img [ref=e506]
+              - generic [ref=e509]:
+                - generic [ref=e511]: Sprint planning
+                - generic [ref=e512]:
+                  - generic [ref=e513]:
+                    - 'generic "Orchestrator: offline" [ref=e514]':
+                      - generic [ref=e515]: O
+                    - 'generic "Frontend: offline" [ref=e516]':
+                      - generic [ref=e517]: F
+                    - 'generic "Backend: offline" [ref=e518]':
+                      - generic [ref=e519]: B
+                    - 'generic "PMO: offline" [ref=e520]':
+                      - generic [ref=e521]: P
+                  - generic [ref=e522]: 4 agents
+                  - generic [ref=e523]: ·
+                  - generic [ref=e524]: 5d
+                - paragraph [ref=e525]:
+                  - generic [ref=e526]: "system:"
+                  - text: "Agent pmo error: Claude Code returned an error result: Not l"
+              - button "Close room" [ref=e528]:
+                - img [ref=e529]
+            - 'button "Testing the pmo tickets O F B P 4 agents · 5d pmo: Pulled all tickets from Reaper Hub. There are **25 open tick 3" [ref=e532] [cursor=pointer]':
+              - img [ref=e533]
+              - generic [ref=e536]:
+                - generic [ref=e538]: Testing the pmo tickets
+                - generic [ref=e539]:
+                  - generic [ref=e540]:
+                    - 'generic "Orchestrator: offline" [ref=e541]':
+                      - generic [ref=e542]: O
+                    - 'generic "Frontend: offline" [ref=e543]':
+                      - generic [ref=e544]: F
+                    - 'generic "Backend: offline" [ref=e545]':
+                      - generic [ref=e546]: B
+                    - 'generic "PMO: offline" [ref=e547]':
+                      - generic [ref=e548]: P
+                  - generic [ref=e549]: 4 agents
+                  - generic [ref=e550]: ·
+                  - generic [ref=e551]: 5d
+                - paragraph [ref=e552]:
+                  - generic [ref=e553]: "pmo:"
+                  - text: Pulled all tickets from Reaper Hub. There are **25 open tick
+              - generic [ref=e554]: "3"
+              - button "Close room" [ref=e555]:
+                - img [ref=e556]
+            - 'button "Ticket triage O F P 3 agents · 5d frontend-worker: Based on my checks: the portal IS live at `vnb.enpal.energy` 4" [ref=e559] [cursor=pointer]':
+              - img [ref=e560]
+              - generic [ref=e563]:
+                - generic [ref=e565]: Ticket triage
+                - generic [ref=e566]:
+                  - generic [ref=e567]:
+                    - 'generic "Orchestrator: offline" [ref=e568]':
+                      - generic [ref=e569]: O
+                    - 'generic "Frontend: offline" [ref=e570]':
+                      - generic [ref=e571]: F
+                    - 'generic "PMO: offline" [ref=e572]':
+                      - generic [ref=e573]: P
+                  - generic [ref=e574]: 3 agents
+                  - generic [ref=e575]: ·
+                  - generic [ref=e576]: 5d
+                - paragraph [ref=e577]:
+                  - generic [ref=e578]: "frontend-worker:"
+                  - text: "Based on my checks: the portal IS live at `vnb.enpal.energy`"
+              - generic [ref=e579]: "4"
+              - button "Close room" [ref=e580]:
+                - img [ref=e581]
+            - 'button "Sprint War Room O B F Q 5 agents · 5m orchestrator: Good progress team. Current status: - ✅ Schema: Done - ✅ Bac 14" [ref=e584] [cursor=pointer]':
+              - img [ref=e585]
+              - generic [ref=e588]:
+                - generic [ref=e590]: Sprint War Room
+                - generic [ref=e591]:
+                  - generic [ref=e592]:
+                    - 'generic "Orchestrator: offline" [ref=e593]':
+                      - generic [ref=e594]: O
+                    - 'generic "Backend: offline" [ref=e595]':
+                      - generic [ref=e596]: B
+                    - 'generic "Frontend: offline" [ref=e597]':
+                      - generic [ref=e598]: F
+                    - 'generic "QA: offline" [ref=e599]':
+                      - generic [ref=e600]: Q
+                  - generic [ref=e601]: 5 agents
+                  - generic [ref=e602]: ·
+                  - generic [ref=e603]: 5m
+                - paragraph [ref=e604]:
+                  - generic [ref=e605]: "orchestrator:"
+                  - text: "Good progress team. Current status: - ✅ Schema: Done - ✅ Bac"
+              - generic [ref=e606]: "14"
+              - button "Close room" [ref=e607]:
+                - img [ref=e608]
+            - generic [ref=e611]: Archived
+            - button "Chain fix test Legacy" [ref=e612] [cursor=pointer]:
+              - img [ref=e613]
+              - generic [ref=e616]:
+                - generic [ref=e618]: Chain fix test
+                - generic [ref=e620]: Legacy
+            - button "Chain test Legacy" [ref=e621] [cursor=pointer]:
+              - img [ref=e622]
+              - generic [ref=e625]:
+                - generic [ref=e627]: Chain test
+                - generic [ref=e629]: Legacy
+            - button "Debug chain Legacy" [ref=e630] [cursor=pointer]:
+              - img [ref=e631]
+              - generic [ref=e634]:
+                - generic [ref=e636]: Debug chain
+                - generic [ref=e638]: Legacy
+            - button "PMO ticket checker Legacy" [ref=e639] [cursor=pointer]:
+              - img [ref=e640]
+              - generic [ref=e643]:
+                - generic [ref=e645]: PMO ticket checker
+                - generic [ref=e647]: Legacy
+            - button "PMO ticket mapping Legacy" [ref=e648] [cursor=pointer]:
+              - img [ref=e649]
+              - generic [ref=e652]:
+                - generic [ref=e654]: PMO ticket mapping
+                - generic [ref=e656]: Legacy
+            - button "PMO tickets monitoring Legacy" [ref=e657] [cursor=pointer]:
+              - img [ref=e658]
+              - generic [ref=e661]:
+                - generic [ref=e663]: PMO tickets monitoring
+                - generic [ref=e665]: Legacy
+            - button "PMO tickets test Legacy" [ref=e666] [cursor=pointer]:
+              - img [ref=e667]
+              - generic [ref=e670]:
+                - generic [ref=e672]: PMO tickets test
+                - generic [ref=e674]: Legacy
+            - button "Slack test Legacy" [ref=e675] [cursor=pointer]:
+              - img [ref=e676]
+              - generic [ref=e679]:
+                - generic [ref=e681]: Slack test
+                - generic [ref=e683]: Legacy
+            - button "Slack v2 Legacy" [ref=e684] [cursor=pointer]:
+              - img [ref=e685]
+              - generic [ref=e688]:
+                - generic [ref=e690]: Slack v2
+                - generic [ref=e692]: Legacy
+            - button "Slack v3 Legacy" [ref=e693] [cursor=pointer]:
+              - img [ref=e694]
+              - generic [ref=e697]:
+                - generic [ref=e699]: Slack v3
+                - generic [ref=e701]: Legacy
+            - button "Test pmo Legacy" [ref=e702] [cursor=pointer]:
+              - img [ref=e703]
+              - generic [ref=e706]:
+                - generic [ref=e708]: Test pmo
+                - generic [ref=e710]: Legacy
+            - button "Test room Legacy" [ref=e711] [cursor=pointer]:
+              - img [ref=e712]
+              - generic [ref=e715]:
+                - generic [ref=e717]: Test room
+                - generic [ref=e719]: Legacy
+            - button "Ticket audit Legacy" [ref=e720] [cursor=pointer]:
+              - img [ref=e721]
+              - generic [ref=e724]:
+                - generic [ref=e726]: Ticket audit
+                - generic [ref=e728]: Legacy
+            - button "Visual QA room Legacy" [ref=e729] [cursor=pointer]:
+              - img [ref=e730]
+              - generic [ref=e733]:
+                - generic [ref=e735]: Visual QA room
+                - generic [ref=e737]: Legacy
+          - generic [ref=e362]:
+            - button "New Room" [ref=e363] [cursor=pointer]:
+              - img [ref=e364]
+              - text: New Room
+            - paragraph [ref=e365]: "Tip: use ⌘K to search rooms"
+      - main [ref=e206]:
+        - generic [ref=e369]:
+          - generic [ref=e371]:
+            - img [ref=e372]
+            - generic [ref=e738]:
+              - generic [ref=e739]: Sprint planning
+              - generic [ref=e740]: Plan the next sprint — review open work and assign agents
+            - generic [ref=e741]:
+              - 'generic "Orchestrator: offline" [ref=e742]':
+                - generic [ref=e743]: O
+              - 'generic "Frontend: offline" [ref=e744]':
+                - generic [ref=e745]: F
+              - 'generic "Backend: offline" [ref=e826]':
+                - generic [ref=e827]: B
+              - 'generic "PMO: offline" [ref=e746]':
+                - generic [ref=e747]: P
+            - generic [ref=e748]: "4"
+            - button "Spawn Agents" [ref=e828] [cursor=pointer]
+            - button "Close" [ref=e829] [cursor=pointer]
+          - generic [ref=e751]:
+            - generic [ref=e832]: "Room \"Sprint planning\" created. Topic: Plan the next sprint — review open work and assign agents. Agents: Orchestrator, Frontend, Backend, PMO"
+            - generic [ref=e836]: "Room ready. 4 agents available: Orchestrator, Frontend, Backend, PMO. @mention an agent to start."
+            - generic [ref=e839]:
+              - generic [ref=e840]:
+                - generic [ref=e841]:
+                  - generic [ref=e842]: 5d ago
+                  - generic [ref=e843]: You
+                - paragraph [ref=e846]: "@pmo What are the top 3 priorities for next sprint? Ask the team for input."
+              - generic [ref=e849]: "Y"
+            - generic [ref=e851]:
+              - generic [ref=e854]: P
+              - generic [ref=e855]:
+                - generic [ref=e856]:
+                  - generic "View session" [ref=e857] [cursor=pointer]: pmo
+                  - generic [ref=e858]: 5d ago
+                - paragraph [ref=e861]: Not logged in Please run /login
+                - button "Details" [ref=e862] [cursor=pointer]:
+                  - img [ref=e863]
+                  - text: Details
+            - generic [ref=e867]: "Agent pmo error: Claude Code returned an error result: Not logged in · Please run /login"
+            - generic [ref=e870]:
+              - generic [ref=e871]:
+                - generic [ref=e872]:
+                  - generic [ref=e873]: 5d ago
+                  - generic [ref=e874]: You
+                - paragraph [ref=e877]: "@orchestrator coordinate with @frontend and @backend on what they can deliver this sprint"
+              - generic [ref=e880]: "Y"
+            - generic [ref=e882]:
+              - generic [ref=e885]: O
+              - generic [ref=e886]:
+                - generic [ref=e887]:
+                  - generic "View session" [ref=e888] [cursor=pointer]: orchestrator
+                  - generic [ref=e889]: 5d ago
+                - paragraph [ref=e892]: Not logged in Please run /login
+                - button "Details" [ref=e893] [cursor=pointer]:
+                  - img [ref=e894]
+                  - text: Details
+            - generic [ref=e898]: "Agent orchestrator error: Claude Code returned an error result: Not logged in · Please run /login"
+            - generic [ref=e901]:
+              - generic [ref=e904]: F
+              - generic [ref=e905]:
+                - generic [ref=e906]:
+                  - generic "View session" [ref=e907] [cursor=pointer]: frontend
+                  - generic [ref=e908]: 5d ago
+                - paragraph [ref=e911]: Not logged in Please run /login
+                - button "Details" [ref=e912] [cursor=pointer]:
+                  - img [ref=e913]
+                  - text: Details
+            - generic [ref=e917]: "Agent frontend error: Claude Code returned an error result: Not logged in · Please run /login"
+            - generic [ref=e920]:
+              - generic [ref=e923]: B
+              - generic [ref=e924]:
+                - generic [ref=e925]:
+                  - generic "View session" [ref=e926] [cursor=pointer]: backend
+                  - generic [ref=e927]: 5d ago
+                - paragraph [ref=e930]: Not logged in Please run /login
+                - button "Details" [ref=e931] [cursor=pointer]:
+                  - img [ref=e932]
+                  - text: Details
+            - generic [ref=e936]: "Agent backend error: Claude Code returned an error result: Not logged in · Please run /login"
+            - generic [ref=e940]: "Room ready. 4 agents available: Orchestrator, Frontend, Backend, PMO. @mention an agent to start."
+            - generic [ref=e943]:
+              - generic [ref=e944]:
+                - generic [ref=e945]:
+                  - generic [ref=e946]: 5d ago
+                  - generic [ref=e947]: You
+                - paragraph [ref=e950]: "@orchestrator What should we prioritize this sprint? Check with @frontend and @pmo."
+              - generic [ref=e953]: "Y"
+            - generic [ref=e955]:
+              - generic [ref=e958]: O
+              - generic [ref=e959]:
+                - generic [ref=e960]:
+                  - generic "View session" [ref=e961] [cursor=pointer]: orchestrator
+                  - generic [ref=e962]: 5d ago
+                - paragraph [ref=e965]: Not logged in Please run /login
+                - button "Details" [ref=e966] [cursor=pointer]:
+                  - img [ref=e967]
+                  - text: Details
+            - generic [ref=e971]: "Agent orchestrator error: Claude Code returned an error result: Not logged in · Please run /login"
+            - generic [ref=e974]:
+              - generic [ref=e977]: F
+              - generic [ref=e978]:
+                - generic [ref=e979]:
+                  - generic "View session" [ref=e980] [cursor=pointer]: frontend
+                  - generic [ref=e981]: 5d ago
+                - paragraph [ref=e984]: Not logged in Please run /login
+                - button "Details" [ref=e985] [cursor=pointer]:
+                  - img [ref=e986]
+                  - text: Details
+            - generic [ref=e990]: "Agent frontend error: Claude Code returned an error result: Not logged in · Please run /login"
+            - generic [ref=e993]:
+              - generic [ref=e996]: P
+              - generic [ref=e997]:
+                - generic [ref=e998]:
+                  - generic "View session" [ref=e999] [cursor=pointer]: pmo
+                  - generic [ref=e1000]: 5d ago
+                - paragraph [ref=e1003]: Not logged in Please run /login
+                - button "Details" [ref=e1004] [cursor=pointer]:
+                  - img [ref=e1005]
+                  - text: Details
+            - generic [ref=e1009]: "Agent pmo error: Claude Code returned an error result: Not logged in · Please run /login"
+          - generic [ref=e1011]:
+            - generic [ref=e1012]: All agents are offline
+            - button "Start Room" [ref=e1013] [cursor=pointer]
+          - generic [ref=e1015]:
+            - 'textbox "Message #Sprint planning..." [ref=e1016]'
+            - button [disabled] [ref=e1017]:
+              - img [ref=e1018]
+  - alert [ref=e6]

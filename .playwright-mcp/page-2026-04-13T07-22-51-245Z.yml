@@ -1,0 +1,171 @@
+- generic:
+  - generic:
+    - banner:
+      - generic:
+        - text: Agent Studio
+        - generic: ·
+        - generic: Session B
+    - generic:
+      - navigation:
+        - generic: A
+        - generic:
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sessions
+                  - generic: ⌘ 1
+                - generic: Interactive Claude Code terminals
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Teams
+                  - generic: ⌘ 2
+                - generic: Multi-agent collaboration rooms
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Sprints
+                  - generic: ⌘ 3
+                - generic: Automated multi-agent pipelines
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Memory
+                  - generic: ⌘ 4
+                - generic: Agent learnings and knowledge base
+          - generic:
+            - button:
+              - img
+            - generic:
+              - generic:
+                - generic:
+                  - text: Reports
+                  - generic: ⌘ 5
+                - generic: Automation output and approvals
+        - generic:
+          - button:
+            - img
+          - generic:
+            - generic:
+              - generic:
+                - text: Settings
+                - generic: ⌘ ,
+      - complementary:
+        - generic:
+          - generic:
+            - heading [level=3]: Memory
+            - paragraph: Agent learnings, corrections, and decisions stored across sessions.
+      - generic:
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - textbox:
+                    - /placeholder: Search memories...
+                - button:
+                  - img
+                  - text: New
+              - generic:
+                - button:
+                  - text: All
+                  - generic: "1"
+                - button:
+                  - text: Learnings
+                  - generic: "1"
+                - button:
+                  - text: Corrections
+                  - generic: "0"
+                - button:
+                  - text: Decisions
+                  - generic: "0"
+                - button:
+                  - text: Human Inputs
+                  - generic: "0"
+                - button:
+                  - text: Knowledge
+                  - generic: "0"
+                - button:
+                  - text: Pinned
+                  - generic: "0"
+              - generic:
+                - generic:
+                  - button:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph: "Express 5 route syntax requires /{*path}"
+                        - paragraph: "Always use /{*path} syntax for Express 5 catch-all routes"
+                      - generic:
+                        - button: "*"
+                        - button:
+                          - img
+                        - button:
+                          - img
+                    - generic:
+                      - generic: Learnings
+                      - generic: 13.04.2026
+                - generic:
+                  - generic:
+                    - generic:
+                      - button:
+                        - img
+                      - generic:
+                        - heading [level=2]: "Express 5 route syntax requires /{*path}"
+                        - paragraph: "Always use /{*path} syntax for Express 5 catch-all routes"
+                      - generic:
+                        - button:
+                          - img
+                          - text: Export
+                        - button:
+                          - img
+                          - text: Edit
+                        - button: Pin
+                        - button:
+                          - img
+                          - text: Delete
+                    - generic:
+                      - generic: learnings
+                      - generic:
+                        - img
+                        - text: dashboard
+                      - generic: 13/04/2026, 09:22
+                      - generic: by dashboard
+                    - generic:
+                      - generic:
+                        - paragraph: Observation
+                        - paragraph: "Express 5 changed wildcard route syntax from * to /{*path}"
+                      - generic:
+                        - paragraph: Lesson
+                        - paragraph: "Always use /{*path} syntax for Express 5 catch-all routes"
+                    - generic:
+                      - img
+                      - generic: ai-agents/memory/learnings/20260413_092215_dashboard_learnings.json
+  - alert
+  - dialog "Delete Memory" [ref=e1087]:
+    - generic [ref=e1088]:
+      - heading "Delete Memory" [level=2] [ref=e1089]:
+        - img [ref=e1090]
+        - text: Delete Memory
+      - button [active] [ref=e1092] [cursor=pointer]:
+        - img [ref=e1093]
+    - generic [ref=e1096]:
+      - paragraph [ref=e1097]: Are you sure you want to delete this memory?
+      - paragraph [ref=e1098]: "“Express 5 route syntax requires /{*path}”"
+      - paragraph [ref=e1099]: This action cannot be undone. The memory file and its index entry will be permanently removed.
+    - generic [ref=e1100]:
+      - button "Cancel" [ref=e1101] [cursor=pointer]
+      - button "Delete" [ref=e1102] [cursor=pointer]

@@ -22,15 +22,7 @@ export function sessionsRoutes(
 
   router.post("/", (req, res) => {
     try {
-      const {
-        name,
-        command,
-        args,
-        cwd,
-        cols,
-        rows,
-        meta,
-      } = req.body as {
+      const { name, command, args, cwd, cols, rows, meta } = req.body as {
         name?: string;
         command?: string;
         args?: string[];
@@ -124,65 +116,67 @@ export function sessionsRoutes(
 
       sessions.sort((a, b) => b.modified - a.modified);
       const { open } = await import("node:fs/promises");
-      const result = await Promise.all(sessions.slice(0, 20).map(async (s) => {
-        let preview = "";
-        let agent = "";
-        try {
-          const fh = await open(s.file, "r");
-          const buf = Buffer.alloc(32768);
-          const { bytesRead } = await fh.read(buf, 0, 32768, 0);
-          await fh.close();
-          const chunk = buf.toString("utf8", 0, bytesRead);
-          const lines = chunk.split("\n").filter(Boolean);
-          for (const line of lines.slice(0, 30)) {
-            try {
-              const entry = JSON.parse(line);
-              if (entry.type === "agent-setting" && entry.agentSetting && !agent) {
-                agent = entry.agentSetting;
-              }
-              if (entry.type === "user" && !preview) {
-                const msg = entry.message;
-                let text = "";
-                if (typeof msg === "string") {
-                  text = msg;
-                } else if (msg && typeof msg.content === "string") {
-                  text = msg.content;
-                } else if (msg && Array.isArray(msg.content)) {
-                  text = msg.content
-                    .filter((b: { type: string }) => b.type === "text")
-                    .map((b: { text: string }) => b.text)
-                    .join(" ");
+      const result = await Promise.all(
+        sessions.slice(0, 20).map(async (s) => {
+          let preview = "";
+          let agent = "";
+          try {
+            const fh = await open(s.file, "r");
+            const buf = Buffer.alloc(32768);
+            const { bytesRead } = await fh.read(buf, 0, 32768, 0);
+            await fh.close();
+            const chunk = buf.toString("utf8", 0, bytesRead);
+            const lines = chunk.split("\n").filter(Boolean);
+            for (const line of lines.slice(0, 30)) {
+              try {
+                const entry = JSON.parse(line);
+                if (entry.type === "agent-setting" && entry.agentSetting && !agent) {
+                  agent = entry.agentSetting;
                 }
-                if (text && !text.startsWith("<") && text.length > 5) {
-                  preview = text.slice(0, 80).replace(/\n/g, " ").trim();
+                if (entry.type === "user" && !preview) {
+                  const msg = entry.message;
+                  let text = "";
+                  if (typeof msg === "string") {
+                    text = msg;
+                  } else if (msg && typeof msg.content === "string") {
+                    text = msg.content;
+                  } else if (msg && Array.isArray(msg.content)) {
+                    text = msg.content
+                      .filter((b: { type: string }) => b.type === "text")
+                      .map((b: { text: string }) => b.text)
+                      .join(" ");
+                  }
+                  if (text && !text.startsWith("<") && text.length > 5) {
+                    preview = text.slice(0, 80).replace(/\n/g, " ").trim();
+                  }
                 }
-              }
-              if (entry.type === "last-prompt" && !preview && entry.lastPrompt) {
-                const lp = entry.lastPrompt as string;
-                if (!lp.startsWith("<") && lp.length > 5) {
-                  preview = lp.slice(0, 80).replace(/\n/g, " ").trim();
+                if (entry.type === "last-prompt" && !preview && entry.lastPrompt) {
+                  const lp = entry.lastPrompt as string;
+                  if (!lp.startsWith("<") && lp.length > 5) {
+                    preview = lp.slice(0, 80).replace(/\n/g, " ").trim();
+                  }
                 }
+              } catch {
+                // Skip unparseable lines
               }
-            } catch {
-              // Skip unparseable lines
             }
+          } catch {
+            // Can't read file, leave preview empty
           }
-        } catch {
-          // Can't read file, leave preview empty
-        }
 
-        const projectShort = s.project.split("/").pop() ?? s.project;
+          const projectShort = s.project.split("/").pop() ?? s.project;
 
-        return {
-          id: s.id,
-          project: s.project,
-          projectShort,
-          modified: s.modified,
-          date: new Date(s.modified).toISOString(),
-          agent,
-          preview,
-        };
-      }));
+          return {
+            id: s.id,
+            project: s.project,
+            projectShort,
+            modified: s.modified,
+            date: new Date(s.modified).toISOString(),
+            agent,
+            preview,
+          };
+        }),
+      );
 
       res.json(result);
     } catch {
