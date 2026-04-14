@@ -37,7 +37,8 @@ export type ExecutorEventType =
   | "gate-waiting"
   | "run-completed"
   | "run-failed"
-  | "run-paused";
+  | "run-paused"
+  | "budget-exceeded";
 
 export interface ExecutorEvent {
   type: ExecutorEventType;
@@ -133,7 +134,7 @@ export class WorkflowExecutor {
   }
 
   /** Create a new run from a workflow definition */
-  startRun(workflowDef: WorkflowPipelineDef): RunState {
+  startRun(workflowDef: WorkflowPipelineDef, options?: { budgetCapUsd?: number }): RunState {
     const runId = createRunId();
     const steps: Record<string, StepState> = {};
 
@@ -148,6 +149,7 @@ export class WorkflowExecutor {
       currentStep: null,
       startedAt: new Date().toISOString(),
       steps,
+      ...(options?.budgetCapUsd != null ? { budgetCapUsd: options.budgetCapUsd } : {}),
     };
 
     saveRunState(runState);
@@ -215,11 +217,12 @@ export class WorkflowExecutor {
           await this.executeAgentGroupStep(runState, stepDef, workflowDef, abortController.signal);
         }
 
-        // If step failed, paused, or waiting for approval, stop
+        // If step failed, paused, budget exceeded, or waiting for approval, stop
         if (
           runState.status === "paused" ||
           runState.status === "failed" ||
-          runState.status === "waiting_approval"
+          runState.status === "waiting_approval" ||
+          runState.status === "budget_exceeded"
         ) {
           return runState;
         }
@@ -245,6 +248,29 @@ export class WorkflowExecutor {
     signal: AbortSignal,
   ): Promise<void> {
     const stepState = runState.steps[stepDef.id];
+
+    // --- Budget check before execution (Task 20) ---
+    const effectiveBudgetCap = runState.budgetCapUsd ?? workflowDef.budgetCapUsd;
+    if (effectiveBudgetCap != null && effectiveBudgetCap > 0) {
+      const currentCost = runState.tokenUsage?.totalCostUsd ?? 0;
+      if (currentCost >= effectiveBudgetCap) {
+        stepState.status = "failed";
+        stepState.error = `Budget cap of $${effectiveBudgetCap.toFixed(2)} reached (spent $${currentCost.toFixed(2)})`;
+        stepState.completedAt = new Date().toISOString();
+        runState.status = "budget_exceeded";
+        runState.completedAt = new Date().toISOString();
+        saveRunState(runState);
+        this.emit({
+          type: "budget-exceeded",
+          runId: runState.runId,
+          workflowId: runState.workflowId,
+          stepId: stepDef.id,
+          data: { budgetCapUsd: effectiveBudgetCap, totalCostUsd: currentCost },
+        });
+        return;
+      }
+    }
+
     stepState.status = "running";
     stepState.startedAt = new Date().toISOString();
     saveRunState(runState);
@@ -256,7 +282,7 @@ export class WorkflowExecutor {
     });
 
     // Build command
-    const args: string[] = ["-p", stepDef.goal];
+    const args: string[] = ["-p", stepDef.goal, "--output-format", "json"];
     if (stepDef.agent) {
       args.push("--agent", stepDef.agent);
     }
@@ -265,6 +291,20 @@ export class WorkflowExecutor {
     }
     if (stepDef.permissions && stepDef.permissions !== "default") {
       args.push("--permissions", stepDef.permissions);
+    }
+
+    // --- Per-step budget cap (Task 20) ---
+    const stepBudget = stepDef.stepBudgetCapUsd ?? workflowDef.stepBudgetCapUsd;
+    if (stepBudget != null && stepBudget > 0) {
+      // Use step-level budget directly
+      args.push("--max-budget-usd", String(stepBudget));
+    } else if (effectiveBudgetCap != null && effectiveBudgetCap > 0) {
+      // No step budget set, but there is a run-level cap — pass remaining budget
+      const spent = runState.tokenUsage?.totalCostUsd ?? 0;
+      const remaining = Math.max(0, effectiveBudgetCap - spent);
+      if (remaining > 0) {
+        args.push("--max-budget-usd", String(remaining));
+      }
     }
 
     try {
@@ -298,6 +338,9 @@ export class WorkflowExecutor {
       }
 
       if (result.exitCode === 0) {
+        // --- Parse JSON output for cost/token data (Task 19) ---
+        this.parseAndAccumulateCost(result.stdout, stepState, runState);
+
         // Check if output file was expected and exists
         if (stepDef.output) {
           const outputPath = join(workflowDef.workingDirectory, stepDef.output);
@@ -320,8 +363,12 @@ export class WorkflowExecutor {
           runId: runState.runId,
           workflowId: runState.workflowId,
           stepId: stepDef.id,
+          data: stepState.tokenUsage ? { tokenUsage: stepState.tokenUsage } : undefined,
         });
       } else {
+        // Still try to parse cost data even on failure (partial usage may exist)
+        this.parseAndAccumulateCost(result.stdout, stepState, runState);
+
         // Non-zero exit code
         const lastLines = (result.stderr || result.stdout).split("\n").slice(-10).join("\n");
         stepState.status = "failed";
@@ -343,6 +390,60 @@ export class WorkflowExecutor {
         stepState.completedAt = new Date().toISOString();
         saveRunState(runState);
         this.handleStepFailure(runState, stepDef);
+      }
+    }
+  }
+
+  /**
+   * Parse JSON output from `claude -p --output-format json` and accumulate cost.
+   * Expected JSON shape: { result: string, cost_usd: number, input_tokens: number, output_tokens: number }
+   * Gracefully handles non-JSON output (logs warning, continues).
+   */
+  private parseAndAccumulateCost(stdout: string, stepState: StepState, runState: RunState): void {
+    try {
+      const parsed = JSON.parse(stdout) as Record<string, unknown>;
+
+      const costUsd =
+        typeof parsed.cost_usd === "number"
+          ? parsed.cost_usd
+          : typeof parsed.total_cost_usd === "number"
+            ? parsed.total_cost_usd
+            : 0;
+      const inputTokens = typeof parsed.input_tokens === "number" ? parsed.input_tokens : 0;
+      const outputTokens = typeof parsed.output_tokens === "number" ? parsed.output_tokens : 0;
+
+      // Store per-step token usage
+      stepState.tokenUsage = {
+        inputTokens,
+        outputTokens,
+        totalCostUsd: costUsd,
+      };
+
+      // Store the text result as step output (if not already a file path)
+      if (typeof parsed.result === "string" && !stepState.output) {
+        // Truncate very long outputs to avoid bloating state
+        const maxLen = 10_000;
+        stepState.output =
+          parsed.result.length > maxLen
+            ? parsed.result.slice(0, maxLen) + "\n... (truncated)"
+            : parsed.result;
+      }
+
+      // Accumulate into run-level totals
+      if (!runState.tokenUsage) {
+        runState.tokenUsage = { inputTokens: 0, outputTokens: 0, totalCostUsd: 0 };
+      }
+      runState.tokenUsage.inputTokens += inputTokens;
+      runState.tokenUsage.outputTokens += outputTokens;
+      runState.tokenUsage.totalCostUsd += costUsd;
+    } catch {
+      // stdout is not valid JSON — this is fine, just means the CLI
+      // didn't output JSON (older version or unexpected format).
+      // Continue without cost data.
+      if (stdout.trim().length > 0) {
+        console.warn(
+          "[workflow-executor] Could not parse JSON output for cost tracking. Continuing without cost data.",
+        );
       }
     }
   }

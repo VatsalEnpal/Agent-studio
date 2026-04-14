@@ -201,7 +201,9 @@ export type WsEventType =
   | "workflow-step-update"
   | "workflow-gate-waiting"
   | "workflow-run-complete"
-  | "workflow-run-failed";
+  | "workflow-run-failed"
+  // Memory extraction events
+  | "memory-extracted";
 
 /** A WebSocket message exchanged between server and client. */
 export interface WsMessage {

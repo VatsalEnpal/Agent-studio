@@ -49,6 +49,7 @@ export function workflowRoutes(deps: WorkflowRouteDeps): Router {
       "run-completed": "workflow-run-complete",
       "run-failed": "workflow-run-failed",
       "run-paused": "workflow-step-update",
+      "budget-exceeded": "workflow-run-failed",
     };
     const wsType = typeMap[event.type];
     if (wsType) {
@@ -166,14 +167,25 @@ export function workflowRoutes(deps: WorkflowRouteDeps): Router {
   // ---------- Run Management ----------
 
   /** Shared logic for starting a workflow run */
-  function handleStartRun(id: string, res: import("express").Response): void {
+  function handleStartRun(
+    id: string,
+    res: import("express").Response,
+    req: import("express").Request,
+  ): void {
     const wf = registry.getWorkflow(id);
     if (!wf) {
       res.status(404).json({ error: "Workflow not found" });
       return;
     }
 
-    const runState = executor.startRun(wf);
+    // Accept optional per-run budget override from request body
+    const body = (req.body ?? {}) as { budgetCapUsd?: number };
+    const budgetCapUsd =
+      typeof body.budgetCapUsd === "number" && body.budgetCapUsd > 0
+        ? body.budgetCapUsd
+        : undefined;
+
+    const runState = executor.startRun(wf, budgetCapUsd != null ? { budgetCapUsd } : undefined);
     res.status(201).json({ runId: runState.runId, status: "started" });
 
     // Execute asynchronously (don't block the response)
@@ -184,14 +196,14 @@ export function workflowRoutes(deps: WorkflowRouteDeps): Router {
 
   /** POST /api/workflows/:id/run — start a new run */
   router.post("/:id/run", (req, res) => {
-    handleStartRun(req.params.id, res);
+    handleStartRun(req.params.id, res, req);
   });
   // Route aliases: /start and POST /runs also start a run (ISSUE-06)
   router.post("/:id/start", (req, res) => {
-    handleStartRun(req.params.id, res);
+    handleStartRun(req.params.id, res, req);
   });
   router.post("/:id/runs", (req, res) => {
-    handleStartRun(req.params.id, res);
+    handleStartRun(req.params.id, res, req);
   });
 
   /** GET /api/workflows/:id/runs — list runs for a workflow */

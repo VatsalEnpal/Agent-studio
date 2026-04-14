@@ -150,7 +150,7 @@ export function SettingsAutomations() {
       try {
         const res = await fetch(`/api/automations/${id}/run`, { method: "POST" });
         if (res.ok) {
-          addToast("Automation triggered — check Reports tab for results", "success");
+          addToast("Automation triggered successfully", "success");
           // Refresh to get updated lastRun
           const autoRes = await fetch("/api/automations");
           if (autoRes.ok) {

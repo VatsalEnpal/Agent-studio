@@ -6,7 +6,6 @@ import {
   RoomsIcon,
   SprintsIcon,
   MemoryIcon,
-  FileIcon,
   SettingsIcon,
 } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -15,7 +14,7 @@ import { cn } from "@/lib/utils";
 // Types
 // ---------------------------------------------------------------------------
 
-export type NavPage = "sessions" | "teams" | "sprints" | "knowledge" | "reports" | "settings";
+export type NavPage = "sessions" | "teams" | "sprints" | "knowledge" | "settings";
 
 interface NavItem {
   id: NavPage;
@@ -25,11 +24,13 @@ interface NavItem {
 }
 
 interface NavRailProps {
-  /** When `null` (e.g. Reports from the top toggle), no pillar is highlighted. */
+  /** When `null`, no pillar is highlighted. */
   activePage: NavPage | null;
   onNavigate: (page: NavPage) => void;
   /** Badge counts keyed by page id */
   badges?: Partial<Record<NavPage, number>>;
+  /** When true, the Memory nav icon gets a brief glow animation */
+  memoryPulse?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -41,7 +42,6 @@ const pillarAccent: Record<string, string> = {
   teams: "text-rooms",
   sprints: "text-sprints",
   knowledge: "text-memory",
-  reports: "text-text-secondary",
 };
 
 /** Accent-colored dot backgrounds for unread indicators */
@@ -50,7 +50,6 @@ const accentDot: Record<string, string> = {
   teams: "bg-rooms",
   sprints: "bg-sprints",
   knowledge: "bg-memory",
-  reports: "bg-text-secondary",
 };
 
 // ---------------------------------------------------------------------------
@@ -86,13 +85,6 @@ const sectionItems: (Omit<NavItem, "badge"> & { hint: string })[] = [
     accent: "knowledge",
     hint: "Agent learnings and knowledge base",
   },
-  {
-    id: "reports",
-    label: "Reports",
-    icon: FileIcon,
-    accent: "reports",
-    hint: "Automation output and approvals",
-  },
 ];
 
 /** Keyboard shortcut hints for nav tooltips */
@@ -101,7 +93,6 @@ const navShortcuts: Record<NavPage, string> = {
   teams: "\u2318 2",
   sprints: "\u2318 3",
   knowledge: "\u2318 4",
-  reports: "\u2318 5",
   settings: "\u2318 ,",
 };
 
@@ -109,7 +100,7 @@ const navShortcuts: Record<NavPage, string> = {
 // Component
 // ---------------------------------------------------------------------------
 
-export function NavRail({ activePage, onNavigate, badges }: NavRailProps) {
+export function NavRail({ activePage, onNavigate, badges, memoryPulse }: NavRailProps) {
   return (
     <nav
       className={cn(
@@ -145,6 +136,7 @@ export function NavRail({ activePage, onNavigate, badges }: NavRailProps) {
             isActive={activePage != null && activePage === item.id}
             badge={badges?.[item.id]}
             onNavigate={onNavigate}
+            pulse={item.id === "knowledge" && memoryPulse}
           />
         ))}
       </div>
@@ -172,11 +164,13 @@ function NavRailItem({
   isActive,
   badge,
   onNavigate,
+  pulse,
 }: {
   item: Omit<NavItem, "badge"> & { hint?: string };
   isActive: boolean;
   badge?: number;
   onNavigate: (page: NavPage) => void;
+  pulse?: boolean;
 }) {
   const Icon = item.icon;
   const accentClass = item.accent ? pillarAccent[item.accent] : undefined;
@@ -199,6 +193,7 @@ function NavRailItem({
           isActive
             ? cn("bg-bg-elevated", accentClass ?? "text-text-primary")
             : "text-text-ghost hover:text-text-secondary hover:bg-bg-elevated/50",
+          pulse && "animate-memory-pulse",
         )}
       >
         {/* Active indicator — 2px accent bar on left edge */}

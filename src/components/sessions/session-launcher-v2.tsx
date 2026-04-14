@@ -5,6 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { CloseIcon, ChevronDownIcon, SearchIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import type { LauncherPreset } from "@/lib/types";
+import { QuickImport } from "./quick-import";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -452,6 +453,46 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
     [launching, cwd, applyPreset, handleLaunchContinue, onLaunch, onOpenChange],
   );
 
+  // Quick Import: refresh agents list after a successful import
+  const refreshAgents = useCallback(async () => {
+    try {
+      const res = await fetch("/api/agents");
+      if (res.ok) {
+        const data = (await res.json()) as AgentOption[];
+        if (Array.isArray(data) && data.length > 0) setAgents(data);
+      }
+    } catch {
+      // Ignore -- agent list will refresh on next dialog open
+    }
+  }, []);
+
+  // Quick Import: launch session with the newly imported agent
+  const handleQuickImportLaunch = useCallback(
+    (config: { name: string; agent: string; cwd: string }) => {
+      void (async () => {
+        if (launching) return;
+        setLaunching(true);
+        setError(null);
+        try {
+          await onLaunch({
+            name: config.name,
+            model,
+            agent: config.agent,
+            permissions,
+            channel: "none",
+            cwd: config.cwd,
+          });
+          onOpenChange(false);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Launch failed");
+        } finally {
+          setLaunching(false);
+        }
+      })();
+    },
+    [launching, model, permissions, onLaunch, onOpenChange],
+  );
+
   const inputCls =
     "w-full px-2 py-1 text-xs bg-bg-input border border-border-default rounded text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all";
 
@@ -521,6 +562,12 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
                 })}
               </div>
             </div>
+
+            {/* Quick Import -- shows unimported projects */}
+            <QuickImport
+              onLaunchSession={handleQuickImportLaunch}
+              onImportComplete={() => void refreshAgents()}
+            />
 
             {/* Resume previous */}
             {recentSessions.length > 0 && (

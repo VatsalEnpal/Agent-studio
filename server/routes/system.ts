@@ -1,18 +1,56 @@
 import { Router } from "express";
-import { exec } from "node:child_process";
+import { exec, execSync } from "node:child_process";
 import { promisify } from "node:util";
 import os from "node:os";
+import fs from "node:fs";
+import path from "node:path";
 import type { TerminalManager } from "../terminal-manager.js";
+import type { WebSocketServer } from "ws";
 import { discoverClaudeProcesses } from "../process-discovery.js";
-import { getAllSessionUsage, getSessionUsage, findSessionIdForPtyPid, getUsageBySessionId, formatCost, formatTokens, getDisplayNameForPtyPid } from "../session-usage.js";
-import { getDevServers, startDevServer, stopDevServer, addCustomServer, removeCustomServer } from "../dev-servers.js";
+import { analyzeProject } from "../project-analyzer.js";
+import { generateSingleAgent, writeQuickImportAgent } from "../quick-import.js";
+import { writeClaudeMd } from "../claudemd-generator.js";
+import {
+  getAllSessionUsage,
+  getSessionUsage,
+  findSessionIdForPtyPid,
+  getUsageBySessionId,
+  formatCost,
+  formatTokens,
+  getDisplayNameForPtyPid,
+} from "../session-usage.js";
+import {
+  getDevServers,
+  startDevServer,
+  stopDevServer,
+  addCustomServer,
+  removeCustomServer,
+} from "../dev-servers.js";
 import { readScanLog } from "../file-watcher.js";
 import { getAgentSystemPath } from "../config.js";
 import type { WorkflowManager } from "../workflows/index.js";
+import {
+  whichCommand,
+  killProcess as platformKill,
+  getDiskUsage,
+  isSchedulerLoaded,
+  loadScheduler,
+  unloadScheduler,
+  IS_MAC,
+  findListeningPorts,
+  getProcessCwd,
+} from "../platform.js";
 
 const execAsync = promisify(exec);
 
-export function systemRoutes(terminalManager: TerminalManager, workflowManager: WorkflowManager): Router {
+export function systemRoutes(
+  terminalManager: TerminalManager,
+  workflowManager: WorkflowManager,
+  deps: {
+    validateProjectPath: (p: string) => string | null;
+    wss: WebSocketServer;
+  },
+): Router {
   const router = Router();
   const PMO_PLIST = `${os.homedir()}/Library/LaunchAgents/com.agent-studio.pmo-scan.plist`;
   const PMO_SCAN_SCRIPT = getAgentSystemPath("tools/pmo-scan.sh") ?? "";
@@ -22,6 +60,31 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
     try {
       const processes = discoverClaudeProcesses();
       res.json(processes);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // Process kill
+  router.post("/processes/:pid/kill", (req, res) => {
+    try {
+      const pid = parseInt(req.params["pid"]!, 10);
+      if (isNaN(pid) || pid <= 0) {
+        res.status(400).json({ error: "Invalid PID" });
+        return;
+      }
+      // Safety: don't allow killing PID 1 or the current process
+      if (pid === 1 || pid === process.pid) {
+        res.status(403).json({ error: "Cannot kill this process" });
+        return;
+      }
+      const killed = platformKill(pid);
+      if (!killed) {
+        res.status(500).json({ error: "Failed to kill process" });
+        return;
+      }
+      res.json({ ok: true, pid });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
@@ -58,20 +121,32 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
     }
   });
 
-  // Process kill
-  router.post("/processes/:pid/kill", (req, res) => {
+  // All listening ports (for Dev Servers view)
+  router.get("/servers/all", (_req, res) => {
     try {
-      const pid = parseInt(req.params["pid"]!, 10);
-      if (isNaN(pid) || pid <= 0) {
-        res.status(400).json({ error: "Invalid PID" });
-        return;
+      const selfPid = process.pid;
+      const selfPort = parseInt(process.env["PORT"] ?? "8080", 10);
+      const raw = findListeningPorts();
+      const seen = new Map<
+        number,
+        { pid: number; port: number; command: string; cwd: string; isSelf: boolean }
+      >();
+
+      for (const entry of raw) {
+        // Deduplicate by pid -- take the first (lowest) port
+        if (seen.has(entry.pid)) continue;
+        const cwd = getProcessCwd(entry.pid) ?? "unknown";
+        const isSelf = entry.pid === selfPid || entry.port === selfPort;
+        seen.set(entry.pid, {
+          pid: entry.pid,
+          port: entry.port,
+          command: entry.command ?? "unknown",
+          cwd,
+          isSelf,
+        });
       }
-      if (pid === 1 || pid === process.pid) {
-        res.status(403).json({ error: "Cannot kill this process" });
-        return;
-      }
-      process.kill(pid, "SIGTERM");
-      res.json({ ok: true, pid });
+
+      res.json(Array.from(seen.values()).sort((a, b) => a.port - b.port));
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
@@ -111,6 +186,7 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
         res.status(400).json({ error: "Invalid PID" });
         return;
       }
+      // Safety: don't allow stopping the agent-studio server itself
       if (pid === process.pid) {
         res.status(403).json({ error: "Cannot stop the agent-studio server" });
         return;
@@ -123,6 +199,7 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
     }
   });
 
+  // Custom servers
   router.post("/servers/custom", (req, res) => {
     try {
       const { name, cwd, command } = req.body as { name?: string; cwd?: string; command?: string };
@@ -153,6 +230,80 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
     }
   });
 
+  // Dev servers (alternate path /api/dev-servers/*)
+  router.get("/dev-servers", (_req, res) => {
+    try {
+      const servers = getDevServers();
+      res.json(servers);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  router.post("/dev-servers/start", async (req, res) => {
+    try {
+      const { cwd, command } = req.body as { cwd: string; command: string };
+      if (!cwd || !command) {
+        res.status(400).json({ error: "cwd and command are required" });
+        return;
+      }
+      const validPath = deps.validateProjectPath(cwd);
+      if (!validPath) {
+        res.status(403).json({ error: "Path not allowed" });
+        return;
+      }
+      const result = await startDevServer(validPath, command);
+      res.json(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  router.post("/dev-servers/:pid/stop", (req, res) => {
+    try {
+      const pid = parseInt(req.params["pid"]!, 10);
+      if (isNaN(pid) || pid <= 0) {
+        res.status(400).json({ error: "Invalid PID" });
+        return;
+      }
+      const success = stopDevServer(pid);
+      res.json({ ok: success });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  router.post("/dev-servers/custom", (req, res) => {
+    try {
+      const { name, port, command, cwd, autoStart } = req.body as {
+        name?: string;
+        port?: number;
+        command?: string;
+        cwd?: string;
+        autoStart?: boolean;
+      };
+      if (!name || !command || !cwd) {
+        res.status(400).json({ error: "name, command, and cwd are required" });
+        return;
+      }
+      addCustomServer({
+        name,
+        cwd,
+        command,
+        port: port ?? undefined,
+        autoStart: autoStart ?? false,
+      });
+      const servers = getDevServers();
+      res.json(servers);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
   // System stats
   router.get("/system/stats", async (_req, res) => {
     try {
@@ -161,28 +312,28 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
       let totalTick = 0;
       for (const cpu of cpus) {
         totalIdle += cpu.times.idle;
-        totalTick += cpu.times.user + cpu.times.nice + cpu.times.sys + cpu.times.irq + cpu.times.idle;
+        totalTick +=
+          cpu.times.user + cpu.times.nice + cpu.times.sys + cpu.times.irq + cpu.times.idle;
       }
-      const cpuUsage = totalTick > 0 ? ((1 - totalIdle / totalTick) * 100) : 0;
+      const cpuUsage = totalTick > 0 ? (1 - totalIdle / totalTick) * 100 : 0;
 
+      // Memory -- on macOS, show memory pressure (active + wired + compressed)
       const totalMem = os.totalmem();
       const freeMem = os.freemem();
       const usedMem = totalMem - freeMem;
 
-      // On macOS, os.freemem() only reports "free" pages, not "available"
-      // memory. The OS keeps most RAM as disk cache, so raw usage looks ~99%.
-      // Use vm_stat to compute app memory (active + wired) for a realistic
-      // "memory pressure" figure that won't alarm users.
       let pressureUsedGB = Math.round((usedMem / (1024 * 1024 * 1024)) * 100) / 100;
       let pressurePercent = Math.round((usedMem / totalMem) * 1000) / 10;
       let pressureLevel: "normal" | "warn" | "critical" = "normal";
 
-      if (process.platform === "darwin") {
+      if (IS_MAC) {
         try {
-          const { stdout: vmOutput } = await execAsync("vm_stat", { encoding: "utf-8", timeout: 3000 });
-          const pageSize = 16384; // default on Apple Silicon; fallback
+          const { stdout: vmOutput } = await execAsync("vm_stat", {
+            encoding: "utf-8",
+            timeout: 3000,
+          });
           const pageSizeMatch = vmOutput.match(/page size of (\d+) bytes/);
-          const ps = pageSizeMatch ? parseInt(pageSizeMatch[1]!, 10) : pageSize;
+          const ps = pageSizeMatch ? parseInt(pageSizeMatch[1]!, 10) : 16384;
 
           const getPages = (label: string): number => {
             const m = vmOutput.match(new RegExp(`${label}:\\s+(\\d+)`));
@@ -207,24 +358,18 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
         else if (pressurePercent > 75) pressureLevel = "warn";
       }
 
+      // Disk
       let diskUsed = 0;
       let diskTotal = 0;
       let diskPercentage = 0;
-      try {
-        const { stdout: dfOutput } = await execAsync("df -k /", { encoding: "utf-8", timeout: 3000 });
-        const lines = dfOutput.trim().split("\n");
-        if (lines.length >= 2) {
-          const parts = lines[1]!.split(/\s+/);
-          const totalBlocks = parseInt(parts[1]!, 10) || 0;
-          const usedBlocks = parseInt(parts[2]!, 10) || 0;
-          diskTotal = totalBlocks / (1024 * 1024);
-          diskUsed = usedBlocks / (1024 * 1024);
-          diskPercentage = diskTotal > 0 ? (diskUsed / diskTotal) * 100 : 0;
-        }
-      } catch {
-        // Disk stats unavailable
+      const diskInfo = getDiskUsage();
+      if (diskInfo) {
+        diskUsed = diskInfo.used;
+        diskTotal = diskInfo.total;
+        diskPercentage = diskInfo.percentage;
       }
 
+      // Active server count
       let activeServers = 0;
       try {
         const servers = getDevServers();
@@ -233,6 +378,7 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
         // ignore
       }
 
+      // Active Claude session count
       const activeSessions = terminalManager.listSessions().length;
 
       res.json({
@@ -251,7 +397,7 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
         activeServers,
         activeSessions,
         uptime: Math.round(process.uptime()),
-        wsConnections: 0,
+        wsConnections: deps.wss.clients.size,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -259,17 +405,331 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
     }
   });
 
-  // PMO (background scan service)
-  router.get("/pmo/status", async (_req, res) => {
+  // System info (git branch, node version, etc.)
+  router.get("/system/info", (_req, res) => {
     try {
-      let isLoaded = false;
+      let branch = "unknown";
+      let commitHash = "unknown";
       try {
-        const { stdout } = await execAsync("launchctl list 2>/dev/null", { timeout: 5000 });
-        isLoaded = stdout.includes("agent-studio");
+        branch = execSync("git rev-parse --abbrev-ref HEAD", {
+          encoding: "utf-8",
+          timeout: 3000,
+          cwd: process.cwd(),
+        }).trim();
+        commitHash = execSync("git rev-parse --short HEAD", {
+          encoding: "utf-8",
+          timeout: 3000,
+          cwd: process.cwd(),
+        }).trim();
       } catch {
-        isLoaded = false;
+        // Not a git repo or git not available
       }
 
+      res.json({
+        branch,
+        commitHash,
+        nodeVersion: process.version,
+        platform: process.platform,
+        arch: process.arch,
+        pid: process.pid,
+        uptime: Math.round(process.uptime()),
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // System preflight
+  router.get("/system/preflight", (_req, res) => {
+    try {
+      const checks = {
+        claudeCode: { installed: false } as {
+          installed: boolean;
+          version?: string;
+          path?: string;
+          authenticated?: boolean;
+        },
+        node: { installed: true, version: process.version },
+        git: { installed: false } as { installed: boolean; version?: string },
+      };
+      const blockers: string[] = [];
+
+      // Check Claude Code CLI
+      try {
+        const claudePath = whichCommand("claude");
+        if (!claudePath) throw new Error("not found");
+        checks.claudeCode.installed = true;
+        checks.claudeCode.path = claudePath;
+        try {
+          const versionOutput = execSync("claude --version", {
+            encoding: "utf-8",
+            timeout: 5000,
+          }).trim();
+          checks.claudeCode.version = versionOutput;
+        } catch {
+          // version check failed but CLI exists
+        }
+        const { join: joinPre } = require("node:path") as typeof import("node:path");
+        const claudeDir = joinPre(os.homedir(), ".claude");
+        const { existsSync: fsExistsPre } = require("node:fs") as typeof import("node:fs");
+        checks.claudeCode.authenticated = fsExistsPre(claudeDir);
+        if (!checks.claudeCode.authenticated) {
+          blockers.push(
+            "Claude Code is not authenticated. Run `claude` in your terminal and complete setup first.",
+          );
+        }
+      } catch {
+        checks.claudeCode.installed = false;
+        blockers.push("Claude Code CLI is not installed.");
+      }
+
+      // Check git
+      try {
+        const gitVersion = execSync("git --version", { encoding: "utf-8", timeout: 5000 }).trim();
+        checks.git.installed = true;
+        checks.git.version = gitVersion.replace("git version ", "");
+      } catch {
+        checks.git.installed = false;
+        blockers.push("Git is not installed.");
+      }
+
+      res.json({ ready: blockers.length === 0, checks, blockers });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // Install Claude Code CLI
+  router.post("/system/install-claude", async (_req, res) => {
+    try {
+      // Check if npm is available
+      const npmPath = whichCommand("npm");
+      if (!npmPath) {
+        res.status(400).json({ error: "npm is not installed. Install Node.js first." });
+        return;
+      }
+
+      // Run the install
+      const result = execSync("npm install -g @anthropic-ai/claude-code 2>&1", {
+        encoding: "utf-8",
+        timeout: 120000,
+      });
+
+      // Verify it installed
+      try {
+        const version = execSync("claude --version 2>&1", {
+          encoding: "utf-8",
+          timeout: 5000,
+        }).trim();
+        res.json({ success: true, version, output: result });
+      } catch {
+        res.json({
+          success: false,
+          error: "Installed but claude command not found. You may need to restart your terminal.",
+          output: result,
+        });
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Installation failed";
+      if (message.includes("EACCES") || message.includes("permission")) {
+        res.status(403).json({
+          error:
+            "Permission denied. Try running Agent Studio with sudo, or install Claude Code manually:\n\nsudo npm install -g @anthropic-ai/claude-code",
+          output: message,
+        });
+      } else {
+        res.status(500).json({ error: message, output: message });
+      }
+    }
+  });
+
+  // System detect (discover projects)
+  router.post("/system/detect", (_req, res) => {
+    try {
+      const {
+        existsSync: fse,
+        readdirSync: fsr,
+        statSync: fss,
+        readFileSync: fsrf,
+        realpathSync: fsrp,
+      } = require("node:fs") as typeof import("node:fs");
+      const { join: pj } = require("node:path") as typeof import("node:path");
+      const home = os.homedir();
+
+      const searchDirs = [
+        pj(home, "Code"),
+        pj(home, "code"),
+        pj(home, "Projects"),
+        pj(home, "Documents"),
+        pj(home, "Desktop"),
+        pj(home, "repos"),
+        pj(home, "dev"),
+        pj(home, "workspace"),
+        pj(home, "src"),
+        pj(home, "work"),
+      ];
+
+      interface DetectedProject {
+        name: string;
+        path: string;
+        techStack: string[];
+        languages: string[];
+        packageManager: string;
+        devCommand?: string;
+        hasAgentSystem: boolean;
+        gitBranch: string;
+        lastCommit: string;
+        lastModified: number;
+      }
+
+      const projects: DetectedProject[] = [];
+      const seenPaths = new Set<string>();
+
+      for (const dir of searchDirs) {
+        if (!fse(dir)) continue;
+        try {
+          const entries = fsr(dir);
+          for (const entry of entries) {
+            if (entry.startsWith(".")) continue;
+            const fullPath = pj(dir, entry);
+            try {
+              const stat = fss(fullPath);
+              if (!stat.isDirectory()) continue;
+              const resolved = fsrp(fullPath);
+              if (seenPaths.has(resolved)) continue;
+              if (!fse(pj(fullPath, ".git"))) continue;
+              seenPaths.add(resolved);
+
+              const techStack: string[] = [];
+              const languages: string[] = [];
+              let packageManager = "unknown";
+              let devCommand: string | undefined;
+
+              // package.json detection
+              if (fse(pj(fullPath, "package.json"))) {
+                try {
+                  const pkg = JSON.parse(fsrf(pj(fullPath, "package.json"), "utf-8")) as {
+                    dependencies?: Record<string, string>;
+                    devDependencies?: Record<string, string>;
+                    scripts?: Record<string, string>;
+                  };
+                  const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
+                  if (allDeps["next"]) techStack.push("Next.js");
+                  else if (allDeps["react"]) techStack.push("React");
+                  if (allDeps["vue"]) techStack.push("Vue");
+                  if (allDeps["svelte"] || allDeps["@sveltejs/kit"]) techStack.push("Svelte");
+                  if (allDeps["@angular/core"]) techStack.push("Angular");
+                  if (allDeps["express"]) techStack.push("Express");
+                  if (allDeps["fastify"]) techStack.push("Fastify");
+                  if (allDeps["tailwindcss"]) techStack.push("Tailwind");
+                  if (allDeps["electron"]) techStack.push("Electron");
+                  if (allDeps["react-native"]) techStack.push("React Native");
+                  if (allDeps["typescript"]) languages.push("TypeScript");
+                  else languages.push("JavaScript");
+
+                  if (fse(pj(fullPath, "pnpm-lock.yaml"))) packageManager = "pnpm";
+                  else if (fse(pj(fullPath, "yarn.lock"))) packageManager = "yarn";
+                  else if (fse(pj(fullPath, "bun.lockb"))) packageManager = "bun";
+                  else packageManager = "npm";
+
+                  if (pkg.scripts?.["dev"]) devCommand = `${packageManager} run dev`;
+                  else if (pkg.scripts?.["start"]) devCommand = `${packageManager} run start`;
+                } catch {
+                  /* bad package.json */
+                }
+              }
+
+              if (fse(pj(fullPath, "requirements.txt")) || fse(pj(fullPath, "pyproject.toml"))) {
+                languages.push("Python");
+                if (packageManager === "unknown")
+                  packageManager = fse(pj(fullPath, "pyproject.toml")) ? "poetry" : "pip";
+                if (fse(pj(fullPath, "manage.py"))) {
+                  techStack.push("Django");
+                  devCommand = devCommand ?? "python manage.py runserver";
+                }
+              }
+              if (fse(pj(fullPath, "go.mod"))) {
+                languages.push("Go");
+                if (packageManager === "unknown") packageManager = "go";
+                devCommand = devCommand ?? "go run .";
+              }
+              if (fse(pj(fullPath, "Cargo.toml"))) {
+                languages.push("Rust");
+                if (packageManager === "unknown") packageManager = "cargo";
+                devCommand = devCommand ?? "cargo run";
+              }
+              if (fse(pj(fullPath, "pom.xml")) || fse(pj(fullPath, "build.gradle"))) {
+                languages.push("Java");
+                if (packageManager === "unknown")
+                  packageManager = fse(pj(fullPath, "build.gradle")) ? "gradle" : "maven";
+              }
+
+              const hasAgentSystem =
+                fse(pj(fullPath, "ai-agents")) || fse(pj(fullPath, ".claude", "agents"));
+
+              let gitBranch = "main";
+              try {
+                gitBranch = execSync("git rev-parse --abbrev-ref HEAD", {
+                  cwd: fullPath,
+                  encoding: "utf-8",
+                  timeout: 3000,
+                }).trim();
+              } catch {
+                /* default */
+              }
+
+              let lastCommit = "";
+              let lastModified = 0;
+              try {
+                const ct = execSync("git log -1 --format=%ci", {
+                  cwd: fullPath,
+                  encoding: "utf-8",
+                  timeout: 3000,
+                }).trim();
+                lastModified = new Date(ct).getTime();
+                const dm = Math.floor((Date.now() - lastModified) / 60000);
+                if (dm < 60) lastCommit = `${dm}m ago`;
+                else if (dm < 1440) lastCommit = `${Math.floor(dm / 60)}h ago`;
+                else lastCommit = `${Math.floor(dm / 1440)}d ago`;
+              } catch {
+                lastCommit = "unknown";
+              }
+
+              projects.push({
+                name: entry,
+                path: fullPath,
+                techStack,
+                languages: languages.length > 0 ? languages : ["Unknown"],
+                packageManager,
+                devCommand,
+                hasAgentSystem,
+                gitBranch,
+                lastCommit,
+                lastModified,
+              });
+            } catch {
+              /* skip */
+            }
+          }
+        } catch {
+          /* skip */
+        }
+      }
+
+      projects.sort((a, b) => b.lastModified - a.lastModified);
+      res.json({ projects });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // PMO Scheduler
+  router.get("/pmo/status", (_req, res) => {
+    try {
+      const isLoaded = isSchedulerLoaded("agent-studio");
       res.json({ loaded: isLoaded, lastScan: null, lastStatus: null, checking: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -279,13 +739,7 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
 
   router.get("/pmo/status-full", async (_req, res) => {
     try {
-      let isLoaded = false;
-      try {
-        const { stdout } = await execAsync("launchctl list 2>/dev/null", { timeout: 5000 });
-        isLoaded = stdout.includes("agent-studio");
-      } catch {
-        isLoaded = false;
-      }
+      const isLoaded = isSchedulerLoaded("agent-studio");
 
       const scanEntries = await readScanLog();
       const lastEntry = scanEntries.length > 0 ? scanEntries[scanEntries.length - 1] : null;
@@ -293,7 +747,7 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
       let nextScanIn: string | null = null;
       if (isLoaded && lastEntry) {
         const lastTime = new Date(lastEntry.timestamp).getTime();
-        const nextTime = lastTime + 2 * 60 * 60 * 1000;
+        const nextTime = lastTime + 2 * 60 * 60 * 1000; // 2 hours
         const remainMs = nextTime - Date.now();
         if (remainMs > 0) {
           const mins = Math.floor(remainMs / 60000);
@@ -317,9 +771,13 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
     }
   });
 
-  router.post("/pmo/start", async (_req, res) => {
+  router.post("/pmo/start", (_req, res) => {
     try {
-      await execAsync(`launchctl load "${PMO_PLIST}" 2>/dev/null || true`, { timeout: 5000 });
+      if (!IS_MAC) {
+        res.status(501).json({ error: "PMO scheduler is only supported on macOS (launchd)" });
+        return;
+      }
+      loadScheduler(PMO_PLIST);
       res.json({ ok: true, status: "started" });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -327,9 +785,13 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
     }
   });
 
-  router.post("/pmo/stop", async (_req, res) => {
+  router.post("/pmo/stop", (_req, res) => {
     try {
-      await execAsync(`launchctl unload "${PMO_PLIST}" 2>/dev/null || true`, { timeout: 5000 });
+      if (!IS_MAC) {
+        res.status(501).json({ error: "PMO scheduler is only supported on macOS (launchd)" });
+        return;
+      }
+      unloadScheduler(PMO_PLIST);
       res.json({ ok: true, status: "stopped" });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -339,8 +801,9 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
 
   router.post("/pmo/scan", (_req, res) => {
     try {
+      // Run scan in background
       exec(`bash "${PMO_SCAN_SCRIPT}"`, { timeout: 120000 }, () => {
-        // fire and forget
+        // fire and forget -- result lands in scan_log.md
       });
       res.json({ ok: true, status: "scan-started" });
     } catch (err) {
@@ -349,27 +812,68 @@ export function systemRoutes(terminalManager: TerminalManager, workflowManager: 
     }
   });
 
-  // Workflows
-  router.get("/workflows", async (_req, res) => {
+  // Quick Import: analyze project, generate one agent, write CLAUDE.md
+  router.post("/quick-import", (req, res) => {
     try {
-      const flows = await workflowManager.getFlows();
-      res.json(flows);
-    } catch {
-      res.json([]);
-    }
-  });
-
-  router.get("/workflows/:flowId/runs/:runId", async (req, res) => {
-    try {
-      const run = await workflowManager.getRun(
-        req.params["flowId"]!,
-        req.params["runId"]!,
-      );
-      if (!run) {
-        res.status(404).json({ error: "Run not found" });
+      const { projectPath } = req.body as { projectPath?: string };
+      if (!projectPath) {
+        res.status(400).json({ error: "Missing projectPath" });
         return;
       }
-      res.json(run);
+
+      const validPath = deps.validateProjectPath(projectPath);
+      if (!validPath) {
+        res.status(400).json({ error: "Invalid project path" });
+        return;
+      }
+
+      // Abort if analysis takes too long (5s guard)
+      const start = Date.now();
+      const profile = analyzeProject(validPath);
+      if (Date.now() - start > 5000) {
+        res.status(504).json({ error: "Project analysis took too long" });
+        return;
+      }
+
+      // Generate a single agent (template-based, no LLM)
+      const { agent, mdContent } = generateSingleAgent(profile);
+
+      // Write agent .md file
+      const agentFilePath = writeQuickImportAgent(validPath, agent.id, mdContent);
+
+      // Generate/update CLAUDE.md using the standard generator
+      const claudeMdResult = writeClaudeMd({
+        analysis: profile,
+        agents: [
+          {
+            id: agent.id,
+            name: agent.name,
+            description: agent.description,
+            model: "sonnet" as const,
+            mdContent,
+          },
+        ],
+        projectPath: validPath,
+        preserveExisting: true,
+      });
+
+      res.status(201).json({
+        agent: {
+          id: agent.id,
+          name: agent.name,
+          path: agentFilePath,
+        },
+        claudeMd: claudeMdResult.path,
+        profile: {
+          name: profile.name,
+          languages: profile.languages,
+          frameworks: profile.frameworks,
+          packageManager: profile.packageManager,
+          hasTests: profile.hasTests,
+          hasDocker: profile.hasDocker,
+          database: profile.database,
+        },
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });

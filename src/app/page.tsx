@@ -13,6 +13,7 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useContextWarning } from "@/hooks/use-context-warning";
 import { useUsage } from "@/hooks/use-usage";
 import { useMemoryStore } from "@/stores/memory";
+import { useToastStore } from "@/stores/toast";
 import { initNotificationManager } from "@/lib/notification-manager";
 import { onBadgeUpdate } from "@/lib/notification-manager";
 
@@ -45,7 +46,6 @@ import { CreateWorkflowDialog } from "@/components/workflows/create-workflow-dia
 import { useWorkflowV2Store } from "@/stores/workflows-v2";
 
 import { MemoryView } from "@/components/memory/memory-view";
-import { ReportsView } from "@/components/reports/reports-view";
 import { SettingsView } from "@/components/settings/settings-view";
 import { DevServersView } from "@/components/dev-servers/dev-servers-view";
 
@@ -85,7 +85,6 @@ const modeToNav: Record<ActiveMode, NavPage | null> = {
   sessions: "sessions",
   teams: "teams",
   sprints: "sprints",
-  reports: "reports",
   memory: "knowledge",
   settings: "settings",
 };
@@ -95,7 +94,6 @@ const navToMode: Record<NavPage, ActiveMode> = {
   teams: "teams",
   sprints: "sprints",
   knowledge: "memory",
-  reports: "reports",
   settings: "settings",
 };
 
@@ -143,6 +141,7 @@ export default function Home() {
   const selectWorkflow = useWorkflowV2Store((s) => s.selectWorkflow);
 
   const memoryEntryCount = useMemoryStore((s) => s.entries.filter((e) => !e.superseded_by).length);
+  const memoryPulse = useUIStore((s) => s.memoryPulse);
 
   // Hooks
   useKeyboardShortcuts();
@@ -312,6 +311,20 @@ export default function Home() {
       }
     });
 
+    const unsubMemoryExtracted = wsClient.on("memory-extracted", (msg: WsMessage) => {
+      const payload = msg.payload as { count: number; sessionName: string; titles: string[] };
+      if (payload?.count > 0) {
+        useToastStore
+          .getState()
+          .addToast(
+            `${payload.count} learning${payload.count > 1 ? "s" : ""} saved from "${payload.sessionName}"`,
+            "success",
+          );
+        // Pulse the Memory nav icon for 3 seconds
+        useUIStore.getState().triggerMemoryPulse();
+      }
+    });
+
     wsClient.connect(`ws://${window.location.host}/ws`);
 
     return () => {
@@ -323,6 +336,7 @@ export default function Home() {
       unsubRoomTyping();
       unsubRoomStreaming();
       unsubRoomNeedsUser();
+      unsubMemoryExtracted();
     };
   }, [setSessions, setRepos]);
 
@@ -600,7 +614,12 @@ export default function Home() {
       {/* Main 3-column layout below title bar */}
       <div className="flex flex-1 min-h-0">
         {/* Nav rail */}
-        <NavRail activePage={currentNavPage} onNavigate={handleNavigate} badges={navBadges} />
+        <NavRail
+          activePage={currentNavPage}
+          onNavigate={handleNavigate}
+          badges={navBadges}
+          memoryPulse={memoryPulse}
+        />
 
         {/* Sidebar — content switches based on active mode */}
         <SidebarShell collapsed={!sidebarOpen}>
@@ -643,14 +662,6 @@ export default function Home() {
               <h3 className="text-label uppercase tracking-wider text-text-ghost">Memory</h3>
               <p className="text-2xs text-text-tertiary mt-1 leading-snug">
                 Agent learnings, corrections, and decisions stored across sessions.
-              </p>
-            </div>
-          )}
-          {activeMode === "reports" && (
-            <div className="px-3 py-2.5">
-              <h3 className="text-label uppercase tracking-wider text-text-ghost">Reports</h3>
-              <p className="text-2xs text-text-tertiary mt-1 leading-snug">
-                Automation output and approvals. Configure schedules in Settings.
               </p>
             </div>
           )}
@@ -782,17 +793,6 @@ export default function Home() {
             >
               <ErrorBoundary fallbackLabel="Memory view error">
                 <MemoryView />
-              </ErrorBoundary>
-            </div>
-
-            {/* Reports (scheduled automations) */}
-            <div
-              className={
-                activeMode === "reports" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"
-              }
-            >
-              <ErrorBoundary fallbackLabel="Reports view error">
-                <ReportsView />
               </ErrorBoundary>
             </div>
 

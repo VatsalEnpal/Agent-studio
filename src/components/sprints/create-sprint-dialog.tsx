@@ -7,6 +7,7 @@ import {
   SprintsIcon,
   ChevronUpIcon,
   ChevronDownIcon,
+  ChevronRightIcon,
 } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
@@ -176,6 +177,10 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
   const [schedule, setSchedule] = useState<"once" | "recurring">("once");
   const [interval, setInterval] = useState<string>("4h");
 
+  // Budget
+  const [budgetCapUsd, setBudgetCapUsd] = useState<string>("");
+  const [stepBudgetCapUsd, setStepBudgetCapUsd] = useState<string>("");
+
   // Step 4: Done
   const [createdSprint, setCreatedSprint] = useState<{
     id: string;
@@ -238,6 +243,8 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
     setPipeline([]);
     setSchedule("once");
     setInterval("4h");
+    setBudgetCapUsd("");
+    setStepBudgetCapUsd("");
     setError(null);
     setSaving(false);
     setCreatedSprint(null);
@@ -302,6 +309,8 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
     setSaving(true);
     setError(null);
     try {
+      const parsedBudget = budgetCapUsd ? parseFloat(budgetCapUsd) : undefined;
+      const parsedStepBudget = stepBudgetCapUsd ? parseFloat(stepBudgetCapUsd) : undefined;
       const res = await fetch("/api/sprints/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -319,6 +328,8 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
             qaLoop: p.qaLoop,
           })),
           schedule: schedule === "recurring" ? { recurring: true, interval } : undefined,
+          budgetCapUsd: parsedBudget && parsedBudget > 0 ? parsedBudget : undefined,
+          stepBudgetCapUsd: parsedStepBudget && parsedStepBudget > 0 ? parsedStepBudget : undefined,
         }),
       });
       if (!res.ok) {
@@ -338,7 +349,18 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
     } finally {
       setSaving(false);
     }
-  }, [name, goal, selectedAgents, cwd, pipeline, schedule, interval, onCreated]);
+  }, [
+    name,
+    goal,
+    selectedAgents,
+    cwd,
+    pipeline,
+    schedule,
+    interval,
+    budgetCapUsd,
+    stepBudgetCapUsd,
+    onCreated,
+  ]);
 
   if (!open) return null;
 
@@ -396,6 +418,10 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
               onScheduleChange={setSchedule}
               interval={interval}
               onIntervalChange={setInterval}
+              budgetCapUsd={budgetCapUsd}
+              onBudgetCapChange={setBudgetCapUsd}
+              stepBudgetCapUsd={stepBudgetCapUsd}
+              onStepBudgetCapChange={setStepBudgetCapUsd}
               error={error}
             />
           )}
@@ -667,6 +693,10 @@ function StepPipeline({
   onScheduleChange,
   interval: intervalValue,
   onIntervalChange,
+  budgetCapUsd,
+  onBudgetCapChange,
+  stepBudgetCapUsd,
+  onStepBudgetCapChange,
   error,
 }: {
   steps: PipelineStep[];
@@ -677,8 +707,13 @@ function StepPipeline({
   onScheduleChange: (v: "once" | "recurring") => void;
   interval: string;
   onIntervalChange: (v: string) => void;
+  budgetCapUsd: string;
+  onBudgetCapChange: (v: string) => void;
+  stepBudgetCapUsd: string;
+  onStepBudgetCapChange: (v: string) => void;
   error: string | null;
 }) {
+  const [budgetOpen, setBudgetOpen] = useState(false);
   const isQaAgent = (agent: string) => agent === "qa" || agent.includes("qa");
 
   return (
@@ -819,6 +854,66 @@ function StepPipeline({
             </select>
           )}
         </div>
+      </div>
+
+      {/* Budget (collapsible) */}
+      <div className="pt-2 border-t border-border-default">
+        <button
+          onClick={() => setBudgetOpen(!budgetOpen)}
+          className="flex items-center gap-1.5 w-full text-left"
+        >
+          <span className="text-label font-medium text-text-secondary uppercase tracking-wider">
+            Budget
+          </span>
+          {budgetOpen ? (
+            <ChevronDownIcon size={10} className="text-text-ghost" />
+          ) : (
+            <ChevronRightIcon size={10} className="text-text-ghost" />
+          )}
+          {!budgetOpen && (budgetCapUsd || stepBudgetCapUsd) && (
+            <span className="text-2xs text-sprints ml-1">
+              {budgetCapUsd ? `$${budgetCapUsd} total` : ""}
+              {budgetCapUsd && stepBudgetCapUsd ? " / " : ""}
+              {stepBudgetCapUsd ? `$${stepBudgetCapUsd}/step` : ""}
+            </span>
+          )}
+        </button>
+        {budgetOpen && (
+          <div className="mt-2 space-y-2">
+            <div className="space-y-1">
+              <label className="text-2xs text-text-tertiary">Total budget cap</label>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-text-ghost">$</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.50"
+                  value={budgetCapUsd}
+                  onChange={(e) => onBudgetCapChange(e.target.value)}
+                  placeholder="No limit"
+                  className="w-28 px-2 py-1 text-xs bg-bg-input border border-border-default rounded-[4px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-sprints transition-all"
+                />
+              </div>
+              <p className="text-2xs text-text-ghost">Leave empty for no limit.</p>
+            </div>
+            <div className="space-y-1">
+              <label className="text-2xs text-text-tertiary">Per-step budget</label>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-text-ghost">$</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.50"
+                  value={stepBudgetCapUsd}
+                  onChange={(e) => onStepBudgetCapChange(e.target.value)}
+                  placeholder="No limit"
+                  className="w-28 px-2 py-1 text-xs bg-bg-input border border-border-default rounded-[4px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-sprints transition-all"
+                />
+              </div>
+              <p className="text-2xs text-text-ghost">Leave empty for no limit.</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {error && <p className="text-xs text-error">{error}</p>}

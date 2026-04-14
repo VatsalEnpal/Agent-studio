@@ -1,7 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useCallback, useState } from "react";
-import { SearchIcon, MemoryIcon, PlusIcon, EditIcon, TrashIcon, SettingsIcon } from "@/components/ui/icons";
+import { useEffect, useMemo, useCallback, useState, useRef } from "react";
+import {
+  SearchIcon,
+  MemoryIcon,
+  PlusIcon,
+  EditIcon,
+  TrashIcon,
+  SettingsIcon,
+  DownloadIcon,
+  UploadIcon,
+} from "@/components/ui/icons";
 import { useMemoryStore, type MemoryEntry, type MemoryEntryDetail } from "@/stores/memory";
 import { useToastStore } from "@/stores/toast";
 import { useUIStore } from "@/stores/ui";
@@ -21,23 +30,35 @@ const CATEGORIES = [
 
 function categoryLabel(cat: string): string {
   switch (cat) {
-    case "learnings": return "Learnings";
-    case "corrections": return "Corrections";
-    case "decisions": return "Decisions";
-    case "human-inputs": return "Human Inputs";
-    case "knowledge": return "Knowledge";
-    default: return cat;
+    case "learnings":
+      return "Learnings";
+    case "corrections":
+      return "Corrections";
+    case "decisions":
+      return "Decisions";
+    case "human-inputs":
+      return "Human Inputs";
+    case "knowledge":
+      return "Knowledge";
+    default:
+      return cat;
   }
 }
 
 function categoryColor(cat: string): string {
   switch (cat) {
-    case "learnings": return "bg-rooms/20 text-rooms";
-    case "corrections": return "bg-error/20 text-error";
-    case "decisions": return "bg-memory/20 text-memory";
-    case "human-inputs": return "bg-sprints/20 text-sprints";
-    case "knowledge": return "bg-sessions/20 text-sessions";
-    default: return "bg-border-default text-text-tertiary";
+    case "learnings":
+      return "bg-rooms/20 text-rooms";
+    case "corrections":
+      return "bg-error/20 text-error";
+    case "decisions":
+      return "bg-memory/20 text-memory";
+    case "human-inputs":
+      return "bg-sprints/20 text-sprints";
+    case "knowledge":
+      return "bg-sessions/20 text-sessions";
+    default:
+      return "bg-border-default text-text-tertiary";
   }
 }
 
@@ -65,6 +86,71 @@ export function MemoryView() {
   const setSelectedDetail = useMemoryStore((s) => s.setSelectedDetail);
   const setDetailLoading = useMemoryStore((s) => s.setDetailLoading);
   const openCreateDialog = useMemoryStore((s) => s.openCreateDialog);
+  const addToast = useToastStore((s) => s.addToast);
+  const importInputRef = useRef<HTMLInputElement>(null);
+
+  // Export all memories as JSON download
+  const handleExport = useCallback(async () => {
+    try {
+      const res = await fetch("/api/memory/export");
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `agent-studio-memories-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      addToast("Memories exported", "success");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      addToast(`Export failed: ${msg}`, "error");
+    }
+  }, [addToast]);
+
+  // Import memories from JSON file
+  const handleImportFile = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        const res = await fetch("/api/memory/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(json),
+        });
+        if (!res.ok) throw new Error("Import failed");
+        const data = (await res.json()) as {
+          imported?: number;
+          skipped?: number;
+        };
+        addToast(
+          `Imported ${data.imported ?? 0} memories (${data.skipped ?? 0} skipped as duplicates)`,
+          "success",
+        );
+        // Reload entries
+        setLoading(true);
+        fetch("/api/memory/entries")
+          .then((r) => r.json())
+          .then((d: { entries: MemoryEntry[]; total: number }) => {
+            setEntries(d.entries ?? []);
+          })
+          .catch(() => setEntries([]))
+          .finally(() => setLoading(false));
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        addToast(`Import failed: ${msg}`, "error");
+      } finally {
+        // Reset the input so the same file can be re-selected
+        if (importInputRef.current) importInputRef.current.value = "";
+      }
+    },
+    [addToast, setLoading, setEntries],
+  );
 
   // Load entries on mount
   useEffect(() => {
@@ -112,9 +198,7 @@ export function MemoryView() {
 
     // Tag filter (OR: entry must have at least one active tag)
     if (activeTags.size > 0) {
-      result = result.filter((e) =>
-        e.tags.some((t) => activeTags.has(t)),
-      );
+      result = result.filter((e) => e.tags.some((t) => activeTags.has(t)));
     }
 
     if (search.trim()) {
@@ -177,12 +261,52 @@ export function MemoryView() {
     });
   }, []);
 
+  // Memory health summary
+  const healthSummary = useMemo(() => {
+    const active = entries.filter((e) => !e.superseded_by);
+    const total = active.length;
+    const uniqueCategories = new Set(active.map((e) => e.category));
+    const autoExtracted = active.filter((e) => e.tags.includes("auto-extracted"));
+    return {
+      total,
+      categoryCount: uniqueCategories.size,
+      autoExtractedCount: autoExtracted.length,
+    };
+  }, [entries]);
+
   return (
     <div className="flex flex-col h-full">
+      {/* Memory health banner */}
+      {healthSummary.total > 0 && (
+        <div className="px-3 py-1.5 border-b border-border-default flex items-center gap-3 bg-bg-base shrink-0">
+          <span className="text-2xs text-text-secondary">
+            <span className="font-medium text-memory">{healthSummary.total}</span> learning
+            {healthSummary.total !== 1 ? "s" : ""} across{" "}
+            <span className="font-medium text-text-primary">{healthSummary.categoryCount}</span>{" "}
+            categor{healthSummary.categoryCount !== 1 ? "ies" : "y"}
+          </span>
+          {healthSummary.autoExtractedCount > 0 && (
+            <>
+              <span className="w-px h-3 bg-border-default" />
+              <span className="text-2xs text-text-ghost">
+                Last auto-extraction:{" "}
+                <span className="text-amber-500 font-medium">
+                  {healthSummary.autoExtractedCount}
+                </span>{" "}
+                learning{healthSummary.autoExtractedCount !== 1 ? "s" : ""} saved
+              </span>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Search bar + create button */}
       <div className="px-3 py-2 border-b border-border-default flex items-center gap-2">
         <div className="relative flex-1">
-          <SearchIcon size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-text-ghost" />
+          <SearchIcon
+            size={12}
+            className="absolute left-2 top-1/2 -translate-y-1/2 text-text-ghost"
+          />
           <input
             type="text"
             value={search}
@@ -198,12 +322,39 @@ export function MemoryView() {
           <PlusIcon size={10} />
           New
         </button>
+        <div className="w-px h-4 bg-border-default" />
+        <button
+          onClick={handleExport}
+          className="flex items-center gap-1 px-1.5 py-1 text-xs text-text-ghost hover:text-text-secondary transition-all shrink-0"
+          title="Export memories as JSON"
+        >
+          <DownloadIcon size={12} />
+          Export
+        </button>
+        <button
+          onClick={() => importInputRef.current?.click()}
+          className="flex items-center gap-1 px-1.5 py-1 text-xs text-text-ghost hover:text-text-secondary transition-all shrink-0"
+          title="Import memories from JSON"
+        >
+          <UploadIcon size={12} />
+          Import
+        </button>
+        <input
+          ref={importInputRef}
+          type="file"
+          accept=".json"
+          onChange={handleImportFile}
+          className="hidden"
+        />
       </div>
 
       {/* Category pills + Pinned filter */}
       <div className="px-3 py-1.5 border-b border-border-default flex items-center gap-1 overflow-x-auto">
         {CATEGORIES.map((cat) => {
-          const isActive = cat === "All" ? !selectedCategory || selectedCategory === "All" : selectedCategory === cat;
+          const isActive =
+            cat === "All"
+              ? !selectedCategory || selectedCategory === "All"
+              : selectedCategory === cat;
           const count = categoryCounts[cat] ?? 0;
           return (
             <button
@@ -217,7 +368,9 @@ export function MemoryView() {
               )}
             >
               {cat === "All" ? "All" : categoryLabel(cat)}
-              <span className={cn("text-label", isActive ? "text-memory/70" : "text-text-tertiary")}>
+              <span
+                className={cn("text-label", isActive ? "text-memory/70" : "text-text-tertiary")}
+              >
                 {count}
               </span>
             </button>
@@ -234,7 +387,9 @@ export function MemoryView() {
           )}
         >
           Pinned
-          <span className={cn("text-label", showPinnedOnly ? "text-sprints/70" : "text-text-tertiary")}>
+          <span
+            className={cn("text-label", showPinnedOnly ? "text-sprints/70" : "text-text-tertiary")}
+          >
             {pinnedCount}
           </span>
         </button>
@@ -243,7 +398,9 @@ export function MemoryView() {
       {/* Tag filter chips */}
       {tagCounts.length > 0 && (
         <div className="px-3 py-1 border-b border-border-default flex items-center gap-1 overflow-x-auto scrollbar-thin">
-          <span className="text-2xs text-text-ghost uppercase tracking-wider shrink-0 mr-1">Tags</span>
+          <span className="text-2xs text-text-ghost uppercase tracking-wider shrink-0 mr-1">
+            Tags
+          </span>
           {tagCounts.map(([tag, count]) => (
             <button
               key={tag}
@@ -256,7 +413,12 @@ export function MemoryView() {
               )}
             >
               {tag}
-              <span className={cn("text-[8px]", activeTags.has(tag) ? "text-memory/60" : "text-text-ghost/60")}>
+              <span
+                className={cn(
+                  "text-[8px]",
+                  activeTags.has(tag) ? "text-memory/60" : "text-text-ghost/60",
+                )}
+              >
                 {count}
               </span>
             </button>
@@ -291,15 +453,22 @@ export function MemoryView() {
                 <MemoryIcon size={20} className="text-text-ghost" />
               </div>
               <span className="text-text-secondary text-xs font-medium">
-                {selectedCategory || showPinnedOnly ? "No memories match this filter" : "No memories stored"}
+                {selectedCategory || showPinnedOnly
+                  ? "No memories match this filter"
+                  : "No memories stored"}
               </span>
               {!selectedCategory && !showPinnedOnly && (
                 <>
                   <p className="text-text-tertiary text-label leading-relaxed max-w-[260px]">
-                    Agent memories are stored in <code className="text-text-secondary bg-bg-elevated px-1 py-0.5 rounded text-label">ai-agents/memory/</code> and help your agents learn from past work.
+                    Agent memories are stored in{" "}
+                    <code className="text-text-secondary bg-bg-elevated px-1 py-0.5 rounded text-label">
+                      ai-agents/memory/
+                    </code>{" "}
+                    and help your agents learn from past work.
                   </p>
                   <p className="text-text-tertiary text-label leading-relaxed max-w-[260px]">
-                    Memories are created automatically when agents complete tasks, or you can create them manually.
+                    Memories are created automatically when agents complete tasks, or you can create
+                    them manually.
                   </p>
                   {entries.length === 0 && (
                     <button
@@ -361,7 +530,7 @@ function MemoryListItem({
         const res = await fetch(`/api/memory/entries/${encodeURIComponent(entry.file)}/pin`, {
           method: "POST",
         });
-        const data = await res.json() as { ok?: boolean; pinned?: boolean; error?: string };
+        const data = (await res.json()) as { ok?: boolean; pinned?: boolean; error?: string };
         if (!data.ok) throw new Error(data.error ?? "Failed to toggle pin");
         updateEntry(entry.file, { pinned: data.pinned });
       } catch (err) {
@@ -393,7 +562,9 @@ function MemoryListItem({
       role="button"
       tabIndex={0}
       onClick={onSelect}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(); }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") onSelect();
+      }}
       className={cn(
         "w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer",
         selected
@@ -444,21 +615,40 @@ function MemoryListItem({
         </div>
       </div>
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-        <span className={cn("text-label px-1.5 py-0.5 rounded font-medium", categoryColor(entry.category))}>
+        <span
+          className={cn(
+            "text-label px-1.5 py-0.5 rounded font-medium",
+            categoryColor(entry.category),
+          )}
+        >
           {categoryLabel(entry.category)}
         </span>
-        {date && (
-          <span className="text-label text-text-tertiary">
-            {date}
+        {entry.tags.includes("auto-extracted") && (
+          <span className="text-label px-1.5 py-0.5 rounded font-medium bg-amber-500/15 text-amber-500">
+            Auto
           </span>
         )}
-        {entry.tags.slice(0, 3).map((tag) => (
-          <span key={tag} className="text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded">
-            {tag}
+        {entry.agent_type && entry.agent_type !== "dashboard" ? (
+          <span className="text-label text-text-ghost italic">Learned by {entry.agent_type}</span>
+        ) : entry.tags.includes("auto-extracted") ? (
+          <span className="text-label text-text-ghost italic">Auto-extracted from session</span>
+        ) : null}
+        {date && <span className="text-label text-text-tertiary">{date}</span>}
+        {entry.tags
+          .filter((t) => t !== "auto-extracted")
+          .slice(0, 3)
+          .map((tag) => (
+            <span
+              key={tag}
+              className="text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded"
+            >
+              {tag}
+            </span>
+          ))}
+        {entry.tags.filter((t) => t !== "auto-extracted").length > 3 && (
+          <span className="text-label text-text-tertiary">
+            +{entry.tags.filter((t) => t !== "auto-extracted").length - 3}
           </span>
-        ))}
-        {entry.tags.length > 3 && (
-          <span className="text-label text-text-tertiary">+{entry.tags.length - 3}</span>
         )}
       </div>
     </div>

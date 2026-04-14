@@ -5,7 +5,6 @@ import {
   MonitorIcon,
   UsersIcon,
   BrainIcon,
-  FileIcon,
   SettingsIcon,
   ExpandIcon,
   CollapseIcon,
@@ -32,7 +31,6 @@ const ALL_TABS: TabConfig[] = [
   { id: "sessions", label: "Sessions", icon: MonitorIcon },
   { id: "teams", label: "Teams", icon: UsersIcon },
   { id: "memory", label: "Memory", icon: BrainIcon },
-  { id: "reports", label: "Reports", icon: FileIcon },
   { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
 

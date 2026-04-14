@@ -190,17 +190,6 @@ export function CommandPalette({ items }: CommandPaletteProps) {
         },
       },
       {
-        id: "action-go-reports",
-        label: "Go to Reports",
-        category: "actions" as CommandCategory,
-        icon: ChevronRightIcon,
-        keywords: ["switch", "navigate", "output", "analysis", "page"],
-        onSelect: () => {
-          setOpen(false);
-          setActiveMode("reports");
-        },
-      },
-      {
         id: "action-go-dev-servers",
         label: "Go to Dev Servers",
         category: "actions" as CommandCategory,

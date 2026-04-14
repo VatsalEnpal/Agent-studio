@@ -10,7 +10,6 @@ import {
   SessionsIcon,
   RoomsIcon,
   SprintsIcon,
-  FileIcon,
   SettingsIcon,
   MonitorIcon,
 } from "@/components/ui/icons";
@@ -82,7 +81,6 @@ export function CommandPalette({
     if (id === "view-teams" || id === "new-room") return "text-rooms";
     if (id === "view-memory") return "text-memory";
     if (id === "pmo-scan" || id === "view-sprints") return "text-sprints";
-    if (id === "view-reports") return "text-rooms";
     if (id === "view-settings") return "text-text-secondary";
     return undefined;
   };
@@ -169,17 +167,6 @@ export function CommandPalette({
         onSelect: () => {
           close();
           setActiveMode("sprints");
-        },
-      },
-      {
-        id: "view-reports",
-        label: "Reports View",
-        description: "View generated reports",
-        icon: FileIcon,
-        keywords: ["reports", "analysis", "output"],
-        onSelect: () => {
-          close();
-          setActiveMode("reports");
         },
       },
       {

@@ -42,6 +42,7 @@ const RUN_STATUS_LABEL: Record<string, { label: string; color: string }> = {
   failed: { label: "Failed", color: "text-red-400" },
   cancelled: { label: "Cancelled", color: "text-zinc-400" },
   planned: { label: "Planned", color: "text-zinc-400" },
+  budget_exceeded: { label: "Budget Exceeded", color: "text-amber-400" },
 };
 
 // ---------- Component ----------
@@ -66,6 +67,9 @@ export function WorkflowDetail({ workflow }: WorkflowDetailProps) {
   } = useWorkflowV2Store();
 
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
+  const [showBudgetInput, setShowBudgetInput] = useState(false);
+  const [runBudgetInput, setRunBudgetInput] = useState("");
+  const [noLimitForRun, setNoLimitForRun] = useState(false);
 
   useEffect(() => {
     fetchRuns(workflow.id);
@@ -87,10 +91,18 @@ export function WorkflowDetail({ workflow }: WorkflowDetailProps) {
   }, [runs, selectedRunId]);
 
   const handleStartRun = async () => {
-    const result = await startRun(workflow.id);
+    let budgetCapUsd: number | undefined;
+    if (!noLimitForRun && runBudgetInput) {
+      const parsed = parseFloat(runBudgetInput);
+      if (parsed > 0) budgetCapUsd = parsed;
+    }
+    const result = await startRun(workflow.id, budgetCapUsd != null ? { budgetCapUsd } : undefined);
     if (result.runId) {
       setSelectedRunId(result.runId);
       fetchRuns(workflow.id);
+      setShowBudgetInput(false);
+      setRunBudgetInput("");
+      setNoLimitForRun(false);
     }
   };
 
@@ -105,13 +117,58 @@ export function WorkflowDetail({ workflow }: WorkflowDetailProps) {
           )}
         </div>
         <div className="flex items-center gap-2">
+          {showBudgetInput && (
+            <div className="flex items-center gap-1.5">
+              {!noLimitForRun && (
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] text-zinc-500">$</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.50"
+                    value={runBudgetInput}
+                    onChange={(e) => setRunBudgetInput(e.target.value)}
+                    placeholder={workflow.budgetCapUsd ? String(workflow.budgetCapUsd) : "No limit"}
+                    className="w-20 rounded border border-zinc-700 bg-zinc-800 px-1.5 py-1 text-[10px] text-zinc-200 placeholder-zinc-600 focus:border-zinc-500 focus:outline-none"
+                  />
+                </div>
+              )}
+              <label className="flex items-center gap-1 text-[10px] text-zinc-500 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={noLimitForRun}
+                  onChange={(e) => setNoLimitForRun(e.target.checked)}
+                  className="rounded border-zinc-600 w-3 h-3"
+                />
+                No limit
+              </label>
+            </div>
+          )}
           <button
-            onClick={handleStartRun}
+            onClick={() => {
+              if (!showBudgetInput) {
+                setShowBudgetInput(true);
+              } else {
+                void handleStartRun();
+              }
+            }}
             className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-500"
           >
             <PlayIcon className="h-3 w-3" />
-            Run
+            {showBudgetInput ? "Start" : "Run"}
           </button>
+          {showBudgetInput && (
+            <button
+              onClick={() => {
+                setShowBudgetInput(false);
+                setRunBudgetInput("");
+                setNoLimitForRun(false);
+              }}
+              className="text-[10px] text-zinc-500 hover:text-zinc-300"
+            >
+              Cancel
+            </button>
+          )}
         </div>
       </div>
 
@@ -145,6 +202,34 @@ export function WorkflowDetail({ workflow }: WorkflowDetailProps) {
           >
             Resume
           </button>
+        </div>
+      )}
+
+      {/* Budget exceeded banner */}
+      {activeRun?.status === "budget_exceeded" && (
+        <div className="flex items-center gap-2 bg-amber-500/10 px-4 py-2 border-b border-amber-500/20">
+          <WarningIcon className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+          <span className="text-xs text-amber-400 flex-1">
+            Budget limit reached — sprint paused.
+            {activeRun.tokenUsage && ` Spent $${activeRun.tokenUsage.totalCostUsd.toFixed(2)}`}
+            {activeRun.budgetCapUsd && ` of $${activeRun.budgetCapUsd.toFixed(2)} budget.`}
+          </span>
+        </div>
+      )}
+
+      {/* Cost summary bar */}
+      {activeRun?.tokenUsage && activeRun.tokenUsage.totalCostUsd > 0 && (
+        <div className="flex items-center gap-3 border-b border-zinc-800 px-4 py-1.5">
+          <span className="text-[10px] text-zinc-400">
+            Total: ${activeRun.tokenUsage.totalCostUsd.toFixed(2)}
+            {(activeRun.budgetCapUsd ?? workflow.budgetCapUsd)
+              ? ` / $${(activeRun.budgetCapUsd ?? workflow.budgetCapUsd)!.toFixed(2)} budget`
+              : ""}
+          </span>
+          <span className="text-[10px] text-zinc-600">
+            {formatTokenCount(activeRun.tokenUsage.inputTokens + activeRun.tokenUsage.outputTokens)}{" "}
+            tokens
+          </span>
         </div>
       )}
 
@@ -271,6 +356,17 @@ function StepRow({ stepDef, stepState, isLast, onApprove, onReject, onRetry }: S
           {stepDef.type === "loop" && stepState?.iteration && (
             <span className="rounded bg-purple-500/15 px-1 py-0.5 text-[9px] text-purple-400">
               Round {stepState.iteration}/{stepDef.maxIterations}
+            </span>
+          )}
+
+          {/* Step cost */}
+          {stepState?.tokenUsage && stepState.tokenUsage.totalCostUsd > 0 && (
+            <span className="text-[10px] text-zinc-500">
+              Cost: ${stepState.tokenUsage.totalCostUsd.toFixed(2)} (
+              {formatTokenCount(
+                stepState.tokenUsage.inputTokens + stepState.tokenUsage.outputTokens,
+              )}{" "}
+              tokens)
             </span>
           )}
         </div>
@@ -410,4 +506,10 @@ function formatDuration(start: string, end: string): string {
   if (secs < 60) return `${secs}s`;
   const mins = Math.round(secs / 60);
   return `${mins}m`;
+}
+
+function formatTokenCount(tokens: number): string {
+  if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(1)}M`;
+  if (tokens >= 1_000) return `${(tokens / 1_000).toFixed(1)}K`;
+  return String(tokens);
 }

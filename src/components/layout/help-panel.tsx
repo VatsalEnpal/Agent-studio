@@ -8,13 +8,11 @@ import {
   SessionsIcon,
   UsersIcon,
   BrainIcon,
-  ChartBarIcon,
   SettingsIcon,
   ExternalLinkIcon,
 } from "@/components/ui/icons";
 
-const HOWTO_URL =
-  "https://github.com/VatsalEnpal/Agent-studio/blob/main/HOWTO.md";
+const HOWTO_URL = "https://github.com/VatsalEnpal/Agent-studio/blob/main/HOWTO.md";
 
 export function HelpPanel() {
   const [open, setOpen] = useState(false);
@@ -113,11 +111,6 @@ export function HelpPanel() {
                   desc="Search and browse agent knowledge entries"
                 />
                 <FeatureRow
-                  icon={<ChartBarIcon className="w-3.5 h-3.5" />}
-                  name="Reports"
-                  desc="View sprint results, QA health, and handoffs"
-                />
-                <FeatureRow
                   icon={<SettingsIcon className="w-3.5 h-3.5" />}
                   name="Settings"
                   desc="Model defaults, permissions, system monitor"
@@ -133,20 +126,10 @@ export function HelpPanel() {
                 Tips
               </p>
               <div className="space-y-1.5 text-xs text-text-secondary">
-                <p>
-                  Use Quick Start presets in the launcher for one-click
-                  sessions.
-                </p>
-                <p>
-                  Click any session in the sidebar to switch focus instantly.
-                </p>
-                <p>
-                  Cmd+Shift+K opens the command palette for fast navigation.
-                </p>
-                <p>
-                  Expand sprint steps to see gate checks, handoffs, and agent
-                  notes.
-                </p>
+                <p>Use Quick Start presets in the launcher for one-click sessions.</p>
+                <p>Click any session in the sidebar to switch focus instantly.</p>
+                <p>Cmd+Shift+K opens the command palette for fast navigation.</p>
+                <p>Expand sprint steps to see gate checks, handoffs, and agent notes.</p>
               </div>
             </div>
 
@@ -166,9 +149,7 @@ export function HelpPanel() {
 
           {/* Version footer */}
           <div className="px-5 py-2 border-t border-border-default">
-            <p className="text-xs text-text-secondary/60">
-              Agent Studio v0.1.0
-            </p>
+            <p className="text-xs text-text-secondary/60">Agent Studio v0.1.0</p>
           </div>
         </Dialog.Content>
       </Dialog.Portal>
@@ -179,9 +160,7 @@ export function HelpPanel() {
 function StepRow({ num, text }: { num: string; text: string }) {
   return (
     <div className="flex items-start gap-2">
-      <span className="text-rooms font-mono text-xs font-medium shrink-0 mt-px">
-        {num}.
-      </span>
+      <span className="text-rooms font-mono text-xs font-medium shrink-0 mt-px">{num}.</span>
       <span>{text}</span>
     </div>
   );
@@ -198,21 +177,11 @@ function ShortcutRow({ keys, label }: { keys: string; label: string }) {
   );
 }
 
-function FeatureRow({
-  icon,
-  name,
-  desc,
-}: {
-  icon: React.ReactNode;
-  name: string;
-  desc: string;
-}) {
+function FeatureRow({ icon, name, desc }: { icon: React.ReactNode; name: string; desc: string }) {
   return (
     <div className="flex items-center gap-2.5">
       <span className="text-rooms shrink-0">{icon}</span>
-      <span className="text-xs text-text-primary font-medium w-16 shrink-0">
-        {name}
-      </span>
+      <span className="text-xs text-text-primary font-medium w-16 shrink-0">{name}</span>
       <span className="text-xs text-text-secondary">{desc}</span>
     </div>
   );

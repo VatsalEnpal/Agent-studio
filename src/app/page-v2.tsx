@@ -28,7 +28,6 @@ import { SprintList } from "@/components/sprints/sprint-list";
 import { useSprintsStore } from "@/stores/sprints";
 import { MemoryView } from "@/components/memory/memory-view";
 import { SettingsView } from "@/components/settings/settings-view";
-import { ReportsView } from "@/components/reports/reports-view";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { PRModal } from "@/components/git/pr-modal";
 import { ToastContainer } from "@/components/ui/toast";
@@ -436,7 +435,6 @@ export default function PageV2() {
         teams: "teams",
         sprints: "sprints",
         knowledge: "memory",
-        reports: "reports",
         settings: "settings",
       };
       setActiveMode((modeMap[page] ?? "sessions") as Parameters<typeof setActiveMode>[0]);
@@ -512,16 +510,14 @@ export default function PageV2() {
 
   // --- Current nav page from activeMode ---
   const currentNavPage: NavPage | null =
-    activeMode === "reports"
-      ? null
-      : activeMode === "memory"
-        ? "knowledge"
-        : activeMode === "sessions" ||
-            activeMode === "teams" ||
-            activeMode === "sprints" ||
-            activeMode === "settings"
-          ? (activeMode as NavPage)
-          : null;
+    activeMode === "memory"
+      ? "knowledge"
+      : activeMode === "sessions" ||
+          activeMode === "teams" ||
+          activeMode === "sprints" ||
+          activeMode === "settings"
+        ? (activeMode as NavPage)
+        : null;
 
   // Find the focused session for terminal
   const focusedSession = sessions.find((s) => s.id === focusedId);
@@ -627,11 +623,6 @@ export default function PageV2() {
             <div className={activeMode === "memory" ? "h-full" : "hidden"}>
               <ErrorBoundary fallbackLabel="Memory view error">
                 <MemoryView />
-              </ErrorBoundary>
-            </div>
-            <div className={activeMode === "reports" ? "h-full" : "hidden"}>
-              <ErrorBoundary fallbackLabel="Reports view error">
-                <ReportsView />
               </ErrorBoundary>
             </div>
             <div className={activeMode === "settings" ? "h-full" : "hidden"}>
