@@ -93,11 +93,7 @@ function RunningProcessItem({
           <span
             className={cn(
               "text-2xs px-1 py-0.5 rounded shrink-0 font-medium",
-              proc.modelShort === "opus"
-                ? "bg-purple-500/20 text-purple-400"
-                : proc.modelShort === "haiku"
-                  ? "bg-teal-500/20 text-teal-400"
-                  : "bg-border-default text-text-tertiary",
+              "bg-[#f59e0b]/10 text-[#f59e0b]",
             )}
           >
             {proc.modelShort}

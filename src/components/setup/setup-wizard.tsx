@@ -1827,12 +1827,8 @@ function PreferencesStep({
               className={cn(
                 "px-4 py-2 text-xs font-medium rounded border transition-all",
                 model === m
-                  ? m === "opus"
-                    ? "bg-purple-500/20 text-purple-400 border-purple-500/30"
-                    : m === "haiku"
-                      ? "bg-teal-500/20 text-teal-400 border border-teal-500/30"
-                      : "bg-rooms/20 text-rooms border-rooms/30"
-                  : "bg-bg-elevated text-text-tertiary hover:text-text-secondary border-transparent",
+                  ? "border-[#f59e0b]/50 bg-[#f59e0b]/10 text-[#f59e0b]"
+                  : "bg-bg-elevated text-text-secondary hover:text-text-primary border-border-default",
               )}
             >
               {m}

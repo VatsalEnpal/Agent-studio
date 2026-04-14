@@ -72,9 +72,9 @@ function useRotatingPlaceholder(interval = 4000) {
 
 function ModelBadge({ model }: { model: string }) {
   const colors: Record<string, string> = {
-    opus: "bg-purple-500/15 text-purple-400",
-    sonnet: "bg-blue-500/15 text-blue-400",
-    haiku: "bg-emerald-500/15 text-emerald-400",
+    opus: "bg-[#f59e0b]/10 text-[#f59e0b]",
+    sonnet: "bg-[#f59e0b]/10 text-[#f59e0b]",
+    haiku: "bg-[#f59e0b]/10 text-[#f59e0b]",
   };
   return (
     <span
