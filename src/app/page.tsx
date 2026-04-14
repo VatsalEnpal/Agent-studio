@@ -21,6 +21,7 @@ import { NavRail, type NavPage } from "@/components/ui/nav-rail";
 import { TitleBar } from "@/components/ui/top-bar";
 import { SidebarShell } from "@/components/ui/sidebar-shell";
 import { ConnectionBanner } from "@/components/ui/connection-banner";
+import { OnboardingTour } from "@/components/ui/onboarding-tour";
 import { ToastContainer } from "@/components/ui/notification-toast";
 import { CommandPalette, type CommandItem } from "@/components/ui/command-palette";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
@@ -838,6 +839,9 @@ export default function Home() {
 
       {/* Toast notifications */}
       <ToastContainer />
+
+      {/* First-time onboarding tour */}
+      <OnboardingTour />
     </div>
   );
 }

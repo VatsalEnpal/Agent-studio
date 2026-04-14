@@ -186,6 +186,7 @@ function NavRailItem({
         onClick={handleClick}
         aria-label={item.label}
         aria-current={isActive ? "page" : undefined}
+        data-nav={item.id}
         className={cn(
           "relative flex items-center justify-center",
           "w-8 h-8 rounded",
