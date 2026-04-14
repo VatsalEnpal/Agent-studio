@@ -1934,11 +1934,73 @@ Choose the schedule and model based on the task:
       const flows = await workflowManager.getFlows();
       flows.unshift(flow as never);
 
-      // Broadcast update
+      // Broadcast initial planned state
       broadcast(wss, {
         type: "workflow-update",
         payload: flowsToSprints(flows),
       } satisfies WsMessage);
+
+      // Build a WorkflowPipelineDef and start execution
+      const pipelineSteps: import("./workflows/definition.js").PipelineStepDef[] = (
+        pipeline ??
+        agents.map((a, i) => ({
+          id: `step-${i}`,
+          agent: a,
+          name: `${a.charAt(0).toUpperCase() + a.slice(1)} Phase`,
+          description: `Agent ${a} works on the sprint goal`,
+        }))
+      ).map((step) => {
+        // Check if it's a gate step (name contains "gate" or "approval")
+        const isGate =
+          step.name?.toLowerCase().includes("gate") ||
+          step.name?.toLowerCase().includes("approval");
+        if (isGate) {
+          return {
+            id: step.id,
+            name: step.name,
+            type: "gate" as const,
+            allowFeedback: true,
+          };
+        }
+        return {
+          id: step.id,
+          name: step.name,
+          type: "agent" as const,
+          agent: step.agent,
+          goal: step.description || goal || `Work on ${name}`,
+        };
+      });
+
+      const workflowDef: import("./workflows/definition.js").WorkflowPipelineDef = {
+        id: sprintId,
+        name,
+        mode: "execute",
+        trigger: { type: "manual" },
+        workingDirectory: cwd || process.cwd(),
+        steps: pipelineSteps,
+      };
+
+      // Start execution asynchronously (don't block the response)
+      try {
+        const runState = workflowExecutor.startRun(workflowDef);
+        // Update the flow status to "running"
+        flow.status = "running" as any;
+        if (flow.runs[0]) {
+          flow.runs[0].status = "running" as any;
+        }
+        // Broadcast the running state
+        broadcast(wss, {
+          type: "workflow-update",
+          payload: flowsToSprints(await workflowManager.getFlows()),
+        } satisfies WsMessage);
+        // Execute in background
+        workflowExecutor.executeRun(workflowDef, runState).catch((err) => {
+          console.error(`Sprint ${sprintId} execution failed:`, err);
+        });
+      } catch (execErr) {
+        console.error(`Failed to start sprint execution:`, execErr);
+        // Sprint still created, just not started — that's OK
+      }
 
       res.status(201).json({
         ok: true,
