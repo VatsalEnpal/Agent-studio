@@ -9,7 +9,7 @@
 
 <p align="center">
   <a href="https://github.com/VatsalEnpal/Agent-studio/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-black" /></a>
-  <a href="https://github.com/VatsalEnpal/Agent-studio"><img alt="Version" src="https://img.shields.io/badge/version-0.4.0-black" /></a>
+  <a href="https://github.com/VatsalEnpal/Agent-studio"><img alt="Version" src="https://img.shields.io/badge/version-0.5.0-black" /></a>
 </p>
 
 <br />
@@ -28,11 +28,11 @@ Agent Studio is the missing environment. You design agents that understand your 
 
 **Custom agent teams for any project.** A setup wizard analyzes your codebase — frameworks, patterns, conventions — and generates specialized agents. Not generic "frontend" or "backend" bots. Agents that know _your_ stack, _your_ patterns, _your_ architecture. Edit them, version them, share them with your team.
 
-**Automated engineering pipelines.** Define multi-step workflows: scan the codebase, check readiness, design the solution, build it, run tests, security review, ship. Each step can pass, fail, or pause for your approval. Configure which gates are mandatory and which can auto-advance. Schedule pipelines to run on their own.
+**Automated engineering pipelines.** Define multi-step workflows: scan the codebase, check readiness, design the solution, build it, run tests, security review, ship. Each step can pass, fail, or pause for your approval. Configure which gates are mandatory and which can auto-advance. Set budget caps per sprint with real-time cost tracking.
 
 **Agent-to-agent collaboration rooms.** Create a chat room, assign agents, give them a problem. They @mention each other — one finds the bug, tags another to fix it, a third writes the test. You watch in real-time, approve when needed. A turn-based protocol prevents chaos.
 
-**Persistent knowledge across everything.** When an agent discovers that your deploy needs a specific flag, or a test is flaky on CI, or the API requires pagination — that goes into a shared knowledge base. Every future session starts with that context. Your agents compound their understanding of your codebase over time.
+**Persistent knowledge across everything.** When an agent discovers that your deploy needs a specific flag, or a test is flaky on CI, or the API requires pagination — that goes into a shared knowledge base. Memories are auto-extracted when sessions end and injected into future sessions via BM25 relevance scoring. Your agents compound their understanding of your codebase over time.
 
 **A full control panel for everything running.** Live terminals with stats (tokens, cost, context window), git integration (branches, commits, PRs from the sidebar), dev server monitoring, system resources, process discovery. Everything an engineering team needs, in one window.
 
@@ -49,7 +49,7 @@ npm install
 npm run dev
 ```
 
-Open [localhost:8080](http://localhost:8080). The setup wizard walks you through everything.
+Open [localhost:8080](http://localhost:8080). Quick Import detects your projects and sets up agents in one click. An onboarding tour guides you through the four main sections.
 
 ```bash
 npm run electron:dev     # desktop app

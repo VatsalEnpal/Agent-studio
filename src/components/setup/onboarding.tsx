@@ -72,9 +72,9 @@ function useRotatingPlaceholder(interval = 4000) {
 
 function ModelBadge({ model }: { model: string }) {
   const colors: Record<string, string> = {
-    opus: "bg-purple-500/15 text-purple-400",
-    sonnet: "bg-blue-500/15 text-blue-400",
-    haiku: "bg-emerald-500/15 text-emerald-400",
+    opus: "bg-[#f59e0b]/10 text-[#f59e0b]",
+    sonnet: "bg-[#f59e0b]/10 text-[#f59e0b]",
+    haiku: "bg-[#f59e0b]/10 text-[#f59e0b]",
   };
   return (
     <span
@@ -109,7 +109,18 @@ function agentIcon(name: string): string {
   return map[name.toLowerCase()] ?? "\u{1F916}";
 }
 
-// ---------- Screen 1: The Ask ----------
+// ---------- Detected project for Quick Import ----------
+
+interface DetectedProject {
+  name: string;
+  path: string;
+  techStack: string[];
+  languages: string[];
+  packageManager: string;
+  hasAgentSystem: boolean;
+}
+
+// ---------- Screen 1: The Ask (Quick Import first) ----------
 
 interface AskScreenProps {
   onSubmit: (description: string, projectPath: string | null) => void;
@@ -119,18 +130,86 @@ interface AskScreenProps {
 
 function AskScreen({ onSubmit, onSkip, initialDescription = "" }: AskScreenProps) {
   const [description, setDescription] = useState(initialDescription);
-  const [showProject, setShowProject] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [projectPath, setProjectPath] = useState("");
+  const [projects, setProjects] = useState<DetectedProject[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [importingPath, setImportingPath] = useState<string | null>(null);
+  const [importedPath, setImportedPath] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const placeholder = useRotatingPlaceholder();
 
+  // Detect projects on mount
   useEffect(() => {
-    textareaRef.current?.focus();
+    void (async () => {
+      try {
+        const res = await fetch("/api/system/detect", { method: "POST" });
+        if (res.ok) {
+          const data = (await res.json()) as { projects: DetectedProject[] };
+          const unimported = (data.projects ?? []).filter((p) => !p.hasAgentSystem);
+          // Deduplicate by name
+          const seen = new Set<string>();
+          const deduped = unimported.filter((p) => {
+            const key = p.name.toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+          setProjects(deduped.slice(0, 6));
+        }
+      } catch {
+        // Detection unavailable — show manual path
+      } finally {
+        setLoadingProjects(false);
+      }
+    })();
   }, []);
+
+  const handleQuickImport = async (project: DetectedProject) => {
+    if (importingPath) return;
+    setImportingPath(project.path);
+    try {
+      const res = await fetch("/api/quick-import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectPath: project.path }),
+      });
+      if (res.ok) {
+        setImportedPath(project.path);
+        // Mark setup complete and finish
+        try {
+          const cfgRes = await fetch("/api/config");
+          if (cfgRes.ok) {
+            const data = (await cfgRes.json()) as { config: Record<string, unknown> };
+            await fetch("/api/config", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                ...data.config,
+                setupComplete: true,
+                defaults: {
+                  ...((data.config.defaults as Record<string, unknown>) ?? {}),
+                  workingDirectory: project.path,
+                },
+              }),
+            });
+          }
+        } catch {
+          // Config save failed — still finish
+        }
+        // Brief delay to show success, then complete
+        setTimeout(() => onSkip(), 1200);
+      }
+    } catch {
+      // Import failed
+    } finally {
+      setImportingPath(null);
+    }
+  };
 
   const handleSubmit = () => {
     if (!description.trim()) return;
-    onSubmit(description.trim(), showProject && projectPath.trim() ? projectPath.trim() : null);
+    onSubmit(description.trim(), projectPath.trim() || null);
   };
 
   return (
@@ -145,83 +224,156 @@ function AskScreen({ onSubmit, onSkip, initialDescription = "" }: AskScreenProps
           <p className="text-sm text-zinc-400 leading-relaxed max-w-md mx-auto">
             Your AI-powered command center.
             <br />
-            Tell me what you&apos;re working on &mdash; I&apos;ll build your perfect setup.
+            Import a project to get started in seconds.
           </p>
         </div>
 
-        {/* Textarea */}
-        <div className="relative">
-          <textarea
-            ref={textareaRef}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={5}
-            className="w-full px-4 py-3.5 rounded bg-zinc-900/80 border border-zinc-700/60 text-sm text-zinc-200 placeholder:text-transparent resize-none focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
-          />
-          {/* Custom animated placeholder */}
-          {!description && (
-            <span
-              className={cn(
-                "absolute top-3.5 left-4 text-sm text-zinc-600 pointer-events-none transition-opacity duration-300",
-                placeholder.visible ? "opacity-100" : "opacity-0",
-              )}
-            >
-              {placeholder.text}
+        {/* Quick Import — detected projects */}
+        {!loadingProjects && projects.length > 0 && (
+          <div className="space-y-2">
+            <span className="block text-xs font-medium text-zinc-500 uppercase tracking-wider">
+              Detected Projects
             </span>
-          )}
-        </div>
+            <div className="space-y-1.5 max-h-[240px] overflow-y-auto">
+              {projects.map((project) => {
+                const isImporting = importingPath === project.path;
+                const isImported = importedPath === project.path;
+                return (
+                  <button
+                    key={project.path}
+                    onClick={() => void handleQuickImport(project)}
+                    disabled={!!importingPath || isImported}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2.5 rounded border text-left transition-all",
+                      isImported
+                        ? "border-emerald-500/30 bg-emerald-500/5"
+                        : "border-zinc-700/60 bg-zinc-900/50 hover:border-amber-500/40 hover:bg-zinc-900/80",
+                      importingPath && !isImporting && "opacity-50",
+                    )}
+                  >
+                    <FolderIcon className="w-4 h-4 text-zinc-500 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium text-zinc-200 block truncate">
+                        {project.name}
+                      </span>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        {project.techStack.slice(0, 3).map((tech) => (
+                          <span
+                            key={tech}
+                            className="text-2xs px-1 py-0.5 rounded bg-zinc-800 text-zinc-500 border border-zinc-700/50"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                        {project.languages.slice(0, 1).map((lang) => (
+                          <span key={lang} className="text-2xs text-zinc-600">
+                            {lang}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {isImported ? (
+                      <CheckIcon className="w-4 h-4 text-emerald-400 shrink-0" />
+                    ) : isImporting ? (
+                      <SpinnerIcon className="w-4 h-4 text-amber-400 animate-spin shrink-0" />
+                    ) : (
+                      <ChevronRightIcon className="w-4 h-4 text-zinc-600 shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
-        {/* Optional project path */}
-        <div className="space-y-2">
-          <button
-            onClick={() => setShowProject(!showProject)}
-            className="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-400 transition-all"
-          >
-            <span
-              className={cn(
-                "w-3.5 h-3.5 rounded-full border border-zinc-600 flex items-center justify-center transition-all",
-                showProject && "bg-amber-500/20 border-amber-500/50",
-              )}
-            >
-              {showProject && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+        {/* Manual path input when no projects detected */}
+        {!loadingProjects && projects.length === 0 && (
+          <div className="space-y-2">
+            <span className="block text-xs font-medium text-zinc-500">
+              No projects detected. Enter a project folder:
             </span>
-            I also have a code project
-          </button>
-          {showProject && (
-            <div className="flex items-center gap-2 pl-5.5">
-              <FolderIcon className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+            <div className="flex items-center gap-2">
+              <FolderIcon className="w-4 h-4 text-zinc-500 shrink-0" />
               <input
                 type="text"
                 value={projectPath}
                 onChange={(e) => setProjectPath(e.target.value)}
-                placeholder="/path/to/project"
-                className="flex-1 px-3 py-2 text-xs bg-zinc-900/80 border border-zinc-700/60 rounded text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 transition-all font-mono"
+                placeholder="/path/to/your/project"
+                className="flex-1 px-3 py-2.5 text-sm bg-zinc-900/80 border border-zinc-700/60 rounded text-zinc-300 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500/50 transition-all font-mono"
               />
             </div>
-          )}
-        </div>
-
-        {/* CTA */}
-        <div className="flex flex-col items-center gap-4">
-          <button
-            onClick={handleSubmit}
-            disabled={!description.trim()}
-            className={cn(
-              "flex items-center gap-2 px-8 py-2.5 rounded text-sm font-medium transition-all",
-              description.trim()
-                ? "bg-amber-500 text-black hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/10 active:scale-[0.98]"
-                : "bg-zinc-800 text-zinc-500 cursor-not-allowed",
+            {projectPath.trim() && (
+              <button
+                onClick={() => onSubmit("Import project", projectPath.trim())}
+                className="flex items-center gap-2 px-6 py-2 rounded text-sm font-medium bg-amber-500 text-black hover:bg-amber-400 transition-all active:scale-[0.98]"
+              >
+                Import Project
+                <ChevronRightIcon className="w-4 h-4" />
+              </button>
             )}
+          </div>
+        )}
+
+        {/* Loading state */}
+        {loadingProjects && (
+          <div className="flex items-center justify-center gap-2 py-8">
+            <SpinnerIcon className="w-4 h-4 text-amber-400 animate-spin" />
+            <span className="text-sm text-zinc-500">Scanning for projects...</span>
+          </div>
+        )}
+
+        {/* Advanced Setup (secondary) */}
+        <div className="flex flex-col items-center gap-3 pt-2">
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="text-xs text-zinc-600 hover:text-zinc-400 transition-all"
           >
-            Set me up
-            <ChevronRightIcon className="w-4 h-4" />
+            {showAdvanced ? "Hide advanced setup" : "Advanced Setup \u2014 describe your workflow"}
           </button>
+
+          {showAdvanced && (
+            <div className="w-full space-y-3">
+              <div className="relative">
+                <textarea
+                  ref={textareaRef}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-3 rounded bg-zinc-900/80 border border-zinc-700/60 text-sm text-zinc-200 placeholder:text-transparent resize-none focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                      e.preventDefault();
+                      handleSubmit();
+                    }
+                  }}
+                />
+                {!description && (
+                  <span
+                    className={cn(
+                      "absolute top-3 left-4 text-sm text-zinc-600 pointer-events-none transition-opacity duration-300",
+                      placeholder.visible ? "opacity-100" : "opacity-0",
+                    )}
+                  >
+                    {placeholder.text}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={handleSubmit}
+                disabled={!description.trim()}
+                className={cn(
+                  "flex items-center gap-2 px-6 py-2 rounded text-sm font-medium transition-all",
+                  description.trim()
+                    ? "bg-amber-500 text-black hover:bg-amber-400 active:scale-[0.98]"
+                    : "bg-zinc-800 text-zinc-500 cursor-not-allowed",
+                )}
+              >
+                Set me up
+                <ChevronRightIcon className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           <button
             onClick={onSkip}
             className="text-xs text-zinc-600 hover:text-zinc-400 transition-all"

@@ -464,7 +464,7 @@ function StepDescribe({
           value={name}
           onChange={(e) => onNameChange(e.target.value)}
           placeholder="e.g. Database Migration Agent"
-          className="w-full px-3 py-2 text-xs bg-bg-input border border-border-default rounded-[4px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-accent transition-all"
+          className="w-full px-3 py-2 text-xs bg-bg-input border border-border-default rounded-[4px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all"
           autoFocus
         />
         {slug && <p className="text-2xs text-text-ghost">File: .claude/agents/{slug}.md</p>}
@@ -479,7 +479,7 @@ function StepDescribe({
           onChange={(e) => onDescriptionChange(e.target.value)}
           placeholder="Describe the agent's role and responsibilities. Be specific about what it should focus on, what it should never do, and how it relates to other agents."
           rows={4}
-          className="w-full px-3 py-2 text-xs bg-bg-input border border-border-default rounded-[4px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-accent transition-all resize-none"
+          className="w-full px-3 py-2 text-xs bg-bg-input border border-border-default rounded-[4px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all resize-none"
         />
       </div>
     </div>
@@ -549,7 +549,7 @@ function StepConfigure({
                 value={rule}
                 onChange={(e) => onRuleChange(i, e.target.value)}
                 placeholder="e.g. Never modify production directly"
-                className="flex-1 px-2 py-1.5 text-xs bg-bg-input border border-border-default rounded-[4px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-accent transition-all"
+                className="flex-1 px-2 py-1.5 text-xs bg-bg-input border border-border-default rounded-[4px] text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all"
               />
               {rules.length > 1 && (
                 <button
@@ -613,7 +613,7 @@ function StepPreview({
         value={markdown}
         onChange={(e) => onMarkdownChange(e.target.value)}
         rows={16}
-        className="w-full px-3 py-2 text-xs font-mono bg-bg-input border border-border-default rounded-[4px] text-text-primary focus:outline-none focus:border-accent transition-all resize-none leading-relaxed"
+        className="w-full px-3 py-2 text-xs font-mono bg-bg-input border border-border-default rounded-[4px] text-text-primary focus:outline-none focus:border-[#f59e0b]/40 transition-all resize-none leading-relaxed"
         spellCheck={false}
       />
       {error && <p className="text-xs text-error">{error}</p>}

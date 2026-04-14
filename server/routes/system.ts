@@ -410,6 +410,7 @@ export function systemRoutes(
     try {
       let branch = "unknown";
       let commitHash = "unknown";
+      let version = "0.0.0";
       try {
         branch = execSync("git rev-parse --abbrev-ref HEAD", {
           encoding: "utf-8",
@@ -424,8 +425,16 @@ export function systemRoutes(
       } catch {
         // Not a git repo or git not available
       }
+      try {
+        const pkgPath = path.join(process.cwd(), "package.json");
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as { version?: string };
+        version = pkg.version ?? "0.0.0";
+      } catch {
+        // package.json not found
+      }
 
       res.json({
+        version,
         branch,
         commitHash,
         nodeVersion: process.version,
@@ -597,7 +606,7 @@ export function systemRoutes(
             try {
               const stat = fss(fullPath);
               if (!stat.isDirectory()) continue;
-              const resolved = fsrp(fullPath);
+              const resolved = fsrp(fullPath).toLowerCase();
               if (seenPaths.has(resolved)) continue;
               if (!fse(pj(fullPath, ".git"))) continue;
               seenPaths.add(resolved);

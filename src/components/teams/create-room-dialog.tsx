@@ -162,7 +162,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="auth-refactor"
-              className="w-full bg-bg-input border border-border-default rounded px-2 py-1 text-xs text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
+              className="w-full bg-bg-input border border-border-default rounded px-2 py-1 text-xs text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all"
               autoFocus
             />
           </div>
@@ -177,7 +177,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="Refactor auth flow to use server-side sessions"
-              className="w-full bg-bg-input border border-border-default rounded px-2 py-1 text-xs text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-border-subtle transition-all"
+              className="w-full bg-bg-input border border-border-default rounded px-2 py-1 text-xs text-text-primary placeholder:text-text-ghost focus:outline-none focus:border-[#f59e0b]/40 transition-all"
             />
           </div>
 
@@ -247,7 +247,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                       onChange={(e) =>
                         setAgentModel(agent.id, e.target.value as "opus" | "sonnet" | "haiku")
                       }
-                      className="bg-bg-base border border-border-default rounded px-2 py-1 text-label font-mono text-text-secondary focus:outline-none focus:border-border-subtle transition-all"
+                      className="bg-bg-base border border-border-default rounded px-2 py-1 text-label font-mono text-text-secondary focus:outline-none focus:border-[#f59e0b]/40 transition-all"
                     >
                       <option value="opus">opus</option>
                       <option value="sonnet">sonnet</option>

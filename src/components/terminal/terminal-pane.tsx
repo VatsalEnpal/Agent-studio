@@ -295,15 +295,8 @@ export function TerminalPane({
     >
       {/* Header bar */}
       <div className="flex items-center gap-2 px-3 py-1.5 bg-bg-surface border-b border-border-default shrink-0 font-mono">
-        <span
-          className={cn(
-            "w-2 h-2 rounded-full shrink-0",
-            statusDotColor(status),
-          )}
-        />
-        <span className="text-xs font-medium text-text-primary truncate">
-          {displayName}
-        </span>
+        <span className={cn("w-2 h-2 rounded-full shrink-0", statusDotColor(status))} />
+        <span className="text-xs font-medium text-text-primary truncate">{displayName}</span>
 
         {/* Badges — real data from Claude session files */}
         <div className="flex items-center gap-1 ml-auto shrink-0">
@@ -311,23 +304,14 @@ export function TerminalPane({
             <span
               className={cn(
                 "text-2xs px-1.5 py-0.5 rounded-full font-medium",
-                effectiveModel === "opus"
-                  ? "bg-purple-500/15 text-purple-400"
-                  : effectiveModel === "haiku"
-                    ? "bg-emerald-500/15 text-emerald-400"
-                    : "bg-blue-500/10 text-blue-400/80",
+                "bg-[#f59e0b]/10 text-[#f59e0b]",
               )}
             >
               {effectiveModel}
             </span>
           )}
           {contextDisplay && (
-            <span
-              className={cn(
-                "text-2xs px-1 py-0.5 rounded-full font-medium",
-                contextColor,
-              )}
-            >
+            <span className={cn("text-2xs px-1 py-0.5 rounded-full font-medium", contextColor)}>
               {contextDisplay}
             </span>
           )}
@@ -381,8 +365,7 @@ export function TerminalPane({
                 if (killing) return;
                 setKilling(true);
                 setConfirmKill(false);
-                if (confirmTimerRef.current)
-                  clearTimeout(confirmTimerRef.current);
+                if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
                 onKill?.();
                 setTimeout(() => setKilling(false), 3000);
               }}
@@ -396,10 +379,7 @@ export function TerminalPane({
                 e.stopPropagation();
                 if (killing) return;
                 setConfirmKill(true);
-                confirmTimerRef.current = setTimeout(
-                  () => setConfirmKill(false),
-                  2000,
-                );
+                confirmTimerRef.current = setTimeout(() => setConfirmKill(false), 2000);
               }}
               disabled={killing}
               className={cn(

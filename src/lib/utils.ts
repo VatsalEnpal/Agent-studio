@@ -30,11 +30,7 @@ export function computeGridLayout(count: number): {
     case 3:
       return {
         gridClass: "grid-cols-2 grid-rows-2",
-        spanClasses: [
-          "col-span-1 row-span-1",
-          "col-span-1 row-span-1",
-          "col-span-2 row-span-1",
-        ],
+        spanClasses: ["col-span-1 row-span-1", "col-span-1 row-span-1", "col-span-2 row-span-1"],
       };
     case 4:
       return {
@@ -88,6 +84,14 @@ export function statusColor(status: string): string {
     default:
       return "bg-text-tertiary";
   }
+}
+
+/** Shorten a cwd path for display — replaces home directory prefix with ~ */
+export function shortenCwd(cwd: string): string {
+  if (cwd === "unknown") return "--";
+  const homeMatch = cwd.match(/^\/(?:Users|home)\/[^/]+/);
+  if (homeMatch) return "~" + cwd.slice(homeMatch[0].length);
+  return cwd;
 }
 
 export function statusDotColor(status: string): string {

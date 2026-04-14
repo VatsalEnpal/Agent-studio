@@ -671,9 +671,11 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
             )}
 
             {/* Divider */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 py-0.5">
               <div className="flex-1 h-px bg-border-default" />
-              <span className="text-xs text-text-ghost uppercase tracking-[0.5px]">customize</span>
+              <span className="text-2xs text-text-ghost/60 uppercase tracking-[1px]">
+                customize
+              </span>
               <div className="flex-1 h-px bg-border-default" />
             </div>
 

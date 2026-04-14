@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { CloseIcon, EditIcon } from "@/components/ui/icons";
-import { cn } from "@/lib/utils";
+import { cn, shortenCwd } from "@/lib/utils";
 import { useSessionUsage } from "@/hooks/use-usage";
 import { useRelativeTime } from "@/hooks/use-relative-time";
 import type { Session } from "@/lib/types";
@@ -50,13 +50,7 @@ function formatUptime(createdAt: number): string {
   return `${days}d ${diffHr % 24}h`;
 }
 
-export function SessionItem({
-  session,
-  focused,
-  visible,
-  onFocus,
-  onKill,
-}: SessionItemProps) {
+export function SessionItem({ session, focused, visible, onFocus, onKill }: SessionItemProps) {
   const [killing, setKilling] = useState(false);
 
   const handleKill = useCallback(async () => {
@@ -71,9 +65,7 @@ export function SessionItem({
 
   const isExited = session.status === "exited";
   const isRunning =
-    session.status === "active" ||
-    session.status === "building" ||
-    session.status === "starting";
+    session.status === "active" || session.status === "building" || session.status === "starting";
 
   // Auto-remove exited sessions after 10 seconds
   useEffect(() => {
@@ -120,10 +112,7 @@ export function SessionItem({
       try {
         localStorage.setItem(RENAME_KEY, JSON.stringify(names));
       } catch (e) {
-        console.error(
-          "Failed to clear custom session name in localStorage:",
-          e,
-        );
+        console.error("Failed to clear custom session name in localStorage:", e);
       }
       setCustomNameState(null);
     }
@@ -163,8 +152,7 @@ export function SessionItem({
           className={cn(
             "w-[5px] h-[5px] rounded-full shrink-0",
             statusDot,
-            (session.status === "building" || session.status === "starting") &&
-              "animate-pulse-dot",
+            (session.status === "building" || session.status === "starting") && "animate-pulse-dot",
           )}
           style={
             session.status === "active" || session.status === "building"
@@ -188,9 +176,7 @@ export function SessionItem({
           />
         ) : (
           <>
-            <span className="text-xs font-medium truncate flex-1">
-              {displayName}
-            </span>
+            <span className="text-xs font-medium truncate flex-1">{displayName}</span>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -229,9 +215,7 @@ export function SessionItem({
               ? "text-error opacity-70 cursor-not-allowed"
               : "text-text-ghost hover:text-error hover:bg-error/10 active:bg-error/20",
             !killing &&
-              (focused
-                ? "opacity-70 hover:opacity-100"
-                : "opacity-0 group-hover:opacity-100"),
+              (focused ? "opacity-70 hover:opacity-100" : "opacity-0 group-hover:opacity-100"),
           )}
           title={killing ? "Killing..." : "Kill session"}
         >
@@ -242,9 +226,7 @@ export function SessionItem({
       {/* Row 2: uptime + cwd + cost + context */}
       <div className="flex items-center gap-2 pl-[13px]">
         {isRunning && (
-          <span className="flex items-center gap-0.5 text-xs text-text-tertiary">
-            {liveUptime}
-          </span>
+          <span className="flex items-center gap-0.5 text-xs text-text-tertiary">{liveUptime}</span>
         )}
         {session.cwd && (
           <span className="text-xs text-text-tertiary truncate flex-1 min-w-0">
@@ -252,18 +234,13 @@ export function SessionItem({
           </span>
         )}
         {usage.totalCost > 0 && (
-          <span
-            className="text-label text-text-ghost tabular-nums shrink-0"
-            title="Session cost"
-          >
+          <span className="text-label text-text-ghost tabular-nums shrink-0" title="Session cost">
             ${usage.totalCost < 0.01 ? "<0.01" : usage.totalCost.toFixed(2)}
           </span>
         )}
         {hasContext && (
           <span className="flex items-center gap-1 shrink-0">
-            <span className="text-label text-text-tertiary">
-              {contextPercent}%
-            </span>
+            <span className="text-label text-text-tertiary">{contextPercent}%</span>
             <span className="w-10 h-1 rounded-full bg-border-default overflow-hidden">
               <span
                 className={cn(
@@ -282,11 +259,4 @@ export function SessionItem({
       </div>
     </div>
   );
-}
-
-/** Shorten cwd for display — strips common home prefixes */
-function shortenCwd(cwd: string): string {
-  const homeMatch = cwd.match(/^\/(?:Users|home)\/[^/]+/);
-  if (homeMatch) return "~" + cwd.slice(homeMatch[0].length);
-  return cwd;
 }

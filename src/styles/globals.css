@@ -22,7 +22,7 @@
   --text-primary: #ededed;
   --text-secondary: #aaaaaa;
   --text-tertiary: #555555;
-  --text-ghost: #333333;
+  --text-ghost: #444444;
 
   /* --- Pillar accents: Sessions (green) --- */
   --accent-sessions: #3fcf6d;
@@ -126,14 +126,14 @@ html:not(.dark) {
   --bg-input: rgba(0, 0, 0, 0.03);
 
   /* --- Borders --- */
-  --border-default: rgba(0, 0, 0, 0.06);
-  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-default: rgba(0, 0, 0, 0.1);
+  --border-subtle: rgba(0, 0, 0, 0.14);
 
   /* --- Text --- */
   --text-primary: #111111;
   --text-secondary: #555555;
   --text-tertiary: #999999;
-  --text-ghost: #cccccc;
+  --text-ghost: #aaaaaa;
 
   /* Pillar accents stay the same in light mode */
 

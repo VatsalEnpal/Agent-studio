@@ -135,15 +135,16 @@ On connect, the server immediately sends `sessions-update` and `git-update` so t
 
 ### API Route Organization
 
-Routes are grouped by domain in `server/index.ts`:
+Routes are modularized in `server/routes/` and mounted in `server/index.ts`:
 
 - **Config** (`/api/config`) -- read/write `.agent-studio.json`
 - **Setup** (`/api/setup/*`) -- validate agent system paths
 - **Scaffold** (`/api/scaffold`) -- generate agent directories
 - **Sessions** (`/api/sessions`) -- CRUD for terminal sessions
-- **Processes** (`/api/processes`) -- discover and kill Claude processes
+- **System** (`/api/system/*`) -- system info, preflight, project detection, Quick Import
 - **Usage** (`/api/usage`) -- token and cost data
-- **Sprint/Memory** (`/api/sprint/*`, `/api/memory/*`) -- read sprint files and memory stats
+- **Sprint** (`/api/sprints/*`) -- sprint CRUD, gate approval, cost tracking
+- **Memory** (`/api/memory/*`) -- memory entries, auto-extraction, BM25 scoring
 - **Git** (`/api/git/*`) -- status, branches, diff, commit, push, PR, open
 - **Workflows** (`/api/workflows`) -- workflow definitions and runs
 - **PMO** (`/api/pmo/*`) -- scheduler status and control
@@ -151,28 +152,36 @@ Routes are grouped by domain in `server/index.ts`:
 - **Rooms** (`/api/rooms/*`) -- create rooms, spawn/remove agents, send messages, close rooms
 - **Agents** (`/api/agents/*`) -- CLI status, analyze project, generate/preview agents, apply to disk
 - **Automations** (`/api/automations/*`) -- suggest and configure scheduled automations
+- **Settings** (`/api/settings`) -- user preferences persistence
 
 ### Supporting Server Modules
 
-| Module                 | File                        | Responsibility                                                        |
-| ---------------------- | --------------------------- | --------------------------------------------------------------------- |
-| Terminal Manager       | `terminal-manager.ts`       | PTY lifecycle, event emission                                         |
-| Config                 | `config.ts`                 | Read, write, generate, cache config                                   |
-| Scaffold               | `scaffold.ts`               | Generate `ai-agents/` directory structure                             |
-| Git Status             | `git-status.ts`             | Poll git repos, detect changes                                        |
-| PR Creator             | `pr-creator.ts`             | Create PRs via `gh` CLI                                               |
-| Session Usage          | `session-usage.ts`          | Read Claude status files, compute costs                               |
-| Process Discovery      | `process-discovery.ts`      | Find running Claude processes via `ps`                                |
-| File Watcher           | `file-watcher.ts`           | Watch sprint/memory files with chokidar                               |
-| Dev Servers            | `dev-servers.ts`            | Start/stop dev server child processes                                 |
-| SDK Session Manager    | `sdk-session.ts`            | Claude Agent SDK lifecycle for room agents                            |
-| Room Manager           | `rooms.ts`                  | Room state, persistence, context files, message history               |
-| Room Routes            | `routes/rooms.ts`           | Room API endpoints wired to SDK callbacks                             |
-| Workflows              | `workflows/`                | Workflow engine with registry and step execution                      |
-| Project Analyzer       | `project-analyzer.ts`       | Static project analysis: detect languages, frameworks, CI, databases  |
-| Agent Generator        | `agent-generator.ts`        | Generate agents via Claude CLI, parse output, write .md files         |
-| Automation Suggestions | `automation-suggestions.ts` | Suggest scheduled automations based on project profile                |
-| Demo Sanitizer         | `demo-sanitizer.ts`         | When `DEMO_MODE=true`, sanitize terminal output (usernames, API keys) |
+| Module                 | File                         | Responsibility                                                         |
+| ---------------------- | ---------------------------- | ---------------------------------------------------------------------- |
+| Terminal Manager       | `terminal-manager.ts`        | PTY lifecycle, event emission                                          |
+| Config                 | `config.ts`                  | Read, write, generate, cache config                                    |
+| Scaffold               | `scaffold.ts`                | Generate `ai-agents/` directory structure                              |
+| Git Status             | `git-status.ts`              | Poll git repos, detect changes                                         |
+| PR Creator             | `pr-creator.ts`              | Create PRs via `gh` CLI                                                |
+| Session Usage          | `session-usage.ts`           | Read Claude status files, compute costs                                |
+| Process Discovery      | `process-discovery.ts`       | Find running Claude processes via `ps`                                 |
+| File Watcher           | `file-watcher.ts`            | Watch sprint/memory files with chokidar                                |
+| Dev Servers            | `dev-servers.ts`             | Start/stop dev server child processes                                  |
+| SDK Session Manager    | `sdk-session.ts`             | Claude Agent SDK lifecycle for room agents                             |
+| Room Manager           | `rooms.ts`                   | Room state, persistence, context files, message history                |
+| Room Routes            | `routes/rooms.ts`            | Room API endpoints wired to SDK callbacks                              |
+| Workflows              | `workflows/`                 | Workflow engine with registry and step execution                       |
+| Project Analyzer       | `project-analyzer.ts`        | Static project analysis: detect languages, frameworks, CI, databases   |
+| Agent Generator        | `agent-generator.ts`         | Generate agents via Claude CLI, parse output, write .md files          |
+| Quick Import           | `quick-import.ts`            | One-click project onboarding: analyze, generate agent, write CLAUDE.md |
+| Memory Extractor       | `memory-extractor.ts`        | Auto-extract learnings from completed sessions into memory files       |
+| BM25 Scorer            | `memory-scorer.ts`           | BM25 relevance scoring for memory injection into new sessions          |
+| Sprint Manager         | `managers/sprint-manager.ts` | Sprint lifecycle, gate advancement, state persistence                  |
+| Workflow Executor      | `workflows/executor.ts`      | Execute workflow steps, handle gates, track cost per step              |
+| Workflow Watcher       | `workflows/watcher.ts`       | Watch workflow state files for external changes                        |
+| Automation Suggestions | `automation-suggestions.ts`  | Suggest scheduled automations based on project profile                 |
+| CLAUDE.md Generator    | `claudemd-generator.ts`      | Generate/update CLAUDE.md files for imported projects                  |
+| Demo Sanitizer         | `demo-sanitizer.ts`          | When `DEMO_MODE=true`, sanitize terminal output (usernames, API keys)  |
 
 ## 3. Frontend Layer
 

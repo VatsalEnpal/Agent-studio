@@ -10,7 +10,7 @@ import {
   CloseIcon,
 } from "@/components/ui/icons";
 import { AmberLoadingBar } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { cn, shortenCwd } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -30,13 +30,6 @@ interface DevServer {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-function shortenCwd(cwd: string): string {
-  if (cwd === "unknown") return "--";
-  const homeMatch = cwd.match(/^\/(?:Users|home)\/[^/]+/);
-  if (homeMatch) return "~" + cwd.slice(homeMatch[0].length);
-  return cwd;
-}
 
 function processLabel(cmd: string): string {
   // Capitalize first letter

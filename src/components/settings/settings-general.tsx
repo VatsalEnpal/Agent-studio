@@ -74,12 +74,8 @@ export function SettingsGeneral() {
                     className={cn(
                       "px-1.5 py-0.5 text-label font-medium rounded transition-all active:scale-[0.98]",
                       settings.defaultModel === model
-                        ? model === "opus"
-                          ? "bg-memory/15 text-memory border border-memory/30"
-                          : model === "haiku"
-                            ? "bg-sessions/15 text-sessions border border-sessions/30"
-                            : "bg-rooms/15 text-rooms border border-rooms/30"
-                        : "bg-bg-elevated text-text-tertiary hover:text-text-secondary border border-border-default",
+                        ? "border-[#f59e0b]/50 bg-[#f59e0b]/10 text-[#f59e0b]"
+                        : "bg-bg-elevated text-text-secondary hover:text-text-primary border border-border-default",
                     )}
                   >
                     {model}
@@ -101,7 +97,7 @@ export function SettingsGeneral() {
                     e.target.value as "bypass" | "default" | "plan",
                   )
                 }
-                className="px-2 py-1.5 text-label bg-bg-base border border-border-default rounded text-text-primary focus:outline-none focus:border-border-subtle"
+                className="px-2 py-1.5 text-label bg-bg-base border border-border-default rounded text-text-primary focus:outline-none focus:border-[#f59e0b]/40"
               >
                 <option value="bypass">Bypass (skip permissions)</option>
                 <option value="default">Default</option>
@@ -118,7 +114,7 @@ export function SettingsGeneral() {
                 type="text"
                 value={settings.defaultCwd}
                 onChange={(e) => updateSetting("defaultCwd", e.target.value)}
-                className="w-full px-2 py-1.5 text-body font-mono bg-bg-base border border-border-default rounded text-text-primary focus:outline-none focus:border-border-subtle"
+                className="w-full px-2 py-1.5 text-body font-mono bg-bg-base border border-border-default rounded text-text-primary focus:outline-none focus:border-[#f59e0b]/40"
               />
             </div>
 
