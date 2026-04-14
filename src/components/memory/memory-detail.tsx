@@ -1,19 +1,33 @@
 "use client";
 
 import { useCallback } from "react";
-import { MemoryIcon, EditIcon, TrashIcon, ChevronRightIcon, UserIcon, ArrowLeftIcon, CopyIcon } from "@/components/ui/icons";
+import {
+  MemoryIcon,
+  EditIcon,
+  TrashIcon,
+  ChevronRightIcon,
+  UserIcon,
+  ArrowLeftIcon,
+  CopyIcon,
+} from "@/components/ui/icons";
 import { useMemoryStore } from "@/stores/memory";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
 
 function categoryColor(cat: string): string {
   switch (cat) {
-    case "learnings": return "bg-rooms/20 text-rooms";
-    case "corrections": return "bg-error/20 text-error";
-    case "decisions": return "bg-memory/20 text-memory";
-    case "human-inputs": return "bg-sprints/20 text-sprints";
-    case "knowledge": return "bg-sessions/20 text-sessions";
-    default: return "bg-border-default text-text-ghost";
+    case "learnings":
+      return "bg-rooms/20 text-rooms";
+    case "corrections":
+      return "bg-error/20 text-error";
+    case "decisions":
+      return "bg-memory/20 text-memory";
+    case "human-inputs":
+      return "bg-sprints/20 text-sprints";
+    case "knowledge":
+      return "bg-sessions/20 text-sessions";
+    default:
+      return "bg-border-default text-text-ghost";
   }
 }
 
@@ -36,7 +50,9 @@ export function MemoryDetail() {
       "",
       `**Category:** ${selectedEntry.category}`,
       `**Agent:** ${selectedEntry.agent_type}`,
-      selectedDetail.created_at ? `**Created:** ${new Date(selectedDetail.created_at).toLocaleString()}` : "",
+      selectedDetail.created_at
+        ? `**Created:** ${new Date(selectedDetail.created_at).toLocaleString()}`
+        : "",
       selectedDetail.created_by ? `**By:** ${selectedDetail.created_by}` : "",
       "",
       `**Tags:** ${selectedEntry.tags.join(", ")}`,
@@ -59,10 +75,9 @@ export function MemoryDetail() {
   const handlePin = useCallback(async () => {
     if (!selectedEntry) return;
     try {
-      const res = await fetch(
-        `/api/memory/entries/${encodeURIComponent(selectedEntry.file)}/pin`,
-        { method: "POST" },
-      );
+      const res = await fetch(`/api/memory/entries/${encodeURIComponent(selectedEntry.file)}/pin`, {
+        method: "POST",
+      });
       const data = (await res.json()) as { ok?: boolean; pinned?: boolean; error?: string };
       if (!data.ok) throw new Error(data.error ?? "Failed to toggle pin");
       updateEntry(selectedEntry.file, { pinned: data.pinned });
@@ -176,12 +191,26 @@ export function MemoryDetail() {
 
       {/* Meta info */}
       <div className="flex items-center gap-3 flex-wrap">
-        <span className={cn("text-label px-2 py-0.5 rounded font-medium", categoryColor(selectedEntry.category))}>
+        <span
+          className={cn(
+            "text-label px-2 py-0.5 rounded font-medium",
+            categoryColor(selectedEntry.category),
+          )}
+        >
           {selectedEntry.category}
         </span>
+        {selectedEntry.tags.includes("auto-extracted") && (
+          <span className="text-label px-2 py-0.5 rounded font-medium bg-amber-500/15 text-amber-500">
+            Auto
+          </span>
+        )}
         <span className="text-label text-text-ghost flex items-center gap-1">
           <UserIcon size={12} />
-          {selectedEntry.agent_type}
+          {selectedEntry.agent_type && selectedEntry.agent_type !== "dashboard"
+            ? `Learned by ${selectedEntry.agent_type} agent`
+            : selectedEntry.tags.includes("auto-extracted")
+              ? "Auto-extracted from session"
+              : selectedEntry.agent_type}
         </span>
         {detail?.created_at && (
           <span className="text-label text-text-ghost">
@@ -195,16 +224,22 @@ export function MemoryDetail() {
           </span>
         )}
         {detail?.created_by && (
-          <span className="text-label text-text-ghost">
-            by {detail.created_by}
-          </span>
+          <span className="text-label text-text-ghost">by {detail.created_by}</span>
         )}
       </div>
 
       {/* Tags */}
       <div className="flex items-center gap-1.5 flex-wrap">
         {selectedEntry.tags.map((tag) => (
-          <span key={tag} className="text-label px-1.5 py-0.5 bg-bg-elevated text-text-secondary rounded">
+          <span
+            key={tag}
+            className={cn(
+              "text-label px-1.5 py-0.5 rounded",
+              tag === "auto-extracted"
+                ? "bg-amber-500/10 text-amber-500"
+                : "bg-bg-elevated text-text-secondary",
+            )}
+          >
             {tag}
           </span>
         ))}
@@ -242,7 +277,9 @@ export function MemoryDetail() {
       {detail?.superseded_by && (
         <div className="flex items-center gap-2 text-label text-memory bg-memory/5 border border-memory/20 px-3 py-2 rounded">
           <ChevronRightIcon size={12} />
-          <span>Superseded by: <span className="font-mono">{detail.superseded_by}</span></span>
+          <span>
+            Superseded by: <span className="font-mono">{detail.superseded_by}</span>
+          </span>
         </div>
       )}
 
@@ -250,7 +287,9 @@ export function MemoryDetail() {
       {detail?.supersedes && (
         <div className="flex items-center gap-2 text-label text-text-ghost bg-bg-elevated px-3 py-2 rounded">
           <ChevronRightIcon size={12} />
-          <span>Supersedes: <span className="font-mono">{detail.supersedes}</span></span>
+          <span>
+            Supersedes: <span className="font-mono">{detail.supersedes}</span>
+          </span>
         </div>
       )}
 
@@ -276,17 +315,13 @@ function ContentSection({
     <div
       className={cn(
         "rounded border px-3 py-2.5",
-        accent
-          ? "border-memory/30 bg-memory/5"
-          : "border-border-default bg-bg-base",
+        accent ? "border-memory/30 bg-memory/5" : "border-border-default bg-bg-base",
       )}
     >
       <p className={cn("text-label font-medium mb-1", accent ? "text-memory" : "text-text-ghost")}>
         {title}
       </p>
-      <p className="text-xs text-text-primary leading-relaxed whitespace-pre-wrap">
-        {value}
-      </p>
+      <p className="text-xs text-text-primary leading-relaxed whitespace-pre-wrap">{value}</p>
     </div>
   );
 }

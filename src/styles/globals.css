@@ -70,8 +70,10 @@
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* --- Typography --- */
-  --font-sans: var(--font-geist-mono), "Geist Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
-  --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  --font-sans:
+    var(--font-geist-mono), "Geist Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  --font-mono:
+    var(--font-geist-mono), "Geist Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
 
   /* --- Legacy aliases (backward compat) --- */
   --elevation-0: var(--bg-base);
@@ -199,7 +201,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: -0.011em;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 /* =============================================================================
@@ -350,17 +354,30 @@ select:focus-visible {
    Text hierarchy utilities
    ============================================================================= */
 
-.text-bright { color: var(--text-emphasis); font-weight: 500; }
-.text-normal { color: var(--text-primary); }
-.text-secondary { color: var(--text-secondary); }
-.text-tertiary { color: var(--text-tertiary); }
+.text-bright {
+  color: var(--text-emphasis);
+  font-weight: 500;
+}
+.text-normal {
+  color: var(--text-primary);
+}
+.text-secondary {
+  color: var(--text-secondary);
+}
+.text-tertiary {
+  color: var(--text-tertiary);
+}
 
 /* =============================================================================
    Panel backgrounds with subtle gradient (legacy)
    ============================================================================= */
 
 .console-panel-bg {
-  background: linear-gradient(180deg, var(--panel-gradient-start) 0%, var(--panel-gradient-end) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--panel-gradient-start) 0%,
+    var(--panel-gradient-end) 100%
+  );
 }
 
 /* =============================================================================
@@ -400,13 +417,21 @@ kbd {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes slideIn {
@@ -455,8 +480,12 @@ kbd {
    ============================================================================= */
 
 @keyframes fullscreenFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .animate-fade-in {
@@ -487,8 +516,13 @@ kbd {
    ============================================================================= */
 
 @keyframes statusPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 .animate-status-pulse {
@@ -501,17 +535,24 @@ kbd {
 
 /* Gate badge color transitions */
 .gate-badge {
-  transition: background-color 400ms ease, color 400ms ease, border-color 400ms ease;
+  transition:
+    background-color 400ms ease,
+    color 400ms ease,
+    border-color 400ms ease;
 }
 
 /* Terminal focus border transition */
 .terminal-pane-border {
-  transition: border-color 200ms ease, box-shadow 200ms ease;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease;
 }
 
 /* Sidebar collapse transition */
 .sidebar-transition {
-  transition: width 200ms ease, opacity 150ms ease;
+  transition:
+    width 200ms ease,
+    opacity 150ms ease;
 }
 
 /* =============================================================================
@@ -520,7 +561,9 @@ kbd {
 
 /* Button hover lift */
 .btn-lift {
-  transition: transform 150ms ease, box-shadow 150ms ease;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
 }
 .btn-lift:hover {
   transform: translateY(-1px);
@@ -531,7 +574,10 @@ kbd {
 
 /* Sidebar item transitions */
 .sidebar-item {
-  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
 }
 
 /* Tab content transition */
@@ -684,8 +730,9 @@ kbd {
    ============================================================================= */
 
 .nav-indicator-slide {
-  transition: top var(--duration-smooth) cubic-bezier(0.16, 1, 0.3, 1),
-              height var(--duration-smooth) cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    top var(--duration-smooth) cubic-bezier(0.16, 1, 0.3, 1),
+    height var(--duration-smooth) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* =============================================================================
@@ -693,8 +740,12 @@ kbd {
    ============================================================================= */
 
 @keyframes sessionCrossfade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .animate-session-crossfade {
@@ -721,7 +772,9 @@ kbd {
 }
 
 @keyframes typing-bounce {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0);
     opacity: 0.4;
   }
@@ -729,4 +782,22 @@ kbd {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+/* =============================================================================
+   Memory nav icon pulse — triggered on memory-extracted events
+   ============================================================================= */
+
+@keyframes memoryPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(167, 139, 250, 0);
+  }
+  50% {
+    box-shadow: 0 0 8px 2px rgba(167, 139, 250, 0.4);
+  }
+}
+
+.animate-memory-pulse {
+  animation: memoryPulse 1.5s ease-in-out infinite;
 }

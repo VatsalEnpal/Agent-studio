@@ -11,6 +11,8 @@ interface UIState {
   launcherOpen: boolean;
   commandPaletteOpen: boolean;
   theme: Theme;
+  /** Briefly true after a memory-extracted WS event, resets after 3s */
+  memoryPulse: boolean;
 
   setActiveMode: (mode: ActiveMode) => void;
   toggleSidebar: () => void;
@@ -22,6 +24,8 @@ interface UIState {
   toggleTheme: () => void;
   /** Navigate to a specific session by id — switches to sessions mode and focuses it */
   navigateToSession: (sessionId: string) => void;
+  /** Trigger a 3-second pulse on the Memory nav icon */
+  triggerMemoryPulse: () => void;
 }
 
 function getInitialTheme(): Theme {
@@ -38,6 +42,7 @@ export const useUIStore = create<UIState>((set) => ({
   launcherOpen: false,
   commandPaletteOpen: false,
   theme: getInitialTheme(),
+  memoryPulse: false,
 
   setActiveMode: (mode) => set({ activeMode: mode }),
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
@@ -58,5 +63,9 @@ export const useUIStore = create<UIState>((set) => ({
   navigateToSession: (sessionId) => {
     set({ activeMode: "sessions" });
     useSessionsStore.getState().setFocused(sessionId);
+  },
+  triggerMemoryPulse: () => {
+    set({ memoryPulse: true });
+    setTimeout(() => set({ memoryPulse: false }), 3000);
   },
 }));

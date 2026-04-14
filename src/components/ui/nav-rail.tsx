@@ -29,6 +29,8 @@ interface NavRailProps {
   onNavigate: (page: NavPage) => void;
   /** Badge counts keyed by page id */
   badges?: Partial<Record<NavPage, number>>;
+  /** When true, the Memory nav icon gets a brief glow animation */
+  memoryPulse?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -98,7 +100,7 @@ const navShortcuts: Record<NavPage, string> = {
 // Component
 // ---------------------------------------------------------------------------
 
-export function NavRail({ activePage, onNavigate, badges }: NavRailProps) {
+export function NavRail({ activePage, onNavigate, badges, memoryPulse }: NavRailProps) {
   return (
     <nav
       className={cn(
@@ -134,6 +136,7 @@ export function NavRail({ activePage, onNavigate, badges }: NavRailProps) {
             isActive={activePage != null && activePage === item.id}
             badge={badges?.[item.id]}
             onNavigate={onNavigate}
+            pulse={item.id === "knowledge" && memoryPulse}
           />
         ))}
       </div>
@@ -161,11 +164,13 @@ function NavRailItem({
   isActive,
   badge,
   onNavigate,
+  pulse,
 }: {
   item: Omit<NavItem, "badge"> & { hint?: string };
   isActive: boolean;
   badge?: number;
   onNavigate: (page: NavPage) => void;
+  pulse?: boolean;
 }) {
   const Icon = item.icon;
   const accentClass = item.accent ? pillarAccent[item.accent] : undefined;
@@ -188,6 +193,7 @@ function NavRailItem({
           isActive
             ? cn("bg-bg-elevated", accentClass ?? "text-text-primary")
             : "text-text-ghost hover:text-text-secondary hover:bg-bg-elevated/50",
+          pulse && "animate-memory-pulse",
         )}
       >
         {/* Active indicator — 2px accent bar on left edge */}

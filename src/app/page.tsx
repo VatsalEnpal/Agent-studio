@@ -141,6 +141,7 @@ export default function Home() {
   const selectWorkflow = useWorkflowV2Store((s) => s.selectWorkflow);
 
   const memoryEntryCount = useMemoryStore((s) => s.entries.filter((e) => !e.superseded_by).length);
+  const memoryPulse = useUIStore((s) => s.memoryPulse);
 
   // Hooks
   useKeyboardShortcuts();
@@ -319,6 +320,8 @@ export default function Home() {
             `${payload.count} learning${payload.count > 1 ? "s" : ""} saved from "${payload.sessionName}"`,
             "success",
           );
+        // Pulse the Memory nav icon for 3 seconds
+        useUIStore.getState().triggerMemoryPulse();
       }
     });
 
@@ -611,7 +614,12 @@ export default function Home() {
       {/* Main 3-column layout below title bar */}
       <div className="flex flex-1 min-h-0">
         {/* Nav rail */}
-        <NavRail activePage={currentNavPage} onNavigate={handleNavigate} badges={navBadges} />
+        <NavRail
+          activePage={currentNavPage}
+          onNavigate={handleNavigate}
+          badges={navBadges}
+          memoryPulse={memoryPulse}
+        />
 
         {/* Sidebar — content switches based on active mode */}
         <SidebarShell collapsed={!sidebarOpen}>
