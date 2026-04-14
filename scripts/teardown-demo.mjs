@@ -15,7 +15,7 @@
  *   node scripts/teardown-demo.mjs
  */
 
-import { existsSync, copyFileSync, rmSync, unlinkSync } from "node:fs";
+import { existsSync, copyFileSync, rmSync, unlinkSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const BASE_URL = "http://localhost:8080";
@@ -119,6 +119,69 @@ const roomsDir = join(PROJECT_ROOT, ".agent-studio-rooms");
 if (existsSync(roomsDir)) {
   rmSync(roomsDir, { recursive: true, force: true });
   log("🗑️", "Removed .agent-studio-rooms persistence dir");
+}
+
+// Step 8: Clean fake agents from real project directories
+const KNOWN_FAKE_AGENTS = [
+  "datadog-expert.md",
+  "gdpr-compliance.md",
+  "nextjs-core-dev.md",
+  "security-expert.md",
+];
+
+const manifestPath = join(PROJECT_ROOT, ".shiploop", "seed-manifest.json");
+let manifestFiles = [];
+
+if (existsSync(manifestPath)) {
+  try {
+    manifestFiles = JSON.parse(readFileSync(manifestPath, "utf-8"));
+    log("📋", `Found seed manifest with ${manifestFiles.length} files`);
+  } catch {
+    log("⚠️", "Could not parse seed manifest");
+  }
+}
+
+// Clean manifest files
+if (manifestFiles.length > 0) {
+  let cleaned = 0;
+  for (const f of manifestFiles) {
+    if (existsSync(f)) {
+      unlinkSync(f);
+      cleaned++;
+    }
+  }
+  if (cleaned > 0) log("🗑️", `Removed ${cleaned} seeded file(s) from manifest`);
+  // Remove the manifest itself
+  unlinkSync(manifestPath);
+  log("🗑️", "Removed seed manifest");
+} else {
+  // Fallback: clean known fake agents from project dirs
+  let configData = null;
+  try {
+    if (existsSync(configPath)) {
+      configData = JSON.parse(readFileSync(configPath, "utf-8"));
+    } else if (existsSync(backupPath)) {
+      configData = JSON.parse(readFileSync(backupPath, "utf-8"));
+    }
+  } catch {
+    // ignore
+  }
+
+  if (configData?.projects) {
+    let cleaned = 0;
+    for (const proj of configData.projects) {
+      const agentsDir = join(proj.path, ".claude", "agents");
+      for (const fakeAgent of KNOWN_FAKE_AGENTS) {
+        const fpath = join(agentsDir, fakeAgent);
+        if (existsSync(fpath)) {
+          unlinkSync(fpath);
+          cleaned++;
+        }
+      }
+    }
+    if (cleaned > 0) log("🗑️", `Removed ${cleaned} fake agent(s) from project directories`);
+    else log("✅", "No fake agents found in project directories");
+  }
 }
 
 console.log("\n✨ Teardown complete. Real config restored.\n");
