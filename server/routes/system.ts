@@ -606,7 +606,7 @@ export function systemRoutes(
             try {
               const stat = fss(fullPath);
               if (!stat.isDirectory()) continue;
-              const resolved = fsrp(fullPath);
+              const resolved = fsrp(fullPath).toLowerCase();
               if (seenPaths.has(resolved)) continue;
               if (!fse(pj(fullPath, ".git"))) continue;
               seenPaths.add(resolved);

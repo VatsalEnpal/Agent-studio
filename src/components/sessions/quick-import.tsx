@@ -51,9 +51,16 @@ export function QuickImport({ onLaunchSession, onImportComplete }: QuickImportPr
           return;
         }
         const data = (await res.json()) as { projects: DetectedProject[] };
-        // Only show projects without existing agent systems
+        // Only show projects without existing agent systems, deduplicated by name
         const unimported = (data.projects ?? []).filter((p) => !p.hasAgentSystem);
-        setProjects(unimported);
+        const seen = new Set<string>();
+        const deduped = unimported.filter((p) => {
+          const key = p.name.toLowerCase();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        setProjects(deduped);
       } catch {
         // Silently fail -- this is a nice-to-have section
       } finally {
