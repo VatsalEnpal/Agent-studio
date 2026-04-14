@@ -29,6 +29,7 @@ import {
   stopDevServer,
   addCustomServer,
   removeCustomServer,
+  getCustomServers,
 } from "./dev-servers.js";
 import { execSync, exec } from "node:child_process";
 import {
@@ -3906,6 +3907,24 @@ Choose the schedule and model based on the task:
     // eslint-disable-next-line no-console
     console.log(`Agent Studio running on http://localhost:${port}`);
   });
+
+  // Auto-start custom dev servers with autoStart flag
+  const autoStartServers = getCustomServers().filter((s) => s.autoStart);
+  if (autoStartServers.length > 0) {
+    for (const s of autoStartServers) {
+      startDevServer(s.cwd, s.command)
+        .then((result) => {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Auto-started "${s.name}": pid=${result.pid} port=${result.port} status=${result.status}`,
+          );
+        })
+        .catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error(`Failed to auto-start "${s.name}":`, err);
+        });
+    }
+  }
 
   // Prepare Next.js in the background — doesn't block API routes
   const nextApp = next({ dev, hostname: "127.0.0.1", port });
