@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { FolderIcon, PlusIcon, CloseIcon, RefreshIcon, WarningIcon, CheckIcon, BrainIcon, SpinnerIcon, SparkleIcon } from "@/components/ui/icons";
+import {
+  FolderIcon,
+  PlusIcon,
+  CloseIcon,
+  RefreshIcon,
+  WarningIcon,
+  CheckIcon,
+  BrainIcon,
+  SpinnerIcon,
+  SparkleIcon,
+} from "@/components/ui/icons";
 import { useToastStore } from "@/stores/toast";
 import { cn } from "@/lib/utils";
 import { ScaffoldDialog } from "./scaffold-dialog";
@@ -44,7 +54,7 @@ export function SettingsWorkspace() {
       try {
         const res = await fetch("/api/config");
         if (res.ok) {
-          const data = await res.json() as { config: WorkspaceConfig };
+          const data = (await res.json()) as { config: WorkspaceConfig };
           setConfig(data.config);
         }
       } catch (err) {
@@ -105,9 +115,7 @@ export function SettingsWorkspace() {
       if (!config) return;
       const updated = {
         ...config,
-        projects: config.projects.map((p, i) =>
-          i === idx ? { ...p, isProd: !p.isProd } : p,
-        ),
+        projects: config.projects.map((p, i) => (i === idx ? { ...p, isProd: !p.isProd } : p)),
       };
       void saveConfig(updated);
     },
@@ -161,11 +169,17 @@ export function SettingsWorkspace() {
         body: JSON.stringify({ analysis, projectPath }),
       });
       if (!genRes.ok) {
-        const err = await genRes.json() as { error?: string };
+        const err = (await genRes.json()) as { error?: string };
         throw new Error(err.error ?? "Generation failed");
       }
-      const genData = await genRes.json() as {
-        agents: Array<{ id: string; name: string; description: string; model: string; mdContent: string }>;
+      const genData = (await genRes.json()) as {
+        agents: Array<{
+          id: string;
+          name: string;
+          description: string;
+          model: string;
+          mdContent: string;
+        }>;
         claudeMd?: string;
       };
       const agents = genData.agents ?? [];
@@ -177,7 +191,7 @@ export function SettingsWorkspace() {
         body: JSON.stringify({ agents, projectPath, claudeMd: genData.claudeMd }),
       });
       if (!applyRes.ok) throw new Error("Failed to write agent files");
-      const result = await applyRes.json() as { created: string[] };
+      const result = (await applyRes.json()) as { created: string[] };
 
       addToast(`Regenerated ${agents.length} agents (${result.created.length} files)`, "success");
     } catch (err) {
@@ -229,7 +243,8 @@ export function SettingsWorkspace() {
                     No projects tracked. Add a project path below to get started.
                   </p>
                   <p className="text-label text-text-ghost mt-1">
-                    Projects let Agent Studio discover agents, sprints, and memory for your codebase.
+                    Projects let Agent Studio discover agents, sprints, and memory for your
+                    codebase.
                   </p>
                 </div>
               ) : (
@@ -238,9 +253,7 @@ export function SettingsWorkspace() {
                     key={`${p.path}-${i}`}
                     className="flex items-center gap-2 px-2 py-1.5 bg-bg-base border border-border-default rounded text-body"
                   >
-                    <span className="flex-1 font-mono text-text-primary truncate">
-                      {p.path}
-                    </span>
+                    <span className="flex-1 font-mono text-text-primary truncate">{p.path}</span>
                     <button
                       onClick={() => toggleProd(i)}
                       className={cn(
@@ -273,7 +286,7 @@ export function SettingsWorkspace() {
                   if (e.key === "Enter") addProject();
                 }}
                 placeholder="/path/to/project"
-                className="flex-1 px-2 py-1 text-body font-mono bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:border-rooms focus:outline-none"
+                className="flex-1 px-2 py-1 text-body font-mono bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:border-[#f59e0b]/40 focus:outline-none"
               />
               <button
                 onClick={addProject}
@@ -322,7 +335,11 @@ export function SettingsWorkspace() {
                   <div className="space-y-1.5">
                     <p className="text-text-primary font-medium">No agent system detected</p>
                     <p className="text-text-secondary leading-relaxed">
-                      Teams, Memory, and Workflows need an <code className="text-rooms bg-bg-elevated px-1 py-0.5 rounded text-label">ai-agents/</code> folder in your project.
+                      Teams, Memory, and Workflows need an{" "}
+                      <code className="text-rooms bg-bg-elevated px-1 py-0.5 rounded text-label">
+                        ai-agents/
+                      </code>{" "}
+                      folder in your project.
                     </p>
                   </div>
                 </div>
@@ -336,7 +353,11 @@ export function SettingsWorkspace() {
                   </button>
                 )}
                 <p className="text-label text-text-tertiary leading-relaxed pl-0.5">
-                  This creates: <code className="text-text-secondary">ai-agents/memory/</code>, <code className="text-text-secondary">ai-agents/sprints/</code>, <code className="text-text-secondary">ai-agents/tools/</code>, and <code className="text-text-secondary">.claude/agents/</code> with your custom agent definitions.
+                  This creates: <code className="text-text-secondary">ai-agents/memory/</code>,{" "}
+                  <code className="text-text-secondary">ai-agents/sprints/</code>,{" "}
+                  <code className="text-text-secondary">ai-agents/tools/</code>, and{" "}
+                  <code className="text-text-secondary">.claude/agents/</code> with your custom
+                  agent definitions.
                 </p>
               </div>
             )}

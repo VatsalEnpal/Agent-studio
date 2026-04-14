@@ -477,7 +477,7 @@ export function SettingsAutomations() {
                   void generateFromDescription();
                 }
               }}
-              className="flex-1 px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary/50 focus:border-rooms focus:outline-none"
+              className="flex-1 px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary placeholder:text-text-tertiary/50 focus:border-[#f59e0b]/40 focus:outline-none"
             />
             <button
               onClick={() => void generateFromDescription()}
@@ -665,7 +665,7 @@ function AutomationCreator({
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary focus:border-rooms focus:outline-none"
+                  className="w-full px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary focus:border-[#f59e0b]/40 focus:outline-none"
                 />
               </div>
               <div>
@@ -673,7 +673,7 @@ function AutomationCreator({
                 <select
                   value={schedule}
                   onChange={(e) => setSchedule(e.target.value)}
-                  className="w-full px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary focus:border-rooms focus:outline-none"
+                  className="w-full px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary focus:border-[#f59e0b]/40 focus:outline-none"
                 >
                   {SCHEDULE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -689,7 +689,7 @@ function AutomationCreator({
               <select
                 value={model}
                 onChange={(e) => setModel(e.target.value as "opus" | "sonnet" | "haiku")}
-                className="w-full px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary focus:border-rooms focus:outline-none"
+                className="w-full px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary focus:border-[#f59e0b]/40 focus:outline-none"
               >
                 <option value="opus">Opus</option>
                 <option value="sonnet">Sonnet</option>
@@ -715,7 +715,7 @@ function AutomationCreator({
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   rows={5}
-                  className="w-full px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary font-mono focus:border-rooms focus:outline-none resize-none"
+                  className="w-full px-2 py-1.5 text-xs bg-bg-base border border-border-default rounded text-text-primary font-mono focus:border-[#f59e0b]/40 focus:outline-none resize-none"
                 />
               )}
             </div>

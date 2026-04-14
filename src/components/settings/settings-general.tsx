@@ -97,7 +97,7 @@ export function SettingsGeneral() {
                     e.target.value as "bypass" | "default" | "plan",
                   )
                 }
-                className="px-2 py-1.5 text-label bg-bg-base border border-border-default rounded text-text-primary focus:outline-none focus:border-border-subtle"
+                className="px-2 py-1.5 text-label bg-bg-base border border-border-default rounded text-text-primary focus:outline-none focus:border-[#f59e0b]/40"
               >
                 <option value="bypass">Bypass (skip permissions)</option>
                 <option value="default">Default</option>
@@ -114,7 +114,7 @@ export function SettingsGeneral() {
                 type="text"
                 value={settings.defaultCwd}
                 onChange={(e) => updateSetting("defaultCwd", e.target.value)}
-                className="w-full px-2 py-1.5 text-body font-mono bg-bg-base border border-border-default rounded text-text-primary focus:outline-none focus:border-border-subtle"
+                className="w-full px-2 py-1.5 text-body font-mono bg-bg-base border border-border-default rounded text-text-primary focus:outline-none focus:border-[#f59e0b]/40"
               />
             </div>
 
