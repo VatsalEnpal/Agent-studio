@@ -6,7 +6,6 @@ import {
   RoomsIcon,
   SprintsIcon,
   MemoryIcon,
-  FileIcon,
   SettingsIcon,
 } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -15,7 +14,7 @@ import { cn } from "@/lib/utils";
 // Types
 // ---------------------------------------------------------------------------
 
-export type NavPage = "sessions" | "teams" | "sprints" | "knowledge" | "reports" | "settings";
+export type NavPage = "sessions" | "teams" | "sprints" | "knowledge" | "settings";
 
 interface NavItem {
   id: NavPage;
@@ -25,7 +24,7 @@ interface NavItem {
 }
 
 interface NavRailProps {
-  /** When `null` (e.g. Reports from the top toggle), no pillar is highlighted. */
+  /** When `null`, no pillar is highlighted. */
   activePage: NavPage | null;
   onNavigate: (page: NavPage) => void;
   /** Badge counts keyed by page id */
@@ -41,7 +40,6 @@ const pillarAccent: Record<string, string> = {
   teams: "text-rooms",
   sprints: "text-sprints",
   knowledge: "text-memory",
-  reports: "text-text-secondary",
 };
 
 /** Accent-colored dot backgrounds for unread indicators */
@@ -50,7 +48,6 @@ const accentDot: Record<string, string> = {
   teams: "bg-rooms",
   sprints: "bg-sprints",
   knowledge: "bg-memory",
-  reports: "bg-text-secondary",
 };
 
 // ---------------------------------------------------------------------------
@@ -86,13 +83,6 @@ const sectionItems: (Omit<NavItem, "badge"> & { hint: string })[] = [
     accent: "knowledge",
     hint: "Agent learnings and knowledge base",
   },
-  {
-    id: "reports",
-    label: "Reports",
-    icon: FileIcon,
-    accent: "reports",
-    hint: "Automation output and approvals",
-  },
 ];
 
 /** Keyboard shortcut hints for nav tooltips */
@@ -101,7 +91,6 @@ const navShortcuts: Record<NavPage, string> = {
   teams: "\u2318 2",
   sprints: "\u2318 3",
   knowledge: "\u2318 4",
-  reports: "\u2318 5",
   settings: "\u2318 ,",
 };
 

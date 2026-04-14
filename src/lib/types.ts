@@ -90,7 +90,7 @@ export interface RepoStatus {
   branches?: BranchInfo[];
 }
 
-export type ActiveMode = "sessions" | "teams" | "sprints" | "memory" | "reports" | "settings";
+export type ActiveMode = "sessions" | "teams" | "sprints" | "memory" | "settings";
 
 export interface LauncherPreset {
   name: string;

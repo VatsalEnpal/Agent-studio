@@ -9,19 +9,13 @@ import type { ActiveMode } from "@/lib/types";
 // Section order for ⌘1-5 shortcuts
 // ---------------------------------------------------------------------------
 
-const sectionByIndex: ActiveMode[] = [
-  "sessions",
-  "teams",
-  "sprints",
-  "memory",
-  "reports",
-];
+const sectionByIndex: ActiveMode[] = ["sessions", "teams", "sprints", "memory"];
 
 /**
  * Global keyboard shortcuts.
  *
  * Section navigation:
- * - ⌘1-5: switch between Sessions / Teams / Sprints / Memory / Reports
+ * - ⌘1-4: switch between Sessions / Teams / Sprints / Memory
  * - ⌘[: previous sidebar item, ⌘]: next sidebar item
  *
  * Session management (Cmd+Shift to avoid browser/OS conflicts):
@@ -109,12 +103,8 @@ export function useKeyboardShortcuts() {
         // For sessions mode, cycle through visible session tabs
         const mode = useUIStore.getState().activeMode;
         if (mode === "sessions" && visibleIds.length > 0) {
-          const currentIndex = focusedId
-            ? visibleIds.indexOf(focusedId)
-            : -1;
-          const nextIndex =
-            (currentIndex + direction + visibleIds.length) %
-            visibleIds.length;
+          const currentIndex = focusedId ? visibleIds.indexOf(focusedId) : -1;
+          const nextIndex = (currentIndex + direction + visibleIds.length) % visibleIds.length;
           setFocused(visibleIds[nextIndex]);
         }
         // Other modes: sections agent can hook into this via a store event
@@ -170,18 +160,10 @@ export function useKeyboardShortcuts() {
       }
 
       // Tab: cycle focus (only when launcher and palette are closed and not typing)
-      if (
-        e.key === "Tab" &&
-        !launcherOpen &&
-        !commandPaletteOpen &&
-        !mod &&
-        !isTyping
-      ) {
+      if (e.key === "Tab" && !launcherOpen && !commandPaletteOpen && !mod && !isTyping) {
         e.preventDefault();
         if (visibleIds.length === 0) return;
-        const currentIndex = focusedId
-          ? visibleIds.indexOf(focusedId)
-          : -1;
+        const currentIndex = focusedId ? visibleIds.indexOf(focusedId) : -1;
         const nextIndex = (currentIndex + 1) % visibleIds.length;
         setFocused(visibleIds[nextIndex]);
         return;

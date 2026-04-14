@@ -45,7 +45,6 @@ import { CreateWorkflowDialog } from "@/components/workflows/create-workflow-dia
 import { useWorkflowV2Store } from "@/stores/workflows-v2";
 
 import { MemoryView } from "@/components/memory/memory-view";
-import { ReportsView } from "@/components/reports/reports-view";
 import { SettingsView } from "@/components/settings/settings-view";
 import { DevServersView } from "@/components/dev-servers/dev-servers-view";
 
@@ -85,7 +84,6 @@ const modeToNav: Record<ActiveMode, NavPage | null> = {
   sessions: "sessions",
   teams: "teams",
   sprints: "sprints",
-  reports: "reports",
   memory: "knowledge",
   settings: "settings",
 };
@@ -95,7 +93,6 @@ const navToMode: Record<NavPage, ActiveMode> = {
   teams: "teams",
   sprints: "sprints",
   knowledge: "memory",
-  reports: "reports",
   settings: "settings",
 };
 
@@ -646,14 +643,6 @@ export default function Home() {
               </p>
             </div>
           )}
-          {activeMode === "reports" && (
-            <div className="px-3 py-2.5">
-              <h3 className="text-label uppercase tracking-wider text-text-ghost">Reports</h3>
-              <p className="text-2xs text-text-tertiary mt-1 leading-snug">
-                Automation output and approvals. Configure schedules in Settings.
-              </p>
-            </div>
-          )}
           {activeMode === "settings" && (
             <div className="px-3 py-2.5">
               <h3 className="text-label uppercase tracking-wider text-text-ghost">Settings</h3>
@@ -782,17 +771,6 @@ export default function Home() {
             >
               <ErrorBoundary fallbackLabel="Memory view error">
                 <MemoryView />
-              </ErrorBoundary>
-            </div>
-
-            {/* Reports (scheduled automations) */}
-            <div
-              className={
-                activeMode === "reports" ? "absolute inset-0 z-10 animate-page-crossfade" : "hidden"
-              }
-            >
-              <ErrorBoundary fallbackLabel="Reports view error">
-                <ReportsView />
               </ErrorBoundary>
             </div>
 

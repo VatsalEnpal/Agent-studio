@@ -61,8 +61,6 @@ import {
   automationTemplatesRoutes,
   automationSuggestionsRoute,
 } from "./routes/automations.js";
-import { reportsRoutes } from "./routes/reports.js";
-
 const port = parseInt(process.env["PORT"] ?? "8080", 10);
 const dev = process.env["NODE_ENV"] !== "production";
 
@@ -344,9 +342,6 @@ async function main() {
   app.use("/api/automations", automationsRoutes({ automationEngine, ...routeDeps }));
   app.use("/api/automation-templates", automationTemplatesRoutes());
   app.use("/api/automation-suggestions", automationSuggestionsRoute(routeDeps));
-
-  // Reports
-  app.use("/api/reports", reportsRoutes(automationEngine));
 
   // Settings (config, setup wizard, scaffold, settings)
   app.use("/api", settingsRoutes(workflowManager, routeDeps));
