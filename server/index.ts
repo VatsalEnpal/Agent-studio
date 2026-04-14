@@ -1930,9 +1930,20 @@ Choose the schedule and model based on the task:
         ],
       };
 
-      // Add to workflow manager's in-memory flows
+      // Persist sprint to disk
+      const sprintsDir = path.join(process.cwd(), ".agent-studio", "sprints");
+      if (!fs.existsSync(sprintsDir)) {
+        fs.mkdirSync(sprintsDir, { recursive: true });
+      }
+      fs.writeFileSync(
+        path.join(sprintsDir, `${sprintId}.json`),
+        JSON.stringify(flow, null, 2),
+        "utf-8",
+      );
+
+      // Reload registry so it picks up the persisted sprint file
+      workflowManager.reload();
       const flows = await workflowManager.getFlows();
-      flows.unshift(flow as never);
 
       // Broadcast initial planned state
       broadcast(wss, {
