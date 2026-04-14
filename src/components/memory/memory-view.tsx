@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useCallback, useState } from "react";
+import { useEffect, useMemo, useCallback, useState, useRef } from "react";
 import {
   SearchIcon,
   MemoryIcon,
@@ -8,6 +8,8 @@ import {
   EditIcon,
   TrashIcon,
   SettingsIcon,
+  DownloadIcon,
+  UploadIcon,
 } from "@/components/ui/icons";
 import { useMemoryStore, type MemoryEntry, type MemoryEntryDetail } from "@/stores/memory";
 import { useToastStore } from "@/stores/toast";
@@ -84,6 +86,71 @@ export function MemoryView() {
   const setSelectedDetail = useMemoryStore((s) => s.setSelectedDetail);
   const setDetailLoading = useMemoryStore((s) => s.setDetailLoading);
   const openCreateDialog = useMemoryStore((s) => s.openCreateDialog);
+  const addToast = useToastStore((s) => s.addToast);
+  const importInputRef = useRef<HTMLInputElement>(null);
+
+  // Export all memories as JSON download
+  const handleExport = useCallback(async () => {
+    try {
+      const res = await fetch("/api/memory/export");
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `agent-studio-memories-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      addToast("Memories exported", "success");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      addToast(`Export failed: ${msg}`, "error");
+    }
+  }, [addToast]);
+
+  // Import memories from JSON file
+  const handleImportFile = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        const res = await fetch("/api/memory/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(json),
+        });
+        if (!res.ok) throw new Error("Import failed");
+        const data = (await res.json()) as {
+          imported?: number;
+          skipped?: number;
+        };
+        addToast(
+          `Imported ${data.imported ?? 0} memories (${data.skipped ?? 0} skipped as duplicates)`,
+          "success",
+        );
+        // Reload entries
+        setLoading(true);
+        fetch("/api/memory/entries")
+          .then((r) => r.json())
+          .then((d: { entries: MemoryEntry[]; total: number }) => {
+            setEntries(d.entries ?? []);
+          })
+          .catch(() => setEntries([]))
+          .finally(() => setLoading(false));
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        addToast(`Import failed: ${msg}`, "error");
+      } finally {
+        // Reset the input so the same file can be re-selected
+        if (importInputRef.current) importInputRef.current.value = "";
+      }
+    },
+    [addToast, setLoading, setEntries],
+  );
 
   // Load entries on mount
   useEffect(() => {
@@ -255,6 +322,30 @@ export function MemoryView() {
           <PlusIcon size={10} />
           New
         </button>
+        <div className="w-px h-4 bg-border-default" />
+        <button
+          onClick={handleExport}
+          className="flex items-center gap-1 px-1.5 py-1 text-xs text-text-ghost hover:text-text-secondary transition-all shrink-0"
+          title="Export memories as JSON"
+        >
+          <DownloadIcon size={12} />
+          Export
+        </button>
+        <button
+          onClick={() => importInputRef.current?.click()}
+          className="flex items-center gap-1 px-1.5 py-1 text-xs text-text-ghost hover:text-text-secondary transition-all shrink-0"
+          title="Import memories from JSON"
+        >
+          <UploadIcon size={12} />
+          Import
+        </button>
+        <input
+          ref={importInputRef}
+          type="file"
+          accept=".json"
+          onChange={handleImportFile}
+          className="hidden"
+        />
       </div>
 
       {/* Category pills + Pinned filter */}

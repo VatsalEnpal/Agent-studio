@@ -118,6 +118,7 @@ async function main() {
                 content: mem.content,
                 tags: [...mem.tags, "auto-extracted", mem.sourceAgent ?? "unknown"].filter(Boolean),
                 pinned: false,
+                agent_type: mem.sourceAgent ?? "auto-extract",
               }),
             });
             if (!res.ok) {

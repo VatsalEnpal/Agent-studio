@@ -108,16 +108,10 @@ export const SearchIcon = icon(
 );
 
 /** Chevron down */
-export const ChevronDownIcon = icon(
-  <polyline points="4 6 8 10 12 6" />,
-  "ChevronDownIcon",
-);
+export const ChevronDownIcon = icon(<polyline points="4 6 8 10 12 6" />, "ChevronDownIcon");
 
 /** Chevron right */
-export const ChevronRightIcon = icon(
-  <polyline points="6 4 10 8 6 12" />,
-  "ChevronRightIcon",
-);
+export const ChevronRightIcon = icon(<polyline points="6 4 10 8 6 12" />, "ChevronRightIcon");
 
 /** Split screen */
 export const SplitIcon = icon(
@@ -159,16 +153,10 @@ export const TrashIcon = icon(
 );
 
 /** Filter / funnel */
-export const FilterIcon = icon(
-  <path d="M2.5 3.5h11L9 8.5v4l-2 1.5v-5.5z" />,
-  "FilterIcon",
-);
+export const FilterIcon = icon(<path d="M2.5 3.5h11L9 8.5v4l-2 1.5v-5.5z" />, "FilterIcon");
 
 /** Checkmark */
-export const CheckIcon = icon(
-  <polyline points="3.5 8.5 6.5 11.5 12.5 4.5" />,
-  "CheckIcon",
-);
+export const CheckIcon = icon(<polyline points="3.5 8.5 6.5 11.5 12.5 4.5" />, "CheckIcon");
 
 /** Warning triangle */
 export const WarningIcon = icon(
@@ -233,10 +221,7 @@ export const ArrowLeftIcon = icon(
 // ---------------------------------------------------------------------------
 
 /** Chevron up */
-export const ChevronUpIcon = icon(
-  <polyline points="4 10 8 6 12 10" />,
-  "ChevronUpIcon",
-);
+export const ChevronUpIcon = icon(<polyline points="4 10 8 6 12 10" />, "ChevronUpIcon");
 
 /** Save / floppy disk */
 export const SaveIcon = icon(
@@ -282,10 +267,7 @@ export const ClockIcon = icon(
 );
 
 /** Play triangle */
-export const PlayIcon = icon(
-  <polygon points="5 3 13 8 5 13" />,
-  "PlayIcon",
-);
+export const PlayIcon = icon(<polygon points="5 3 13 8 5 13" />, "PlayIcon");
 
 /** Pause */
 export const PauseIcon = icon(
@@ -297,10 +279,7 @@ export const PauseIcon = icon(
 );
 
 /** Stop / square */
-export const StopIcon = icon(
-  <rect x="3.5" y="3.5" width="9" height="9" rx="1" />,
-  "StopIcon",
-);
+export const StopIcon = icon(<rect x="3.5" y="3.5" width="9" height="9" rx="1" />, "StopIcon");
 
 /** CPU chip */
 export const CpuIcon = icon(
@@ -385,10 +364,7 @@ export const GitPRIcon = icon(
 );
 
 /** Lightning bolt */
-export const BoltIcon = icon(
-  <polygon points="9 2 4 9 8 9 7 14 12 7 8 7" />,
-  "BoltIcon",
-);
+export const BoltIcon = icon(<polygon points="9 2 4 9 8 9 7 14 12 7 8 7" />, "BoltIcon");
 
 /** Rocket */
 export const RocketIcon = icon(
@@ -434,6 +410,16 @@ export const UploadIcon = icon(
   "UploadIcon",
 );
 
+/** Download / arrow-down into tray */
+export const DownloadIcon = icon(
+  <>
+    <line x1="8" y1="3" x2="8" y2="10" />
+    <polyline points="5 7.5 8 10 11 7.5" />
+    <path d="M3 10v3a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-3" />
+  </>,
+  "DownloadIcon",
+);
+
 /** External link / arrow square out */
 export const ExternalLinkIcon = icon(
   <>
@@ -461,10 +447,7 @@ export const SunIcon = icon(
 );
 
 /** Moon */
-export const MoonIcon = icon(
-  <path d="M12 10A6 6 0 0 1 6 4a6 6 0 1 0 6 6z" />,
-  "MoonIcon",
-);
+export const MoonIcon = icon(<path d="M12 10A6 6 0 0 1 6 4a6 6 0 1 0 6 6z" />, "MoonIcon");
 
 /** Sparkle / star */
 export const SparkleIcon = icon(
@@ -579,10 +562,7 @@ export const GaugeIcon = icon(
 );
 
 /** Circle (hollow) */
-export const CircleIcon = icon(
-  <circle cx="8" cy="8" r="5" />,
-  "CircleIcon",
-);
+export const CircleIcon = icon(<circle cx="8" cy="8" r="5" />, "CircleIcon");
 
 /** Check circle */
 export const CheckCircleIcon = icon(
@@ -644,10 +624,7 @@ export const ChartBarIcon = icon(
 );
 
 /** Spinner / loading */
-export const SpinnerIcon = icon(
-  <path d="M8 2a6 6 0 0 1 6 6" />,
-  "SpinnerIcon",
-);
+export const SpinnerIcon = icon(<path d="M8 2a6 6 0 0 1 6 6" />, "SpinnerIcon");
 
 /** Clock counter-clockwise / history */
 export const HistoryIcon = icon(
@@ -670,10 +647,7 @@ export const PlusCircleIcon = icon(
 );
 
 /** Pencil / edit simple */
-export const PencilIcon = icon(
-  <path d="M11.5 2.5l2 2L5 13H3v-2z" />,
-  "PencilIcon",
-);
+export const PencilIcon = icon(<path d="M11.5 2.5l2 2L5 13H3v-2z" />, "PencilIcon");
 
 /** File code */
 export const FileCodeIcon = icon(
