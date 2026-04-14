@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import next from "next";
 import { WebSocketServer, WebSocket } from "ws";
 import { TerminalManager } from "./terminal-manager.js";
+import { extractMemories } from "./memory-extractor.js";
 import {
   getAllSessionUsage,
   getSessionUsage,
@@ -96,6 +97,51 @@ async function main() {
   const wss = new WebSocketServer({ noServer: true });
   const terminalManager = new TerminalManager();
   const gitWatcher = new GitWatcher();
+
+  // --- Memory auto-extraction on session close ---
+  terminalManager.onSessionClose = (session, buffer) => {
+    extractMemories(buffer, undefined, {
+      agentName: session.meta?.agent ?? session.name,
+      sessionId: session.id,
+    })
+      .then(async (memories) => {
+        if (memories.length === 0) return;
+        // Save each extracted memory via the memory API endpoint
+        for (const mem of memories) {
+          try {
+            const res = await fetch(`http://127.0.0.1:${port}/api/memory/entries`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                title: mem.title,
+                category: mem.category,
+                content: mem.content,
+                tags: [...mem.tags, "auto-extracted", mem.sourceAgent ?? "unknown"].filter(Boolean),
+                pinned: false,
+              }),
+            });
+            if (!res.ok) {
+              // eslint-disable-next-line no-console
+              console.warn("[memory-extract] Failed to save memory:", await res.text());
+            }
+          } catch {
+            // Memory save failed — non-critical
+          }
+        }
+        // Broadcast to clients so UI can update
+        broadcast(wss, {
+          type: "memory-extracted",
+          payload: {
+            count: memories.length,
+            sessionName: session.name,
+            titles: memories.map((m) => m.title),
+          },
+        } satisfies WsMessage);
+      })
+      .catch(() => {
+        // Extraction failed — non-critical, don't crash
+      });
+  };
 
   // --- Room management ---
   const roomManager = new RoomManager();

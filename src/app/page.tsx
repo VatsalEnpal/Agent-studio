@@ -13,6 +13,7 @@ import { useThemeSync } from "@/hooks/use-theme-sync";
 import { useContextWarning } from "@/hooks/use-context-warning";
 import { useUsage } from "@/hooks/use-usage";
 import { useMemoryStore } from "@/stores/memory";
+import { useToastStore } from "@/stores/toast";
 import { initNotificationManager } from "@/lib/notification-manager";
 import { onBadgeUpdate } from "@/lib/notification-manager";
 
@@ -309,6 +310,18 @@ export default function Home() {
       }
     });
 
+    const unsubMemoryExtracted = wsClient.on("memory-extracted", (msg: WsMessage) => {
+      const payload = msg.payload as { count: number; sessionName: string; titles: string[] };
+      if (payload?.count > 0) {
+        useToastStore
+          .getState()
+          .addToast(
+            `${payload.count} learning${payload.count > 1 ? "s" : ""} saved from "${payload.sessionName}"`,
+            "success",
+          );
+      }
+    });
+
     wsClient.connect(`ws://${window.location.host}/ws`);
 
     return () => {
@@ -320,6 +333,7 @@ export default function Home() {
       unsubRoomTyping();
       unsubRoomStreaming();
       unsubRoomNeedsUser();
+      unsubMemoryExtracted();
     };
   }, [setSessions, setRepos]);
 

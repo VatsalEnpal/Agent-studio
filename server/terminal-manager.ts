@@ -277,11 +277,18 @@ export class TerminalManager {
     entry.pty.resize(cols, rows);
   }
 
+  /** Optional callback invoked when a session is closed, before cleanup. */
+  onSessionClose?: (session: Session, buffer: string) => void;
+
   killSession(id: string): void {
     const entry = this.sessions.get(id);
     if (!entry) {
       throw new Error(`Session ${id} not found`);
     }
+
+    // Capture buffer and session data BEFORE deletion for memory extraction
+    const sessionSnapshot = { ...entry.session };
+    const bufferSnapshot = entry.outputBuffer;
 
     // Already exited — just remove from history
     if (entry.session.status === "exited" || !entry.pty) {
@@ -290,6 +297,14 @@ export class TerminalManager {
         type: "sessions-update",
         payload: this.listSessions(),
       });
+      // Trigger memory extraction asynchronously
+      if (this.onSessionClose && bufferSnapshot.length > 100) {
+        try {
+          this.onSessionClose(sessionSnapshot, bufferSnapshot);
+        } catch {
+          /* ignore */
+        }
+      }
       return;
     }
 
@@ -302,6 +317,15 @@ export class TerminalManager {
       type: "sessions-update",
       payload: this.listSessions(),
     });
+
+    // Trigger memory extraction asynchronously
+    if (this.onSessionClose && bufferSnapshot.length > 100) {
+      try {
+        this.onSessionClose(sessionSnapshot, bufferSnapshot);
+      } catch {
+        /* ignore */
+      }
+    }
 
     // Escalation: SIGTERM -> 2s -> SIGKILL tree (runs in background)
     // Step 1: Graceful SIGTERM
