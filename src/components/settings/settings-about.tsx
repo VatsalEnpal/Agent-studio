@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { InfoIcon, RefreshIcon } from "@/components/ui/icons";
 
 interface SystemInfo {
+  version: string;
   branch: string;
   commitHash: string;
   nodeVersion: string;
@@ -22,7 +23,7 @@ export function SettingsAbout() {
     try {
       const res = await fetch("/api/system/info");
       if (res.ok) {
-        setInfo(await res.json() as SystemInfo);
+        setInfo((await res.json()) as SystemInfo);
       } else {
         console.error("[about] /api/system/info returned", res.status);
         setFetchError(true);
@@ -64,7 +65,7 @@ export function SettingsAbout() {
         )}
       </div>
       <div className="px-4 py-3 space-y-1.5">
-        <Row label="Version" value="0.2.0" />
+        <Row label="Version" value={info?.version ?? placeholder} />
         <Row label="Branch" value={info?.branch ?? placeholder} />
         <Row label="Commit" value={info?.commitHash ?? placeholder} />
         <Row label="License" value="MIT" />
