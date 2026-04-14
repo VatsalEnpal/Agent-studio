@@ -5,7 +5,13 @@ import { lazy, Suspense, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import { useRelativeTime } from "@/hooks/use-relative-time";
-import { CheckIcon, CloseIcon, ChevronDownIcon, ChevronRightIcon, CopyIcon } from "@/components/ui/icons";
+import {
+  CheckIcon,
+  CloseIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  CopyIcon,
+} from "@/components/ui/icons";
 import type { RoomMessage } from "@/stores/rooms";
 
 /** Code block with copy button overlay */
@@ -110,11 +116,12 @@ function MessageContent({ text, isSystem }: { text: string; isSystem: boolean })
   const plugins = gfmReady && _remarkGfm ? [_remarkGfm] : [];
 
   return (
-    <Suspense fallback={<span className="text-xs leading-relaxed">{cleanText}</span>}>
-      <div className="text-xs leading-relaxed prose prose-invert prose-sm max-w-none
+    <Suspense fallback={<span className="text-sm leading-relaxed">{cleanText}</span>}>
+      <div
+        className="text-sm leading-relaxed prose prose-invert prose-sm max-w-none
         prose-p:my-1 prose-pre:my-2 prose-pre:p-3
-        prose-code:text-rooms prose-code:bg-bg-elevated prose-code:px-1 prose-code:py-0.5 prose-code:rounded-sm prose-code:text-xs prose-code:font-mono
-        prose-pre:bg-bg-elevated prose-pre:border prose-pre:border-border-subtle prose-pre:rounded
+        prose-code:text-rooms prose-code:bg-bg-elevated prose-code:px-1 prose-code:py-0.5 prose-code:rounded-sm prose-code:text-[13px] prose-code:font-mono prose-code:leading-relaxed
+        prose-pre:bg-bg-elevated prose-pre:border prose-pre:border-border-subtle prose-pre:rounded prose-pre:text-[13px] prose-pre:leading-relaxed
         prose-headings:text-xs prose-headings:font-semibold prose-headings:text-text-primary prose-headings:mt-3 prose-headings:mb-1
         prose-a:text-rooms prose-a:no-underline hover:prose-a:underline
         prose-strong:text-text-primary
@@ -122,7 +129,8 @@ function MessageContent({ text, isSystem }: { text: string; isSystem: boolean })
         prose-blockquote:border-rooms/30 prose-blockquote:text-text-secondary
         prose-table:text-xs prose-table:w-full
         prose-th:text-left prose-th:text-text-secondary prose-th:font-semibold prose-th:pb-1 prose-th:pr-4 prose-th:border-b prose-th:border-border-subtle
-        prose-td:py-1 prose-td:pr-4 prose-td:text-text-primary prose-td:border-b prose-td:border-border-subtle/50">
+        prose-td:py-1 prose-td:pr-4 prose-td:text-text-primary prose-td:border-b prose-td:border-border-subtle/50"
+      >
         <Markdown
           remarkPlugins={plugins}
           components={{
@@ -130,7 +138,9 @@ function MessageContent({ text, isSystem }: { text: string; isSystem: boolean })
               <CopyableCodeBlock {...props}>{children}</CopyableCodeBlock>
             ),
             p: ({ children, ...props }) => (
-              <p {...props}>{typeof children === "string" ? highlightMentions(children) : children}</p>
+              <p {...props}>
+                {typeof children === "string" ? highlightMentions(children) : children}
+              </p>
             ),
           }}
         >
@@ -179,9 +189,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
                 <span className="text-label text-text-tertiary shrink-0 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-150">
                   {liveTimestamp}
                 </span>
-                <span className="text-xs font-semibold text-rooms">
-                  You
-                </span>
+                <span className="text-xs font-semibold text-rooms">You</span>
               </div>
             )}
             {/* Message bubble */}
@@ -232,10 +240,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
               className="w-6 h-6 rounded-[4px] flex items-center justify-center"
               style={{ backgroundColor: color + "18", border: `1.5px solid ${color}30` }}
             >
-              <span
-                className="text-xs font-semibold leading-none"
-                style={{ color }}
-              >
+              <span className="text-xs font-semibold leading-none" style={{ color }}>
                 {msg.from.charAt(0).toUpperCase()}
               </span>
             </div>
@@ -252,16 +257,19 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
                   onAgentClick && "cursor-pointer hover:underline",
                 )}
                 style={{ color }}
-                onClick={onAgentClick ? (e) => { e.stopPropagation(); onAgentClick(msg.from); } : undefined}
+                onClick={
+                  onAgentClick
+                    ? (e) => {
+                        e.stopPropagation();
+                        onAgentClick(msg.from);
+                      }
+                    : undefined
+                }
                 title={onAgentClick ? "View session" : undefined}
               >
                 {msg.from}
               </span>
-              {msg.to && (
-                <span className="text-label text-text-tertiary">
-                  &rarr; {msg.to}
-                </span>
-              )}
+              {msg.to && <span className="text-label text-text-tertiary">&rarr; {msg.to}</span>}
               <span className="text-label text-text-tertiary ml-auto shrink-0 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-150">
                 {liveTimestamp}
               </span>
@@ -318,11 +326,7 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
               onClick={() => setDetailsOpen(!detailsOpen)}
               className="flex items-center gap-1 mt-1 text-label text-text-tertiary hover:text-text-secondary transition-all duration-100"
             >
-              {detailsOpen ? (
-                <ChevronDownIcon size={12} />
-              ) : (
-                <ChevronRightIcon size={12} />
-              )}
+              {detailsOpen ? <ChevronDownIcon size={12} /> : <ChevronRightIcon size={12} />}
               Details
             </button>
           )}
@@ -373,14 +377,21 @@ export function StreamingMessage({ agentId, text }: { agentId: string; text: str
               <span className="text-xs font-semibold" style={{ color }}>
                 {agentId}
               </span>
-              <span className="text-label text-text-tertiary italic">
-                is thinking...
-              </span>
+              <span className="text-label text-text-tertiary italic">is thinking...</span>
             </div>
             <div className="flex gap-1.5 py-1">
-              <span className="w-1.5 h-1.5 bg-text-tertiary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-1.5 h-1.5 bg-text-tertiary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-1.5 h-1.5 bg-text-tertiary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+              <span
+                className="w-1.5 h-1.5 bg-text-tertiary rounded-full animate-bounce"
+                style={{ animationDelay: "0ms" }}
+              />
+              <span
+                className="w-1.5 h-1.5 bg-text-tertiary rounded-full animate-bounce"
+                style={{ animationDelay: "150ms" }}
+              />
+              <span
+                className="w-1.5 h-1.5 bg-text-tertiary rounded-full animate-bounce"
+                style={{ animationDelay: "300ms" }}
+              />
             </div>
           </div>
         </div>
@@ -421,7 +432,9 @@ function highlightMentions(text: string): React.ReactNode {
   const parts = text.split(/(@\w+)/g);
   return parts.map((part, i) =>
     part.startsWith("@") ? (
-      <span key={i} className="text-rooms font-semibold">{part}</span>
+      <span key={i} className="text-rooms font-semibold">
+        {part}
+      </span>
     ) : (
       part
     ),

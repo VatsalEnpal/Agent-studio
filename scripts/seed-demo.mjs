@@ -28,6 +28,8 @@ const PROJECT_ROOT = process.cwd();
 const DEMO_BASE = "/tmp/agent-studio-demo";
 const DRY_RUN = process.argv.includes("--dry");
 
+const seedManifest = [];
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 async function api(method, path, body) {
@@ -155,7 +157,9 @@ for (const proj of PROJECTS) {
         '\tlog.Fatal(http.ListenAndServe(":"+port, mux))',
         '}',
       ].join('\n') + '\n');
+      seedManifest.push(join(proj.path, "main.go"));
       writeFileSync(join(proj.path, "go.mod"), 'module github.com/acme/velocity-api\n\ngo 1.22\n');
+      seedManifest.push(join(proj.path, "go.mod"));
       writeFileSync(join(proj.path, "handlers.go"), [
         'package main',
         '',
@@ -213,6 +217,7 @@ for (const proj of PROJECTS) {
         '\tjson.NewEncoder(w).Encode(map[string]string{"status": "ok", "version": "2.4.1"})',
         '}',
       ].join('\n') + '\n');
+      seedManifest.push(join(proj.path, "handlers.go"));
       writeFileSync(join(proj.path, "db.go"), [
         'package main',
         '',
@@ -229,12 +234,14 @@ for (const proj of PROJECTS) {
         '\tCreated  string `json:"created"`',
         '}',
       ].join('\n') + '\n');
+      seedManifest.push(join(proj.path, "db.go"));
     } else if (proj.lang === "react") {
       writeFileSync(join(proj.path, "package.json"), JSON.stringify({
         name: "nova-dashboard", version: "3.1.0",
         scripts: { dev: "next dev", build: "next build", test: "jest" },
         dependencies: { "next": "16.0.1", "react": "19.0.0", "tailwindcss": "4.0.0" },
       }, null, 2));
+      seedManifest.push(join(proj.path, "package.json"));
       mkdirSync(join(proj.path, "src", "components"), { recursive: true });
       mkdirSync(join(proj.path, "src", "lib"), { recursive: true });
       writeFileSync(join(proj.path, "src", "components", "Dashboard.tsx"), [
@@ -276,6 +283,7 @@ for (const proj of PROJECTS) {
         '  );',
         '}',
       ].join('\n') + '\n');
+      seedManifest.push(join(proj.path, "src", "components", "Dashboard.tsx"));
       writeFileSync(join(proj.path, "src", "lib", "api.ts"), [
         'const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";',
         '',
@@ -291,6 +299,7 @@ for (const proj of PROJECTS) {
         '  return res.json();',
         '}',
       ].join('\n') + '\n');
+      seedManifest.push(join(proj.path, "src", "lib", "api.ts"));
     } else {
       writeFileSync(join(proj.path, "pipeline.py"), [
         '"""Mercury data pipeline — ETL for analytics."""',
@@ -328,7 +337,9 @@ for (const proj of PROJECTS) {
         '    loaded = load(df)',
         '    return loaded',
       ].join('\n') + '\n');
+      seedManifest.push(join(proj.path, "pipeline.py"));
       writeFileSync(join(proj.path, "requirements.txt"), 'pandas==2.2.0\npyarrow==15.0.0\nsqlalchemy==2.0.27\npytest==8.0.0\npytest-cov==4.1.0\n');
+      seedManifest.push(join(proj.path, "requirements.txt"));
       writeFileSync(join(proj.path, "config.py"), [
         '"""Pipeline configuration."""',
         'import os',
@@ -338,6 +349,7 @@ for (const proj of PROJECTS) {
         'MAX_RETRIES = int(os.getenv("MAX_RETRIES", "3"))',
         'RETRY_DELAY = float(os.getenv("RETRY_DELAY", "1.0"))',
       ].join('\n') + '\n');
+      seedManifest.push(join(proj.path, "config.py"));
     }
 
     execSync(`git add -A && git commit -q -m "Initial commit" --allow-empty`, {
@@ -350,6 +362,7 @@ for (const proj of PROJECTS) {
       execSync(`git checkout -b ${proj.branch}`, { cwd: proj.path, stdio: "ignore" });
       // Make a couple more commits on the branch
       writeFileSync(join(proj.path, "CHANGELOG.md"), `# Changelog\n\n## Unreleased\n- ${proj.branch}\n`);
+      seedManifest.push(join(proj.path, "CHANGELOG.md"));
       execSync(`git add -A && git commit -q -m "WIP: ${proj.branch}"`, {
         cwd: proj.path,
         env: { ...process.env, GIT_AUTHOR_NAME: "Demo", GIT_COMMITTER_NAME: "Demo", GIT_AUTHOR_EMAIL: "demo@example.com", GIT_COMMITTER_EMAIL: "demo@example.com" },
@@ -358,6 +371,7 @@ for (const proj of PROJECTS) {
 
     // Add some uncommitted changes for dirty status
     writeFileSync(join(proj.path, "TODO.md"), `# TODO\n- [ ] Finish implementation\n- [ ] Add tests\n`);
+    seedManifest.push(join(proj.path, "TODO.md"));
   }
 
   log("📁", `Project: ${proj.name} (${proj.branch}) at ${proj.path}`);
@@ -416,6 +430,7 @@ const AGENT_DEFS = [
 for (const agent of AGENT_DEFS) {
   const md = `---\nname: ${agent.id}\ndescription: ${agent.description}\nmodel: ${agent.model}\n---\n\n# ${agent.name} Agent\n\n${agent.content}\n`;
   writeFileSync(join(AGENTS_DIR, `${agent.id}.md`), md);
+  seedManifest.push(join(AGENTS_DIR, `${agent.id}.md`));
 }
 log("🤖", `Created ${AGENT_DEFS.length} agent definitions`);
 
@@ -584,6 +599,7 @@ for (const entry of MEMORY_ENTRIES) {
       2,
     ),
   );
+  seedManifest.push(entryPath);
 }
 
 // Write memory index
@@ -592,6 +608,7 @@ const memoryIndex = {
   total_entries: MEMORY_ENTRIES.length,
 };
 writeFileSync(join(TOOLS_DIR, "memory_index.json"), JSON.stringify(memoryIndex, null, 2));
+seedManifest.push(join(TOOLS_DIR, "memory_index.json"));
 log("🧠", `Seeded ${MEMORY_ENTRIES.length} memory entries`);
 
 // ─── Step 5: Update config ──────────────────────────────────────────────────
@@ -627,6 +644,7 @@ const demoConfig = {
 };
 
 writeFileSync(configPath, JSON.stringify(demoConfig, null, 2));
+seedManifest.push(configPath);
 log("⚙️", "Wrote demo config to .agent-studio.json");
 
 // Tell the server to reload config
@@ -757,6 +775,7 @@ const scanLogMd = `## PMO Scan Log
 | 2026-04-13 08:01 | INFO | Recommended sprint: Auth System Overhaul (8 tasks, ~12h agent time) |
 `;
 writeFileSync(join(SPRINTS_DIR, "scan_log.md"), scanLogMd);
+seedManifest.push(join(SPRINTS_DIR, "scan_log.md"));
 
 // ready.md — makes Readiness Report step completed
 const readyMd = `# Sprint Readiness Report
@@ -792,6 +811,7 @@ Scan result: **READY — 12 To Do tickets**
 - **Dependencies:** None — can start immediately
 `;
 writeFileSync(join(SPRINTS_DIR, "ready.md"), readyMd);
+seedManifest.push(join(SPRINTS_DIR, "ready.md"));
 
 // current.md — Status: IN PROGRESS gives mixed gate states
 const sprintCurrentMd = `# Sprint: Auth System Overhaul
@@ -852,6 +872,7 @@ Write end-to-end tests for the complete auth flow including error cases.
 Add monitoring for token refresh latency, failed auth attempts, and suspicious patterns.
 `;
 writeFileSync(join(SPRINTS_DIR, "current.md"), sprintCurrentMd);
+seedManifest.push(join(SPRINTS_DIR, "current.md"));
 
 // Handoff files — give backend gate rich data
 mkdirSync(join(SPRINTS_DIR, "handoffs"), { recursive: true });
@@ -875,6 +896,7 @@ const backendHandoff = {
   notes: "Migration script tested with 1M rows in staging. Zero downtime confirmed.",
 };
 writeFileSync(join(SPRINTS_DIR, "handoffs", "backend-worker_to_orchestrator.json"), JSON.stringify(backendHandoff, null, 2));
+seedManifest.push(join(SPRINTS_DIR, "handoffs", "backend-worker_to_orchestrator.json"));
 
 // Add an archived sprint for history richness
 mkdirSync(join(SPRINTS_DIR, "archive"), { recursive: true });
@@ -914,6 +936,7 @@ Convert hero images to WebP, add lazy loading for below-fold content.
 - LCP: 3.8s → 0.9s
 `;
 writeFileSync(join(SPRINTS_DIR, "archive", "2026-04-06_dashboard_performance.md"), archivedSprint);
+seedManifest.push(join(SPRINTS_DIR, "archive", "2026-04-06_dashboard_performance.md"));
 
 log("🏃", "Created sprint files (scan_log, ready, current IN PROGRESS, 1 archived)");
 
@@ -961,6 +984,18 @@ if (roomId) {
 } else {
   log("⚠️", "Failed to create room — check server logs");
 }
+
+// Write seed manifest
+const manifestDir = join(PROJECT_ROOT, ".shiploop");
+if (!existsSync(manifestDir)) {
+  mkdirSync(manifestDir, { recursive: true });
+}
+writeFileSync(
+  join(manifestDir, "seed-manifest.json"),
+  JSON.stringify(seedManifest, null, 2),
+  "utf-8",
+);
+log("📋", `Wrote seed manifest with ${seedManifest.length} files`);
 
 // ─── Done! ──────────────────────────────────────────────────────────────────
 

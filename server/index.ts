@@ -29,6 +29,7 @@ import {
   stopDevServer,
   addCustomServer,
   removeCustomServer,
+  getCustomServers,
 } from "./dev-servers.js";
 import { execSync, exec } from "node:child_process";
 import {
@@ -1033,7 +1034,7 @@ Choose the schedule and model based on the task:
       const session = terminalManager.createSession({
         name,
         command: command ?? "claude",
-        args: args ?? ["--dangerously-skip-permissions"],
+        args: args ?? ["--model", "sonnet"],
         cwd,
         cols,
         rows,
@@ -1930,15 +1931,88 @@ Choose the schedule and model based on the task:
         ],
       };
 
-      // Add to workflow manager's in-memory flows
-      const flows = await workflowManager.getFlows();
-      flows.unshift(flow as never);
+      // Persist sprint to disk
+      const sprintsDir = path.join(process.cwd(), ".agent-studio", "sprints");
+      if (!fs.existsSync(sprintsDir)) {
+        fs.mkdirSync(sprintsDir, { recursive: true });
+      }
+      fs.writeFileSync(
+        path.join(sprintsDir, `${sprintId}.json`),
+        JSON.stringify(flow, null, 2),
+        "utf-8",
+      );
 
-      // Broadcast update
+      // Reload registry so it picks up the persisted sprint file
+      workflowManager.reload();
+      const flows = await workflowManager.getFlows();
+
+      // Broadcast initial planned state
       broadcast(wss, {
         type: "workflow-update",
         payload: flowsToSprints(flows),
       } satisfies WsMessage);
+
+      // Build a WorkflowPipelineDef and start execution
+      const pipelineSteps: import("./workflows/definition.js").PipelineStepDef[] = (
+        pipeline ??
+        agents.map((a, i) => ({
+          id: `step-${i}`,
+          agent: a,
+          name: `${a.charAt(0).toUpperCase() + a.slice(1)} Phase`,
+          description: `Agent ${a} works on the sprint goal`,
+        }))
+      ).map((step) => {
+        // Check if it's a gate step (name contains "gate" or "approval")
+        const isGate =
+          step.name?.toLowerCase().includes("gate") ||
+          step.name?.toLowerCase().includes("approval");
+        if (isGate) {
+          return {
+            id: step.id,
+            name: step.name,
+            type: "gate" as const,
+            allowFeedback: true,
+          };
+        }
+        return {
+          id: step.id,
+          name: step.name,
+          type: "agent" as const,
+          agent: step.agent,
+          goal: step.description || goal || `Work on ${name}`,
+        };
+      });
+
+      const workflowDef: import("./workflows/definition.js").WorkflowPipelineDef = {
+        id: sprintId,
+        name,
+        mode: "execute",
+        trigger: { type: "manual" },
+        workingDirectory: cwd || process.cwd(),
+        steps: pipelineSteps,
+      };
+
+      // Start execution asynchronously (don't block the response)
+      try {
+        const runState = workflowExecutor.startRun(workflowDef);
+        // Update the flow status to "running"
+        flow.status = "running" as any;
+        if (flow.runs[0]) {
+          flow.runs[0].status = "running" as any;
+        }
+        // Broadcast the running state
+        broadcast(wss, {
+          type: "workflow-update",
+          payload: flowsToSprints(await workflowManager.getFlows()),
+        } satisfies WsMessage);
+        // Execute in background
+        workflowExecutor.executeRun(workflowDef, runState).catch((err) => {
+          console.error(`Sprint ${sprintId} execution failed:`, err);
+        });
+      } catch (execErr) {
+        console.error(`Failed to start sprint execution:`, execErr);
+        // Sprint still created, just not started — that's OK
+      }
 
       res.status(201).json({
         ok: true,
@@ -3833,6 +3907,24 @@ Choose the schedule and model based on the task:
     // eslint-disable-next-line no-console
     console.log(`Agent Studio running on http://localhost:${port}`);
   });
+
+  // Auto-start custom dev servers with autoStart flag
+  const autoStartServers = getCustomServers().filter((s) => s.autoStart);
+  if (autoStartServers.length > 0) {
+    for (const s of autoStartServers) {
+      startDevServer(s.cwd, s.command)
+        .then((result) => {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Auto-started "${s.name}": pid=${result.pid} port=${result.port} status=${result.status}`,
+          );
+        })
+        .catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error(`Failed to auto-start "${s.name}":`, err);
+        });
+    }
+  }
 
   // Prepare Next.js in the background — doesn't block API routes
   const nextApp = next({ dev, hostname: "127.0.0.1", port });

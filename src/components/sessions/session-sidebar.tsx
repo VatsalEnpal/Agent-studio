@@ -252,7 +252,7 @@ export function SessionSidebar({
               name: displayName,
               pid: 0,
               command: "claude",
-              args: ["--resume", d.id, "--dangerously-skip-permissions"],
+              args: ["--resume", d.id],
               cwd,
               status: "exited" as const,
               createdAt: d.modified,
@@ -349,7 +349,7 @@ export function SessionSidebar({
           body: JSON.stringify({
             name: `${basename} (resumed)`,
             command: "claude",
-            args: ["--resume", session.id, "--dangerously-skip-permissions"],
+            args: ["--resume", session.id],
             cwd: session.cwd,
             meta: {
               model: session.meta?.model ?? "sonnet",

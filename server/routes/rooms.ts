@@ -91,9 +91,14 @@ STYLE:
 - Do NOT write reports, tables, or "comprehensive analyses." Just the headline + @mention.
 - Ask ONE question at a time.
 - ALWAYS @mention who you're talking to. Without @mention, nobody receives your message.
-- To ask the human: @user
 - Do NOT use the SendMessage tool — write @agentname directly in your text.
 - Never introduce yourself. Never say "Let me check" without actually checking and reporting.
+
+MENTION PROTOCOL:
+- Discuss with OTHER AGENTS first. Work through the problem as a team before involving the user.
+- Only @user when you genuinely need human input, approval, or a decision that agents cannot make.
+- Consolidate questions for @user into ONE message — don't ping the user multiple times.
+- If you're unsure whether to ask the user, ask another agent first.
 
 EXAMPLE good message:
 "Checked Notion — 5 tickets look stale (Week 1-2 leftovers). @frontend-worker are these 3 features actually shipped? [list]. @backend-worker is the migration ticket still needed?"
@@ -109,8 +114,18 @@ You are a teammate on Slack, not an assistant writing a report.
             prompt +
             "\n\n[ROOM REMINDER: Max 3-4 sentences. Summarize findings briefly. List max 3-5 items, not everything. @mention who should act next. No reports.]";
         } else {
-          // Not first message — still append brevity reminder after the prompt
+          // Not first message — prepend recent room context + brevity reminder
+          const recentRoom = roomManager.getRoom(roomId);
+          const recentMsgs = (recentRoom?.messages ?? [])
+            .filter((m) => m.from !== agentId && m.type !== "system")
+            .slice(-10)
+            .map((m) => `[${m.from}]: ${(m.text ?? "").slice(0, 300)}`)
+            .join("\n");
+          const contextBlock = recentMsgs
+            ? `\n--- Recent room messages ---\n${recentMsgs}\n---\n\n`
+            : "";
           messageToSend =
+            contextBlock +
             prompt +
             "\n\n[ROOM REMINDER: Max 3-4 sentences. Summarize findings briefly. List max 3-5 items, not everything. @mention who should act next. No reports.]";
         }

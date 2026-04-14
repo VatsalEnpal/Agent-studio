@@ -147,6 +147,23 @@ export function buildRegistry(): WorkflowRegistry {
     }
   }
 
+  // --- Persisted sprints from .agent-studio/sprints/ ---
+  const sprintsDir = join(process.cwd(), ".agent-studio", "sprints");
+  if (existsSync(sprintsDir)) {
+    const sprintFiles = readdirSync(sprintsDir).filter((f) => f.endsWith(".json"));
+    for (const file of sprintFiles) {
+      try {
+        const data = JSON.parse(readFileSync(join(sprintsDir, file), "utf-8"));
+        if (data.id && data.name) {
+          const sprintId = data.id;
+          registry.register(sprintId, async () => data as WorkflowFlow);
+        }
+      } catch {
+        // Skip corrupt files
+      }
+    }
+  }
+
   return registry;
 }
 
