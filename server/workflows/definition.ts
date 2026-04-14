@@ -44,6 +44,8 @@ export interface AgentStepDef {
   /** For hybrid mode: "internal" (Agent Studio executes) or "external" (watched) */
   execution?: "internal" | "external";
   watchFile?: string;
+  /** Max budget for this individual step in USD */
+  stepBudgetCapUsd?: number;
 }
 
 export interface GateStepDef {
@@ -90,6 +92,10 @@ export interface WorkflowPipelineDef {
   steps: PipelineStepDef[];
   /** For watch mode */
   stateFile?: string;
+  /** Total budget cap for the entire workflow run in USD */
+  budgetCapUsd?: number;
+  /** Default per-step budget cap in USD (used if individual step doesn't specify one) */
+  stepBudgetCapUsd?: number;
 }
 
 // ---------- Validation ----------

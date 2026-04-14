@@ -220,12 +220,14 @@ export function sprintsRoutes(deps: {
   // Create sprint
   router.post("/create", async (req, res) => {
     try {
-      const { name, goal, agents, cwd, pipeline } = req.body as {
+      const { name, goal, agents, cwd, pipeline, budgetCapUsd, stepBudgetCapUsd } = req.body as {
         name?: string;
         goal?: string;
         agents?: string[];
         cwd?: string;
         pipeline?: Array<{ id: string; agent: string; name: string; description: string }>;
+        budgetCapUsd?: number;
+        stepBudgetCapUsd?: number;
       };
       if (!name || !agents || agents.length === 0) {
         res.status(400).json({ error: "Missing required fields: name, agents" });
@@ -334,6 +336,8 @@ export function sprintsRoutes(deps: {
         trigger: { type: "manual" },
         workingDirectory: cwd || process.cwd(),
         steps: pipelineSteps,
+        ...(budgetCapUsd != null && budgetCapUsd > 0 ? { budgetCapUsd } : {}),
+        ...(stepBudgetCapUsd != null && stepBudgetCapUsd > 0 ? { stepBudgetCapUsd } : {}),
       };
 
       // Start execution asynchronously (don't block the response)

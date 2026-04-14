@@ -229,6 +229,10 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
   const [interval, setInterval] = useState("every 2h");
   const [stateFilePath, setStateFilePath] = useState("");
 
+  // Budget
+  const [budgetCapUsd, setBudgetCapUsd] = useState("");
+  const [stepBudgetCapUsd, setStepBudgetCapUsd] = useState("");
+
   // Available agents
   const [agents, setAgents] = useState<string[]>([]);
 
@@ -254,6 +258,8 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
     setTriggerType("manual");
     setInterval("every 2h");
     setStateFilePath("");
+    setBudgetCapUsd("");
+    setStepBudgetCapUsd("");
     setSaving(false);
   }, []);
 
@@ -317,6 +323,9 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
           ? { type: "event", stateFile: stateFilePath }
           : { type: "manual" };
 
+    const parsedBudget = budgetCapUsd ? parseFloat(budgetCapUsd) : undefined;
+    const parsedStepBudget = stepBudgetCapUsd ? parseFloat(stepBudgetCapUsd) : undefined;
+
     const def: WorkflowPipelineClient = {
       id: name
         .toLowerCase()
@@ -328,6 +337,8 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
       trigger,
       workingDirectory: workingDirectory || "/tmp",
       steps: pipelineSteps,
+      ...(parsedBudget && parsedBudget > 0 ? { budgetCapUsd: parsedBudget } : {}),
+      ...(parsedStepBudget && parsedStepBudget > 0 ? { stepBudgetCapUsd: parsedStepBudget } : {}),
     };
 
     const result = await createWorkflow(def);
@@ -652,6 +663,50 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
                     />
                   </div>
                 )}
+
+                {/* Budget controls */}
+                <div className="border-t border-zinc-800 pt-4">
+                  <label className="mb-1 block text-xs font-medium text-zinc-400">
+                    Budget (optional)
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="mb-0.5 block text-[10px] text-zinc-500">
+                        Total budget cap
+                      </label>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-zinc-500">$</span>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.50"
+                          value={budgetCapUsd}
+                          onChange={(e) => setBudgetCapUsd(e.target.value)}
+                          placeholder="No limit"
+                          className="w-full rounded border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-xs text-zinc-200 placeholder-zinc-600 focus:border-zinc-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-0.5 block text-[10px] text-zinc-500">
+                        Per-step budget
+                      </label>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-zinc-500">$</span>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.50"
+                          value={stepBudgetCapUsd}
+                          onChange={(e) => setStepBudgetCapUsd(e.target.value)}
+                          placeholder="No limit"
+                          className="w-full rounded border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-xs text-zinc-200 placeholder-zinc-600 focus:border-zinc-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <p className="mt-1 text-[10px] text-zinc-600">Leave empty for no limit.</p>
+                </div>
               </div>
             )}
 
@@ -701,6 +756,16 @@ export function CreateWorkflowDialog({ open, onOpenChange }: CreateWorkflowDialo
                       ))}
                     </div>
                   </div>
+                  {(budgetCapUsd || stepBudgetCapUsd) && (
+                    <div>
+                      <div className="text-xs text-zinc-500">Budget</div>
+                      <div className="text-sm text-zinc-300">
+                        {budgetCapUsd ? `$${budgetCapUsd} total` : "No total limit"}
+                        {" / "}
+                        {stepBudgetCapUsd ? `$${stepBudgetCapUsd} per step` : "No per-step limit"}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

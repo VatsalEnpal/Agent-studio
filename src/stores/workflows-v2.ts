@@ -30,6 +30,10 @@ export interface WorkflowPipelineClient {
     nextRunAt?: string;
   } | null;
   activeRuns?: number;
+  /** Total budget cap for the entire workflow run in USD */
+  budgetCapUsd?: number;
+  /** Default per-step budget cap in USD */
+  stepBudgetCapUsd?: number;
 }
 
 export interface PipelineStepClient {
@@ -47,6 +51,8 @@ export interface PipelineStepClient {
   maxIterations?: number;
   onExhausted?: string;
   onFailure?: string;
+  /** Max budget for this individual step in USD */
+  stepBudgetCapUsd?: number;
 }
 
 export interface RunStateClient {
@@ -58,6 +64,12 @@ export interface RunStateClient {
   completedAt?: string;
   steps: Record<string, StepStateClient>;
   error?: string;
+  tokenUsage?: {
+    inputTokens: number;
+    outputTokens: number;
+    totalCostUsd: number;
+  };
+  budgetCapUsd?: number;
 }
 
 export interface StepStateClient {
@@ -70,6 +82,11 @@ export interface StepStateClient {
   iteration?: number;
   feedback?: string;
   subSteps?: Record<string, StepStateClient>;
+  tokenUsage?: {
+    inputTokens: number;
+    outputTokens: number;
+    totalCostUsd: number;
+  };
 }
 
 export interface RunSummaryClient {
@@ -94,7 +111,10 @@ interface WorkflowV2State {
   createWorkflow: (def: WorkflowPipelineClient) => Promise<{ error?: string }>;
   deleteWorkflow: (id: string) => Promise<{ error?: string }>;
   selectWorkflow: (id: string | null) => void;
-  startRun: (workflowId: string) => Promise<{ runId?: string; error?: string }>;
+  startRun: (
+    workflowId: string,
+    options?: { budgetCapUsd?: number },
+  ) => Promise<{ runId?: string; error?: string }>;
   fetchRuns: (workflowId: string) => Promise<void>;
   fetchRunDetail: (workflowId: string, runId: string) => Promise<void>;
   approveGate: (workflowId: string, runId: string, stepId: string) => Promise<void>;
@@ -168,10 +188,15 @@ export const useWorkflowV2Store = create<WorkflowV2State>((set, get) => ({
 
   selectWorkflow: (id) => set({ selectedWorkflowId: id }),
 
-  startRun: async (workflowId) => {
+  startRun: async (workflowId, options?) => {
     try {
+      const body: Record<string, unknown> = {};
+      if (options?.budgetCapUsd != null) {
+        body.budgetCapUsd = options.budgetCapUsd;
+      }
       const result = await api<{ runId?: string; error?: string }>(`/${workflowId}/run`, {
         method: "POST",
+        body: JSON.stringify(body),
       });
       if (result.error) return { error: result.error };
       if (result.runId) {

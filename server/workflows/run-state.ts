@@ -26,7 +26,8 @@ export type RunStatus =
   | "waiting_approval"
   | "completed"
   | "failed"
-  | "cancelled";
+  | "cancelled"
+  | "budget_exceeded";
 
 export type StepStatus =
   | "pending"
@@ -52,6 +53,11 @@ export interface StepState {
   iteration?: number;
   iterationHistory?: Array<{ iteration: number; status: StepStatus; completedAt: string }>;
   subSteps?: Record<string, StepState>;
+  tokenUsage?: {
+    inputTokens: number;
+    outputTokens: number;
+    totalCostUsd: number;
+  };
 }
 
 export interface RunState {
@@ -67,6 +73,8 @@ export interface RunState {
     outputTokens: number;
     totalCostUsd: number;
   };
+  /** Per-run budget override (takes precedence over workflow definition budgetCapUsd) */
+  budgetCapUsd?: number;
   error?: string;
 }
 
