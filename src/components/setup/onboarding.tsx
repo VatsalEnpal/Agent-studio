@@ -458,14 +458,45 @@ function ResultScreen({
 
 // ---------- Loading screen ----------
 
-function LoadingScreen({ onSkip }: { onSkip?: () => void }) {
+function LoadingScreen({ onSkip, step }: { onSkip?: () => void; step?: number }) {
+  const steps = [
+    { label: "Analyzing project structure...", done: (step ?? 0) > 1 },
+    { label: "Generating agents...", done: (step ?? 0) > 2 },
+    { label: "Creating configuration...", done: (step ?? 0) > 3 },
+  ];
+  const currentStep = Math.min(step ?? 1, 3);
+
   return (
     <div className="h-screen flex items-center justify-center bg-canvas">
       <div className="text-center space-y-4">
         <SpinnerIcon className="w-8 h-8 text-amber-400 animate-spin mx-auto" />
         <div>
           <p className="text-sm text-zinc-300 font-medium">Building your setup...</p>
-          <p className="text-xs text-zinc-600 mt-1">Analyzing your needs and generating agents</p>
+          <p className="text-xs text-zinc-500 mt-1">Step {currentStep}/3</p>
+        </div>
+        <div className="text-left inline-block space-y-1.5">
+          {steps.map((s, i) => (
+            <div key={i} className="flex items-center gap-2 text-xs">
+              {s.done ? (
+                <span className="text-green-400">✓</span>
+              ) : i + 1 === currentStep ? (
+                <SpinnerIcon className="w-3 h-3 text-amber-400 animate-spin" />
+              ) : (
+                <span className="text-zinc-700">○</span>
+              )}
+              <span
+                className={
+                  s.done
+                    ? "text-zinc-500"
+                    : i + 1 === currentStep
+                      ? "text-zinc-300"
+                      : "text-zinc-700"
+                }
+              >
+                {s.label}
+              </span>
+            </div>
+          ))}
         </div>
         {onSkip && (
           <button
@@ -489,6 +520,7 @@ interface OnboardingProps {
 
 export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
   const [screen, setScreen] = useState<"ask" | "loading" | "result">("ask");
+  const [loadingStep, setLoadingStep] = useState(1);
   const [agents, setAgents] = useState<GeneratedAgent[]>([]);
   const [automations, setAutomations] = useState<AutomationSuggestion[]>([]);
   const [claudeMd, setClaudeMd] = useState<string | null>(null);
@@ -500,6 +532,7 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
 
   const handleSubmit = useCallback(async (description: string, path: string | null) => {
     setScreen("loading");
+    setLoadingStep(1);
     setUserDescription(description);
     setProjectPath(path);
     setErrorMessage(null);
@@ -518,6 +551,7 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
       }
 
       // If a project path is given, use the preview endpoint which analyzes + generates
+      setLoadingStep(2);
       if (path) {
         const res = await fetch("/api/generate-agents/preview", {
           method: "POST",
@@ -532,6 +566,7 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
           setAgents(data.agents ?? []);
           setClaudeMd(data.claudeMd ?? null);
 
+          setLoadingStep(3);
           // Also fetch automation suggestions
           try {
             const autoRes = await fetch("/api/automations/suggest", {
@@ -573,6 +608,7 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
         profile = await analyzeRes.json();
       }
 
+      setLoadingStep(2);
       if (profile) {
         const genRes = await fetch("/api/agents/generate", {
           method: "POST",
@@ -773,7 +809,7 @@ export function Onboarding({ onComplete, onDismiss }: OnboardingProps) {
     return (
       <>
         {dismissButton}
-        <LoadingScreen onSkip={() => setScreen("result")} />
+        <LoadingScreen onSkip={() => setScreen("result")} step={loadingStep} />
       </>
     );
   }
