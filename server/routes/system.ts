@@ -3,9 +3,13 @@ import { exec, execSync } from "node:child_process";
 import { promisify } from "node:util";
 import os from "node:os";
 import fs from "node:fs";
+import path from "node:path";
 import type { TerminalManager } from "../terminal-manager.js";
 import type { WebSocketServer } from "ws";
 import { discoverClaudeProcesses } from "../process-discovery.js";
+import { analyzeProject } from "../project-analyzer.js";
+import { generateSingleAgent, writeQuickImportAgent } from "../quick-import.js";
+import { writeClaudeMd } from "../claudemd-generator.js";
 import {
   getAllSessionUsage,
   getSessionUsage,
@@ -802,6 +806,74 @@ export function systemRoutes(
         // fire and forget -- result lands in scan_log.md
       });
       res.json({ ok: true, status: "scan-started" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // Quick Import: analyze project, generate one agent, write CLAUDE.md
+  router.post("/quick-import", (req, res) => {
+    try {
+      const { projectPath } = req.body as { projectPath?: string };
+      if (!projectPath) {
+        res.status(400).json({ error: "Missing projectPath" });
+        return;
+      }
+
+      const validPath = deps.validateProjectPath(projectPath);
+      if (!validPath) {
+        res.status(400).json({ error: "Invalid project path" });
+        return;
+      }
+
+      // Abort if analysis takes too long (5s guard)
+      const start = Date.now();
+      const profile = analyzeProject(validPath);
+      if (Date.now() - start > 5000) {
+        res.status(504).json({ error: "Project analysis took too long" });
+        return;
+      }
+
+      // Generate a single agent (template-based, no LLM)
+      const { agent, mdContent } = generateSingleAgent(profile);
+
+      // Write agent .md file
+      const agentFilePath = writeQuickImportAgent(validPath, agent.id, mdContent);
+
+      // Generate/update CLAUDE.md using the standard generator
+      const claudeMdResult = writeClaudeMd({
+        analysis: profile,
+        agents: [
+          {
+            id: agent.id,
+            name: agent.name,
+            description: agent.description,
+            model: "sonnet" as const,
+            mdContent,
+          },
+        ],
+        projectPath: validPath,
+        preserveExisting: true,
+      });
+
+      res.status(201).json({
+        agent: {
+          id: agent.id,
+          name: agent.name,
+          path: agentFilePath,
+        },
+        claudeMd: claudeMdResult.path,
+        profile: {
+          name: profile.name,
+          languages: profile.languages,
+          frameworks: profile.frameworks,
+          packageManager: profile.packageManager,
+          hasTests: profile.hasTests,
+          hasDocker: profile.hasDocker,
+          database: profile.database,
+        },
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
