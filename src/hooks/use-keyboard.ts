@@ -6,7 +6,7 @@ import { useSessionsStore } from "@/stores/sessions";
 import type { ActiveMode } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
-// Section order for ⌘1-5 shortcuts
+// Section order for ⌘1-4 shortcuts
 // ---------------------------------------------------------------------------
 
 const sectionByIndex: ActiveMode[] = ["sessions", "teams", "sprints", "memory"];
@@ -89,7 +89,7 @@ export function useKeyboardShortcuts() {
       }
 
       // ⌘1-4: switch sections (without shift — only when not typing)
-      if (mod && !shift && !isTyping && e.key >= "1" && e.key <= "5") {
+      if (mod && !shift && !isTyping && e.key >= "1" && e.key <= "4") {
         e.preventDefault();
         const index = parseInt(e.key) - 1;
         setActiveMode(sectionByIndex[index]);
