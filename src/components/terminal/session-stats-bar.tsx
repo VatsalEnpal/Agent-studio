@@ -3,7 +3,7 @@
 import { useSessionUsage, formatCostDisplay, formatTokensDisplay } from "@/hooks/use-usage";
 import { useSessionsStore } from "@/stores/sessions";
 import { contextColor } from "@/lib/design-tokens";
-import { cn } from "@/lib/utils";
+import { cn, shortenCwd } from "@/lib/utils";
 
 interface SessionStatsBarProps {
   sessionId: string;
@@ -84,10 +84,4 @@ export function SessionStatsBar({ sessionId }: SessionStatsBarProps) {
       </span>
     </div>
   );
-}
-
-function shortenCwd(cwd: string): string {
-  const homeMatch = cwd.match(/^\/(?:Users|home)\/[^/]+/);
-  if (homeMatch) return "~" + cwd.slice(homeMatch[0].length);
-  return cwd;
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { CpuIcon, ClockIcon, CloseIcon } from "@/components/ui/icons";
-import { cn } from "@/lib/utils";
+import { cn, shortenCwd } from "@/lib/utils";
 import { useSessionsStore } from "@/stores/sessions";
 import { SessionGroup } from "@/components/sessions/session-group";
 import type { DiscoveredProcess } from "./types";
@@ -138,7 +138,7 @@ function RunningProcessItem({
       </div>
       <div className="pl-5 flex items-center gap-2">
         <span className="text-2xs text-text-tertiary truncate flex-1 min-w-0">
-          {proc.cwd !== "unknown" ? proc.cwd.replace(/^\/Users\/[^/]+/, "~") : ""}
+          {proc.cwd !== "unknown" ? shortenCwd(proc.cwd) : ""}
         </span>
       </div>
     </div>

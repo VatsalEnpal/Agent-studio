@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { EditIcon, CloseIcon, CopyIcon } from "@/components/ui/icons";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { cn } from "@/lib/utils";
+import { cn, shortenCwd } from "@/lib/utils";
 import { contextColor } from "@/lib/design-tokens";
 import { useSessionUsage } from "@/hooks/use-usage";
 import type { Session } from "@/lib/types";
@@ -145,13 +145,6 @@ function statusGlow(status: string): boolean {
 
 function statusPulse(status: string): boolean {
   return status === "building" || status === "starting";
-}
-
-/** Shorten cwd for display */
-function shortenCwd(cwd: string): string {
-  const homeMatch = cwd.match(/^\/(?:Users|home)\/[^/]+/);
-  if (homeMatch) return "~" + cwd.slice(homeMatch[0].length);
-  return cwd;
 }
 
 /** Live elapsed timer hook — ticks every second for running sessions */
