@@ -2,15 +2,30 @@ import { Router } from "express";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import os from "node:os";
-import { getConfig, loadConfig, saveConfig, reloadConfig, generateDefaultConfig, getAgentSystemPath, resolvePath, getMainProjectDir } from "../config.js";
+import {
+  getConfig,
+  loadConfig,
+  saveConfig,
+  reloadConfig,
+  generateDefaultConfig,
+  getAgentSystemPath,
+  resolvePath,
+  getMainProjectDir,
+} from "../config.js";
 import { scaffoldAgentSystem, previewScaffold } from "../scaffold.js";
 import type { ScaffoldOptions } from "../scaffold.js";
 import type { AgentStudioConfig } from "../config.js";
 import type { WorkflowManager } from "../workflows/index.js";
 
-export function settingsRoutes(workflowManager: WorkflowManager): Router {
+export function settingsRoutes(
+  workflowManager: WorkflowManager,
+  deps: {
+    validateProjectPath: (p: string) => string | null;
+  },
+): Router {
   const router = Router();
   const SETTINGS_PATH = `${process.cwd()}/.settings.json`;
+  const { validateProjectPath } = deps;
 
   // Config
   router.get("/config", (_req, res) => {
@@ -19,7 +34,7 @@ export function settingsRoutes(workflowManager: WorkflowManager): Router {
       homeDir: os.homedir(),
       cwd: process.cwd(),
       mainProjectDir: getMainProjectDir(),
-      defaultCwd: resolvePath(config.defaults.workingDirectory),
+      defaultCwd: resolvePath(config.defaults?.workingDirectory),
       config,
     });
   });
@@ -62,7 +77,9 @@ export function settingsRoutes(workflowManager: WorkflowManager): Router {
           const raw = await readFile(memoryIndexPath, "utf-8");
           const data = JSON.parse(raw) as { total_entries?: number };
           memoryCount = data.total_entries ?? 0;
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
 
       res.json({
@@ -100,6 +117,12 @@ export function settingsRoutes(workflowManager: WorkflowManager): Router {
         res.status(400).json({ error: "Missing projectPath or agents array" });
         return;
       }
+      const validPath = validateProjectPath(options.projectPath);
+      if (!validPath) {
+        res.status(403).json({ error: "Path not allowed" });
+        return;
+      }
+      options.projectPath = validPath;
       const result = scaffoldAgentSystem(options);
       if (result.alreadyExists) {
         res.status(409).json({ error: "Agent system already exists at this path", result });
@@ -130,16 +153,8 @@ export function settingsRoutes(workflowManager: WorkflowManager): Router {
 
   router.post("/settings", async (req, res) => {
     try {
-      const { defaultModel, defaultPermissions, defaultCwd, customServers } = req.body as Record<string, unknown>;
-      // Only persist known fields — reject arbitrary keys
-      const validated: Record<string, unknown> = {};
-      if (defaultModel && typeof defaultModel === "string") validated.defaultModel = defaultModel;
-      if (defaultPermissions && typeof defaultPermissions === "string") validated.defaultPermissions = defaultPermissions;
-      if (defaultCwd && typeof defaultCwd === "string") validated.defaultCwd = defaultCwd;
-      if (Array.isArray(customServers)) validated.customServers = customServers;
-
       const { writeFile } = await import("node:fs/promises");
-      await writeFile(SETTINGS_PATH, JSON.stringify(validated, null, 2), "utf-8");
+      await writeFile(SETTINGS_PATH, JSON.stringify(req.body, null, 2), "utf-8");
       res.json({ ok: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";

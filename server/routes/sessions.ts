@@ -9,6 +9,7 @@ import {
   formatCost,
   formatTokens,
 } from "../session-usage.js";
+import { sanitize } from "../demo-sanitizer.js";
 import os from "node:os";
 
 export function sessionsRoutes(
@@ -32,10 +33,15 @@ export function sessionsRoutes(
         meta?: SessionMeta;
       };
 
+      if (!name || typeof name !== "string") {
+        res.status(400).json({ error: "Missing required field: name" });
+        return;
+      }
+
       const session = terminalManager.createSession({
-        name: name ?? "Agent",
+        name,
         command: command ?? "claude",
-        args: args ?? ["--dangerously-skip-permissions"],
+        args: args ?? ["--model", "sonnet"],
         cwd,
         cols,
         rows,
@@ -60,7 +66,7 @@ export function sessionsRoutes(
   // IMPORTANT: /history must come before /:id routes to avoid matching "history" as :id
   router.get("/history", async (_req, res) => {
     try {
-      const { readdir, stat: fsStat } = await import("node:fs/promises");
+      const { readdirSync, statSync } = await import("node:fs");
       const { join } = await import("node:path");
       const home = os.homedir();
       const projectsDir = join(home, ".claude", "projects");
@@ -76,23 +82,24 @@ export function sessionsRoutes(
       const sessions: HistorySession[] = [];
 
       try {
-        const projectDirs = await readdir(projectsDir);
+        const projectDirs = readdirSync(projectsDir);
         for (const projDir of projectDirs) {
           const projPath = join(projectsDir, projDir);
           try {
-            const s = await fsStat(projPath);
-            if (!s.isDirectory()) continue;
+            const stat = statSync(projPath);
+            if (!stat.isDirectory()) continue;
           } catch {
             continue;
           }
 
           try {
-            const files = await readdir(projPath);
+            const files = readdirSync(projPath);
             for (const file of files) {
               if (!file.endsWith(".jsonl")) continue;
               const filePath = join(projPath, file);
               try {
-                const fileStat = await fsStat(filePath);
+                const fileStat = statSync(filePath);
+                // Decode project name from directory name
                 const projectName = projDir.replace(/-/g, "/").replace(/^\/+/, "");
 
                 sessions.push({
@@ -114,69 +121,85 @@ export function sessionsRoutes(
         // projects dir may not exist
       }
 
+      // Sort by modified time, newest first, limit to 20
       sessions.sort((a, b) => b.modified - a.modified);
-      const { open } = await import("node:fs/promises");
-      const result = await Promise.all(
-        sessions.slice(0, 20).map(async (s) => {
-          let preview = "";
-          let agent = "";
-          try {
-            const fh = await open(s.file, "r");
-            const buf = Buffer.alloc(32768);
-            const { bytesRead } = await fh.read(buf, 0, 32768, 0);
-            await fh.close();
-            const chunk = buf.toString("utf8", 0, bytesRead);
-            const lines = chunk.split("\n").filter(Boolean);
-            for (const line of lines.slice(0, 30)) {
-              try {
-                const entry = JSON.parse(line);
-                if (entry.type === "agent-setting" && entry.agentSetting && !agent) {
-                  agent = entry.agentSetting;
-                }
-                if (entry.type === "user" && !preview) {
-                  const msg = entry.message;
-                  let text = "";
-                  if (typeof msg === "string") {
-                    text = msg;
-                  } else if (msg && typeof msg.content === "string") {
-                    text = msg.content;
-                  } else if (msg && Array.isArray(msg.content)) {
-                    text = msg.content
-                      .filter((b: { type: string }) => b.type === "text")
-                      .map((b: { text: string }) => b.text)
-                      .join(" ");
-                  }
-                  if (text && !text.startsWith("<") && text.length > 5) {
-                    preview = text.slice(0, 80).replace(/\n/g, " ").trim();
-                  }
-                }
-                if (entry.type === "last-prompt" && !preview && entry.lastPrompt) {
-                  const lp = entry.lastPrompt as string;
-                  if (!lp.startsWith("<") && lp.length > 5) {
-                    preview = lp.slice(0, 80).replace(/\n/g, " ").trim();
-                  }
-                }
-              } catch {
-                // Skip unparseable lines
+      const result = sessions.slice(0, 20).map((s) => {
+        // Extract preview and agent from first ~30 lines of JSONL
+        let preview = "";
+        let agent = "";
+        try {
+          const fd = require("node:fs").openSync(s.file, "r");
+          const buf = Buffer.alloc(32768);
+          const bytesRead = require("node:fs").readSync(fd, buf, 0, 32768, 0);
+          require("node:fs").closeSync(fd);
+          const chunk = buf.toString("utf8", 0, bytesRead);
+          const lines = chunk.split("\n").filter(Boolean);
+          for (const line of lines.slice(0, 30)) {
+            try {
+              const entry = JSON.parse(line);
+              // Extract agent setting (e.g., "pmo", "frontend-worker")
+              if (entry.type === "agent-setting" && entry.agentSetting && !agent) {
+                agent = entry.agentSetting;
               }
+              // Extract first real user message as preview
+              if (entry.type === "user" && !preview) {
+                const msg = entry.message;
+                let text = "";
+                if (typeof msg === "string") {
+                  text = msg;
+                } else if (msg && typeof msg.content === "string") {
+                  text = msg.content;
+                } else if (msg && Array.isArray(msg.content)) {
+                  text = msg.content
+                    .filter((b: { type: string }) => b.type === "text")
+                    .map((b: { text: string }) => b.text)
+                    .join(" ");
+                }
+                // Skip system/command messages
+                if (text && !text.startsWith("<") && text.length > 5) {
+                  preview = text.slice(0, 80).replace(/\n/g, " ").trim();
+                }
+              }
+              // Also check last-prompt as fallback
+              if (entry.type === "last-prompt" && !preview && entry.lastPrompt) {
+                const lp = entry.lastPrompt as string;
+                if (!lp.startsWith("<") && lp.length > 5) {
+                  preview = lp.slice(0, 80).replace(/\n/g, " ").trim();
+                }
+              }
+            } catch {
+              // Skip unparseable lines
             }
-          } catch {
-            // Can't read file, leave preview empty
           }
+        } catch {
+          // Can't read file, leave preview empty
+        }
 
-          const projectShort = s.project.split("/").pop() ?? s.project;
+        // Derive short project name from directory path
+        const projectShort = s.project.split("/").pop() ?? s.project;
 
-          return {
-            id: s.id,
-            project: s.project,
-            projectShort,
-            modified: s.modified,
-            date: new Date(s.modified).toISOString(),
-            agent,
-            preview,
-          };
-        }),
-      );
+        // Extract cost from JSONL usage data
+        let cost: string | null = null;
+        try {
+          const usage = getUsageBySessionId(s.id);
+          if (usage && usage.totalCost > 0) {
+            cost = formatCost(usage.totalCost);
+          }
+        } catch {
+          // Best effort -- skip if usage parsing fails
+        }
+
+        return {
+          id: s.id,
+          project: s.project,
+          projectShort,
+          modified: s.modified,
+          date: new Date(s.modified).toISOString(),
+          agent,
+          preview,
+          cost,
+        };
+      });
 
       res.json(result);
     } catch {
@@ -204,7 +227,7 @@ export function sessionsRoutes(
       res.status(404).json({ error: "Session not found" });
       return;
     }
-    res.json({ buffer });
+    res.json({ buffer: sanitize(buffer) });
   });
 
   router.get("/:id/usage", (req, res) => {
@@ -213,7 +236,15 @@ export function sessionsRoutes(
       const sessions = terminalManager.listSessions();
       const session = sessions.find((s) => s.id === sessionId);
       if (!session) {
-        res.status(404).json({ error: "Session not found" });
+        // Return empty usage instead of 404 -- CLI-discovered sessions
+        // won't be in the server's session map but the frontend still
+        // asks for their usage.
+        res.json({
+          cost: null,
+          tokens: null,
+          model: null,
+          modelShort: null,
+        });
         return;
       }
 
