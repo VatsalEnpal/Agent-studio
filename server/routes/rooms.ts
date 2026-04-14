@@ -114,8 +114,18 @@ You are a teammate on Slack, not an assistant writing a report.
             prompt +
             "\n\n[ROOM REMINDER: Max 3-4 sentences. Summarize findings briefly. List max 3-5 items, not everything. @mention who should act next. No reports.]";
         } else {
-          // Not first message — still append brevity reminder after the prompt
+          // Not first message — prepend recent room context + brevity reminder
+          const recentRoom = roomManager.getRoom(roomId);
+          const recentMsgs = (recentRoom?.messages ?? [])
+            .filter((m) => m.from !== agentId && m.type !== "system")
+            .slice(-10)
+            .map((m) => `[${m.from}]: ${(m.text ?? "").slice(0, 300)}`)
+            .join("\n");
+          const contextBlock = recentMsgs
+            ? `\n--- Recent room messages ---\n${recentMsgs}\n---\n\n`
+            : "";
           messageToSend =
+            contextBlock +
             prompt +
             "\n\n[ROOM REMINDER: Max 3-4 sentences. Summarize findings briefly. List max 3-5 items, not everything. @mention who should act next. No reports.]";
         }
