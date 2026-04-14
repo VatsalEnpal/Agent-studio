@@ -1,6 +1,6 @@
 {
   "name": "agent-studio",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Web-based command center for AI coding agents. Manage Claude Code sessions, custom agents, and automated workflows from one dashboard.",
   "license": "MIT",
   "repository": {
