@@ -10,7 +10,11 @@ import {
   formatTokens,
 } from "../session-usage.js";
 import { sanitize } from "../demo-sanitizer.js";
+import { scoreMemories } from "../memory-scorer.js";
+import { getAgentSystemPath, getMainProjectDir } from "../config.js";
 import os from "node:os";
+import path from "node:path";
+import { writeFileSync, mkdirSync, readFileSync } from "node:fs";
 
 export function sessionsRoutes(
   terminalManager: TerminalManager,
@@ -38,10 +42,62 @@ export function sessionsRoutes(
         return;
       }
 
+      // --- Memory injection: score and inject relevant memories ---
+      let finalArgs = args ?? ["--model", "sonnet"];
+      try {
+        const indexPath = getAgentSystemPath("tools/memory_index.json");
+        if (indexPath) {
+          const rawIndex = readFileSync(indexPath, "utf-8");
+          const index = JSON.parse(rawIndex) as {
+            entries: Array<{
+              file: string;
+              title: string;
+              key_point?: string;
+              tags?: string[];
+              category?: string;
+              agent_type?: string;
+              pinned?: boolean;
+            }>;
+          };
+
+          if (index.entries && index.entries.length > 0) {
+            // Build query from session context
+            const queryParts = [name, meta?.agent ?? "", cwd ?? getMainProjectDir() ?? ""];
+            const query = queryParts.filter(Boolean).join(" ");
+
+            const topMemories = scoreMemories(query, index.entries, 5);
+            if (topMemories.length > 0) {
+              // Format memories as context block
+              const memoryBlock = [
+                "## Relevant Knowledge from Past Sessions\n",
+                ...topMemories.map(
+                  (m, i) =>
+                    `${i + 1}. **${m.title}**${m.key_point ? `: ${m.key_point}` : ""}${m.tags && m.tags.length > 0 ? ` [${m.tags.join(", ")}]` : ""}`,
+                ),
+                "\n_These learnings were auto-extracted from previous sessions._",
+              ].join("\n");
+
+              // Write to temp file
+              const tmpDir = path.join(os.tmpdir(), "agent-studio-memories");
+              mkdirSync(tmpDir, { recursive: true });
+              const tmpFile = path.join(tmpDir, `session-${Date.now()}.md`);
+              writeFileSync(tmpFile, memoryBlock, "utf-8");
+
+              // Append to args (only if command is claude)
+              if ((command ?? "claude") === "claude") {
+                finalArgs = [...finalArgs, "--append-system-prompt", tmpFile];
+              }
+            }
+          }
+        }
+      } catch {
+        // Memory injection failed — non-critical, proceed without it
+      }
+
       const session = terminalManager.createSession({
         name,
         command: command ?? "claude",
-        args: args ?? ["--model", "sonnet"],
+        args: finalArgs,
         cwd,
         cols,
         rows,
