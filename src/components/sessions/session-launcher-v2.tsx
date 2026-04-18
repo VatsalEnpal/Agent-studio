@@ -280,13 +280,15 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
     })();
   }, [defaultCwdLoaded]);
 
-  // Fetch agents
+  // Fetch agents — refetch every time the dialog opens so agents created via
+  // Settings (or any other surface) appear immediately, without a page reload.
   useEffect(() => {
+    if (!open) return;
     setAgentsLoading(true);
     setAgentsError(null);
     void (async () => {
       try {
-        const res = await fetch("/api/agents");
+        const res = await fetch("/api/agents", { cache: "no-store" });
         if (!res.ok) throw new Error(`Failed to load agents (${String(res.status)})`);
         const data = (await res.json()) as AgentOption[];
         if (Array.isArray(data) && data.length > 0) setAgents(data);
@@ -297,7 +299,7 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
         setAgentsLoading(false);
       }
     })();
-  }, []);
+  }, [open]);
 
   // Fetch recent sessions when opened
   useEffect(() => {
