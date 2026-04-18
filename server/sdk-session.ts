@@ -3,49 +3,56 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 import type { SDKMessage } from "@anthropic-ai/claude-agent-sdk";
 import { EventEmitter } from "events";
 import { randomUUID } from "node:crypto";
-import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { homedir } from "node:os";
 import { join } from "node:path";
 
 // ---------------------------------------------------------------------------
 // Claude CLI path resolution.
 //
-// The @anthropic-ai/claude-agent-sdk does NOT bundle a `cli.js`.  It tries
-// to resolve `node_modules/@anthropic-ai/claude-agent-sdk/cli.js` by default
-// and throws "Claude Code executable not found" when it is missing — which is
-// always, in a plain npm install.  The SDK accepts
-// `options.pathToClaudeCodeExecutable` pointing at the user's system `claude`
-// binary.  Resolve once at module load and cache.
+// The SDK spawns a Node subprocess from `pathToClaudeCodeExecutable`; it
+// expects a JavaScript entrypoint (e.g. `cli.js`), NOT a native binary.
+// Passing a native Mach-O/ELF binary makes Node fail with a parse error
+// ("Claude Code native binary not found at ...").
+//
+// Resolution order (R1b fix):
+//   1) CLAUDE_PATH env override — only honor it if it looks like a .js file.
+//   2) @anthropic-ai/claude-code's bundled cli.js (if present — older v1.x
+//      packages shipped it).
+//   3) @anthropic-ai/claude-agent-sdk's own bundled cli.js — the SDK's
+//      default fallback, which is what it uses when no path is passed.
+//      We return it explicitly so the path is visible in logs.
+//   4) If nothing is found, return null and let the SDK use its built-in
+//      default (same as option 3, but without our explicit detection).
+//
+// We deliberately do NOT fall through to a native `claude` binary
+// (~/.local/bin/claude, /opt/homebrew/bin/claude etc.) — those are native
+// installer binaries that the SDK cannot execute as a Node script.
 // ---------------------------------------------------------------------------
 
 function resolveClaudeCliPath(): string | null {
-  // 1) Explicit env override
+  // 1) Explicit env override — only if it's a .js file the SDK can execute
   const envPath = process.env["CLAUDE_PATH"];
-  if (envPath && existsSync(envPath)) return envPath;
-
-  // 2) `which claude`
-  try {
-    const out = execSync("which claude", { stdio: ["ignore", "pipe", "ignore"] })
-      .toString()
-      .trim();
-    if (out && existsSync(out)) return out;
-  } catch {
-    // not on PATH
+  if (envPath && existsSync(envPath) && envPath.endsWith(".js")) {
+    return envPath;
   }
 
-  // 3) Common install locations
-  const candidates = [
-    join(homedir(), ".claude", "local", "claude"),
-    join(homedir(), ".local", "bin", "claude"),
-    "/usr/local/bin/claude",
-    "/opt/homebrew/bin/claude",
-    "/usr/bin/claude",
-  ];
-  for (const p of candidates) {
-    if (existsSync(p)) return p;
-  }
+  // 2) @anthropic-ai/claude-code/cli.js (installed as production dep)
+  const claudeCodeCli = join(
+    process.cwd(),
+    "node_modules",
+    "@anthropic-ai",
+    "claude-code",
+    "cli.js",
+  );
+  if (existsSync(claudeCodeCli)) return claudeCodeCli;
 
+  // 3) @anthropic-ai/claude-agent-sdk/cli.js (the SDK's bundled CLI — always
+  //    present because `@anthropic-ai/claude-agent-sdk` is a direct dep).
+  const sdkCli = join(process.cwd(), "node_modules", "@anthropic-ai", "claude-agent-sdk", "cli.js");
+  if (existsSync(sdkCli)) return sdkCli;
+
+  // 4) Nothing found — let the SDK use its own default (same as step 3
+  //    resolved relative to the SDK's import.meta.url).
   return null;
 }
 
