@@ -17,7 +17,7 @@ import { importSprintAsWorkflow } from "../workflows/sprint-import.js";
 import { loadRunState, listRuns, getActiveRuns, deleteRun } from "../workflows/run-state.js";
 import type { WorkflowPipelineDef } from "../workflows/definition.js";
 import type { WsMessage } from "../shared/types.js";
-import { broadcast, GLOBAL_TOPIC } from "../ws/broadcast.js";
+import { broadcast } from "../ws/broadcast.js";
 import notifier from "node-notifier";
 
 interface WorkflowRouteDeps {
@@ -67,15 +67,12 @@ export function workflowRoutes(deps: WorkflowRouteDeps): Router {
             data: event.data,
           },
         };
-        // Sprint-scoped tabs (topic `sprint:<runId>`) receive step updates
-        // via the default inferTopic routing.
+        // Sprint-scoped tabs (topic `sprint:<workflowId>-<runId>`)
+        // receive step updates via inferTopic's composite-id routing.
+        // (Previously this also dual-broadcast to GLOBAL because the
+        // composite-id topic match was broken — H2 fixes that and the
+        // GLOBAL fan-out is no longer needed.)
         broadcast(wss, msg);
-        // Also fan out to every dashboard / legacy client subscribed to
-        // the default `global` topic. Per S1 the verify harness asserts on
-        // workflow-step-update frames without opting into a sprint topic;
-        // dual-broadcast keeps both consumers satisfied without changing
-        // the WS protocol.
-        broadcast(wss, msg, GLOBAL_TOPIC);
       } else {
         broadcast(wss, { type: wsType, payload: event } satisfies WsMessage);
       }

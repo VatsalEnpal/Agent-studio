@@ -729,6 +729,27 @@ export function sprintsRoutes(deps: {
     try {
       const { sprintId: rawSprintId } = req.params as { sprintId: string };
       const sprintId = stripRunSuffix(rawSprintId);
+
+      // H1: Halt the executor for this sprint's run BEFORE updating any
+      // legacy state. `pauseRun` flips the run's `paused` flag and clears
+      // any pending step-gate waiters so an awaiting step bails instead
+      // of running. M2: then mirror the executor's run state into the
+      // persisted sprint JSON so `GET /api/sprints` reflects `paused` on
+      // page refresh.
+      const runId = readSprintRunId(sprintId);
+      if (runId) {
+        workflowExecutor.pauseRun(runId);
+        const runState = loadRunState(sprintId, runId);
+        if (runState) {
+          // Mark paused before sync so the persisted file is correct
+          // even if the executor loop hasn't yet observed the flag.
+          runState.status = "paused";
+          saveRunState(runState);
+          syncSprintFileFromRun(sprintId, runState);
+        }
+        workflowManager.reload();
+      }
+
       const { readFile, writeFile } = await import("node:fs/promises");
       const statePath = getAgentSystemPath("sprints/state.json");
       const currentPath = getAgentSystemPath("sprints/current.md");
@@ -977,12 +998,16 @@ export function sprintsRoutes(deps: {
 
       const body = (req.body ?? {}) as {
         title?: unknown;
-        goal?: unknown;
         agents?: unknown;
         pipelineDef?: unknown;
       };
 
       // Whitelist + type-check. Ignore everything else (including id/runId).
+      // M3: `goal` was previously written into `data.goal`, but the actual
+      // goal lives on each agent step (`pipelineDef.steps[i].goal`) — the
+      // top-level field was never read. The edit dialog already lets users
+      // change per-step goals via `body.pipelineDef`, so we drop the dead
+      // branch entirely instead of fanning a sprint-level value out.
       if (typeof body.title === "string" && body.title.trim().length > 0) {
         const newName = body.title.trim();
         data.name = newName;
@@ -994,10 +1019,6 @@ export function sprintsRoutes(deps: {
         if (pDef && typeof pDef === "object") {
           pDef.name = newName;
         }
-      }
-
-      if (typeof body.goal === "string") {
-        data.goal = body.goal;
       }
 
       if (Array.isArray(body.agents) && body.agents.every((a) => typeof a === "string")) {
@@ -1056,6 +1077,25 @@ export function sprintsRoutes(deps: {
     try {
       const { sprintId: rawSprintId } = req.params as { sprintId: string };
       const sprintId = stripRunSuffix(rawSprintId);
+
+      // H1: Abort the executor for this sprint's run BEFORE writing any
+      // legacy state. `cancelRun` triggers the run's AbortController and
+      // clears pending step-gate waiters so the executor doesn't burn
+      // tokens after the operator asked to cancel. M2: then mirror the
+      // run state into the persisted sprint JSON.
+      const runId = readSprintRunId(sprintId);
+      if (runId) {
+        workflowExecutor.cancelRun(runId);
+        const runState = loadRunState(sprintId, runId);
+        if (runState) {
+          runState.status = "cancelled";
+          runState.completedAt = runState.completedAt ?? new Date().toISOString();
+          saveRunState(runState);
+          syncSprintFileFromRun(sprintId, runState);
+        }
+        workflowManager.reload();
+      }
+
       const { readFile, writeFile } = await import("node:fs/promises");
       const statePath = getAgentSystemPath("sprints/state.json");
       const currentPath = getAgentSystemPath("sprints/current.md");

@@ -85,7 +85,13 @@ interface TopicHintMessage {
  *         → `room:<payload.roomId>`
  *   - `sprint-update` / `workflow-*` (workflow-update, workflow-step-update,
  *     workflow-gate-waiting, workflow-run-complete, workflow-run-failed)
- *         → `sprint:<payload.runId|sprintId|workflowId>`
+ *         → `sprint:<workflowId>-<runId>` when both are present (this is the
+ *           composite id the UI subscribes to — see `flowsToSprints` in
+ *           server/routes/sprint.ts which exposes each sprint as
+ *           `${flowId}-${runId}`, and src/components/sprints/sprints-view.tsx
+ *           which calls `subscribeTopic("sprint:" + selectedSprintId)`).
+ *           Falls back to `sprint:<sprintId>` or `sprint:<runId>` when only
+ *           one id is available.
  *   - Anything without enough id metadata, or types like `usage-update`,
  *     `git-update`, `sessions-update`, `memory-*`, `notification`,
  *     `file-update`, `server-status` → `global`.
@@ -115,6 +121,13 @@ export function inferTopic(message: unknown): string {
     // `workflow-update` carries a Sprint[] payload (no single id) — stays global
     if (type === "workflow-update" && Array.isArray(msg.payload)) {
       return GLOBAL_TOPIC;
+    }
+    // Prefer the composite `<workflowId>-<runId>` id used by the UI when
+    // both are present. The client's selected sprint id is built from
+    // exactly these two fields, so the topic must match or the
+    // sprint-scoped tab will never receive its scoped frames.
+    if (payload?.workflowId && payload?.runId) {
+      return `sprint:${payload.workflowId}-${payload.runId}`;
     }
     const id = payload?.sprintId ?? payload?.runId ?? payload?.workflowId;
     if (id) return `sprint:${id}`;

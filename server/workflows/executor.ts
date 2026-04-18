@@ -7,10 +7,10 @@
 
 import { existsSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { execSync } from "node:child_process";
 import { homedir } from "node:os";
 import type { CommandRunner } from "./command-runner.js";
 import { getAgentSystemBase } from "../config.js";
+import { getResolvedClaudePath } from "../sdk-session.js";
 import {
   validateWorkflow,
   type WorkflowPipelineDef,
@@ -59,10 +59,12 @@ export class WorkflowExecutor {
   private activeRuns = new Map<string, { abortController: AbortController; paused: boolean }>();
   /**
    * Pending per-step gate approvals. Key: `${runId}::${stepId}`.
-   * Each entry resolves the promise when the external approval arrives
-   * via `approveStepGate()` (wired from /api/sprints/:sprintId/gates/:gateId/approve).
+   * Each entry resolves the promise with `"approved"` when the external
+   * approval arrives via `approveStepGate()` (wired from
+   * /api/sprints/:sprintId/gates/:gateId/approve), or `"cancelled"` when
+   * `pauseRun` / `cancelRun` clears the gate.
    */
-  private pendingStepGates = new Map<string, () => void>();
+  private pendingStepGates = new Map<string, (result: "approved" | "cancelled") => void>();
   /** Override retry delay for tests (default: 60000ms) */
   _testRetryDelayMs?: number;
 
@@ -77,14 +79,15 @@ export class WorkflowExecutor {
 
   /**
    * Register a pending step-gate approval and emit the gate-waiting event.
-   * Returns a promise that resolves once `approveStepGate` is called.
+   * Resolves with `"approved"` when `approveStepGate` is called, or
+   * `"cancelled"` if the run is paused/cancelled while waiting.
    * Marks the run as `waiting_approval` and persists run state.
    */
   private waitForStepApproval(
     runState: RunState,
     stepId: string,
     gateType: "approve-before-start" | "approve-before-finish",
-  ): Promise<void> {
+  ): Promise<"approved" | "cancelled"> {
     const key = this.gateKey(runState.runId, stepId);
     runState.status = "waiting_approval";
     saveRunState(runState);
@@ -95,7 +98,7 @@ export class WorkflowExecutor {
       stepId,
       data: { gateType },
     });
-    return new Promise<void>((resolve) => {
+    return new Promise<"approved" | "cancelled">((resolve) => {
       this.pendingStepGates.set(key, resolve);
     });
   }
@@ -110,7 +113,7 @@ export class WorkflowExecutor {
     const resolve = this.pendingStepGates.get(key);
     if (!resolve) return false;
     this.pendingStepGates.delete(key);
-    resolve();
+    resolve("approved");
     return true;
   }
 
@@ -131,10 +134,10 @@ export class WorkflowExecutor {
       errors.push(...defValidation.errors);
     }
 
-    // Check claude CLI on PATH
-    try {
-      execSync("which claude", { stdio: "pipe" });
-    } catch {
+    // Check claude CLI is resolvable. `getResolvedClaudePath` is the
+    // canonical (cached, async-safe) probe used elsewhere in the server;
+    // it returns null when neither CLAUDE_PATH nor PATH yields a binary.
+    if (!getResolvedClaudePath()) {
       errors.push("Claude Code CLI not found. Install it from https://claude.ai/code");
     }
 
@@ -427,7 +430,13 @@ export class WorkflowExecutor {
     if (stepDef.gate === "approve-before-finish") {
       stepState.status = "waiting";
       saveRunState(runState);
-      await this.waitForStepApproval(runState, stepDef.id, "approve-before-finish");
+      const result = await this.waitForStepApproval(runState, stepDef.id, "approve-before-finish");
+      // pause/cancel cleared the gate — leave the step `waiting` and
+      // bail. Output was already written above; the run will be marked
+      // paused/cancelled by the outer loop.
+      if (result === "cancelled") {
+        return;
+      }
       // Post-approval: restore `running` on both run + step and persist
       // BEFORE marking completed. This guarantees syncSprintFileFromRun
       // sees a clean `running` transition instead of jumping straight from
@@ -470,7 +479,15 @@ export class WorkflowExecutor {
     if (stepDef.gate === "approve-before-start") {
       stepState.status = "waiting";
       stepState.startedAt = stepState.startedAt ?? new Date().toISOString();
-      await this.waitForStepApproval(runState, stepDef.id, "approve-before-start");
+      const result = await this.waitForStepApproval(runState, stepDef.id, "approve-before-start");
+      // If the gate was cleared by pause/cancel rather than approve, leave
+      // the step in `waiting` and bail. The outer executor loop will see
+      // the abort signal / paused flag and persist the appropriate run
+      // status. Importantly, do NOT fall through to dispatch — that would
+      // burn tokens after the operator asked us to stop.
+      if (result === "cancelled") {
+        return;
+      }
       // Approved — resume as running. Fall through to normal dispatch.
       runState.status = "running";
       stepState.status = "pending";
@@ -1029,6 +1046,9 @@ export class WorkflowExecutor {
     if (control) {
       control.abortController.abort();
     }
+    // Clear any pending step-gate waiters for this run so the executor
+    // loop unblocks and observes the cancellation.
+    this.clearPendingGates(runId);
   }
 
   /** Pause a running workflow */
@@ -1036,6 +1056,30 @@ export class WorkflowExecutor {
     const control = this.activeRuns.get(runId);
     if (control) {
       control.paused = true;
+    }
+    // Clear any pending step-gate waiters so a paused run that was
+    // sitting on `waitForStepApproval` returns; the outer executor loop
+    // then sees `paused === true` and bails out before running the next
+    // step. This also means a subsequent `approveStepGate` call is a
+    // no-op (false) — the user must explicitly resume the sprint.
+    this.clearPendingGates(runId);
+  }
+
+  /** Drop all pending step-gate resolvers belonging to `runId`. */
+  private clearPendingGates(runId: string): void {
+    const prefix = `${runId}::`;
+    for (const [key, resolve] of this.pendingStepGates) {
+      if (key.startsWith(prefix)) {
+        this.pendingStepGates.delete(key);
+        // Resolve with `cancelled` so the awaiting `waitForStepApproval`
+        // promise settles and the caller can bail out instead of falling
+        // through to step dispatch.
+        try {
+          resolve("cancelled");
+        } catch {
+          /* never propagate */
+        }
+      }
     }
   }
 
