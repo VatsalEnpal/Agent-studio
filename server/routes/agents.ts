@@ -2,7 +2,13 @@ import { Router } from "express";
 import type express from "express";
 import fs from "node:fs";
 import path from "node:path";
-import { getConfig, getAgentSources, type AgentConfig, type DiscoveredAgent } from "../config.js";
+import {
+  getConfig,
+  getAgentSources,
+  resolvePath,
+  type AgentConfig,
+  type DiscoveredAgent,
+} from "../config.js";
 import {
   generateAgentsWithClaudeMd,
   writeAgentFiles,
@@ -128,6 +134,132 @@ export function agentsRoutes(deps: { validateProjectPath: (p: string) => string 
       }
 
       res.json(agents);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // Create a single agent as a markdown file under a configured agent source.
+  // Accepts the richer payload spec'd by plan task A7: name (filename-safe),
+  // description, optional model/permissions/icon, body (markdown), and a
+  // targetSourcePath that MUST match one of config.agentSources[].path.
+  router.post("/", (req, res) => {
+    try {
+      const body = req.body as {
+        name?: string;
+        description?: string;
+        model?: string;
+        permissions?: string;
+        icon?: string;
+        body?: string;
+        targetSourcePath?: string;
+      };
+      const name = (body.name ?? "").trim();
+      const description = (body.description ?? "").trim();
+      const model = (body.model ?? "inherit").trim();
+      const permissions = (body.permissions ?? "").trim();
+      const icon = (body.icon ?? "").trim();
+      const mdBody = body.body ?? "";
+      const targetRaw = (body.targetSourcePath ?? "").trim();
+
+      // --- Validation ---
+      if (!name) {
+        res.status(400).json({ error: "name is required" });
+        return;
+      }
+      // Filename-safe: alphanumeric + _- , must start with alphanumeric.
+      const nameRe = /^[a-z0-9][a-z0-9_-]*$/i;
+      if (!nameRe.test(name)) {
+        res.status(400).json({
+          error:
+            "name must be filename-safe (letters, digits, _ and -; must start with a letter or digit)",
+        });
+        return;
+      }
+      const allowedModels = new Set(["opus", "sonnet", "haiku", "inherit"]);
+      if (!allowedModels.has(model)) {
+        res.status(400).json({ error: "model must be one of: opus, sonnet, haiku, inherit" });
+        return;
+      }
+      if (permissions) {
+        const allowedPerms = new Set(["auto", "plan", "default", "bypass"]);
+        if (!allowedPerms.has(permissions)) {
+          res
+            .status(400)
+            .json({ error: "permissions must be one of: auto, plan, default, bypass" });
+          return;
+        }
+      }
+      if (!targetRaw) {
+        res.status(400).json({ error: "targetSourcePath is required" });
+        return;
+      }
+
+      // Resolve ~ on both sides and compare.
+      const config = getConfig();
+      const sources = getAgentSources(config);
+      const targetResolved = resolvePath(targetRaw);
+      const matchedSource = sources.find((s) => s.path === targetResolved);
+      if (!matchedSource) {
+        res.status(400).json({
+          error: "targetSourcePath must match one of the configured agentSources",
+        });
+        return;
+      }
+
+      const targetDir = matchedSource.path;
+      const targetFile = path.join(targetDir, `${name}.md`);
+      if (fs.existsSync(targetFile)) {
+        res.status(409).json({ error: "agent with this name already exists" });
+        return;
+      }
+
+      // --- Compose frontmatter ---
+      // YAML-ish serializer for a flat map of strings. Skips empty values and
+      // `model: "inherit"` (the sentinel meaning "don't set it"). Values that
+      // contain characters needing quoting are wrapped in double quotes.
+      const escapeYaml = (v: string): string => {
+        // Allow bare scalars for simple descriptions; quote anything that
+        // looks risky (leading/trailing whitespace, colon, #, quotes, newline).
+        if (/^[A-Za-z0-9 _\-./,()!?]*$/.test(v) && !/^\s|\s$/.test(v)) {
+          return v;
+        }
+        return `"${v.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n")}"`;
+      };
+      const fmLines: string[] = [`name: ${name}`];
+      if (description) fmLines.push(`description: ${escapeYaml(description)}`);
+      if (model && model !== "inherit") fmLines.push(`model: ${model}`);
+      if (permissions) fmLines.push(`permissions: ${permissions}`);
+      if (icon) fmLines.push(`icon: ${escapeYaml(icon)}`);
+
+      const trimmedBody = mdBody.replace(/^\s+/, "");
+      const fileContents = `---\n${fmLines.join("\n")}\n---\n\n${trimmedBody}${
+        trimmedBody.endsWith("\n") ? "" : "\n"
+      }`;
+
+      // --- Atomic write: tmp + rename ---
+      fs.mkdirSync(targetDir, { recursive: true });
+      const tmpFile = `${targetFile}.tmp-${process.pid}-${Date.now()}`;
+      fs.writeFileSync(tmpFile, fileContents, "utf-8");
+      fs.renameSync(tmpFile, targetFile);
+
+      // Mirror the shape used by GET /api/agents for the new record.
+      const scopeLabel =
+        matchedSource.scope === "global"
+          ? "global"
+          : (matchedSource.label ?? matchedSource.scope.project);
+      const agentRecord: DiscoveredAgent = {
+        id: name,
+        name,
+        description: description || `Agent from ${scopeLabel}`,
+        ...(model !== "inherit" ? { model: model as "opus" | "sonnet" | "haiku" } : {}),
+        ...(icon ? { icon } : {}),
+        sourcePath: matchedSource.path,
+        scope: matchedSource.scope,
+      };
+
+      res.status(201).json({ ok: true, path: targetFile, agent: agentRecord });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
