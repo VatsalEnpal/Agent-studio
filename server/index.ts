@@ -27,6 +27,7 @@ import { WorkflowExecutor } from "./workflows/executor.js";
 import { WorkflowScheduler } from "./workflows/scheduler.js";
 import { ClaudeCommandRunner } from "./workflows/command-runner.js";
 import { getActiveRuns, saveRunState, loadRunState, listRuns } from "./workflows/run-state.js";
+import type { RunState } from "./workflows/run-state.js";
 import { SdkSessionManager } from "./sdk-session.js";
 import {
   getConfig,
@@ -56,7 +57,12 @@ import { healthRoutes } from "./routes/health.js";
 import { gitRoutes } from "./routes/git.js";
 import { sessionsRoutes } from "./routes/sessions.js";
 import { memoryRoutes } from "./routes/memory.js";
-import { sprintRoutes, sprintsRoutes, flowsToSprints } from "./routes/sprint.js";
+import {
+  sprintRoutes,
+  sprintsRoutes,
+  flowsToSprints,
+  syncSprintFileFromRun,
+} from "./routes/sprint.js";
 import { settingsRoutes } from "./routes/settings.js";
 import { systemRoutes } from "./routes/system.js";
 import {
@@ -283,6 +289,32 @@ async function main() {
     return true;
   });
   workflowScheduler.restoreSchedules();
+
+  // --- Sprint state-sync: keep .agent-studio/sprints/<id>.json in lockstep
+  //     with RunState on every executor transition, then broadcast a
+  //     workflow-update so the UI + GET /api/sprints reflect the new
+  //     gate statuses. workflow-step-update WS frames are emitted
+  //     separately by routes/workflows.ts — this listener is ONLY about
+  //     persisting the sprint flow JSON. ---
+  workflowExecutor.onEvent((event) => {
+    // All stepDef.workflowId === sprintId (that's how sprint.ts create
+    // sets it). Resolve the RunState from disk — the executor has
+    // already called saveRunState before emitting.
+    const runState: RunState | null = loadRunState(event.workflowId, event.runId);
+    if (!runState) return;
+
+    const changed = syncSprintFileFromRun(event.workflowId, runState);
+    if (!changed) return;
+
+    // Flush the registry's in-memory provider cache and re-broadcast.
+    workflowManager.reload();
+    void workflowManager.getFlows().then((flows) => {
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
+    });
+  });
 
   // --- Server restart recovery: detect interrupted runs ---
   {
