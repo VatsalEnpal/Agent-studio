@@ -14,6 +14,9 @@ COPY . .
 # Port for Agent Studio
 EXPOSE 8080
 
+# Bind to all interfaces inside the container so `docker run -p` forwards work
+ENV HOST=0.0.0.0
+
 # Persist user's Claude agents across container restarts
 VOLUME ["/root/.claude/agents"]
 

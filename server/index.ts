@@ -921,10 +921,13 @@ async function main() {
     }
   });
 
-  // Start HTTP server IMMEDIATELY -- API routes are ready now
-  server.listen(port, "127.0.0.1", () => {
+  // Start HTTP server IMMEDIATELY -- API routes are ready now.
+  // Host defaults to loopback for safety; container/remote deployments
+  // can set HOST=0.0.0.0 to bind all interfaces.
+  const host = process.env["HOST"] || "127.0.0.1";
+  server.listen(port, host, () => {
     // eslint-disable-next-line no-console
-    console.log(`Agent Studio running on http://localhost:${port}`);
+    console.log(`Agent Studio running on http://${host}:${port}`);
   });
 
   // Auto-start custom dev servers with autoStart flag
