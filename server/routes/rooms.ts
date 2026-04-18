@@ -258,28 +258,55 @@ You are a teammate on Slack, not an assistant writing a report.
 
   router.post("/", (req, res) => {
     try {
-      const { name, topic, agents } = req.body as {
+      const {
+        name,
+        topic,
+        agents: rawAgents,
+      } = req.body as {
         name?: string;
         topic?: string;
-        agents?: Array<{ id: string; name: string; model: "opus" | "sonnet" | "haiku" }>;
+        agents?: Array<
+          string | { id?: string; name?: string; model?: "opus" | "sonnet" | "haiku" }
+        >;
       };
       if (!name || !topic) {
         res.status(400).json({ error: "Missing 'name' or 'topic'" });
         return;
       }
-      if (agents !== undefined && !Array.isArray(agents)) {
+      if (rawAgents !== undefined && !Array.isArray(rawAgents)) {
         res.status(400).json({ error: "agents must be an array" });
         return;
       }
-      if (agents) {
-        for (const a of agents) {
+
+      // Normalize: accept string shorthand (e.g. "orchestrator") as
+      // { id, name, model: "sonnet" }.  Objects pass through with defaults.
+      type AgentInput = { id: string; name: string; model: "opus" | "sonnet" | "haiku" };
+      const agents: AgentInput[] = [];
+      if (rawAgents) {
+        for (const a of rawAgents) {
+          if (typeof a === "string") {
+            if (!a.trim()) {
+              res.status(400).json({ error: "Agent id string must be non-empty" });
+              return;
+            }
+            agents.push({ id: a, name: a, model: "sonnet" });
+            continue;
+          }
           if (!a || typeof a.id !== "string" || typeof a.name !== "string") {
-            res.status(400).json({ error: "Each agent must have string 'id' and 'name' fields" });
+            res.status(400).json({
+              error:
+                "Each agent must be a string id or an object with string 'id' and 'name' fields",
+            });
             return;
           }
+          agents.push({
+            id: a.id,
+            name: a.name,
+            model: (a.model ?? "sonnet") as "opus" | "sonnet" | "haiku",
+          });
         }
       }
-      const room = roomManager.createRoom(name, topic, agents ?? []);
+      const room = roomManager.createRoom(name, topic, agents);
       res.status(201).json(room);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";

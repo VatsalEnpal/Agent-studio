@@ -128,16 +128,32 @@ export const useRoomsStore = create<RoomsState>((set) => ({
     }),
 
   updateAgentStatus: (roomId, agentId, status) =>
-    set((state) => ({
-      rooms: state.rooms.map((r) =>
-        r.id === roomId
-          ? {
-              ...r,
-              agents: r.agents.map((a) => (a.id === agentId ? { ...a, status } : a)),
-            }
-          : r,
-      ),
-    })),
+    set((state) => {
+      // Clear any stuck typing indicator / streaming text when an agent
+      // transitions out of "working" — covers the SDK-error case where no
+      // final assistant message ever arrives to flush the typing state.
+      const next: Partial<RoomsState> = {
+        rooms: state.rooms.map((r) =>
+          r.id === roomId
+            ? {
+                ...r,
+                agents: r.agents.map((a) => (a.id === agentId ? { ...a, status } : a)),
+              }
+            : r,
+        ),
+      };
+      if (status !== "working") {
+        const newTyping = { ...state.typingAgents };
+        if (newTyping[roomId]) {
+          newTyping[roomId] = newTyping[roomId].filter((ta) => ta.agentId !== agentId);
+        }
+        const newStreamingText = { ...state.streamingText };
+        delete newStreamingText[agentId];
+        next.typingAgents = newTyping;
+        next.streamingText = newStreamingText;
+      }
+      return next as RoomsState;
+    }),
 
   updateApproval: (roomId, messageId, approved) =>
     set((state) => ({

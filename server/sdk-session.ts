@@ -3,6 +3,66 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 import type { SDKMessage } from "@anthropic-ai/claude-agent-sdk";
 import { EventEmitter } from "events";
 import { randomUUID } from "node:crypto";
+import { execSync } from "node:child_process";
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
+
+// ---------------------------------------------------------------------------
+// Claude CLI path resolution.
+//
+// The @anthropic-ai/claude-agent-sdk does NOT bundle a `cli.js`.  It tries
+// to resolve `node_modules/@anthropic-ai/claude-agent-sdk/cli.js` by default
+// and throws "Claude Code executable not found" when it is missing — which is
+// always, in a plain npm install.  The SDK accepts
+// `options.pathToClaudeCodeExecutable` pointing at the user's system `claude`
+// binary.  Resolve once at module load and cache.
+// ---------------------------------------------------------------------------
+
+function resolveClaudeCliPath(): string | null {
+  // 1) Explicit env override
+  const envPath = process.env["CLAUDE_PATH"];
+  if (envPath && existsSync(envPath)) return envPath;
+
+  // 2) `which claude`
+  try {
+    const out = execSync("which claude", { stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim();
+    if (out && existsSync(out)) return out;
+  } catch {
+    // not on PATH
+  }
+
+  // 3) Common install locations
+  const candidates = [
+    join(homedir(), ".claude", "local", "claude"),
+    join(homedir(), ".local", "bin", "claude"),
+    "/usr/local/bin/claude",
+    "/opt/homebrew/bin/claude",
+    "/usr/bin/claude",
+  ];
+  for (const p of candidates) {
+    if (existsSync(p)) return p;
+  }
+
+  return null;
+}
+
+const RESOLVED_CLAUDE_PATH: string | null = resolveClaudeCliPath();
+if (RESOLVED_CLAUDE_PATH) {
+  console.log(`[sdk-session] Using Claude CLI at: ${RESOLVED_CLAUDE_PATH}`);
+} else {
+  console.warn(
+    "[sdk-session] Could not resolve `claude` CLI executable. " +
+      "Room agents will fail until CLAUDE_PATH is set or `claude` is on PATH. " +
+      "Install from https://claude.ai/code",
+  );
+}
+
+export function getResolvedClaudePath(): string | null {
+  return RESOLVED_CLAUDE_PATH;
+}
 
 export interface SdkSession {
   agentId: string;
@@ -95,6 +155,12 @@ export class SdkSessionManager extends EventEmitter {
         allowDangerouslySkipPermissions: true,
         includePartialMessages: true,
       };
+
+      // The SDK looks for a bundled cli.js that doesn't exist — point it at
+      // the system `claude` binary we resolved at module load.
+      if (RESOLVED_CLAUDE_PATH) {
+        options.pathToClaudeCodeExecutable = RESOLVED_CLAUDE_PATH;
+      }
 
       // Resume existing conversation if we have a sessionId
       if (session.sessionId) {
