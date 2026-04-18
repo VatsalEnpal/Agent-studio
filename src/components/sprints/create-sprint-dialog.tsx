@@ -15,10 +15,44 @@ import { cn } from "@/lib/utils";
 // Types
 // ---------------------------------------------------------------------------
 
+type StepGateMode = "auto" | "approve-before-start" | "approve-before-finish";
+
+/**
+ * Minimal shape of an existing sprint passed to the dialog when editing.
+ * The dialog only reads the subset of fields relevant to the edit form —
+ * additional fields are ignored. `id` here is the bare sprintId (no
+ * `-run-<runId>` suffix); the PUT endpoint accepts either form.
+ */
+export interface EditableSprint {
+  id: string;
+  name?: string;
+  goal?: string;
+  agents?: string[];
+  cwd?: string;
+  pipeline?: Array<{
+    id: string;
+    agent: string;
+    name: string;
+    description?: string;
+    gateRequired?: boolean;
+    qaLoop?: boolean;
+    gate?: StepGateMode;
+  }>;
+  budgetCapUsd?: number;
+  stepBudgetCapUsd?: number;
+}
+
 interface CreateSprintDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated?: () => void;
+  /**
+   * When present, the dialog opens in EDIT mode: form fields are prefilled
+   * from the sprint and Submit issues `PUT /api/sprints/:id` instead of
+   * `POST /api/sprints/create`. `onCreated` still fires after a successful
+   * save so callers can refresh the list.
+   */
+  editingSprint?: EditableSprint | null;
 }
 
 type Step = "define" | "agents" | "pipeline" | "done";
@@ -29,8 +63,6 @@ interface AgentOption {
   description: string;
   scope?: "global" | { project: string };
 }
-
-type StepGateMode = "auto" | "approve-before-start" | "approve-before-finish";
 
 interface PipelineStep {
   id: string;
@@ -168,7 +200,13 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
 // Component
 // ---------------------------------------------------------------------------
 
-export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSprintDialogProps) {
+export function CreateSprintDialog({
+  open,
+  onOpenChange,
+  onCreated,
+  editingSprint,
+}: CreateSprintDialogProps) {
+  const isEditMode = Boolean(editingSprint);
   const [step, setStep] = useState<Step>("define");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -201,9 +239,46 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
     gateCount: number;
   } | null>(null);
 
+  // Prefill when editing. Runs once per dialog-open in edit mode — the effect
+  // does not depend on `editingSprint` identity changes while open because
+  // the caller should close + reopen to switch sprints.
+  useEffect(() => {
+    if (!open || !editingSprint) return;
+    setName(editingSprint.name ?? "");
+    setGoal(editingSprint.goal ?? "");
+    if (editingSprint.cwd) setCwd(editingSprint.cwd);
+    setSelectedAgents(new Set(editingSprint.agents ?? []));
+    if (editingSprint.pipeline && editingSprint.pipeline.length > 0) {
+      setPipeline(
+        editingSprint.pipeline.map((p) => ({
+          id: p.id,
+          agent: p.agent,
+          name: p.name,
+          description: p.description ?? "",
+          gateRequired: p.gateRequired ?? false,
+          qaLoop: p.qaLoop ?? false,
+          gate: p.gate ?? "auto",
+        })),
+      );
+    }
+    if (editingSprint.budgetCapUsd != null) {
+      setBudgetCapUsd(String(editingSprint.budgetCapUsd));
+    }
+    if (editingSprint.stepBudgetCapUsd != null) {
+      setStepBudgetCapUsd(String(editingSprint.stepBudgetCapUsd));
+    }
+    // Edit flow lands on the Define step so users see the rename entry
+    // first — they can click Next through to Pipeline to change the rest.
+    setStep("define");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, editingSprint?.id]);
+
   // Load default cwd
   useEffect(() => {
     if (!open) return;
+    // In edit mode the cwd is already prefilled from the sprint — don't
+    // overwrite it with the project default.
+    if (editingSprint) return;
     fetch("/api/config")
       .then((res) => res.json())
       .then((data: Record<string, unknown>) => {
@@ -226,7 +301,7 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
       .catch(() => {
         // Fallback: leave empty
       });
-  }, [open]);
+  }, [open, editingSprint]);
 
   // Load agents when entering step 2.
   // Task A9: pass the sprint's target project (cwd) as ?projectPath= so
@@ -331,6 +406,71 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
     try {
       const parsedBudget = budgetCapUsd ? parseFloat(budgetCapUsd) : undefined;
       const parsedStepBudget = stepBudgetCapUsd ? parseFloat(stepBudgetCapUsd) : undefined;
+
+      if (isEditMode && editingSprint) {
+        // EDIT path — PUT /api/sprints/:id with a whitelisted payload.
+        // The server validates status !== in_progress (409) and merges the
+        // incoming pipelineDef over the persisted one.
+        const pipelineSteps = pipeline.map((p) => {
+          const isGate =
+            p.name.toLowerCase().includes("gate") || p.name.toLowerCase().includes("approval");
+          if (isGate) {
+            return {
+              id: p.id,
+              name: p.name,
+              type: "gate" as const,
+              allowFeedback: true,
+            };
+          }
+          return {
+            id: p.id,
+            name: p.name,
+            type: "agent" as const,
+            agent: p.agent,
+            goal: p.description || goal || `Work on ${name}`,
+            ...(p.gate && p.gate !== "auto" ? { gate: p.gate } : {}),
+          };
+        });
+
+        const pipelineDef: Record<string, unknown> = {
+          name,
+          mode: "execute",
+          trigger: { type: "manual" },
+          workingDirectory: cwd || undefined,
+          steps: pipelineSteps,
+          ...(parsedBudget && parsedBudget > 0 ? { budgetCapUsd: parsedBudget } : {}),
+          ...(parsedStepBudget && parsedStepBudget > 0
+            ? { stepBudgetCapUsd: parsedStepBudget }
+            : {}),
+        };
+
+        const res = await fetch(`/api/sprints/${encodeURIComponent(editingSprint.id)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: name,
+            goal,
+            agents: Array.from(selectedAgents),
+            pipelineDef,
+          }),
+        });
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
+          throw new Error(data.error || `Failed to update sprint (${res.status})`);
+        }
+        // Skip the "done" screen in edit mode — fire onCreated (which
+        // refreshes the list) and close the dialog immediately so the user
+        // sees the updated title without a page reload.
+        onCreated?.();
+        onOpenChange(false);
+        setTimeout(() => {
+          setStep("define");
+          setError(null);
+          setSaving(false);
+        }, 200);
+        return;
+      }
+
       const res = await fetch("/api/sprints/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -381,6 +521,9 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
     budgetCapUsd,
     stepBudgetCapUsd,
     onCreated,
+    isEditMode,
+    editingSprint,
+    onOpenChange,
   ]);
 
   if (!open) return null;
@@ -396,7 +539,9 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-default">
           <div className="flex items-center gap-2">
             <SprintsIcon size={14} className="text-sprints" />
-            <h2 className="text-xs font-medium text-text-primary">Create Sprint</h2>
+            <h2 className="text-xs font-medium text-text-primary">
+              {isEditMode ? "Edit Sprint" : "Create Sprint"}
+            </h2>
             <StepIndicator current={step} />
           </div>
           <button
@@ -503,7 +648,13 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
                     : "bg-sprints text-bg-base hover:bg-sprints/90",
                 )}
               >
-                {saving ? "Creating..." : "Create Sprint"}
+                {saving
+                  ? isEditMode
+                    ? "Saving..."
+                    : "Creating..."
+                  : isEditMode
+                    ? "Save Changes"
+                    : "Create Sprint"}
               </button>
             )}
             {step === "done" && (

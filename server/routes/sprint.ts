@@ -914,6 +914,143 @@ export function sprintsRoutes(deps: {
     }
   });
 
+  // Return the raw persisted sprint JSON so the UI can prefill an edit
+  // dialog with the full pipelineDef / agents / goal (data the
+  // flowsToSprints UI shape omits).
+  router.get("/:sprintId", async (req, res) => {
+    try {
+      const { sprintId: rawSprintId } = req.params as { sprintId: string };
+      const sprintId = stripRunSuffix(rawSprintId);
+      const file = path.join(sprintsDir(), `${sprintId}.json`);
+      if (!fs.existsSync(file)) {
+        res.status(404).json({ error: `Sprint '${sprintId}' not found` });
+        return;
+      }
+      const raw = fs.readFileSync(file, "utf-8");
+      try {
+        res.json(JSON.parse(raw));
+      } catch {
+        res.json({ raw });
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // Edit sprint metadata (title / goal / agents / pipelineDef).
+  //
+  // Only editable while the sprint is NOT `in_progress` / `running`. Returns
+  // 409 otherwise. Fields are whitelisted — unknown fields are ignored, and
+  // immutable fields (`id`, `runId`, `status`, `createdAt`) cannot be changed.
+  router.put("/:sprintId", async (req, res) => {
+    try {
+      const { sprintId: rawSprintId } = req.params as { sprintId: string };
+      const sprintId = stripRunSuffix(rawSprintId);
+
+      const file = path.join(sprintsDir(), `${sprintId}.json`);
+      if (!fs.existsSync(file)) {
+        res.status(404).json({ error: `Sprint '${sprintId}' not found` });
+        return;
+      }
+
+      const status = readPersistedSprintStatus(sprintId);
+      // Block edits on active sprints. The UI route maps "running" →
+      // "in_progress" for display; the persisted status can be either form
+      // depending on when the file was last written, so guard against both.
+      if (status === "in_progress" || status === "running") {
+        res.status(409).json({
+          error: "Cannot edit sprint while in_progress",
+          status,
+        });
+        return;
+      }
+
+      let data: Record<string, unknown>;
+      try {
+        data = JSON.parse(fs.readFileSync(file, "utf-8"));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Unknown error";
+        res.status(500).json({ error: `Failed to read sprint file: ${message}` });
+        return;
+      }
+
+      const body = (req.body ?? {}) as {
+        title?: unknown;
+        goal?: unknown;
+        agents?: unknown;
+        pipelineDef?: unknown;
+      };
+
+      // Whitelist + type-check. Ignore everything else (including id/runId).
+      if (typeof body.title === "string" && body.title.trim().length > 0) {
+        const newName = body.title.trim();
+        data.name = newName;
+        const runs = Array.isArray(data.runs) ? (data.runs as Array<Record<string, unknown>>) : [];
+        if (runs[0]) {
+          runs[0].name = `${newName} Run`;
+        }
+        const pDef = data.pipelineDef as Record<string, unknown> | undefined;
+        if (pDef && typeof pDef === "object") {
+          pDef.name = newName;
+        }
+      }
+
+      if (typeof body.goal === "string") {
+        data.goal = body.goal;
+      }
+
+      if (Array.isArray(body.agents) && body.agents.every((a) => typeof a === "string")) {
+        const runs = Array.isArray(data.runs) ? (data.runs as Array<Record<string, unknown>>) : [];
+        if (runs[0]) {
+          const stats = (runs[0].stats as Record<string, unknown> | undefined) ?? {};
+          stats.agentsUsed = body.agents;
+          runs[0].stats = stats;
+        }
+      }
+
+      if (body.pipelineDef && typeof body.pipelineDef === "object") {
+        const incoming = body.pipelineDef as Record<string, unknown>;
+        const existing = (data.pipelineDef as Record<string, unknown> | undefined) ?? {};
+        // Preserve id — pipelineDef.id === sprintId and must not change.
+        const merged: Record<string, unknown> = {
+          ...existing,
+          ...incoming,
+          id: existing.id ?? sprintId,
+        };
+        data.pipelineDef = merged;
+      }
+
+      try {
+        const tmp = file + ".tmp";
+        fs.writeFileSync(tmp, JSON.stringify(data, null, 2), "utf-8");
+        fs.renameSync(tmp, file);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Unknown error";
+        res.status(500).json({ error: `Failed to write sprint file: ${message}` });
+        return;
+      }
+
+      // Reload + broadcast so connected clients see the change without a
+      // manual refresh.
+      workflowManager.reload();
+      try {
+        const flows = await workflowManager.getFlows();
+        broadcast(wss, {
+          type: "workflow-update",
+          payload: flowsToSprints(flows),
+        } satisfies WsMessage);
+      } catch {
+        /* best-effort */
+      }
+
+      res.json({ ok: true, sprintId, updated: data });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
   // Cancel sprint
   router.post("/:sprintId/cancel", async (req, res) => {
     try {

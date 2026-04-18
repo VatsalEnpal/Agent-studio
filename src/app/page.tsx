@@ -38,7 +38,7 @@ import { CreateRoomDialog } from "@/components/teams/create-room-dialog";
 
 import { SprintsView } from "@/components/sprints/sprints-view";
 import { SprintList } from "@/components/sprints/sprint-list";
-import { CreateSprintDialog } from "@/components/sprints/create-sprint-dialog";
+import { CreateSprintDialog, type EditableSprint } from "@/components/sprints/create-sprint-dialog";
 import { useSprintsStore } from "@/stores/sprints";
 
 import { WorkflowList } from "@/components/workflows/workflow-list";
@@ -112,6 +112,7 @@ export default function Home() {
   const [showDevServers, setShowDevServers] = useState(false);
   const [createRoomOpen, setCreateRoomOpen] = useState(false);
   const [createSprintOpen, setCreateSprintOpen] = useState(false);
+  const [editingSprint, setEditingSprint] = useState<EditableSprint | null>(null);
   const [createWorkflowOpen, setCreateWorkflowOpen] = useState(false);
   const [navBadges, setNavBadges] = useState<Partial<Record<NavPage, number>>>({});
 
@@ -644,7 +645,77 @@ export default function Home() {
                   selectSprint(id);
                   selectWorkflow(null);
                 }}
-                onCreateSprint={() => setCreateSprintOpen(true)}
+                onCreateSprint={() => {
+                  setEditingSprint(null);
+                  setCreateSprintOpen(true);
+                }}
+                onEditSprint={(sprint) => {
+                  // Fetch raw sprint JSON so we can prefill the dialog with
+                  // the full pipelineDef + goal (fields flowsToSprints drops).
+                  void fetch(`/api/sprints/${encodeURIComponent(sprint.id)}`)
+                    .then((res) => (res.ok ? res.json() : null))
+                    .then((data) => {
+                      if (!data) {
+                        setEditingSprint({
+                          id: sprint.id,
+                          name: sprint.name,
+                          agents: sprint.agents.map((a) => a.name),
+                        });
+                        setCreateSprintOpen(true);
+                        return;
+                      }
+                      const pDef = data.pipelineDef as
+                        | {
+                            name?: string;
+                            workingDirectory?: string;
+                            steps?: Array<{
+                              id: string;
+                              name: string;
+                              type?: string;
+                              agent?: string;
+                              goal?: string;
+                              gate?: "auto" | "approve-before-start" | "approve-before-finish";
+                            }>;
+                            budgetCapUsd?: number;
+                            stepBudgetCapUsd?: number;
+                          }
+                        | undefined;
+                      const pipeline =
+                        pDef?.steps?.map((s) => ({
+                          id: s.id,
+                          agent: s.agent ?? "",
+                          name: s.name,
+                          description: s.goal ?? "",
+                          gateRequired: false,
+                          qaLoop: false,
+                          gate: s.gate ?? "auto",
+                        })) ?? [];
+                      const runs = (data.runs as Array<Record<string, unknown>>) ?? [];
+                      const stats = (runs[0]?.stats as Record<string, unknown> | undefined) ?? {};
+                      const agents =
+                        (stats.agentsUsed as string[] | undefined) ??
+                        sprint.agents.map((a) => a.name);
+                      setEditingSprint({
+                        id: data.id ?? sprint.id,
+                        name: (data.name as string) ?? sprint.name,
+                        goal: (data.goal as string | undefined) ?? "",
+                        agents,
+                        cwd: pDef?.workingDirectory,
+                        pipeline,
+                        budgetCapUsd: pDef?.budgetCapUsd,
+                        stepBudgetCapUsd: pDef?.stepBudgetCapUsd,
+                      });
+                      setCreateSprintOpen(true);
+                    })
+                    .catch(() => {
+                      setEditingSprint({
+                        id: sprint.id,
+                        name: sprint.name,
+                        agents: sprint.agents.map((a) => a.name),
+                      });
+                      setCreateSprintOpen(true);
+                    });
+                }}
               />
               <div className="border-t border-border-default mt-2 pt-2">
                 <WorkflowList
@@ -829,7 +900,18 @@ export default function Home() {
       )}
 
       {/* Create sprint dialog */}
-      <CreateSprintDialog open={createSprintOpen} onOpenChange={setCreateSprintOpen} />
+      <CreateSprintDialog
+        open={createSprintOpen}
+        onOpenChange={(next) => {
+          setCreateSprintOpen(next);
+          if (!next) {
+            // Clear editingSprint after close so the next open defaults to
+            // create mode unless explicitly set again.
+            setTimeout(() => setEditingSprint(null), 220);
+          }
+        }}
+        editingSprint={editingSprint}
+      />
 
       {/* Create workflow dialog */}
       <CreateWorkflowDialog open={createWorkflowOpen} onOpenChange={setCreateWorkflowOpen} />
