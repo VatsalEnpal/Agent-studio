@@ -24,6 +24,17 @@ function sprintsDir(): string {
 }
 
 /**
+ * The UI receives sprint rows with `id` formatted as `<sprintId>-run-<runId>`
+ * (see `flowsToSprints`). Action routes accept either the bare sprintId or
+ * the combined form; this helper strips the `-run-<runId>` suffix so the
+ * lookup always resolves against the persisted sprint file.
+ */
+function stripRunSuffix(id: string): string {
+  const idx = id.indexOf("-run-");
+  return idx === -1 ? id : id.slice(0, idx);
+}
+
+/**
  * Map a workflow step-state status to the value persisted on disk in the
  * sprint flow JSON. `flowsToSprints` further remaps these to UI gate
  * status values, so we pass through the executor's `completed`/`running`/
@@ -522,7 +533,11 @@ export function sprintsRoutes(deps: {
   // Gate approval
   router.post("/:sprintId/gates/:gateId/approve", async (req, res) => {
     try {
-      const { sprintId, gateId } = req.params as { sprintId: string; gateId: string };
+      const { sprintId: rawSprintId, gateId } = req.params as {
+        sprintId: string;
+        gateId: string;
+      };
+      const sprintId = stripRunSuffix(rawSprintId);
 
       // First, try to resume a per-step gate in the executor. This covers
       // agent steps configured with `gate: "approve-before-start"` or
@@ -596,7 +611,8 @@ export function sprintsRoutes(deps: {
   // Pause sprint
   router.post("/:sprintId/pause", async (req, res) => {
     try {
-      const { sprintId } = req.params as { sprintId: string };
+      const { sprintId: rawSprintId } = req.params as { sprintId: string };
+      const sprintId = stripRunSuffix(rawSprintId);
       const { readFile, writeFile } = await import("node:fs/promises");
       const statePath = getAgentSystemPath("sprints/state.json");
       const currentPath = getAgentSystemPath("sprints/current.md");
@@ -646,7 +662,8 @@ export function sprintsRoutes(deps: {
   //                               ai-agents sprint state.json view.
   router.post("/:sprintId/resume", async (req, res) => {
     try {
-      const { sprintId } = req.params as { sprintId: string };
+      const { sprintId: rawSprintId } = req.params as { sprintId: string };
+      const sprintId = stripRunSuffix(rawSprintId);
 
       // Path 1: START a planned workflow-backed sprint via the executor.
       const persistedStatus = readPersistedSprintStatus(sprintId);
@@ -728,7 +745,8 @@ export function sprintsRoutes(deps: {
   // Cancel sprint
   router.post("/:sprintId/cancel", async (req, res) => {
     try {
-      const { sprintId } = req.params as { sprintId: string };
+      const { sprintId: rawSprintId } = req.params as { sprintId: string };
+      const sprintId = stripRunSuffix(rawSprintId);
       const { readFile, writeFile } = await import("node:fs/promises");
       const statePath = getAgentSystemPath("sprints/state.json");
       const currentPath = getAgentSystemPath("sprints/current.md");
