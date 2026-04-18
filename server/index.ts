@@ -40,6 +40,7 @@ import {
 import { AutomationEngine } from "./automations.js";
 import type { Automation } from "./automations.js";
 import { broadcast } from "./ws/broadcast.js";
+import { stats as pollerStats } from "./services/poller.js";
 import {
   initSubscriptions,
   subscribe as subscribeTopic,
@@ -367,7 +368,8 @@ async function main() {
       payload: repos,
     } satisfies WsMessage);
   });
-  gitWatcher.start(30_000);
+  // 10s interval — unified poller (see server/services/poller.ts, plan task 3a).
+  gitWatcher.start(10_000);
 
   // Broadcast workflow updates on sprint file changes
   fileWatcher.onUpdate(() => {
@@ -388,6 +390,11 @@ async function main() {
 
   // Health (early mount so it works even before Next.js is ready)
   app.use("/api/health", healthRoutes(terminalManager, wss));
+
+  // Debug — unified poller stats (plan task 3a).
+  app.get("/api/debug/poller-stats", (_req, res) => {
+    res.json(pollerStats());
+  });
 
   // Sessions
   const telegramSessions = new Map<string, string>();

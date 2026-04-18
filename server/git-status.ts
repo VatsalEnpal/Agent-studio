@@ -1,6 +1,9 @@
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { getConfig } from "./config.js";
+import { register as registerPoller, unregister as unregisterPoller } from "./services/poller.js";
+
+const POLLER_KEY = "git-status";
 
 export interface RepoConfig {
   name: string;
@@ -52,7 +55,11 @@ function execGit(cmd: string, cwd: string): string {
   }
 }
 
-function getBranchInfo(repoPath: string, branchName: string, currentBranch: string): BranchInfo | null {
+function getBranchInfo(
+  repoPath: string,
+  branchName: string,
+  currentBranch: string,
+): BranchInfo | null {
   // Check if branch exists locally
   const exists = execGit(`git rev-parse --verify ${branchName}`, repoPath);
   if (!exists) return null;
@@ -112,7 +119,6 @@ function getRepoStatus(repo: RepoConfig): RepoStatus | null {
 
 export class GitWatcher {
   private repos: RepoConfig[];
-  private interval: ReturnType<typeof setInterval> | null = null;
   private callbacks = new Set<GitUpdateCallback>();
   private lastSnapshot = "";
 
@@ -138,21 +144,18 @@ export class GitWatcher {
     };
   }
 
+  /**
+   * Start polling. As of plan task 3a, this registers with the unified
+   * poller service (`server/services/poller.ts`) rather than owning its
+   * own setInterval. Behavior is unchanged — `git-update` WS events still
+   * only fire on a changed snapshot.
+   */
   start(intervalMs = 10_000): void {
-    // Initial poll
-    this.poll();
-
-    // Poll every intervalMs
-    this.interval = setInterval(() => {
-      this.poll();
-    }, intervalMs);
+    registerPoller(POLLER_KEY, intervalMs, () => this.poll());
   }
 
   stop(): void {
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
+    unregisterPoller(POLLER_KEY);
     this.callbacks.clear();
   }
 
