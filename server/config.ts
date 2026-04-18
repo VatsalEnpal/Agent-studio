@@ -70,6 +70,31 @@ export interface AgentConfig {
   icon?: string;
 }
 
+/**
+ * Scope for an agent source directory.
+ * - "global": agents in this source apply to every project (e.g. ~/.claude/agents)
+ * - {project: string}: agents in this source apply only when the given project is active
+ */
+export type AgentSourceScope = "global" | { project: string };
+
+export interface AgentSourceConfig {
+  /** Absolute path (may contain ~, resolved via resolvePath) */
+  path: string;
+  scope: AgentSourceScope;
+  /** Optional human-readable label for UI (e.g. "User agents", project name) */
+  label?: string;
+}
+
+/**
+ * Agent record returned by the discovery endpoint. Extends AgentConfig with the
+ * source directory and scope so the client can distinguish global vs project agents.
+ */
+export interface DiscoveredAgent extends AgentConfig {
+  /** Absolute directory the agent .md file was read from */
+  sourcePath: string;
+  scope: AgentSourceScope;
+}
+
 export interface AutomationConfig {
   id: string;
   name: string;
@@ -90,6 +115,8 @@ export interface AgentStudioConfig {
   defaults: DefaultsConfig;
   workflows?: WorkflowConfig[];
   agents?: AgentConfig[];
+  /** Directories to scan for agent .md files, each with a global or project scope. */
+  agentSources?: AgentSourceConfig[];
   automations?: AutomationConfig[];
   setupComplete: boolean;
   version: string;
@@ -130,10 +157,39 @@ export function loadConfig(): AgentStudioConfig | null {
       parsed.defaults = { model: "sonnet", permissions: "bypass", workingDirectory: "~" };
     }
     if (!Array.isArray(parsed.devServers)) parsed.devServers = [];
+    // Seed agentSources if missing/empty — presented to callers, not written back here.
+    if (!Array.isArray(parsed.agentSources) || parsed.agentSources.length === 0) {
+      parsed.agentSources = defaultAgentSources(parsed.projects);
+    }
     return parsed;
   } catch {
     return null;
   }
+}
+
+/**
+ * Build default agent-source entries: the user's global ~/.claude/agents plus one
+ * project-scoped entry for each configured project's .claude/agents directory.
+ * Pure function — does not touch the filesystem.
+ */
+function defaultAgentSources(projects: ProjectConfig[]): AgentSourceConfig[] {
+  const sources: AgentSourceConfig[] = [
+    {
+      path: join(os.homedir(), ".claude", "agents"),
+      scope: "global",
+      label: "User agents",
+    },
+  ];
+  for (const p of projects) {
+    if (!p?.path) continue;
+    const resolvedProjectPath = resolvePath(p.path);
+    sources.push({
+      path: join(resolvedProjectPath, ".claude", "agents"),
+      scope: { project: resolvedProjectPath },
+      label: p.name ?? resolvedProjectPath.split(sep).pop() ?? resolvedProjectPath,
+    });
+  }
+  return sources;
 }
 
 /** Write the config to disk. */
@@ -228,6 +284,7 @@ export function generateDefaultConfig(): AgentStudioConfig {
       permissions: "bypass",
       workingDirectory,
     },
+    agentSources: defaultAgentSources(projects),
     setupComplete,
     version: CONFIG_VERSION,
   };
@@ -309,6 +366,21 @@ export function getAgentSystemPath(relativePath: string): string | null {
   const base = getAgentSystemBase();
   if (!base) return null;
   return join(base, relativePath);
+}
+
+/**
+ * Get the list of agent-source directories for discovery. If the loaded config
+ * doesn't have `agentSources`, return the seeded defaults (global ~/.claude/agents
+ * plus one project-scoped entry per configured project). Paths are `~`-expanded.
+ */
+export function getAgentSources(config?: AgentStudioConfig): AgentSourceConfig[] {
+  const cfg = config ?? getConfig();
+  const sources =
+    Array.isArray(cfg.agentSources) && cfg.agentSources.length > 0
+      ? cfg.agentSources
+      : defaultAgentSources(cfg.projects ?? []);
+  // Ensure `~` is expanded for each source path before returning to callers.
+  return sources.map((s) => ({ ...s, path: resolvePath(s.path) }));
 }
 
 /**

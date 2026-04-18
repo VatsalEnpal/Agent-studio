@@ -2,7 +2,7 @@ import { Router } from "express";
 import type express from "express";
 import fs from "node:fs";
 import path from "node:path";
-import { getConfig, getMainProjectDir, type AgentConfig } from "../config.js";
+import { getConfig, getAgentSources, type AgentConfig, type DiscoveredAgent } from "../config.js";
 import {
   generateAgentsWithClaudeMd,
   writeAgentFiles,
@@ -19,66 +19,95 @@ export function agentsRoutes(deps: { validateProjectPath: (p: string) => string 
   const router = Router();
   const { validateProjectPath } = deps;
 
-  // List agents
-  router.get("/", async (_req, res) => {
+  // List agents. Optional ?projectPath=<path> filters to global sources
+  // plus the one source scoped to that exact project. Project-scoped
+  // agents override global agents on name-collision (same id).
+  router.get("/", async (req, res) => {
     try {
       const config = getConfig();
-      const agents: AgentConfig[] = [];
-      const seenIds = new Set<string>();
+      const projectPathQuery =
+        typeof req.query.projectPath === "string" ? req.query.projectPath : undefined;
+
+      // byId preserves insertion order (globals first, then project-scoped so
+      // project entries overwrite global on same id — precedence rule).
+      const byId = new Map<string, DiscoveredAgent | AgentConfig>();
 
       // Always include "No Agent" as the first option
-      agents.push({ id: "none", name: "No Agent", description: "Plain Claude session" });
-      seenIds.add("none");
+      byId.set("none", { id: "none", name: "No Agent", description: "Plain Claude session" });
 
-      // Add agents from config
+      // Add agents from config (explicitly listed agents, treated as global)
       if (config.agents && Array.isArray(config.agents)) {
         for (const a of config.agents) {
-          if (!seenIds.has(a.id)) {
-            agents.push(a);
-            seenIds.add(a.id);
-          }
+          if (!byId.has(a.id)) byId.set(a.id, a);
         }
       }
 
-      // Auto-discover agents from .claude/agents/ in each project
       const { existsSync, readdirSync } = await import("node:fs");
       const { readFile } = await import("node:fs/promises");
       const { join, basename } = await import("node:path");
 
-      for (const project of config.projects) {
-        const agentsDir = join(project.path, ".claude", "agents");
-        if (!existsSync(agentsDir)) continue;
+      const sources = getAgentSources(config);
 
+      // Partition into global and project-matching sources so we can insert
+      // global entries first, then overwrite with project-scoped entries.
+      const globalSources = sources.filter((s) => s.scope === "global");
+      const projectSources = projectPathQuery
+        ? sources.filter((s) => s.scope !== "global" && s.scope.project === projectPathQuery)
+        : sources.filter((s) => s.scope !== "global");
+
+      const readSource = async (source: (typeof sources)[number]): Promise<DiscoveredAgent[]> => {
+        if (!existsSync(source.path)) return [];
+        let files: string[];
         try {
-          const files = readdirSync(agentsDir).filter((f: string) => f.endsWith(".md"));
-          for (const file of files) {
-            const id = basename(file, ".md");
-            if (seenIds.has(id)) continue;
-
-            // Try to extract description from frontmatter
-            let description = `Agent from ${project.name}`;
-            let model: "opus" | "sonnet" | "haiku" | undefined;
-            try {
-              const content = await readFile(join(agentsDir, file), "utf-8");
-              // Parse YAML frontmatter for description
-              const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
-              if (fmMatch) {
-                const descMatch = fmMatch[1].match(/description:\s*(.+)/);
-                if (descMatch) description = descMatch[1].trim();
-              }
-            } catch {
-              // Use default description
-            }
-
-            agents.push({ id, name: id, description, model });
-            seenIds.add(id);
-          }
+          files = readdirSync(source.path).filter((f: string) => f.endsWith(".md"));
         } catch {
-          // Can't read directory, skip
+          return [];
+        }
+        const out: DiscoveredAgent[] = [];
+        for (const file of files) {
+          const id = basename(file, ".md");
+          const scopeLabel =
+            source.scope === "global" ? "global" : (source.label ?? source.scope.project);
+          let description = `Agent from ${scopeLabel}`;
+          let model: "opus" | "sonnet" | "haiku" | undefined;
+          try {
+            const content = await readFile(join(source.path, file), "utf-8");
+            const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+            if (fmMatch) {
+              const descMatch = fmMatch[1].match(/description:\s*(.+)/);
+              if (descMatch) description = descMatch[1].trim();
+            }
+          } catch {
+            // Use default description
+          }
+          out.push({
+            id,
+            name: id,
+            description,
+            model,
+            sourcePath: source.path,
+            scope: source.scope,
+          });
+        }
+        return out;
+      };
+
+      // Insert global agents first.
+      for (const source of globalSources) {
+        for (const agent of await readSource(source)) {
+          if (!byId.has(agent.id)) byId.set(agent.id, agent);
+        }
+      }
+      // Then project-scoped — these overwrite global entries on same id (precedence).
+      for (const source of projectSources) {
+        for (const agent of await readSource(source)) {
+          byId.set(agent.id, agent);
         }
       }
 
-      // If no agents beyond "none", add sensible defaults
+      const agents = Array.from(byId.values());
+
+      // If no real agents were discovered (only "none"), fall back to built-in defaults.
       if (agents.length <= 1) {
         const defaults: AgentConfig[] = [
           {
@@ -94,10 +123,7 @@ export function agentsRoutes(deps: { validateProjectPath: (p: string) => string 
           { id: "documentation", name: "documentation", description: "Maintains docs and READMEs" },
         ];
         for (const d of defaults) {
-          if (!seenIds.has(d.id)) {
-            agents.push(d);
-            seenIds.add(d.id);
-          }
+          if (!byId.has(d.id)) agents.push(d);
         }
       }
 
