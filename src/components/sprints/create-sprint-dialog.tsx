@@ -27,6 +27,7 @@ interface AgentOption {
   id: string;
   name: string;
   description: string;
+  scope?: "global" | { project: string };
 }
 
 interface PipelineStep {
@@ -215,11 +216,14 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
       });
   }, [open]);
 
-  // Load agents when entering step 2
+  // Load agents when entering step 2.
+  // Task A9: pass the sprint's target project (cwd) as ?projectPath= so
+  // project-scoped agents from the selected project show up alongside globals.
   useEffect(() => {
     if (step !== "agents") return;
     setAgentsLoading(true);
-    fetch("/api/agents")
+    const url = cwd ? `/api/agents?projectPath=${encodeURIComponent(cwd)}` : "/api/agents";
+    fetch(url)
       .then((res) => res.json())
       .then((data: AgentOption[]) => {
         // Filter out "No Agent" placeholder
@@ -232,7 +236,7 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
       .finally(() => {
         setAgentsLoading(false);
       });
-  }, [step]);
+  }, [step, cwd]);
 
   const reset = useCallback(() => {
     setStep("define");
@@ -662,7 +666,22 @@ function StepAgents({
                   : "bg-bg-input border-border-default text-text-tertiary hover:border-border-subtle",
               )}
             >
-              <span className="text-xs font-medium font-mono">{agent.name}</span>
+              <span className="flex items-center gap-1.5 text-xs font-medium font-mono">
+                {/* Task A9: scope badge — ● Global, ◆ Project */}
+                {agent.scope && (
+                  <span
+                    className="text-2xs text-text-ghost"
+                    title={
+                      agent.scope === "global"
+                        ? "Global agent"
+                        : `Project agent (${agent.scope.project})`
+                    }
+                  >
+                    {agent.scope === "global" ? "●" : "◆"}
+                  </span>
+                )}
+                {agent.name}
+              </span>
               <span className="text-2xs text-text-ghost mt-0.5 line-clamp-2">
                 {agent.description}
               </span>

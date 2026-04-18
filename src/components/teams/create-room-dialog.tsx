@@ -17,6 +17,7 @@ interface AgentConfig {
   name: string;
   model: "opus" | "sonnet" | "haiku";
   enabled: boolean;
+  scope?: "global" | { project: string };
 }
 
 export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) {
@@ -25,10 +26,14 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
   const [agents, setAgents] = useState<AgentConfig[]>([]);
   const [creating, setCreating] = useState(false);
   const [defaultModel, setDefaultModel] = useState<"opus" | "sonnet" | "haiku">("sonnet");
+  // Task A9: target project for this room — used to scope the agent list.
+  // We pick the first non-prod project from config (same convention as
+  // session launcher + sprint dialog) so scope filtering is applied.
+  const [targetProject, setTargetProject] = useState<string>("");
   const addRoom = useRoomsStore((s) => s.addRoom);
   const selectRoom = useRoomsStore((s) => s.selectRoom);
 
-  // Fetch global default model from config
+  // Fetch global default model + target project from config
   useEffect(() => {
     fetch("/api/config")
       .then((res) => res.json())
@@ -40,35 +45,57 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
         if (defaults?.model) {
           setDefaultModel(defaults.model);
         }
+        const projects = (config?.projects ?? data.projects) as
+          | Array<{ path: string; isProd?: boolean }>
+          | undefined;
+        if (projects && projects.length > 0) {
+          const main = projects.find((p) => !p.isProd);
+          setTargetProject(main?.path ?? projects[0]?.path ?? "");
+        }
       })
       .catch(() => {
         // Keep fallback "sonnet"
       });
   }, []);
 
-  // Fetch discovered agents from server when dialog opens
+  // Fetch discovered agents from server when dialog opens.
+  // Task A9: pass the room's target project as ?projectPath= so project-scoped
+  // agents from the selected project appear alongside global agents.
   useEffect(() => {
     if (!open) return;
     setName("");
     setTopic("");
     setCreating(false);
-    fetch("/api/agents")
+    const url = targetProject
+      ? `/api/agents?projectPath=${encodeURIComponent(targetProject)}`
+      : "/api/agents";
+    fetch(url)
       .then((res) => res.json())
-      .then((data: Array<{ id: string; name: string; description?: string }>) => {
-        const agentConfigs: AgentConfig[] = data
-          .filter((a) => a.id !== "none")
-          .map((a) => ({
-            id: a.id,
-            name: a.name,
-            model: a.id === "orchestrator" ? ("opus" as const) : defaultModel,
-            enabled: false,
-          }));
-        setAgents(agentConfigs);
-      })
+      .then(
+        (
+          data: Array<{
+            id: string;
+            name: string;
+            description?: string;
+            scope?: "global" | { project: string };
+          }>,
+        ) => {
+          const agentConfigs: AgentConfig[] = data
+            .filter((a) => a.id !== "none")
+            .map((a) => ({
+              id: a.id,
+              name: a.name,
+              model: a.id === "orchestrator" ? ("opus" as const) : defaultModel,
+              enabled: false,
+              scope: a.scope,
+            }));
+          setAgents(agentConfigs);
+        },
+      )
       .catch(() => {
         setAgents([]);
       });
-  }, [open, defaultModel]);
+  }, [open, defaultModel, targetProject]);
 
   // Escape key to close
   useEffect(() => {
@@ -239,6 +266,19 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                       >
                         {agent.name}
                       </span>
+                      {/* Task A9: scope badge — ● Global, ◆ Project */}
+                      {agent.scope && (
+                        <span
+                          className="text-2xs text-text-ghost shrink-0"
+                          title={
+                            agent.scope === "global"
+                              ? "Global agent"
+                              : `Project agent (${agent.scope.project})`
+                          }
+                        >
+                          {agent.scope === "global" ? "●" : "◆"}
+                        </span>
+                      )}
                     </div>
 
                     {/* Model selector */}

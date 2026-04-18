@@ -23,6 +23,7 @@ interface AgentOption {
   name: string;
   description: string;
   model?: "opus" | "sonnet" | "haiku";
+  scope?: "global" | { project: string };
 }
 
 interface SessionLauncherV2Props {
@@ -280,15 +281,20 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
     })();
   }, [defaultCwdLoaded]);
 
-  // Fetch agents — refetch every time the dialog opens so agents created via
-  // Settings (or any other surface) appear immediately, without a page reload.
+  // Fetch agents — refetch every time the dialog opens (or when cwd changes
+  // while open) so the list reflects the current project's scope filter plus
+  // any agents created/imported since last open.
+  // Task A9: pass the current cwd as ?projectPath= so project-scoped agents
+  // from .claude/agents under the selected project show up alongside globals.
   useEffect(() => {
     if (!open) return;
     setAgentsLoading(true);
     setAgentsError(null);
     void (async () => {
       try {
-        const res = await fetch("/api/agents", { cache: "no-store" });
+        const url =
+          cwd && cwd !== "~" ? `/api/agents?projectPath=${encodeURIComponent(cwd)}` : "/api/agents";
+        const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error(`Failed to load agents (${String(res.status)})`);
         const data = (await res.json()) as AgentOption[];
         if (Array.isArray(data) && data.length > 0) setAgents(data);
@@ -299,7 +305,7 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
         setAgentsLoading(false);
       }
     })();
-  }, [open]);
+  }, [open, cwd]);
 
   // Fetch recent sessions when opened
   useEffect(() => {
@@ -458,7 +464,9 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
   // Quick Import: refresh agents list after a successful import
   const refreshAgents = useCallback(async () => {
     try {
-      const res = await fetch("/api/agents");
+      const url =
+        cwd && cwd !== "~" ? `/api/agents?projectPath=${encodeURIComponent(cwd)}` : "/api/agents";
+      const res = await fetch(url);
       if (res.ok) {
         const data = (await res.json()) as AgentOption[];
         if (Array.isArray(data) && data.length > 0) setAgents(data);
@@ -466,7 +474,7 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
     } catch {
       // Ignore -- agent list will refresh on next dialog open
     }
-  }, []);
+  }, [cwd]);
 
   // Quick Import: launch session with the newly imported agent
   const handleQuickImportLaunch = useCallback(
@@ -726,11 +734,21 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
                 }}
                 className={inputCls}
               >
-                {agents.map((a) => (
-                  <option key={a.id} value={a.id} title={a.description}>
-                    {a.name}
-                  </option>
-                ))}
+                {agents.map((a) => {
+                  // Task A9: scope badge — ● Global, ◆ Project. "none" has no scope.
+                  const badge =
+                    a.scope === "global"
+                      ? "● "
+                      : a.scope && typeof a.scope === "object"
+                        ? "◆ "
+                        : "";
+                  return (
+                    <option key={a.id} value={a.id} title={a.description}>
+                      {badge}
+                      {a.name}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
