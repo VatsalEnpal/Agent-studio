@@ -229,24 +229,41 @@ function SettingsAgentsDiscovery() {
     }
   }
 
-  const handleRemoveSource = async (index: number, path: string) => {
+  const refreshConfigAndAgents = useCallback(async () => {
+    invalidateConfigCache();
+    // Re-fetch /api/config so useConfig consumers see the new agentSources list.
+    try {
+      await fetch("/api/config")
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null);
+    } catch {
+      // ignore — useConfig will retry on its own next mount
+    }
+    loadAgents(true);
+  }, [loadAgents]);
+
+  const handleRemoveSource = async (source: SourceRecord) => {
     if (
       !window.confirm(
-        `Remove source "${path}"?\n\nFiles on disk are NOT deleted. Agents from this source will no longer appear in the agent list.`,
+        `Remove source "${source.path}"?\n\nFiles on disk are NOT deleted. Agents from this source will no longer appear in the agent list.`,
       )
     ) {
       return;
     }
     try {
-      const res = await fetch(`/api/config/agent-sources/${index}`, { method: "DELETE" });
+      // M4: signature-keyed delete (path + scope) instead of array index.
+      const res = await fetch(`/api/config/agent-sources`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: source.path, scope: source.scope }),
+      });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(data.error || `Failed to remove source (${res.status})`);
       }
       addToast("Source removed", "success");
-      invalidateConfigCache();
-      // Force a hard reload of the config + agents list.
-      window.location.reload();
+      // M5: refresh in place — no full page reload.
+      await refreshConfigAndAgents();
     } catch (err) {
       addToast(err instanceof Error ? err.message : "Unknown error", "error");
     }
@@ -359,7 +376,7 @@ function SettingsAgentsDiscovery() {
                       {count} agent{count === 1 ? "" : "s"}
                     </span>
                     <button
-                      onClick={() => void handleRemoveSource(idx, src.path)}
+                      onClick={() => void handleRemoveSource(src)}
                       className="p-1 text-text-ghost hover:text-error transition-all shrink-0"
                       title="Remove source"
                     >
@@ -507,8 +524,8 @@ function SettingsAgentsDiscovery() {
         open={addSourceOpen}
         onOpenChange={setAddSourceOpen}
         onAdded={() => {
-          invalidateConfigCache();
-          window.location.reload();
+          // M5: refresh in place — no full page reload.
+          void refreshConfigAndAgents();
         }}
         projects={config?.config.projects ?? []}
       />

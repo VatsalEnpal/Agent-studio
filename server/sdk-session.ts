@@ -33,6 +33,19 @@ import { join } from "node:path";
 //     the claude-code package's binary, not its own cli.js.
 // ---------------------------------------------------------------------------
 
+/**
+ * Resolve the executable path the Claude Agent SDK should spawn.
+ *
+ * IMPORTANT: `@anthropic-ai/claude-agent-sdk@0.2.x` only works with
+ * `@anthropic-ai/claude-code@1.x` (the legacy `cli.js` Node entrypoint).
+ * The v2.x release of `@anthropic-ai/claude-code` ships a native binary
+ * (`bin/claude.exe`) whose CLI surface the SDK does NOT recognize, so room
+ * agents fail to start. That's why `package.json` pins claude-code to
+ * `~1.0.128` (patch-only). Do NOT widen that range without simultaneously
+ * upgrading the SDK and re-validating room dispatch.
+ *
+ * (M7 — recorded for v0.7 SDK upgrade work.)
+ */
 function resolveClaudeCliPath(): string | null {
   // 1) Explicit env override — trust the user
   const envPath = process.env["CLAUDE_PATH"];

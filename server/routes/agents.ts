@@ -738,32 +738,10 @@ export function agentsRoutes(deps: { validateProjectPath: (p: string) => string 
     }
   });
 
-  // Create a single agent (simple endpoint for the Create Agent dialog)
-  router.post("/create", (req, res) => {
-    try {
-      const { id, name, description, mdContent, projectPath } = req.body as {
-        id?: string;
-        name?: string;
-        description?: string;
-        mdContent?: string;
-        projectPath?: string;
-      };
-      if (!id || !mdContent) {
-        res.status(400).json({ error: "Missing required fields: id, mdContent" });
-        return;
-      }
-      const model = "sonnet" as const;
-      const targetPath = projectPath || getConfig().defaults?.workingDirectory || process.cwd();
-      const result = writeAgentFiles(
-        [{ id, name: name ?? id, description: description ?? "", model, mdContent }],
-        targetPath,
-      );
-      res.status(201).json(result);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      res.status(500).json({ error: message });
-    }
-  });
+  // M6: removed `POST /create` — the Create Agent dialog uses the canonical
+  // `POST /` (A7) which validates frontmatter, enforces filename safety, and
+  // requires `targetSourcePath` to match a configured agent source. The old
+  // `/create` route bypassed all of that and shipped no callers.
 
   return router;
 }
