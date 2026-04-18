@@ -10,12 +10,32 @@ import { useToastStore } from "@/stores/toast";
 // Types
 // ---------------------------------------------------------------------------
 
+interface EditingAgent {
+  /** Existing agent id (filename without .md). */
+  id: string;
+  name: string;
+  description?: string;
+  model?: "opus" | "sonnet" | "haiku" | "inherit";
+  permissions?: "auto" | "plan" | "default" | "bypass";
+  icon?: string;
+  /** Optional: markdown body to prefill. We do not fetch the file — callers
+   *  can leave this blank and users can type a new body on save. */
+  body?: string;
+  sourcePath: string;
+}
+
 interface CreateAgentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Optional — currently unused by the create form, kept for API compat. */
   projectPath?: string;
   onCreated?: () => void;
+  /**
+   * When present, the dialog switches into edit mode:
+   *   - prefills form fields
+   *   - submits PUT /api/agents/:id instead of POST /api/agents
+   */
+  editingAgent?: EditingAgent;
 }
 
 type ModelChoice = "opus" | "sonnet" | "haiku" | "inherit";
@@ -48,9 +68,15 @@ interface AgentSourceOption {
 // Component
 // ---------------------------------------------------------------------------
 
-export function CreateAgentDialog({ open, onOpenChange, onCreated }: CreateAgentDialogProps) {
+export function CreateAgentDialog({
+  open,
+  onOpenChange,
+  onCreated,
+  editingAgent,
+}: CreateAgentDialogProps) {
   const { config } = useConfig();
   const addToast = useToastStore((s) => s.addToast);
+  const isEdit = !!editingAgent;
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -65,14 +91,29 @@ export function CreateAgentDialog({ open, onOpenChange, onCreated }: CreateAgent
 
   const sources = useMemo<AgentSourceOption[]>(() => config?.config.agentSources ?? [], [config]);
 
-  // Default target: first global source, else first entry.
+  // When editing, prefill on open.
   useEffect(() => {
     if (!open) return;
+    if (!editingAgent) return;
+    setName(editingAgent.name);
+    setDescription(editingAgent.description ?? "");
+    setModel(editingAgent.model ?? "inherit");
+    setPermissions(editingAgent.permissions ?? "default");
+    setIcon(editingAgent.icon ?? "");
+    setBody(editingAgent.body ?? "");
+    setTargetSourcePath(editingAgent.sourcePath);
+  }, [open, editingAgent]);
+
+  // Default target: first global source, else first entry. Skip in edit mode
+  // (the editing agent's sourcePath already drives selection).
+  useEffect(() => {
+    if (!open) return;
+    if (editingAgent) return;
     if (sources.length === 0) return;
     if (targetSourcePath && sources.some((s) => s.path === targetSourcePath)) return;
     const firstGlobal = sources.find((s) => s.scope === "global");
     setTargetSourcePath((firstGlobal ?? sources[0]).path);
-  }, [open, sources, targetSourcePath]);
+  }, [open, sources, targetSourcePath, editingAgent]);
 
   const reset = useCallback(() => {
     setName("");
@@ -107,8 +148,10 @@ export function CreateAgentDialog({ open, onOpenChange, onCreated }: CreateAgent
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("/api/agents", {
-        method: "POST",
+      const method = isEdit ? "PUT" : "POST";
+      const url = isEdit ? `/api/agents/${encodeURIComponent(editingAgent!.id)}` : "/api/agents";
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
@@ -122,11 +165,19 @@ export function CreateAgentDialog({ open, onOpenChange, onCreated }: CreateAgent
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(data.error || `Failed to create agent (${res.status})`);
+        throw new Error(
+          data.error || `Failed to ${isEdit ? "update" : "create"} agent (${res.status})`,
+        );
       }
       const data = (await res.json()) as { path?: string };
-      addToast(`Agent "${name.trim()}" created`, "success");
-      setSuccessBanner(data.path ? `Saved to ${data.path}` : "Agent created");
+      addToast(`Agent "${name.trim()}" ${isEdit ? "updated" : "created"}`, "success");
+      setSuccessBanner(
+        data.path
+          ? `${isEdit ? "Updated" : "Saved to"} ${data.path}`
+          : isEdit
+            ? "Agent updated"
+            : "Agent created",
+      );
       onCreated?.();
       // Auto-dismiss + close after 1.5s
       setTimeout(() => {
@@ -138,6 +189,8 @@ export function CreateAgentDialog({ open, onOpenChange, onCreated }: CreateAgent
       setSaving(false);
     }
   }, [
+    isEdit,
+    editingAgent,
     name,
     description,
     model,
@@ -175,7 +228,9 @@ export function CreateAgentDialog({ open, onOpenChange, onCreated }: CreateAgent
         <div className="flex items-center justify-between px-4 py-3 border-b border-border-default">
           <div className="flex items-center gap-2">
             <UserIcon size={14} className="text-accent" />
-            <h2 className="text-xs font-medium text-text-primary">Create Agent</h2>
+            <h2 className="text-xs font-medium text-text-primary">
+              {isEdit ? "Edit Agent" : "Create Agent"}
+            </h2>
           </div>
           <button
             onClick={handleClose}
@@ -376,7 +431,7 @@ export function CreateAgentDialog({ open, onOpenChange, onCreated }: CreateAgent
                 : "bg-bg-elevated text-text-ghost cursor-not-allowed",
             )}
           >
-            {saving ? "Saving..." : "Create Agent"}
+            {saving ? "Saving..." : isEdit ? "Save Changes" : "Create Agent"}
           </button>
         </div>
       </div>

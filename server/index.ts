@@ -57,6 +57,7 @@ import {
   generateAgentsPreviewRoute,
   generateClaudeMdRoute,
 } from "./routes/agents.js";
+import { agentSourcesRoutes } from "./routes/agent-sources.js";
 import {
   automationsRoutes,
   automationTemplatesRoutes,
@@ -381,6 +382,7 @@ async function main() {
 
   // Agents
   app.use("/api/agents", agentsRoutes(routeDeps));
+  app.use("/api/config/agent-sources", agentSourcesRoutes());
   app.post("/api/analyze-project", analyzeProjectRoute(routeDeps));
   app.post("/api/generate-agents/preview", generateAgentsPreviewRoute(routeDeps));
   app.post("/api/generate-claudemd", generateClaudeMdRoute(routeDeps));

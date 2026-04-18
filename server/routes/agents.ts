@@ -6,6 +6,7 @@ import {
   getConfig,
   getAgentSources,
   resolvePath,
+  reloadConfig,
   type AgentConfig,
   type DiscoveredAgent,
 } from "../config.js";
@@ -30,7 +31,9 @@ export function agentsRoutes(deps: { validateProjectPath: (p: string) => string 
   // agents override global agents on name-collision (same id).
   router.get("/", async (req, res) => {
     try {
-      const config = getConfig();
+      // ?refresh=1 forces a reload of config from disk so newly-added
+      // agent sources and on-disk file changes are picked up immediately.
+      const config = req.query.refresh ? reloadConfig() : getConfig();
       const projectPathQuery =
         typeof req.query.projectPath === "string" ? req.query.projectPath : undefined;
 
@@ -260,6 +263,201 @@ export function agentsRoutes(deps: { validateProjectPath: (p: string) => string 
       };
 
       res.status(201).json({ ok: true, path: targetFile, agent: agentRecord });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // ---------- Update / Delete individual agents (plan task 11) ----------
+
+  // Shared frontmatter writer used by POST / PUT. Returns the file contents.
+  const buildAgentFile = (fields: {
+    name: string;
+    description: string;
+    model: string;
+    permissions: string;
+    icon: string;
+    body: string;
+  }): string => {
+    const escapeYaml = (v: string): string => {
+      if (/^[A-Za-z0-9 _\-./,()!?]*$/.test(v) && !/^\s|\s$/.test(v)) {
+        return v;
+      }
+      return `"${v.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n")}"`;
+    };
+    const fmLines: string[] = [`name: ${fields.name}`];
+    if (fields.description) fmLines.push(`description: ${escapeYaml(fields.description)}`);
+    if (fields.model && fields.model !== "inherit") fmLines.push(`model: ${fields.model}`);
+    if (fields.permissions) fmLines.push(`permissions: ${fields.permissions}`);
+    if (fields.icon) fmLines.push(`icon: ${escapeYaml(fields.icon)}`);
+
+    const trimmedBody = fields.body.replace(/^\s+/, "");
+    return `---\n${fmLines.join("\n")}\n---\n\n${trimmedBody}${
+      trimmedBody.endsWith("\n") ? "" : "\n"
+    }`;
+  };
+
+  // PUT /api/agents/:id — update an existing agent's .md file. Accepts the
+  // same payload shape as POST /api/agents. If `name !== :id`, treats it as a
+  // rename: writes the new file first, then removes the old one.
+  router.put("/:id", (req, res) => {
+    try {
+      const oldId = req.params.id;
+      const body = req.body as {
+        name?: string;
+        description?: string;
+        model?: string;
+        permissions?: string;
+        icon?: string;
+        body?: string;
+        targetSourcePath?: string;
+      };
+      const name = (body.name ?? "").trim();
+      const description = (body.description ?? "").trim();
+      const model = (body.model ?? "inherit").trim();
+      const permissions = (body.permissions ?? "").trim();
+      const icon = (body.icon ?? "").trim();
+      const mdBody = body.body ?? "";
+      const targetRaw = (body.targetSourcePath ?? "").trim();
+
+      if (!name) {
+        res.status(400).json({ error: "name is required" });
+        return;
+      }
+      const nameRe = /^[a-z0-9][a-z0-9_-]*$/i;
+      if (!nameRe.test(name)) {
+        res.status(400).json({
+          error:
+            "name must be filename-safe (letters, digits, _ and -; must start with a letter or digit)",
+        });
+        return;
+      }
+      const allowedModels = new Set(["opus", "sonnet", "haiku", "inherit"]);
+      if (!allowedModels.has(model)) {
+        res.status(400).json({ error: "model must be one of: opus, sonnet, haiku, inherit" });
+        return;
+      }
+      if (permissions) {
+        const allowedPerms = new Set(["auto", "plan", "default", "bypass"]);
+        if (!allowedPerms.has(permissions)) {
+          res
+            .status(400)
+            .json({ error: "permissions must be one of: auto, plan, default, bypass" });
+          return;
+        }
+      }
+      if (!targetRaw) {
+        res.status(400).json({ error: "targetSourcePath is required" });
+        return;
+      }
+
+      const config = getConfig();
+      const sources = getAgentSources(config);
+      const targetResolved = resolvePath(targetRaw);
+      const matchedSource = sources.find((s) => s.path === targetResolved);
+      if (!matchedSource) {
+        res.status(400).json({
+          error: "targetSourcePath must match one of the configured agentSources",
+        });
+        return;
+      }
+
+      const targetDir = matchedSource.path;
+      const oldFile = path.join(targetDir, `${oldId}.md`);
+      const newFile = path.join(targetDir, `${name}.md`);
+
+      if (!fs.existsSync(oldFile)) {
+        res.status(404).json({ error: "agent not found" });
+        return;
+      }
+      if (oldFile !== newFile && fs.existsSync(newFile)) {
+        res.status(409).json({ error: "an agent with the new name already exists" });
+        return;
+      }
+
+      const fileContents = buildAgentFile({
+        name,
+        description,
+        model,
+        permissions,
+        icon,
+        body: mdBody,
+      });
+
+      fs.mkdirSync(targetDir, { recursive: true });
+      const tmpFile = `${newFile}.tmp-${process.pid}-${Date.now()}`;
+      fs.writeFileSync(tmpFile, fileContents, "utf-8");
+      fs.renameSync(tmpFile, newFile);
+      if (oldFile !== newFile) {
+        try {
+          fs.unlinkSync(oldFile);
+        } catch {
+          // ignore: old file missing after rename is fine
+        }
+      }
+
+      const scopeLabel =
+        matchedSource.scope === "global"
+          ? "global"
+          : (matchedSource.label ?? matchedSource.scope.project);
+      const agentRecord: DiscoveredAgent = {
+        id: name,
+        name,
+        description: description || `Agent from ${scopeLabel}`,
+        ...(model !== "inherit" ? { model: model as "opus" | "sonnet" | "haiku" } : {}),
+        ...(icon ? { icon } : {}),
+        sourcePath: matchedSource.path,
+        scope: matchedSource.scope,
+      };
+
+      res.json({ ok: true, path: newFile, agent: agentRecord });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // DELETE /api/agents/:id — remove the agent .md file. `sourcePath` must be
+  // supplied (query or body) and match one of the configured agentSources.
+  router.delete("/:id", (req, res) => {
+    try {
+      const id = req.params.id;
+      const sourcePathRaw =
+        (typeof req.query.sourcePath === "string" ? req.query.sourcePath : undefined) ??
+        (typeof (req.body as { sourcePath?: string })?.sourcePath === "string"
+          ? (req.body as { sourcePath: string }).sourcePath
+          : "");
+
+      if (!sourcePathRaw) {
+        res.status(400).json({ error: "sourcePath is required" });
+        return;
+      }
+
+      const config = getConfig();
+      const sources = getAgentSources(config);
+      const targetResolved = resolvePath(sourcePathRaw);
+      const matchedSource = sources.find((s) => s.path === targetResolved);
+      if (!matchedSource) {
+        res.status(400).json({
+          error: "sourcePath must match one of the configured agentSources",
+        });
+        return;
+      }
+
+      // Reject ids that contain path separators / escape chars.
+      if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(id)) {
+        res.status(400).json({ error: "invalid agent id" });
+        return;
+      }
+
+      const filePath = path.join(matchedSource.path, `${id}.md`);
+      if (!fs.existsSync(filePath)) {
+        res.status(404).json({ error: "agent not found" });
+        return;
+      }
+      fs.unlinkSync(filePath);
+      res.json({ ok: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       res.status(500).json({ error: message });
