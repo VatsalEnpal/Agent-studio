@@ -20,7 +20,7 @@ const {
   ipcMain,
   dialog,
 } = require("electron");
-const { spawn } = require("child_process");
+const { spawn, execSync } = require("child_process");
 const path = require("path");
 const net = require("net");
 const fs = require("fs");
@@ -120,9 +120,9 @@ function resolveNodeBin() {
 
   // 4. Well-known locations
   const candidates = [
-    "/opt/homebrew/bin/node",       // macOS ARM (Homebrew)
-    "/usr/local/bin/node",          // macOS Intel / Linux
-    "/usr/bin/node",                // Linux system
+    "/opt/homebrew/bin/node", // macOS ARM (Homebrew)
+    "/usr/local/bin/node", // macOS Intel / Linux
+    "/usr/bin/node", // Linux system
     "C:\\Program Files\\nodejs\\node.exe",
   ];
   for (const c of candidates) {
@@ -137,9 +137,7 @@ function resolveNodeBin() {
 function initLogStream() {
   fs.mkdirSync(APP_DIR, { recursive: true });
   logStream = fs.createWriteStream(LOG_PATH, { flags: "a" });
-  logStream.write(
-    `\n--- Agent Studio starting at ${new Date().toISOString()} ---\n`,
-  );
+  logStream.write(`\n--- Agent Studio starting at ${new Date().toISOString()} ---\n`);
 }
 
 /** Write a line to the log file. */
@@ -189,25 +187,21 @@ async function findFreePort(start = DEFAULT_PORT_START) {
  */
 function httpGetJson(urlPath) {
   return new Promise((resolve, reject) => {
-    const req = http.get(
-      `http://127.0.0.1:${serverPort}${urlPath}`,
-      { timeout: 3000 },
-      (res) => {
-        if (res.statusCode !== 200) {
-          res.resume();
-          return reject(new Error(`HTTP ${res.statusCode}`));
+    const req = http.get(`http://127.0.0.1:${serverPort}${urlPath}`, { timeout: 3000 }, (res) => {
+      if (res.statusCode !== 200) {
+        res.resume();
+        return reject(new Error(`HTTP ${res.statusCode}`));
+      }
+      let data = "";
+      res.on("data", (c) => (data += c));
+      res.on("end", () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch (e) {
+          reject(e);
         }
-        let data = "";
-        res.on("data", (c) => (data += c));
-        res.on("end", () => {
-          try {
-            resolve(JSON.parse(data));
-          } catch (e) {
-            reject(e);
-          }
-        });
-      },
-    );
+      });
+    });
     req.on("error", reject);
     req.on("timeout", () => {
       req.destroy();
@@ -264,10 +258,7 @@ function saveWindowState() {
   try {
     const bounds = mainWindow.getBounds();
     const isMaximized = mainWindow.isMaximized();
-    fs.writeFileSync(
-      WINDOW_STATE_PATH,
-      JSON.stringify({ ...bounds, isMaximized }, null, 2),
-    );
+    fs.writeFileSync(WINDOW_STATE_PATH, JSON.stringify({ ...bounds, isMaximized }, null, 2));
   } catch {
     // Non-critical
   }
@@ -278,6 +269,44 @@ function setServerStatus(status) {
   currentServerStatus = status;
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send("server-status", status);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// macOS TCC (Transparency, Consent, Control) Notifications Check
+// ---------------------------------------------------------------------------
+
+/**
+ * Best-effort check for macOS notification permission.
+ * Logs a warning if notifications are not granted / tccutil unavailable.
+ *
+ * Notes:
+ *   - `tccutil check` exists on macOS 12+; older versions just error out.
+ *   - The bundle id is what the user sees in System Settings > Notifications.
+ *     For dev we hint at dev.agent-studio; packaged builds use whatever
+ *     `build.appId` is set to in electron-builder config.
+ *   - We do NOT prompt a UI here. A first-run prompt flow is tracked as v0.7
+ *     follow-up (task A6a). This shim just surfaces a log so support can tell
+ *     the user "grant notifications in System Settings".
+ */
+function checkTCCNotifications() {
+  if (process.platform !== "darwin") return;
+  const bundleId = "dev.agent-studio";
+  try {
+    execSync(`tccutil check Notifications ${bundleId}`, {
+      stdio: "pipe",
+      timeout: 2000,
+    });
+    log(`[tcc] Notifications granted for ${bundleId}`);
+  } catch (err) {
+    // Either tccutil doesn't support `check` on this macOS, or permission
+    // hasn't been granted yet. Either way, warn — don't crash.
+    const msg = err instanceof Error ? err.message : String(err);
+    log(
+      `[tcc] Notifications check failed for ${bundleId} — ` +
+        `grant in System Settings > Notifications > Agent Studio if desktop ` +
+        `notifications don't appear. (${msg.split("\n")[0]})`,
+    );
   }
 }
 
@@ -309,17 +338,28 @@ function connectNotifyWs(port) {
             const agentId = msg.payload?.agentId ?? "An agent";
             const n = new Notification({
               title: "Agent Studio",
-              body: msg.payload?.reason === "depth-limit"
-                ? "Agent chain reached depth limit — your input needed"
-                : `${agentId} mentioned you`,
+              body:
+                msg.payload?.reason === "depth-limit"
+                  ? "Agent chain reached depth limit — your input needed"
+                  : `${agentId} mentioned you`,
               silent: false,
             });
             // Store reference to prevent GC from killing the notification
             activeNotifications.add(n);
-            n.on("click", () => { activeNotifications.delete(n); if (mainWindow) mainWindow.focus(); });
-            n.on("close", () => { activeNotifications.delete(n); });
-            n.on("show", () => { log("[notify-ws] Notification shown"); });
-            n.on("failed", (e) => { log(`[notify-ws] Notification failed: ${e}`); activeNotifications.delete(n); });
+            n.on("click", () => {
+              activeNotifications.delete(n);
+              if (mainWindow) mainWindow.focus();
+            });
+            n.on("close", () => {
+              activeNotifications.delete(n);
+            });
+            n.on("show", () => {
+              log("[notify-ws] Notification shown");
+            });
+            n.on("failed", (e) => {
+              log(`[notify-ws] Notification failed: ${e}`);
+              activeNotifications.delete(n);
+            });
             n.show();
             log(`[notify-ws] Active notifications: ${activeNotifications.size}`);
           } else {
@@ -402,31 +442,27 @@ async function startServer() {
     throw new Error(err);
   }
 
-  serverProcess = spawn(
-    nodeBin,
-    spawnArgs,
-    {
-      env: {
-        ...process.env,
-        PORT: String(port),
-        NODE_ENV: app.isPackaged ? "production" : (process.env.NODE_ENV || "development"),
-        // Electron GUI apps on macOS don't inherit terminal PATH.
-        // Ensure common bin dirs are included so the server can find claude, git, etc.
-        PATH: [
-          path.join(os.homedir(), ".local", "bin"),
-          path.join(os.homedir(), ".bun", "bin"),
-          "/opt/homebrew/bin",
-          "/opt/homebrew/sbin",
-          "/usr/local/bin",
-          "/usr/bin",
-          "/bin",
-          process.env.PATH || "",
-        ].join(":"),
-      },
-      cwd,
-      stdio: ["ignore", "pipe", "pipe"],
+  serverProcess = spawn(nodeBin, spawnArgs, {
+    env: {
+      ...process.env,
+      PORT: String(port),
+      NODE_ENV: app.isPackaged ? "production" : process.env.NODE_ENV || "development",
+      // Electron GUI apps on macOS don't inherit terminal PATH.
+      // Ensure common bin dirs are included so the server can find claude, git, etc.
+      PATH: [
+        path.join(os.homedir(), ".local", "bin"),
+        path.join(os.homedir(), ".bun", "bin"),
+        "/opt/homebrew/bin",
+        "/opt/homebrew/sbin",
+        "/usr/local/bin",
+        "/usr/bin",
+        "/bin",
+        process.env.PATH || "",
+      ].join(":"),
     },
-  );
+    cwd,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
 
   // Pipe stdout/stderr to log file
   if (serverProcess.stdout) {
@@ -462,6 +498,9 @@ async function startServer() {
   setServerStatus("running");
   log(`Server is healthy on port ${port}`);
 
+  // Check macOS notification permission (task A6a)
+  checkTCCNotifications();
+
   // Connect WS to listen for agent notification events
   connectNotifyWs(port);
 }
@@ -486,9 +525,7 @@ function waitForServerReady() {
       } catch {
         if (Date.now() - start > HEALTH_STARTUP_TIMEOUT_MS) {
           return reject(
-            new Error(
-              `Server did not become healthy within ${HEALTH_STARTUP_TIMEOUT_MS / 1000}s`,
-            ),
+            new Error(`Server did not become healthy within ${HEALTH_STARTUP_TIMEOUT_MS / 1000}s`),
           );
         }
         setTimeout(poll, HEALTH_STARTUP_POLL_MS);
@@ -567,9 +604,7 @@ function startWatchdog() {
       }
     } catch {
       consecutiveHealthFailures++;
-      log(
-        `Health check failed (${consecutiveHealthFailures}/${CONSECUTIVE_FAILURES_THRESHOLD})`,
-      );
+      log(`Health check failed (${consecutiveHealthFailures}/${CONSECUTIVE_FAILURES_THRESHOLD})`);
 
       if (consecutiveHealthFailures >= CONSECUTIVE_FAILURES_THRESHOLD) {
         log("Consecutive health failures threshold reached — killing server");
@@ -705,12 +740,7 @@ function createWindow() {
     const displays = screen.getAllDisplays();
     const visible = displays.some((d) => {
       const { x, y, width, height } = d.bounds;
-      return (
-        saved.x >= x &&
-        saved.x < x + width &&
-        saved.y >= y &&
-        saved.y < y + height
-      );
+      return saved.x >= x && saved.x < x + width && saved.y >= y && saved.y < y + height;
     });
     if (visible) {
       opts.x = saved.x;
@@ -935,9 +965,7 @@ app.on("will-quit", (e) => {
   const cleanup = async () => {
     await gracefulShutdownServer();
     if (logStream) {
-      logStream.write(
-        `--- Agent Studio shutting down at ${new Date().toISOString()} ---\n`,
-      );
+      logStream.write(`--- Agent Studio shutting down at ${new Date().toISOString()} ---\n`);
       logStream.end();
       logStream = null;
     }

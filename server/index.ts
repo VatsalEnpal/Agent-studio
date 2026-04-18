@@ -54,6 +54,7 @@ import {
 import { roomsRoutes } from "./routes/rooms.js";
 import { workflowRoutes } from "./routes/workflows.js";
 import { healthRoutes } from "./routes/health.js";
+import { testNotifyRoutes } from "./routes/test-notify.js";
 import { gitRoutes } from "./routes/git.js";
 import { sessionsRoutes } from "./routes/sessions.js";
 import { memoryRoutes } from "./routes/memory.js";
@@ -445,6 +446,11 @@ async function main() {
 
   // Health (early mount so it works even before Next.js is ready)
   app.use("/api/health", healthRoutes(terminalManager, wss));
+
+  // Dev-only test endpoints (task A6b — verify Mac notifications / TCC grant)
+  if (process.env.NODE_ENV !== "production") {
+    app.use("/api/test", testNotifyRoutes());
+  }
 
   // Debug — unified poller stats (plan task 3a).
   app.get("/api/debug/poller-stats", (_req, res) => {

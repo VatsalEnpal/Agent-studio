@@ -38,6 +38,12 @@ Agent Studio is the missing environment. You design agents that understand your 
 
 <br />
 
+## Who this is for
+
+Agent Studio is built for **developers** who already run Claude Code on the terminal and want a better cockpit. If you're comfortable with `git`, `node`, and your own shell environment, you're the target audience. There is no hosted SaaS — you clone, install, and run it locally (or wrap it in Electron).
+
+<br />
+
 ## Get started
 
 > **Prerequisites:** Node.js 22+ and [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed.
@@ -45,16 +51,35 @@ Agent Studio is the missing environment. You design agents that understand your 
 ```bash
 git clone https://github.com/VatsalEnpal/Agent-studio.git
 cd Agent-studio
-npm install
-npm run dev
+./install.sh
 ```
 
-Open [localhost:8080](http://localhost:8080). An onboarding tour guides you through the four main sections.
+`install.sh` is the supported first-run bootstrap: it verifies Node 22+, npm, git and the `claude` CLI, runs `npm ci`, rebuilds `node-pty` for your platform, exports `AGENT_STUDIO_DIR` to your shell profile, and warns if port 8080 is already in use. It is idempotent — safe to re-run any time the environment shifts.
 
-```bash
-npm run electron:dev     # desktop app
-npm run build:mac        # macOS .dmg
-```
+Then pick one of the three runtime shapes:
+
+| Command                | What it does                                                               | Use when                                        |
+| ---------------------- | -------------------------------------------------------------------------- | ----------------------------------------------- |
+| `npm run dev`          | Starts Express + Next.js on :8080. Browser at `http://localhost:8080`.     | Day-to-day hacking, fast reload.                |
+| `npm run electron:dev` | Spawns the dev server and opens the Electron window pointed at it.         | Testing the desktop shell, tray, notifications. |
+| `npm run install:mac`  | Builds and installs `Agent Studio.app` to `/Applications`. Takes 5-10 min. | Smoke-testing a real packaged build.            |
+
+An onboarding tour guides you through the four main sections the first time you land on the dashboard.
+
+### Unsigned DMG — first launch
+
+Packaged Mac builds are **unsigned and unnotarized**. This is intentional for the current developer-focused distribution. On first launch:
+
+> Right-click `Agent Studio.app` in `/Applications` and choose **Open**. Gatekeeper prompts once; subsequent launches open normally. Or run `xattr -dr com.apple.quarantine '/Applications/Agent Studio.app'` once.
+
+Notarization is a v1.0 item. If you are not comfortable running unnotarized software, run `npm run dev` in the browser instead.
+
+### Permission modes for autonomous runs
+
+When driving Claude Code against this repo (or any repo) autonomously:
+
+- **Preferred:** `--permission-mode auto` — same as `npm run claude:auto`. A classifier blocks destructive / scope-creep actions without prompting you.
+- **Avoid:** `--dangerously-skip-permissions` — skips _all_ safety checks. Only use for throwaway, tightly-scoped experiments.
 
 <br />
 
@@ -67,6 +92,16 @@ Two execution modes under one roof:
 **Agent SDK rooms** — Structured conversations via the Claude Agent SDK. Clean markdown output, streaming responses, typing indicators, approval gates. No terminal noise — just the conversation.
 
 Both stream over a single WebSocket. The server (Express 5) wraps Next.js, manages PTY lifecycles, watches files, polls git, and coordinates everything on one port.
+
+### Agent discovery — user > project > builtin
+
+Agents are resolved from three sources, highest precedence first:
+
+1. **User-scoped** (`~/.claude/agents/*.md`) — your personal global agents, available in every project.
+2. **Project-scoped** (`<projectPath>/.claude/agents/*.md`) — agents that only apply when that project is active.
+3. **Builtin templates** — the defaults that ship in `.claude/agents/` of this repo, used as a fallback seed.
+
+On name collision, the more specific source wins: a project-scoped `frontend` overrides a global `frontend`, which in turn overrides the builtin `frontend`. `GET /api/agents?projectPath=<path>` returns the merged, de-duplicated list for a given project.
 
 <br />
 
