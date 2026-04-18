@@ -62,6 +62,7 @@ import {
   sprintsRoutes,
   flowsToSprints,
   syncSprintFileFromRun,
+  reconcileInterruptedSprints,
 } from "./routes/sprint.js";
 import { settingsRoutes } from "./routes/settings.js";
 import { systemRoutes } from "./routes/system.js";
@@ -334,6 +335,22 @@ async function main() {
     if (interrupted.length > 0) {
       console.log(
         `[workflow-engine] ${interrupted.length} interrupted run(s) detected. Resume via API or UI.`,
+      );
+    }
+
+    // Flip persisted sprint flow JSON to `status: "paused"` +
+    // `pauseReason: "server-restarted"` for any sprint whose RunState was
+    // paused above. POST /api/sprints/:sprintId/resume will re-hydrate the
+    // RunState, reconcile step statuses from handoffs, and continue the
+    // pipeline. PTY-backed steps always relaunch from their last
+    // `<stepId>_input.json` handoff — PTY re-attach across process restart
+    // is impossible (master fds die with the spawning process; kernel sends
+    // SIGHUP to the session leader). SDK-backed steps re-use the saved
+    // session.sessionId via options.resume (sdk-session.ts:100-101).
+    const reconciledSprints = reconcileInterruptedSprints();
+    if (reconciledSprints.length > 0) {
+      console.log(
+        `[sprints] Marked ${reconciledSprints.length} sprint(s) as paused (server-restarted): ${reconciledSprints.join(", ")}`,
       );
     }
   }

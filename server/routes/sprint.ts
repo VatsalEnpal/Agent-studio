@@ -15,6 +15,7 @@ import type { WorkflowExecutor } from "../workflows/executor.js";
 import type { PipelineRegistry } from "../workflows/workflow-registry.js";
 import type { WorkflowPipelineDef } from "../workflows/definition.js";
 import type { RunState, StepStatus } from "../workflows/run-state.js";
+import { loadRunState, saveRunState } from "../workflows/run-state.js";
 import type { WsMessage } from "../shared/types.js";
 import { broadcast } from "../ws/broadcast.js";
 
@@ -111,6 +112,71 @@ export function syncSprintFileFromRun(sprintId: string, runState: RunState): boo
   }
 }
 
+/**
+ * Post server-restart reconciliation: for any sprint flow JSON whose persisted
+ * status is `running` or whose run RunState was flipped to `paused` by the
+ * restart-recovery block in `server/index.ts`, rewrite the sprint file to
+ * `status: "paused"` + `pauseReason: "server-restarted"`.
+ *
+ * Must be called AFTER the index.ts recovery loop has persisted interrupted
+ * RunStates. Returns the list of sprintIds that were reconciled so the caller
+ * can log.
+ */
+export function reconcileInterruptedSprints(): string[] {
+  const dir = sprintsDir();
+  if (!fs.existsSync(dir)) return [];
+  const reconciled: string[] = [];
+  let files: string[];
+  try {
+    files = fs.readdirSync(dir).filter((f) => f.endsWith(".json"));
+  } catch {
+    return [];
+  }
+  for (const f of files) {
+    const file = path.join(dir, f);
+    let data: any;
+    try {
+      data = JSON.parse(fs.readFileSync(file, "utf-8"));
+    } catch {
+      continue;
+    }
+
+    const sprintStatus = data.status as string | undefined;
+    // Only consider sprints that were mid-flight. "planned" + "completed" +
+    // "cancelled" + "failed" are terminal/not-started and should not be
+    // touched by reconciliation.
+    if (sprintStatus !== "running" && sprintStatus !== "in_progress") {
+      continue;
+    }
+
+    const runId = data.runs?.[0]?.id as string | undefined;
+    if (!runId) continue;
+
+    // Cross-check run state on disk — if the executor's RunState is paused,
+    // the restart-recovery block already flipped it from `running` →
+    // `paused`. If it's still `running` somehow (no state file / crash
+    // before save), treat it as interrupted too.
+    const runState = loadRunState(data.id, runId);
+    const runIsPaused = !runState || runState.status === "paused";
+    if (!runIsPaused) continue;
+
+    data.status = "paused";
+    data.pauseReason = "server-restarted";
+    if (data.runs?.[0]) {
+      data.runs[0].status = "paused";
+    }
+    try {
+      const tmp = file + ".tmp";
+      fs.writeFileSync(tmp, JSON.stringify(data, null, 2), "utf-8");
+      fs.renameSync(tmp, file);
+      reconciled.push(data.id);
+    } catch {
+      /* best-effort */
+    }
+  }
+  return reconciled;
+}
+
 /** Read the persisted pipelineDef (embedded on create) for a sprint. */
 function readPersistedPipelineDef(sprintId: string): WorkflowPipelineDef | null {
   const file = path.join(sprintsDir(), `${sprintId}.json`);
@@ -154,6 +220,8 @@ function markSprintRunning(sprintId: string, runId: string): void {
   try {
     const data = JSON.parse(fs.readFileSync(file, "utf-8"));
     data.status = "running";
+    // Clear restart-pause marker — the sprint is live again.
+    delete data.pauseReason;
     if (data.runs?.[0]) {
       data.runs[0].id = runId;
       data.runs[0].status = "running";
@@ -164,6 +232,54 @@ function markSprintRunning(sprintId: string, runId: string): void {
     fs.renameSync(tmp, file);
   } catch {
     // best-effort; don't throw from this helper
+  }
+}
+
+/** Handoffs directory (same logic as executor.resolveHandoffsDir). */
+function handoffsDir(): string {
+  const base = getAgentSystemBase();
+  return base
+    ? path.join(base, "sprints", "handoffs")
+    : path.join(process.cwd(), ".agent-studio", "sprints", "handoffs");
+}
+
+/**
+ * Walk a paused RunState and reconcile step statuses from disk before resume:
+ * (a) any step with a `<stepId>_output.json` handoff on disk is marked
+ *     `completed` (and advanced past).
+ * (b) any step with status `interrupted` or `running` but no output is reset
+ *     to `pending` so it re-executes.
+ * (c) `waiting` steps stay `waiting` — `executeAgentStep` will re-enter the
+ *     gate and re-register a `pendingStepGates` resolver.
+ *
+ * For SDK-backed agents, the executor's SDK runtime already honors
+ * `options.resume = session.sessionId` (see server/sdk-session.ts:100-101), so
+ * re-dispatching the step picks up the same conversation.
+ *
+ * For PTY-backed agents, PTY re-attach across a process restart is IMPOSSIBLE
+ * (node-pty master fds die with the spawning process; the kernel sends SIGHUP
+ * to the session leader). Policy: PTY steps relaunch using the already-written
+ * `<stepId>_input.json` handoff as the new prompt — the executor's
+ * `writeHandoffInput` reuses existing files so input is stable across restarts.
+ */
+function reconcileRunStateFromHandoffs(runState: RunState): void {
+  const dir = handoffsDir();
+  for (const [stepId, stepState] of Object.entries(runState.steps)) {
+    const outputFile = path.join(dir, `${stepId}_output.json`);
+    const hasOutput = fs.existsSync(outputFile);
+    if (hasOutput && stepState.status !== "completed" && stepState.status !== "skipped") {
+      stepState.status = "completed";
+      stepState.completedAt = stepState.completedAt ?? new Date().toISOString();
+      continue;
+    }
+    if (stepState.status === "interrupted" || stepState.status === "running") {
+      // Reset so executeAgentStep re-enters cleanly.
+      stepState.status = "pending";
+      delete stepState.startedAt;
+      delete stepState.completedAt;
+    }
+    // "waiting" / "pending" / "failed" / "timeout" stay as-is — the executor
+    // loop will handle them.
   }
 }
 
@@ -699,6 +815,62 @@ export function sprintsRoutes(deps: {
         } catch (execErr) {
           const message = execErr instanceof Error ? execErr.message : "Unknown error";
           res.status(500).json({ error: `Failed to start sprint: ${message}` });
+          return;
+        }
+      }
+
+      // Path 1b: paused → in_progress (server-restart resume). The sprint
+      // flow JSON carries `pauseReason: "server-restarted"` if the current
+      // process was brought up after an interrupted run (see
+      // `reconcileInterruptedSprints` on boot). Re-hydrate the existing
+      // RunState from disk, reconcile step statuses against the handoffs
+      // folder, then call `executeRun` to resume from the first incomplete
+      // step. The executor's loop already skips `completed`/`skipped`
+      // steps, so the same pipelineDef drives us back to the right point.
+      if (persistedStatus === "paused") {
+        const def = readPersistedPipelineDef(sprintId);
+        const existingRunId = readSprintRunId(sprintId);
+        if (!def || !existingRunId) {
+          res.status(400).json({
+            error: `Sprint '${sprintId}' is paused but is missing pipelineDef or runId — cannot resume.`,
+          });
+          return;
+        }
+        const existingRun = loadRunState(sprintId, existingRunId);
+        if (!existingRun) {
+          res.status(400).json({
+            error: `Sprint '${sprintId}' has no persisted RunState at runId=${existingRunId} — cannot resume.`,
+          });
+          return;
+        }
+
+        try {
+          // Reconcile from handoffs: steps with output files → completed,
+          // interrupted/running → pending for re-dispatch. SDK steps will
+          // re-attach via options.resume (sdk-session.ts); PTY steps will
+          // relaunch from their existing input handoff file.
+          reconcileRunStateFromHandoffs(existingRun);
+          existingRun.status = "running";
+          existingRun.currentStep = null;
+          saveRunState(existingRun);
+
+          markSprintRunning(sprintId, existingRun.runId);
+          workflowManager.reload();
+
+          broadcast(wss, {
+            type: "workflow-update",
+            payload: flowsToSprints(await workflowManager.getFlows()),
+          } satisfies WsMessage);
+
+          workflowExecutor.executeRun(def, existingRun).catch((err) => {
+            console.error(`Sprint ${sprintId} resume execution failed:`, err);
+          });
+
+          res.json({ ok: true, sprintId, action: "resumed", runId: existingRun.runId });
+          return;
+        } catch (execErr) {
+          const message = execErr instanceof Error ? execErr.message : "Unknown error";
+          res.status(500).json({ error: `Failed to resume sprint: ${message}` });
           return;
         }
       }
