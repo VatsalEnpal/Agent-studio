@@ -1,0 +1,2120 @@
+{
+  "generatedAt": "2026-04-18T21:08:42.016Z",
+  "baseUrl": "http://localhost:8080",
+  "summary": {
+    "bySeverity": {
+      "critical": 0,
+      "serious": 10,
+      "moderate": 0,
+      "minor": 0
+    },
+    "uniqueRules": [
+      "color-contrast",
+      "nested-interactive",
+      "scrollable-region-focusable"
+    ]
+  },
+  "perTab": [
+    {
+      "tab": "sessions",
+      "label": "Sessions",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".text-text-ghost.gap-1\\.5.font-medium"
+              ],
+              "html": "<span class=\"text-text-ghost font-medium flex items-center gap-1.5\" style=\"font-size: 12px; letter-spacing: -0.2px;\">Agent Studio</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.03 (foreground color: #444444, background color: #0a0a0a, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".relative.group:nth-child(1) > .left-full.ml-4.shadow-lg > .flex-col.flex > .gap-2.items-center.flex > kbd"
+              ],
+              "html": "<kbd class=\"text-2xs font-mono text-text-ghost\">⌘ 1</kbd>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".relative.group:nth-child(1) > .left-full.ml-4.shadow-lg > .flex-col.flex > .font-normal.text-2xs.text-text-ghost"
+              ],
+              "html": "<span class=\"text-2xs text-text-ghost font-normal\">Interactive Claude Code terminals</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".rounded-\\[3px\\].py-1.px-2:nth-child(2)"
+              ],
+              "html": "<button class=\"flex-1 px-2 py-1 text-xs font-medium rounded-[3px] transition-all text-text-tertiary hover:text-text-secondary\">History</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.49 (foreground color: #555555, background color: #131313, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".rounded-\\[3px\\].py-1.px-2:nth-child(3)"
+              ],
+              "html": "<button class=\"flex-1 px-2 py-1 text-xs font-medium rounded-[3px] transition-all text-text-tertiary hover:text-text-secondary\">Servers</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.49 (foreground color: #555555, background color: #131313, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".cursor-default > span"
+              ],
+              "html": "<span>Running</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #555555, background color: #0c0c0c, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".mt-1"
+              ],
+              "html": "<p class=\"text-xs text-text-tertiary mt-1\">Click “New Session” below to get started</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #555555, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".tracking-wider.uppercase.gap-1"
+              ],
+              "html": "<button class=\"flex items-center gap-1 w-full py-1 text-2xs font-medium text-text-ghost uppercase tracking-wider hover:text-text-secondary transition-all\">",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-40"
+              ],
+              "html": "<kbd class=\"ml-auto text-2xs font-mono opacity-40\">⇧⌘N</kbd>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #929292, background color: #ededed, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".space-y-2.text-center > .max-w-sm"
+              ],
+              "html": "<p class=\"text-xs text-text-tertiary max-w-sm\">",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".max-w-sm > .rounded-\\[3px\\]:nth-child(1)"
+              ],
+              "html": "<kbd class=\"px-1 py-0.5 rounded-[3px] bg-bg-input text-text-ghost text-2xs border border-border-default\">Cmd+Shift+N</kbd>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".max-w-sm > .rounded-\\[3px\\]:nth-child(2)"
+              ],
+              "html": "<kbd class=\"px-1 py-0.5 rounded-[3px] bg-bg-input text-text-ghost text-2xs border border-border-default\">Cmd+Shift+K</kbd>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tab": "teams",
+      "label": "Teams",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".text-text-ghost.gap-1\\.5.font-medium"
+              ],
+              "html": "<span class=\"text-text-ghost font-medium flex items-center gap-1.5\" style=\"font-size: 12px; letter-spacing: -0.2px;\">Agent Studio</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.03 (foreground color: #444444, background color: #0a0a0a, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".relative.group:nth-child(2) > .left-full.ml-4.shadow-lg > .flex-col.flex > .gap-2.items-center.flex"
+              ],
+              "html": "<span class=\"flex items-center gap-2\">Teams<kbd class=\"text-2xs font-mono text-text-ghost\">⌘ 2</kbd></span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.84 (foreground color: #3f3f3f, background color: #0d0d0d, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".relative.group:nth-child(2) > .left-full.ml-4.shadow-lg > .flex-col.flex > .gap-2.items-center.flex > kbd"
+              ],
+              "html": "<kbd class=\"text-2xs font-mono text-text-ghost\">⌘ 2</kbd>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.1 (foreground color: #191919, background color: #0d0d0d, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".relative.group:nth-child(2) > .left-full.ml-4.shadow-lg > .flex-col.flex > .font-normal.text-2xs.text-text-ghost"
+              ],
+              "html": "<span class=\"text-2xs text-text-ghost font-normal\">Multi-agent collaboration rooms</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.1 (foreground color: #191919, background color: #0d0d0d, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".rounded-\\[3px\\].hover\\:text-text-tertiary.py-1"
+              ],
+              "html": "<button class=\"flex-1 px-2 py-1 text-xs font-medium rounded-[3px] text-text-ghost hover:text-text-tertiary transition-all\">Agents</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #444444, background color: #131313, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".pt-1 > .tracking-\\[0\\.06em\\].uppercase.text-text-ghost"
+              ],
+              "html": "<span class=\"text-label uppercase text-text-ghost tracking-[0.06em]\">Active</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:text-rooms"
+              ],
+              "html": "<button class=\"flex items-center gap-1 text-2xs text-text-ghost hover:text-rooms transition-all\" title=\"Mark all as read\">",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(2) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost\">0 agents</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(2) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .tabular-nums.text-2xs.text-text-ghost"
+              ],
+              "html": "<span class=\"text-2xs text-text-ghost tabular-nums shrink-0\">5h</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(2) > .min-w-0.flex-1 > .text-2xs.truncate.mt-0\\.5"
+              ],
+              "html": "<p class=\"text-2xs text-text-ghost truncate mt-0.5\"><span class=\"font-medium text-text-tertiary\">system: </span>Protocol error: Default target \"orchestrator\" not found</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(2) > .min-w-0.flex-1 > .text-2xs.truncate.mt-0\\.5 > .font-medium.text-text-tertiary"
+              ],
+              "html": "<span class=\"font-medium text-text-tertiary\">system: </span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #555555, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(3) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost\">0 agents</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(3) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .tabular-nums.text-2xs.text-text-ghost"
+              ],
+              "html": "<span class=\"text-2xs text-text-ghost tabular-nums shrink-0\">5h</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(3) > .min-w-0.flex-1 > .text-2xs.truncate.mt-0\\.5"
+              ],
+              "html": "<p class=\"text-2xs text-text-ghost truncate mt-0.5\"><span class=\"font-medium text-text-tertiary\">system: </span>Room \"Room-Y-Verify\" created. Topic: Verify task 2. Agents: </p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(3) > .min-w-0.flex-1 > .text-2xs.truncate.mt-0\\.5 > .font-medium.text-text-tertiary"
+              ],
+              "html": "<span class=\"font-medium text-text-tertiary\">system: </span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #555555, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".pt-4 > .tracking-\\[0\\.06em\\].uppercase.text-text-ghost"
+              ],
+              "html": "<span class=\"text-label uppercase text-text-ghost tracking-[0.06em]\">Archived</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-rooms-subtle > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.28 (foreground color: #282828, background color: #101013, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(6) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">e2e-test</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(6) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(7) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">final-e2e</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(7) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(8) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">final-test</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(8) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(9) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">flow-test</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(9) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(10) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">pty-write-test</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(10) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(11) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">qa-agent-e2e</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(11) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(12) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">qa-agent-e2e2</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(12) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".text-2xs.text-center.mt-0\\.5"
+              ],
+              "html": "<p class=\"text-center text-2xs text-text-ghost mt-0.5\">Tip: use ⌘K to search rooms</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".sm\\:inline"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost truncate hidden sm:inline\">cap test</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-6.py-3.gap-3:nth-child(1) > .max-w-sm.text-center.shrink-0"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary shrink-0 max-w-sm text-center\">Protocol error: Default target \"orchestrator\" not found</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-6.py-3.gap-3:nth-child(3) > .max-w-sm.text-center.shrink-0"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary shrink-0 max-w-sm text-center\">Protocol error: Default target \"orchestrator\" not found</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-6.py-3.gap-3:nth-child(5) > .max-w-sm.text-center.shrink-0"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary shrink-0 max-w-sm text-center\">Protocol error: Default target \"orchestrator\" not found</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-6.py-3.gap-3:nth-child(7) > .max-w-sm.text-center.shrink-0"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary shrink-0 max-w-sm text-center\">Protocol error: Default target \"orchestrator\" not found</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-6.py-3.gap-3:nth-child(9) > .max-w-sm.text-center.shrink-0"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary shrink-0 max-w-sm text-center\">Protocol error: Default target \"orchestrator\" not found</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-6.py-3.gap-3:nth-child(11) > .max-w-sm.text-center.shrink-0"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary shrink-0 max-w-sm text-center\">Protocol error: Default target \"orchestrator\" not found</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".justify-between.items-center.flex > .hover\\:text-text-tertiary.text-2xs.text-text-ghost"
+              ],
+              "html": "<button class=\"text-2xs text-text-ghost hover:text-text-tertiary transition-all\">Skip tour</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "nested-interactive",
+          "impact": "serious",
+          "description": "Ensure interactive controls are not nested as they are not always announced by screen readers or can cause focus problems for assistive technologies",
+          "help": "Interactive controls must not be nested",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/nested-interactive?application=axeAPI",
+          "tags": [
+            "cat.keyboard",
+            "wcag2a",
+            "wcag412",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.4.1.2",
+            "RGAAv4",
+            "RGAA-7.1.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(2)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"group flex items-center gap-2.5 w-full px-2.5 py-2 rounded text-left transition-all cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(99,102,241,0.06)] border border-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(3)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"group flex items-center gap-2.5 w-full px-2.5 py-2 rounded text-left transition-all cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(99,102,241,0.06)] border border-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            }
+          ]
+        },
+        {
+          "id": "scrollable-region-focusable",
+          "impact": "serious",
+          "description": "Ensure elements that have scrollable content are accessible by keyboard in Safari",
+          "help": "Scrollable region must have keyboard access",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/scrollable-region-focusable?application=axeAPI",
+          "tags": [
+            "cat.keyboard",
+            "wcag2a",
+            "wcag211",
+            "wcag213",
+            "TTv5",
+            "TT4.a",
+            "EN-301-549",
+            "EN-9.2.1.1",
+            "EN-9.2.1.3",
+            "RGAAv4",
+            "RGAA-7.3.2"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".overflow-y-auto.scrollbar-thin.relative"
+              ],
+              "html": "<div class=\"relative flex-1 overflow-y-auto scrollbar-thin\">",
+              "failureSummary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tab": "sprints",
+      "label": "Sprints",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".text-text-ghost.gap-1\\.5.font-medium"
+              ],
+              "html": "<span class=\"text-text-ghost font-medium flex items-center gap-1.5\" style=\"font-size: 12px; letter-spacing: -0.2px;\">Agent Studio</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.03 (foreground color: #444444, background color: #0a0a0a, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".relative.group:nth-child(3) > .left-full.ml-4.shadow-lg > .flex-col.flex > .gap-2.items-center.flex > kbd"
+              ],
+              "html": "<kbd class=\"text-2xs font-mono text-text-ghost\">⌘ 3</kbd>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".relative.group:nth-child(3) > .left-full.ml-4.shadow-lg > .flex-col.flex > .font-normal.text-2xs.text-text-ghost"
+              ],
+              "html": "<span class=\"text-2xs text-text-ghost font-normal\">Automated multi-agent pipelines</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".rounded-\\[3px\\].hover\\:text-text-tertiary.py-1"
+              ],
+              "html": "<button class=\"flex-1 px-2 py-1 text-xs font-medium rounded-[3px] text-text-ghost hover:text-text-tertiary transition-all\">Agents</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #444444, background color: #131313, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".pt-1 > .tracking-\\[0\\.06em\\].uppercase.text-text-ghost"
+              ],
+              "html": "<span class=\"text-label uppercase text-text-ghost tracking-[0.06em]\">Active</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:text-rooms"
+              ],
+              "html": "<button class=\"flex items-center gap-1 text-2xs text-text-ghost hover:text-rooms transition-all\" title=\"Mark all as read\">",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(2) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost\">0 agents</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(2) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .tabular-nums.text-2xs.text-text-ghost"
+              ],
+              "html": "<span class=\"text-2xs text-text-ghost tabular-nums shrink-0\">5h</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(2) > .min-w-0.flex-1 > .text-2xs.truncate.mt-0\\.5"
+              ],
+              "html": "<p class=\"text-2xs text-text-ghost truncate mt-0.5\"><span class=\"font-medium text-text-tertiary\">system: </span>Protocol error: Default target \"orchestrator\" not found</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(2) > .min-w-0.flex-1 > .text-2xs.truncate.mt-0\\.5 > .font-medium.text-text-tertiary"
+              ],
+              "html": "<span class=\"font-medium text-text-tertiary\">system: </span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #555555, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(3) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost\">0 agents</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(3) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .tabular-nums.text-2xs.text-text-ghost"
+              ],
+              "html": "<span class=\"text-2xs text-text-ghost tabular-nums shrink-0\">5h</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(3) > .min-w-0.flex-1 > .text-2xs.truncate.mt-0\\.5"
+              ],
+              "html": "<p class=\"text-2xs text-text-ghost truncate mt-0.5\"><span class=\"font-medium text-text-tertiary\">system: </span>Room \"Room-Y-Verify\" created. Topic: Verify task 2. Agents: </p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(3) > .min-w-0.flex-1 > .text-2xs.truncate.mt-0\\.5 > .font-medium.text-text-tertiary"
+              ],
+              "html": "<span class=\"font-medium text-text-tertiary\">system: </span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #555555, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".pt-4 > .tracking-\\[0\\.06em\\].uppercase.text-text-ghost"
+              ],
+              "html": "<span class=\"text-label uppercase text-text-ghost tracking-[0.06em]\">Archived</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-rooms-subtle > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.28 (foreground color: #282828, background color: #101013, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(6) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">e2e-test</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(6) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(7) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">final-e2e</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(7) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(8) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">final-test</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(8) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(9) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">flow-test</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(9) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(10) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">pty-write-test</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(10) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(11) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">qa-agent-e2e</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(11) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(12) > .min-w-0.flex-1 > .gap-1\\.5.items-center.flex:nth-child(1) > .truncate.text-text-secondary.text-xs"
+              ],
+              "html": "<span class=\"text-xs truncate text-text-secondary\">qa-agent-e2e2</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.88 (foreground color: #5b5b5b, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".opacity-50.hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5:nth-child(12) > .min-w-0.flex-1 > .mt-0\\.5.gap-1\\.5.items-center > .italic.text-text-ghost.text-xs"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost italic\">Legacy</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.32 (foreground color: #282828, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".text-2xs.text-center.mt-0\\.5"
+              ],
+              "html": "<p class=\"text-center text-2xs text-text-ghost mt-0.5\">Tip: use ⌘K to search rooms</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".sm\\:inline"
+              ],
+              "html": "<span class=\"text-xs text-text-ghost truncate hidden sm:inline\">cap test</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-6.py-3.gap-3:nth-child(1) > .max-w-sm.text-center.shrink-0"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary shrink-0 max-w-sm text-center\">Protocol error: Default target \"orchestrator\" not found</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-6.py-3.gap-3:nth-child(3) > .max-w-sm.text-center.shrink-0"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary shrink-0 max-w-sm text-center\">Protocol error: Default target \"orchestrator\" not found</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-6.py-3.gap-3:nth-child(5) > .max-w-sm.text-center.shrink-0"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary shrink-0 max-w-sm text-center\">Protocol error: Default target \"orchestrator\" not found</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-6.py-3.gap-3:nth-child(7) > .max-w-sm.text-center.shrink-0"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary shrink-0 max-w-sm text-center\">Protocol error: Default target \"orchestrator\" not found</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-6.py-3.gap-3:nth-child(9) > .max-w-sm.text-center.shrink-0"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary shrink-0 max-w-sm text-center\">Protocol error: Default target \"orchestrator\" not found</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".px-6.py-3.gap-3:nth-child(11) > .max-w-sm.text-center.shrink-0"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary shrink-0 max-w-sm text-center\">Protocol error: Default target \"orchestrator\" not found</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "nested-interactive",
+          "impact": "serious",
+          "description": "Ensure interactive controls are not nested as they are not always announced by screen readers or can cause focus problems for assistive technologies",
+          "help": "Interactive controls must not be nested",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/nested-interactive?application=axeAPI",
+          "tags": [
+            "cat.keyboard",
+            "wcag2a",
+            "wcag412",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.4.1.2",
+            "RGAAv4",
+            "RGAA-7.1.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(2)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"group flex items-center gap-2.5 w-full px-2.5 py-2 rounded text-left transition-all cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(99,102,241,0.06)] border border-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".hover\\:shadow-\\[0_0_12px_rgba\\(99\\,102\\,241\\,0\\.06\\)\\].gap-2\\.5.px-2\\.5:nth-child(3)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"group flex items-center gap-2.5 w-full px-2.5 py-2 rounded text-left transition-all cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(99,102,241,0.06)] border border-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            }
+          ]
+        },
+        {
+          "id": "scrollable-region-focusable",
+          "impact": "serious",
+          "description": "Ensure elements that have scrollable content are accessible by keyboard in Safari",
+          "help": "Scrollable region must have keyboard access",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/scrollable-region-focusable?application=axeAPI",
+          "tags": [
+            "cat.keyboard",
+            "wcag2a",
+            "wcag211",
+            "wcag213",
+            "TTv5",
+            "TT4.a",
+            "EN-301-549",
+            "EN-9.2.1.1",
+            "EN-9.2.1.3",
+            "RGAAv4",
+            "RGAA-7.3.2"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".overflow-y-auto.scrollbar-thin.relative"
+              ],
+              "html": "<div class=\"relative flex-1 overflow-y-auto scrollbar-thin\">",
+              "failureSummary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tab": "memory",
+      "label": "Memory",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".text-text-ghost.gap-1\\.5.font-medium"
+              ],
+              "html": "<span class=\"text-text-ghost font-medium flex items-center gap-1.5\" style=\"font-size: 12px; letter-spacing: -0.2px;\">Agent Studio</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.03 (foreground color: #444444, background color: #0a0a0a, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".gap-1.flex-col.items-center > .relative.group:nth-child(4) > .left-full.ml-4.shadow-lg > .flex-col.flex > .gap-2.items-center.flex > kbd"
+              ],
+              "html": "<kbd class=\"text-2xs font-mono text-text-ghost\">⌘ 4</kbd>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".relative.group:nth-child(4) > .left-full.ml-4.shadow-lg > .flex-col.flex > .font-normal.text-2xs.text-text-ghost"
+              ],
+              "html": "<span class=\"text-2xs text-text-ghost font-normal\">Agent learnings and knowledge base</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-2\\.5.px-3 > .uppercase.tracking-wider"
+              ],
+              "html": "<h3 class=\"text-label uppercase tracking-wider text-text-ghost\">Memory</h3>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".mt-1"
+              ],
+              "html": "<p class=\"text-2xs text-text-tertiary mt-1 leading-snug\">Agent learnings, corrections, and decisions stored across sessions.</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #555555, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[title=\"Export memories as JSON\"]"
+              ],
+              "html": "<button class=\"flex items-center gap-1 px-1.5 py-1 text-xs text-text-ghost hover:text-text-secondary transition-all shrink-0\" title=\"Export memories as JSON\">",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.03 (foreground color: #444444, background color: #0a0a0a, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "button[title=\"Import memories from JSON\"]"
+              ],
+              "html": "<button class=\"flex items-center gap-1 px-1.5 py-1 text-xs text-text-ghost hover:text-text-secondary transition-all shrink-0\" title=\"Import memories from JSON\">",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.03 (foreground color: #444444, background color: #0a0a0a, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:bg-bg-elevated\\/80.hover\\:text-text-primary.border-transparent:nth-child(2) > .text-text-tertiary"
+              ],
+              "html": "<span class=\"text-text-tertiary\">51</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.53 (foreground color: #555555, background color: #111111, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:bg-bg-elevated\\/80.hover\\:text-text-primary.border-transparent:nth-child(3) > .text-text-tertiary"
+              ],
+              "html": "<span class=\"text-text-tertiary\">18</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.53 (foreground color: #555555, background color: #111111, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:bg-bg-elevated\\/80.hover\\:text-text-primary.border-transparent:nth-child(4) > .text-text-tertiary"
+              ],
+              "html": "<span class=\"text-text-tertiary\">23</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.53 (foreground color: #555555, background color: #111111, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".mr-1"
+              ],
+              "html": "<span class=\"text-2xs text-text-ghost uppercase tracking-wider shrink-0 mr-1\">Tags</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.03 (foreground color: #444444, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(2)"
+              ],
+              "html": "<button class=\"flex items-center gap-0.5 px-1.5 py-0.5 text-2xs rounded whitespace-nowrap transition-all bg-bg-input text-text-ghost hover:text-text-tertiary border border-transparent\">dso-portal<span class=\"text-[8px] text-text-ghost/60\">31</span></button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(2) > .text-\\[8px\\].text-text-ghost\\/60"
+              ],
+              "html": "<span class=\"text-[8px] text-text-ghost/60\">31</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(3)"
+              ],
+              "html": "<button class=\"flex items-center gap-0.5 px-1.5 py-0.5 text-2xs rounded whitespace-nowrap transition-all bg-bg-input text-text-ghost hover:text-text-tertiary border border-transparent\">auth<span class=\"text-[8px] text-text-ghost/60\">22</span></button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(3) > .text-\\[8px\\].text-text-ghost\\/60"
+              ],
+              "html": "<span class=\"text-[8px] text-text-ghost/60\">22</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(4)"
+              ],
+              "html": "<button class=\"flex items-center gap-0.5 px-1.5 py-0.5 text-2xs rounded whitespace-nowrap transition-all bg-bg-input text-text-ghost hover:text-text-tertiary border border-transparent\">security<span class=\"text-[8px] text-text-ghost/60\">19</span></button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(4) > .text-\\[8px\\].text-text-ghost\\/60"
+              ],
+              "html": "<span class=\"text-[8px] text-text-ghost/60\">19</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(5)"
+              ],
+              "html": "<button class=\"flex items-center gap-0.5 px-1.5 py-0.5 text-2xs rounded whitespace-nowrap transition-all bg-bg-input text-text-ghost hover:text-text-tertiary border border-transparent\">qa<span class=\"text-[8px] text-text-ghost/60\">16</span></button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(5) > .text-\\[8px\\].text-text-ghost\\/60"
+              ],
+              "html": "<span class=\"text-[8px] text-text-ghost/60\">16</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(6)"
+              ],
+              "html": "<button class=\"flex items-center gap-0.5 px-1.5 py-0.5 text-2xs rounded whitespace-nowrap transition-all bg-bg-input text-text-ghost hover:text-text-tertiary border border-transparent\">orchestrator<span class=\"text-[8px] text-text-ghost/60\">14</span></button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(6) > .text-\\[8px\\].text-text-ghost\\/60"
+              ],
+              "html": "<span class=\"text-[8px] text-text-ghost/60\">14</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(7)"
+              ],
+              "html": "<button class=\"flex items-center gap-0.5 px-1.5 py-0.5 text-2xs rounded whitespace-nowrap transition-all bg-bg-input text-text-ghost hover:text-text-tertiary border border-transparent\">hackathon<span class=\"text-[8px] text-text-ghost/60\">14</span></button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(7) > .text-\\[8px\\].text-text-ghost\\/60"
+              ],
+              "html": "<span class=\"text-[8px] text-text-ghost/60\">14</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(8)"
+              ],
+              "html": "<button class=\"flex items-center gap-0.5 px-1.5 py-0.5 text-2xs rounded whitespace-nowrap transition-all bg-bg-input text-text-ghost hover:text-text-tertiary border border-transparent\">backend<span class=\"text-[8px] text-text-ghost/60\">14</span></button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(8) > .text-\\[8px\\].text-text-ghost\\/60"
+              ],
+              "html": "<span class=\"text-[8px] text-text-ghost/60\">14</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(9)"
+              ],
+              "html": "<button class=\"flex items-center gap-0.5 px-1.5 py-0.5 text-2xs rounded whitespace-nowrap transition-all bg-bg-input text-text-ghost hover:text-text-tertiary border border-transparent\">v1<span class=\"text-[8px] text-text-ghost/60\">14</span></button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(9) > .text-\\[8px\\].text-text-ghost\\/60"
+              ],
+              "html": "<span class=\"text-[8px] text-text-ghost/60\">14</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(10)"
+              ],
+              "html": "<button class=\"flex items-center gap-0.5 px-1.5 py-0.5 text-2xs rounded whitespace-nowrap transition-all bg-bg-input text-text-ghost hover:text-text-tertiary border border-transparent\">frontend<span class=\"text-[8px] text-text-ghost/60\">13</span></button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(10) > .text-\\[8px\\].text-text-ghost\\/60"
+              ],
+              "html": "<span class=\"text-[8px] text-text-ghost/60\">13</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(11)"
+              ],
+              "html": "<button class=\"flex items-center gap-0.5 px-1.5 py-0.5 text-2xs rounded whitespace-nowrap transition-all bg-bg-input text-text-ghost hover:text-text-tertiary border border-transparent\">otp<span class=\"text-[8px] text-text-ghost/60\">11</span></button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-input.hover\\:text-text-tertiary.border-transparent:nth-child(11) > .text-\\[8px\\].text-text-ghost\\/60"
+              ],
+              "html": "<span class=\"text-[8px] text-text-ghost/60\">11</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.0pt (8px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(1) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .text-label.text-text-tertiary:nth-child(2)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary\">18.04.2026</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(1) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .px-1.bg-border-default.py-0\\.5:nth-child(3)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded\">ai-collaboration</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.47 (foreground color: #555555, background color: #141414, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(1) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .px-1.bg-border-default.py-0\\.5:nth-child(4)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded\">planning</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.47 (foreground color: #555555, background color: #141414, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(1) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .px-1.bg-border-default.py-0\\.5:nth-child(5)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded\">review-process</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.47 (foreground color: #555555, background color: #141414, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(1) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .text-label.text-text-tertiary:nth-child(6)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary\">+9</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(2) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .text-label.text-text-tertiary:nth-child(2)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary\">16.04.2026</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(2) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .px-1.bg-border-default.py-0\\.5:nth-child(3)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded\">access-matrix</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.47 (foreground color: #555555, background color: #141414, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(2) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .px-1.bg-border-default.py-0\\.5:nth-child(4)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded\">scope-reduction</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.47 (foreground color: #555555, background color: #141414, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(2) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .px-1.bg-border-default.py-0\\.5:nth-child(5)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded\">context-keeper</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.47 (foreground color: #555555, background color: #141414, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(2) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .text-label.text-text-tertiary:nth-child(6)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary\">+3</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(3) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .italic.text-text-ghost.text-label"
+              ],
+              "html": "<span class=\"text-label text-text-ghost italic\">Learned by documentation</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.03 (foreground color: #444444, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(3) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .text-label.text-text-tertiary:nth-child(3)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary\">16.04.2026</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(3) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .px-1.bg-border-default.py-0\\.5:nth-child(4)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded\">context-keeper</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.47 (foreground color: #555555, background color: #141414, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(3) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .px-1.bg-border-default.py-0\\.5:nth-child(5)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded\">documentation</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.47 (foreground color: #555555, background color: #141414, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(3) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .px-1.bg-border-default.py-0\\.5:nth-child(6)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded\">access-matrix</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.47 (foreground color: #555555, background color: #141414, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(3) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .text-label.text-text-tertiary:nth-child(7)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary\">+5</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(4) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .italic.text-text-ghost.text-label"
+              ],
+              "html": "<span class=\"text-label text-text-ghost italic\">Learned by qa</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.03 (foreground color: #444444, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(4) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .text-label.text-text-tertiary:nth-child(3)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary\">16.04.2026</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(4) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .px-1.bg-border-default.py-0\\.5:nth-child(4)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded\">qa</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.47 (foreground color: #555555, background color: #141414, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(4) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .px-1.bg-border-default.py-0\\.5:nth-child(5)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded\">visual-testing</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.47 (foreground color: #555555, background color: #141414, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(4) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .px-1.bg-border-default.py-0\\.5:nth-child(6)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary bg-border-default px-1 py-0.5 rounded\">improvement-log</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.47 (foreground color: #555555, background color: #141414, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(4) > .mt-1\\.5.flex-wrap.gap-1\\.5 > .text-label.text-text-tertiary:nth-child(7)"
+              ],
+              "html": "<span class=\"text-label text-text-tertiary\">+5</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".max-w-\\[200px\\]"
+              ],
+              "html": "<p class=\"text-xs text-text-tertiary max-w-[200px]\">Select a memory from the list to view its full details</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.65 (foreground color: #555555, background color: #0a0a0a, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "nested-interactive",
+          "impact": "serious",
+          "description": "Ensure interactive controls are not nested as they are not always announced by screen readers or can cause focus problems for assistive technologies",
+          "help": "Interactive controls must not be nested",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/nested-interactive?application=axeAPI",
+          "tags": [
+            "cat.keyboard",
+            "wcag2a",
+            "wcag412",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.4.1.2",
+            "RGAAv4",
+            "RGAA-7.1.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(1)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(2)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(3)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(4)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(5)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(6)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(7)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(8)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(9)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(10)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(11)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(12)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(13)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(14)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(15)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(16)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(17)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(18)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(19)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(20)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(21)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(22)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(23)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(24)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(25)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(26)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(27)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(28)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(29)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(30)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(31)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(32)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(33)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(34)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(35)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(36)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(37)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(38)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(39)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(40)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(41)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(42)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(43)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(44)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(45)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(46)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(47)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(48)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(49)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(50)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(51)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(52)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(53)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(54)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(55)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(56)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(57)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(58)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(59)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(60)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(61)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(62)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(63)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(64)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(65)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(66)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(67)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(68)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(69)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(70)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(71)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(72)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(73)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(74)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(75)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(76)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(77)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(78)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(79)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(80)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(81)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(82)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(83)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(84)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(85)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(86)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(87)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(88)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(89)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(90)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(91)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(92)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(93)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(94)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(95)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(96)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(97)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            },
+            {
+              "target": [
+                ".border-border-subtle\\/50.cursor-pointer.hover\\:shadow-\\[0_0_12px_rgba\\(167\\,139\\,250\\,0\\.06\\)\\]:nth-child(98)"
+              ],
+              "html": "<div role=\"button\" tabindex=\"0\" class=\"w-full text-left px-3 py-2.5 border-b border-border-subtle/50 transition-all group cursor-pointer hover:bg-bg-elevated/50 hover:shadow-[0_0_12px_rgba(167,139,250,0.06)] border-l-2 border-l-transparent\">",
+              "failureSummary": "Fix any of the following:\n  Element has focusable descendants"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tab": "settings",
+      "label": "Settings",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI",
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "nodes": [
+            {
+              "target": [
+                ".text-text-ghost.gap-1\\.5.font-medium"
+              ],
+              "html": "<span class=\"text-text-ghost font-medium flex items-center gap-1.5\" style=\"font-size: 12px; letter-spacing: -0.2px;\">Agent Studio</span>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.03 (foreground color: #444444, background color: #0a0a0a, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "nav > .relative.group > .left-full.ml-4.shadow-lg > .flex-col.flex > .gap-2.items-center.flex > kbd"
+              ],
+              "html": "<kbd class=\"text-2xs font-mono text-text-ghost\">⌘ ,</kbd>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.93 (foreground color: #444444, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-2\\.5.px-3 > .uppercase.tracking-wider"
+              ],
+              "html": "<h3 class=\"text-label uppercase tracking-wider text-text-ghost\">Settings</h3>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".mt-1"
+              ],
+              "html": "<p class=\"text-2xs text-text-tertiary mt-1 leading-snug\">Model defaults, projects, agent system, and system monitor.</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #555555, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".bg-bg-elevated.group.text-left > .pl-5.text-2xs.leading-snug"
+              ],
+              "html": "<p class=\"text-2xs mt-0.5 pl-5 leading-snug text-text-tertiary\">Model, theme, notifications</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.53 (foreground color: #555555, background color: #111111, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:text-text-primary.group.text-left:nth-child(2) > .pl-5.text-2xs.leading-snug"
+              ],
+              "html": "<p class=\"text-2xs mt-0.5 pl-5 leading-snug text-text-ghost\">Tracked repos and agent system</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:text-text-primary.group.text-left:nth-child(3) > .pl-5.text-2xs.leading-snug"
+              ],
+              "html": "<p class=\"text-2xs mt-0.5 pl-5 leading-snug text-text-ghost\">Discovered agent definitions</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:text-text-primary.group.text-left:nth-child(4) > .pl-5.text-2xs.leading-snug"
+              ],
+              "html": "<p class=\"text-2xs mt-0.5 pl-5 leading-snug text-text-ghost\">CPU, memory, disk, active processes</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:text-text-primary.group.text-left:nth-child(5) > .pl-5.text-2xs.leading-snug"
+              ],
+              "html": "<p class=\"text-2xs mt-0.5 pl-5 leading-snug text-text-ghost\">Sprint protocol, PMO scans, scheduled tasks</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:text-text-primary.group.text-left:nth-child(6) > .pl-5.text-2xs.leading-snug"
+              ],
+              "html": "<p class=\"text-2xs mt-0.5 pl-5 leading-snug text-text-ghost\">Keyboard shortcuts reference</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".hover\\:text-text-primary.group.text-left:nth-child(7) > .pl-5.text-2xs.leading-snug"
+              ],
+              "html": "<p class=\"text-2xs mt-0.5 pl-5 leading-snug text-text-ghost\">Version and system info</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".justify-between > .hover\\:text-text-tertiary.text-text-ghost"
+              ],
+              "html": "<button class=\"text-label text-text-ghost hover:text-text-tertiary transition-all\">Send Test</button>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".pl-2"
+              ],
+              "html": "<p class=\"text-2xs text-text-ghost border-l-2 border-border-default pl-2 leading-snug\">Stored in this browser only. Settings will not sync across devices or browsers.</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2 (foreground color: #444444, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".items-start.gap-2.flex:nth-child(2) > .min-w-0.flex-1 > .text-2xs.mt-0\\.5"
+              ],
+              "html": "<p class=\"text-2xs text-text-tertiary mt-0.5\">When a sprint phase needs your sign-off</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #555555, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".items-start.gap-2.flex:nth-child(3) > .min-w-0.flex-1 > .text-2xs.mt-0\\.5"
+              ],
+              "html": "<p class=\"text-2xs text-text-tertiary mt-0.5\">When an agent wants to run destructive commands</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #555555, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".items-start.gap-2.flex:nth-child(4) > .min-w-0.flex-1 > .text-2xs.mt-0\\.5"
+              ],
+              "html": "<p class=\"text-2xs text-text-tertiary mt-0.5\">When an agent finishes a task</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #555555, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".items-start.gap-2.flex:nth-child(5) > .min-w-0.flex-1 > .text-2xs.mt-0\\.5"
+              ],
+              "html": "<p class=\"text-2xs text-text-tertiary mt-0.5\">When a Claude session ends</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #555555, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".items-start.gap-2.flex:nth-child(6) > .min-w-0.flex-1 > .text-2xs.mt-0\\.5"
+              ],
+              "html": "<p class=\"text-2xs text-text-tertiary mt-0.5\">When a session hits 80%+ context usage</p>",
+              "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.62 (foreground color: #555555, background color: #0c0c0c, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

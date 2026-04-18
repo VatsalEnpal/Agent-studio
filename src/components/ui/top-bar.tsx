@@ -41,20 +41,23 @@ export function TitleBar({ sessionName, sessionCount, totalCost }: TitleBarProps
         className="absolute left-4 flex items-center gap-[7px]"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
+        {/* Decorative only — these dots mimic macOS traffic lights but do
+            nothing. aria-hidden keeps them out of the accessibility tree
+            (axe's `aria-prohibited-attr` flags aria-label on plain spans). */}
         <span
           className="w-3 h-3 rounded-full"
           style={{ backgroundColor: "#ff5f57" }}
-          aria-label="Close"
+          aria-hidden="true"
         />
         <span
           className="w-3 h-3 rounded-full"
           style={{ backgroundColor: "#febc2e" }}
-          aria-label="Minimize"
+          aria-hidden="true"
         />
         <span
           className="w-3 h-3 rounded-full"
           style={{ backgroundColor: "#28c840" }}
-          aria-label="Maximize"
+          aria-hidden="true"
         />
       </div>
 
@@ -73,7 +76,9 @@ export function TitleBar({ sessionName, sessionCount, totalCost }: TitleBarProps
         {!sessionName && sessionCount != null && sessionCount > 0 && (
           <>
             <span className="text-text-ghost/40">&middot;</span>
-            <span className="text-text-tertiary">{sessionCount} session{sessionCount !== 1 ? "s" : ""}</span>
+            <span className="text-text-tertiary">
+              {sessionCount} session{sessionCount !== 1 ? "s" : ""}
+            </span>
           </>
         )}
       </span>
@@ -85,8 +90,7 @@ export function TitleBar({ sessionName, sessionCount, totalCost }: TitleBarProps
             className="text-xs font-mono text-sprints/70 flex items-center gap-1"
             title="Total API spend across all active sessions"
           >
-            <span className="text-text-ghost/50 text-2xs">Spend</span>
-            ${totalCost.toFixed(2)}
+            <span className="text-text-ghost/50 text-2xs">Spend</span>${totalCost.toFixed(2)}
           </span>
         )}
         <span

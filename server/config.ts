@@ -160,7 +160,8 @@ export function loadConfig(): AgentStudioConfig | null {
 
   try {
     const raw = readFileSync(configPath, "utf-8");
-    const parsed = JSON.parse(raw) as AgentStudioConfig;
+    const rawParsed = JSON.parse(raw) as Record<string, unknown>;
+    const parsed = rawParsed as unknown as AgentStudioConfig;
     // Basic validation — accept partial configs, fill in defaults
     if (!Array.isArray(parsed.projects)) parsed.projects = [];
     if (!parsed.version) parsed.version = CONFIG_VERSION;
@@ -168,8 +169,14 @@ export function loadConfig(): AgentStudioConfig | null {
       parsed.defaults = { model: "sonnet", permissions: "bypass", workingDirectory: "~" };
     }
     if (!Array.isArray(parsed.devServers)) parsed.devServers = [];
-    // Seed agentSources if missing/empty — presented to callers, not written back here.
-    if (!Array.isArray(parsed.agentSources) || parsed.agentSources.length === 0) {
+    // Seed agentSources ONLY when the key is absent from the on-disk config.
+    // If the user has explicitly set it to [] (e.g. by removing all sources in
+    // Settings), honor that — do NOT re-seed, or the Global row will reappear
+    // on the next read. Non-array values get replaced with defaults as before.
+    if (!("agentSources" in rawParsed)) {
+      parsed.agentSources = defaultAgentSources(parsed.projects);
+    } else if (!Array.isArray(parsed.agentSources)) {
+      // Corrupt value (e.g. null, object) — fall back to defaults.
       parsed.agentSources = defaultAgentSources(parsed.projects);
     }
     return parsed;
@@ -412,10 +419,11 @@ export function getAgentSystemPath(relativePath: string): string | null {
  */
 export function getAgentSources(config?: AgentStudioConfig): AgentSourceConfig[] {
   const cfg = config ?? getConfig();
-  const sources =
-    Array.isArray(cfg.agentSources) && cfg.agentSources.length > 0
-      ? cfg.agentSources
-      : defaultAgentSources(cfg.projects ?? []);
+  // Honor an explicit empty array — the user cleared all sources.
+  // Only fall back to defaults when `agentSources` is truly absent or corrupt.
+  const sources = Array.isArray(cfg.agentSources)
+    ? cfg.agentSources
+    : defaultAgentSources(cfg.projects ?? []);
   // Ensure `~` is expanded for each source path before returning to callers.
   return sources.map((s) => ({ ...s, path: resolvePath(s.path) }));
 }
