@@ -49,7 +49,7 @@ npm install
 npm run dev
 ```
 
-Open [localhost:8080](http://localhost:8080). Quick Import detects your projects and sets up agents in one click. An onboarding tour guides you through the four main sections.
+Open [localhost:8080](http://localhost:8080). An onboarding tour guides you through the four main sections.
 
 ```bash
 npm run electron:dev     # desktop app
@@ -86,11 +86,12 @@ Both stream over a single WebSocket. The server (Express 5) wraps Next.js, manag
 
 ## Docs
 
-|                                        |                                                 |
-| -------------------------------------- | ----------------------------------------------- |
-| **[HOWTO.md](HOWTO.md)**               | User guide — features, shortcuts, configuration |
-| **[ARCHITECTURE.md](ARCHITECTURE.md)** | Technical deep-dive for contributors            |
-| **[CLAUDE.md](CLAUDE.md)**             | Agent and contributor instructions              |
+|                                                      |                                                 |
+| ---------------------------------------------------- | ----------------------------------------------- |
+| **[HOWTO.md](HOWTO.md)**                             | User guide — features, shortcuts, configuration |
+| **[ARCHITECTURE.md](ARCHITECTURE.md)**               | Technical deep-dive for contributors            |
+| **[docs/sprint-handoff.md](docs/sprint-handoff.md)** | Handoff JSON contract between sprint steps      |
+| **[CLAUDE.md](CLAUDE.md)**                           | Agent and contributor instructions              |
 
 <br />
 
