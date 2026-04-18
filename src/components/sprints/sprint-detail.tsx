@@ -376,16 +376,24 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                   Pause
                 </button>
               ))}
-            {sprint.status === "paused" &&
+            {(sprint.status === "paused" || sprint.status === "planned") &&
               (confirmingResume ? (
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-text-tertiary">Resume this sprint?</span>
+                  <span className="text-xs text-text-tertiary">
+                    {sprint.status === "planned" ? "Start this sprint?" : "Resume this sprint?"}
+                  </span>
                   <button
                     onClick={() => void handleResume()}
                     disabled={resuming}
                     className="px-2.5 py-0.5 text-xs font-medium bg-sprints text-bg-base rounded hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
                   >
-                    {resuming ? "Resuming..." : "Resume"}
+                    {resuming
+                      ? sprint.status === "planned"
+                        ? "Starting..."
+                        : "Resuming..."
+                      : sprint.status === "planned"
+                        ? "Start"
+                        : "Resume"}
                   </button>
                   <button
                     onClick={() => setConfirmingResume(false)}
@@ -400,7 +408,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                   className="flex items-center gap-1 px-3 py-1 text-xs font-semibold bg-sprints text-bg-base rounded hover:opacity-90 active:scale-[0.98] transition-all shadow-sm"
                 >
                   <PlayIcon size={12} />
-                  Resume Sprint
+                  {sprint.status === "planned" ? "Start Sprint" : "Resume Sprint"}
                 </button>
               ))}
             {(sprint.status === "in_progress" ||

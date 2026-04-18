@@ -428,8 +428,15 @@ export class WorkflowExecutor {
       stepState.status = "waiting";
       saveRunState(runState);
       await this.waitForStepApproval(runState, stepDef.id, "approve-before-finish");
+      // Post-approval: restore `running` on both run + step and persist
+      // BEFORE marking completed. This guarantees syncSprintFileFromRun
+      // sees a clean `running` transition instead of jumping straight from
+      // `waiting_approval` → `completed`, which can confuse UI polling
+      // that filters on intermediate states.
       runState.status = "running";
       stepState.status = "running";
+      stepState.approvedAt = new Date().toISOString();
+      saveRunState(runState);
     }
 
     stepState.status = "completed";
@@ -590,8 +597,14 @@ export class WorkflowExecutor {
           stepState.status = "waiting";
           saveRunState(runState);
           await this.waitForStepApproval(runState, stepDef.id, "approve-before-finish");
+          // Post-approval: restore `running` + persist BEFORE completion so
+          // the run-state never jumps waiting_approval → completed in a
+          // single save (which can confuse UI pollers and downstream
+          // syncSprintFileFromRun consumers).
           runState.status = "running";
           stepState.status = "running";
+          stepState.approvedAt = new Date().toISOString();
+          saveRunState(runState);
         }
 
         stepState.status = "completed";

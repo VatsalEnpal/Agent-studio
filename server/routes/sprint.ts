@@ -256,6 +256,7 @@ export function flowsToSprints(
       const statusMap: Record<string, string> = {
         running: "in_progress",
         waiting: "paused",
+        paused: "paused",
         completed: "completed",
         failed: "failed",
         cancelled: "cancelled",
