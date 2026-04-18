@@ -9,7 +9,7 @@ import {
   readSprintHistory,
   readHandoffs,
 } from "../file-watcher.js";
-import { getAgentSystemPath } from "../config.js";
+import { getAgentSystemPath, getAgentSystemBase } from "../config.js";
 import type { WorkflowManager } from "../workflows/index.js";
 import type { WorkflowExecutor } from "../workflows/executor.js";
 import type { PipelineRegistry } from "../workflows/workflow-registry.js";
@@ -164,6 +164,8 @@ export function flowsToSprints(
 
   for (const flow of flows) {
     for (const run of (flow as any).runs ?? []) {
+      const runAgent = (step: any): string | null =>
+        (step as any).agent ?? (step as any).agents?.[0] ?? null;
       const gates = ((run as any).steps ?? []).map((step: any, i: number) => ({
         id: step.id ?? `gate-${i}`,
         name: step.name ?? `Step ${i + 1}`,
@@ -175,7 +177,7 @@ export function flowsToSprints(
               : step.status === "failed"
                 ? "failed"
                 : step.status === "waiting"
-                  ? "in_progress"
+                  ? "awaiting"
                   : "not_started",
         requirements: ((step as any).agents ?? []).map((a: string) => ({
           label: `${a} complete`,
@@ -184,6 +186,10 @@ export function flowsToSprints(
         action: (step as any).action ?? null,
         details: (step as any).details ?? null,
         richContent: (step as any).richContent ?? null,
+        // S3: expose per-step metadata so the UI can render step-card chrome
+        // (agent name, handoff output link) without a second round trip.
+        agent: runAgent(step),
+        hasOutput: Boolean((step as any).output) || step.status === "completed",
       }));
 
       // Build activity entries from step details and richContent
@@ -800,6 +806,35 @@ export function sprintsRoutes(deps: {
       res.json({ content: null, source: null });
     } catch {
       res.json({ content: null, source: null });
+    }
+  });
+
+  // S3: read a step's handoff output JSON for inline rendering in the step card.
+  // Resolves `<agent-system-base>/sprints/handoffs/<stepId>_output.json` (falls
+  // back to `<cwd>/.agent-studio/sprints/handoffs/...` mirroring the executor's
+  // `resolveHandoffsDir`). Returns 404 if the file is absent so the UI can hide
+  // the panel without a console error.
+  router.get("/:sprintId/steps/:stepId/output", async (req, res) => {
+    try {
+      const { stepId } = req.params as { sprintId: string; stepId: string };
+      const base = getAgentSystemBase();
+      const handoffsDir = base
+        ? path.join(base, "sprints", "handoffs")
+        : path.join(process.cwd(), ".agent-studio", "sprints", "handoffs");
+      const file = path.join(handoffsDir, `${stepId}_output.json`);
+      if (!fs.existsSync(file)) {
+        res.status(404).json({ error: "Output not available" });
+        return;
+      }
+      const raw = fs.readFileSync(file, "utf-8");
+      try {
+        res.json(JSON.parse(raw));
+      } catch {
+        res.json({ raw });
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
     }
   });
 

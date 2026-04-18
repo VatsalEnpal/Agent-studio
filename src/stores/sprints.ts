@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type GateStatus = "not_started" | "in_progress" | "passed" | "failed";
+export type GateStatus = "not_started" | "in_progress" | "awaiting" | "passed" | "failed";
 export type SprintStatus =
   | "planned"
   | "launching"
@@ -18,6 +18,10 @@ export interface Gate {
   action?: { label: string; type: "go" | "approve" | "input" } | null;
   details?: string | null;
   richContent?: Record<string, unknown> | null;
+  /** S3: agent attached to this step (from pipelineDef), for step-card chrome. */
+  agent?: string | null;
+  /** S3: true when the executor has written a handoff output JSON for this step. */
+  hasOutput?: boolean;
 }
 
 export interface SprintAgent {
@@ -84,17 +88,14 @@ export const useSprintsStore = create<SprintsState>((set) => ({
   specLoading: false,
 
   setSprints: (sprints) => set({ sprints }),
-  selectSprint: (selectedSprintId) =>
-    set({ selectedSprintId, handoffPanelData: null }),
+  selectSprint: (selectedSprintId) => set({ selectedSprintId, handoffPanelData: null }),
   setLoading: (loading) => set({ loading }),
   setActiveTab: (activeTab) => set({ activeTab }),
   setExpandedGate: (expandedGateId) => set({ expandedGateId }),
   setHandoffPanelData: (handoffPanelData) => set({ handoffPanelData }),
   updateSprint: (id, updates) =>
     set((state) => ({
-      sprints: state.sprints.map((s) =>
-        s.id === id ? { ...s, ...updates } : s,
-      ),
+      sprints: state.sprints.map((s) => (s.id === id ? { ...s, ...updates } : s)),
     })),
   setSpecPanel: (specPanelOpen) => set({ specPanelOpen }),
   setSpecContent: (specContent) => set({ specContent }),

@@ -421,9 +421,15 @@ export class WorkflowExecutor {
     stepState.output = `test-noop output for ${stepDef.id}`;
 
     // approve-before-finish: pause after output produced, before completion.
+    // Surface `waiting` on the step state so the UI step-card badge reads
+    // "Awaiting approval" (S3). `waitForStepApproval` also sets
+    // runState.status to `waiting_approval`.
     if (stepDef.gate === "approve-before-finish") {
+      stepState.status = "waiting";
+      saveRunState(runState);
       await this.waitForStepApproval(runState, stepDef.id, "approve-before-finish");
       runState.status = "running";
+      stepState.status = "running";
     }
 
     stepState.status = "completed";
@@ -577,10 +583,15 @@ export class WorkflowExecutor {
         }
 
         // approve-before-finish: step produced output, but pause before
-        // we mark it completed / write the output handoff.
+        // we mark it completed / write the output handoff. Surface `waiting`
+        // on the step state so the UI step-card badge reads "Awaiting
+        // approval" (S3).
         if (stepDef.gate === "approve-before-finish") {
+          stepState.status = "waiting";
+          saveRunState(runState);
           await this.waitForStepApproval(runState, stepDef.id, "approve-before-finish");
           runState.status = "running";
+          stepState.status = "running";
         }
 
         stepState.status = "completed";
