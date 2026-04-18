@@ -57,11 +57,61 @@ export class WorkflowExecutor {
   private runner: CommandRunner;
   private listeners: ExecutorEventListener[] = [];
   private activeRuns = new Map<string, { abortController: AbortController; paused: boolean }>();
+  /**
+   * Pending per-step gate approvals. Key: `${runId}::${stepId}`.
+   * Each entry resolves the promise when the external approval arrives
+   * via `approveStepGate()` (wired from /api/sprints/:sprintId/gates/:gateId/approve).
+   */
+  private pendingStepGates = new Map<string, () => void>();
   /** Override retry delay for tests (default: 60000ms) */
   _testRetryDelayMs?: number;
 
   constructor(runner: CommandRunner) {
     this.runner = runner;
+  }
+
+  /** Key used in `pendingStepGates` — (runId, stepId) pair. */
+  private gateKey(runId: string, stepId: string): string {
+    return `${runId}::${stepId}`;
+  }
+
+  /**
+   * Register a pending step-gate approval and emit the gate-waiting event.
+   * Returns a promise that resolves once `approveStepGate` is called.
+   * Marks the run as `waiting_approval` and persists run state.
+   */
+  private waitForStepApproval(
+    runState: RunState,
+    stepId: string,
+    gateType: "approve-before-start" | "approve-before-finish",
+  ): Promise<void> {
+    const key = this.gateKey(runState.runId, stepId);
+    runState.status = "waiting_approval";
+    saveRunState(runState);
+    this.emit({
+      type: "gate-waiting",
+      runId: runState.runId,
+      workflowId: runState.workflowId,
+      stepId,
+      data: { gateType },
+    });
+    return new Promise<void>((resolve) => {
+      this.pendingStepGates.set(key, resolve);
+    });
+  }
+
+  /**
+   * Externally signal that a per-step gate has been approved. Invoked from
+   * the /gates/:gateId/approve HTTP handler. No-op if no pending gate for
+   * this (runId, stepId).
+   */
+  approveStepGate(runId: string, stepId: string): boolean {
+    const key = this.gateKey(runId, stepId);
+    const resolve = this.pendingStepGates.get(key);
+    if (!resolve) return false;
+    this.pendingStepGates.delete(key);
+    resolve();
+    return true;
   }
 
   /**
@@ -336,6 +386,10 @@ export class WorkflowExecutor {
    * Test-only fast path: noop runtime.
    * Reads handoff input (smoke check), writes canned output, marks step
    * complete, emits step-completed. No subprocess is spawned.
+   *
+   * Honors `stepDef.gate === "approve-before-finish"` by pausing between
+   * producing output and emitting step-completed. The "approve-before-start"
+   * gate is enforced by the caller (executeAgentStep) before this runs.
    */
   private async executeNoopStep(
     runState: RunState,
@@ -365,6 +419,13 @@ export class WorkflowExecutor {
     }
 
     stepState.output = `test-noop output for ${stepDef.id}`;
+
+    // approve-before-finish: pause after output produced, before completion.
+    if (stepDef.gate === "approve-before-finish") {
+      await this.waitForStepApproval(runState, stepDef.id, "approve-before-finish");
+      runState.status = "running";
+    }
+
     stepState.status = "completed";
     stepState.completedAt = new Date().toISOString();
     saveRunState(runState);
@@ -390,6 +451,19 @@ export class WorkflowExecutor {
 
     // Always write the input handoff before any runtime dispatch.
     this.writeHandoffInput(stepDef, workflowDef, runState);
+
+    // Per-step gate: "approve-before-start" pauses BEFORE any dispatch.
+    // Mark step as waiting in persisted state so the UI can reflect it.
+    if (stepDef.gate === "approve-before-start") {
+      stepState.status = "waiting";
+      stepState.startedAt = stepState.startedAt ?? new Date().toISOString();
+      await this.waitForStepApproval(runState, stepDef.id, "approve-before-start");
+      // Approved — resume as running. Fall through to normal dispatch.
+      runState.status = "running";
+      stepState.status = "pending";
+      stepState.approvedAt = new Date().toISOString();
+      saveRunState(runState);
+    }
 
     // Noop runtime: deterministic completion for sprint verification.
     if (stepDef.runtime === "noop") {
@@ -500,6 +574,13 @@ export class WorkflowExecutor {
             this.handleStepFailure(runState, stepDef);
             return;
           }
+        }
+
+        // approve-before-finish: step produced output, but pause before
+        // we mark it completed / write the output handoff.
+        if (stepDef.gate === "approve-before-finish") {
+          await this.waitForStepApproval(runState, stepDef.id, "approve-before-finish");
+          runState.status = "running";
         }
 
         stepState.status = "completed";

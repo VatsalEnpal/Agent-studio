@@ -28,6 +28,23 @@ export type TriggerConfig = ManualTrigger | ScheduledTrigger | EventTrigger;
 
 // ---------- Step Definitions ----------
 
+/**
+ * Per-step gate mode.
+ * - "auto" (default): no pause; executor runs step as soon as reached.
+ * - "approve-before-start": executor emits `gate-waiting` and pauses BEFORE
+ *   launching the step. Resumes once `approveStepGate(runId, stepId)` is
+ *   called (wired from the existing /gates/:gateId/approve endpoint).
+ * - "approve-before-finish": executor runs the step normally, but after the
+ *   step produces output — and before writing the output handoff /
+ *   emitting `step-completed` — it pauses with `gate-waiting` until
+ *   approved.
+ *
+ * Distinct from the separate `GateStepDef` type: `gate` attaches gate
+ * semantics to any individual agent step without adding a dedicated gate
+ * step to the pipeline.
+ */
+export type StepGateMode = "auto" | "approve-before-start" | "approve-before-finish";
+
 export interface AgentStepDef {
   id: string;
   name: string;
@@ -56,6 +73,11 @@ export interface AgentStepDef {
    *   harness; not production surface.
    */
   runtime?: "cli" | "sdk" | "pty" | "noop";
+  /**
+   * Optional per-step gate mode. Defaults to "auto" when omitted.
+   * See `StepGateMode` for semantics.
+   */
+  gate?: StepGateMode;
 }
 
 export interface GateStepDef {

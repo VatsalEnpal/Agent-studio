@@ -112,6 +112,18 @@ function readPersistedPipelineDef(sprintId: string): WorkflowPipelineDef | null 
   }
 }
 
+/** Read the runId of the first (and currently only) run on a sprint. */
+function readSprintRunId(sprintId: string): string | null {
+  const file = path.join(sprintsDir(), `${sprintId}.json`);
+  if (!fs.existsSync(file)) return null;
+  try {
+    const data = JSON.parse(fs.readFileSync(file, "utf-8"));
+    return (data.runs?.[0]?.id as string | undefined) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /** Read the persisted sprint status from disk (not via WorkflowManager cache). */
 function readPersistedSprintStatus(sprintId: string): string | null {
   const file = path.join(sprintsDir(), `${sprintId}.json`);
@@ -360,6 +372,8 @@ export function sprintsRoutes(deps: {
           description: string;
           /** Optional per-step runtime override (e.g. "noop" for test fixtures). */
           runtime?: "cli" | "sdk" | "pty" | "noop";
+          /** Optional per-step gate mode (S2). Defaults to "auto". */
+          gate?: "auto" | "approve-before-start" | "approve-before-finish";
         }>;
         budgetCapUsd?: number;
         stepBudgetCapUsd?: number;
@@ -413,6 +427,11 @@ export function sprintsRoutes(deps: {
           };
         }
         const runtime = (step as unknown as { runtime?: "cli" | "sdk" | "pty" | "noop" }).runtime;
+        const gate = (
+          step as unknown as {
+            gate?: "auto" | "approve-before-start" | "approve-before-finish";
+          }
+        ).gate;
         return {
           id: step.id,
           name: step.name,
@@ -420,6 +439,7 @@ export function sprintsRoutes(deps: {
           agent: step.agent,
           goal: step.description || goal || `Work on ${name}`,
           ...(runtime ? { runtime } : {}),
+          ...(gate && gate !== "auto" ? { gate } : {}),
         };
       });
 
@@ -496,6 +516,27 @@ export function sprintsRoutes(deps: {
   router.post("/:sprintId/gates/:gateId/approve", async (req, res) => {
     try {
       const { sprintId, gateId } = req.params as { sprintId: string; gateId: string };
+
+      // First, try to resume a per-step gate in the executor. This covers
+      // agent steps configured with `gate: "approve-before-start"` or
+      // `"approve-before-finish"` (S2). If no pending gate exists, fall
+      // through to the legacy file-based approval below.
+      const runId = readSprintRunId(sprintId);
+      if (runId && workflowExecutor.approveStepGate(runId, gateId)) {
+        // Broadcast a workflow update so the UI reflects the unpaused step.
+        try {
+          const flows = await workflowManager.getFlows();
+          broadcast(wss, {
+            type: "workflow-update",
+            payload: flowsToSprints(flows),
+          } satisfies WsMessage);
+        } catch {
+          /* best-effort */
+        }
+        res.json({ ok: true, sprintId, gateId, action: "step-gate-approved" });
+        return;
+      }
+
       const { readFile, writeFile } = await import("node:fs/promises");
       const statePath = getAgentSystemPath("sprints/state.json");
       const currentPath = getAgentSystemPath("sprints/current.md");

@@ -30,6 +30,8 @@ interface AgentOption {
   scope?: "global" | { project: string };
 }
 
+type StepGateMode = "auto" | "approve-before-start" | "approve-before-finish";
+
 interface PipelineStep {
   id: string;
   agent: string;
@@ -37,6 +39,8 @@ interface PipelineStep {
   description: string;
   gateRequired: boolean;
   qaLoop: boolean;
+  /** Per-step gate mode (S2). Defaults to "auto". */
+  gate: StepGateMode;
 }
 
 // ---------------------------------------------------------------------------
@@ -58,6 +62,7 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       description: "Orchestrator reviews goal and creates task breakdown",
       gateRequired: false,
       qaLoop: false,
+      gate: "auto",
     });
   }
 
@@ -71,6 +76,7 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       description: "Build APIs, database schemas, server logic",
       gateRequired: false,
       qaLoop: false,
+      gate: "auto",
     });
   }
 
@@ -83,6 +89,7 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       description: "Build UI components, pages, and client logic",
       gateRequired: false,
       qaLoop: false,
+      gate: "auto",
     });
   }
 
@@ -96,6 +103,7 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       description: "Review code for vulnerabilities and security issues",
       gateRequired: false,
       qaLoop: false,
+      gate: "auto",
     });
   }
 
@@ -110,6 +118,7 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       description: agent?.description ?? `${agentId} agent tasks`,
       gateRequired: false,
       qaLoop: false,
+      gate: "auto",
     });
   }
 
@@ -123,6 +132,7 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       description: "Project management review and task tracking",
       gateRequired: false,
       qaLoop: false,
+      gate: "auto",
     });
   }
 
@@ -135,6 +145,7 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
       description: "Run tests, verify quality, report bugs",
       gateRequired: false,
       qaLoop: false,
+      gate: "auto",
     });
   }
 
@@ -147,6 +158,7 @@ function buildPipeline(agents: string[], agentMap: Map<string, AgentOption>): Pi
     description: "Final review, create PR, archive sprint",
     gateRequired: false,
     qaLoop: false,
+    gate: "auto",
   });
 
   return steps;
@@ -309,6 +321,10 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
     setPipeline((prev) => prev.map((s, i) => (i === index ? { ...s, qaLoop: !s.qaLoop } : s)));
   }, []);
 
+  const handleChangeGate = useCallback((index: number, gate: StepGateMode) => {
+    setPipeline((prev) => prev.map((s, i) => (i === index ? { ...s, gate } : s)));
+  }, []);
+
   const handleCreate = useCallback(async () => {
     setSaving(true);
     setError(null);
@@ -330,6 +346,7 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
             description: p.description,
             gateRequired: p.gateRequired,
             qaLoop: p.qaLoop,
+            gate: p.gate,
           })),
           schedule: schedule === "recurring" ? { recurring: true, interval } : undefined,
           budgetCapUsd: parsedBudget && parsedBudget > 0 ? parsedBudget : undefined,
@@ -418,6 +435,7 @@ export function CreateSprintDialog({ open, onOpenChange, onCreated }: CreateSpri
               onMove={handleMoveStep}
               onToggleGate={handleToggleGate}
               onToggleQaLoop={handleToggleQaLoop}
+              onChangeGate={handleChangeGate}
               schedule={schedule}
               onScheduleChange={setSchedule}
               interval={interval}
@@ -708,6 +726,7 @@ function StepPipeline({
   onMove,
   onToggleGate,
   onToggleQaLoop,
+  onChangeGate,
   schedule,
   onScheduleChange,
   interval: intervalValue,
@@ -722,6 +741,7 @@ function StepPipeline({
   onMove: (index: number, direction: "up" | "down") => void;
   onToggleGate: (index: number) => void;
   onToggleQaLoop: (index: number) => void;
+  onChangeGate: (index: number, gate: StepGateMode) => void;
   schedule: "once" | "recurring";
   onScheduleChange: (v: "once" | "recurring") => void;
   interval: string;
@@ -775,7 +795,7 @@ function StepPipeline({
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <label className="flex items-center gap-1 cursor-pointer">
                   <input
                     type="checkbox"
@@ -796,6 +816,19 @@ function StepPipeline({
                     <span className="text-2xs text-text-tertiary">QA Loop</span>
                   </label>
                 )}
+                <label className="flex items-center gap-1">
+                  <span className="text-2xs text-text-tertiary">Gate</span>
+                  <select
+                    value={pStep.gate}
+                    onChange={(e) => onChangeGate(i, e.target.value as StepGateMode)}
+                    aria-label={`Gate mode for step ${pStep.name}`}
+                    className="bg-bg-base border border-border-default rounded px-1 py-0.5 text-2xs text-text-secondary focus:outline-none focus:border-sprints"
+                  >
+                    <option value="auto">Auto</option>
+                    <option value="approve-before-start">Approve before start</option>
+                    <option value="approve-before-finish">Approve before finish</option>
+                  </select>
+                </label>
               </div>
             </div>
 
