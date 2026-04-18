@@ -225,7 +225,14 @@ export function sprintsRoutes(deps: {
         goal?: string;
         agents?: string[];
         cwd?: string;
-        pipeline?: Array<{ id: string; agent: string; name: string; description: string }>;
+        pipeline?: Array<{
+          id: string;
+          agent: string;
+          name: string;
+          description: string;
+          /** Optional per-step runtime override (e.g. "noop" for test fixtures). */
+          runtime?: "cli" | "sdk" | "pty" | "noop";
+        }>;
         budgetCapUsd?: number;
         stepBudgetCapUsd?: number;
       };
@@ -320,12 +327,14 @@ export function sprintsRoutes(deps: {
             allowFeedback: true,
           };
         }
+        const runtime = (step as unknown as { runtime?: "cli" | "sdk" | "pty" | "noop" }).runtime;
         return {
           id: step.id,
           name: step.name,
           type: "agent" as const,
           agent: step.agent,
           goal: step.description || goal || `Work on ${name}`,
+          ...(runtime ? { runtime } : {}),
         };
       });
 

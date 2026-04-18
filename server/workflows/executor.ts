@@ -5,11 +5,12 @@
  * Emits events for UI updates via a listener callback.
  */
 
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
 import { homedir } from "node:os";
 import type { CommandRunner } from "./command-runner.js";
+import { getAgentSystemBase } from "../config.js";
 import {
   validateWorkflow,
   type WorkflowPipelineDef,
@@ -240,6 +241,144 @@ export class WorkflowExecutor {
     }
   }
 
+  /**
+   * Resolve the handoffs directory on disk:
+   *   <agent-system-base>/sprints/handoffs
+   * Falls back to `<cwd>/.agent-studio/sprints/handoffs` if no agent system
+   * is configured. Creates the directory if missing.
+   * Returns null if the directory cannot be created.
+   */
+  private resolveHandoffsDir(workflowDef: WorkflowPipelineDef): string | null {
+    const base = getAgentSystemBase();
+    const dir = base
+      ? join(base, "sprints", "handoffs")
+      : join(workflowDef.workingDirectory, ".agent-studio", "sprints", "handoffs");
+    try {
+      if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+      return dir;
+    } catch (err) {
+      console.warn("[workflow-executor] Could not create handoffs dir:", err);
+      return null;
+    }
+  }
+
+  /**
+   * Write (or reuse, on resume) the input handoff for a step.
+   * Shape: { stepId, goal, agent, priorStepOutput?: { stepId, ref } }
+   */
+  private writeHandoffInput(
+    stepDef: AgentStepDef,
+    workflowDef: WorkflowPipelineDef,
+    runState: RunState,
+  ): string | null {
+    const dir = this.resolveHandoffsDir(workflowDef);
+    if (!dir) return null;
+    const file = join(dir, `${stepDef.id}_input.json`);
+    if (existsSync(file)) return file; // reuse on resume
+
+    // Find the previous agent step's output file as the prior reference
+    const stepIndex = workflowDef.steps.findIndex((s) => s.id === stepDef.id);
+    let priorStepOutput: { stepId: string; ref: string } | undefined;
+    for (let i = stepIndex - 1; i >= 0; i--) {
+      const prev = workflowDef.steps[i];
+      if (prev.type === "agent") {
+        const prevRef = join(dir, `${prev.id}_output.json`);
+        priorStepOutput = { stepId: prev.id, ref: prevRef };
+        break;
+      }
+    }
+
+    const payload: Record<string, unknown> = {
+      stepId: stepDef.id,
+      runId: runState.runId,
+      workflowId: runState.workflowId,
+      agent: stepDef.agent,
+      goal: stepDef.goal,
+      ...(priorStepOutput ? { priorStepOutput } : {}),
+    };
+    try {
+      writeFileSync(file, JSON.stringify(payload, null, 2) + "\n", "utf-8");
+    } catch (err) {
+      console.warn("[workflow-executor] Could not write handoff input:", err);
+      return null;
+    }
+    return file;
+  }
+
+  /** Write the output handoff for a step. */
+  private writeHandoffOutput(
+    stepDef: AgentStepDef,
+    workflowDef: WorkflowPipelineDef,
+    runState: RunState,
+    stepState: StepState,
+  ): void {
+    const dir = this.resolveHandoffsDir(workflowDef);
+    if (!dir) return;
+    const file = join(dir, `${stepDef.id}_output.json`);
+    const payload: Record<string, unknown> = {
+      stepId: stepDef.id,
+      runId: runState.runId,
+      workflowId: runState.workflowId,
+      agent: stepDef.agent,
+      status: stepState.status,
+      completedAt: stepState.completedAt ?? new Date().toISOString(),
+      output: stepState.output ?? null,
+      tokenUsage: stepState.tokenUsage ?? null,
+    };
+    try {
+      writeFileSync(file, JSON.stringify(payload, null, 2) + "\n", "utf-8");
+    } catch (err) {
+      console.warn("[workflow-executor] Could not write handoff output:", err);
+    }
+  }
+
+  /**
+   * Test-only fast path: noop runtime.
+   * Reads handoff input (smoke check), writes canned output, marks step
+   * complete, emits step-completed. No subprocess is spawned.
+   */
+  private async executeNoopStep(
+    runState: RunState,
+    stepDef: AgentStepDef,
+    workflowDef: WorkflowPipelineDef,
+  ): Promise<void> {
+    const stepState = runState.steps[stepDef.id];
+    stepState.status = "running";
+    stepState.startedAt = new Date().toISOString();
+    saveRunState(runState);
+    this.emit({
+      type: "step-started",
+      runId: runState.runId,
+      workflowId: runState.workflowId,
+      stepId: stepDef.id,
+    });
+
+    // Smoke-check input file
+    const dir = this.resolveHandoffsDir(workflowDef);
+    const inputFile = dir ? join(dir, `${stepDef.id}_input.json`) : null;
+    if (inputFile && existsSync(inputFile)) {
+      try {
+        readFileSync(inputFile, "utf-8");
+      } catch {
+        /* ignore */
+      }
+    }
+
+    stepState.output = `test-noop output for ${stepDef.id}`;
+    stepState.status = "completed";
+    stepState.completedAt = new Date().toISOString();
+    saveRunState(runState);
+
+    this.writeHandoffOutput(stepDef, workflowDef, runState, stepState);
+
+    this.emit({
+      type: "step-completed",
+      runId: runState.runId,
+      workflowId: runState.workflowId,
+      stepId: stepDef.id,
+    });
+  }
+
   /** Execute a single agent step */
   async executeAgentStep(
     runState: RunState,
@@ -248,6 +387,15 @@ export class WorkflowExecutor {
     signal: AbortSignal,
   ): Promise<void> {
     const stepState = runState.steps[stepDef.id];
+
+    // Always write the input handoff before any runtime dispatch.
+    this.writeHandoffInput(stepDef, workflowDef, runState);
+
+    // Noop runtime: deterministic completion for sprint verification.
+    if (stepDef.runtime === "noop") {
+      await this.executeNoopStep(runState, stepDef, workflowDef);
+      return;
+    }
 
     // --- Budget check before execution (Task 20) ---
     const effectiveBudgetCap = runState.budgetCapUsd ?? workflowDef.budgetCapUsd;
@@ -358,6 +506,7 @@ export class WorkflowExecutor {
         stepState.completedAt = new Date().toISOString();
         if (stepDef.output) stepState.output = stepDef.output;
         saveRunState(runState);
+        this.writeHandoffOutput(stepDef, workflowDef, runState, stepState);
         this.emit({
           type: "step-completed",
           runId: runState.runId,

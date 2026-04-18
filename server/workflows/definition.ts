@@ -46,6 +46,16 @@ export interface AgentStepDef {
   watchFile?: string;
   /** Max budget for this individual step in USD */
   stepBudgetCapUsd?: number;
+  /**
+   * Dispatch runtime for this step.
+   * - "cli" (default): spawn `claude` CLI via CommandRunner.
+   * - "sdk": reserved for SDK-backed dispatch (future).
+   * - "pty": reserved for PTY-backed dispatch (future).
+   * - "noop": test affordance — writes canned handoff output and completes
+   *   immediately without spawning any process. Used by sprint verification
+   *   harness; not production surface.
+   */
+  runtime?: "cli" | "sdk" | "pty" | "noop";
 }
 
 export interface GateStepDef {

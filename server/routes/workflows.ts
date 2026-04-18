@@ -43,9 +43,33 @@ export function workflowRoutes(deps: WorkflowRouteDeps): Router {
       "run-paused": "workflow-step-update",
       "budget-exceeded": "workflow-run-failed",
     };
+    // Map internal executor events to public step-status values the UI expects.
+    const statusMap: Record<string, string> = {
+      "step-started": "running",
+      "step-completed": "completed",
+      "step-failed": "failed",
+      "run-paused": "paused",
+    };
     const wsType = typeMap[event.type];
     if (wsType) {
-      broadcast(wss, { type: wsType, payload: event } satisfies WsMessage);
+      // For step-update events, include {runId, stepId, status} at the payload
+      // root (per S1 verify contract) while keeping the full event for
+      // backward-compatible consumers.
+      if (wsType === "workflow-step-update") {
+        const status = statusMap[event.type];
+        broadcast(wss, {
+          type: wsType,
+          payload: {
+            runId: event.runId,
+            workflowId: event.workflowId,
+            stepId: event.stepId,
+            status,
+            data: event.data,
+          },
+        } satisfies WsMessage);
+      } else {
+        broadcast(wss, { type: wsType, payload: event } satisfies WsMessage);
+      }
     }
 
     // Gate notifications: Mac notification via node-notifier
