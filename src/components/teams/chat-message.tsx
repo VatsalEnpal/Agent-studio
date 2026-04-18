@@ -429,16 +429,29 @@ export function StreamingMessage({ agentId, text }: { agentId: string; text: str
 }
 
 function highlightMentions(text: string): React.ReactNode {
+  // Leading @mention (anchored) = the routed target; render with a stronger
+  // highlight so users can see who the message was dispatched to.
+  const leading = text.match(/^@([a-z0-9][a-z0-9_-]*)\b/i);
   const parts = text.split(/(@\w+)/g);
-  return parts.map((part, i) =>
-    part.startsWith("@") ? (
-      <span key={i} className="text-rooms font-semibold">
+  let leadingConsumed = false;
+  return parts.map((part, i) => {
+    if (!part.startsWith("@")) return part;
+    const isLeadingTarget =
+      !leadingConsumed && leading !== null && part.toLowerCase() === `@${leading[1].toLowerCase()}`;
+    if (isLeadingTarget) leadingConsumed = true;
+    return (
+      <span
+        key={i}
+        className={
+          isLeadingTarget
+            ? "text-rooms font-semibold bg-rooms/15 px-1 rounded mention mention-target"
+            : "text-rooms font-semibold mention"
+        }
+      >
         {part}
       </span>
-    ) : (
-      part
-    ),
-  );
+    );
+  });
 }
 
 function formatTimestamp(iso: string): string {

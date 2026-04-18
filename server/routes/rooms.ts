@@ -370,9 +370,31 @@ You are a teammate on Slack, not an assistant writing a report.
           protocol.resume();
         }
         agentTurnCounts.set(roomId, 0); // Reset turn counter on human input
-        // Route to the first agent in the room (no hardcoded orchestrator dependency)
-        const targetAgent = room.agents[0]?.id ?? "orchestrator";
-        protocol.humanMessage(text, targetAgent);
+
+        // Leading @mention parser: if the message begins with @<slug>,
+        // route directly to that agent and skip the orchestrator fan-out.
+        // Anchored at ^ so mid-body emails (user@host.com) don't match.
+        // Only the FIRST leading mention routes; any additional @tokens
+        // remain in the prompt body delivered to the target agent.
+        const leadingMention = text.match(/^@([a-z0-9][a-z0-9_-]*)\b/i);
+        let routed = false;
+        if (leadingMention) {
+          const slug = leadingMention[1].toLowerCase();
+          const matched = room.agents.find((a) => a.id.toLowerCase() === slug);
+          if (matched) {
+            // Reuses the existing SdkSession for this agent — no new session
+            // is created per @-mention (onInvoke lazy-spawns if absent).
+            protocol.routeHumanMessageTo(matched.id, text);
+            routed = true;
+          }
+          // Unknown slug: silent fallthrough to orchestrator below
+        }
+
+        if (!routed) {
+          // Route to the first agent in the room (no hardcoded orchestrator dependency)
+          const targetAgent = room.agents[0]?.id ?? "orchestrator";
+          protocol.humanMessage(text, targetAgent);
+        }
       }
 
       res.status(201).json(msg);
