@@ -230,15 +230,9 @@ function SettingsAgentsDiscovery() {
   }
 
   const refreshConfigAndAgents = useCallback(async () => {
+    // invalidateConfigCache() now re-fetches /api/config AND notifies every
+    // useConfig() consumer via pub/sub, so the Sources list updates in place.
     invalidateConfigCache();
-    // Re-fetch /api/config so useConfig consumers see the new agentSources list.
-    try {
-      await fetch("/api/config")
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null);
-    } catch {
-      // ignore — useConfig will retry on its own next mount
-    }
     loadAgents(true);
   }, [loadAgents]);
 
