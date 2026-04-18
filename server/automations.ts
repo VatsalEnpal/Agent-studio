@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { register as pollerRegister, unregister as pollerUnregister } from "./services/poller.js";
 
 // ---------- Types ----------
 
@@ -162,9 +163,14 @@ type EventListener = (event: { type: string; payload: unknown }) => void;
 export class AutomationEngine {
   private automations: Automation[] = [];
   private reports: AutomationReport[] = [];
-  private timers = new Map<string, NodeJS.Timeout>();
+  /** Set of automation ids currently registered with the poller. */
+  private registered = new Set<string>();
   private listeners = new Set<EventListener>();
   private cwd: string;
+
+  private pollerKey(id: string): string {
+    return `automations.${id}`;
+  }
 
   constructor(cwd?: string) {
     this.cwd = cwd ?? process.cwd();
@@ -296,7 +302,7 @@ export class AutomationEngine {
 
   /** Stop all timers */
   stopAll(): void {
-    for (const [id] of this.timers) {
+    for (const id of [...this.registered]) {
       this.clearTimer(id);
     }
   }
@@ -315,18 +321,16 @@ export class AutomationEngine {
     // Calculate next run
     auto.nextRun = new Date(Date.now() + intervalMs).toISOString();
 
-    const timer = setInterval(() => {
-      void this.executeAutomation(auto);
-    }, intervalMs);
-
-    this.timers.set(auto.id, timer);
+    // Route through the unified poller so this automation shows up in
+    // /api/debug/poller-stats under the `automations.<id>` key (plan task 3b).
+    pollerRegister(this.pollerKey(auto.id), intervalMs, () => this.executeAutomation(auto));
+    this.registered.add(auto.id);
   }
 
   private clearTimer(id: string): void {
-    const timer = this.timers.get(id);
-    if (timer) {
-      clearInterval(timer);
-      this.timers.delete(id);
+    if (this.registered.has(id)) {
+      pollerUnregister(this.pollerKey(id));
+      this.registered.delete(id);
     }
   }
 
