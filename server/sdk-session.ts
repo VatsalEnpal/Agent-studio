@@ -9,50 +9,59 @@ import { join } from "node:path";
 // ---------------------------------------------------------------------------
 // Claude CLI path resolution.
 //
-// The SDK spawns a Node subprocess from `pathToClaudeCodeExecutable`; it
-// expects a JavaScript entrypoint (e.g. `cli.js`), NOT a native binary.
-// Passing a native Mach-O/ELF binary makes Node fail with a parse error
-// ("Claude Code native binary not found at ...").
+// The SDK spawns `pathToClaudeCodeExecutable` as the Claude Code process.
+// The `@anthropic-ai/claude-code` npm package declares `"bin": {"claude":
+// "bin/claude.exe"}` — despite the `.exe` extension, on macOS/Linux this
+// file is a platform-native executable (Mach-O arm64 / ELF x86_64) that
+// the SDK is built to invoke directly. That is the canonical target.
 //
-// Resolution order (R1b fix):
-//   1) CLAUDE_PATH env override — only honor it if it looks like a .js file.
-//   2) @anthropic-ai/claude-code's bundled cli.js (if present — older v1.x
-//      packages shipped it).
-//   3) @anthropic-ai/claude-agent-sdk's own bundled cli.js — the SDK's
-//      default fallback, which is what it uses when no path is passed.
-//      We return it explicitly so the path is visible in logs.
-//   4) If nothing is found, return null and let the SDK use its built-in
-//      default (same as option 3, but without our explicit detection).
+// Resolution order (R1b attempt 3):
+//   1) CLAUDE_PATH env override — honored as-is if the file exists.
+//   2) node_modules/@anthropic-ai/claude-code/bin/claude.exe — the npm
+//      package's native binary. Added as a direct dep in ab9ba8d, so this
+//      should always be present after `npm install`.
+//   3) node_modules/@anthropic-ai/claude-code/cli-wrapper.cjs — a Node
+//      fallback launcher shipped by the same package.
+//   4) null — let the SDK use its own built-in default resolution.
 //
-// We deliberately do NOT fall through to a native `claude` binary
-// (~/.local/bin/claude, /opt/homebrew/bin/claude etc.) — those are native
-// installer binaries that the SDK cannot execute as a Node script.
+// Previous attempts that failed and why:
+//   - Passing `~/.local/bin/claude` (a system-installed native binary):
+//     SDK rejected with "native binary not found" (the file is likely a
+//     symlink that fails an internal signature check).
+//   - Passing `node_modules/@anthropic-ai/claude-agent-sdk/cli.js`: SDK
+//     rejected with "Claude Code executable not found" — the SDK wants
+//     the claude-code package's binary, not its own cli.js.
 // ---------------------------------------------------------------------------
 
 function resolveClaudeCliPath(): string | null {
-  // 1) Explicit env override — only if it's a .js file the SDK can execute
+  // 1) Explicit env override — trust the user
   const envPath = process.env["CLAUDE_PATH"];
-  if (envPath && existsSync(envPath) && envPath.endsWith(".js")) {
+  if (envPath && existsSync(envPath)) {
     return envPath;
   }
 
-  // 2) @anthropic-ai/claude-code/cli.js (installed as production dep)
-  const claudeCodeCli = join(
+  // 2) npm-installed claude-code native binary (the SDK's expected target)
+  const claudeCodeBin = join(
     process.cwd(),
     "node_modules",
     "@anthropic-ai",
     "claude-code",
-    "cli.js",
+    "bin",
+    "claude.exe",
   );
-  if (existsSync(claudeCodeCli)) return claudeCodeCli;
+  if (existsSync(claudeCodeBin)) return claudeCodeBin;
 
-  // 3) @anthropic-ai/claude-agent-sdk/cli.js (the SDK's bundled CLI — always
-  //    present because `@anthropic-ai/claude-agent-sdk` is a direct dep).
-  const sdkCli = join(process.cwd(), "node_modules", "@anthropic-ai", "claude-agent-sdk", "cli.js");
-  if (existsSync(sdkCli)) return sdkCli;
+  // 3) claude-code's Node-based wrapper as fallback
+  const claudeCodeWrapper = join(
+    process.cwd(),
+    "node_modules",
+    "@anthropic-ai",
+    "claude-code",
+    "cli-wrapper.cjs",
+  );
+  if (existsSync(claudeCodeWrapper)) return claudeCodeWrapper;
 
-  // 4) Nothing found — let the SDK use its own default (same as step 3
-  //    resolved relative to the SDK's import.meta.url).
+  // 4) Nothing found — let the SDK use its own built-in default.
   return null;
 }
 
