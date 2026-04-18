@@ -2,6 +2,17 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, sep } from "node:path";
 import os from "node:os";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
+import { ttlCache } from "./services/ttl-cache.js";
+
+const execAsync = promisify(exec);
+
+/** 60s TTL per ShipLoop plan task 4. Per-repo-path cache of tracked branches. */
+const BRANCH_LIST_TTL_MS = 60_000;
+const branchListCache = ttlCache<string[]>(BRANCH_LIST_TTL_MS);
+/** Tracks in-flight async refreshes so we don't spawn duplicate `git branch` processes. */
+const branchListInFlight = new Set<string>();
 
 // ---------- Schema ----------
 
@@ -292,27 +303,53 @@ export function generateDefaultConfig(): AgentStudioConfig {
 
 // ---------- Helpers ----------
 
+/**
+ * Returns tracked branches for a repo path with a 60s TTL cache.
+ *
+ * Per ShipLoop plan task 4: we must not block startup on `git branch --list`.
+ * The git shellout is issued asynchronously — the first call returns the
+ * default `["main"]` immediately and schedules a background refresh that
+ * populates the cache. Subsequent calls (within TTL) return the full branch
+ * list. If the filesystem or git hangs, `execAsync`'s 3s timeout kicks in
+ * and we fall through to the cached default without blocking the event loop.
+ */
 function detectTrackedBranches(repoPath: string): string[] {
-  const branches = ["main"];
-  try {
-    const { execSync } = require("node:child_process") as typeof import("node:child_process");
-    const raw = execSync("git branch --list --format='%(refname:short)'", {
-      cwd: repoPath,
-      encoding: "utf-8",
-      timeout: 3000,
-    }).trim();
-    const all = raw
-      .split("\n")
-      .map((b: string) => b.trim().replace(/^'|'$/g, ""))
-      .filter(Boolean);
-    // Include all local branches
-    for (const name of all) {
-      if (!branches.includes(name)) branches.push(name);
-    }
-  } catch {
-    // fallback: just main
+  const cached = branchListCache.get(repoPath);
+  if (cached !== undefined) return cached;
+
+  const fallback = ["main"];
+
+  // Kick off async refresh exactly once per repo path until it completes.
+  if (!branchListInFlight.has(repoPath)) {
+    branchListInFlight.add(repoPath);
+    void (async () => {
+      try {
+        const { stdout } = await execAsync("git branch --list --format='%(refname:short)'", {
+          cwd: repoPath,
+          encoding: "utf-8",
+          timeout: 3000,
+        });
+        const all = stdout
+          .toString()
+          .trim()
+          .split("\n")
+          .map((b) => b.trim().replace(/^'|'$/g, ""))
+          .filter(Boolean);
+        const branches = ["main"];
+        for (const name of all) {
+          if (!branches.includes(name)) branches.push(name);
+        }
+        branchListCache.set(repoPath, branches);
+      } catch {
+        // Keep the fallback in cache so we don't re-issue every call within TTL.
+        branchListCache.set(repoPath, fallback);
+      } finally {
+        branchListInFlight.delete(repoPath);
+      }
+    })();
   }
-  return branches;
+
+  return fallback;
 }
 
 // ---------- Resolvers (used by other server modules) ----------

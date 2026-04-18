@@ -56,9 +56,9 @@ export function systemRoutes(
   const PMO_SCAN_SCRIPT = getAgentSystemPath("tools/pmo-scan.sh") ?? "";
 
   // Process discovery
-  router.get("/processes", (_req, res) => {
+  router.get("/processes", async (_req, res) => {
     try {
-      const processes = discoverClaudeProcesses();
+      const processes = await discoverClaudeProcesses();
       res.json(processes);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
