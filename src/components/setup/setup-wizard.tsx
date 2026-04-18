@@ -42,6 +42,19 @@ interface AgentSystemState {
   };
 }
 
+/**
+ * UI-only shape for the "Where are your agents?" step. `scopeKind` is the
+ * radio-group selection; `scopeProject` is the selected project path when
+ * `scopeKind === "project"`. Before sending to the server these collapse
+ * back to `AgentSourceConfig` (`scope: "global" | { project: string }`).
+ */
+interface AgentSourceEntry {
+  path: string;
+  label: string;
+  scopeKind: "global" | "project";
+  scopeProject: string;
+}
+
 interface GeneratedAgentDef {
   id: string;
   name: string;
@@ -83,7 +96,7 @@ const AVAILABLE_AGENTS = [
 type WorkflowType = "sprint" | "simple" | "custom";
 
 function getAllSteps(agentSystem: AgentSystemState) {
-  const base = ["Welcome", "Projects", "Agent System", "Preferences"] as const;
+  const base = ["Welcome", "Projects", "Agent System", "Agent Sources", "Preferences"] as const;
   if (agentSystem.enabled && agentSystem.createNew) {
     return [
       ...base.slice(0, 3),
@@ -112,6 +125,13 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
     path: "",
     found: { memoryIndex: false, currentSprint: false, scanLog: false, memoryCount: 0 },
   });
+
+  // Step "Agent Sources": directories the backend should scan for agent .md files.
+  // Seeded from the config GET response; users can add/remove/edit rows here.
+  // Tracks whether the user has manually touched the list so that project edits
+  // on the Projects step can still reseed defaults until then.
+  const [agentSources, setAgentSources] = useState<AgentSourceEntry[]>([]);
+  const [agentSourcesDirty, setAgentSourcesDirty] = useState(false);
 
   // Step 4 (conditional): Agent Team
   const [selectedAgents, setSelectedAgents] = useState<string[]>(
@@ -209,6 +229,8 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
         if (data.config?.projects?.length) {
           setProjects(data.config.projects);
         }
+        // Note: `agentSources` defaults are recomputed from `projects` in an
+        // effect below, so we don't hydrate them from the server here.
 
         if (data.config?.agentSystem) {
           setAgentSystem((prev) => ({
@@ -344,6 +366,28 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
     }
   }, [projects, scanResult, projectDescription, teamSize]);
 
+  // Seed / reseed agentSources from the current projects list while the user
+  // hasn't manually touched the Agent Sources step. This keeps the "Where are
+  // your agents?" defaults in sync as projects are added on step 2.
+  useEffect(() => {
+    if (agentSourcesDirty) return;
+    const defaults: AgentSourceEntry[] = [
+      {
+        path: "~/.claude/agents",
+        label: "User agents",
+        scopeKind: "global",
+        scopeProject: "",
+      },
+      ...projects.map((p) => ({
+        path: `${p.path.replace(/\/$/, "")}/.claude/agents`,
+        label: p.name,
+        scopeKind: "project" as const,
+        scopeProject: p.path,
+      })),
+    ];
+    setAgentSources(defaults);
+  }, [projects, agentSourcesDirty]);
+
   // Validate agent system path
   useEffect(() => {
     if (!agentSystem.enabled || !agentSystem.path || agentSystem.createNew) {
@@ -459,6 +503,24 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
           workingDirectory:
             projects[0]?.path?.replace(new RegExp(`^${await getHomeDir()}`), "~") ?? "~",
         },
+        // Persist user's agent-source directories as-is; `~` is kept unexpanded
+        // on disk so the file stays portable across machines. Backend resolves
+        // `~` on read via `getAgentSources`.
+        agentSources: agentSources
+          .map((s) => {
+            const path = s.path.trim();
+            if (!path) return null;
+            const scope =
+              s.scopeKind === "project" && s.scopeProject
+                ? { project: s.scopeProject }
+                : ("global" as const);
+            const label = s.label.trim();
+            return label ? { path, scope, label } : { path, scope };
+          })
+          .filter(
+            (s): s is { path: string; scope: "global" | { project: string }; label?: string } =>
+              s !== null,
+          ),
         setupComplete: true,
         version: "1.0.0",
       };
@@ -490,11 +552,21 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
     onComplete,
     useAiAgents,
     aiGen.agents,
+    aiGen.claudeMd,
+    agentSources,
   ]);
 
   const canAdvance = (): boolean => {
     const currentStep = STEPS[step];
     if (currentStep === "Projects") return projects.length > 0;
+    if (currentStep === "Agent Sources") {
+      // Every row must have a non-empty path; project-scope rows must have a
+      // project selected. No filesystem check — the directory may be created later.
+      if (agentSources.length === 0) return false;
+      return agentSources.every(
+        (s) => s.path.trim() !== "" && (s.scopeKind === "global" || s.scopeProject.trim() !== ""),
+      );
+    }
     if (currentStep === "Agent Team") return selectedAgents.length > 0;
     return true;
   };
@@ -638,6 +710,16 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
                   setAutoSuggestionsLoading(false);
                 }
               }}
+            />
+          )}
+          {currentStep === "Agent Sources" && (
+            <AgentSourcesStep
+              agentSources={agentSources}
+              setAgentSources={(updater) => {
+                setAgentSourcesDirty(true);
+                setAgentSources(updater);
+              }}
+              projects={projects}
             />
           )}
           {currentStep === "Preferences" && (
@@ -1106,6 +1188,125 @@ function AgentSystemStep({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function AgentSourcesStep({
+  agentSources,
+  setAgentSources,
+  projects,
+}: {
+  agentSources: AgentSourceEntry[];
+  setAgentSources: (updater: (prev: AgentSourceEntry[]) => AgentSourceEntry[]) => void;
+  projects: ProjectEntry[];
+}) {
+  const updateRow = (idx: number, patch: Partial<AgentSourceEntry>) => {
+    setAgentSources((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+  };
+  const addRow = () => {
+    setAgentSources((prev) => [
+      ...prev,
+      { path: "", label: "", scopeKind: "global", scopeProject: "" },
+    ]);
+  };
+  const removeRow = (idx: number) => {
+    setAgentSources((prev) => (prev.length <= 1 ? prev : prev.filter((_, i) => i !== idx)));
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-sm font-semibold text-text-primary mb-1">
+          <FolderIcon className="w-4 h-4 inline mr-1.5 -mt-0.5" />
+          Where are your agents?
+        </h2>
+        <p className="text-xs text-text-tertiary">
+          Agent Studio scans these folders for <code className="text-rooms">.md</code> files. Global
+          folders apply everywhere; project folders apply only when that project is active. Defaults
+          work for most people — leave as-is and continue.
+        </p>
+      </div>
+
+      <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+        {agentSources.map((row, idx) => {
+          const canRemove = agentSources.length > 1;
+          return (
+            <div
+              key={idx}
+              className="space-y-2 px-3 py-2.5 bg-bg-base border border-border-default rounded"
+            >
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={row.label}
+                  onChange={(e) => updateRow(idx, { label: e.target.value })}
+                  placeholder="Label (optional)"
+                  className="w-36 px-2 py-1.5 text-xs bg-bg-surface border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:border-rooms focus:outline-none"
+                />
+                <input
+                  type="text"
+                  value={row.path}
+                  onChange={(e) => updateRow(idx, { path: e.target.value })}
+                  placeholder="~/.claude/agents"
+                  className="flex-1 px-2 py-1.5 text-xs font-mono bg-bg-surface border border-border-default rounded text-text-primary placeholder:text-text-tertiary focus:border-rooms focus:outline-none"
+                />
+                <button
+                  onClick={() => removeRow(idx)}
+                  disabled={!canRemove}
+                  className={cn(
+                    "p-1.5 rounded transition-all",
+                    canRemove
+                      ? "text-text-tertiary hover:text-error"
+                      : "text-text-tertiary/30 cursor-not-allowed",
+                  )}
+                  aria-label="Remove source"
+                  title={canRemove ? "Remove source" : "At least one source is required"}
+                >
+                  <CloseIcon className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 pl-0.5">
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    type="radio"
+                    name={`scope-${idx}`}
+                    checked={row.scopeKind === "global"}
+                    onChange={() => updateRow(idx, { scopeKind: "global", scopeProject: "" })}
+                    className="accent-rooms"
+                  />
+                  <span className="text-2xs text-text-secondary">Global</span>
+                </label>
+                {projects.map((p) => (
+                  <label key={p.path} className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name={`scope-${idx}`}
+                      checked={row.scopeKind === "project" && row.scopeProject === p.path}
+                      onChange={() =>
+                        updateRow(idx, { scopeKind: "project", scopeProject: p.path })
+                      }
+                      className="accent-rooms"
+                    />
+                    <span className="text-2xs text-text-secondary">
+                      Project: <span className="text-text-primary">{p.name}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <button
+        onClick={addRow}
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-rooms bg-rooms/5 hover:bg-rooms/10 border border-rooms/20 hover:border-rooms/40 rounded transition-all"
+      >
+        <PlusIcon className="w-3 h-3" />
+        Add another folder
+      </button>
     </div>
   );
 }

@@ -31,6 +31,12 @@ export interface AgentStudioClientConfig {
       permissions: "bypass" | "default" | "plan" | "auto";
       workingDirectory: string;
     };
+    /** Directories scanned for agent `.md` files, with global / project scope. */
+    agentSources?: Array<{
+      path: string;
+      scope: "global" | { project: string };
+      label?: string;
+    }>;
     setupComplete: boolean;
     version: string;
   };
