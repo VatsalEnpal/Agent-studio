@@ -112,16 +112,25 @@ function parseScheduleMs(schedule: string): number | null {
   if (lower === "weekly") return 604_800_000;
   if (lower === "on-push") return null; // Event-driven, not interval
 
-  const match = lower.match(/^every\s+(\d+)\s*h$/);
-  if (match) {
-    const hours = parseInt(match[1], 10);
-    return hours * 3_600_000;
+  // "every N<unit>" where unit is h (hours), m (minutes), s (seconds).
+  // Supports optional whitespace between number and unit.
+  const everyMatch = lower.match(/^every\s+(\d+)\s*(h|m|s)$/);
+  if (everyMatch) {
+    const n = parseInt(everyMatch[1], 10);
+    const unit = everyMatch[2];
+    if (unit === "h") return n * 3_600_000;
+    if (unit === "m") return n * 60_000;
+    if (unit === "s") return n * 1_000;
   }
 
-  // Fallback: try parsing as hours
-  const numMatch = lower.match(/^(\d+)\s*h$/);
-  if (numMatch) {
-    return parseInt(numMatch[1], 10) * 3_600_000;
+  // Fallback: bare "<N><unit>" (e.g. "2h", "5m", "30s")
+  const bareMatch = lower.match(/^(\d+)\s*(h|m|s)$/);
+  if (bareMatch) {
+    const n = parseInt(bareMatch[1], 10);
+    const unit = bareMatch[2];
+    if (unit === "h") return n * 3_600_000;
+    if (unit === "m") return n * 60_000;
+    if (unit === "s") return n * 1_000;
   }
 
   return null;
