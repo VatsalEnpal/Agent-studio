@@ -40,7 +40,17 @@ function resolveClaudeCliPath(): string | null {
     return envPath;
   }
 
-  // 2) npm-installed claude-code native binary (the SDK's expected target)
+  // 2a) claude-code v1.x cli.js — JS entry the SDK can invoke as Node
+  const claudeCodeCliJs = join(
+    process.cwd(),
+    "node_modules",
+    "@anthropic-ai",
+    "claude-code",
+    "cli.js",
+  );
+  if (existsSync(claudeCodeCliJs)) return claudeCodeCliJs;
+
+  // 2b) claude-code v2.x native binary fallback
   const claudeCodeBin = join(
     process.cwd(),
     "node_modules",
