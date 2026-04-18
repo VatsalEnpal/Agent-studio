@@ -1,14 +1,17 @@
 /**
- * Workflow scheduler — manages cron/interval triggers.
+ * Workflow scheduler — manages interval triggers for workflows.
  *
- * Uses setInterval (not node-cron) for simplicity.
- * Persists schedules to disk, restores on server start.
+ * Routes recurring triggers through the unified poller service so every
+ * background timer in the app is observable via /api/debug/poller-stats.
+ * Persists schedules to disk and restores them on server start.
+ *
+ * Poller key pattern: `workflow-scheduler.<workflowId>` (plan task 3c).
  */
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { parseInterval, type ScheduledTrigger } from "./definition.js";
-import type { WorkflowPipelineDef } from "./definition.js";
+import { register as pollerRegister, unregister as pollerUnregister } from "../services/poller.js";
 
 // ---------- Types ----------
 
@@ -26,7 +29,8 @@ export type SchedulerRunCallback = (workflowId: string) => Promise<boolean>;
 // ---------- Scheduler ----------
 
 export class WorkflowScheduler {
-  private timers = new Map<string, ReturnType<typeof setInterval>>();
+  /** Set of workflow ids currently registered with the poller. */
+  private registered = new Set<string>();
   private schedules = new Map<string, ScheduleEntry>();
   private runCallback: SchedulerRunCallback;
   private persistPath: string;
@@ -34,6 +38,11 @@ export class WorkflowScheduler {
   constructor(runCallback: SchedulerRunCallback, persistPath = ".agent-studio/schedules.json") {
     this.runCallback = runCallback;
     this.persistPath = persistPath;
+  }
+
+  /** Poller key for a given workflow id. */
+  private pollerKey(workflowId: string): string {
+    return `workflow-scheduler.${workflowId}`;
   }
 
   /** Schedule a workflow with an interval trigger */
@@ -71,11 +80,7 @@ export class WorkflowScheduler {
 
   /** Remove schedule for a workflow */
   unschedule(workflowId: string): void {
-    const timer = this.timers.get(workflowId);
-    if (timer) {
-      clearInterval(timer);
-      this.timers.delete(workflowId);
-    }
+    this.clearTimer(workflowId);
     this.schedules.delete(workflowId);
     this.persist();
   }
@@ -86,11 +91,7 @@ export class WorkflowScheduler {
     if (!entry) return;
 
     entry.paused = true;
-    const timer = this.timers.get(workflowId);
-    if (timer) {
-      clearInterval(timer);
-      this.timers.delete(workflowId);
-    }
+    this.clearTimer(workflowId);
     this.persist();
   }
 
@@ -138,16 +139,18 @@ export class WorkflowScheduler {
 
   /** Stop all timers (for shutdown) */
   stopAll(): void {
-    for (const timer of this.timers.values()) {
-      clearInterval(timer);
+    for (const workflowId of [...this.registered]) {
+      this.clearTimer(workflowId);
     }
-    this.timers.clear();
   }
 
   // ---------- Private ----------
 
   private startTimer(workflowId: string, intervalMs: number): void {
-    const timer = setInterval(async () => {
+    // Route through the unified poller (plan task 3c). This surfaces every
+    // workflow schedule under the `workflow-scheduler.<id>` key in
+    // /api/debug/poller-stats.
+    pollerRegister(this.pollerKey(workflowId), intervalMs, async () => {
       const entry = this.schedules.get(workflowId);
       if (!entry || entry.paused) return;
 
@@ -157,11 +160,15 @@ export class WorkflowScheduler {
 
       // Run callback returns false if a run is already active (skip)
       await this.runCallback(workflowId);
-    }, intervalMs);
+    });
+    this.registered.add(workflowId);
+  }
 
-    // Don't let the timer prevent process exit
-    if (timer.unref) timer.unref();
-    this.timers.set(workflowId, timer);
+  private clearTimer(workflowId: string): void {
+    if (this.registered.has(workflowId)) {
+      pollerUnregister(this.pollerKey(workflowId));
+      this.registered.delete(workflowId);
+    }
   }
 
   private persist(): void {

@@ -41,6 +41,7 @@ import { AutomationEngine } from "./automations.js";
 import type { Automation } from "./automations.js";
 import { broadcast } from "./ws/broadcast.js";
 import { stats as pollerStats } from "./services/poller.js";
+import { startFsWatchers } from "./services/fs-watchers.js";
 import {
   initSubscriptions,
   subscribe as subscribeTopic,
@@ -256,6 +257,11 @@ async function main() {
   if (initialConfig.automations && Array.isArray(initialConfig.automations)) {
     automationEngine.loadAutomations(initialConfig.automations as Automation[]);
   }
+
+  // Start event-driven fs watchers for config + agent dirs (plan task 3c).
+  // Replaces any polling of these paths with chokidar events — target
+  // overall idle is < 30 FS ops/min (observable via /api/debug/poller-stats).
+  startFsWatchers();
 
   // Forward automation events to WebSocket clients
   automationEngine.onEvent((event) => {
