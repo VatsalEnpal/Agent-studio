@@ -21,6 +21,7 @@ import { SettingsShortcuts } from "./settings-shortcuts";
 import { SettingsAbout } from "./settings-about";
 import { SettingsNotifications } from "./settings-notifications";
 import { CreateAgentDialog } from "@/components/agents/create-agent-dialog";
+import { BrowseTemplatesDialog } from "@/components/agents/browse-templates-dialog";
 import { PlusIcon } from "@/components/ui/icons";
 
 type SettingsTab =
@@ -170,6 +171,7 @@ function SettingsAgentsDiscovery() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
+  const [browseOpen, setBrowseOpen] = useState(false);
 
   const loadAgents = useCallback(() => {
     setLoading(true);
@@ -207,13 +209,21 @@ function SettingsAgentsDiscovery() {
             </code>
           </p>
         </div>
-        <button
-          onClick={() => setCreateOpen(true)}
-          className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-accent text-bg-base rounded-[4px] hover:bg-accent/90 transition-all shrink-0"
-        >
-          <PlusIcon size={10} />
-          Create Agent
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setBrowseOpen(true)}
+            className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-bg-elevated border border-border-default text-text-secondary rounded-[4px] hover:text-text-primary hover:border-border-subtle transition-all"
+          >
+            Browse Templates
+          </button>
+          <button
+            onClick={() => setCreateOpen(true)}
+            className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-accent text-bg-base rounded-[4px] hover:bg-accent/90 transition-all"
+          >
+            <PlusIcon size={10} />
+            Create Agent
+          </button>
+        </div>
       </div>
       <div className="px-4 py-3">
         {loading ? (
@@ -254,6 +264,11 @@ function SettingsAgentsDiscovery() {
         )}
       </div>
       <CreateAgentDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={loadAgents} />
+      <BrowseTemplatesDialog
+        open={browseOpen}
+        onOpenChange={setBrowseOpen}
+        onImported={loadAgents}
+      />
     </section>
   );
 }

@@ -706,6 +706,12 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
             </div>
 
             {/* Agent */}
+            {/* TODO(task 9): when agents array is empty (no real agents
+                discovered — only the built-in "none" + fallback defaults),
+                render a first-run empty state with "Browse Templates" +
+                "Create Agent" buttons. Use <BrowseTemplatesDialog> from
+                components/agents/browse-templates-dialog.tsx and call the
+                existing refetch() after onImported so the dropdown populates. */}
             <div>
               <span className="block text-2xs font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
                 Agent

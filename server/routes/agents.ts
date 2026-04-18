@@ -266,6 +266,163 @@ export function agentsRoutes(deps: { validateProjectPath: (p: string) => string 
     }
   });
 
+  // ---------- Browse Templates (plan task A8) ----------
+  // The repo ships a curated set of agent templates under `<repo>/.claude/agents/*.md`.
+  // GET /api/agents/templates lists them; POST /api/agents/templates/import copies
+  // explicitly-selected ones into a chosen configured agentSource.
+  //
+  // Repo-root resolution: server runs from the AgentStudio repo root (process.cwd()).
+  // In packaged Electron builds cwd may be the app bundle, so we also try a few
+  // relative fallbacks from this module's location. Guarded to avoid
+  // ReferenceError under strict ESM where __dirname is undefined.
+  const resolveTemplatesDir = (): string | null => {
+    const candidates: string[] = [path.join(process.cwd(), ".claude", "agents")];
+    const here: string | undefined = typeof __dirname !== "undefined" ? __dirname : undefined;
+    if (here) {
+      candidates.push(path.resolve(here, "..", "..", ".claude", "agents"));
+      candidates.push(path.resolve(here, "..", "..", "..", ".claude", "agents"));
+    }
+    for (const c of candidates) {
+      if (fs.existsSync(c)) return c;
+    }
+    return null;
+  };
+
+  // Minimal YAML frontmatter parser — handles `key: value` and `key: "quoted"`.
+  // Leaves anything fancier (multiline, nested) as a single string.
+  const parseFrontmatter = (content: string): Record<string, string> => {
+    const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!match) return {};
+    const out: Record<string, string> = {};
+    for (const line of match[1].split(/\r?\n/)) {
+      const idx = line.indexOf(":");
+      if (idx <= 0) continue;
+      const key = line.slice(0, idx).trim();
+      let value = line.slice(idx + 1).trim();
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+      if (key) out[key] = value;
+    }
+    return out;
+  };
+
+  router.get("/templates", (_req, res) => {
+    try {
+      const dir = resolveTemplatesDir();
+      if (!dir) {
+        res.json([]);
+        return;
+      }
+      const files = fs
+        .readdirSync(dir)
+        .filter((f) => f.endsWith(".md"))
+        .sort();
+      const out: Array<{
+        filename: string;
+        name: string;
+        description: string;
+        model?: string;
+      }> = [];
+      for (const filename of files) {
+        try {
+          const content = fs.readFileSync(path.join(dir, filename), "utf-8");
+          const fm = parseFrontmatter(content);
+          out.push({
+            filename,
+            name: fm.name || path.basename(filename, ".md"),
+            description: fm.description || "",
+            ...(fm.model ? { model: fm.model } : {}),
+          });
+        } catch {
+          // Skip unreadable files — stay lenient.
+        }
+      }
+      res.json(out);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // Safe filename pattern: must match a .md file with no path separators or `..`.
+  const FILENAME_RE = /^[a-zA-Z0-9][a-zA-Z0-9_-]*\.md$/;
+
+  router.post("/templates/import", (req, res) => {
+    try {
+      const body = req.body as { filenames?: unknown; targetSourcePath?: unknown };
+      const filenames = body.filenames;
+      const targetRaw = typeof body.targetSourcePath === "string" ? body.targetSourcePath : "";
+
+      if (!Array.isArray(filenames) || filenames.length === 0) {
+        res.status(400).json({ error: "filenames must be a non-empty array" });
+        return;
+      }
+      for (const f of filenames) {
+        if (typeof f !== "string" || !FILENAME_RE.test(f)) {
+          res.status(400).json({ error: `Invalid filename: ${String(f)}` });
+          return;
+        }
+      }
+      if (!targetRaw) {
+        res.status(400).json({ error: "targetSourcePath is required" });
+        return;
+      }
+
+      const config = getConfig();
+      const sources = getAgentSources(config);
+      const targetResolved = resolvePath(targetRaw);
+      const matchedSource = sources.find((s) => s.path === targetResolved);
+      if (!matchedSource) {
+        res.status(400).json({
+          error: "targetSourcePath must match one of the configured agentSources",
+        });
+        return;
+      }
+
+      const templatesDir = resolveTemplatesDir();
+      if (!templatesDir) {
+        res.status(500).json({ error: "Templates directory not found on server" });
+        return;
+      }
+
+      const targetDir = matchedSource.path;
+      fs.mkdirSync(targetDir, { recursive: true });
+
+      const imported: string[] = [];
+      const skipped: string[] = [];
+      for (const filename of filenames as string[]) {
+        const srcFile = path.join(templatesDir, filename);
+        const dstFile = path.join(targetDir, filename);
+        if (!fs.existsSync(srcFile)) {
+          skipped.push(filename);
+          continue;
+        }
+        if (fs.existsSync(dstFile)) {
+          // Never overwrite — report as skipped.
+          skipped.push(filename);
+          continue;
+        }
+        try {
+          // COPYFILE_EXCL guards against a race between the existsSync check
+          // and the write.
+          fs.copyFileSync(srcFile, dstFile, fs.constants.COPYFILE_EXCL);
+          imported.push(filename);
+        } catch {
+          skipped.push(filename);
+        }
+      }
+
+      res.json({ ok: true, imported, skipped });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      res.status(500).json({ error: message });
+    }
+  });
+
   // CLI status check
   router.get("/cli-status", (req, res) => {
     try {
