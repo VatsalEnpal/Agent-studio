@@ -221,6 +221,7 @@ export function SessionLauncher({ open, onOpenChange, onLaunch }: SessionLaunche
   }, [defaultCwdLoaded]);
 
   useEffect(() => {
+    if (!open) return;
     void (async () => {
       try {
         const res = await fetch("/api/agents");
@@ -234,7 +235,7 @@ export function SessionLauncher({ open, onOpenChange, onLaunch }: SessionLaunche
         console.error("Caught error:", e);
       }
     })();
-  }, []);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
