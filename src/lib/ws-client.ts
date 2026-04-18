@@ -2,12 +2,14 @@ import type { WsMessage } from "./types";
 
 type MessageHandler = (msg: WsMessage) => void;
 
-export type ConnectionState =
-  | "connecting"
-  | "connected"
-  | "disconnected"
-  | "reconnecting";
+export type ConnectionState = "connecting" | "connected" | "disconnected" | "reconnecting";
 type ConnectionHandler = (state: ConnectionState) => void;
+
+/**
+ * Grammar for topic strings recognised by the server. Keep in sync with
+ * server/ws/subscriptions.ts → TOPIC_RE.
+ */
+const TOPIC_RE = /^(?:(?:terminal|room|sprint):[A-Za-z0-9_-]+|global)$/;
 
 class WsClient {
   private ws: WebSocket | null = null;
@@ -20,6 +22,12 @@ class WsClient {
   private connectionState: ConnectionState = "disconnected";
   private connectionHandlers = new Set<ConnectionHandler>();
   private reconnectAttempts = 0;
+  /**
+   * Topics this client wants to stay subscribed to. Kept across
+   * reconnects so a transient disconnect doesn't silently drop
+   * room/sprint/terminal feeds.
+   */
+  private desiredTopics = new Set<string>();
 
   private setConnectionState(state: ConnectionState): void {
     this.connectionState = state;
@@ -75,6 +83,14 @@ class WsClient {
       this.reconnectAttempts = 0;
       this.setConnectionState("connected");
 
+      // Replay desired topic subscriptions. Server defaults every new
+      // connection to `global`, so we only need to re-send explicit ones.
+      for (const topic of this.desiredTopics) {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+          this.ws.send(JSON.stringify({ op: "subscribe", topic }));
+        }
+      }
+
       // Flush pending messages
       for (const raw of this.pendingMessages) {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
@@ -103,10 +119,7 @@ class WsClient {
       if (!this.intentionalClose && this.url) {
         this.reconnectAttempts++;
         this.setConnectionState("reconnecting");
-        const delay = Math.min(
-          2000 * Math.pow(1.5, this.reconnectAttempts - 1),
-          15000,
-        );
+        const delay = Math.min(2000 * Math.pow(1.5, this.reconnectAttempts - 1), 15000);
         this.reconnectTimer = setTimeout(() => {
           this.createConnection();
         }, delay);
@@ -145,6 +158,42 @@ class WsClient {
         }
       }
     };
+  }
+
+  /**
+   * Subscribe this connection to a server topic (e.g. `room:abc`,
+   * `sprint:run-123`, `terminal:sess-1`). The server filters outgoing
+   * frames so only subscribed clients receive topic-scoped events.
+   * `global` is already subscribed server-side by default — don't send it.
+   *
+   * The topic is remembered and replayed on reconnect.
+   * Returns a cleanup function that unsubscribes.
+   */
+  subscribeTopic(topic: string): () => void {
+    if (!TOPIC_RE.test(topic)) {
+      console.warn(`[ws-client] refusing to subscribe to invalid topic: ${topic}`);
+      return () => {};
+    }
+    this.desiredTopics.add(topic);
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ op: "subscribe", topic }));
+    }
+    // Cleanup unsubscribes — safe to call multiple times
+    let released = false;
+    return () => {
+      if (released) return;
+      released = true;
+      this.unsubscribeTopic(topic);
+    };
+  }
+
+  /** Unsubscribe from a server topic. Also removes from reconnect replay. */
+  unsubscribeTopic(topic: string): void {
+    if (!TOPIC_RE.test(topic)) return;
+    this.desiredTopics.delete(topic);
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ op: "unsubscribe", topic }));
+    }
   }
 
   disconnect(): void {

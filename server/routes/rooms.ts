@@ -3,9 +3,9 @@ import { Router } from "express";
 import type { RoomManager } from "../rooms.js";
 import type { SdkSessionManager, SdkSessionCallbacks } from "../sdk-session.js";
 import { getMainProjectDir } from "../config.js";
-import type { WebSocket } from "ws";
 import type { WebSocketServer } from "ws";
 import { ConversationProtocol, parseMentions } from "../managers/conversation-protocol.js";
+import { broadcast as wsBroadcast } from "../ws/broadcast.js";
 
 export function roomsRoutes(
   roomManager: RoomManager,
@@ -14,15 +14,11 @@ export function roomsRoutes(
 ): Router {
   const router = Router();
 
-  // Helper: broadcast a WebSocket message to all clients
+  // Helper: broadcast a WebSocket message through the topic-aware fan-out.
+  // Room-* events are routed to `room:<roomId>`; if the payload lacks
+  // `roomId`, they fall through to `global`.
   function broadcast(type: string, payload: unknown): void {
-    const msg = JSON.stringify({ type, payload });
-    for (const client of wss.clients) {
-      if ((client as WebSocket).readyState === 1) {
-        // WebSocket.OPEN
-        (client as WebSocket).send(msg);
-      }
-    }
+    wsBroadcast(wss, { type, payload });
   }
 
   // Per-room ConversationProtocol instances for @mention chaining

@@ -40,6 +40,12 @@ import {
 import { AutomationEngine } from "./automations.js";
 import type { Automation } from "./automations.js";
 import { broadcast } from "./ws/broadcast.js";
+import {
+  initSubscriptions,
+  subscribe as subscribeTopic,
+  unsubscribe as unsubscribeTopic,
+  parseControlFrame,
+} from "./ws/subscriptions.js";
 
 // --- Route modules ---
 import { roomsRoutes } from "./routes/rooms.js";
@@ -181,8 +187,20 @@ async function main() {
     }
   });
 
+  // --- Terminal event fan-out: route through topic-filtered broadcast ---
+  // All connected clients get a chance; only those subscribed to
+  // `terminal:<sessionId>` (or `global` for sessions-update) receive the
+  // frame. Replaces the old per-connection direct forward which leaked
+  // every session's I/O to every tab.
+  terminalManager.onEvent((message: WsMessage) => {
+    broadcast(wss, message);
+  });
+
   // --- WebSocket handling ---
   wss.on("connection", (ws: WebSocket) => {
+    // Initialize per-socket topic state (default: subscribed to "global")
+    initSubscriptions(ws);
+
     // Send current sessions on connect
     const sessionsMsg: WsMessage = {
       type: "sessions-update",
@@ -197,17 +215,23 @@ async function main() {
     };
     ws.send(JSON.stringify(gitMsg));
 
-    // Subscribe to terminal events and forward to this client
-    const unsubscribe = terminalManager.onEvent((message: WsMessage) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify(message));
-      }
-    });
-
     ws.on("message", (raw: Buffer | string) => {
       try {
-        const msg: WsMessage = JSON.parse(typeof raw === "string" ? raw : raw.toString("utf-8"));
+        const parsed: unknown = JSON.parse(typeof raw === "string" ? raw : raw.toString("utf-8"));
 
+        // Control frames: subscribe / unsubscribe (additive, outside WsMessage protocol)
+        const control = parseControlFrame(parsed);
+        if (control) {
+          if (control.op === "subscribe") {
+            subscribeTopic(ws, control.topic);
+          } else {
+            unsubscribeTopic(ws, control.topic);
+          }
+          return;
+        }
+
+        // Normal WsMessage protocol (unchanged)
+        const msg = parsed as WsMessage;
         if (msg.type === "terminal-input" && msg.sessionId && msg.data) {
           terminalManager.writeToSession(msg.sessionId, msg.data);
         } else if (msg.type === "terminal-resize" && msg.sessionId && msg.cols && msg.rows) {
@@ -218,13 +242,8 @@ async function main() {
       }
     });
 
-    ws.on("close", () => {
-      unsubscribe();
-    });
-
     ws.on("error", () => {
       // Don't let a single client error crash the server
-      unsubscribe();
     });
   });
 

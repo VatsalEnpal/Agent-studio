@@ -9,6 +9,7 @@ import { useUIStore } from "@/stores/ui";
 import { useToastStore } from "@/components/ui/notification-toast";
 import { useHasAgentSystem } from "@/hooks/use-config";
 import { notifyMention, getNotificationPrefs } from "@/lib/notifications";
+import { wsClient } from "@/lib/ws-client";
 import type { Room, RoomMessage } from "@/stores/rooms";
 import { ChatMessage, StreamingMessage } from "./chat-message";
 import { TypingIndicator } from "./typing-indicator";
@@ -24,9 +25,7 @@ function shouldGroup(prev: RoomMessage | undefined, curr: RoomMessage): boolean 
 
 export function RoomChat() {
   const selectedRoomId = useRoomsStore((s) => s.selectedRoomId);
-  const room = useRoomsStore((s) =>
-    s.rooms.find((r) => r.id === s.selectedRoomId),
-  );
+  const room = useRoomsStore((s) => s.rooms.find((r) => r.id === s.selectedRoomId));
 
   const typingAgents = useRoomsStore((s) => s.typingAgents);
   const streamingText = useRoomsStore((s) => s.streamingText);
@@ -53,7 +52,8 @@ export function RoomChat() {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       return;
     }
-    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight < 100;
     if (isNearBottom) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
@@ -74,6 +74,13 @@ export function RoomChat() {
   // Focus input when room changes
   useEffect(() => {
     inputRef.current?.focus();
+  }, [selectedRoomId]);
+
+  // Subscribe to this room's WebSocket topic so room-message / room-agent-*
+  // frames are delivered. Other rooms' traffic is filtered server-side.
+  useEffect(() => {
+    if (!selectedRoomId) return;
+    return wsClient.subscribeTopic(`room:${selectedRoomId}`);
   }, [selectedRoomId]);
 
   // Mark room as seen
@@ -97,11 +104,7 @@ export function RoomChat() {
       });
       const prefs = getNotificationPrefs();
       if (prefs.approvals) {
-        notifyMention(
-          lastMsg.from ?? "Agent",
-          (lastMsg.text ?? "").slice(0, 100),
-          room.id,
-        );
+        notifyMention(lastMsg.from ?? "Agent", (lastMsg.text ?? "").slice(0, 100), room.id);
       }
     }
   }, [room?.messages.length, room, addToast]);
@@ -242,8 +245,7 @@ export function RoomChat() {
     .filter((a) => a && a.id && a.name)
     .filter(
       (a) =>
-        a.id.toLowerCase().includes(mentionFilter) ||
-        a.name.toLowerCase().includes(mentionFilter),
+        a.id.toLowerCase().includes(mentionFilter) || a.name.toLowerCase().includes(mentionFilter),
     );
 
   const hasAgentSystem = useHasAgentSystem();
@@ -255,18 +257,16 @@ export function RoomChat() {
           <div className="w-12 h-12 rounded bg-bg-elevated flex items-center justify-center mx-auto mb-3">
             <HashIcon size={20} className="text-text-ghost" />
           </div>
-          <p className="text-xs font-medium text-text-secondary mb-1">
-            No room selected
-          </p>
+          <p className="text-xs font-medium text-text-secondary mb-1">No room selected</p>
           <p className="text-xs text-text-tertiary leading-relaxed">
-            Select a room from the sidebar or create a new one to start chatting
-            with your agent team.
+            Select a room from the sidebar or create a new one to start chatting with your agent
+            team.
           </p>
           {!hasAgentSystem && (
             <>
               <p className="text-xs text-text-tertiary leading-relaxed mt-3">
-                Rooms require an agent system. Set one up in Settings to define
-                your agents and start collaborating.
+                Rooms require an agent system. Set one up in Settings to define your agents and
+                start collaborating.
               </p>
               <button
                 onClick={() => useUIStore.getState().setActiveMode("settings")}
@@ -291,12 +291,8 @@ export function RoomChat() {
         <div className="flex items-center gap-2">
           <HashIcon size={12} className="text-rooms shrink-0" />
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className="text-xs font-semibold text-text-primary truncate">
-              {room.name}
-            </span>
-            <span className="text-xs text-text-ghost truncate hidden sm:inline">
-              {room.topic}
-            </span>
+            <span className="text-xs font-semibold text-text-primary truncate">{room.name}</span>
+            <span className="text-xs text-text-ghost truncate hidden sm:inline">{room.topic}</span>
           </div>
 
           {/* Agent avatars — 16px colored squares */}
@@ -319,9 +315,7 @@ export function RoomChat() {
           </div>
 
           {/* Member count */}
-          <span className="text-xs text-text-ghost shrink-0">
-            {room.agents.length}
-          </span>
+          <span className="text-xs text-text-ghost shrink-0">{room.agents.length}</span>
 
           {/* Spawn button */}
           {room.active && allOffline && (
@@ -360,9 +354,7 @@ export function RoomChat() {
             <div className="w-12 h-12 rounded bg-bg-elevated flex items-center justify-center mx-auto">
               <HashIcon size={20} className="text-text-ghost" />
             </div>
-            <h3 className="text-xs font-medium text-text-secondary">
-              Agents are offline
-            </h3>
+            <h3 className="text-xs font-medium text-text-secondary">Agents are offline</h3>
             <p className="text-xs text-text-tertiary max-w-xs">
               Spawn all agents to start chatting in this room
             </p>
@@ -392,7 +384,9 @@ export function RoomChat() {
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full gap-2 text-center px-6">
                 <p className="text-xs text-text-secondary font-medium">Start the conversation</p>
-                <p className="text-xs text-text-tertiary">Send a message to begin collaborating with agents in this room</p>
+                <p className="text-xs text-text-tertiary">
+                  Send a message to begin collaborating with agents in this room
+                </p>
               </div>
             ) : (
               <div>
@@ -430,17 +424,12 @@ export function RoomChat() {
           )}
 
           {/* Typing indicator bar */}
-          <TypingIndicator
-            typingAgents={roomTyping}
-            roomAgents={room.agents}
-          />
+          <TypingIndicator typingAgents={roomTyping} roomAgents={room.agents} />
 
           {/* Spawn banner when offline but has messages */}
           {room.active && allOffline && messages.length > 0 && (
             <div className="px-3 py-2 border-t border-border-default bg-bg-elevated flex items-center justify-between">
-              <span className="text-xs text-text-tertiary">
-                All agents are offline
-              </span>
+              <span className="text-xs text-text-tertiary">All agents are offline</span>
               <button
                 onClick={handleSpawn}
                 disabled={spawning}
@@ -472,9 +461,7 @@ export function RoomChat() {
                             {a.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <span className="text-text-primary font-medium">
-                          {a.name}
-                        </span>
+                        <span className="text-text-primary font-medium">{a.name}</span>
                         <span
                           className={cn(
                             "w-1.5 h-1.5 rounded-full shrink-0 ml-auto",
@@ -484,9 +471,7 @@ export function RoomChat() {
                             a.status === "offline" && "bg-text-ghost",
                           )}
                         />
-                        <span className="text-label text-text-ghost">
-                          {a.model}
-                        </span>
+                        <span className="text-label text-text-ghost">{a.model}</span>
                       </button>
                     ))}
                     <button
@@ -497,9 +482,7 @@ export function RoomChat() {
                         <span className="text-[7px] font-bold text-rooms">*</span>
                       </div>
                       <span className="text-text-primary font-medium">all</span>
-                      <span className="text-label text-text-ghost ml-auto">
-                        everyone in room
-                      </span>
+                      <span className="text-label text-text-ghost ml-auto">everyone in room</span>
                     </button>
                   </div>
                 )}

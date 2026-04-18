@@ -17,6 +17,7 @@ import { importSprintAsWorkflow } from "../workflows/sprint-import.js";
 import { loadRunState, listRuns, getActiveRuns, deleteRun } from "../workflows/run-state.js";
 import type { WorkflowPipelineDef } from "../workflows/definition.js";
 import type { WsMessage } from "../shared/types.js";
+import { broadcast } from "../ws/broadcast.js";
 import notifier from "node-notifier";
 
 interface WorkflowRouteDeps {
@@ -24,15 +25,6 @@ interface WorkflowRouteDeps {
   executor: WorkflowExecutor;
   scheduler: WorkflowScheduler;
   wss: WebSocketServer;
-}
-
-function broadcast(wss: WebSocketServer, msg: WsMessage): void {
-  const data = JSON.stringify(msg);
-  for (const client of wss.clients) {
-    if (client.readyState === 1) {
-      client.send(data);
-    }
-  }
 }
 
 export function workflowRoutes(deps: WorkflowRouteDeps): Router {

@@ -19,6 +19,7 @@ interface TerminalEntry {
   term: Terminal;
   fitAddon: FitAddon;
   wsUnsub: (() => void) | null;
+  topicUnsub: (() => void) | null;
   inputDisposable: { dispose: () => void } | null;
   bufferLoaded: boolean;
 }
@@ -32,8 +33,7 @@ function getOrCreateTerminal(sessionId: string): TerminalEntry {
   const term = new Terminal({
     cursorBlink: true,
     fontSize: 13,
-    fontFamily:
-      "'Geist Mono', 'SF Mono', SFMono-Regular, ui-monospace, Menlo, monospace",
+    fontFamily: "'Geist Mono', 'SF Mono', SFMono-Regular, ui-monospace, Menlo, monospace",
     theme: {
       background: "#050505",
       foreground: "#d4d4d4",
@@ -69,10 +69,15 @@ function getOrCreateTerminal(sessionId: string): TerminalEntry {
     }
   });
 
+  // Subscribe to this session's topic so the server routes terminal-data
+  // frames here. Without this, only `global` frames would arrive.
+  const topicUnsub = wsClient.subscribeTopic(`terminal:${sessionId}`);
+
   const entry: TerminalEntry = {
     term,
     fitAddon,
     wsUnsub,
+    topicUnsub,
     inputDisposable,
     bufferLoaded: false,
   };
@@ -103,6 +108,7 @@ export function disposeTerminal(sessionId: string): void {
   const entry = terminalPool.get(sessionId);
   if (!entry) return;
   entry.wsUnsub?.();
+  entry.topicUnsub?.();
   entry.inputDisposable?.dispose();
   entry.fitAddon.dispose();
   entry.term.dispose();
@@ -119,11 +125,7 @@ interface TerminalPaneV2Props {
   fontSize?: number;
 }
 
-export function TerminalPaneV2({
-  sessionId,
-  visible = true,
-  fontSize,
-}: TerminalPaneV2Props) {
+export function TerminalPaneV2({ sessionId, visible = true, fontSize }: TerminalPaneV2Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const attachedRef = useRef<string | null>(null);
 
