@@ -116,25 +116,9 @@ export function agentsRoutes(deps: { validateProjectPath: (p: string) => string 
 
       const agents = Array.from(byId.values());
 
-      // If no real agents were discovered (only "none"), fall back to built-in defaults.
-      if (agents.length <= 1) {
-        const defaults: AgentConfig[] = [
-          {
-            id: "orchestrator",
-            name: "orchestrator",
-            description: "Coordinates agent teams and delegates work",
-          },
-          { id: "frontend", name: "frontend", description: "Builds UI and frontend code" },
-          { id: "backend", name: "backend", description: "Builds APIs, database, server logic" },
-          { id: "qa", name: "qa", description: "Tests the application" },
-          { id: "security", name: "security", description: "Reviews code for vulnerabilities" },
-          { id: "pmo", name: "pmo", description: "Scans for tasks, manages sprints" },
-          { id: "documentation", name: "documentation", description: "Maintains docs and READMEs" },
-        ];
-        for (const d of defaults) {
-          if (!byId.has(d.id)) agents.push(d);
-        }
-      }
+      // Plan task 9: no silent fallback — return only what was discovered (plus
+      // the "none" sentinel). The launcher renders a first-run empty state
+      // when the list contains only "none".
 
       res.json(agents);
     } catch (err) {

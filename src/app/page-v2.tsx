@@ -308,6 +308,15 @@ export default function PageV2() {
     };
   }, [setSessions, setRepos]);
 
+  // Plan task 9: the first-run launcher empty state fires this event when the
+  // user clicks "Scan custom path…" so we can jump them to Settings → Agents
+  // where the Add-source dialog lives.
+  useEffect(() => {
+    const handler = () => setActiveMode("settings");
+    window.addEventListener("agentstudio:open-settings-agents", handler);
+    return () => window.removeEventListener("agentstudio:open-settings-agents", handler);
+  }, [setActiveMode]);
+
   // --- Session creation ---
   const handleCreateSession = useCallback(
     async (config: {
