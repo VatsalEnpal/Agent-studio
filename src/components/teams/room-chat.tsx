@@ -175,7 +175,18 @@ export function RoomChat() {
   const handleApprove = useCallback(
     async (msg: RoomMessage) => {
       if (!selectedRoomId) return;
-      await fetch(`/api/rooms/${selectedRoomId}/approve/${msg.id}`, { method: "POST" });
+      try {
+        const res = await fetch(`/api/rooms/${selectedRoomId}/messages/${msg.id}/approve`, {
+          method: "POST",
+        });
+        if (!res.ok) throw new Error(`Approve failed (${res.status})`);
+      } catch (err) {
+        useToastStore.getState().addToast({
+          type: "error",
+          title: "Could not approve action",
+          body: err instanceof Error ? err.message : String(err),
+        });
+      }
     },
     [selectedRoomId],
   );
@@ -183,7 +194,18 @@ export function RoomChat() {
   const handleReject = useCallback(
     async (msg: RoomMessage) => {
       if (!selectedRoomId) return;
-      await fetch(`/api/rooms/${selectedRoomId}/reject/${msg.id}`, { method: "POST" });
+      try {
+        const res = await fetch(`/api/rooms/${selectedRoomId}/messages/${msg.id}/reject`, {
+          method: "POST",
+        });
+        if (!res.ok) throw new Error(`Reject failed (${res.status})`);
+      } catch (err) {
+        useToastStore.getState().addToast({
+          type: "error",
+          title: "Could not reject action",
+          body: err instanceof Error ? err.message : String(err),
+        });
+      }
     },
     [selectedRoomId],
   );

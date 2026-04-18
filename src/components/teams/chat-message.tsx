@@ -309,13 +309,13 @@ export function ChatMessage({ msg, grouped, onApprove, onReject, onAgentClick }:
             {isApproval && msg.approvalStatus === "approved" && (
               <div className="flex items-center gap-1 mt-1.5 text-label text-sessions">
                 <CheckIcon size={12} />
-                Approved
+                Approved by you
               </div>
             )}
             {isApproval && msg.approvalStatus === "rejected" && (
               <div className="flex items-center gap-1 mt-1.5 text-label text-error">
                 <CloseIcon size={12} />
-                Rejected
+                Rejected by you
               </div>
             )}
           </div>

@@ -336,24 +336,36 @@ You are a teammate on Slack, not an assistant writing a report.
         text,
         to,
         id: clientId,
+        type,
+        approvalStatus,
+        actionCommand,
       } = req.body as {
         from?: string;
         text?: string;
         to?: string;
         id?: string;
+        type?: "message" | "action" | "approval-request" | "system";
+        approvalStatus?: "pending" | "approved" | "rejected";
+        actionCommand?: string;
       };
       if (!text) {
         res.status(400).json({ error: "Missing 'text'" });
         return;
       }
 
+      // Allow posting approval-request (and other non-message) types via API so
+      // integrations / tests can surface human-in-the-loop prompts directly.
+      const resolvedType = type ?? "message";
+      const isApproval = resolvedType === "approval-request";
       const msg = roomManager.addMessage(
         roomId,
         {
           from: from ?? "user",
           text,
           to,
-          type: "message",
+          type: resolvedType,
+          ...(isApproval ? { approvalStatus: approvalStatus ?? "pending" } : {}),
+          ...(actionCommand ? { actionCommand } : {}),
         },
         clientId,
       );
@@ -364,7 +376,7 @@ You are a teammate on Slack, not an assistant writing a report.
       }
 
       const room = roomManager.getRoom(roomId);
-      if (room && (from === "user" || from === undefined)) {
+      if (room && resolvedType === "message" && (from === "user" || from === undefined)) {
         const protocol = getOrCreateProtocol(roomId);
         if (protocol.isPaused) {
           protocol.resume();
@@ -446,6 +458,27 @@ You are a teammate on Slack, not an assistant writing a report.
   });
 
   router.post("/:id/reject/:msgId", (req, res) => {
+    const ok = roomManager.rejectAction(req.params["id"]!, req.params["msgId"]!);
+    if (!ok) {
+      res.status(404).json({ error: "Message not found or not pending" });
+      return;
+    }
+    res.json({ ok: true });
+  });
+
+  // Canonical REST-style paths mirroring the approval card contract. The
+  // older /:id/approve/:msgId variants are kept above for backward
+  // compatibility with existing clients.
+  router.post("/:id/messages/:msgId/approve", (req, res) => {
+    const ok = roomManager.approveAction(req.params["id"]!, req.params["msgId"]!);
+    if (!ok) {
+      res.status(404).json({ error: "Message not found or not pending" });
+      return;
+    }
+    res.json({ ok: true });
+  });
+
+  router.post("/:id/messages/:msgId/reject", (req, res) => {
     const ok = roomManager.rejectAction(req.params["id"]!, req.params["msgId"]!);
     if (!ok) {
       res.status(404).json({ error: "Message not found or not pending" });
