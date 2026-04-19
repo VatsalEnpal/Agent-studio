@@ -79,6 +79,7 @@ import {
   automationTemplatesRoutes,
   automationSuggestionsRoute,
 } from "./routes/automations.js";
+import { terminalImagesRoutes } from "./routes/terminal-images.js";
 const port = parseInt(process.env["PORT"] ?? "8080", 10);
 const dev = process.env["NODE_ENV"] !== "production";
 
@@ -869,6 +870,9 @@ async function main() {
 
   app.post("/api/workflows/:id/start", (req, res) => handleStartRunAlias(req, res));
   app.post("/api/workflows/:id/runs", (req, res) => handleStartRunAlias(req, res));
+
+  // --- Terminal image drops (drag-and-drop onto PTY pane) ---
+  app.use("/api/terminal-images", terminalImagesRoutes());
 
   // --- Room routes (mounted via route module) ---
   app.use("/api/rooms", roomsRoutes(roomManager, sdkManager, wss));

@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 
 import { wsClient } from "@/lib/ws-client";
 import type { WsMessage } from "@/lib/types";
+import { useToastStore } from "@/stores/toast";
+
+const ALLOWED_IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/gif", "image/webp"]);
+const MAX_DROP_BYTES = 10 * 1024 * 1024;
 
 // ---------------------------------------------------------------------------
 // Global terminal pool — one Terminal instance per session
@@ -128,6 +132,86 @@ interface TerminalPaneV2Props {
 export function TerminalPaneV2({ sessionId, visible = true, fontSize }: TerminalPaneV2Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const attachedRef = useRef<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const dragDepthRef = useRef(0);
+  const addToast = useToastStore((s) => s.addToast);
+
+  // Drag-and-drop handlers for image attachment.
+  // Uses raw binary upload (Content-Type: image/<ext>, body = file bytes).
+  // On success, inserts `@<absolute-path> ` into the PTY input so Claude Code
+  // picks it up via the native @-path syntax.
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (!e.dataTransfer?.types.includes("Files")) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (!e.dataTransfer?.types.includes("Files")) return;
+    e.preventDefault();
+    dragDepthRef.current += 1;
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+    if (dragDepthRef.current === 0) setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      dragDepthRef.current = 0;
+      setIsDragOver(false);
+
+      const file = e.dataTransfer?.files?.[0];
+      if (!file) return;
+
+      if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+        addToast(
+          `Unsupported file type "${file.type || "unknown"}". Drop a PNG, JPEG, GIF, or WebP.`,
+          "error",
+        );
+        return;
+      }
+      if (file.size > MAX_DROP_BYTES) {
+        addToast(
+          `Image too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Max 10 MB.`,
+          "error",
+        );
+        return;
+      }
+
+      void (async () => {
+        try {
+          const res = await fetch("/api/terminal-images/upload", {
+            method: "POST",
+            headers: { "Content-Type": file.type },
+            body: file,
+          });
+          const data = (await res.json()) as { ok?: boolean; path?: string; error?: string };
+          if (!res.ok || !data.ok || !data.path) {
+            throw new Error(data.error ?? `Upload failed (${res.status})`);
+          }
+          // Inject `@<path> ` into the PTY input. The server's WsMessage
+          // "terminal-input" handler writes straight to the pty master, so
+          // the text appears on the user's current input line whether they
+          // are in bash or inside a claude prompt.
+          wsClient.send({
+            type: "terminal-input",
+            sessionId,
+            data: `@${data.path} `,
+          });
+          addToast(`Image attached: @${data.path}`, "success");
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Upload failed";
+          addToast(msg, "error");
+        }
+      })();
+    },
+    [sessionId, addToast],
+  );
 
   const fitAndResize = useCallback(
     (entry: TerminalEntry) => {
