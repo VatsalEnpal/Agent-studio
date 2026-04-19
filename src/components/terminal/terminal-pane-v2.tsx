@@ -165,8 +165,11 @@ export function TerminalPaneV2({ sessionId, visible = true, fontSize }: Terminal
       dragDepthRef.current = 0;
       setIsDragOver(false);
 
-      const file = e.dataTransfer?.files?.[0];
+      const files = e.dataTransfer?.files;
+      const file = files?.[0];
       if (!file) return;
+
+      const multiple = files && files.length > 1;
 
       if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
         addToast(
@@ -204,6 +207,9 @@ export function TerminalPaneV2({ sessionId, visible = true, fontSize }: Terminal
             data: `@${data.path} `,
           });
           addToast(`Image attached: @${data.path}`, "success");
+          if (multiple) {
+            addToast("Only the first image was attached", "info");
+          }
         } catch (err) {
           const msg = err instanceof Error ? err.message : "Upload failed";
           addToast(msg, "error");
@@ -362,9 +368,19 @@ export function TerminalPaneV2({ sessionId, visible = true, fontSize }: Terminal
 
   return (
     <div
-      ref={containerRef}
-      className="flex-1 min-h-0 overflow-hidden"
-      style={{ backgroundColor: "#050505" }}
-    />
+      data-testid="terminal-drop-zone"
+      className="flex-1 min-h-0 overflow-hidden relative"
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      <div ref={containerRef} className="h-full w-full" style={{ backgroundColor: "#050505" }} />
+      {isDragOver && (
+        <div className="absolute inset-0 flex items-center justify-center bg-canvas/80 border-2 border-dashed border-sessions rounded-md pointer-events-none text-text-secondary text-sm font-medium z-10">
+          Drop image to attach
+        </div>
+      )}
+    </div>
   );
 }
