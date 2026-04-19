@@ -27,6 +27,7 @@ import { WorkflowExecutor } from "./workflows/executor.js";
 import { WorkflowScheduler } from "./workflows/scheduler.js";
 import { ClaudeCommandRunner } from "./workflows/command-runner.js";
 import { getActiveRuns, saveRunState, loadRunState, listRuns } from "./workflows/run-state.js";
+import type { RunState } from "./workflows/run-state.js";
 import { SdkSessionManager } from "./sdk-session.js";
 import {
   getConfig,
@@ -40,15 +41,30 @@ import {
 import { AutomationEngine } from "./automations.js";
 import type { Automation } from "./automations.js";
 import { broadcast } from "./ws/broadcast.js";
+import { stats as pollerStats } from "./services/poller.js";
+import { startFsWatchers } from "./services/fs-watchers.js";
+import {
+  initSubscriptions,
+  subscribe as subscribeTopic,
+  unsubscribe as unsubscribeTopic,
+  parseControlFrame,
+} from "./ws/subscriptions.js";
 
 // --- Route modules ---
 import { roomsRoutes } from "./routes/rooms.js";
 import { workflowRoutes } from "./routes/workflows.js";
 import { healthRoutes } from "./routes/health.js";
+import { testNotifyRoutes } from "./routes/test-notify.js";
 import { gitRoutes } from "./routes/git.js";
 import { sessionsRoutes } from "./routes/sessions.js";
 import { memoryRoutes } from "./routes/memory.js";
-import { sprintRoutes, sprintsRoutes, flowsToSprints } from "./routes/sprint.js";
+import {
+  sprintRoutes,
+  sprintsRoutes,
+  flowsToSprints,
+  syncSprintFileFromRun,
+  reconcileInterruptedSprints,
+} from "./routes/sprint.js";
 import { settingsRoutes } from "./routes/settings.js";
 import { systemRoutes } from "./routes/system.js";
 import {
@@ -57,11 +73,13 @@ import {
   generateAgentsPreviewRoute,
   generateClaudeMdRoute,
 } from "./routes/agents.js";
+import { agentSourcesRoutes } from "./routes/agent-sources.js";
 import {
   automationsRoutes,
   automationTemplatesRoutes,
   automationSuggestionsRoute,
 } from "./routes/automations.js";
+import { terminalImagesRoutes, sweepOldDrops } from "./routes/terminal-images.js";
 const port = parseInt(process.env["PORT"] ?? "8080", 10);
 const dev = process.env["NODE_ENV"] !== "production";
 
@@ -180,8 +198,20 @@ async function main() {
     }
   });
 
+  // --- Terminal event fan-out: route through topic-filtered broadcast ---
+  // All connected clients get a chance; only those subscribed to
+  // `terminal:<sessionId>` (or `global` for sessions-update) receive the
+  // frame. Replaces the old per-connection direct forward which leaked
+  // every session's I/O to every tab.
+  terminalManager.onEvent((message: WsMessage) => {
+    broadcast(wss, message);
+  });
+
   // --- WebSocket handling ---
   wss.on("connection", (ws: WebSocket) => {
+    // Initialize per-socket topic state (default: subscribed to "global")
+    initSubscriptions(ws);
+
     // Send current sessions on connect
     const sessionsMsg: WsMessage = {
       type: "sessions-update",
@@ -196,17 +226,23 @@ async function main() {
     };
     ws.send(JSON.stringify(gitMsg));
 
-    // Subscribe to terminal events and forward to this client
-    const unsubscribe = terminalManager.onEvent((message: WsMessage) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify(message));
-      }
-    });
-
     ws.on("message", (raw: Buffer | string) => {
       try {
-        const msg: WsMessage = JSON.parse(typeof raw === "string" ? raw : raw.toString("utf-8"));
+        const parsed: unknown = JSON.parse(typeof raw === "string" ? raw : raw.toString("utf-8"));
 
+        // Control frames: subscribe / unsubscribe (additive, outside WsMessage protocol)
+        const control = parseControlFrame(parsed);
+        if (control) {
+          if (control.op === "subscribe") {
+            subscribeTopic(ws, control.topic);
+          } else {
+            unsubscribeTopic(ws, control.topic);
+          }
+          return;
+        }
+
+        // Normal WsMessage protocol (unchanged)
+        const msg = parsed as WsMessage;
         if (msg.type === "terminal-input" && msg.sessionId && msg.data) {
           terminalManager.writeToSession(msg.sessionId, msg.data);
         } else if (msg.type === "terminal-resize" && msg.sessionId && msg.cols && msg.rows) {
@@ -217,13 +253,8 @@ async function main() {
       }
     });
 
-    ws.on("close", () => {
-      unsubscribe();
-    });
-
     ws.on("error", () => {
       // Don't let a single client error crash the server
-      unsubscribe();
     });
   });
 
@@ -235,6 +266,11 @@ async function main() {
   if (initialConfig.automations && Array.isArray(initialConfig.automations)) {
     automationEngine.loadAutomations(initialConfig.automations as Automation[]);
   }
+
+  // Start event-driven fs watchers for config + agent dirs (plan task 3c).
+  // Replaces any polling of these paths with chokidar events — target
+  // overall idle is < 30 FS ops/min (observable via /api/debug/poller-stats).
+  startFsWatchers();
 
   // Forward automation events to WebSocket clients
   automationEngine.onEvent((event) => {
@@ -257,6 +293,32 @@ async function main() {
   });
   workflowScheduler.restoreSchedules();
 
+  // --- Sprint state-sync: keep .agent-studio/sprints/<id>.json in lockstep
+  //     with RunState on every executor transition, then broadcast a
+  //     workflow-update so the UI + GET /api/sprints reflect the new
+  //     gate statuses. workflow-step-update WS frames are emitted
+  //     separately by routes/workflows.ts — this listener is ONLY about
+  //     persisting the sprint flow JSON. ---
+  workflowExecutor.onEvent((event) => {
+    // All stepDef.workflowId === sprintId (that's how sprint.ts create
+    // sets it). Resolve the RunState from disk — the executor has
+    // already called saveRunState before emitting.
+    const runState: RunState | null = loadRunState(event.workflowId, event.runId);
+    if (!runState) return;
+
+    const changed = syncSprintFileFromRun(event.workflowId, runState);
+    if (!changed) return;
+
+    // Flush the registry's in-memory provider cache and re-broadcast.
+    workflowManager.reload();
+    void workflowManager.getFlows().then((flows) => {
+      broadcast(wss, {
+        type: "workflow-update",
+        payload: flowsToSprints(flows),
+      } satisfies WsMessage);
+    });
+  });
+
   // --- Server restart recovery: detect interrupted runs ---
   {
     const interrupted = getActiveRuns().filter((r) => r.status === "running");
@@ -275,6 +337,22 @@ async function main() {
     if (interrupted.length > 0) {
       console.log(
         `[workflow-engine] ${interrupted.length} interrupted run(s) detected. Resume via API or UI.`,
+      );
+    }
+
+    // Flip persisted sprint flow JSON to `status: "paused"` +
+    // `pauseReason: "server-restarted"` for any sprint whose RunState was
+    // paused above. POST /api/sprints/:sprintId/resume will re-hydrate the
+    // RunState, reconcile step statuses from handoffs, and continue the
+    // pipeline. PTY-backed steps always relaunch from their last
+    // `<stepId>_input.json` handoff — PTY re-attach across process restart
+    // is impossible (master fds die with the spawning process; kernel sends
+    // SIGHUP to the session leader). SDK-backed steps re-use the saved
+    // session.sessionId via options.resume (sdk-session.ts:100-101).
+    const reconciledSprints = reconcileInterruptedSprints();
+    if (reconciledSprints.length > 0) {
+      console.log(
+        `[sprints] Marked ${reconciledSprints.length} sprint(s) as paused (server-restarted): ${reconciledSprints.join(", ")}`,
       );
     }
   }
@@ -347,7 +425,8 @@ async function main() {
       payload: repos,
     } satisfies WsMessage);
   });
-  gitWatcher.start(30_000);
+  // 10s interval — unified poller (see server/services/poller.ts, plan task 3a).
+  gitWatcher.start(10_000);
 
   // Broadcast workflow updates on sprint file changes
   fileWatcher.onUpdate(() => {
@@ -369,6 +448,16 @@ async function main() {
   // Health (early mount so it works even before Next.js is ready)
   app.use("/api/health", healthRoutes(terminalManager, wss));
 
+  // Dev-only test endpoints (task A6b — verify Mac notifications / TCC grant)
+  if (process.env.NODE_ENV !== "production") {
+    app.use("/api/test", testNotifyRoutes());
+  }
+
+  // Debug — unified poller stats (plan task 3a).
+  app.get("/api/debug/poller-stats", (_req, res) => {
+    res.json(pollerStats());
+  });
+
   // Sessions
   const telegramSessions = new Map<string, string>();
   const sendTelegramNotify = (_message: string) => {
@@ -381,6 +470,7 @@ async function main() {
 
   // Agents
   app.use("/api/agents", agentsRoutes(routeDeps));
+  app.use("/api/config/agent-sources", agentSourcesRoutes());
   app.post("/api/analyze-project", analyzeProjectRoute(routeDeps));
   app.post("/api/generate-agents/preview", generateAgentsPreviewRoute(routeDeps));
   app.post("/api/generate-claudemd", generateClaudeMdRoute(routeDeps));
@@ -781,6 +871,11 @@ async function main() {
   app.post("/api/workflows/:id/start", (req, res) => handleStartRunAlias(req, res));
   app.post("/api/workflows/:id/runs", (req, res) => handleStartRunAlias(req, res));
 
+  // --- Terminal image drops (drag-and-drop onto PTY pane) ---
+  app.use("/api/terminal-images", terminalImagesRoutes());
+  // Best-effort sweep of drops older than 24h — non-blocking, errors swallowed.
+  sweepOldDrops();
+
   // --- Room routes (mounted via route module) ---
   app.use("/api/rooms", roomsRoutes(roomManager, sdkManager, wss));
 
@@ -832,10 +927,13 @@ async function main() {
     }
   });
 
-  // Start HTTP server IMMEDIATELY -- API routes are ready now
-  server.listen(port, "127.0.0.1", () => {
+  // Start HTTP server IMMEDIATELY -- API routes are ready now.
+  // Host defaults to loopback for safety; container/remote deployments
+  // can set HOST=0.0.0.0 to bind all interfaces.
+  const host = process.env["HOST"] || "127.0.0.1";
+  server.listen(port, host, () => {
     // eslint-disable-next-line no-console
-    console.log(`Agent Studio running on http://localhost:${port}`);
+    console.log(`Agent Studio running on http://${host}:${port}`);
   });
 
   // Auto-start custom dev servers with autoStart flag

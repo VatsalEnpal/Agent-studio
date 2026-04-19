@@ -86,10 +86,14 @@ export function SettingsGeneral() {
 
             {/* Default Permissions */}
             <div>
-              <label className="text-label text-text-secondary block mb-1.5">
+              <label
+                htmlFor="settings-default-permissions"
+                className="text-label text-text-secondary block mb-1.5"
+              >
                 Default Permissions
               </label>
               <select
+                id="settings-default-permissions"
                 value={settings.defaultPermissions}
                 onChange={(e) =>
                   updateSetting(
@@ -107,10 +111,14 @@ export function SettingsGeneral() {
 
             {/* Default Working Directory */}
             <div>
-              <label className="text-label text-text-secondary block mb-1.5">
+              <label
+                htmlFor="settings-default-cwd"
+                className="text-label text-text-secondary block mb-1.5"
+              >
                 Default Working Directory
               </label>
               <input
+                id="settings-default-cwd"
                 type="text"
                 value={settings.defaultCwd}
                 onChange={(e) => updateSetting("defaultCwd", e.target.value)}

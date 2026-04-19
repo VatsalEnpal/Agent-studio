@@ -4,6 +4,37 @@ Quick reference for everything you can do. App runs at [http://localhost:8080](h
 
 ---
 
+## Install (first time on a machine)
+
+Agent Studio ships with a bootstrap script — use it instead of `npm install`:
+
+```bash
+git clone https://github.com/VatsalEnpal/Agent-studio.git
+cd Agent-studio
+./install.sh
+```
+
+`install.sh` is idempotent. It verifies Node 22+, npm, git, `claude`, runs `npm ci`, rebuilds `node-pty` for your platform, exports `AGENT_STUDIO_DIR`, and warns on a busy port 8080.
+
+### Three runtime shapes
+
+| Command                | Use when                                            |
+| ---------------------- | --------------------------------------------------- |
+| `npm run dev`          | Normal local dev. Open `http://localhost:8080`.     |
+| `npm run electron:dev` | Test the desktop shell, tray, and notifications.    |
+| `npm run install:mac`  | Build and install a real `.app` to `/Applications`. |
+
+Packaged Mac builds are **unsigned and unnotarized** (developer-focus posture). On first launch, right-click `Agent Studio.app` in `/Applications` and choose **Open**, or run `xattr -dr com.apple.quarantine '/Applications/Agent Studio.app'`.
+
+### Permission modes for autonomous Claude runs
+
+When driving `claude` against this or any repo:
+
+- Preferred: `npm run claude:auto` (`claude --permission-mode auto`) — blocks destructive / scope-creep actions via a classifier, without constant prompts.
+- Avoid: `--dangerously-skip-permissions` — skips all safety checks.
+
+---
+
 ## Getting Started
 
 ### First Launch
@@ -90,6 +121,20 @@ You are... [identity and rules here]
 
 The launcher dropdown shows all agents detected from `.claude/agents/` in your project. Defaults: No Agent, orchestrator, frontend, backend, qa, security, pmo, documentation. Custom agents appear automatically when you add `.md` files.
 
+### Agent discovery precedence
+
+Agents resolve user > project > builtin:
+
+1. `~/.claude/agents/*.md` — your global personal agents, everywhere.
+2. `<projectPath>/.claude/agents/*.md` — agents scoped to one project.
+3. Builtin templates from this repo's `.claude/agents/` — fallback seed.
+
+Project-scoped beats global; global beats builtin. Drop a `foo.md` in your project's `.claude/agents/` to override the global `foo` just for that project.
+
+### Import agents from another project
+
+Settings > Workspace > Agents has an **Import** action that copies `.md` files from a picked source (another project, or a gist you cloned) into the active project's `.claude/agents/`. Or just `cp` the files directly — the launcher re-scans on focus.
+
 ---
 
 ## Automations
@@ -108,14 +153,14 @@ Go to **Settings > Automations**. Three ways to add:
 
 ### Available Templates
 
-| Template | What it does | Default schedule |
-|----------|-------------|-----------------|
-| Code Health | tsc, tests, npm audit | Every 2h |
-| PR Reviewer | Reviews open PRs | Every 6h |
-| Security Scanner | Deps + code secrets scan | Daily |
-| Dependency Updater | Checks outdated packages | Weekly |
-| Test Coverage | Finds untested code | Daily |
-| Documentation | Checks README + inline docs | Weekly |
+| Template           | What it does                | Default schedule |
+| ------------------ | --------------------------- | ---------------- |
+| Code Health        | tsc, tests, npm audit       | Every 2h         |
+| PR Reviewer        | Reviews open PRs            | Every 6h         |
+| Security Scanner   | Deps + code secrets scan    | Daily            |
+| Dependency Updater | Checks outdated packages    | Weekly           |
+| Test Coverage      | Finds untested code         | Daily            |
+| Documentation      | Checks README + inline docs | Weekly           |
 
 ### Manage Automations
 
@@ -232,16 +277,16 @@ Version info and links.
 
 ## Keyboard Shortcuts
 
-| Action | Mac | Windows/Linux |
-|--------|-----|---------------|
-| New session | `Cmd+Shift+N` | `Ctrl+Shift+N` |
-| Command palette | `Cmd+Shift+K` | `Ctrl+Shift+K` |
-| Toggle sidebar | `Cmd+Shift+\` | `Ctrl+Shift+\` |
-| Focus session 1-6 | `Cmd+Shift+1` - `6` | `Ctrl+Shift+1` - `6` |
-| Browser fullscreen | `Cmd+Shift+F` | `Ctrl+Shift+F` |
-| Fullscreen focused pane | `Cmd+Enter` | `Ctrl+Enter` |
-| Cycle session focus | `Tab` | `Tab` |
-| Close modal / exit fullscreen | `Esc` | `Esc` |
+| Action                        | Mac                 | Windows/Linux        |
+| ----------------------------- | ------------------- | -------------------- |
+| New session                   | `Cmd+Shift+N`       | `Ctrl+Shift+N`       |
+| Command palette               | `Cmd+Shift+K`       | `Ctrl+Shift+K`       |
+| Toggle sidebar                | `Cmd+Shift+\`       | `Ctrl+Shift+\`       |
+| Focus session 1-6             | `Cmd+Shift+1` - `6` | `Ctrl+Shift+1` - `6` |
+| Browser fullscreen            | `Cmd+Shift+F`       | `Ctrl+Shift+F`       |
+| Fullscreen focused pane       | `Cmd+Enter`         | `Ctrl+Enter`         |
+| Cycle session focus           | `Tab`               | `Tab`                |
+| Close modal / exit fullscreen | `Esc`               | `Esc`                |
 
 ---
 
@@ -316,9 +361,7 @@ Agent Studio reads `.agent-studio.json` from its working directory:
     "permissions": "default",
     "workingDirectory": "~/Code/my-app"
   },
-  "devServers": [
-    { "name": "frontend", "path": "~/Code/frontend", "command": "npm run dev" }
-  ]
+  "devServers": [{ "name": "frontend", "path": "~/Code/frontend", "command": "npm run dev" }]
 }
 ```
 
@@ -412,6 +455,20 @@ ps aux | grep claude
 ```
 
 Kill any leftover processes with `kill <PID>`. This should be rare under normal operation.
+
+### Desktop notifications don't appear (macOS)
+
+Desktop notifications require the macOS TCC grant. The first time Agent Studio tries to show one, macOS should prompt you. If you dismissed the prompt or never saw it, open **System Settings > Notifications > Agent Studio** and enable notifications manually.
+
+Test the pipeline end-to-end with the dev-only endpoint (dev mode only, `NODE_ENV !== "production"`):
+
+```bash
+curl -XPOST http://localhost:8080/api/test/notify \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Hello","message":"Testing notifications"}'
+```
+
+A banner should appear in Notification Center. If it doesn't, check `~/.agent-studio/server.log` for `[tcc]` warnings.
 
 ### Port already in use
 

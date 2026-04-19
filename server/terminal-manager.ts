@@ -2,8 +2,51 @@ import * as pty from "node-pty";
 import treeKill from "tree-kill";
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
+import { execFile } from "node:child_process";
 import { whichCommand, IS_WINDOWS } from "./platform.js";
 import { sanitize, sanitizeName, DEMO_MODE } from "./demo-sanitizer.js";
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Returns true if the given PID has any descendant processes (grandchildren
+ * relative to the PTY caller). Used to widen the SIGTERM → SIGKILL delay so
+ * long-running child trees get a fair chance to exit gracefully.
+ *
+ * Implementation is best-effort: on any error or timeout, returns false so
+ * callers fall back to the shorter default delay and don't block shutdown.
+ */
+function ptyHasGrandchildren(pid: number): Promise<boolean> {
+  if (IS_WINDOWS || !pid) return Promise.resolve(false);
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = (value: boolean) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+    const timer = setTimeout(() => done(false), 1500);
+    try {
+      // pgrep -P <pid> lists direct children; if any exist, the PTY has
+      // grandchildren from its spawning caller's perspective.
+      execFile("pgrep", ["-P", String(pid)], (err, stdout) => {
+        clearTimeout(timer);
+        if (err) {
+          // pgrep exits 1 when no matches — treat as "no children".
+          done(false);
+          return;
+        }
+        const hasChildren = stdout.trim().length > 0;
+        done(hasChildren);
+      });
+    } catch {
+      clearTimeout(timer);
+      done(false);
+    }
+  });
+}
 
 const ALLOWED_COMMANDS = new Set([
   "claude",
@@ -327,22 +370,59 @@ export class TerminalManager {
       }
     }
 
-    // Escalation: SIGTERM -> 2s -> SIGKILL tree (runs in background)
-    // Step 1: Graceful SIGTERM
-    try {
-      pty.kill("SIGTERM");
-    } catch {
-      // PTY may already be dead
-    }
-
-    // Step 2: After 2s, kill entire process tree with SIGKILL
-    setTimeout(() => {
-      if (pid) {
-        treeKill(pid, "SIGKILL", () => {
-          // tree-kill done — process fully cleaned up
-        });
+    // Escalation: SIGTERM -> wait -> SIGKILL tree -> post-kill verify
+    // (runs in background — fire-and-forget so the caller returns promptly).
+    void (async () => {
+      // Step 1: Graceful SIGTERM
+      try {
+        pty.kill("SIGTERM");
+      } catch {
+        // PTY may already be dead
       }
-    }, 2000);
+
+      if (!pid) return;
+
+      // Step 2: Wait before SIGKILL. Widen to 4s when PTY has grandchildren
+      // so nested child trees get a chance to unwind cleanly.
+      const hasGrandchildren = await ptyHasGrandchildren(pid);
+      const waitMs = hasGrandchildren ? 4000 : 2000;
+      await sleep(waitMs);
+
+      // Step 3: SIGKILL entire process tree.
+      try {
+        treeKill(pid, "SIGKILL");
+      } catch {
+        // tree-kill swallows most errors; ignore any surface-level throws.
+      }
+
+      // Step 4: Post-kill verification. Loop up to 5s confirming the pid is
+      // actually gone. process.kill(pid, 0) throws ESRCH when dead; EPERM
+      // (foreign pid) means "maybe alive" — keep polling until the deadline.
+      const killStart = Date.now();
+      const deadline = killStart + 5000;
+      let stillAlive = true;
+      while (Date.now() < deadline) {
+        try {
+          process.kill(pid, 0);
+          // No throw → process is still alive (or we still own it).
+          stillAlive = true;
+          await sleep(200);
+        } catch (err) {
+          const code = (err as NodeJS.ErrnoException).code;
+          if (code === "ESRCH") {
+            stillAlive = false;
+            break;
+          }
+          // EPERM or anything else: can't confirm death, keep polling.
+          await sleep(200);
+        }
+      }
+
+      if (stillAlive) {
+        const elapsedMs = Date.now() - killStart;
+        console.warn(`PTY_KILL_FAILED pid=${pid} session=${id} elapsed_ms=${elapsedMs}`);
+      }
+    })();
   }
 
   listSessions(): Session[] {

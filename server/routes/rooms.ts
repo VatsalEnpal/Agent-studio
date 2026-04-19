@@ -3,9 +3,9 @@ import { Router } from "express";
 import type { RoomManager } from "../rooms.js";
 import type { SdkSessionManager, SdkSessionCallbacks } from "../sdk-session.js";
 import { getMainProjectDir } from "../config.js";
-import type { WebSocket } from "ws";
 import type { WebSocketServer } from "ws";
 import { ConversationProtocol, parseMentions } from "../managers/conversation-protocol.js";
+import { broadcast as wsBroadcast } from "../ws/broadcast.js";
 
 export function roomsRoutes(
   roomManager: RoomManager,
@@ -14,15 +14,11 @@ export function roomsRoutes(
 ): Router {
   const router = Router();
 
-  // Helper: broadcast a WebSocket message to all clients
+  // Helper: broadcast a WebSocket message through the topic-aware fan-out.
+  // Room-* events are routed to `room:<roomId>`; if the payload lacks
+  // `roomId`, they fall through to `global`.
   function broadcast(type: string, payload: unknown): void {
-    const msg = JSON.stringify({ type, payload });
-    for (const client of wss.clients) {
-      if ((client as WebSocket).readyState === 1) {
-        // WebSocket.OPEN
-        (client as WebSocket).send(msg);
-      }
-    }
+    wsBroadcast(wss, { type, payload });
   }
 
   // Per-room ConversationProtocol instances for @mention chaining
@@ -262,28 +258,55 @@ You are a teammate on Slack, not an assistant writing a report.
 
   router.post("/", (req, res) => {
     try {
-      const { name, topic, agents } = req.body as {
+      const {
+        name,
+        topic,
+        agents: rawAgents,
+      } = req.body as {
         name?: string;
         topic?: string;
-        agents?: Array<{ id: string; name: string; model: "opus" | "sonnet" | "haiku" }>;
+        agents?: Array<
+          string | { id?: string; name?: string; model?: "opus" | "sonnet" | "haiku" }
+        >;
       };
       if (!name || !topic) {
         res.status(400).json({ error: "Missing 'name' or 'topic'" });
         return;
       }
-      if (agents !== undefined && !Array.isArray(agents)) {
+      if (rawAgents !== undefined && !Array.isArray(rawAgents)) {
         res.status(400).json({ error: "agents must be an array" });
         return;
       }
-      if (agents) {
-        for (const a of agents) {
+
+      // Normalize: accept string shorthand (e.g. "orchestrator") as
+      // { id, name, model: "sonnet" }.  Objects pass through with defaults.
+      type AgentInput = { id: string; name: string; model: "opus" | "sonnet" | "haiku" };
+      const agents: AgentInput[] = [];
+      if (rawAgents) {
+        for (const a of rawAgents) {
+          if (typeof a === "string") {
+            if (!a.trim()) {
+              res.status(400).json({ error: "Agent id string must be non-empty" });
+              return;
+            }
+            agents.push({ id: a, name: a, model: "sonnet" });
+            continue;
+          }
           if (!a || typeof a.id !== "string" || typeof a.name !== "string") {
-            res.status(400).json({ error: "Each agent must have string 'id' and 'name' fields" });
+            res.status(400).json({
+              error:
+                "Each agent must be a string id or an object with string 'id' and 'name' fields",
+            });
             return;
           }
+          agents.push({
+            id: a.id,
+            name: a.name,
+            model: (a.model ?? "sonnet") as "opus" | "sonnet" | "haiku",
+          });
         }
       }
-      const room = roomManager.createRoom(name, topic, agents ?? []);
+      const room = roomManager.createRoom(name, topic, agents);
       res.status(201).json(room);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -313,24 +336,36 @@ You are a teammate on Slack, not an assistant writing a report.
         text,
         to,
         id: clientId,
+        type,
+        approvalStatus,
+        actionCommand,
       } = req.body as {
         from?: string;
         text?: string;
         to?: string;
         id?: string;
+        type?: "message" | "action" | "approval-request" | "system";
+        approvalStatus?: "pending" | "approved" | "rejected";
+        actionCommand?: string;
       };
       if (!text) {
         res.status(400).json({ error: "Missing 'text'" });
         return;
       }
 
+      // Allow posting approval-request (and other non-message) types via API so
+      // integrations / tests can surface human-in-the-loop prompts directly.
+      const resolvedType = type ?? "message";
+      const isApproval = resolvedType === "approval-request";
       const msg = roomManager.addMessage(
         roomId,
         {
           from: from ?? "user",
           text,
           to,
-          type: "message",
+          type: resolvedType,
+          ...(isApproval ? { approvalStatus: approvalStatus ?? "pending" } : {}),
+          ...(actionCommand ? { actionCommand } : {}),
         },
         clientId,
       );
@@ -341,15 +376,37 @@ You are a teammate on Slack, not an assistant writing a report.
       }
 
       const room = roomManager.getRoom(roomId);
-      if (room && (from === "user" || from === undefined)) {
+      if (room && resolvedType === "message" && (from === "user" || from === undefined)) {
         const protocol = getOrCreateProtocol(roomId);
         if (protocol.isPaused) {
           protocol.resume();
         }
         agentTurnCounts.set(roomId, 0); // Reset turn counter on human input
-        // Route to the first agent in the room (no hardcoded orchestrator dependency)
-        const targetAgent = room.agents[0]?.id ?? "orchestrator";
-        protocol.humanMessage(text, targetAgent);
+
+        // Leading @mention parser: if the message begins with @<slug>,
+        // route directly to that agent and skip the orchestrator fan-out.
+        // Anchored at ^ so mid-body emails (user@host.com) don't match.
+        // Only the FIRST leading mention routes; any additional @tokens
+        // remain in the prompt body delivered to the target agent.
+        const leadingMention = text.match(/^@([a-z0-9][a-z0-9_-]*)\b/i);
+        let routed = false;
+        if (leadingMention) {
+          const slug = leadingMention[1].toLowerCase();
+          const matched = room.agents.find((a) => a.id.toLowerCase() === slug);
+          if (matched) {
+            // Reuses the existing SdkSession for this agent — no new session
+            // is created per @-mention (onInvoke lazy-spawns if absent).
+            protocol.routeHumanMessageTo(matched.id, text);
+            routed = true;
+          }
+          // Unknown slug: silent fallthrough to orchestrator below
+        }
+
+        if (!routed) {
+          // Route to the first agent in the room (no hardcoded orchestrator dependency)
+          const targetAgent = room.agents[0]?.id ?? "orchestrator";
+          protocol.humanMessage(text, targetAgent);
+        }
       }
 
       res.status(201).json(msg);
@@ -401,6 +458,27 @@ You are a teammate on Slack, not an assistant writing a report.
   });
 
   router.post("/:id/reject/:msgId", (req, res) => {
+    const ok = roomManager.rejectAction(req.params["id"]!, req.params["msgId"]!);
+    if (!ok) {
+      res.status(404).json({ error: "Message not found or not pending" });
+      return;
+    }
+    res.json({ ok: true });
+  });
+
+  // Canonical REST-style paths mirroring the approval card contract. The
+  // older /:id/approve/:msgId variants are kept above for backward
+  // compatibility with existing clients.
+  router.post("/:id/messages/:msgId/approve", (req, res) => {
+    const ok = roomManager.approveAction(req.params["id"]!, req.params["msgId"]!);
+    if (!ok) {
+      res.status(404).json({ error: "Message not found or not pending" });
+      return;
+    }
+    res.json({ ok: true });
+  });
+
+  router.post("/:id/messages/:msgId/reject", (req, res) => {
     const ok = roomManager.rejectAction(req.params["id"]!, req.params["msgId"]!);
     if (!ok) {
       res.status(404).json({ error: "Message not found or not pending" });

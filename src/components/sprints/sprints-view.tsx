@@ -48,7 +48,10 @@ export function SprintsView() {
     void loadSprints();
   }, [loadSprints]);
 
-  // Listen for real-time sprint updates
+  // Listen for real-time sprint updates.
+  // Note: `workflow-update` carries the whole sprint list (array payload) and
+  // is routed to the `global` topic server-side, so it arrives without any
+  // explicit topic subscribe.
   useEffect(() => {
     const unsub = wsClient.on("workflow-update", (msg: WsMessage) => {
       if (Array.isArray(msg.payload)) {
@@ -57,6 +60,14 @@ export function SprintsView() {
     });
     return unsub;
   }, [setSprints]);
+
+  // Subscribe to the selected sprint's topic so scoped frames
+  // (workflow-step-update, workflow-gate-waiting, workflow-run-complete,
+  // workflow-run-failed) are delivered only for the run this tab is viewing.
+  useEffect(() => {
+    if (!selectedSprintId) return;
+    return wsClient.subscribeTopic(`sprint:${selectedSprintId}`);
+  }, [selectedSprintId]);
 
   // Auto-select when selection is stale (sprint deleted, back button, WebSocket update)
   useEffect(() => {

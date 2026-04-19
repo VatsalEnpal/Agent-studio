@@ -1,6 +1,6 @@
 {
   "name": "agent-studio",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Web-based command center for AI coding agents. Manage Claude Code sessions, custom agents, and automated workflows from one dashboard.",
   "license": "MIT",
   "repository": {
@@ -15,6 +15,9 @@
     "automation"
   ],
   "main": "electron/main.js",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "start": "npm run build:all && node dist-server/index.js",
     "dev": "tsx server/index.ts",
@@ -25,6 +28,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:smoke": "bash scripts/smoke-test.sh",
+    "a11y": "node scripts/a11y-scan.mjs",
     "electron": "electron electron/main.js",
     "electron:dev": "concurrently \"npm run dev\" \"sleep 8 && EXTERNAL_SERVER_PORT=8080 electron electron/main.js\"",
     "build:mac": "npm run build:all && electron-builder --mac",
@@ -33,10 +37,15 @@
     "build:linux": "npm run build:all && electron-builder --linux",
     "postbuild:mac": "npm rebuild node-pty",
     "postbuild:win": "npm rebuild node-pty",
-    "postbuild:linux": "npm rebuild node-pty"
+    "postbuild:linux": "npm rebuild node-pty",
+    "claude:auto": "claude --permission-mode auto",
+    "claude:plan": "claude --permission-mode plan",
+    "claude:shiploop": "echo '→ Run: claude --permission-mode auto  then type: /shiploop'",
+    "bootstrap": "bash install.sh"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.90",
+    "@anthropic-ai/claude-code": "~1.0.128",
     "@phosphor-icons/react": "^2.1.10",
     "@radix-ui/react-dialog": "^1.1.0",
     "@radix-ui/react-dropdown-menu": "^2.1.0",
@@ -74,6 +83,7 @@
     "@types/supertest": "^7.2.0",
     "@types/ws": "^8",
     "autoprefixer": "^10",
+    "axe-core": "^4.11.3",
     "concurrently": "^9.2.1",
     "electron": "^41.1.1",
     "electron-builder": "^26.8.1",

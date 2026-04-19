@@ -59,27 +59,10 @@ interface AgentOption {
   model?: "opus" | "sonnet" | "haiku";
 }
 
+// Plan task 9: removed hardcoded DEFAULT_AGENTS fallback. The only intrinsic
+// agent is the "No Agent" sentinel, which the server returns from /api/agents.
 const DEFAULT_AGENTS: AgentOption[] = [
   { id: "none", name: "No Agent", description: "Plain Claude session" },
-  {
-    id: "orchestrator",
-    name: "orchestrator",
-    description: "Coordinates agent teams",
-  },
-  { id: "frontend", name: "frontend", description: "Builds UI code" },
-  {
-    id: "backend",
-    name: "backend",
-    description: "Builds APIs and server logic",
-  },
-  { id: "qa", name: "qa", description: "Tests the application" },
-  {
-    id: "security",
-    name: "security",
-    description: "Reviews code for vulnerabilities",
-  },
-  { id: "pmo", name: "pmo", description: "Scans for tasks" },
-  { id: "documentation", name: "documentation", description: "Maintains docs" },
 ];
 
 const MODELS: ("opus" | "sonnet" | "haiku")[] = ["opus", "sonnet", "haiku"];
@@ -221,6 +204,7 @@ export function SessionLauncher({ open, onOpenChange, onLaunch }: SessionLaunche
   }, [defaultCwdLoaded]);
 
   useEffect(() => {
+    if (!open) return;
     void (async () => {
       try {
         const res = await fetch("/api/agents");
@@ -234,7 +218,7 @@ export function SessionLauncher({ open, onOpenChange, onLaunch }: SessionLaunche
         console.error("Caught error:", e);
       }
     })();
-  }, []);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;

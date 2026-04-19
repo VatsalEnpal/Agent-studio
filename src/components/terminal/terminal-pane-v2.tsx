@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 
 import { wsClient } from "@/lib/ws-client";
 import type { WsMessage } from "@/lib/types";
+import { useToastStore } from "@/stores/toast";
+
+const ALLOWED_IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/gif", "image/webp"]);
+const MAX_DROP_BYTES = 10 * 1024 * 1024;
 
 // ---------------------------------------------------------------------------
 // Global terminal pool — one Terminal instance per session
@@ -19,6 +23,7 @@ interface TerminalEntry {
   term: Terminal;
   fitAddon: FitAddon;
   wsUnsub: (() => void) | null;
+  topicUnsub: (() => void) | null;
   inputDisposable: { dispose: () => void } | null;
   bufferLoaded: boolean;
 }
@@ -32,8 +37,7 @@ function getOrCreateTerminal(sessionId: string): TerminalEntry {
   const term = new Terminal({
     cursorBlink: true,
     fontSize: 13,
-    fontFamily:
-      "'Geist Mono', 'SF Mono', SFMono-Regular, ui-monospace, Menlo, monospace",
+    fontFamily: "'Geist Mono', 'SF Mono', SFMono-Regular, ui-monospace, Menlo, monospace",
     theme: {
       background: "#050505",
       foreground: "#d4d4d4",
@@ -69,10 +73,15 @@ function getOrCreateTerminal(sessionId: string): TerminalEntry {
     }
   });
 
+  // Subscribe to this session's topic so the server routes terminal-data
+  // frames here. Without this, only `global` frames would arrive.
+  const topicUnsub = wsClient.subscribeTopic(`terminal:${sessionId}`);
+
   const entry: TerminalEntry = {
     term,
     fitAddon,
     wsUnsub,
+    topicUnsub,
     inputDisposable,
     bufferLoaded: false,
   };
@@ -103,6 +112,7 @@ export function disposeTerminal(sessionId: string): void {
   const entry = terminalPool.get(sessionId);
   if (!entry) return;
   entry.wsUnsub?.();
+  entry.topicUnsub?.();
   entry.inputDisposable?.dispose();
   entry.fitAddon.dispose();
   entry.term.dispose();
@@ -119,13 +129,95 @@ interface TerminalPaneV2Props {
   fontSize?: number;
 }
 
-export function TerminalPaneV2({
-  sessionId,
-  visible = true,
-  fontSize,
-}: TerminalPaneV2Props) {
+export function TerminalPaneV2({ sessionId, visible = true, fontSize }: TerminalPaneV2Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const attachedRef = useRef<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const dragDepthRef = useRef(0);
+  const addToast = useToastStore((s) => s.addToast);
+
+  // Drag-and-drop handlers for image attachment.
+  // Uses raw binary upload (Content-Type: image/<ext>, body = file bytes).
+  // On success, inserts `@<absolute-path> ` into the PTY input so Claude Code
+  // picks it up via the native @-path syntax.
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (!e.dataTransfer?.types.includes("Files")) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (!e.dataTransfer?.types.includes("Files")) return;
+    e.preventDefault();
+    dragDepthRef.current += 1;
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+    if (dragDepthRef.current === 0) setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      dragDepthRef.current = 0;
+      setIsDragOver(false);
+
+      const files = e.dataTransfer?.files;
+      const file = files?.[0];
+      if (!file) return;
+
+      const multiple = files && files.length > 1;
+
+      if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+        addToast(
+          `Unsupported file type "${file.type || "unknown"}". Drop a PNG, JPEG, GIF, or WebP.`,
+          "error",
+        );
+        return;
+      }
+      if (file.size > MAX_DROP_BYTES) {
+        addToast(
+          `Image too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Max 10 MB.`,
+          "error",
+        );
+        return;
+      }
+
+      void (async () => {
+        try {
+          const res = await fetch("/api/terminal-images/upload", {
+            method: "POST",
+            headers: { "Content-Type": file.type },
+            body: file,
+          });
+          const data = (await res.json()) as { ok?: boolean; path?: string; error?: string };
+          if (!res.ok || !data.ok || !data.path) {
+            throw new Error(data.error ?? `Upload failed (${res.status})`);
+          }
+          // Inject `@<path> ` into the PTY input. The server's WsMessage
+          // "terminal-input" handler writes straight to the pty master, so
+          // the text appears on the user's current input line whether they
+          // are in bash or inside a claude prompt.
+          wsClient.send({
+            type: "terminal-input",
+            sessionId,
+            data: `@${data.path} `,
+          });
+          addToast(`Image attached: @${data.path}`, "success");
+          if (multiple) {
+            addToast("Only the first image was attached", "info");
+          }
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Upload failed";
+          addToast(msg, "error");
+        }
+      })();
+    },
+    [sessionId, addToast],
+  );
 
   const fitAndResize = useCallback(
     (entry: TerminalEntry) => {
@@ -276,9 +368,19 @@ export function TerminalPaneV2({
 
   return (
     <div
-      ref={containerRef}
-      className="flex-1 min-h-0 overflow-hidden"
-      style={{ backgroundColor: "#050505" }}
-    />
+      data-testid="terminal-drop-zone"
+      className="flex-1 min-h-0 overflow-hidden relative"
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      <div ref={containerRef} className="h-full w-full" style={{ backgroundColor: "#050505" }} />
+      {isDragOver && (
+        <div className="absolute inset-0 flex items-center justify-center bg-canvas/80 border-2 border-dashed border-sessions rounded-md pointer-events-none text-text-secondary text-sm font-medium z-10">
+          Drop image to attach
+        </div>
+      )}
+    </div>
   );
 }

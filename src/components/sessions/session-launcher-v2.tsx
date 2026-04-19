@@ -6,6 +6,8 @@ import { CloseIcon, ChevronDownIcon, SearchIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import type { LauncherPreset } from "@/lib/types";
 import { QuickImport } from "./quick-import";
+import { CreateAgentDialog } from "@/components/agents/create-agent-dialog";
+import { BrowseTemplatesDialog } from "@/components/agents/browse-templates-dialog";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -23,6 +25,7 @@ interface AgentOption {
   name: string;
   description: string;
   model?: "opus" | "sonnet" | "haiku";
+  scope?: "global" | { project: string };
 }
 
 interface SessionLauncherV2Props {
@@ -92,27 +95,12 @@ const PRESETS: (LauncherPreset & { description: string })[] = [
   },
 ];
 
+// Plan task 9: removed the hardcoded DEFAULT_AGENTS fallback. The list now
+// starts with the "No Agent" sentinel only; real agents come from
+// GET /api/agents. If no real agents are discovered the launcher shows an
+// empty-state block instead of a populated dropdown.
 const DEFAULT_AGENTS: AgentOption[] = [
   { id: "none", name: "No Agent", description: "Plain Claude session" },
-  {
-    id: "orchestrator",
-    name: "orchestrator",
-    description: "Coordinates agent teams",
-  },
-  { id: "frontend", name: "frontend", description: "Builds UI code" },
-  {
-    id: "backend",
-    name: "backend",
-    description: "Builds APIs and server logic",
-  },
-  { id: "qa", name: "qa", description: "Tests the application" },
-  {
-    id: "security",
-    name: "security",
-    description: "Reviews code for vulnerabilities",
-  },
-  { id: "pmo", name: "pmo", description: "Scans for tasks" },
-  { id: "documentation", name: "documentation", description: "Maintains docs" },
 ];
 
 const MODELS: ("opus" | "sonnet" | "haiku")[] = ["opus", "sonnet", "haiku"];
@@ -170,6 +158,10 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
   const [resumeDropdownOpen, setResumeDropdownOpen] = useState(false);
   const [resumeSearch, setResumeSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Plan task 9: first-run empty-state dialogs (A7 + A8 hosts).
+  const [createAgentOpen, setCreateAgentOpen] = useState(false);
+  const [browseTemplatesOpen, setBrowseTemplatesOpen] = useState(false);
 
   // Defaults loaded from server config
   const [configDefaults, setConfigDefaults] = useState<{
@@ -280,16 +272,25 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
     })();
   }, [defaultCwdLoaded]);
 
-  // Fetch agents
+  // Fetch agents — refetch every time the dialog opens (or when cwd changes
+  // while open) so the list reflects the current project's scope filter plus
+  // any agents created/imported since last open.
+  // Task A9: pass the current cwd as ?projectPath= so project-scoped agents
+  // from .claude/agents under the selected project show up alongside globals.
   useEffect(() => {
+    if (!open) return;
     setAgentsLoading(true);
     setAgentsError(null);
     void (async () => {
       try {
-        const res = await fetch("/api/agents");
+        const url =
+          cwd && cwd !== "~" ? `/api/agents?projectPath=${encodeURIComponent(cwd)}` : "/api/agents";
+        const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error(`Failed to load agents (${String(res.status)})`);
         const data = (await res.json()) as AgentOption[];
-        if (Array.isArray(data) && data.length > 0) setAgents(data);
+        // Plan task 9: always replace the list — if the server returns only
+        // the "none" sentinel, the dropdown section swaps to the empty state.
+        if (Array.isArray(data)) setAgents(data);
       } catch (e) {
         console.error("Caught error:", e);
         setAgentsError(e instanceof Error ? e.message : "Failed to load agents");
@@ -297,7 +298,7 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
         setAgentsLoading(false);
       }
     })();
-  }, []);
+  }, [open, cwd]);
 
   // Fetch recent sessions when opened
   useEffect(() => {
@@ -456,15 +457,20 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
   // Quick Import: refresh agents list after a successful import
   const refreshAgents = useCallback(async () => {
     try {
-      const res = await fetch("/api/agents");
+      const url =
+        cwd && cwd !== "~"
+          ? `/api/agents?projectPath=${encodeURIComponent(cwd)}&refresh=1`
+          : "/api/agents?refresh=1";
+      const res = await fetch(url, { cache: "no-store" });
       if (res.ok) {
         const data = (await res.json()) as AgentOption[];
-        if (Array.isArray(data) && data.length > 0) setAgents(data);
+        // Always replace — empty lists trigger the empty-state render.
+        if (Array.isArray(data)) setAgents(data);
       }
     } catch {
       // Ignore -- agent list will refresh on next dialog open
     }
-  }, []);
+  }, [cwd]);
 
   // Quick Import: launch session with the newly imported agent
   const handleQuickImportLaunch = useCallback(
@@ -703,27 +709,56 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
               </div>
             </div>
 
-            {/* Agent */}
+            {/* Agent — dropdown when agents exist, first-run empty state when
+                only the "none" sentinel is present (plan task 9). */}
             <div>
               <span className="block text-2xs font-medium uppercase text-text-ghost tracking-[0.5px] mb-1">
                 Agent
               </span>
-              <select
-                value={agent}
-                onChange={(e) => {
-                  const selectedId = e.target.value;
-                  setAgent(selectedId);
-                  const selectedAgent = agents.find((a) => a.id === selectedId);
-                  if (selectedAgent?.model) setModel(selectedAgent.model);
-                }}
-                className={inputCls}
-              >
-                {agents.map((a) => (
-                  <option key={a.id} value={a.id} title={a.description}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
+              {agents.filter((a) => a.id !== "none").length === 0 && !agentsLoading ? (
+                <AgentEmptyState
+                  onCreate={() => setCreateAgentOpen(true)}
+                  onBrowse={() => setBrowseTemplatesOpen(true)}
+                  onScanPath={() => {
+                    // Close the launcher and ask page-v2 to open
+                    // Settings → Agents (where Add source lives).
+                    onOpenChange(false);
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("agentstudio:open-settings-agents"));
+                    }
+                  }}
+                  onRefresh={() => void refreshAgents()}
+                  refreshing={agentsLoading}
+                />
+              ) : (
+                <select
+                  value={agent}
+                  onChange={(e) => {
+                    const selectedId = e.target.value;
+                    setAgent(selectedId);
+                    const selectedAgent = agents.find((a) => a.id === selectedId);
+                    if (selectedAgent?.model) setModel(selectedAgent.model);
+                  }}
+                  className={inputCls}
+                >
+                  {agents.map((a) => {
+                    // Task A9: scope badge — ● Global, ◆ Project. "none" has no scope.
+                    const badge =
+                      a.scope === "global"
+                        ? "● "
+                        : a.scope && typeof a.scope === "object"
+                          ? "◆ "
+                          : "";
+                    return (
+                      <option key={a.id} value={a.id} title={a.description}>
+                        {badge}
+                        {a.name}
+                      </option>
+                    );
+                  })}
+                </select>
+              )}
+              {agentsError && <p className="mt-1 text-2xs text-error">{agentsError}</p>}
             </div>
 
             {/* Permissions — subtle pills */}
@@ -817,6 +852,71 @@ export function SessionLauncherV2({ open, onOpenChange, onLaunch }: SessionLaunc
           </div>
         </Dialog.Content>
       </Dialog.Portal>
+
+      {/* Plan task 9: host dialogs for the first-run empty state. */}
+      <CreateAgentDialog
+        open={createAgentOpen}
+        onOpenChange={setCreateAgentOpen}
+        onCreated={() => {
+          setCreateAgentOpen(false);
+          void refreshAgents();
+        }}
+      />
+      <BrowseTemplatesDialog
+        open={browseTemplatesOpen}
+        onOpenChange={setBrowseTemplatesOpen}
+        onImported={() => {
+          setBrowseTemplatesOpen(false);
+          void refreshAgents();
+        }}
+      />
     </Dialog.Root>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// First-run empty state (plan task 9)
+// ---------------------------------------------------------------------------
+
+interface AgentEmptyStateProps {
+  onCreate: () => void;
+  onBrowse: () => void;
+  onScanPath: () => void;
+  onRefresh: () => void;
+  refreshing: boolean;
+}
+
+function AgentEmptyState({
+  onCreate,
+  onBrowse,
+  onScanPath,
+  onRefresh,
+  refreshing,
+}: AgentEmptyStateProps) {
+  const btnCls =
+    "px-2 py-1 rounded text-xs font-medium transition-all border border-border-default hover:border-[#f59e0b]/40 hover:bg-[#f59e0b]/5 active:scale-[0.98] text-text-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
+  return (
+    <div className="rounded border border-dashed border-border-default bg-bg-input/40 px-3 py-2.5 space-y-2">
+      <p className="text-xs text-text-primary">You haven&apos;t set up any agents yet.</p>
+      <p className="text-2xs text-text-ghost">
+        Agents are <code className="font-mono">.md</code> files in{" "}
+        <code className="font-mono">~/.claude/agents/</code> or{" "}
+        <code className="font-mono">&lt;project&gt;/.claude/agents/</code>.
+      </p>
+      <div className="flex gap-1 flex-wrap pt-0.5">
+        <button type="button" onClick={onCreate} className={btnCls}>
+          + Create Agent
+        </button>
+        <button type="button" onClick={onBrowse} className={btnCls}>
+          Browse Templates
+        </button>
+        <button type="button" onClick={onScanPath} className={btnCls}>
+          Scan custom path…
+        </button>
+        <button type="button" onClick={onRefresh} disabled={refreshing} className={btnCls}>
+          {refreshing ? "Refreshing…" : "Refresh"}
+        </button>
+      </div>
+    </div>
   );
 }

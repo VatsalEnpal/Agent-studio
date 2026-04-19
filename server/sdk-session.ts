@@ -3,6 +3,105 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 import type { SDKMessage } from "@anthropic-ai/claude-agent-sdk";
 import { EventEmitter } from "events";
 import { randomUUID } from "node:crypto";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
+// ---------------------------------------------------------------------------
+// Claude CLI path resolution.
+//
+// The SDK spawns `pathToClaudeCodeExecutable` as the Claude Code process.
+// The `@anthropic-ai/claude-code` npm package declares `"bin": {"claude":
+// "bin/claude.exe"}` — despite the `.exe` extension, on macOS/Linux this
+// file is a platform-native executable (Mach-O arm64 / ELF x86_64) that
+// the SDK is built to invoke directly. That is the canonical target.
+//
+// Resolution order (R1b attempt 3):
+//   1) CLAUDE_PATH env override — honored as-is if the file exists.
+//   2) node_modules/@anthropic-ai/claude-code/bin/claude.exe — the npm
+//      package's native binary. Added as a direct dep in ab9ba8d, so this
+//      should always be present after `npm install`.
+//   3) node_modules/@anthropic-ai/claude-code/cli-wrapper.cjs — a Node
+//      fallback launcher shipped by the same package.
+//   4) null — let the SDK use its own built-in default resolution.
+//
+// Previous attempts that failed and why:
+//   - Passing `~/.local/bin/claude` (a system-installed native binary):
+//     SDK rejected with "native binary not found" (the file is likely a
+//     symlink that fails an internal signature check).
+//   - Passing `node_modules/@anthropic-ai/claude-agent-sdk/cli.js`: SDK
+//     rejected with "Claude Code executable not found" — the SDK wants
+//     the claude-code package's binary, not its own cli.js.
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve the executable path the Claude Agent SDK should spawn.
+ *
+ * IMPORTANT: `@anthropic-ai/claude-agent-sdk@0.2.x` only works with
+ * `@anthropic-ai/claude-code@1.x` (the legacy `cli.js` Node entrypoint).
+ * The v2.x release of `@anthropic-ai/claude-code` ships a native binary
+ * (`bin/claude.exe`) whose CLI surface the SDK does NOT recognize, so room
+ * agents fail to start. That's why `package.json` pins claude-code to
+ * `~1.0.128` (patch-only). Do NOT widen that range without simultaneously
+ * upgrading the SDK and re-validating room dispatch.
+ *
+ * (M7 — recorded for v0.7 SDK upgrade work.)
+ */
+function resolveClaudeCliPath(): string | null {
+  // 1) Explicit env override — trust the user
+  const envPath = process.env["CLAUDE_PATH"];
+  if (envPath && existsSync(envPath)) {
+    return envPath;
+  }
+
+  // 2a) claude-code v1.x cli.js — JS entry the SDK can invoke as Node
+  const claudeCodeCliJs = join(
+    process.cwd(),
+    "node_modules",
+    "@anthropic-ai",
+    "claude-code",
+    "cli.js",
+  );
+  if (existsSync(claudeCodeCliJs)) return claudeCodeCliJs;
+
+  // 2b) claude-code v2.x native binary fallback
+  const claudeCodeBin = join(
+    process.cwd(),
+    "node_modules",
+    "@anthropic-ai",
+    "claude-code",
+    "bin",
+    "claude.exe",
+  );
+  if (existsSync(claudeCodeBin)) return claudeCodeBin;
+
+  // 3) claude-code's Node-based wrapper as fallback
+  const claudeCodeWrapper = join(
+    process.cwd(),
+    "node_modules",
+    "@anthropic-ai",
+    "claude-code",
+    "cli-wrapper.cjs",
+  );
+  if (existsSync(claudeCodeWrapper)) return claudeCodeWrapper;
+
+  // 4) Nothing found — let the SDK use its own built-in default.
+  return null;
+}
+
+const RESOLVED_CLAUDE_PATH: string | null = resolveClaudeCliPath();
+if (RESOLVED_CLAUDE_PATH) {
+  console.log(`[sdk-session] Using Claude CLI at: ${RESOLVED_CLAUDE_PATH}`);
+} else {
+  console.warn(
+    "[sdk-session] Could not resolve `claude` CLI executable. " +
+      "Room agents will fail until CLAUDE_PATH is set or `claude` is on PATH. " +
+      "Install from https://claude.ai/code",
+  );
+}
+
+export function getResolvedClaudePath(): string | null {
+  return RESOLVED_CLAUDE_PATH;
+}
 
 export interface SdkSession {
   agentId: string;
@@ -95,6 +194,12 @@ export class SdkSessionManager extends EventEmitter {
         allowDangerouslySkipPermissions: true,
         includePartialMessages: true,
       };
+
+      // The SDK looks for a bundled cli.js that doesn't exist — point it at
+      // the system `claude` binary we resolved at module load.
+      if (RESOLVED_CLAUDE_PATH) {
+        options.pathToClaudeCodeExecutable = RESOLVED_CLAUDE_PATH;
+      }
 
       // Resume existing conversation if we have a sessionId
       if (session.sessionId) {

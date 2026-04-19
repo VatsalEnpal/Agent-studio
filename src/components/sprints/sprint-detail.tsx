@@ -173,6 +173,12 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
   const [pausing, setPausing] = useState(false);
   const [confirmingResume, setConfirmingResume] = useState(false);
   const [resuming, setResuming] = useState(false);
+  // S3: per-gate inline error shown under the step card on API failure.
+  const [gateErrors, setGateErrors] = useState<Record<string, string>>({});
+  // S3: lazy-loaded handoff output JSON keyed by stepId.
+  const [gateOutputs, setGateOutputs] = useState<
+    Record<string, { loading: boolean; content?: unknown; error?: string }>
+  >({});
 
   const badge = statusBadge(sprint.status);
   const eta = estimateETA(sprint);
@@ -185,19 +191,58 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
   const handleApproveGate = useCallback(
     async (gateId: string) => {
       setApprovingGate(gateId);
+      // Clear any stale inline error from a previous attempt.
+      setGateErrors((prev) => {
+        if (!prev[gateId]) return prev;
+        const next = { ...prev };
+        delete next[gateId];
+        return next;
+      });
       try {
         const res = await fetch(`/api/sprints/${sprint.id}/gates/${gateId}/approve`, {
           method: "POST",
         });
-        if (!res.ok) throw new Error("Failed to approve gate");
+        if (!res.ok) {
+          // Surface the server message when available; fall back to a generic error.
+          let message = `Approve failed (${res.status})`;
+          try {
+            const body = (await res.json()) as { error?: string };
+            if (body?.error) message = body.error;
+          } catch {
+            /* non-JSON body */
+          }
+          throw new Error(message);
+        }
         addToast("Gate approved", "success");
-      } catch {
-        addToast("Failed to approve gate", "error");
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to approve gate";
+        setGateErrors((prev) => ({ ...prev, [gateId]: message }));
+        addToast(message, "error");
       } finally {
         setApprovingGate(null);
       }
     },
     [sprint.id, addToast],
+  );
+
+  const handleLoadOutput = useCallback(
+    async (gateId: string) => {
+      setGateOutputs((prev) => ({ ...prev, [gateId]: { loading: true } }));
+      try {
+        const res = await fetch(`/api/sprints/${sprint.id}/steps/${gateId}/output`);
+        if (!res.ok) {
+          const message = res.status === 404 ? "No output yet" : `Failed (${res.status})`;
+          setGateOutputs((prev) => ({ ...prev, [gateId]: { loading: false, error: message } }));
+          return;
+        }
+        const content = (await res.json()) as unknown;
+        setGateOutputs((prev) => ({ ...prev, [gateId]: { loading: false, content } }));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to load output";
+        setGateOutputs((prev) => ({ ...prev, [gateId]: { loading: false, error: message } }));
+      }
+    },
+    [sprint.id],
   );
 
   const handlePause = useCallback(async () => {
@@ -331,16 +376,24 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                   Pause
                 </button>
               ))}
-            {sprint.status === "paused" &&
+            {(sprint.status === "paused" || sprint.status === "planned") &&
               (confirmingResume ? (
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-text-tertiary">Resume this sprint?</span>
+                  <span className="text-xs text-text-tertiary">
+                    {sprint.status === "planned" ? "Start this sprint?" : "Resume this sprint?"}
+                  </span>
                   <button
                     onClick={() => void handleResume()}
                     disabled={resuming}
                     className="px-2.5 py-0.5 text-xs font-medium bg-sprints text-bg-base rounded hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
                   >
-                    {resuming ? "Resuming..." : "Resume"}
+                    {resuming
+                      ? sprint.status === "planned"
+                        ? "Starting..."
+                        : "Resuming..."
+                      : sprint.status === "planned"
+                        ? "Start"
+                        : "Resume"}
                   </button>
                   <button
                     onClick={() => setConfirmingResume(false)}
@@ -355,7 +408,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                   className="flex items-center gap-1 px-3 py-1 text-xs font-semibold bg-sprints text-bg-base rounded hover:opacity-90 active:scale-[0.98] transition-all shadow-sm"
                 >
                   <PlayIcon size={12} />
-                  Resume Sprint
+                  {sprint.status === "planned" ? "Start Sprint" : "Resume Sprint"}
                 </button>
               ))}
             {(sprint.status === "in_progress" ||
@@ -466,12 +519,16 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                 const isPassed = gate.status === "passed";
                 const isCurrent = gate.status === "in_progress";
                 const isFailed = gate.status === "failed";
+                const isAwaiting = gate.status === "awaiting";
                 const isExpanded = expandedGateId === gate.id;
+                // Legacy requirements-satisfied gate (file-based sprints).
                 const isReady =
                   isCurrent &&
                   gate.requirements.length > 0 &&
                   gate.requirements.every((r) => r.met);
                 const hasAction = gate.action && (isCurrent || gate.status === "not_started");
+                const gateError = gateErrors[gate.id];
+                const outputState = gateOutputs[gate.id];
 
                 return (
                   <div key={gate.id}>
@@ -486,26 +543,46 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                           "w-2.5 h-2.5 rounded-full shrink-0",
                           isPassed && "bg-sessions",
                           isCurrent && "bg-sprints animate-pulse-dot",
+                          isAwaiting && "bg-amber-400 animate-pulse-dot",
                           isFailed && "bg-error",
-                          !isPassed && !isCurrent && !isFailed && "bg-border-default",
+                          !isPassed &&
+                            !isCurrent &&
+                            !isAwaiting &&
+                            !isFailed &&
+                            "bg-border-default",
                         )}
                       />
 
                       {/* Gate name */}
                       <span
                         className={cn(
-                          "text-xs font-medium flex-1 truncate",
+                          "text-xs font-medium truncate",
                           isPassed
                             ? "text-text-primary"
                             : isCurrent
                               ? "text-sprints"
-                              : isFailed
-                                ? "text-error"
-                                : "text-text-tertiary",
+                              : isAwaiting
+                                ? "text-amber-400"
+                                : isFailed
+                                  ? "text-error"
+                                  : "text-text-tertiary",
                         )}
                       >
                         {gate.name}
                       </span>
+
+                      {/* Agent chip (S3) */}
+                      {gate.agent && (
+                        <span
+                          className="text-2xs font-medium px-1.5 py-0.5 rounded bg-bg-elevated text-text-tertiary shrink-0"
+                          title={`Agent: ${gate.agent}`}
+                        >
+                          {gate.agent}
+                        </span>
+                      )}
+
+                      {/* Spacer so status/chevron stay right-aligned */}
+                      <span className="flex-1" />
 
                       {/* Status label */}
                       <span
@@ -513,17 +590,20 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                           "text-2xs font-medium px-1.5 py-0.5 rounded-full shrink-0",
                           isPassed && "bg-sessions/10 text-sessions",
                           isCurrent && "bg-sprints/10 text-sprints",
+                          isAwaiting && "bg-amber-400/10 text-amber-400",
                           isFailed && "bg-error/10 text-error",
-                          !isPassed && !isCurrent && !isFailed && "text-text-ghost",
+                          !isPassed && !isCurrent && !isAwaiting && !isFailed && "text-text-ghost",
                         )}
                       >
                         {isPassed
-                          ? "Passed"
+                          ? "Completed"
                           : isCurrent
-                            ? "In Progress"
-                            : isFailed
-                              ? "Failed"
-                              : "Pending"}
+                            ? "Running"
+                            : isAwaiting
+                              ? "Awaiting approval"
+                              : isFailed
+                                ? "Failed"
+                                : "Pending"}
                       </span>
 
                       {/* Expand chevron */}
@@ -539,8 +619,25 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                     {/* Expanded details — inline below the gate */}
                     {isExpanded && <ExpandedGatePanel gate={gate} />}
 
-                    {/* Approve button for gates ready for approval */}
-                    {isReady && (
+                    {/* S3: Awaiting-approval affordance (per-step executor gate). */}
+                    {isAwaiting && (
+                      <div className="px-4 py-2 bg-amber-400/5 flex items-center gap-2">
+                        <CheckIcon size={12} className="text-amber-400 shrink-0" />
+                        <span className="text-xs text-amber-400 flex-1">
+                          {gate.name} awaiting approval
+                        </span>
+                        <button
+                          onClick={() => void handleApproveGate(gate.id)}
+                          disabled={approvingGate === gate.id}
+                          className="px-3 py-1 text-xs font-medium bg-amber-400 text-bg-base rounded hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100"
+                        >
+                          {approvingGate === gate.id ? "Approving..." : "Approve"}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Approve button for gates ready for approval (legacy file-based). */}
+                    {isReady && !isAwaiting && (
                       <div className="px-4 py-2 bg-sprints/5 flex items-center gap-2">
                         <CheckIcon size={12} className="text-sprints shrink-0" />
                         <span className="text-xs text-sprints flex-1">
@@ -563,7 +660,7 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                     )}
 
                     {/* Action button for gates with explicit actions (not already showing approve) */}
-                    {hasAction && !isReady && (
+                    {hasAction && !isReady && !isAwaiting && (
                       <div className="px-4 py-2 bg-sprints/5 flex items-center gap-2">
                         <BoltIcon size={12} className="text-sprints shrink-0" />
                         <span className="text-xs font-medium text-text-primary flex-1">
@@ -582,6 +679,53 @@ export function SprintDetail({ sprint, onBack }: SprintDetailProps) {
                         >
                           {approvingGate === gate.id ? "..." : (gate.action?.label ?? "Approve")}
                         </button>
+                      </div>
+                    )}
+
+                    {/* S3: inline red error under the step card (e.g. Approve failed). */}
+                    {gateError && (
+                      <div className="px-4 py-2 bg-error/5 flex items-start gap-2 border-t border-error/20">
+                        <span className="text-xs text-error flex-1">Error: {gateError}</span>
+                        <button
+                          onClick={() =>
+                            setGateErrors((prev) => {
+                              const next = { ...prev };
+                              delete next[gate.id];
+                              return next;
+                            })
+                          }
+                          className="text-2xs text-error/70 hover:text-error transition-all"
+                        >
+                          Dismiss
+                        </button>
+                      </div>
+                    )}
+
+                    {/* S3: handoff output JSON — lazy-loaded from
+                        /api/sprints/:sprintId/steps/:stepId/output. */}
+                    {gate.hasOutput && (
+                      <div className="px-4 py-2 bg-bg-elevated/30 border-t border-border-subtle">
+                        {!outputState ? (
+                          <button
+                            onClick={() => void handleLoadOutput(gate.id)}
+                            className="text-2xs font-medium text-text-tertiary hover:text-text-secondary underline decoration-dotted underline-offset-2 transition-all"
+                          >
+                            View handoff output
+                          </button>
+                        ) : outputState.loading ? (
+                          <span className="text-2xs text-text-ghost">Loading output...</span>
+                        ) : outputState.error ? (
+                          <span className="text-2xs text-error">Output: {outputState.error}</span>
+                        ) : (
+                          <details open>
+                            <summary className="text-2xs font-medium text-text-tertiary cursor-pointer hover:text-text-secondary">
+                              Handoff output
+                            </summary>
+                            <pre className="mt-1.5 text-2xs font-mono text-text-secondary whitespace-pre-wrap break-all leading-relaxed max-h-48 overflow-y-auto scrollbar-thin">
+                              {JSON.stringify(outputState.content, null, 2)}
+                            </pre>
+                          </details>
+                        )}
                       </div>
                     )}
                   </div>

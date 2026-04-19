@@ -5,11 +5,12 @@
  * Emits events for UI updates via a listener callback.
  */
 
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { execSync } from "node:child_process";
 import { homedir } from "node:os";
 import type { CommandRunner } from "./command-runner.js";
+import { getAgentSystemBase } from "../config.js";
+import { getResolvedClaudePath } from "../sdk-session.js";
 import {
   validateWorkflow,
   type WorkflowPipelineDef,
@@ -56,11 +57,64 @@ export class WorkflowExecutor {
   private runner: CommandRunner;
   private listeners: ExecutorEventListener[] = [];
   private activeRuns = new Map<string, { abortController: AbortController; paused: boolean }>();
+  /**
+   * Pending per-step gate approvals. Key: `${runId}::${stepId}`.
+   * Each entry resolves the promise with `"approved"` when the external
+   * approval arrives via `approveStepGate()` (wired from
+   * /api/sprints/:sprintId/gates/:gateId/approve), or `"cancelled"` when
+   * `pauseRun` / `cancelRun` clears the gate.
+   */
+  private pendingStepGates = new Map<string, (result: "approved" | "cancelled") => void>();
   /** Override retry delay for tests (default: 60000ms) */
   _testRetryDelayMs?: number;
 
   constructor(runner: CommandRunner) {
     this.runner = runner;
+  }
+
+  /** Key used in `pendingStepGates` — (runId, stepId) pair. */
+  private gateKey(runId: string, stepId: string): string {
+    return `${runId}::${stepId}`;
+  }
+
+  /**
+   * Register a pending step-gate approval and emit the gate-waiting event.
+   * Resolves with `"approved"` when `approveStepGate` is called, or
+   * `"cancelled"` if the run is paused/cancelled while waiting.
+   * Marks the run as `waiting_approval` and persists run state.
+   */
+  private waitForStepApproval(
+    runState: RunState,
+    stepId: string,
+    gateType: "approve-before-start" | "approve-before-finish",
+  ): Promise<"approved" | "cancelled"> {
+    const key = this.gateKey(runState.runId, stepId);
+    runState.status = "waiting_approval";
+    saveRunState(runState);
+    this.emit({
+      type: "gate-waiting",
+      runId: runState.runId,
+      workflowId: runState.workflowId,
+      stepId,
+      data: { gateType },
+    });
+    return new Promise<"approved" | "cancelled">((resolve) => {
+      this.pendingStepGates.set(key, resolve);
+    });
+  }
+
+  /**
+   * Externally signal that a per-step gate has been approved. Invoked from
+   * the /gates/:gateId/approve HTTP handler. No-op if no pending gate for
+   * this (runId, stepId).
+   */
+  approveStepGate(runId: string, stepId: string): boolean {
+    const key = this.gateKey(runId, stepId);
+    const resolve = this.pendingStepGates.get(key);
+    if (!resolve) return false;
+    this.pendingStepGates.delete(key);
+    resolve("approved");
+    return true;
   }
 
   /**
@@ -80,10 +134,10 @@ export class WorkflowExecutor {
       errors.push(...defValidation.errors);
     }
 
-    // Check claude CLI on PATH
-    try {
-      execSync("which claude", { stdio: "pipe" });
-    } catch {
+    // Check claude CLI is resolvable. `getResolvedClaudePath` is the
+    // canonical (cached, async-safe) probe used elsewhere in the server;
+    // it returns null when neither CLAUDE_PATH nor PATH yields a binary.
+    if (!getResolvedClaudePath()) {
       errors.push("Claude Code CLI not found. Install it from https://claude.ai/code");
     }
 
@@ -240,6 +294,174 @@ export class WorkflowExecutor {
     }
   }
 
+  /**
+   * Resolve the handoffs directory on disk:
+   *   <agent-system-base>/sprints/handoffs
+   * Falls back to `<cwd>/.agent-studio/sprints/handoffs` if no agent system
+   * is configured. Creates the directory if missing.
+   * Returns null if the directory cannot be created.
+   */
+  private resolveHandoffsDir(workflowDef: WorkflowPipelineDef): string | null {
+    const base = getAgentSystemBase();
+    const dir = base
+      ? join(base, "sprints", "handoffs")
+      : join(workflowDef.workingDirectory, ".agent-studio", "sprints", "handoffs");
+    try {
+      if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+      return dir;
+    } catch (err) {
+      console.warn("[workflow-executor] Could not create handoffs dir:", err);
+      return null;
+    }
+  }
+
+  /**
+   * Write (or reuse, on resume) the input handoff for a step.
+   * Shape: { stepId, goal, agent, priorStepOutput?: { stepId, ref } }
+   */
+  private writeHandoffInput(
+    stepDef: AgentStepDef,
+    workflowDef: WorkflowPipelineDef,
+    runState: RunState,
+  ): string | null {
+    const dir = this.resolveHandoffsDir(workflowDef);
+    if (!dir) return null;
+    const file = join(dir, `${stepDef.id}_input.json`);
+    if (existsSync(file)) return file; // reuse on resume
+
+    // Find the previous agent step's output file as the prior reference
+    const stepIndex = workflowDef.steps.findIndex((s) => s.id === stepDef.id);
+    let priorStepOutput: { stepId: string; ref: string } | undefined;
+    for (let i = stepIndex - 1; i >= 0; i--) {
+      const prev = workflowDef.steps[i];
+      if (prev.type === "agent") {
+        const prevRef = join(dir, `${prev.id}_output.json`);
+        priorStepOutput = { stepId: prev.id, ref: prevRef };
+        break;
+      }
+    }
+
+    const payload: Record<string, unknown> = {
+      stepId: stepDef.id,
+      runId: runState.runId,
+      workflowId: runState.workflowId,
+      agent: stepDef.agent,
+      goal: stepDef.goal,
+      ...(priorStepOutput ? { priorStepOutput } : {}),
+    };
+    try {
+      writeFileSync(file, JSON.stringify(payload, null, 2) + "\n", "utf-8");
+    } catch (err) {
+      console.warn("[workflow-executor] Could not write handoff input:", err);
+      return null;
+    }
+    return file;
+  }
+
+  /** Write the output handoff for a step. */
+  private writeHandoffOutput(
+    stepDef: AgentStepDef,
+    workflowDef: WorkflowPipelineDef,
+    runState: RunState,
+    stepState: StepState,
+  ): void {
+    const dir = this.resolveHandoffsDir(workflowDef);
+    if (!dir) return;
+    const file = join(dir, `${stepDef.id}_output.json`);
+    const payload: Record<string, unknown> = {
+      stepId: stepDef.id,
+      runId: runState.runId,
+      workflowId: runState.workflowId,
+      agent: stepDef.agent,
+      status: stepState.status,
+      completedAt: stepState.completedAt ?? new Date().toISOString(),
+      output: stepState.output ?? null,
+      tokenUsage: stepState.tokenUsage ?? null,
+    };
+    try {
+      writeFileSync(file, JSON.stringify(payload, null, 2) + "\n", "utf-8");
+    } catch (err) {
+      console.warn("[workflow-executor] Could not write handoff output:", err);
+    }
+  }
+
+  /**
+   * Test-only fast path: noop runtime.
+   * Reads handoff input (smoke check), writes canned output, marks step
+   * complete, emits step-completed. No subprocess is spawned.
+   *
+   * Honors `stepDef.gate === "approve-before-finish"` by pausing between
+   * producing output and emitting step-completed. The "approve-before-start"
+   * gate is enforced by the caller (executeAgentStep) before this runs.
+   */
+  private async executeNoopStep(
+    runState: RunState,
+    stepDef: AgentStepDef,
+    workflowDef: WorkflowPipelineDef,
+  ): Promise<void> {
+    const stepState = runState.steps[stepDef.id];
+    stepState.status = "running";
+    stepState.startedAt = new Date().toISOString();
+    saveRunState(runState);
+    this.emit({
+      type: "step-started",
+      runId: runState.runId,
+      workflowId: runState.workflowId,
+      stepId: stepDef.id,
+    });
+
+    // Smoke-check input file
+    const dir = this.resolveHandoffsDir(workflowDef);
+    const inputFile = dir ? join(dir, `${stepDef.id}_input.json`) : null;
+    if (inputFile && existsSync(inputFile)) {
+      try {
+        readFileSync(inputFile, "utf-8");
+      } catch {
+        /* ignore */
+      }
+    }
+
+    stepState.output = `test-noop output for ${stepDef.id}`;
+
+    // approve-before-finish: pause after output produced, before completion.
+    // Surface `waiting` on the step state so the UI step-card badge reads
+    // "Awaiting approval" (S3). `waitForStepApproval` also sets
+    // runState.status to `waiting_approval`.
+    if (stepDef.gate === "approve-before-finish") {
+      stepState.status = "waiting";
+      saveRunState(runState);
+      const result = await this.waitForStepApproval(runState, stepDef.id, "approve-before-finish");
+      // pause/cancel cleared the gate — leave the step `waiting` and
+      // bail. Output was already written above; the run will be marked
+      // paused/cancelled by the outer loop.
+      if (result === "cancelled") {
+        return;
+      }
+      // Post-approval: restore `running` on both run + step and persist
+      // BEFORE marking completed. This guarantees syncSprintFileFromRun
+      // sees a clean `running` transition instead of jumping straight from
+      // `waiting_approval` → `completed`, which can confuse UI polling
+      // that filters on intermediate states.
+      runState.status = "running";
+      stepState.status = "running";
+      stepState.approvedAt = new Date().toISOString();
+      saveRunState(runState);
+    }
+
+    stepState.status = "completed";
+    stepState.completedAt = new Date().toISOString();
+    saveRunState(runState);
+
+    this.writeHandoffOutput(stepDef, workflowDef, runState, stepState);
+
+    this.emit({
+      type: "step-completed",
+      runId: runState.runId,
+      workflowId: runState.workflowId,
+      stepId: stepDef.id,
+    });
+  }
+
   /** Execute a single agent step */
   async executeAgentStep(
     runState: RunState,
@@ -248,6 +470,36 @@ export class WorkflowExecutor {
     signal: AbortSignal,
   ): Promise<void> {
     const stepState = runState.steps[stepDef.id];
+
+    // Always write the input handoff before any runtime dispatch.
+    this.writeHandoffInput(stepDef, workflowDef, runState);
+
+    // Per-step gate: "approve-before-start" pauses BEFORE any dispatch.
+    // Mark step as waiting in persisted state so the UI can reflect it.
+    if (stepDef.gate === "approve-before-start") {
+      stepState.status = "waiting";
+      stepState.startedAt = stepState.startedAt ?? new Date().toISOString();
+      const result = await this.waitForStepApproval(runState, stepDef.id, "approve-before-start");
+      // If the gate was cleared by pause/cancel rather than approve, leave
+      // the step in `waiting` and bail. The outer executor loop will see
+      // the abort signal / paused flag and persist the appropriate run
+      // status. Importantly, do NOT fall through to dispatch — that would
+      // burn tokens after the operator asked us to stop.
+      if (result === "cancelled") {
+        return;
+      }
+      // Approved — resume as running. Fall through to normal dispatch.
+      runState.status = "running";
+      stepState.status = "pending";
+      stepState.approvedAt = new Date().toISOString();
+      saveRunState(runState);
+    }
+
+    // Noop runtime: deterministic completion for sprint verification.
+    if (stepDef.runtime === "noop") {
+      await this.executeNoopStep(runState, stepDef, workflowDef);
+      return;
+    }
 
     // --- Budget check before execution (Task 20) ---
     const effectiveBudgetCap = runState.budgetCapUsd ?? workflowDef.budgetCapUsd;
@@ -354,10 +606,29 @@ export class WorkflowExecutor {
           }
         }
 
+        // approve-before-finish: step produced output, but pause before
+        // we mark it completed / write the output handoff. Surface `waiting`
+        // on the step state so the UI step-card badge reads "Awaiting
+        // approval" (S3).
+        if (stepDef.gate === "approve-before-finish") {
+          stepState.status = "waiting";
+          saveRunState(runState);
+          await this.waitForStepApproval(runState, stepDef.id, "approve-before-finish");
+          // Post-approval: restore `running` + persist BEFORE completion so
+          // the run-state never jumps waiting_approval → completed in a
+          // single save (which can confuse UI pollers and downstream
+          // syncSprintFileFromRun consumers).
+          runState.status = "running";
+          stepState.status = "running";
+          stepState.approvedAt = new Date().toISOString();
+          saveRunState(runState);
+        }
+
         stepState.status = "completed";
         stepState.completedAt = new Date().toISOString();
         if (stepDef.output) stepState.output = stepDef.output;
         saveRunState(runState);
+        this.writeHandoffOutput(stepDef, workflowDef, runState, stepState);
         this.emit({
           type: "step-completed",
           runId: runState.runId,
@@ -775,6 +1046,9 @@ export class WorkflowExecutor {
     if (control) {
       control.abortController.abort();
     }
+    // Clear any pending step-gate waiters for this run so the executor
+    // loop unblocks and observes the cancellation.
+    this.clearPendingGates(runId);
   }
 
   /** Pause a running workflow */
@@ -782,6 +1056,30 @@ export class WorkflowExecutor {
     const control = this.activeRuns.get(runId);
     if (control) {
       control.paused = true;
+    }
+    // Clear any pending step-gate waiters so a paused run that was
+    // sitting on `waitForStepApproval` returns; the outer executor loop
+    // then sees `paused === true` and bails out before running the next
+    // step. This also means a subsequent `approveStepGate` call is a
+    // no-op (false) — the user must explicitly resume the sprint.
+    this.clearPendingGates(runId);
+  }
+
+  /** Drop all pending step-gate resolvers belonging to `runId`. */
+  private clearPendingGates(runId: string): void {
+    const prefix = `${runId}::`;
+    for (const [key, resolve] of this.pendingStepGates) {
+      if (key.startsWith(prefix)) {
+        this.pendingStepGates.delete(key);
+        // Resolve with `cancelled` so the awaiting `waitForStepApproval`
+        // promise settles and the caller can bail out instead of falling
+        // through to step dispatch.
+        try {
+          resolve("cancelled");
+        } catch {
+          /* never propagate */
+        }
+      }
     }
   }
 

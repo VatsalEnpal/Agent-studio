@@ -17,6 +17,7 @@ interface AgentConfig {
   name: string;
   model: "opus" | "sonnet" | "haiku";
   enabled: boolean;
+  scope?: "global" | { project: string };
 }
 
 export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) {
@@ -25,10 +26,14 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
   const [agents, setAgents] = useState<AgentConfig[]>([]);
   const [creating, setCreating] = useState(false);
   const [defaultModel, setDefaultModel] = useState<"opus" | "sonnet" | "haiku">("sonnet");
+  // Task A9: target project for this room — used to scope the agent list.
+  // We pick the first non-prod project from config (same convention as
+  // session launcher + sprint dialog) so scope filtering is applied.
+  const [targetProject, setTargetProject] = useState<string>("");
   const addRoom = useRoomsStore((s) => s.addRoom);
   const selectRoom = useRoomsStore((s) => s.selectRoom);
 
-  // Fetch global default model from config
+  // Fetch global default model + target project from config
   useEffect(() => {
     fetch("/api/config")
       .then((res) => res.json())
@@ -40,35 +45,57 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
         if (defaults?.model) {
           setDefaultModel(defaults.model);
         }
+        const projects = (config?.projects ?? data.projects) as
+          | Array<{ path: string; isProd?: boolean }>
+          | undefined;
+        if (projects && projects.length > 0) {
+          const main = projects.find((p) => !p.isProd);
+          setTargetProject(main?.path ?? projects[0]?.path ?? "");
+        }
       })
       .catch(() => {
         // Keep fallback "sonnet"
       });
   }, []);
 
-  // Fetch discovered agents from server when dialog opens
+  // Fetch discovered agents from server when dialog opens.
+  // Task A9: pass the room's target project as ?projectPath= so project-scoped
+  // agents from the selected project appear alongside global agents.
   useEffect(() => {
     if (!open) return;
     setName("");
     setTopic("");
     setCreating(false);
-    fetch("/api/agents")
+    const url = targetProject
+      ? `/api/agents?projectPath=${encodeURIComponent(targetProject)}`
+      : "/api/agents";
+    fetch(url)
       .then((res) => res.json())
-      .then((data: Array<{ id: string; name: string; description?: string }>) => {
-        const agentConfigs: AgentConfig[] = data
-          .filter((a) => a.id !== "none")
-          .map((a) => ({
-            id: a.id,
-            name: a.name,
-            model: a.id === "orchestrator" ? ("opus" as const) : defaultModel,
-            enabled: false,
-          }));
-        setAgents(agentConfigs);
-      })
+      .then(
+        (
+          data: Array<{
+            id: string;
+            name: string;
+            description?: string;
+            scope?: "global" | { project: string };
+          }>,
+        ) => {
+          const agentConfigs: AgentConfig[] = data
+            .filter((a) => a.id !== "none")
+            .map((a) => ({
+              id: a.id,
+              name: a.name,
+              model: a.id === "orchestrator" ? ("opus" as const) : defaultModel,
+              enabled: false,
+              scope: a.scope,
+            }));
+          setAgents(agentConfigs);
+        },
+      )
       .catch(() => {
         setAgents([]);
       });
-  }, [open, defaultModel]);
+  }, [open, defaultModel, targetProject]);
 
   // Escape key to close
   useEffect(() => {
@@ -189,21 +216,33 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
             <div className="space-y-1">
               {agents.map((agent) => {
                 const color = agentColor(agent.name);
+                const checkboxId = `room-agent-${agent.id}`;
                 return (
-                  <div
+                  <label
                     key={agent.id}
+                    htmlFor={checkboxId}
                     className={cn(
-                      "flex items-center gap-2 px-2.5 py-1.5 rounded border transition-all",
+                      "flex items-center gap-2 px-2.5 py-1.5 rounded border transition-all cursor-pointer",
                       agent.enabled
                         ? "border-rooms/30 bg-rooms-subtle shadow-[0_0_8px_rgba(124,131,247,0.06)]"
                         : "border-border-default bg-transparent hover:bg-bg-input/30 hover:shadow-[0_0_12px_rgba(124,131,247,0.06)]",
                     )}
                   >
-                    {/* Checkbox */}
-                    <button
-                      onClick={() => toggleAgent(agent.id)}
+                    {/* Real checkbox — visually hidden but focusable + accessible */}
+                    <input
+                      id={checkboxId}
+                      type="checkbox"
+                      checked={agent.enabled}
+                      onChange={() => toggleAgent(agent.id)}
+                      className="sr-only peer"
+                      aria-label={`Select agent ${agent.name}`}
+                    />
+
+                    {/* Visual checkbox (driven by peer state) */}
+                    <span
+                      aria-hidden="true"
                       className={cn(
-                        "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all",
+                        "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-rooms/60 peer-focus-visible:ring-offset-1 peer-focus-visible:ring-offset-bg-elevated",
                         agent.enabled ? "bg-rooms border-rooms" : "border-text-tertiary",
                       )}
                     >
@@ -219,7 +258,7 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                           />
                         </svg>
                       )}
-                    </button>
+                    </span>
 
                     {/* Avatar + Name */}
                     <div className="flex items-center gap-1.5 flex-1 min-w-0">
@@ -239,21 +278,35 @@ export function CreateRoomDialog({ open, onOpenChange }: CreateRoomDialogProps) 
                       >
                         {agent.name}
                       </span>
+                      {/* Task A9: scope badge — ● Global, ◆ Project */}
+                      {agent.scope && (
+                        <span
+                          className="text-2xs text-text-ghost shrink-0"
+                          title={
+                            agent.scope === "global"
+                              ? "Global agent"
+                              : `Project agent (${agent.scope.project})`
+                          }
+                        >
+                          {agent.scope === "global" ? "●" : "◆"}
+                        </span>
+                      )}
                     </div>
 
-                    {/* Model selector */}
+                    {/* Model selector — clicks here must NOT also toggle the label */}
                     <select
                       value={agent.model}
                       onChange={(e) =>
                         setAgentModel(agent.id, e.target.value as "opus" | "sonnet" | "haiku")
                       }
+                      onClick={(e) => e.stopPropagation()}
                       className="bg-bg-base border border-border-default rounded px-2 py-1 text-label font-mono text-text-secondary focus:outline-none focus:border-[#f59e0b]/40 transition-all"
                     >
                       <option value="opus">opus</option>
                       <option value="sonnet">sonnet</option>
                       <option value="haiku">haiku</option>
                     </select>
-                  </div>
+                  </label>
                 );
               })}
             </div>

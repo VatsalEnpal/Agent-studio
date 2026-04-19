@@ -67,6 +67,25 @@ export class ConversationProtocol {
     this.onError = onError;
   }
 
+  /**
+   * Directly route a human message to a specific agent without parsing mentions.
+   * Used by the leading-@ parser to dispatch to ONE agent and skip orchestrator
+   * fan-out. The full `text` is passed through so the target agent sees any
+   * remaining mid-body @mentions as part of the prompt.
+   */
+  routeHumanMessageTo(agentId: string, text: string): void {
+    // Reset chain state — human input starts a new turn
+    this.chainDepth = 0;
+    this.queue = [];
+    this.currentAgent = null;
+
+    if (!this.agents.has(agentId)) {
+      this.onError(new Error(`Target agent "${agentId}" not found`));
+      return;
+    }
+    this.invokeAgent(agentId, text);
+  }
+
   /** Process a human message. Resets chain depth, parses @mentions, routes to agent(s). */
   humanMessage(text: string, defaultTarget?: string): void {
     // Human input resets chain depth and cancels pending chain
@@ -216,9 +235,7 @@ export class ConversationProtocol {
       this.onInvoke(agentId, prompt);
     } catch (err) {
       this.currentAgent = null;
-      this.onError(
-        err instanceof Error ? err : new Error(String(err)),
-      );
+      this.onError(err instanceof Error ? err : new Error(String(err)));
       this.drainQueue();
     }
   }

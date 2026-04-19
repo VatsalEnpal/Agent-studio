@@ -17,6 +17,7 @@ import { importSprintAsWorkflow } from "../workflows/sprint-import.js";
 import { loadRunState, listRuns, getActiveRuns, deleteRun } from "../workflows/run-state.js";
 import type { WorkflowPipelineDef } from "../workflows/definition.js";
 import type { WsMessage } from "../shared/types.js";
+import { broadcast } from "../ws/broadcast.js";
 import notifier from "node-notifier";
 
 interface WorkflowRouteDeps {
@@ -24,15 +25,6 @@ interface WorkflowRouteDeps {
   executor: WorkflowExecutor;
   scheduler: WorkflowScheduler;
   wss: WebSocketServer;
-}
-
-function broadcast(wss: WebSocketServer, msg: WsMessage): void {
-  const data = JSON.stringify(msg);
-  for (const client of wss.clients) {
-    if (client.readyState === 1) {
-      client.send(data);
-    }
-  }
 }
 
 export function workflowRoutes(deps: WorkflowRouteDeps): Router {
@@ -51,9 +43,39 @@ export function workflowRoutes(deps: WorkflowRouteDeps): Router {
       "run-paused": "workflow-step-update",
       "budget-exceeded": "workflow-run-failed",
     };
+    // Map internal executor events to public step-status values the UI expects.
+    const statusMap: Record<string, string> = {
+      "step-started": "running",
+      "step-completed": "completed",
+      "step-failed": "failed",
+      "run-paused": "paused",
+    };
     const wsType = typeMap[event.type];
     if (wsType) {
-      broadcast(wss, { type: wsType, payload: event } satisfies WsMessage);
+      // For step-update events, include {runId, stepId, status} at the payload
+      // root (per S1 verify contract) while keeping the full event for
+      // backward-compatible consumers.
+      if (wsType === "workflow-step-update") {
+        const status = statusMap[event.type];
+        const msg: WsMessage = {
+          type: wsType,
+          payload: {
+            runId: event.runId,
+            workflowId: event.workflowId,
+            stepId: event.stepId,
+            status,
+            data: event.data,
+          },
+        };
+        // Sprint-scoped tabs (topic `sprint:<workflowId>-<runId>`)
+        // receive step updates via inferTopic's composite-id routing.
+        // (Previously this also dual-broadcast to GLOBAL because the
+        // composite-id topic match was broken — H2 fixes that and the
+        // GLOBAL fan-out is no longer needed.)
+        broadcast(wss, msg);
+      } else {
+        broadcast(wss, { type: wsType, payload: event } satisfies WsMessage);
+      }
     }
 
     // Gate notifications: Mac notification via node-notifier

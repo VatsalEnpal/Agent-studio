@@ -9,6 +9,7 @@ import {
   reloadConfig,
   generateDefaultConfig,
   getAgentSystemPath,
+  getAgentSources,
   resolvePath,
   getMainProjectDir,
 } from "../config.js";
@@ -30,12 +31,17 @@ export function settingsRoutes(
   // Config
   router.get("/config", (_req, res) => {
     const config = getConfig();
+    // Ensure `agentSources` is always populated in the response, even on
+    // older configs written before the field existed. `getAgentSources`
+    // falls back to seeded defaults (global ~/.claude/agents + one entry
+    // per configured project) and `~`-expands each path.
+    const agentSources = getAgentSources(config);
     res.json({
       homeDir: os.homedir(),
       cwd: process.cwd(),
       mainProjectDir: getMainProjectDir(),
       defaultCwd: resolvePath(config.defaults?.workingDirectory),
-      config,
+      config: { ...config, agentSources },
     });
   });
 

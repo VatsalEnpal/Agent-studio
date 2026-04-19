@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { register as pollerRegister, unregister as pollerUnregister } from "./services/poller.js";
 
 // ---------- Types ----------
 
@@ -111,16 +112,25 @@ function parseScheduleMs(schedule: string): number | null {
   if (lower === "weekly") return 604_800_000;
   if (lower === "on-push") return null; // Event-driven, not interval
 
-  const match = lower.match(/^every\s+(\d+)\s*h$/);
-  if (match) {
-    const hours = parseInt(match[1], 10);
-    return hours * 3_600_000;
+  // "every N<unit>" where unit is h (hours), m (minutes), s (seconds).
+  // Supports optional whitespace between number and unit.
+  const everyMatch = lower.match(/^every\s+(\d+)\s*(h|m|s)$/);
+  if (everyMatch) {
+    const n = parseInt(everyMatch[1], 10);
+    const unit = everyMatch[2];
+    if (unit === "h") return n * 3_600_000;
+    if (unit === "m") return n * 60_000;
+    if (unit === "s") return n * 1_000;
   }
 
-  // Fallback: try parsing as hours
-  const numMatch = lower.match(/^(\d+)\s*h$/);
-  if (numMatch) {
-    return parseInt(numMatch[1], 10) * 3_600_000;
+  // Fallback: bare "<N><unit>" (e.g. "2h", "5m", "30s")
+  const bareMatch = lower.match(/^(\d+)\s*(h|m|s)$/);
+  if (bareMatch) {
+    const n = parseInt(bareMatch[1], 10);
+    const unit = bareMatch[2];
+    if (unit === "h") return n * 3_600_000;
+    if (unit === "m") return n * 60_000;
+    if (unit === "s") return n * 1_000;
   }
 
   return null;
@@ -162,9 +172,14 @@ type EventListener = (event: { type: string; payload: unknown }) => void;
 export class AutomationEngine {
   private automations: Automation[] = [];
   private reports: AutomationReport[] = [];
-  private timers = new Map<string, NodeJS.Timeout>();
+  /** Set of automation ids currently registered with the poller. */
+  private registered = new Set<string>();
   private listeners = new Set<EventListener>();
   private cwd: string;
+
+  private pollerKey(id: string): string {
+    return `automations.${id}`;
+  }
 
   constructor(cwd?: string) {
     this.cwd = cwd ?? process.cwd();
@@ -296,7 +311,7 @@ export class AutomationEngine {
 
   /** Stop all timers */
   stopAll(): void {
-    for (const [id] of this.timers) {
+    for (const id of [...this.registered]) {
       this.clearTimer(id);
     }
   }
@@ -315,18 +330,16 @@ export class AutomationEngine {
     // Calculate next run
     auto.nextRun = new Date(Date.now() + intervalMs).toISOString();
 
-    const timer = setInterval(() => {
-      void this.executeAutomation(auto);
-    }, intervalMs);
-
-    this.timers.set(auto.id, timer);
+    // Route through the unified poller so this automation shows up in
+    // /api/debug/poller-stats under the `automations.<id>` key (plan task 3b).
+    pollerRegister(this.pollerKey(auto.id), intervalMs, () => this.executeAutomation(auto));
+    this.registered.add(auto.id);
   }
 
   private clearTimer(id: string): void {
-    const timer = this.timers.get(id);
-    if (timer) {
-      clearInterval(timer);
-      this.timers.delete(id);
+    if (this.registered.has(id)) {
+      pollerUnregister(this.pollerKey(id));
+      this.registered.delete(id);
     }
   }
 

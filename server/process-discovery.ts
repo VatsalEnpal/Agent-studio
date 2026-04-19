@@ -1,6 +1,15 @@
-import { execSync } from "node:child_process";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
 import { getSessionUsage, formatCost, formatTokens } from "./session-usage.js";
 import { IS_WINDOWS, getProcessCwd as platformGetCwd } from "./platform.js";
+import { ttlCache } from "./services/ttl-cache.js";
+
+const execAsync = promisify(exec);
+
+/** 15s TTL per ShipLoop plan task 4. */
+const DISCOVERY_TTL_MS = 15_000;
+const discoveryCache = ttlCache<DiscoveredProcess[]>(DISCOVERY_TTL_MS);
+const DISCOVERY_KEY = "claude-processes";
 
 export interface DiscoveredProcess {
   pid: number;
@@ -22,8 +31,14 @@ export interface DiscoveredProcess {
  * Discover running Claude Code processes on the machine.
  * Parses `ps` output to find processes whose command contains "claude".
  * Excludes the current process and any grep/ps artifacts.
+ *
+ * Results are cached for 15s (plan task 4) so rapid-fire API hits don't
+ * fork a new `ps`/`tasklist` each time.
  */
-export function discoverClaudeProcesses(): DiscoveredProcess[] {
+export async function discoverClaudeProcesses(): Promise<DiscoveredProcess[]> {
+  const cached = discoveryCache.get(DISCOVERY_KEY);
+  if (cached !== undefined) return cached;
+
   try {
     const processes: DiscoveredProcess[] = [];
     const myPid = process.pid;
@@ -33,11 +48,13 @@ export function discoverClaudeProcesses(): DiscoveredProcess[] {
       // On Windows, use tasklist to find claude processes
       let raw: string;
       try {
-        raw = execSync(
-          'tasklist /v /fo csv | findstr /i "claude"',
-          { encoding: "utf-8", timeout: 5000 },
-        );
+        const { stdout } = await execAsync('tasklist /v /fo csv | findstr /i "claude"', {
+          encoding: "utf-8",
+          timeout: 5000,
+        });
+        raw = stdout.toString();
       } catch {
+        discoveryCache.set(DISCOVERY_KEY, []);
         return [];
       }
 
@@ -75,10 +92,18 @@ export function discoverClaudeProcesses(): DiscoveredProcess[] {
       }
     } else {
       // Use ps with custom format to get relevant info
-      const raw = execSync(
-        'ps -eo pid,user,lstart,command | grep -i "[c]laude"',
-        { encoding: "utf-8", timeout: 5000 },
-      );
+      let raw: string;
+      try {
+        const { stdout } = await execAsync('ps -eo pid,user,lstart,command | grep -i "[c]laude"', {
+          encoding: "utf-8",
+          timeout: 5000,
+        });
+        raw = stdout.toString();
+      } catch {
+        // ps/grep returned nothing or errored (grep exits 1 if no match)
+        discoveryCache.set(DISCOVERY_KEY, []);
+        return [];
+      }
 
       for (const line of raw.trim().split("\n")) {
         if (!line.trim()) continue;
@@ -87,9 +112,7 @@ export function discoverClaudeProcesses(): DiscoveredProcess[] {
         // Example: 16623 user  Sat Mar 29 11:16:00 2026 claude --dangerously-skip-permissions
         const match = line
           .trim()
-          .match(
-            /^\s*(\d+)\s+(\S+)\s+(\w+\s+\w+\s+\d+\s+[\d:]+\s+\d+)\s+(.+)$/,
-          );
+          .match(/^\s*(\d+)\s+(\S+)\s+(\w+\s+\w+\s+\d+\s+[\d:]+\s+\d+)\s+(.+)$/);
         if (!match) continue;
 
         const pid = parseInt(match[1]!, 10);
@@ -114,10 +137,7 @@ export function discoverClaudeProcesses(): DiscoveredProcess[] {
 
         // Must be a direct claude CLI invocation (not just mentioned in args)
         const cmdBase = fullCommand.split(/\s+/)[0];
-        if (
-          !cmdBase?.endsWith("claude") &&
-          !cmdBase?.endsWith("claude-code")
-        ) {
+        if (!cmdBase?.endsWith("claude") && !cmdBase?.endsWith("claude-code")) {
           continue;
         }
 
@@ -154,9 +174,11 @@ export function discoverClaudeProcesses(): DiscoveredProcess[] {
       }
     }
 
+    discoveryCache.set(DISCOVERY_KEY, processes);
     return processes;
   } catch {
     // ps/grep returned nothing or errored
+    discoveryCache.set(DISCOVERY_KEY, []);
     return [];
   }
 }

@@ -1,8 +1,10 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { CheckIcon, PlusIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { formatRelative } from "@/hooks/use-relative-time";
+import { useToastStore } from "@/stores/toast";
 import type { Sprint } from "@/stores/sprints";
 
 interface SprintListProps {
@@ -10,6 +12,12 @@ interface SprintListProps {
   selectedSprintId: string | null;
   onSelect: (id: string) => void;
   onCreateSprint?: () => void;
+  /**
+   * Invoked when the user clicks the Edit button on a card. Receives the
+   * card's sprint id (includes the `-run-<runId>` suffix — the PUT endpoint
+   * strips it server-side).
+   */
+  onEditSprint?: (sprint: Sprint) => void;
 }
 
 function gateProgress(sprint: Sprint): { passed: number; total: number } {
@@ -35,12 +43,48 @@ export function SprintList({
   selectedSprintId,
   onSelect,
   onCreateSprint,
+  onEditSprint,
 }: SprintListProps) {
   const active = sprints.filter(
     (s) => s.status === "in_progress" || s.status === "launching" || s.status === "paused",
   );
   const completed = sprints.filter((s) => s.status === "completed");
   const planned = sprints.filter((s) => s.status === "planned");
+  const addToast = useToastStore((s) => s.addToast);
+  const [resumingId, setResumingId] = useState<string | null>(null);
+
+  const handleResume = useCallback(
+    async (sprint: Sprint, e: React.MouseEvent) => {
+      // Stop the click from bubbling to the parent card selector.
+      e.stopPropagation();
+      setResumingId(sprint.id);
+      try {
+        const res = await fetch(`/api/sprints/${encodeURIComponent(sprint.id)}/resume`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
+          throw new Error(data.error || `Resume failed (${res.status})`);
+        }
+        addToast("Sprint resumed", "success");
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        addToast(`Resume failed: ${msg}`, "error");
+      } finally {
+        setResumingId(null);
+      }
+    },
+    [addToast],
+  );
+
+  const handleEdit = useCallback(
+    (sprint: Sprint, e: React.MouseEvent) => {
+      e.stopPropagation();
+      onEditSprint?.(sprint);
+    },
+    [onEditSprint],
+  );
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -60,19 +104,33 @@ export function SprintList({
             {active.map((sprint) => {
               const { passed, total } = gateProgress(sprint);
               const pct = total > 0 ? (passed / total) * 100 : 0;
+              const isPaused = sprint.status === "paused";
               return (
-                <button
+                <div
                   key={sprint.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => onSelect(sprint.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onSelect(sprint.id);
+                    }
+                  }}
                   className={cn(
-                    "w-full text-left px-2.5 py-2 rounded transition-all",
+                    "w-full text-left px-2.5 py-2 rounded transition-all group cursor-pointer",
                     sprint.id === selectedSprintId
                       ? "bg-bg-elevated border-l-2 border-l-sprints shadow-[inset_0_0_0_1px_var(--accent-sprints-glow,rgba(251,191,36,0.08))]"
                       : "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(251,191,36,0.06)] border-l-2 border-transparent",
                   )}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="w-[4px] h-[4px] rounded-full bg-sprints animate-pulse-dot shrink-0" />
+                    <span
+                      className={cn(
+                        "w-[4px] h-[4px] rounded-full shrink-0",
+                        isPaused ? "bg-text-ghost" : "bg-sprints animate-pulse-dot",
+                      )}
+                    />
                     <span className="text-xs font-medium text-text-primary truncate flex-1">
                       {sprint.name}
                     </span>
@@ -103,7 +161,42 @@ export function SprintList({
                       </span>
                     )}
                   </div>
-                </button>
+                  {/* Task 7b/7c: Resume button on paused cards + Edit on editable cards. */}
+                  {(isPaused || onEditSprint) && (
+                    <div className="mt-1.5 flex items-center gap-1.5">
+                      {isPaused && (
+                        <button
+                          type="button"
+                          onClick={(e) => void handleResume(sprint, e)}
+                          disabled={resumingId === sprint.id}
+                          className={cn(
+                            "text-2xs px-1.5 py-0.5 rounded transition-all",
+                            "border border-sprints/40 text-sprints",
+                            "hover:bg-sprints/10 hover:border-sprints/60",
+                            resumingId === sprint.id && "opacity-60 cursor-wait",
+                          )}
+                          title="Resume sprint"
+                        >
+                          {resumingId === sprint.id ? "Resuming..." : "Resume"}
+                        </button>
+                      )}
+                      {onEditSprint && isPaused && (
+                        <button
+                          type="button"
+                          onClick={(e) => handleEdit(sprint, e)}
+                          className={cn(
+                            "text-2xs px-1.5 py-0.5 rounded transition-all",
+                            "border border-border-default text-text-tertiary",
+                            "hover:text-text-primary hover:border-border-subtle",
+                          )}
+                          title="Edit sprint"
+                        >
+                          Edit
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </SprintSection>
@@ -159,11 +252,19 @@ export function SprintList({
         {planned.length > 0 && (
           <SprintSection title="Planned">
             {planned.map((sprint) => (
-              <button
+              <div
                 key={sprint.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => onSelect(sprint.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelect(sprint.id);
+                  }
+                }}
                 className={cn(
-                  "w-full text-left px-2.5 py-2 rounded transition-all",
+                  "w-full text-left px-2.5 py-2 rounded transition-all cursor-pointer",
                   sprint.id === selectedSprintId
                     ? "bg-bg-elevated border-l-2 border-l-sprints"
                     : "hover:bg-bg-elevated/30 hover:shadow-[0_0_12px_rgba(251,191,36,0.06)] border-l-2 border-transparent",
@@ -173,7 +274,25 @@ export function SprintList({
                   <span className="w-2.5 h-2.5 rounded-full border border-text-ghost shrink-0" />
                   <span className="text-xs text-text-tertiary truncate">{sprint.name}</span>
                 </div>
-              </button>
+                {/* Task 7c: Edit button on planned cards — planned sprints are
+                    always editable because they have not started. */}
+                {onEditSprint && (
+                  <div className="mt-1.5 flex items-center gap-1.5 pl-[22px]">
+                    <button
+                      type="button"
+                      onClick={(e) => handleEdit(sprint, e)}
+                      className={cn(
+                        "text-2xs px-1.5 py-0.5 rounded transition-all",
+                        "border border-border-default text-text-tertiary",
+                        "hover:text-text-primary hover:border-border-subtle",
+                      )}
+                      title="Edit sprint"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                )}
+              </div>
             ))}
           </SprintSection>
         )}

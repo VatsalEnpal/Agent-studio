@@ -2,6 +2,17 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, sep } from "node:path";
 import os from "node:os";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
+import { ttlCache } from "./services/ttl-cache.js";
+
+const execAsync = promisify(exec);
+
+/** 60s TTL per ShipLoop plan task 4. Per-repo-path cache of tracked branches. */
+const BRANCH_LIST_TTL_MS = 60_000;
+const branchListCache = ttlCache<string[]>(BRANCH_LIST_TTL_MS);
+/** Tracks in-flight async refreshes so we don't spawn duplicate `git branch` processes. */
+const branchListInFlight = new Set<string>();
 
 // ---------- Schema ----------
 
@@ -70,6 +81,31 @@ export interface AgentConfig {
   icon?: string;
 }
 
+/**
+ * Scope for an agent source directory.
+ * - "global": agents in this source apply to every project (e.g. ~/.claude/agents)
+ * - {project: string}: agents in this source apply only when the given project is active
+ */
+export type AgentSourceScope = "global" | { project: string };
+
+export interface AgentSourceConfig {
+  /** Absolute path (may contain ~, resolved via resolvePath) */
+  path: string;
+  scope: AgentSourceScope;
+  /** Optional human-readable label for UI (e.g. "User agents", project name) */
+  label?: string;
+}
+
+/**
+ * Agent record returned by the discovery endpoint. Extends AgentConfig with the
+ * source directory and scope so the client can distinguish global vs project agents.
+ */
+export interface DiscoveredAgent extends AgentConfig {
+  /** Absolute directory the agent .md file was read from */
+  sourcePath: string;
+  scope: AgentSourceScope;
+}
+
 export interface AutomationConfig {
   id: string;
   name: string;
@@ -90,6 +126,8 @@ export interface AgentStudioConfig {
   defaults: DefaultsConfig;
   workflows?: WorkflowConfig[];
   agents?: AgentConfig[];
+  /** Directories to scan for agent .md files, each with a global or project scope. */
+  agentSources?: AgentSourceConfig[];
   automations?: AutomationConfig[];
   setupComplete: boolean;
   version: string;
@@ -122,7 +160,8 @@ export function loadConfig(): AgentStudioConfig | null {
 
   try {
     const raw = readFileSync(configPath, "utf-8");
-    const parsed = JSON.parse(raw) as AgentStudioConfig;
+    const rawParsed = JSON.parse(raw) as Record<string, unknown>;
+    const parsed = rawParsed as unknown as AgentStudioConfig;
     // Basic validation — accept partial configs, fill in defaults
     if (!Array.isArray(parsed.projects)) parsed.projects = [];
     if (!parsed.version) parsed.version = CONFIG_VERSION;
@@ -130,10 +169,45 @@ export function loadConfig(): AgentStudioConfig | null {
       parsed.defaults = { model: "sonnet", permissions: "bypass", workingDirectory: "~" };
     }
     if (!Array.isArray(parsed.devServers)) parsed.devServers = [];
+    // Seed agentSources ONLY when the key is absent from the on-disk config.
+    // If the user has explicitly set it to [] (e.g. by removing all sources in
+    // Settings), honor that — do NOT re-seed, or the Global row will reappear
+    // on the next read. Non-array values get replaced with defaults as before.
+    if (!("agentSources" in rawParsed)) {
+      parsed.agentSources = defaultAgentSources(parsed.projects);
+    } else if (!Array.isArray(parsed.agentSources)) {
+      // Corrupt value (e.g. null, object) — fall back to defaults.
+      parsed.agentSources = defaultAgentSources(parsed.projects);
+    }
     return parsed;
   } catch {
     return null;
   }
+}
+
+/**
+ * Build default agent-source entries: the user's global ~/.claude/agents plus one
+ * project-scoped entry for each configured project's .claude/agents directory.
+ * Pure function — does not touch the filesystem.
+ */
+function defaultAgentSources(projects: ProjectConfig[]): AgentSourceConfig[] {
+  const sources: AgentSourceConfig[] = [
+    {
+      path: join(os.homedir(), ".claude", "agents"),
+      scope: "global",
+      label: "User agents",
+    },
+  ];
+  for (const p of projects) {
+    if (!p?.path) continue;
+    const resolvedProjectPath = resolvePath(p.path);
+    sources.push({
+      path: join(resolvedProjectPath, ".claude", "agents"),
+      scope: { project: resolvedProjectPath },
+      label: p.name ?? resolvedProjectPath.split(sep).pop() ?? resolvedProjectPath,
+    });
+  }
+  return sources;
 }
 
 /** Write the config to disk. */
@@ -228,6 +302,7 @@ export function generateDefaultConfig(): AgentStudioConfig {
       permissions: "bypass",
       workingDirectory,
     },
+    agentSources: defaultAgentSources(projects),
     setupComplete,
     version: CONFIG_VERSION,
   };
@@ -235,27 +310,53 @@ export function generateDefaultConfig(): AgentStudioConfig {
 
 // ---------- Helpers ----------
 
+/**
+ * Returns tracked branches for a repo path with a 60s TTL cache.
+ *
+ * Per ShipLoop plan task 4: we must not block startup on `git branch --list`.
+ * The git shellout is issued asynchronously — the first call returns the
+ * default `["main"]` immediately and schedules a background refresh that
+ * populates the cache. Subsequent calls (within TTL) return the full branch
+ * list. If the filesystem or git hangs, `execAsync`'s 3s timeout kicks in
+ * and we fall through to the cached default without blocking the event loop.
+ */
 function detectTrackedBranches(repoPath: string): string[] {
-  const branches = ["main"];
-  try {
-    const { execSync } = require("node:child_process") as typeof import("node:child_process");
-    const raw = execSync("git branch --list --format='%(refname:short)'", {
-      cwd: repoPath,
-      encoding: "utf-8",
-      timeout: 3000,
-    }).trim();
-    const all = raw
-      .split("\n")
-      .map((b: string) => b.trim().replace(/^'|'$/g, ""))
-      .filter(Boolean);
-    // Include all local branches
-    for (const name of all) {
-      if (!branches.includes(name)) branches.push(name);
-    }
-  } catch {
-    // fallback: just main
+  const cached = branchListCache.get(repoPath);
+  if (cached !== undefined) return cached;
+
+  const fallback = ["main"];
+
+  // Kick off async refresh exactly once per repo path until it completes.
+  if (!branchListInFlight.has(repoPath)) {
+    branchListInFlight.add(repoPath);
+    void (async () => {
+      try {
+        const { stdout } = await execAsync("git branch --list --format='%(refname:short)'", {
+          cwd: repoPath,
+          encoding: "utf-8",
+          timeout: 3000,
+        });
+        const all = stdout
+          .toString()
+          .trim()
+          .split("\n")
+          .map((b) => b.trim().replace(/^'|'$/g, ""))
+          .filter(Boolean);
+        const branches = ["main"];
+        for (const name of all) {
+          if (!branches.includes(name)) branches.push(name);
+        }
+        branchListCache.set(repoPath, branches);
+      } catch {
+        // Keep the fallback in cache so we don't re-issue every call within TTL.
+        branchListCache.set(repoPath, fallback);
+      } finally {
+        branchListInFlight.delete(repoPath);
+      }
+    })();
   }
-  return branches;
+
+  return fallback;
 }
 
 // ---------- Resolvers (used by other server modules) ----------
@@ -309,6 +410,22 @@ export function getAgentSystemPath(relativePath: string): string | null {
   const base = getAgentSystemBase();
   if (!base) return null;
   return join(base, relativePath);
+}
+
+/**
+ * Get the list of agent-source directories for discovery. If the loaded config
+ * doesn't have `agentSources`, return the seeded defaults (global ~/.claude/agents
+ * plus one project-scoped entry per configured project). Paths are `~`-expanded.
+ */
+export function getAgentSources(config?: AgentStudioConfig): AgentSourceConfig[] {
+  const cfg = config ?? getConfig();
+  // Honor an explicit empty array — the user cleared all sources.
+  // Only fall back to defaults when `agentSources` is truly absent or corrupt.
+  const sources = Array.isArray(cfg.agentSources)
+    ? cfg.agentSources
+    : defaultAgentSources(cfg.projects ?? []);
+  // Ensure `~` is expanded for each source path before returning to callers.
+  return sources.map((s) => ({ ...s, path: resolvePath(s.path) }));
 }
 
 /**

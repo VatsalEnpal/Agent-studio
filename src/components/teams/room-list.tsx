@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useCallback, useRef, useState } from "react";
-import {
-  HashIcon,
-  PlusIcon,
-  CloseIcon,
-  CheckIcon,
-  SettingsIcon,
-} from "@/components/ui/icons";
+import { HashIcon, PlusIcon, CloseIcon, CheckIcon, SettingsIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { agentColor } from "@/lib/design-tokens";
 import { useRoomsStore } from "@/stores/rooms";
@@ -44,9 +38,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
   const hasAgentSystem = useHasAgentSystem();
 
   const [closingRoomId, setClosingRoomId] = useState<string | null>(null);
-  const closingRoom = closingRoomId
-    ? rooms.find((r) => r.id === closingRoomId)
-    : null;
+  const closingRoom = closingRoomId ? rooms.find((r) => r.id === closingRoomId) : null;
 
   // Compute total unread across all rooms
   const totalUnread = rooms.reduce((acc, room) => {
@@ -54,9 +46,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
     const seen = lastSeenByRoom[room.id];
     const msgs = room.messages ?? [];
     const unread = seen
-      ? msgs.filter(
-          (m) => new Date(m.timestamp) > new Date(seen) && m.from !== "user",
-        ).length
+      ? msgs.filter((m) => new Date(m.timestamp) > new Date(seen) && m.from !== "user").length
       : msgs.filter((m) => m.from !== "user").length;
     return acc + unread;
   }, 0);
@@ -82,13 +72,10 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
     void loadRooms();
   }, [loadRooms]);
 
-  const handleRequestClose = useCallback(
-    (e: React.MouseEvent, roomId: string) => {
-      e.stopPropagation();
-      setClosingRoomId(roomId);
-    },
-    [],
-  );
+  const handleRequestClose = useCallback((e: React.MouseEvent, roomId: string) => {
+    e.stopPropagation();
+    setClosingRoomId(roomId);
+  }, []);
 
   const handleConfirmClose = useCallback(async () => {
     if (!closingRoomId) return;
@@ -100,9 +87,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
         useRoomsStore.getState().setRooms(data);
         if (selectedRoomId === closingRoomId) {
           const active = data.filter((r) => r.active);
-          useRoomsStore
-            .getState()
-            .selectRoom(active.length > 0 ? active[0].id : null);
+          useRoomsStore.getState().selectRoom(active.length > 0 ? active[0].id : null);
         }
       }
     } catch (e) {
@@ -170,12 +155,37 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
           </div>
         )}
 
+        {/* First-run empty state — prominent CTA when zero rooms exist */}
+        {!loading && rooms.length === 0 && hasAgentSystem && (
+          <div className="mx-2 my-4 px-4 py-5 rounded-[6px] border border-rooms/30 bg-rooms/5 flex flex-col items-center text-center">
+            <div className="w-8 h-8 rounded-full bg-rooms/10 flex items-center justify-center mb-2">
+              <HashIcon size={16} className="text-rooms" />
+            </div>
+            <p className="text-sm font-medium text-text-primary">No rooms yet</p>
+            <p className="text-xs text-text-secondary mt-1 leading-relaxed">
+              Rooms are where you chat with agents.
+            </p>
+            <button
+              onClick={onCreateRoom}
+              className={cn(
+                "flex items-center justify-center gap-1.5 w-full",
+                "mt-3 px-3 py-2 rounded",
+                "text-xs font-medium",
+                "bg-rooms text-bg-base",
+                "hover:bg-rooms/90",
+                "active:scale-[0.98] transition-all",
+              )}
+            >
+              <PlusIcon size={12} />
+              Create your first room
+            </button>
+          </div>
+        )}
+
         {/* Active section */}
         {activeRooms.length > 0 && (
           <div className="px-2 pt-1 pb-2 flex items-center justify-between">
-            <span className="text-label uppercase text-text-ghost tracking-[0.06em]">
-              Active
-            </span>
+            <span className="text-label uppercase text-text-ghost tracking-[0.06em]">Active</span>
             {totalUnread > 0 && (
               <button
                 onClick={markAllSeen}
@@ -202,9 +212,7 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
         {activeRooms.length === 0 && (
           <div className="text-center py-6 px-4">
             <HashIcon size={20} className="text-text-ghost mx-auto mb-2" />
-            <p className="text-xs text-text-secondary font-medium">
-              No active rooms
-            </p>
+            <p className="text-xs text-text-secondary font-medium">No active rooms</p>
             <p className="text-xs text-text-tertiary mt-1">
               {hasAgentSystem
                 ? "Create a room to start collaborating with agents"
@@ -272,10 +280,8 @@ export function RoomList({ onCreateRoom }: RoomListProps) {
             <p className="text-xs font-medium text-text-primary">Close room?</p>
             <p className="text-xs text-text-secondary leading-relaxed">
               This will close{" "}
-              <span className="font-medium text-text-primary">
-                {closingRoom.name}
-              </span>{" "}
-              and its agent sessions. Chat history is preserved.
+              <span className="font-medium text-text-primary">{closingRoom.name}</span> and its
+              agent sessions. Chat history is preserved.
             </p>
             <div className="flex items-center gap-2 justify-end">
               <button
@@ -318,17 +324,14 @@ function RoomItem({
   const unreadCount = !room.active
     ? 0
     : lastSeen
-      ? messages.filter(
-          (m) =>
-            new Date(m.timestamp) > new Date(lastSeen) && m.from !== "user",
-        ).length
+      ? messages.filter((m) => new Date(m.timestamp) > new Date(lastSeen) && m.from !== "user")
+          .length
       : messages.filter((m) => m.from !== "user").length;
 
   // Last message metadata
   const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
   const lastMsgTime = lastMsg ? relativeMessageTime(lastMsg.timestamp) : null;
-  const lastMsgSender =
-    lastMsg?.from === "user" ? "You" : (lastMsg?.from ?? null);
+  const lastMsgSender = lastMsg?.from === "user" ? "You" : (lastMsg?.from ?? null);
 
   return (
     <div
@@ -353,9 +356,7 @@ function RoomItem({
           <span
             className={cn(
               "text-xs truncate",
-              selected
-                ? "text-text-primary font-medium"
-                : "text-text-secondary",
+              selected ? "text-text-primary font-medium" : "text-text-secondary",
             )}
           >
             {room.name}
@@ -388,9 +389,7 @@ function RoomItem({
               </span>
               {lastMsgTime && (
                 <>
-                  <span className="text-text-ghost/40 text-[8px]">
-                    &middot;
-                  </span>
+                  <span className="text-text-ghost/40 text-[8px]">&middot;</span>
                   <span className="text-2xs text-text-ghost tabular-nums shrink-0">
                     {lastMsgTime}
                   </span>
@@ -404,9 +403,7 @@ function RoomItem({
         {/* Last message preview */}
         {lastMsg && room.active && (
           <p className="text-2xs text-text-ghost truncate mt-0.5">
-            <span className="font-medium text-text-tertiary">
-              {lastMsgSender}:{" "}
-            </span>
+            <span className="font-medium text-text-tertiary">{lastMsgSender}: </span>
             {(lastMsg.text ?? "").slice(0, 60).replace(/\s+/g, " ")}
           </p>
         )}

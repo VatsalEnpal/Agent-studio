@@ -229,6 +229,9 @@ export function TerminalPane({
       }
     });
 
+    // Subscribe to this session's topic so the server routes terminal-data here.
+    const topicUnsub = wsClient.subscribeTopic(`terminal:${sessionId}`);
+
     // Debounced resize observer — prevents rapid-fire fits that cause overlapping lines
     let fitTimeout: ReturnType<typeof setTimeout> | null = null;
     const resizeObserver = new ResizeObserver(() => {
@@ -270,6 +273,7 @@ export function TerminalPane({
       if (fitTimeout) clearTimeout(fitTimeout);
       inputDisposable.dispose();
       unsubscribe();
+      topicUnsub();
       resizeObserver.disconnect();
       window.removeEventListener("terminal-refit", refitHandler);
       term.dispose();
